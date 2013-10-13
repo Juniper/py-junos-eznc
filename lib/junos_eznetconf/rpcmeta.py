@@ -1,9 +1,12 @@
-import pdb
-
 import re
 from lxml import etree
 
 class _RpcMetaExec(object):
+
+  ##### -----------------------------------------------------------------------
+  ##### CONSTRUCTOR
+  ##### -----------------------------------------------------------------------
+
   def __init__(self, junos):
     """
       ~PRIVATE CLASS~
@@ -11,6 +14,10 @@ class _RpcMetaExec(object):
       :junos: object
     """
     self._junos = junos
+
+  ##### -----------------------------------------------------------------------
+  ##### method missing
+  ##### -----------------------------------------------------------------------
 
   def __getattr__( self, rpc_cmd_name ):
     """
@@ -48,10 +55,16 @@ class _RpcMetaExec(object):
     # return the metafunction that the caller will in-turn invoke
     return _exec_rpc
 
-  def __call__( self, rpc_cmd ):
+  ##### -----------------------------------------------------------------------
+  ##### callable
+  ##### -----------------------------------------------------------------------
+
+  def __call__( self, rpc_cmd, **kvargs ):
     """
       callable will execute the provided :rpc_cmd: against the
-      attached :junos: object and retur the RPC response per 
+      attached :junos: object and return the RPC response per 
       :junos:execute()
+
+      kvargs is simply passed 'as-is' to :junos:execute()
     """
-    return True
+    return self._junos.execute( rpc_cmd, **kvargs )

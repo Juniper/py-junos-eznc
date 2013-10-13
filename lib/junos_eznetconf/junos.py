@@ -126,13 +126,19 @@ class JunosEzNetconf(object):
     self._conn.close_session()
     self.connected = False
 
-  def execute( self, rpc_cmd ):
+  def execute( self, rpc_cmd, **kvargs ):
     """
       executes the :rpc_cmd: and returns the result as an lxml Element
 
       :rpc_cmd: can either be an Element or xml-as-string.  In either case
       the command starts with the specific command element, i.e., not the
       <rpc> element itself
+
+      known options for kvargs:
+        :to_py: is a caller provided function that takes the response and
+                will convert the results to native python types.  all kvargs
+                will be passed to this function as well in the form:
+                :to_py:( self, rpc_rsp_e, **kvargs )
     """
 
     if isinstance(rpc_cmd, str):
@@ -144,7 +150,10 @@ class JunosEzNetconf(object):
 
     rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
 
-    return rpc_rsp_e
+    if kvargs['to_py']:
+      return kvargs['to_py']( self, rpc_rsp_e, **kvargs )
+    else:
+      return rpc_rsp_e
 
   ##### -------------------------------------------------------------
   ##### Constructor buddies ...
