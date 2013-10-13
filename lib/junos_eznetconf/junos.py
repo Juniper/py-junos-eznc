@@ -2,6 +2,8 @@
 from lxml import etree
 from ncclient import manager as netconf_ssh
 
+from .rpcmeta import _RpcMetaExec
+
 class JunosEzNetconf(object):
 
   ##### -------------------------------------------------------------------------
@@ -99,7 +101,7 @@ class JunosEzNetconf(object):
     # accessable attributes
 
     self.connected = False
-    self.rpc = True
+    self.rpc = _RpcMetaExec( self )
 
   ##### -----------------------------------------------------------------------
   ##### Basic device methods
