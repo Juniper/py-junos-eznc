@@ -1,6 +1,7 @@
 import pdb
 import re
 from lxml import etree
+from lxml.builder import E
 
 class _RpcMetaExec(object):
 
@@ -15,6 +16,18 @@ class _RpcMetaExec(object):
       ez-netconf :junos: object
     """
     self._junos = junos
+
+  ##### -----------------------------------------------------------------------
+  ##### get_config
+  ##### -----------------------------------------------------------------------
+
+  def get_config( self, config_filter=None, options=None ):
+    rpc = E('get-configuration')
+
+    if config_filter != None:
+      etree.SubElement(rpc, 'configuration').append( config_filter )
+
+    return self._junos.execute( rpc )
 
   ##### -----------------------------------------------------------------------
   ##### method missing

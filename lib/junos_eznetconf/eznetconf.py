@@ -6,6 +6,7 @@ from ncclient import manager as netconf_ssh
 
 from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
+from .ezmgr import EzMgr
 
 class EzNetconf(object):
 
@@ -105,6 +106,7 @@ class EzNetconf(object):
 
     self.connected = False
     self.rpc = _RpcMetaExec( self )
+    self.ez = EzMgr( self )
 
   ##### -----------------------------------------------------------------------
   ##### Basic device methods
