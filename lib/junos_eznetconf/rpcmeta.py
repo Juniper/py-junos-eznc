@@ -1,3 +1,4 @@
+import pdb
 import re
 from lxml import etree
 
@@ -10,8 +11,8 @@ class _RpcMetaExec(object):
   def __init__(self, junos):
     """
       ~PRIVATE CLASS~
-      creates an RPC meta-executor object bound to the provide
-      :junos: object
+      creates an RPC meta-executor object bound to the provided
+      ez-netconf :junos: object
     """
     self._junos = junos
 
@@ -34,11 +35,18 @@ class _RpcMetaExec(object):
     def _exec_rpc(*vargs, **kvargs):
       # create the rpc as XML command
       rpc = etree.Element( rpc_cmd )
+
+      # kvargs are the command parameter/values
       if kvargs:
         for arg_name, arg_value in kvargs.items():
           arg_name = re.sub('_','-',arg_name)               
           arg = etree.SubElement( rpc, arg_name )
           if arg_value != True: arg.text = arg_value
+
+      # vargs[0] is a dict, command options like format='text'
+      if vargs:
+        for k,v in vargs[0].items():
+          rpc.attrib[k] = v
 
       # now invoke the command against the
       # associated :junos: device and return
