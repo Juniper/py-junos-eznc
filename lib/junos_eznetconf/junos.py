@@ -1,4 +1,6 @@
 
+import pdb
+
 from lxml import etree
 from ncclient import manager as netconf_ssh
 
@@ -150,10 +152,26 @@ class JunosEzNetconf(object):
 
     rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
 
-    if kvargs['to_py']:
-      return kvargs['to_py']( self, rpc_rsp_e, **kvargs )
+    # @@@ need to check for rpc-error with builtin RPC exception object
+
+    rpc_err = rpc_rsp_e.find('.//rpc-error')
+    if rpc_err:
+      raise RuntimeError("RPC Error, please handle me")
+
+    # skip the <rpc-reply> element and pass the caller the first child element
+    # generally speaking this is what they really want.  if they want to uplevel 
+    # they can always call the getparent() method on it.
+
+    ret_rpc_rsp = rpc_rsp_e[0]    
+
+    # if the caller provided a "to Python" conversion function, then invoke
+    # that now and return the results of that function.  otherwise just return
+    # the RPC results as XML
+    
+    if kvargs.get('to_py'):
+      return kvargs['to_py']( self, ret_rpc_rsp, **kvargs )
     else:
-      return rpc_rsp_e
+      return ret_rpc_rsp
 
   ##### -------------------------------------------------------------
   ##### Constructor buddies ...
