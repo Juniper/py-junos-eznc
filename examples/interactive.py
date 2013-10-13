@@ -1,7 +1,8 @@
 import pdb
 
 from exampleutils import *
-from junos_eznetconf import JunosEzNetconf as Junos
+import junos_eznetconf as junos
+from junos_eznetconf import EzNetconf as Junos
 from lxml.builder import E 
 from lxml import etree
 
@@ -11,9 +12,6 @@ jdev = Junos(**login)
 
 jdev.open()
 
-def convert_me( junos, rpc_rsp_e, **kvargs ):
-  pdb.set_trace()
-  return rpc_rsp_e
 
 
 

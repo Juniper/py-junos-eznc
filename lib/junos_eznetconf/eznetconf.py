@@ -5,8 +5,9 @@ from lxml import etree
 from ncclient import manager as netconf_ssh
 
 from .rpcmeta import _RpcMetaExec
+from .exception import RpcError
 
-class JunosEzNetconf(object):
+class EzNetconf(object):
 
   ##### -------------------------------------------------------------------------
   ##### PROPERTIES
@@ -100,7 +101,7 @@ class JunosEzNetconf(object):
     self._auth_password = kvargs['password']
     self._conn = None
 
-    # accessable attributes
+    # public attributes
 
     self.connected = False
     self.rpc = _RpcMetaExec( self )
@@ -130,13 +131,15 @@ class JunosEzNetconf(object):
 
   def execute( self, rpc_cmd, **kvargs ):
     """
-      executes the :rpc_cmd: and returns the result as an lxml Element
+      executes the :rpc_cmd: and returns the result.  the result is an
+      lxml Element following <rpc-reply> unless the caller specifies
+      a :to_py: param
 
       :rpc_cmd: can either be an Element or xml-as-string.  In either case
       the command starts with the specific command element, i.e., not the
       <rpc> element itself
 
-      known options for kvargs:
+      KNOWN options for kvargs:
         :to_py: is a caller provided function that takes the response and
                 will convert the results to native python types.  all kvargs
                 will be passed to this function as well in the form:
@@ -150,13 +153,17 @@ class JunosEzNetconf(object):
     else:
       raise ValueError("Dont know what to do with rpc of type %s" % rpc_cmd.__class__.__name__)
 
+    # invoking a bad RPC will cause a connection object exception
+    # will will be raised directly to the caller ... for now ...
+    # @@@ need to trap this and re-raise accordingly.
+
     rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
 
-    # @@@ need to check for rpc-error with builtin RPC exception object
+    # for RPCs that have embedded rpc-errors, need to check for those now
 
-    rpc_err = rpc_rsp_e.find('.//rpc-error')
-    if rpc_err:
-      raise RuntimeError("RPC Error, please handle me")
+    rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
+    if len(rpc_errs):
+      raise RpcError( rpc_cmd_e, rpc_rsp_e, rpc_errs )
 
     # skip the <rpc-reply> element and pass the caller the first child element
     # generally speaking this is what they really want.  if they want to uplevel 
@@ -167,7 +174,7 @@ class JunosEzNetconf(object):
     # if the caller provided a "to Python" conversion function, then invoke
     # that now and return the results of that function.  otherwise just return
     # the RPC results as XML
-    
+
     if kvargs.get('to_py'):
       return kvargs['to_py']( self, ret_rpc_rsp, **kvargs )
     else:
