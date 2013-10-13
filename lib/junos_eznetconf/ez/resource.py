@@ -32,6 +32,10 @@ class EzResource(object):
     self.has = {}
     self.should = {}
 
+  ### -------------------------------------------------------------------------
+  ### read
+  ### -------------------------------------------------------------------------
+
   def read(self):
     """
       read resource configuration from device
@@ -60,11 +64,19 @@ class EzResource(object):
     # return the python structure represntation
     return self.has
 
+  ### -------------------------------------------------------------------------
+  ### write
+  ### -------------------------------------------------------------------------
+
   def write(self):
     """
       write resource configuration to device
     """
     return True
+
+  ### -------------------------------------------------------------------------
+  ### OPERATOR OVERLOADING
+  ### -------------------------------------------------------------------------
 
   def __getitem__( self, namekey ):
     """
@@ -99,6 +111,10 @@ class EzResource(object):
     iam = self.__class__.__name__
     return "%s: %s" % (iam, self._name) if not self.is_mgr \
       else "Resource Manager: %s" % iam
+
+  ### -------------------------------------------------------------------------
+  ### PROPERTY ACCESSORS
+  ### -------------------------------------------------------------------------
 
   @property
   def is_mgr(self):
