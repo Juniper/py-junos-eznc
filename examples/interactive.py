@@ -1,8 +1,9 @@
 import pdb
 
 from exampleutils import *
-import junos_eznetconf as junos
-from junos_eznetconf import EzNetconf as Junos
+from junos.eznc import Netconf as Junos
+from junos.eznc.resources.srx import Application
+
 from lxml.builder import E 
 from lxml import etree
 
@@ -12,55 +13,7 @@ jdev = Junos(**login)
 
 jdev.open()
 
-from junos_eznetconf import EzResource
-
-class SrxApp( EzResource ):
-
-  PROPERTIES = [
-    'description',
-    'protocol',
-    'dest_port',
-    'timeout'
-  ]
-
-  def __init__(self, junos, namekey=None, **kvargs ):
-    EzResource.__init__( self, junos, namekey, **kvargs )
-
-  def _xml_at_top(self):
-    xml = E.applications(
-      E.application(
-        E.name( self._name )
-      )
-    )
-    return xml
-
-  def _xml_at_res(self, xml):
-    return xml.find('.//application')
-
-  def _xml_read_to_py(self, has_xml, has_py ):
-    self._set_ea_status( has_xml, has_py )
-
-    has_py['protocol'] = has_xml.find('protocol').text
-    has_py['dest_port'] = has_xml.find('destination-port').text
-    has_py['timeout'] = int(has_xml.find('inactivity-timeout').text)
-
-  ##### -----------------------------------------------------------------------
-  ##### XML property writers
-  ##### -----------------------------------------------------------------------
-
-  def _xml_change_protocol( self, xml ):
-    xml.append(E.protocol(self['protocol']))
-    return True
-
-  def _xml_change_dest_port( self, xml ):
-    xml.append(E('destination-port', self['dest_port']))
-    return True
-
-  def _xml_change_timeout( self, xml ):
-    xml.append(E('inactivity-timeout', str(self['timeout'])))
-    return True
-
-apps = SrxApp( jdev )
+apps = Application( jdev )
 
 
 

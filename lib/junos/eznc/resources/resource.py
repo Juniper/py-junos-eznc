@@ -5,7 +5,7 @@ from pprint import pformat
 P_JUNOS_EXISTS = '_exists'
 P_JUNOS_ACTIVE = '_active'
 
-class EzResource(object):
+class Resource(object):
 
   PROPERTIES = [
     P_JUNOS_EXISTS,
@@ -29,8 +29,8 @@ class EzResource(object):
 
     # otherwise, a resource includes public attributes:
 
-    self.properties = EzResource.PROPERTIES 
-    if self.__class__ != EzResource: self.properties += self.__class__.PROPERTIES
+    self.properties = Resource.PROPERTIES 
+    if self.__class__ != Resource: self.properties += self.__class__.PROPERTIES
     self.has = {}
     self.should = {}
 
@@ -101,7 +101,7 @@ class EzResource(object):
   ##### -----------------------------------------------------------------------
 
   ### -------------------------------------------------------------------------
-  ### activate()
+  ### activate
   ### -------------------------------------------------------------------------
 
   def activate(self):
@@ -115,7 +115,7 @@ class EzResource(object):
 
 
   ### -------------------------------------------------------------------------
-  ### deactivate()
+  ### deactivate
   ### -------------------------------------------------------------------------
 
   def deactivate(self):
@@ -128,11 +128,16 @@ class EzResource(object):
     return self.write()
 
   ### -------------------------------------------------------------------------
-  ### delete()
+  ### delete
   ### -------------------------------------------------------------------------
 
   def delete(self):
+    """
+      remove configuration from Junos device
+    """
     # cannot delete something that doesn't exist
+    # @@@ should raise?
+
     if not self.exists: return False
 
     # remove the config from Junos
@@ -147,13 +152,59 @@ class EzResource(object):
 
     return True
 
+  ### -------------------------------------------------------------------------
+  ### rename
+  ### -------------------------------------------------------------------------
+
+  def rename(self, new_name):
+    """
+      renames the resource in Junos configuration
+    """
+    # cannot rename something that doesn't exist
+    # @@@ should raise?
+
+    if not self.exists: return False
+
+    xml = self._xml_edit_at_res()
+    xml.attrib['rename'] = 'rename'
+    xml.attrib['name'] = new_name
+
+    rsp = self._xml_config_write( xml )
+    self._name = new_name
+
+    return True
+
+  ### -------------------------------------------------------------------------
+  ### reorder
+  ### -------------------------------------------------------------------------
+
+  def reorder( self, **kvargs ):
+    """
+      reorder the resource within the Junos configuration
+
+      :kvargs: will contain one of the two options:
+        after="<name>"
+        before="<name>"
+    """
+    cmd, name = next(kvargs.iteritems())
+    if cmd != 'before' and cmd != 'after':
+      raise ValueError("Must be either 'before' or 'after'")
+
+    xml = self._xml_edit_at_res()
+    xml.attrib['insert'] = cmd
+    xml.attrib['name'] = name
+
+    rsp = self._xml_config_write( xml )
+    return True
+
   ##### -----------------------------------------------------------------------
   ##### OPERATOR OVERLOADING
   ##### -----------------------------------------------------------------------
 
   def __getitem__( self, namekey ):
     """
-      implements []
+      implements [] to obtain property value.  value will come
+      from :should: if set or from :has: otherwise.
     """
     if self.is_mgr:      
       return self._select( namekey )
@@ -168,7 +219,7 @@ class EzResource(object):
 
   def __setitem__(self, r_prop, value):
     """
-      implements []=
+      implements []= to set property value into :should:
     """
     if self.is_mgr: 
       raise RuntimeError("Not on a manager!")
@@ -237,6 +288,12 @@ class EzResource(object):
     """
     as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
     as_py[P_JUNOS_EXISTS] = True
+
+  def _xml_set_or_delete(self, xml, ele_name, value):
+    """
+      HELPER function to either set a value or remove the element
+    """
+    xml.append(E(ele_name,(value if value else {'delete':'delete'})))
 
   ##### -----------------------------------------------------------------------
   ##### abstract methods
@@ -307,18 +364,12 @@ class EzResource(object):
     return self._xml_at_res(self._xml_at_top())
 
   # ---------------------------------------------------------------------------
-  # XML standard change methods
+  # XML standard change properties
   # ---------------------------------------------------------------------------
 
   def _xml_change_description(self, xml):
     self._xml_set_or_delete(xml, 'description', self.should['description'])
     return True
-
-  def _xml_set_or_delete(self, xml, ele_name, value):
-    """
-      HELPER function to either set a value or remove the element
-    """
-    xml.append(E(ele_name,(value if value else {'delete':'delete'})))
 
   def _xml_change__active(self, xml):
     if self.should[P_JUNOS_ACTIVE] == self.has[P_JUNOS_ACTIVE]:
