@@ -1,5 +1,6 @@
 import pdb
 from lxml.builder import E 
+from pprint import pformat
 
 P_JUNOS_EXISTS = '_exists'
 P_JUNOS_ACTIVE = '_active'
@@ -95,9 +96,60 @@ class EzResource(object):
 
     return True
 
+  ##### -----------------------------------------------------------------------
+  ##### Junos configuration simulants
+  ##### -----------------------------------------------------------------------
+
   ### -------------------------------------------------------------------------
-  ### OPERATOR OVERLOADING
+  ### activate()
   ### -------------------------------------------------------------------------
+
+  def activate(self):
+    """
+      write config to activate resource; i.e. "activate ..."
+    """
+    # no action needed if it's already active 
+    if self.has[P_JUNOS_ACTIVE] == True: return False
+    self[P_JUNOS_ACTIVE] = True
+    return self.write()
+
+
+  ### -------------------------------------------------------------------------
+  ### deactivate()
+  ### -------------------------------------------------------------------------
+
+  def deactivate(self):
+    """
+      write config to deactivate resource, i.e. "deactivate ..."
+    """
+    # no action needed if it's already deactive
+    if self.has[P_JUNOS_ACTIVE] == False: return False
+    self[P_JUNOS_ACTIVE] = False
+    return self.write()
+
+  ### -------------------------------------------------------------------------
+  ### delete()
+  ### -------------------------------------------------------------------------
+
+  def delete(self):
+    # cannot delete something that doesn't exist
+    if not self.exists: return False
+
+    # remove the config from Junos
+    xml = self._xml_edit_at_res()
+    xml.attrib['delete'] = 'delete'
+    self._xml_on_delete( xml )
+    rsp = self._xml_config_write( xml )
+
+    # reset the :has: attribute
+    self.has.clear()
+    self.has[P_JUNOS_EXISTS] = False
+
+    return True
+
+  ##### -----------------------------------------------------------------------
+  ##### OPERATOR OVERLOADING
+  ##### -----------------------------------------------------------------------
 
   def __getitem__( self, namekey ):
     """
@@ -128,10 +180,16 @@ class EzResource(object):
   def __repr__(self):
     """
       stringify for debug/printing
+
+      this will show the resource manager (class) name, 
+      the resource (Junos) name, and the contents
+      of the :has: dict and the contents of the :should: dict
     """
-    iam = self.__class__.__name__
-    return "%s: %s" % (iam, self._name) if not self.is_mgr \
-      else "Resource Manager: %s" % iam
+    mgr_name = self.__class__.__name__    
+    return "NAME: %s: %s\nHAS: %s\nSHOULD:%s" % \
+      (mgr_name, self._name, pformat(self.has), pformat(self.should)) \
+      if not self.is_mgr \
+      else "Resource Manager: %s" % mgr_name
 
   ### -------------------------------------------------------------------------
   ### PROPERTY ACCESSORS
@@ -205,6 +263,16 @@ class EzResource(object):
     """
     edit_xml = self._xml_edit_at_res()
 
+    # if this resource should be deleted then
+    # handle that case and return
+
+    if not self.should[P_JUNOS_EXISTS]:
+      self._xml_change__exists( edit_xml )
+      return edit_xml
+
+    # otherwise, this is an update, and we need to
+    # construct the XML for change
+
     changed = False
     for r_prop in self.should.keys():
       edit_fn = "_xml_change_" + r_prop
@@ -215,8 +283,8 @@ class EzResource(object):
 
   def _xml_config_write(self, xml):
     """
-      write the xml change to the Junos device, trapping
-      on exceptions.
+      write the xml change to the Junos device, 
+      trapping on exceptions.
     """
     top_xml = xml.getroottree().getroot()
 
@@ -242,6 +310,16 @@ class EzResource(object):
   # XML standard change methods
   # ---------------------------------------------------------------------------
 
+  def _xml_change_description(self, xml):
+    self._xml_set_or_delete(xml, 'description', self.should['description'])
+    return True
+
+  def _xml_set_or_delete(self, xml, ele_name, value):
+    """
+      HELPER function to either set a value or remove the element
+    """
+    xml.append(E(ele_name,(value if value else {'delete':'delete'})))
+
   def _xml_change__active(self, xml):
     if self.should[P_JUNOS_ACTIVE] == self.has[P_JUNOS_ACTIVE]:
       return False
@@ -249,7 +327,21 @@ class EzResource(object):
     xml.attrib[value] = value
     return True
 
-  def _xml_change__exists(self, xml): return False
+  def _xml_change__exists(self, xml): 
+    # if this is a change to create something new,
+    # then invoke the 'on-create' hook and return 
+    # the results
+
+    if self.should[P_JUNOS_EXISTS]:
+      return self._xml_on_create( xml )
+
+    # otherwise, we are deleting this resource
+    xml.attrib['delete'] = 'delete'
+
+    # now call the 'on-delete' hook and return 
+    # the results
+
+    return self._xml_on_delete( xml )
 
   ##### -----------------------------------------------------------------------
   ##### abstract pass methods
@@ -258,5 +350,8 @@ class EzResource(object):
   def _init_has( self ): pass
   def _xml_at_res( self, xml ): return None
   def _xml_at_top( self ): return None
+
+  def _xml_on_delete( self, xml ): return True
+  def _xml_on_create( self, xml ): return False
 
 

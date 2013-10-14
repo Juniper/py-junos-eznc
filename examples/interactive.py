@@ -17,6 +17,7 @@ from junos_eznetconf import EzResource
 class SrxApp( EzResource ):
 
   PROPERTIES = [
+    'description',
     'protocol',
     'dest_port',
     'timeout'
@@ -48,14 +49,16 @@ class SrxApp( EzResource ):
   ##### -----------------------------------------------------------------------
 
   def _xml_change_protocol( self, xml ):
-    xml.append(E.protocol(self.should['protocol']))
+    xml.append(E.protocol(self['protocol']))
     return True
 
   def _xml_change_dest_port( self, xml ):
-    return False
+    xml.append(E('destination-port', self['dest_port']))
+    return True
 
   def _xml_change_timeout( self, xml ):
-    return False
+    xml.append(E('inactivity-timeout', str(self['timeout'])))
+    return True
 
 apps = SrxApp( jdev )
 
