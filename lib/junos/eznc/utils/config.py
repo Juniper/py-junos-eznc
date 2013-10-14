@@ -1,17 +1,75 @@
 # utils/config.py
 
+import pdb
+
+### ---------------------------------------------------------------------------
+### commit
+### ---------------------------------------------------------------------------
 
 def _cfg_u_commit( junos, *vargs, **kvargs ):
   """
-    commit a configuration
+    commit a configuration.  returns either :True: or
+    raises an RPCError exception
+
+    :kvargs: options
+      confirm = [True | <timeout-minutes>]
+      comment = <comment log string>
+
   """
-  pass
+  rpc_args = {}
+
+  # if a comment is provided, then include that in the RPC
+
+  comment = kvargs.get('comment')
+  if comment: rpc_args['log'] = comment
+
+  # if confirm is provided, then setup the RPC args
+  # so that Junos will either use the default confirm
+  # timeout (confirm=True) or a specific timeout
+  # (confirm=<minutes>)
+
+  confirm = kvargs.get('confirm')
+  if confirm:
+    rpc_args['confirmed'] = True
+    confirm_val = str(confirm)
+    if 'True' != confirm_val: rpc_args['confirm-timeout'] = confirm_val
+
+  # dbl-splat the rpc_args since we want to pass key/value to metaexec
+  # if there is a commit/check error, this will raise an execption
+
+  junos.rpc.commit_configuration( **rpc_args )
+  return True
+
+### ---------------------------------------------------------------------------
+### commit check
+### ---------------------------------------------------------------------------
 
 def _cfg_u_commit_check( junos, *vargs, **kvargs):
   """
-    perform a commit check
+    perform a commit check.  if the commit check passes, this function
+    will return :True:.  If there is a commit check 
+    error, an :RPCError: execption will be raised.  the "on-error" behavior 
+    can be changed by using kvargs as follows:
+
+      on_err = False    : return False
+      on_err = 'rpc'    : return the RPCError object
+
   """
-  pass
+  try:
+    junos.rpc.commit_configuration(dict(check=True))
+  except Exception as err:
+    on_err = kvargs.get('on_err',True)    # defaul raise exception to caller
+    if False == on_err:
+      return False
+    if 'rpc' == on_err:
+      return err
+    raise err
+
+  return True
+
+### ---------------------------------------------------------------------------
+### show | compare rollback <number|0*>
+### ---------------------------------------------------------------------------
 
 def _cfg_u_diff( junos, *vargs, **kvargs ):
   """
@@ -32,23 +90,41 @@ def _cfg_u_diff( junos, *vargs, **kvargs ):
   diff_txt = rsp.find('configuration-output').text
   return None if diff_txt == "\n" else diff_txt
 
+### ---------------------------------------------------------------------------
+### helper on loading configs
+### ---------------------------------------------------------------------------
+
 def _cfg_u_load( junos, *vargs, **kvargs ):
   """
     loads configuration into the device
   """
   pass
 
+### ---------------------------------------------------------------------------
+### config exclusive
+### ---------------------------------------------------------------------------
+
 def _cfg_u_lock( junos, *vargs, **kvargs ):
   """
     attempts an exclusive lock on the candidate configuration
   """
-  pass
+  junos.rpc.lock_configuration()
+  return True
+
+### ---------------------------------------------------------------------------
+### releases the exclusive lock
+### ---------------------------------------------------------------------------
 
 def _cfg_u_unlock( junos, *vargs, **kvargs ):
   """
     unlocks the candidate configuration
   """
-  pass
+  junos.rpc.unlock_configuration()
+  return True
+
+### ---------------------------------------------------------------------------
+### rollback <number|0*>
+### ---------------------------------------------------------------------------
 
 def _cfg_u_rollback( junos, *vargs, **kvargs ):
   """
@@ -69,6 +145,10 @@ def _cfg_u_rollback( junos, *vargs, **kvargs ):
 
   return True
 
+### ---------------------------------------------------------------------------
+### The following dictionary is 'exported' so that programmers can include
+### it into their :Netconf: objects via the :ez: attribute
+### ---------------------------------------------------------------------------
 
 ConfigUtils = dict(
   commit = _cfg_u_commit,

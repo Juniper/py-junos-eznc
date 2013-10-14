@@ -78,7 +78,7 @@ class _RpcMetaExec(object):
       # vargs[0] is a dict, command options like format='text'
       if vargs:
         for k,v in vargs[0].items():
-          rpc.attrib[k] = v
+          if v != True: rpc.attrib[k] = v
 
       # now invoke the command against the
       # associated :junos: device and return
