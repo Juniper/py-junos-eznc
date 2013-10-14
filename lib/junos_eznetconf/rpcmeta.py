@@ -21,12 +21,22 @@ class _RpcMetaExec(object):
   ##### get_config
   ##### -----------------------------------------------------------------------
 
-  def get_config( self, config_filter=None, options=None ):
+  def get_config( self, filter_xml=None, options=None ):
     rpc = E('get-configuration')
 
-    if config_filter != None:
-      etree.SubElement(rpc, 'configuration').append( config_filter )
+    if filter_xml != None:
+      etree.SubElement(rpc, 'configuration').append( filter_xml )
 
+    return self._junos.execute( rpc )
+
+  def load_config( self, config_xml, options=None ):
+    rpc = E('load-configuration')
+    etree.SubElement(rpc, 'configuration').append( config_xml )
+    if len(options): 
+      for k,v in options.items(): rpc.attrib[k] = v
+
+    pdb.set_trace()
+    
     return self._junos.execute( rpc )
 
   ##### -----------------------------------------------------------------------

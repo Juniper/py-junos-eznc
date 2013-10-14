@@ -26,9 +26,10 @@ class EzResource(object):
 
     if not namekey: return
 
-    # otherwise, a resource includes attributes to manage the :has: and
-    # :should: property information
+    # otherwise, a resource includes public attributes:
 
+    self.properties = EzResource.PROPERTIES 
+    if self.__class__ != EzResource: self.properties += self.__class__.PROPERTIES
     self.has = {}
     self.should = {}
 
@@ -43,7 +44,7 @@ class EzResource(object):
 
     self.has.clear()
     cfg_xml = self._xml_config_read()
-    self._has_xml = self._xml_get_has_xml( cfg_xml )
+    self._has_xml = self._xml_at_res( cfg_xml )
 
     # if the resource does not exist in Junos, then mark
     # the :has: accordingly and invoke :_init_has: for any
@@ -59,7 +60,7 @@ class EzResource(object):
     # resource subclass.  it is used to parse the XML
     # into native python structures.
 
-    self._xml_read_parser( self._has_xml, self.has )
+    self._xml_read_to_py( self._has_xml, self.has )
 
     # return the python structure represntation
     return self.has
@@ -70,8 +71,28 @@ class EzResource(object):
 
   def write(self):
     """
-      write resource configuration to device
+      write resource configuration stored in :should: back to device
     """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")
+
+    # if there is nothing to write, then return False
+    if not len(self.should): return False
+
+    # if the 'exists' property is not set, then default it to True
+    if not self.should.get(P_JUNOS_EXISTS):
+      self.should[P_JUNOS_EXISTS] = True
+
+    # construct the XML change structure
+    xml_change = self._xml_build_change()
+    if None == xml_change: return False
+
+    # write these changes to the device
+    rsp = self._xml_config_write( xml_change )
+
+    # copy :should: into :has: and then clear :should:
+    self.has.update( self.should )
+    self.should.clear()
+
     return True
 
   ### -------------------------------------------------------------------------
@@ -171,12 +192,71 @@ class EzResource(object):
     return res
 
   def _xml_config_read(self):
+    """
+      read the resource config from the Junos device
+    """
     return self._junos.rpc.get_config( self._xml_at_top() )
+
+  def _xml_build_change(self):
+    """
+      iterate through the :should: properties creating the 
+      necessary configuration change structure.  if there
+      are no changes, then return :None:
+    """
+    edit_xml = self._xml_edit_at_res()
+
+    changed = False
+    for r_prop in self.should.keys():
+      edit_fn = "_xml_change_" + r_prop
+      if getattr(self, edit_fn)(edit_xml):
+        changed = True
+
+    return edit_xml if changed else None
+
+  def _xml_config_write(self, xml):
+    """
+      write the xml change to the Junos device, trapping
+      on exceptions.
+    """
+    top_xml = xml.getroottree().getroot()
+
+    try:
+      attrs = dict(action='replace')
+      result = self._junos.rpc.load_config( top_xml, attrs )
+    except Exception as err:
+      # see if this is OK or just a warning
+      if None == err.rsp.find('.//ok'):
+        raise err
+      return err.rsp
+
+    return result    
+
+  # ---------------------------------------------------------------------------
+  # XML edit cursor methods
+  # ---------------------------------------------------------------------------
+
+  def _xml_edit_at_res(self):
+    return self._xml_at_res(self._xml_at_top())
+
+  # ---------------------------------------------------------------------------
+  # XML standard change methods
+  # ---------------------------------------------------------------------------
+
+  def _xml_change__active(self, xml):
+    if self.should[P_JUNOS_ACTIVE] == self.has[P_JUNOS_ACTIVE]:
+      return False
+    value = 'active' if self.should[P_JUNOS_ACTIVE] else 'inactive'
+    xml.attrib[value] = value
+    return True
+
+  def _xml_change__exists(self, xml): return False
 
   ##### -----------------------------------------------------------------------
   ##### abstract pass methods
   ##### -----------------------------------------------------------------------
 
   def _init_has( self ): pass
-  def _xml_get_has_xml( self, xml ): pass
+  def _xml_at_res( self, xml ): return None
+  def _xml_at_top( self ): return None
+
 
