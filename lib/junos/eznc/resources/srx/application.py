@@ -1,14 +1,14 @@
 
 # 3rd-party modules
 from lxml.builder import E 
-from lxml import etree
 
 # module packages
 from ..resource import Resource
 
 class Application( Resource ):
   """
-    SRX application resource
+    SRX application resource:
+    [edit applications application <name>]
   """
 
   PROPERTIES = [
@@ -35,7 +35,7 @@ class Application( Resource ):
     """
     return xml.find('.//application')
 
-  def _xml_read_to_py(self, has_xml, has_py ):
+  def _xml_to_py(self, has_xml, has_py ):
     """
       converts Junos XML to native Python
     """

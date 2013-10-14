@@ -61,7 +61,7 @@ class Resource(object):
     # resource subclass.  it is used to parse the XML
     # into native python structures.
 
-    self._xml_read_to_py( self._has_xml, self.has )
+    self._xml_to_py( self._has_xml, self.has )
 
     # return the python structure represntation
     return self.has
