@@ -21,7 +21,16 @@ def _cfg_u_diff( junos, *vargs, **kvargs ):
     kvargs optional:
       rollback=<rollback-number>
   """
-  pass
+  rb_id = kvargs.get('rollback', 0)
+  if rb_id < 0 or rb_id > 50:
+    raise ValueError("Invalid rollback #"+str(rb_id))
+
+  rsp = junos.rpc.get_configuration(dict(
+    compare='rollback', rollback=str(rb_id)
+    ))
+
+  diff_txt = rsp.find('configuration-output').text
+  return None if diff_txt == "\n" else diff_txt
 
 def _cfg_u_load( junos, *vargs, **kvargs ):
   """
@@ -49,7 +58,7 @@ def _cfg_u_rollback( junos, *vargs, **kvargs ):
     kvargs optional:
       rollback=<rollback-number>
   """
-  
+
   rb_id = kvargs.get('rollback', 0)
   if rb_id < 0 or rb_id > 50:
     raise ValueError("Invalid rollback #"+str(rb_id))
