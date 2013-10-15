@@ -1,8 +1,9 @@
+import pdb
 from lxml import etree
 
-class RpcError( StandardError ):
+class RpcError( Exception ):
 
-  def __init__( self, cmd, rsp, errs ):
+  def __init__( self, cmd=None, rsp=None, errs=None ):
     """
       :cmd: is the rpc command
       :rsp: is the rpc response (after <rpc-reply>)
@@ -17,3 +18,11 @@ class RpcError( StandardError ):
       pprints the response XML attribute
     """
     return etree.tostring(self.rsp, pretty_print=True)
+
+  @property
+  def to_py(self):
+    return self._rsp_to_py
+
+# class CommitError( RpcError ):
+#   def __init__(self,cmd = None, rsp, errs = None):
+#     RpcError.__init__( self, cmd, rsp, errs )

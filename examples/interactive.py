@@ -1,5 +1,7 @@
 import pdb
 
+from pprint import pprint as pp 
+
 from exampleutils import *
 from junos.eznc import Netconf as Junos
 from junos.eznc.resources.srx import ApplicationSet

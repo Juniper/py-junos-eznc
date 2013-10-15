@@ -2,6 +2,10 @@
 
 import pdb
 
+# package modules
+from junos.eznc import RpcError
+from junos.eznc import jxml as JXML
+
 ### ---------------------------------------------------------------------------
 ### commit
 ### ---------------------------------------------------------------------------
@@ -47,23 +51,15 @@ def _cfg_u_commit( junos, *vargs, **kvargs ):
 def _cfg_u_commit_check( junos, *vargs, **kvargs):
   """
     perform a commit check.  if the commit check passes, this function
-    will return :True:.  If there is a commit check 
-    error, an :RPCError: execption will be raised.  the "on-error" behavior 
-    can be changed by using kvargs as follows:
+    will return :True:
 
-      on_err = False    : return False
-      on_err = 'rpc'    : return the RPCError object
-
+    If there is a commit check error, then the RPC error reply XML
+    structure will be returned
   """
   try:
-    junos.rpc.commit_configuration(dict(check=True))
+    junos.rpc.commit_configuration( check=True )
   except Exception as err:
-    on_err = kvargs.get('on_err',True)    # defaul raise exception to caller
-    if False == on_err:
-      return False
-    if 'rpc' == on_err:
-      return err
-    raise err
+    return JXML.rpc_error( err.xml )
 
   return True
 

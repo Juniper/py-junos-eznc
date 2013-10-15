@@ -14,6 +14,8 @@
 
 """
 
+import pdb
+
 DEL = {'delete': 'delete'}            # Junos XML resource delete
 REN = {'rename': 'rename'}            # Junos XML resource rename
 
@@ -27,3 +29,30 @@ AFTER = {'insert': 'after'}
 # not all the subsequent configuration
 
 NAMES_ONLY = {'recurse': "false"}
+
+def remove_namespaces( xml ):
+  for elem in xml.getiterator():
+    i = elem.tag.find('}')
+    if i > 0: elem.tag = elem.tag[i+1:]
+
+def rpc_error( rpc_xml ):
+  """
+    extract the various bits from an <rpc-error> element
+    into a dictionary
+  """
+  remove_namespaces( rpc_xml )
+
+  def find_strip(x):
+    ele = rpc_xml.find(x)
+    return ele.text.strip() if None != ele else None
+
+  this_err = {}
+  this_err['severity'] = find_strip('error-severity')
+  this_err['source'] = find_strip('source-daemon')
+  this_err['edit-path'] = find_strip('error-path')
+  this_err['bad-element'] = find_strip('error-info/bad-element')
+  this_err['message'] = find_strip('error-message')
+
+  return this_err
+
+
