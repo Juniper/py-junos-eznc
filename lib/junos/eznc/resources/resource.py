@@ -256,6 +256,14 @@ class Resource(object):
   ### -------------------------------------------------------------------------
 
   @property
+  def name(self):
+    return self._name
+
+  @name.setter
+  def name(self, value):
+    raise AttributeError("name is currently read-only")
+  
+  @property
   def is_mgr(self):
     """
       is this a resource manager?

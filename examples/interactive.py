@@ -4,7 +4,7 @@ from pprint import pprint as pp
 
 from exampleutils import *
 from junos.eznc import Netconf as Junos
-from junos.eznc.resources.srx import ApplicationSet
+from junos.eznc.resources.srx import ApplicationSet, PolicyContext
 from junos.eznc.utils import ConfigUtils
 from junos.eznc.exception import *
 
@@ -18,9 +18,11 @@ jdev = Junos(**login)
 jdev.open()
 
 jdev.ez( cu=ConfigUtils )
-jdev.ez( aset=ApplicationSet )
+jdev.ez( spc=PolicyContext )
 
-r = jdev.ez.aset["JMET-DB-PORTS"]
+pc = jdev.ez.spc[("OUTSIDE-DC-ST1","PCI-APP-DC-ST1")]
+
+
 
 
 
