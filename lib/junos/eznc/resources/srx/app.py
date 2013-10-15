@@ -25,9 +25,7 @@ class Application( Resource ):
     """
       configuration to retrieve resource
     """
-    return E.applications(
-      E.application(E.name( self._name ))
-    )
+    return E.applications(E.application(E.name( self._name )))
 
   def _xml_at_res(self, xml):
     """
@@ -39,8 +37,9 @@ class Application( Resource ):
     """
       converts Junos XML to native Python
     """
-    self._set_ea_status( has_xml, has_py )
+    Resource.set_ea_status( has_xml, has_py )
 
+    Resource.copyifexists( has_xml, 'description', has_py )
     has_py['protocol'] = has_xml.find('protocol').text
     has_py['dest_port'] = has_xml.find('destination-port').text
     has_py['timeout'] = int(has_xml.find('inactivity-timeout').text)

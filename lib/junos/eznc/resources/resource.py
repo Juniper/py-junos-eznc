@@ -1,6 +1,14 @@
 import pdb
-from lxml.builder import E 
+
+# stdlib
 from pprint import pformat
+from copy import deepcopy
+
+# 3rd-party
+from lxml.builder import E 
+
+# package modules
+from .. import jxml as JXML
 
 P_JUNOS_EXISTS = '_exists'
 P_JUNOS_ACTIVE = '_active'
@@ -17,10 +25,11 @@ class Resource(object):
     self._name = namekey
     self._parent = kvargs.get('parent')
     self._opts = kvargs
+    self._manager = kvargs.get('M')
 
     # resource manager list and catalog
-    self._rlist = None
-    self._rcatalog = None
+    self._rlist = []
+    self._rcatalog = {}
 
     # if we are creating the manager, i.e. not a specific named item,
     # then return now.
@@ -142,7 +151,7 @@ class Resource(object):
 
     # remove the config from Junos
     xml = self._xml_edit_at_res()
-    xml.attrib['delete'] = 'delete'
+    xml.attrib.update( JXML.DEL )
     self._xml_on_delete( xml )
     rsp = self._xml_config_write( xml )
 
@@ -166,8 +175,8 @@ class Resource(object):
     if not self.exists: return False
 
     xml = self._xml_edit_at_res()
-    xml.attrib['rename'] = 'rename'
-    xml.attrib['name'] = new_name
+    xml.attrib.update( JXML.REN )
+    xml.attrib.update( JXML.NAME( new_name ))
 
     rsp = self._xml_config_write( xml )
     self._name = new_name
@@ -191,8 +200,8 @@ class Resource(object):
       raise ValueError("Must be either 'before' or 'after'")
 
     xml = self._xml_edit_at_res()
-    xml.attrib['insert'] = cmd
-    xml.attrib['name'] = name
+    xml.attrib.update( JXML.INSERT( cmd ))
+    xml.attrib.update( JXML.NAME( name ))
 
     rsp = self._xml_config_write( xml )
     return True
@@ -278,31 +287,123 @@ class Resource(object):
     if not isinstance(value,bool): raise ValueError("value must be True/False")
     self.should[P_JUNOS_ACTIVE] = value
 
+  ### -------------------------------------------------------------------------
+  ### list of resources (names)
+  ### -------------------------------------------------------------------------
+
+  @property
+  def list(self):
+    """
+      returns a list of named resources
+    """
+    if not self.is_mgr: raise RuntimeError("Must be a manager!")
+    if not len(self._rlist): self.list_refresh()
+    return self._rlist
+
+  def list_refresh(self):
+    """
+      reloads the resource list from the Junos device
+    """
+    del self._rlist[:]
+    self._rlist = self._r_list()      # invoke the specific resource method
+
+  ### -------------------------------------------------------------------------
+  ### catalog of resources (dictionary)
+  ### -------------------------------------------------------------------------
+
+  @property
+  def catalog(self):
+    """
+      returns a dictionary of resources
+    """
+    if not self.is_mgr: raise RuntimeError("Must be a manager!")
+    if not len(self._rcatalog): self.catalog_refresh()
+    return self._rcatalog
+  
+  def catalog_refresh(self):
+    """
+      reloads the resource catalog from the Junos device
+    """
+    self._rcatalog.clear()
+    self._rcatalog = self._r_catalog()  # invoke the specific resource method
+
+  ### -------------------------------------------------------------------------
+  ### shortcuts
+  ### -------------------------------------------------------------------------
+
+  @property
+  def J(self):
+    """
+      returns the Junos object associated to this resource/manager
+    """
+    return self._junos
+
+  @property
+  def M(self):
+    """
+      returns the :Resource: manager associated to this resource
+    """
+    return self._manager
+
+  @property
+  def E(self):
+    """
+      returns the :ez: attribute of the associated Junos object
+    """
+    return self._junos.ez
+  
   ##### -----------------------------------------------------------------------
   ##### resource subclass helper methods
   ##### -----------------------------------------------------------------------
 
-  def _set_ea_status( self, as_xml, as_py ):
+  def copy(self, p_name):
+    """
+      performs a 'deepcopy' of the property :p_name: from the
+      resource :has: into the :should:
+    """
+    self.should[p_name] = deepcopy(self.has[p_name])
+    return self.should[p_name]
+
+  @classmethod
+  def set_ea_status( klass, as_xml, as_py ):
     """
       set the 'exists' and 'active' :has: values
     """
     as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
     as_py[P_JUNOS_EXISTS] = True
 
-  def _xml_set_or_delete(self, xml, ele_name, value):
+  @classmethod
+  def xml_set_or_delete( klass, xml, ele_name, value):
     """
       HELPER function to either set a value or remove the element
     """
-    xml.append(E(ele_name,(value if value else {'delete':'delete'})))
+    xml.append(E(ele_name,(value if value else JXML.DEL )))
+
+  @classmethod
+  def copyifexists( klass, xml, ele_name, to_py, py_name=None ):
+    ele_val = xml.find(ele_name)
+    if ele_val != None: 
+      to_py[(py_name if py_name else ele_name)] = ele_val.text.strip()
+
+  @classmethod
+  def diff_list( klass, has_list, should_list ):
+    # covert lists to perform differencing
+    should = set(should_list)
+    has = set(has_list)
+
+    # return lists (added, removed)
+    return (list(should - has), list(has - should))
 
   ##### -----------------------------------------------------------------------
   ##### abstract methods
   ##### -----------------------------------------------------------------------
 
   def _select( self, namekey ):
-    if not self.is_mgr:
-      raise RuntimeError("This is not a reosurce manager")
+    if not self.is_mgr: raise RuntimeError("This is not a reosurce manager")
+
+    self._opts['M'] = self
     res = self.__class__( self._junos, namekey, **self._opts )
+
     res.read()
     return res
 
@@ -368,7 +469,7 @@ class Resource(object):
   # ---------------------------------------------------------------------------
 
   def _xml_change_description(self, xml):
-    self._xml_set_or_delete(xml, 'description', self.should['description'])
+    xml_set_or_delete(xml, 'description', self.should['description'])
     return True
 
   def _xml_change__active(self, xml):
@@ -387,7 +488,7 @@ class Resource(object):
       return self._xml_on_create( xml )
 
     # otherwise, we are deleting this resource
-    xml.attrib['delete'] = 'delete'
+    xml.attrib.update( JXML.DEL )
 
     # now call the 'on-delete' hook and return 
     # the results

@@ -64,18 +64,11 @@ class Manager(object):
   ##### -----------------------------------------------------------------------
 
   @property
-  def Children(self):
+  def items(self):
     """
       returns a list of child names
     """
-    return self._children.keys()
-
-  @property
-  def Items(self):
-    """
-      returns a list of helper function names
-    """
-    return self._items.keys()
+    return self._items.keys() + self._children.keys()
 
   ##### -----------------------------------------------------------------------
   ##### OPERATOR OVERLOADING
