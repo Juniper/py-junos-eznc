@@ -287,6 +287,13 @@ class Resource(object):
     if not isinstance(value,bool): raise ValueError("value must be True/False")
     self.should[P_JUNOS_ACTIVE] = value
 
+  @property
+  def xml(self):
+    """
+      returns the :_has_xml structure read from the Junos device
+    """
+    return self._has_xml
+  
   ### -------------------------------------------------------------------------
   ### list of resources (names)
   ### -------------------------------------------------------------------------
@@ -305,7 +312,7 @@ class Resource(object):
       reloads the resource list from the Junos device
     """
     del self._rlist[:]
-    self._rlist = self._r_list()      # invoke the specific resource method
+    self._r_list()      # invoke the specific resource method
 
   ### -------------------------------------------------------------------------
   ### catalog of resources (dictionary)
@@ -325,7 +332,7 @@ class Resource(object):
       reloads the resource catalog from the Junos device
     """
     self._rcatalog.clear()
-    self._rcatalog = self._r_catalog()  # invoke the specific resource method
+    self._r_catalog()  # invoke the specific resource method
 
   ### -------------------------------------------------------------------------
   ### shortcuts

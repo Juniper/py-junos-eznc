@@ -106,6 +106,7 @@ class ApplicationSet( Resource ):
 
   ##### -----------------------------------------------------------------------
   ##### Resource List, Catalog
+  ##### -- only executed by 'manager' resources
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
@@ -113,7 +114,7 @@ class ApplicationSet( Resource ):
     got = self._junos.rpc.get_config(
       E.applications(E('application-set', JNX.NAMES_ONLY)))
 
-    return [ this.text for this in got.xpath('.//name')]
+    self._rlist = [ this.text for this in got.xpath('.//name')]
 
   def _r_catalog(self):
 
@@ -121,6 +122,10 @@ class ApplicationSet( Resource ):
       E.applications(E('application-set')))
 
     for this in got.xpath('.//application-set'):
+      name = this.find('name').text
       this_py = {}
-      self.xml_to_py( this, this_py )
+      self._xml_to_py( this, this_py )
+      self._rcatalog[name] = this_py
+
+
 
