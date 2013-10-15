@@ -1,4 +1,3 @@
-import pdb
 from lxml import etree
 
 class RpcError( Exception ):
@@ -17,12 +16,19 @@ class RpcError( Exception ):
     """
       pprints the response XML attribute
     """
-    return etree.tostring(self.rsp, pretty_print=True)
+    if None != rsp:
+      return etree.tostring(self.rsp, pretty_print=True)
+    else:
+      return
 
-  @property
-  def to_py(self):
-    return self._rsp_to_py
+class CommitError( RpcError ):
+  def __init__(self,cmd = None, rsp=None, errs = None):
+    RpcError.__init__( self, cmd, rsp, errs )
 
-# class CommitError( RpcError ):
-#   def __init__(self,cmd = None, rsp, errs = None):
-#     RpcError.__init__( self, cmd, rsp, errs )
+class LockError( RpcError ):
+  def __init__(self):
+    RpcError.__init__(self)
+
+class UnlockError( RpcError ):
+  def __init__(self):
+    RpcError.__init__(self)

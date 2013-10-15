@@ -147,12 +147,13 @@ class Manager(object):
 
     name, thing = next(kvargs.iteritems())
 
-    if isclass(thing) and issubclass(thing, Resource):
-      # then we're adding a Resource manager object
-      new_inst = thing(self._junos)
-      self._items[name] = new_inst
-      self.__dict__[name] = new_inst
-      return self
+    if isclass(thing):
+      if issubclass(thing, Resource):
+        # then we're adding a Resource manager object
+        new_inst = thing(self._junos)
+        self._items[name] = new_inst
+        self.__dict__[name] = new_inst
+        return self
 
     if isinstance( thing, dict ):
       # then this a dictionary of name=<function> and we want to

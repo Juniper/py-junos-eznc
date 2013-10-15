@@ -1,9 +1,18 @@
 # utils/config.py
+"""
+  ConfigUtils is a library to facilitate Junos configuration commands:
 
-import pdb
+  commit()
+  commit_check()
+  lock()
+  unlock()
+  rollback()
+  load()
+  diff()
+"""
 
 # package modules
-from junos.eznc import RpcError
+from junos.eznc.exception import *
 from junos.eznc import jxml as JXML
 
 ### ---------------------------------------------------------------------------
@@ -41,7 +50,14 @@ def _cfg_u_commit( junos, *vargs, **kvargs ):
   # dbl-splat the rpc_args since we want to pass key/value to metaexec
   # if there is a commit/check error, this will raise an execption
 
-  junos.rpc.commit_configuration( **rpc_args )
+  try:
+    junos.rpc.commit_configuration( **rpc_args )
+  except Exception as err:
+    # so the ncclient gives us something I don't want.  I'm going to convert
+    # it and re-raise the commit error
+    JXML.remove_namespaces( err.xml )
+    raise CommitError( rsp=err.xml )
+
   return True
 
 ### ---------------------------------------------------------------------------
@@ -147,11 +163,21 @@ def _cfg_u_rollback( junos, *vargs, **kvargs ):
 ### ---------------------------------------------------------------------------
 
 ConfigUtils = dict(
-  commit = _cfg_u_commit,
-  commit_check = _cfg_u_commit_check,
-  diff = _cfg_u_diff,
-  load = _cfg_u_load,
-  lock = _cfg_u_lock,
-  unlock = _cfg_u_unlock,
-  rollback = _cfg_u_rollback
-)
+    commit = _cfg_u_commit,
+    commit_check = _cfg_u_commit_check,
+    diff = _cfg_u_diff,
+    load = _cfg_u_load,
+    lock = _cfg_u_lock,
+    unlock = _cfg_u_unlock,
+    rollback = _cfg_u_rollback
+  )
+
+# rename functions for help() happiness ...
+
+_cfg_u_commit.__name__ = 'commit'
+_cfg_u_commit_check.__name__ = 'commit_check'
+_cfg_u_diff.__name__ = 'diff'
+_cfg_u_lock.__name__ = 'lock'
+_cfg_u_unlock.__name__ = 'unlock'
+_cfg_u_load.__name__ = 'load'
+_cfg_u_rollback.__name__ = 'rollback'
