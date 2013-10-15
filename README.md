@@ -1,5 +1,8 @@
 ___WORK IN PROGRESS - TINKER AT YOUR OWN PERIL___
 
+___UNDER ACTIVE DEVELOPMENT, ITEMS WILL SHIFT AROUND WHILE COLLECTING FEEDBACK___
+
+
 # ABOUT
 
 A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge or Junos XML.
