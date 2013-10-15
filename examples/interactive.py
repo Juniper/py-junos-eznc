@@ -6,6 +6,7 @@ from exampleutils import *
 from junos.eznc import Netconf as Junos
 from junos.eznc.resources.srx import ApplicationSet
 from junos.eznc.utils import ConfigUtils
+from junos.eznc.exception import *
 
 from lxml.builder import E 
 from lxml import etree
@@ -20,4 +21,6 @@ jdev.ez( cu=ConfigUtils )
 jdev.ez( aset=ApplicationSet )
 
 r = jdev.ez.aset["JMET-DB-PORTS"]
+
+
 

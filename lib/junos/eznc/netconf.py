@@ -171,7 +171,11 @@ class Netconf(object):
     # generally speaking this is what they really want.  if they want to uplevel 
     # they can always call the getparent() method on it.
 
-    ret_rpc_rsp = rpc_rsp_e[0]    
+    try:
+      ret_rpc_rsp = rpc_rsp_e[0]    
+    except IndexError:
+      # no children, so assume it means we are OK
+      return True
 
     # if the caller provided a "to Python" conversion function, then invoke
     # that now and return the results of that function.  otherwise just return

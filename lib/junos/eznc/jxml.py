@@ -34,6 +34,7 @@ def remove_namespaces( xml ):
   for elem in xml.getiterator():
     i = elem.tag.find('}')
     if i > 0: elem.tag = elem.tag[i+1:]
+  return xml
 
 def rpc_error( rpc_xml ):
   """
@@ -49,8 +50,8 @@ def rpc_error( rpc_xml ):
   this_err = {}
   this_err['severity'] = find_strip('error-severity')
   this_err['source'] = find_strip('source-daemon')
-  this_err['edit-path'] = find_strip('error-path')
-  this_err['bad-element'] = find_strip('error-info/bad-element')
+  this_err['edit_path'] = find_strip('error-path')
+  this_err['bad_element'] = find_strip('error-info/bad-element')
   this_err['message'] = find_strip('error-message')
 
   return this_err

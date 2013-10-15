@@ -120,7 +120,11 @@ def _cfg_u_lock( junos, *vargs, **kvargs ):
   """
     attempts an exclusive lock on the candidate configuration
   """
-  junos.rpc.lock_configuration()
+  try:
+    junos.rpc.lock_configuration()
+  except Exception as err:
+    raise LockError(rsp = JXML.remove_namespaces(err.xml))
+
   return True
 
 ### ---------------------------------------------------------------------------
@@ -131,7 +135,11 @@ def _cfg_u_unlock( junos, *vargs, **kvargs ):
   """
     unlocks the candidate configuration
   """
-  junos.rpc.unlock_configuration()
+  try:
+    junos.rpc.unlock_configuration()
+  except Exception as err:
+    raise UnlockError(rsp = JXML.remove_namespaces(err.xml))
+
   return True
 
 ### ---------------------------------------------------------------------------
