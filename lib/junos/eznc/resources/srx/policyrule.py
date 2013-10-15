@@ -5,6 +5,7 @@ from lxml.builder import E
 
 # local packages
 from ..resource import Resource
+from ....eznc import jxml as JXML
 
 class PolicyRule( Resource ):
 
@@ -57,7 +58,7 @@ class PolicyRule( Resource ):
 
     to_py['action'] = x_then.xpath('permit | reject | deny')[0].tag
 
-    if x_then.find('count') is not None: as_py['count'] = True
+    if x_then.find('count') is not None: to_py['count'] = True
     if x_then.find('log/session-init') is not None: to_py['log_init'] = True
     if x_then.find('log/session-close') is not None: to_py['log_close'] = True
 
@@ -88,13 +89,49 @@ class PolicyRule( Resource ):
     return True
 
   def _xml_change_match_srcs(self, xml):
-    pass
+    adds, dels = Resource.diff_list( self.has['match_srcs'], self.should['match_srcs'] )
+
+    if len(adds):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in adds: x_match.append(E('source-address',E.name(this)))
+
+    if len(dels):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in dels: x_match.append(E('source-address', JXML.DEL, E.name(this)))
+
+    return True
 
   def _xml_change_match_dsts(self, xml):
-    pass
+    adds, dels = Resource.diff_list( self.has['match_dsts'], self.should['match_dsts'] )
+
+    if len(adds):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in adds: x_match.append(E('destination-address',E.name(this)))
+
+    if len(dels):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in dels: x_match.append(E('destination-address', JXML.DEL, E.name(this)))
+
+    return True
 
   def _xml_change_match_apps(self, xml):
-    pass
+    adds, dels = Resource.diff_list( self.has['match_apps'], self.should['match_apps'] )
+
+    if len(adds):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in adds: x_match.append(E('application',E.name(this)))
+
+    if len(dels):
+      x_match = E.match()
+      xml.append(x_match)
+      for this in dels: x_match.append(E('application', JXML.DEL, E.name(this)))
+
+    return True
 
   ##### -----------------------------------------------------------------------
   ##### Resource List, Catalog
