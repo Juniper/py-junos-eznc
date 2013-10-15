@@ -18,8 +18,8 @@ The first pass of this module is targeting resource abstractions for the SRX fir
  * Security policy contexts and rule-sets
  * Security screens
  * Application items and sets
- * NAT simple source-NAT
- * NAT simple bi-directional static-NAT
+ * NAT for simple source-NAT use-cases
+ * NAT for simple bi-directional static-NAT use-cases
  
 
 # DEPENDENCIES
