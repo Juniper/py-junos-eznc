@@ -367,6 +367,13 @@ class Resource(object):
     """
     return self._junos.ez
   
+  @property
+  def P(self):
+    """
+      returns the parent of the associated Junos object
+    """
+    return self._parent
+
   ##### -----------------------------------------------------------------------
   ##### resource subclass helper methods
   ##### -----------------------------------------------------------------------
@@ -393,6 +400,14 @@ class Resource(object):
       HELPER function to either set a value or remove the element
     """
     xml.append(E(ele_name,(value if value else JXML.DEL )))
+
+  @classmethod
+  def xmltag_set_or_del( klass, ele_name, value):
+    """
+      HELPER function creates an XML element tag read-only 
+      that includes the DEL attribute depending on :value:
+    """
+    return E(ele_name, ({} if value else JXML.DEL ))
 
   @classmethod
   def copyifexists( klass, xml, ele_name, to_py, py_name=None ):

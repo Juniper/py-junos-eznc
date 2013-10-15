@@ -20,7 +20,9 @@ jdev.open()
 jdev.ez( cu=ConfigUtils )
 jdev.ez( spc=PolicyContext )
 
-pc = jdev.ez.spc[("OUTSIDE-DC-ST1","PCI-APP-DC-ST1")]
+pc = jdev.ez.spc[("PRODUCT-DC-ST1","PII-SOX-DC-ST1")]
+r = pc.rule['105']
+r['count'] = True
 
 
 

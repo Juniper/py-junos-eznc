@@ -15,6 +15,8 @@ class PolicyContext( Resource ):
     [edit security policy from-zone <from_zone> to-zone <to_zone>]
 
     namekey is a tuple( from_zone, to_zone )
+
+    Manages attribute :rule: of type PolicyRule
   """
 
   PROPERTIES = [
@@ -27,7 +29,7 @@ class PolicyContext( Resource ):
     if True == self.is_mgr: 
       return
 
-    self.rules = PolicyRule( junos, M=self, parent=self )
+    self.rule = PolicyRule( junos, M=self, parent=self )
     self._name_from_zone = name[0]
     self._name_to_zone = name[1]
 
