@@ -205,6 +205,19 @@ class Netconf(object):
       return ret_rpc_rsp
 
   ### ---------------------------------------------------------------------------
+  ### cli - for cheating commands :-)
+  ### ---------------------------------------------------------------------------
+
+  def cli(self, command, format='text'):
+    try:
+      rsp = self.rpc.cli( command, format)
+      if rsp.tag == 'output': return rsp.text
+      if rsp.tag == 'rpc': return etree.tostring(rsp[0],pretty_print=True)
+      return rsp
+    except:
+      return "invalid command: "+command
+
+  ### ---------------------------------------------------------------------------
   ### Template: retrieves a Jinja2 template
   ### ---------------------------------------------------------------------------
 

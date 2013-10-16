@@ -35,6 +35,10 @@ class _RpcMetaExec(object):
       etree.SubElement(rpc, 'configuration').append( filter_xml )
     return self._junos.execute( rpc )
 
+  ##### -----------------------------------------------------------------------
+  ##### load_config
+  ##### -----------------------------------------------------------------------
+
   def load_config( self, config_xml, options=None ):
     """
       loads :config_xml: onto the Junos device.
@@ -46,6 +50,15 @@ class _RpcMetaExec(object):
     if len(options): 
       for k,v in options.items(): rpc.attrib[k] = v
 
+    return self._junos.execute( rpc )
+
+  ##### -----------------------------------------------------------------------
+  ##### cli
+  ##### -----------------------------------------------------------------------
+
+  def cli( self, command, format='text' ):
+    rpc = E('command', command)
+    if 'text' == format: rpc.attrib['format'] = 'text'    
     return self._junos.execute( rpc )
 
   ##### -----------------------------------------------------------------------
