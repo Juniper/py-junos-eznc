@@ -6,8 +6,7 @@ from lxml.builder import E
 # module packages
 from ..resource import Resource
 from .policyrule import PolicyRule
-
-from junos.eznc import jxml as JXML
+from ... import jxml as JXML
 
 class PolicyContext( Resource ):
   """

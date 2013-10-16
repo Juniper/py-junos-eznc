@@ -3,10 +3,10 @@ import pdb
 from pprint import pprint as pp 
 
 from exampleutils import *
-from junos.eznc import Netconf as Junos
-from junos.eznc.resources.srx import ApplicationSet, PolicyContext
-from junos.eznc.utils import ConfigUtils
-from junos.eznc.exception import *
+from jnpr.eznc import Netconf as Junos
+from jnpr.eznc.resources.srx import ApplicationSet, PolicyContext
+from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.exception import *
 
 from lxml.builder import E 
 from lxml import etree

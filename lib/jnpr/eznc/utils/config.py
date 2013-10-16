@@ -12,8 +12,8 @@
 """
 
 # package modules
-from junos.eznc.exception import *
-from junos.eznc import jxml as JXML
+from ..exception import *
+from .. import jxml as JXML
 
 ### ---------------------------------------------------------------------------
 ### commit

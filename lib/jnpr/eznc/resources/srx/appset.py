@@ -6,7 +6,7 @@ from lxml.builder import E
 
 # module packages
 from ..resource import Resource
-from junos.eznc import jxml as JNX
+from ... import jxml as JXML
 
 class ApplicationSet( Resource ):
   """
