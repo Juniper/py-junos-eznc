@@ -23,7 +23,7 @@ jdev.ez( cu=ConfigUtils )
 
 rmgr = NatSourceSimple( jdev )
 
-# if you want to see the resource properties you could do:
+# if you want to see the resource properties, you could do:
 # >>> print NatSourceSimple.PROPERTIES
 # ['zone_from', 'zone_to', 'match_src_addr', 'match_dst_addr', 'pool_from_addr', 'pool_to_addr']
 
