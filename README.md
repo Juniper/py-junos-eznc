@@ -9,7 +9,9 @@ A Python module that makes automating Junos devices over the NETCONF API "easy".
 
 # SUPPORTED PRODUCTS
 
-This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  
+This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  There are specific _Resources_ that are platform/function specific.
+
+### SRX
 
 The first pass of this module is targeting resource abstractions for the SRX firewall products.  These resource abstractions include:
 
