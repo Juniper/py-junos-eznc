@@ -16,10 +16,10 @@ from ... import jxml as JXML
 
 _J2LDR = jinja2.Environment(
   trim_blocks=True,
-  loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+  loader=jinja2.FileSystemLoader(os.path.dirname(__file__)+'/templates'))
 
-_RD_TEMPLATE = 'nat_simple_source__rd.j2.xml'
-_WR_TEMPLATE = 'nat_simple_source__wr.j2.xml'
+_RD_TEMPLATE = 'nat_src_simple__rd'
+_WR_TEMPLATE = 'nat_src_simple__wr'
 
 _XPATH_NAMES = dict(
   pool_name='nat/source/pool',
@@ -27,7 +27,7 @@ _XPATH_NAMES = dict(
   rule_name='nat/source/rule-set/rule'
 )
 
-class NatSimpleSource( TemplateResource ):
+class NatSourceSimple( TemplateResource ):
 
   PROPERTIES = [
     'zone_from',              # name of from-zone
@@ -68,20 +68,25 @@ class NatSimpleSource( TemplateResource ):
   ##### -----------------------------------------------------------------------
 
   def _xml_template_read(self):
-    t = _J2LDR.get_template( _RD_TEMPLATE )    
+    t = _J2LDR.get_template( _RD_TEMPLATE+'.j2.xml' )    
     return etree.XML(t.render(self._template_names))
 
   def _xml_to_py( self, as_xml, to_py ):
     x_pool = as_xml.find('.//source/pool')
     x_ruleset = as_xml.find('.//source/rule-set')
-    x_rule = x_ruleset.xpath('./rule[name=$rule_name]', rule_name=self._template_names['rule_name'])[0]
+    x_rule = x_ruleset.xpath('./rule[name=$rule_name]', rule_name=self._template_names['rule_name'])
+
+    if None != x_pool:
+      to_py['pool_from_addr'] = x_pool.find('address/name').text
+      to_py['pool_to_addr'] = x_pool.find('address/to/ipaddr').text
 
     to_py['zone_from'] = x_ruleset.find('from/zone').text
     to_py['zone_to'] = x_ruleset.find('to/zone').text
-    to_py['match_src_addr'] = x_rule.find('.//source-address').text
-    to_py['match_dst_addr'] = x_rule.find('.//destination-address').text
-    to_py['pool_from_addr'] = x_pool.find('address/name').text
-    to_py['pool_to_addr'] = x_pool.find('address/to/ipaddr').text
+
+    if len(x_rule):
+      x_rule = x_rule[0]
+      to_py['match_src_addr'] = x_rule.find('.//source-address').text
+      to_py['match_dst_addr'] = x_rule.find('.//destination-address').text
 
     to_py[P_JUNOS_ACTIVE] = True
     to_py[P_JUNOS_EXISTS] = True
@@ -92,10 +97,16 @@ class NatSimpleSource( TemplateResource ):
   ##### XML writing
   ##### -----------------------------------------------------------------------
 
+  def _xml_set_defaults(self):
+    self['match_src_addr'] = self.should.get('match_src_addr', '0.0.0.0/0')
+    self['match_dst_addr'] = self.should.get('match_dst_addr', '0.0.0.0/0')
+
   def _xml_template_write(self):
-    t = _J2LDR.get_template( _WR_TEMPLATE )    
+    t = _J2LDR.get_template( _WR_TEMPLATE+'.j2.xml' )    
 
     t_vars = dict(self._template_names)
+
+    self._xml_set_defaults()
 
     if self.should.has_key('pool_from_addr') or self.should.has_key('pool_to_addr'):
       t_vars['_pool_'] = True
@@ -121,7 +132,9 @@ class NatSimpleSource( TemplateResource ):
     return etree.XML(t.render(self._template_names, NAMES_ONLY=True))
 
   def _xml_template_rename(self, new_name):
-    
+    """
+      ~! work in progress !~
+    """
     # create a tmp dictionary
     _tmp_names = self._r_template_names( new_name )
 

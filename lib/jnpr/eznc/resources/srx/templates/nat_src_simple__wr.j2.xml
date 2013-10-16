@@ -10,7 +10,7 @@
                     </to>
                 </address>
             </pool>
-            <rule-set replace='replace'>
+            <rule-set>
                 <name>{{ ruleset_name }}</name>
                 <from>
                     <zone>{{ zone_from }}</zone>
@@ -18,7 +18,7 @@
                 <to>
                     <zone>{{ zone_to }}</zone>
                 </to>
-                <rule>
+                <rule replace='replace'>
                     <name>{{ rule_name }}</name>
                     <src-nat-rule-match>
                         <source-address>{{ match_src_addr }}</source-address>

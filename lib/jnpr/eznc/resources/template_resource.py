@@ -82,7 +82,6 @@ class TemplateResource( Resource ):
       remove configuration from Junos device
     """
     # cannot delete something that doesn't exist
-    # @@@ should raise?
 
     if not self.exists: return False
 
@@ -102,18 +101,9 @@ class TemplateResource( Resource ):
 
   def rename(self, new_name=None, **kvargs):
     """
-      renames the resource in Junos configuration
+      not supported (for now) - raise RuntimeError
     """
-    # cannot rename something that doesn't exist
-    # @@@ should raise?
-
-    if not self.exists: return False
-
-    xml = self._xml_template_rename( new_name, kvargs )
-    rsp = self._xml_config_write( xml )
-    self._name = new_name
-
-    return True
+    raise RuntimeError("rename not supported on %s" % self.__class__.__name__)
 
   ### -------------------------------------------------------------------------
   ### reorder
