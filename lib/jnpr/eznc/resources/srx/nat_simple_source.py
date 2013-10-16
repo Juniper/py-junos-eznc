@@ -121,14 +121,16 @@ class NatSimpleSource( TemplateResource ):
     return etree.XML(t.render(self._template_names, NAMES_ONLY=True))
 
   def _xml_template_rename(self, new_name):
+    
     # create a tmp dictionary
-
     _tmp_names = self._r_template_names( new_name )
 
     # remove the existing configuration
     self._xml_config_write(self._xml_template_delete())
+
     # change the names
     self._template_names.update( _tmp_names)
+
     # return fully created the config
     return self._xml_template_write()
 
