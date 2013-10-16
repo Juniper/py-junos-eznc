@@ -23,7 +23,11 @@ jdev.ez( cu=ConfigUtils )
 
 rmgr = NatSourceSimple( jdev )
 
-# define some defaults we'll use
+# if you want to see the resource properties you could do:
+# >>> print NatSourceSimple.PROPERTIES
+# ['zone_from', 'zone_to', 'match_src_addr', 'match_dst_addr', 'pool_from_addr', 'pool_to_addr']
+
+# define some default properties we'll use:
 
 defaults = dict(
   zone_from='OUTSIDE-DC-ST1',
@@ -38,8 +42,9 @@ defaults = dict(
 
 r = rmgr["outbound-all"]
 
-# load the defaults
-r.should.update( defaults )
+# load the defaults into the resource
+
+for k,v in defaults.items(): r[k]=v
 
 # set properties; the pool address range.  
 
@@ -164,7 +169,7 @@ print jdev.ez.cu.diff()
 # +   }
 
 # if you want to commit these changes you could do:
+# >>> jdev.ez.cu.commit_check()
 # >>> jdev.ez.cu.commit()
-
 # or if you want to discard the changes:
 # >>> jdev.ez.cu.rollback()
