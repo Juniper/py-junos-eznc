@@ -1,12 +1,29 @@
 
 import pdb
 
+# stdlib
+import os
+
+# 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
+import jinja2
 
+# local modules
 from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
 from .ez import Manager as EzMgr
+
+DEFAULT_TEMPLATE_PATH = '.'
+
+class _RelativeEnvironment(jinja2.Environment):
+  """Override join_path() to enable relative template paths."""
+  def join_path(self, template, parent):
+      pdb.set_trace()
+      return os.path.join(os.path.dirname(parent), template)
+
+_Jinja2ldr = _RelativeEnvironment(
+  loader=jinja2.FileSystemLoader( DEFAULT_TEMPLATE_PATH.split(':') ))
 
 class Netconf(object):
 
@@ -101,6 +118,7 @@ class Netconf(object):
     self._auth_user = kvargs['user']
     self._auth_password = kvargs['password']
     self._conn = None
+    self._j2ldr = _Jinja2ldr
 
     # public attributes
 
@@ -186,10 +204,18 @@ class Netconf(object):
     else:
       return ret_rpc_rsp
 
-  ##### -------------------------------------------------------------
-  ##### Constructor buddies ...
-  ##### -------------------------------------------------------------
+  ### ---------------------------------------------------------------------------
+  ### Template: retrieves a Jinja2 template
+  ### ---------------------------------------------------------------------------
 
-  def Template( self, filename ):
-    return True
+  def Template( self, filename, parent=None, globals=None ):
+
+    # templates are XML files, and the assumption here is that they will
+    # have .xml extensions.  if the caller doesn't include any extension
+    # be kind and add '.xml' for them
+
+    if os.path.splitext(filename)[1] == '':
+      filename = filename + '.xml'
+
+    return self._j2ldr.get_template( filename, parent, globals )
 

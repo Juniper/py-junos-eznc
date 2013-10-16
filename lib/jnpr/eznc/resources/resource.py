@@ -60,7 +60,7 @@ class Resource(object):
     # the :has: accordingly and invoke :_init_has: for any
     # defaults
 
-    if None == self._has_xml:
+    if None == self._has_xml or not len(self._has_xml):
       self.has[P_JUNOS_EXISTS] = False
       self.has[P_JUNOS_ACTIVE] = False
       self._init_has()
@@ -481,7 +481,7 @@ class Resource(object):
       result = self._junos.rpc.load_config( top_xml, attrs )
     except Exception as err:
       # see if this is OK or just a warning
-      if None == err.rsp.find('.//ok'):
+      if len(err.rsp.xpath('.//error-severity[. = "error"]')):
         raise err
       return err.rsp
 
