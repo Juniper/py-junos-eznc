@@ -23,6 +23,10 @@ The first pass of this module is targeting resource abstractions for the SRX fir
  * NAT for simple source-NAT use-cases
  * NAT for simple bi-directional static-NAT use-cases
  
+# HACKING
+
+If you'd like to hack on this code or try it out, you will need to install the [ncclient](https://github.com/juniper/ncclient) module from the Juniper github repo directly.  You will then need to install this module and source the `env-setup.sh` file.  This will set your `PYTHONPATH` variable so it picks up the local module.
+
 
 # DEPENDENCIES
 
