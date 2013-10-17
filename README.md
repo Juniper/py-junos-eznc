@@ -1,6 +1,12 @@
+
+
+# ABOUT
+
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge or Junos XML.
+
 # STATUS
 
-___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT ___
+___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
 
 The following are *safe* to try out:
 
@@ -13,9 +19,6 @@ The following are *safe* to try out:
  - SRX application items and sets
    - from jnpr.eznc.resources.srx import Application, ApplicationSet
 
-# ABOUT
-
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge or Junos XML.
 
 # SUPPORTED PRODUCTS
 
