@@ -42,8 +42,6 @@ defaults = dict(
 
 r = rmgr["outbound-all"]
 
-pdb.set_trace()
-
 # load the defaults into the resource
 
 for k,v in defaults.items(): r[k]=v
