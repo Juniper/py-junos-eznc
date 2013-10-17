@@ -1,7 +1,17 @@
-___WORK IN PROGRESS - TINKER AT YOUR OWN PERIL___
+# STATUS
 
-___UNDER ACTIVE DEVELOPMENT, ITEMS WILL SHIFT AROUND WHILE COLLECTING FEEDBACK___
+___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT ___
 
+The following are *safe* to try out:
+
+ - Netconf:rpc meta-exec to invoke RPCs
+ - Netconf:cli() to invoke CLI commands and get back text
+ - Netconf:ez: meta-toolbox configuration utilities
+   - from jnpr.eznc.utils.config import ConfigUtils
+ - SRX security policy context and rule resources
+   - from jnpr.eznc.resources.srx import PolicyContext, PolicyRule
+ - SRX application items and sets
+   - from jnpr.eznc.resources.srx import Application, ApplicationSet
 
 # ABOUT
 
