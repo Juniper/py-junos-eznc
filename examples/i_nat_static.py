@@ -25,3 +25,6 @@ rmgr = NatStaticSimple( jdev )
 
 r_name = dict(ruleset_name="INBOUND_TRANSLATIONS", rule_name="WEB_Srvrs")
 r = rmgr[r_name]
+
+r_name = dict(ruleset_name="OUTBOUND_TRANSLATIONS", rule_name="WEB_Srvrs")
+r = rmgr[r_name]

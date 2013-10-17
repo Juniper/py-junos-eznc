@@ -106,7 +106,7 @@ class Resource(object):
     self._r_has_init()
     self._has_xml =  self._r_config_read_xml()
 
-    if not len(self._has_xml):
+    if None == self._has_xml or not len(self._has_xml):
       self._is_new = True
       self._r_when_new()
       return None
@@ -201,7 +201,7 @@ class Resource(object):
     # remove the config from Junos
     xml = self._xml_edit_at_res()
     xml.attrib.update( JXML.DEL )
-    self._xml_on_delete( xml )
+    self._xml_when_delete( xml )
     rsp = self._r_config_write_xml( xml )
 
     # reset the :has: attribute
@@ -407,6 +407,7 @@ class Resource(object):
     as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
     as_py[P_JUNOS_EXISTS] = True
 
+
   @classmethod
   def xml_set_or_delete( klass, xml, ele_name, value):
     """
@@ -476,10 +477,11 @@ class Resource(object):
     # construct the XML for change
 
     changed = False
-    for r_prop in self.should.keys():
-      edit_fn = "_xml_change_" + r_prop
-      if getattr(self, edit_fn)(edit_xml):
-        changed = True
+    for r_prop in self.properties:
+      if r_prop in self.should:
+        edit_fn = "_xml_change_" + r_prop
+        if getattr(self, edit_fn)(edit_xml):
+          changed = True
 
     return edit_xml if changed else None
 
@@ -537,7 +539,7 @@ class Resource(object):
     # now call the 'on-delete' hook and return 
     # the results
 
-    return self._xml_on_delete( xml )
+    return self._xml_when_delete( xml )
 
   ##### -----------------------------------------------------------------------
   ##### abstract pass methods
@@ -581,3 +583,12 @@ class Resource(object):
     self.has.clear()
     self.has[P_JUNOS_EXISTS] = False
     self.has[P_JUNOS_ACTIVE] = False
+
+  @classmethod
+  def _r_has_xml_status( klass, as_xml, as_py ):
+    """
+      set the 'exists' and 'active' :has: values
+    """
+    as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
+    as_py[P_JUNOS_EXISTS] = True    
+

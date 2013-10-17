@@ -20,6 +20,7 @@ DEL = {'delete': 'delete'}              # Junos XML resource delete
 REN = {'rename': 'rename'}              # Junos XML resource rename
 ACTIVATE = {'active': 'active'}         # activate resource
 DEACTIVATE = {'inactive': 'inactive'}   # deactivate resource
+REPLACE = {'relace': 'replace'}         # replace elements
 
 def NAME(name): return { 'name': name }
 def INSERT(cmd): return {'insert': cmd}
