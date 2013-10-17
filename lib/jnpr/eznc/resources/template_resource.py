@@ -1,6 +1,7 @@
 import pdb
 
 # 3rd-party
+from lxml import etree
 from lxml.builder import E 
 
 # package modules
@@ -25,9 +26,10 @@ class TemplateResource( Resource ):
     # defaults
 
     if None == self._has_xml or not len(self._has_xml):
-      self.has[P_JUNOS_EXISTS] = False
-      self.has[P_JUNOS_ACTIVE] = False
-      self._init_has()
+      for name in self._name:
+        self.has[P_JUNOS_EXISTS+'_'+name] = False
+        self.has[P_JUNOS_ACTIVE+'_'+name] = False
+        self._init_has()
       return None
 
     # the xml_read_parser *MUST* be implement by the 
@@ -125,11 +127,28 @@ class TemplateResource( Resource ):
     """
     return self._junos.rpc.get_config(self._xml_template_read())
 
+  def _xml_template_read(self):
+    t = self._j2_ldr.get_template(self._j2_rd+'.j2.xml' )    
+    return etree.XML(t.render(self._name))    
+
+  def _xml_template_names_only( self ):
+    t = self._j2_ldr.get_template(self._j2_rd)
+    return etree.XML(t.render(self._name, NAMES_ONLY=True))  
+
   def _xml_build_change(self):
     """
       run the templater to produce the XML for change
     """
     return self._xml_template_write()
+
+  def _set_ea_status( self, xml_ele, to_py ):
+    for name in self._xpath_names:
+      if xml_ele[name] is not None:        
+        to_py[P_JUNOS_EXISTS+'_'+name] = True 
+        to_py[P_JUNOS_ACTIVE+'_'+name] = False if xml_ele[name].attrib.has_key('inactive') else True
+      else:
+        to_py[P_JUNOS_EXISTS+'_'+name] = False
+        to_py[P_JUNOS_ACTIVE+'_'+name] = False
 
   ##### -----------------------------------------------------------------------
   ##### standard template resource methods

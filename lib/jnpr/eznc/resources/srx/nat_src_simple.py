@@ -13,10 +13,7 @@ from lxml.builder import E
 from .. import TemplateResource
 from ..resource import P_JUNOS_ACTIVE, P_JUNOS_EXISTS
 from ... import jxml as JXML
-
-_J2LDR = jinja2.Environment(
-  trim_blocks=True,
-  loader=jinja2.FileSystemLoader(os.path.dirname(__file__)+'/templates'))
+from .j2 import _J2LDR
 
 _RD_TEMPLATE = 'nat_src_simple__rd'
 _WR_TEMPLATE = 'nat_src_simple__wr'
@@ -41,17 +38,21 @@ class NatSourceSimple( TemplateResource ):
   def __init__(self, junos, name=None, **kvargs):
     TemplateResource.__init__(self,junos,name,**kvargs)
     self._xpath_names = _XPATH_NAMES
+    self._j2_ldr = _J2LDR
+    self._j2_rd = _RD_TEMPLATE
+    self._j2_wr = _WR_TEMPLATE
+
     if self.is_mgr: return
 
-    self._template_names = self._r_template_names( name )
+    self._name = self._r_template_names( name )
 
   def _r_template_names( self, name ):
     if isinstance(name, str):
+      # if given a string, then default all the names to the same value
       return dict(ruleset_name=name, pool_name=name, rule_name=name)
 
     if isinstance(name, dict):
-      # the caller is passing up the name in a tuple that could be
-      # (ruleset_name, *pool_name, *rule_name)
+      # otherwise the name is a dictionary of the individual template names
       t_names = dict(name)
       try:
         t_names['pool_name'] = name['pool_name']
@@ -67,29 +68,35 @@ class NatSourceSimple( TemplateResource ):
   ##### XML reading
   ##### -----------------------------------------------------------------------
 
-  def _xml_template_read(self):
-    t = _J2LDR.get_template( _RD_TEMPLATE+'.j2.xml' )    
-    return etree.XML(t.render(self._template_names))
-
   def _xml_to_py( self, as_xml, to_py ):
-    x_pool = as_xml.find('.//source/pool')
-    x_ruleset = as_xml.find('.//source/rule-set')
-    x_rule = x_ruleset.xpath('./rule[name=$rule_name]', rule_name=self._template_names['rule_name'])
+    """
+      convert the read XML config into python dictionary
+    """
 
-    if None != x_pool:
-      to_py['pool_from_addr'] = x_pool.find('address/name').text
-      to_py['pool_to_addr'] = x_pool.find('address/to/ipaddr').text
+    # create a dictionary of names to XML elements
 
-    to_py['zone_from'] = x_ruleset.find('from/zone').text
-    to_py['zone_to'] = x_ruleset.find('to/zone').text
+    xml_ele = dict(
+      pool_name = as_xml.find('.//source/pool'),
+      ruleset_name = as_xml.find('.//source/rule-set'))
+    e = as_xml.xpath('.//rule[name=$rule_name]', rule_name=self._name['rule_name'])
+    xml_ele['rule_name'] = e[0] if len(e) else None
 
-    if len(x_rule):
-      x_rule = x_rule[0]
-      to_py['match_src_addr'] = x_rule.find('.//source-address').text
-      to_py['match_dst_addr'] = x_rule.find('.//destination-address').text
+    # set the exist/active for each
+    self._set_ea_status( xml_ele, to_py )
 
-    to_py[P_JUNOS_ACTIVE] = True
-    to_py[P_JUNOS_EXISTS] = True
+    if xml_ele['pool_name'] is not None:
+      e = xml_ele['pool_name']
+      to_py['pool_from_addr'] = e.find('address/name').text
+      to_py['pool_to_addr'] = e.find('address/to/ipaddr').text
+
+    e = xml_ele['ruleset_name']
+    to_py['zone_from'] = e.find('from/zone').text
+    to_py['zone_to'] = e.find('to/zone').text
+
+    if xml_ele['rule_name'] is not None:
+      e = xml_ele['rule_name']
+      to_py['match_src_addr'] = e.find('.//source-address').text
+      to_py['match_dst_addr'] = e.find('.//destination-address').text
 
     return True
 
@@ -102,9 +109,11 @@ class NatSourceSimple( TemplateResource ):
     self['match_dst_addr'] = self.should.get('match_dst_addr', '0.0.0.0/0')
 
   def _xml_template_write(self):
-    t = _J2LDR.get_template( _WR_TEMPLATE+'.j2.xml' )    
 
-    t_vars = dict(self._template_names)
+    # set up templar vars for rending, starting with the
+    # resource template names
+
+    t_vars = dict(self._name)
 
     self._xml_set_defaults()
 
@@ -121,15 +130,12 @@ class NatSourceSimple( TemplateResource ):
     t_vars.update( self.has )
     t_vars.update( self.should )
 
+    t = self._j2_ldr.get_template( self._j2_wr+'.j2.xml' ) 
     return etree.XML(t.render( t_vars ))
 
   ##### -----------------------------------------------------------------------
   ##### XML Junos commands
   ##### -----------------------------------------------------------------------    
-
-  def _xml_template_names_only( self ):
-    t = _J2LDR.get_template(_RD_TEMPLATE)
-    return etree.XML(t.render(self._template_names, NAMES_ONLY=True))
 
   def _xml_template_rename(self, new_name):
     """
@@ -142,7 +148,7 @@ class NatSourceSimple( TemplateResource ):
     self._xml_config_write(self._xml_template_delete())
 
     # change the names
-    self._template_names.update( _tmp_names)
+    self._name.update( _tmp_names)
 
     # return fully created the config
     return self._xml_template_write()
