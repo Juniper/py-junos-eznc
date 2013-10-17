@@ -191,6 +191,18 @@ class TemplateResource( Resource ):
         to_py[P_JUNOS_EXISTS+'_'+name] = False
         to_py[P_JUNOS_ACTIVE+'_'+name] = False    
 
+  def _r_template_write_vars(self):
+    """
+      This method is called when the XML config-write template
+      is being formed.  by default the simplest case is to combine
+      all of the variables together.  more complicated template 
+      resources can overload this method to do what they want.
+    """
+    t_vars = dict(self._name)
+    t_vars.update( self.has )
+    t_vars.update( self.should )
+    return t_vars
+
   ##### -----------------------------------------------------------------------
   ##### ~private~ methods used to create XML structures from templates
   ##### -----------------------------------------------------------------------
