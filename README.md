@@ -8,8 +8,8 @@ The following are *safe* to try out:
  - Netconf:cli() to invoke CLI commands and get back text
  - Netconf:ez: meta-toolbox configuration utilities
    - from jnpr.eznc.utils.config import ConfigUtils
- - SRX security policy context and rule resources
-   - from jnpr.eznc.resources.srx import PolicyContext, PolicyRule
+ - SRX security policy context and rule resources. The PolicyRule is auto-loaded
+   - from jnpr.eznc.resources.srx import PolicyContext
  - SRX application items and sets
    - from jnpr.eznc.resources.srx import Application, ApplicationSet
 
