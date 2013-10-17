@@ -42,6 +42,57 @@ class Resource(object):
     if self.__class__ != Resource: self.properties += self.__class__.PROPERTIES
     self.has = {}
     self.should = {}
+    self._is_new = False
+
+  ##### -----------------------------------------------------------------------
+  ##### PROPERTIES
+  ##### -----------------------------------------------------------------------
+
+  @property
+  def active(self):
+    """
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")    
+    return self.has[P_JUNOS_ACTIVE]
+
+  @property
+  def exists(self):
+    """
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")    
+    return self.has[P_JUNOS_EXISTS]
+
+  @property
+  def is_mgr(self):
+    """
+      is this a resource manager?
+    """    
+    return (self._name == None)
+
+  @property
+  def is_new(self):
+    """
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")    
+    return self._is_new
+
+  @property
+  def name(self):
+    if self.is_mgr: raise RuntimeError("Not on a manager!")    
+    return self._name
+
+  @name.setter
+  def name(self, value):
+    if self.is_mgr: raise RuntimeError("Not on a manager!")        
+    raise AttributeError("name is currently read-only")
+  
+  @property
+  def xml(self):
+    """
+      returns the :_has_xml structure read from the Junos device
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")        
+    return self._has_xml
 
   ### -------------------------------------------------------------------------
   ### read
@@ -52,18 +103,12 @@ class Resource(object):
       read resource configuration from device
     """
 
-    self.has.clear()
-    cfg_xml = self._xml_config_read()
-    self._has_xml = self._xml_at_res( cfg_xml )
+    self._r_has_init()
+    self._has_xml =  self._r_config_read_xml()
 
-    # if the resource does not exist in Junos, then mark
-    # the :has: accordingly and invoke :_init_has: for any
-    # defaults
-
-    if None == self._has_xml or not len(self._has_xml):
-      self.has[P_JUNOS_EXISTS] = False
-      self.has[P_JUNOS_ACTIVE] = False
-      self._init_has()
+    if not len(self._has_xml):
+      self._is_new = True
+      self._r_when_new()
       return None
 
     # the xml_read_parser *MUST* be implement by the 
@@ -73,7 +118,7 @@ class Resource(object):
     self._xml_to_py( self._has_xml, self.has )
 
     # return the python structure represntation
-    return self.has
+    return True
 
   ### -------------------------------------------------------------------------
   ### write
@@ -88,16 +133,21 @@ class Resource(object):
     # if there is nothing to write, then return False
     if not len(self.should): return False
 
-    # if the 'exists' property is not set, then default it to True
-    if not self.should.get(P_JUNOS_EXISTS):
-      self.should[P_JUNOS_EXISTS] = True
+    # if this resource did not previously exist,
+    # then mark it now into :should:
+
+    if not self.should.has_key(P_JUNOS_EXISTS): 
+      self._r_set_exists( self.should, True )
+
+    if self.is_new:
+      self._r_set_active( self.should, True )
 
     # construct the XML change structure
     xml_change = self._xml_build_change()
     if None == xml_change: return False
 
     # write these changes to the device
-    rsp = self._xml_config_write( xml_change )
+    rsp = self._r_config_write_xml( xml_change )
 
     # copy :should: into :has: and then clear :should:
     self.has.update( self.should )
@@ -118,10 +168,9 @@ class Resource(object):
       write config to activate resource; i.e. "activate ..."
     """
     # no action needed if it's already active 
-    if self.has[P_JUNOS_ACTIVE] == True: return False
-    self[P_JUNOS_ACTIVE] = True
+    if self.active: return False
+    self._r_set_active( self.should, True )
     return self.write()
-
 
   ### -------------------------------------------------------------------------
   ### deactivate
@@ -132,8 +181,8 @@ class Resource(object):
       write config to deactivate resource, i.e. "deactivate ..."
     """
     # no action needed if it's already deactive
-    if self.has[P_JUNOS_ACTIVE] == False: return False
-    self[P_JUNOS_ACTIVE] = False
+    if not self.active: return False
+    self._r_set_active( self.should, False)
     return self.write()
 
   ### -------------------------------------------------------------------------
@@ -153,12 +202,10 @@ class Resource(object):
     xml = self._xml_edit_at_res()
     xml.attrib.update( JXML.DEL )
     self._xml_on_delete( xml )
-    rsp = self._xml_config_write( xml )
+    rsp = self._r_config_write_xml( xml )
 
     # reset the :has: attribute
-    self.has.clear()
-    self.has[P_JUNOS_EXISTS] = False
-
+    self._r_has_init()
     return True
 
   ### -------------------------------------------------------------------------
@@ -178,7 +225,7 @@ class Resource(object):
     xml.attrib.update( JXML.REN )
     xml.attrib.update( JXML.NAME( new_name ))
 
-    rsp = self._xml_config_write( xml )
+    rsp = self._r_config_write_xml( xml )
     self._name = new_name
 
     return True
@@ -203,7 +250,7 @@ class Resource(object):
     xml.attrib.update( JXML.INSERT( cmd ))
     xml.attrib.update( JXML.NAME( name ))
 
-    rsp = self._xml_config_write( xml )
+    rsp = self._r_config_write_xml( xml )
     return True
 
   ##### -----------------------------------------------------------------------
@@ -251,56 +298,6 @@ class Resource(object):
       if not self.is_mgr \
       else "Resource Manager: %s" % mgr_name
 
-  ### -------------------------------------------------------------------------
-  ### PROPERTY ACCESSORS
-  ### -------------------------------------------------------------------------
-
-  @property
-  def name(self):
-    return self._name
-
-  @name.setter
-  def name(self, value):
-    raise AttributeError("name is currently read-only")
-  
-  @property
-  def is_mgr(self):
-    """
-      is this a resource manager?
-    """    
-    return (self._name == None)
-  
-  @property
-  def exists(self):
-    """
-      does this resource configuration exist?
-    """
-    if self.is_mgr: raise RuntimeError("Not on a manager!")
-    return self.has[P_JUNOS_EXISTS]
-
-  @property
-  def active(self):
-    """
-      is this configuration active?
-    """
-    if self.is_mgr: raise RuntimeError("Not on a manager!")
-    return self.has[P_JUNOS_ACTIVE]
-    
-  @active.setter
-  def active(self, value):
-    """
-      mark the resource for activate/deactivate
-    """
-    if self.is_mgr: raise RuntimeError("Not on a manager!")
-    if not isinstance(value,bool): raise ValueError("value must be True/False")
-    self.should[P_JUNOS_ACTIVE] = value
-
-  @property
-  def xml(self):
-    """
-      returns the :_has_xml structure read from the Junos device
-    """
-    return self._has_xml
   
   ### -------------------------------------------------------------------------
   ### list of resources (names)
@@ -437,11 +434,12 @@ class Resource(object):
     res.read()
     return res
 
-  def _xml_config_read(self):
+  def _r_config_read_xml(self):
     """
       read the resource config from the Junos device
     """
-    return self._junos.rpc.get_config( self._xml_at_top() )
+    cfg_xml = self._junos.rpc.get_config( self._xml_at_top() )
+    return self._xml_at_res( cfg_xml )
 
   def _xml_build_change(self):
     """
@@ -469,7 +467,7 @@ class Resource(object):
 
     return edit_xml if changed else None
 
-  def _xml_config_write(self, xml):
+  def _r_config_write_xml(self, xml):
     """
       write the xml change to the Junos device, 
       trapping on exceptions.
@@ -515,7 +513,7 @@ class Resource(object):
     # the results
 
     if self.should[P_JUNOS_EXISTS]:
-      return self._xml_on_create( xml )
+      return self._xml_when_new( xml )
 
     # otherwise, we are deleting this resource
     xml.attrib.update( JXML.DEL )
@@ -529,11 +527,41 @@ class Resource(object):
   ##### abstract pass methods
   ##### -----------------------------------------------------------------------
 
-  def _init_has( self ): pass
   def _xml_at_res( self, xml ): return None
   def _xml_at_top( self ): return None
 
-  def _xml_on_delete( self, xml ): return True
-  def _xml_on_create( self, xml ): return False
+  def _xml_when_delete( self, xml ): pass
+  def _xml_when_new( self, xml ): 
+    """
+      called from :_xml_build_change(): when this is a completely
+      new resource being added to Junos
+    """
+    pass
 
+  ##### -----------------------------------------------------------------------
+  ##### ~private~ resource methods
+  ##### -----------------------------------------------------------------------
 
+  def _r_set_active(self, my_props, value):
+    my_props[P_JUNOS_ACTIVE] = value
+
+  def _r_set_exists(self, my_props, value):
+    my_props[P_JUNOS_EXISTS] = value
+
+  def _r_when_new(self): 
+    """
+      called by :read(): when the resource is new; i.e.
+      there is no existing Junos configuration
+    """
+    pass
+
+  def _r_when_delete(self):
+    """
+    ~| not used yet |~
+    """
+    pass
+
+  def _r_has_init(self):
+    self.has.clear()
+    self.has[P_JUNOS_EXISTS] = False
+    self.has[P_JUNOS_ACTIVE] = False

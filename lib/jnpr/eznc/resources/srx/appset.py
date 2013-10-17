@@ -68,7 +68,7 @@ class ApplicationSet( Resource ):
     (adds,dels) = Resource.diff_list( self.has.get('app_list',[]), self.should['app_list'])
 
     for this in adds: xml.append(E.application(E.name(this)))
-    for this in dels: xml.append(E.application(JNX.DEL, E.name(this)))
+    for this in dels: xml.append(E.application(JXML.DEL, E.name(this)))
     return True
 
   def _xml_change_app_list_adds( self, xml ):
@@ -78,7 +78,7 @@ class ApplicationSet( Resource ):
 
   def _xml_change_app_list_dels( self, xml ):
     for this in self.should['app_list_dels']:
-      xml.append(E.application(JNX.DEL, E.name(this)))
+      xml.append(E.application(JXML.DEL, E.name(this)))
     return True
 
   ### -------------------------------------------------------------------------
@@ -91,7 +91,7 @@ class ApplicationSet( Resource ):
     (adds,dels) = Resource.diff_list( self.has.get('appset_list',[]), self.should['appset_list'])
 
     for this in adds: xml.append(E('application-set',E.name(this)))
-    for this in dels: xml.append(E('application-set', JNX.DEL, E.name(this)))
+    for this in dels: xml.append(E('application-set', JXML.DEL, E.name(this)))
     return True
 
   def _xml_change_appset_list_adds( self, xml ):
@@ -101,7 +101,7 @@ class ApplicationSet( Resource ):
 
   def _xml_change_appset_list_dels( self, xml ):
     for this in self.should['appset_list_dels']:
-      xml.append(E('application-set', JNX.DEL, E.name(this)))
+      xml.append(E('application-set', JXML.DEL, E.name(this)))
     return True    
 
   ##### -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ class ApplicationSet( Resource ):
   def _r_list(self):
 
     got = self._junos.rpc.get_config(
-      E.applications(E('application-set', JNX.NAMES_ONLY)))
+      E.applications(E('application-set', JXML.NAMES_ONLY)))
 
     self._rlist = [ this.text for this in got.xpath('.//name')]
 

@@ -1,22 +1,18 @@
 
 import pdb
 
-# stdlib
-import os
-
-# 3rd-party packages
-import jinja2
-from lxml import etree
-from lxml.builder import E
-
 # local modules
 from .. import TemplateResource
 from ..resource import P_JUNOS_ACTIVE, P_JUNOS_EXISTS
 from ... import jxml as JXML
 from .j2 import _J2LDR
 
-_RD_TEMPLATE = 'nat_src_simple__rd'
-_WR_TEMPLATE = 'nat_src_simple__wr'
+# template files located in the ./templates directory
+
+_RD_TEMPLATE = 'nat_src_simple__rd.j2.xml'
+_WR_TEMPLATE = 'nat_src_simple__wr.j2.xml'
+
+# dictionary of resource name items and associated XPath
 
 _XPATH_NAMES = dict(
   pool_name='nat/source/pool',
@@ -44,9 +40,9 @@ class NatSourceSimple( TemplateResource ):
 
     if self.is_mgr: return
 
-    self._name = self._r_template_names( name )
+    self._name = self._r_xpath_names( name )
 
-  def _r_template_names( self, name ):
+  def _r_xpath_names( self, name ):
     if isinstance(name, str):
       # if given a string, then default all the names to the same value
       return dict(ruleset_name=name, pool_name=name, rule_name=name)
@@ -75,23 +71,23 @@ class NatSourceSimple( TemplateResource ):
 
     # create a dictionary of names to XML elements
 
-    xml_ele = dict(
-      pool_name = as_xml.find('.//source/pool'),
-      ruleset_name = as_xml.find('.//source/rule-set'))
+    xml_ele = {}
+    xml_ele['pool_name'] = as_xml.find('.//source/pool')
+    xml_ele['ruleset_name']= as_xml.find('.//source/rule-set')
     e = as_xml.xpath('.//rule[name=$rule_name]', rule_name=self._name['rule_name'])
     xml_ele['rule_name'] = e[0] if len(e) else None
 
-    # set the exist/active for each
-    self._set_ea_status( xml_ele, to_py )
+    # set the exist/active status for each name
+    self._r_has_xml_status( xml_ele, to_py )
+
+    e = xml_ele['ruleset_name']
+    to_py['zone_from'] = e.find('from/zone').text
+    to_py['zone_to'] = e.find('to/zone').text
 
     if xml_ele['pool_name'] is not None:
       e = xml_ele['pool_name']
       to_py['pool_from_addr'] = e.find('address/name').text
       to_py['pool_to_addr'] = e.find('address/to/ipaddr').text
-
-    e = xml_ele['ruleset_name']
-    to_py['zone_from'] = e.find('from/zone').text
-    to_py['zone_to'] = e.find('to/zone').text
 
     if xml_ele['rule_name'] is not None:
       e = xml_ele['rule_name']
@@ -104,18 +100,35 @@ class NatSourceSimple( TemplateResource ):
   ##### XML writing
   ##### -----------------------------------------------------------------------
 
-  def _xml_set_defaults(self):
-    self['match_src_addr'] = self.should.get('match_src_addr', '0.0.0.0/0')
-    self['match_dst_addr'] = self.should.get('match_dst_addr', '0.0.0.0/0')
+  def _r_should_defaults(self, t_vars):
+    """
+      when doing a write, assign default values if they are not present
+    """
+    def _default_to(p_name,d_val):
+      if not t_vars.has_key(p_name): t_vars[p_name] = d_val
 
-  def _xml_template_write(self):
+    _default_to( 'match_dst_addr', '0.0.0.0/0')
+    _default_to( 'match_src_addr', '0.0.0.0/0')
 
-    # set up templar vars for rending, starting with the
-    # resource template names
+  def _r_template_write_vars(self):
+    """
+      create a dictionary of variables that will be used to
+      render the write-XML configuration
+    """
+
+    # set up template vars for rending, starting with the
+    # resource names
 
     t_vars = dict(self._name)
 
-    self._xml_set_defaults()
+    # then load the :has:, followed by :should:, and then defaults
+
+    t_vars.update( self.has )
+    t_vars.update( self.should )
+    self._r_should_defaults( t_vars )
+
+    # mark the vars to indicate sections of the XML template to buildup;
+    # these markers are specific to the actual template (see file for details)
 
     if self.should.has_key('pool_from_addr') or self.should.has_key('pool_to_addr'):
       t_vars['_pool_'] = True
@@ -127,31 +140,4 @@ class NatSourceSimple( TemplateResource ):
       t_vars['_rule_set_'] = True
       t_vars['_rule_'] = True
 
-    t_vars.update( self.has )
-    t_vars.update( self.should )
-
-    t = self._j2_ldr.get_template( self._j2_wr+'.j2.xml' ) 
-    return etree.XML(t.render( t_vars ))
-
-  ##### -----------------------------------------------------------------------
-  ##### XML Junos commands
-  ##### -----------------------------------------------------------------------    
-
-  def _xml_template_rename(self, new_name):
-    """
-      ~! work in progress !~
-    """
-    # create a tmp dictionary
-    _tmp_names = self._r_template_names( new_name )
-
-    # remove the existing configuration
-    self._xml_config_write(self._xml_template_delete())
-
-    # change the names
-    self._name.update( _tmp_names)
-
-    # return fully created the config
-    return self._xml_template_write()
-
-
-
+    return t_vars
