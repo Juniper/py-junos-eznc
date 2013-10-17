@@ -212,7 +212,7 @@ class Netconf(object):
     try:
       rsp = self.rpc.cli( command, format)
       if rsp.tag == 'output': return rsp.text
-      if rsp.tag == 'rpc': return etree.tostring(rsp[0],pretty_print=True)
+      if rsp.tag == 'rpc': return rsp[0]
       return rsp
     except:
       return "invalid command: "+command

@@ -25,17 +25,17 @@ print jdev.cli("show version")
 # doing this:
 
 print "showing as XML RPC command:"
-xml_cmd_str = jdev.cli("show version | display xml rpc")
-print xml_cmd_str
+xml_cmd = jdev.cli("show version | display xml rpc")
+
+# this is an actual XML element, so we can dump it for debug:
+etree.dump(xml_cmd)
 
 # showing as XML RPC command:
 # <get-software-information>
 # </get-software-information>
 
-# you can then take that output and create an actual XML command
-# from it, and then feed it back into the :rpc: metaexec
+# you can then take that output then feed it back into the :rpc: metaexec
 
-xml_cmd = etree.XML( xml_cmd_str )
 cmd_rsp = jdev.rpc( xml_cmd )
 
 # now dump the XML response output;
@@ -53,5 +53,18 @@ etree.dump( cmd_rsp )
 # <comment>JUNOS Software Release [12.1X44-D10.4]</comment>
 # </package-information>
 # </software-information>
+
+# of course, you could have gotten the exact same thing:
+print "And again another way ..."
+
+xml_rsp = jdev.cli( "show version", format='xml' )
+etree.dump(xml_rsp)
+
+# but the 'rigth' way to invoke XML commands is to use
+# the :rpc: as the metaexec as intented, such as:
+
+xml_rsp = jdev.rpc.get_software_information();
+print "And again using meta rpc"
+etree.dump(xml_rsp)
 
 jdev.close()
