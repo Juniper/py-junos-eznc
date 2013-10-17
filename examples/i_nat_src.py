@@ -6,7 +6,7 @@ from lxml import etree
 # for the example ...
 from exampleutils import *
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.resources.srx import NatSourceSimple
+from jnpr.eznc.resources.srx.nat_src_simple import NatSourceSimple
 from jnpr.eznc.utils import ConfigUtils
 
 login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')

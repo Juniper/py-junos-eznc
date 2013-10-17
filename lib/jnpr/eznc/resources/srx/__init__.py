@@ -1,4 +1,4 @@
 from .app import Application
 from .appset import ApplicationSet
 from .policy import PolicyContext
-from .nat_src_simple import NatSourceSimple
+from .policyrule import PolicyRule
