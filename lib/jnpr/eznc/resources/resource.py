@@ -298,7 +298,23 @@ class Resource(object):
       if not self.is_mgr \
       else "Resource Manager: %s" % mgr_name
 
-  
+  def __call__(self, **kvargs):
+    """
+      alternative way to set property values as aggregation of
+      key/value pairs
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")
+    if not kvargs: return False
+
+    # validate property names first!
+    for p_name,p_val in kvargs.items():
+      if p_name not in self.properties:
+        raise ValueError("Unknown property: %s" % p_name)
+
+    # now cleared to add all the values
+    self.should.update( kvargs )
+    return True
+
   ### -------------------------------------------------------------------------
   ### list of resources (names)
   ### -------------------------------------------------------------------------
