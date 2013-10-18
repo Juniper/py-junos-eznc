@@ -65,7 +65,7 @@ class PolicyContext( Resource ):
     """
       converts Junos XML to native Python
     """
-    Resource.set_ea_status( as_xml, to_py )
+    Resource._r_has_xml_status( as_xml, to_py )
     to_py['rules'] = [policy.text for policy in as_xml.xpath('.//policy/name')]
     to_py['rules_count'] = len(to_py['rules'])
 

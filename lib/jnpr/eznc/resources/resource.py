@@ -404,6 +404,7 @@ class Resource(object):
     """
       set the 'exists' and 'active' :has: values
     """
+    print "~~DEPRECIATED~~[set_ea_status]~~"
     as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
     as_py[P_JUNOS_EXISTS] = True
 
