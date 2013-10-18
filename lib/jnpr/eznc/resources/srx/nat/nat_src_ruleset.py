@@ -16,7 +16,9 @@ class NatSrcRuleSet( Resource ):
 
   PROPERTIES = [
     "zone_from",
-    "zone_to"
+    "zone_to",
+    "$rules",
+    "$rules_count"
   ]
 
   def __init__(self, junos, name=None, **kvargs ):
@@ -25,65 +27,41 @@ class NatSrcRuleSet( Resource ):
       return
 
     self.rule = NatSrcRule( junos, M=self, parent=self )
+    self._manages = ['rule']
 
   ##### -----------------------------------------------------------------------
   ##### XML read
   ##### -----------------------------------------------------------------------
 
   def _xml_at_top(self):
-    """
-      configuration to retrieve resource
-    """
     return E.security(E.nat(E.source(
-      E('rule-set',
-        E.name(self._name),
-        E('from'),
-        E('to')
-      )
+      E('rule-set',E.name(self._name))
     )))
 
-  def _r_config_read_xml(self):
+  def _xml_hook_read_begin(self,xml):
     """
-    ~! OVERLOADS !~
-      read the resource config from the Junos device
+    need to add the <from>,<to> elements to pick up the zone context
+    need to add the rules, names-only
     """
-    xml = self._xml_at_top()
-    xml.find('.//rule-set').append(E.rule(JXML.NAMES_ONLY))
-    cfg_xml = self._junos.rpc.get_config( xml )
-    return self._xml_at_res( cfg_xml )
+    rs = xml.find('.//rule-set')
+    rs.append(E('from'))
+    rs.append(E('to'))
+    rs.append(E.rule(JXML.NAMES_ONLY))
+    return True
 
   def _xml_at_res(self, xml):
-    """
-      return Element at resource
-    """
     return xml.find('.//rule-set')
 
   def _xml_to_py(self, as_xml, to_py ):
-    """
-      converts Junos XML to native Python
-    """
     Resource._r_has_xml_status( as_xml, to_py )
     to_py['zone_from'] = as_xml.find('from/zone').text
     to_py['zone_to'] = as_xml.find('to/zone').text
-    to_py['rules'] = [rule.text for rule in as_xml.xpath('.//rule/name')]
-    to_py['rules_count'] = len(to_py['rules'])
+    to_py['$rules'] = [rule.text for rule in as_xml.xpath('.//rule/name')]
+    to_py['$rules_count'] = len(to_py['$rules'])
 
   ##### -----------------------------------------------------------------------
   ##### XML write
   ##### -----------------------------------------------------------------------
-
-  def _r_config_write_xml(self, xml):
-    """
-    ~! OVERLOADS !~
-    """
-    # need to remove the 'stub' <from> and <to> elements
-    # that were created from _xml_at_top()
-
-    for stub in [xml.find('from'), xml.find('to')]:
-      stub.getparent().remove(stub)
-
-    # now continue with our normally scheduled program ...
-    return super(self.__class__,self)._r_config_write_xml(xml)    
 
   def _xml_change_zone_from( self, xml ):
     xml.append(E('from', JXML.REPLACE, E.zone( self.should['zone_from'])))

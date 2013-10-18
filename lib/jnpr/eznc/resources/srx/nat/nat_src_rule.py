@@ -36,7 +36,7 @@ class NatSrcRule( Resource ):
 
   def _xml_to_py(self, as_xml, to_py ):
     """
-      converts Junos XML to native Python
+    converts Junos XML to native Python
     """
     Resource._r_has_xml_status( as_xml, to_py )
     e = as_xml.find('src-nat-rule-match')
@@ -47,6 +47,17 @@ class NatSrcRule( Resource ):
   ##### -----------------------------------------------------------------------
   ##### XML write
   ##### -----------------------------------------------------------------------
+
+  def _xml_hook_build_change_begin( self, xml ):
+    """
+    when doing a write, assign default values if they are not present
+    """
+    def _default_to(prop, value):
+      if prop not in self.should: self.should[prop] = value
+
+    if self.is_new:
+      _default_to( 'match_dst_addr', '0.0.0.0/0')
+      _default_to( 'match_src_addr', '0.0.0.0/0')
 
   def _xml_change_match_src_addr(self, xml):
     xml.append(E('src-nat-rule-match',
