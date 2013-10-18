@@ -21,4 +21,3 @@ rs = mgr["Goober"]
 r = rs.rule["G_WWW"]
 
 
-
