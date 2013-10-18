@@ -1,5 +1,4 @@
 
-
 # ABOUT
 
 A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge or Junos XML.
@@ -10,14 +9,22 @@ ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
 
 The following are *safe* to try out:
 
+#### General
+
  - Netconf:rpc meta-exec to invoke RPCs
  - Netconf:cli() to invoke CLI commands and get back text
  - Netconf:ez: meta-toolbox configuration utilities
    - from jnpr.eznc.utils.config import ConfigUtils
- - SRX security policy context and rule resources. The PolicyRule is auto-loaded
+
+#### SRX
+
+ - SRX security policy context and rule resources
    - from jnpr.eznc.resources.srx import PolicyContext
  - SRX application items and sets
    - from jnpr.eznc.resources.srx import Application, ApplicationSet
+ - SRX source NAT pool, rule-set, and rules
+   - from jnpr.eznc.resources.srx.nat import NatSrcPool
+   - from jnpr.eznc.resources.srx.nat import NatSrcRuleSet 
 
 
 # SUPPORTED PRODUCTS
