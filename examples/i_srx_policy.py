@@ -74,7 +74,7 @@ rule = r.rule["655"]
 # we can modify the contents, like adding a few new apps.  we 
 # copy what is there first, and then add to it
 
-rule.copy('match_apps')
+rule.prop_copy('match_apps')
 rule['match_apps'].append( "TCP-21")
 rule['match_apps'].append(" TCP-99")
 
