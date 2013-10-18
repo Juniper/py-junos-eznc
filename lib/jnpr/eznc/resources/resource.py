@@ -38,8 +38,11 @@ class Resource(object):
 
     # otherwise, a resource includes public attributes:
 
-    self.properties = Resource.PROPERTIES 
-    if self.__class__ != Resource: self.properties += self.__class__.PROPERTIES
+    self.properties = []
+    self.properties.extend(Resource.PROPERTIES)
+    if self.__class__ != Resource: 
+      self.properties.extend(self.__class__.PROPERTIES)
+
     self.has = {}
     self.should = {}
     self._is_new = False
@@ -437,8 +440,10 @@ class Resource(object):
     """
     read the resource config from the Junos device
     """
-    cfg_xml = self._junos.rpc.get_config( self._xml_at_top() )
-    return self._xml_at_res( cfg_xml )
+    get = self._xml_at_top()
+    self._xml_hook_read_begin( get )
+    got = self._junos.rpc.get_config( get )
+    return self._xml_at_res( got )
 
   def _xml_at_top( self ): 
     """
@@ -563,11 +568,21 @@ class Resource(object):
 
     return self._xml_hook_on_delete( xml )
 
-
-
   ##### -----------------------------------------------------------------------
   ##### XML HOOK methods
   ##### -----------------------------------------------------------------------
+
+  def _xml_hook_read_begin(self, xml):
+    """
+    called from :_r_config_read_xml(): after call to :_xml_at_top(): and
+    before the config request is made to the Junos device.  This hook allows
+    the subclass to munge the XML get-request with additional items if necessary
+
+    Returns:
+      :True: when :xml: is changed
+      :False: otherwise
+    """
+    return False
 
   def _xml_hook_build_change_begin(self, xml):
     """

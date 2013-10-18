@@ -63,12 +63,8 @@ class ApplicationSet( Resource ):
   ### -------------------------------------------------------------------------
 
   def _xml_change_app_list( self, xml ):
-    if None == self.should.get('app_list'): self['app_list'] = []
-
-    (adds,dels) = Resource.diff_list( self.has.get('app_list',[]), self.should['app_list'])
-
-    for this in adds: xml.append(E.application(E.name(this)))
-    for this in dels: xml.append(E.application(JXML.DEL, E.name(this)))
+    self._xml_list_property_add_del_names( xml,
+      prop_name='app_list',element_name='application')
     return True
 
   def _xml_change_app_list_adds( self, xml ):

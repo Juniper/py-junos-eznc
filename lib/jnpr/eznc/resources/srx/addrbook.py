@@ -34,7 +34,7 @@ class ZoneAddrBook( Resource ):
     self._manages = ['addr','set']
 
   def _xml_at_top(self):
-    xml = E.security(E.zones(
+    return E.security(E.zones(
       E('security-zone', 
         E.name( self._name ),
         E('address-book',
@@ -43,12 +43,11 @@ class ZoneAddrBook( Resource ):
         )
       )
     ))
-    return xml
 
-  ### -------------------------------------------------------------------------
-  ### XML reading
-  ### -------------------------------------------------------------------------
-
+  ##### -----------------------------------------------------------------------
+  ##### XML reading
+  ##### -----------------------------------------------------------------------
+  
   def _xml_at_res(self, xml):
     return xml.find('.//address-book')
 
