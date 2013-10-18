@@ -26,14 +26,24 @@ ab = jdev.ez.ab
 z_name = "OUTSIDE-DC-ST1"
 zone = jdev.ez.ab[z_name]
 
-# grab the first address book entry, and change it's
-# ip_prefix to "1.1.1.1/32"
+def test_addr():
+  # grab the first address book entry, and change it's
+  # ip_prefix to "1.1.1.1/32"
 
-first_addr = zone['$addrs'][0]
-addr = zone.addr[first_addr]
-addr(ip_prefix="1.1.1.1")
-addr.write()
+  first_addr = zone['$addrs'][0]
+  addr = zone.addr[first_addr]
+  addr(ip_prefix="1.1.1.1")
+  addr.write()
 
-print cu.diff()
-cu.rollback()
+  print cu.diff()
+  cu.rollback()
+
+  return addr
+
+def test_addr_set():
+  # let's take a look at the address-set
+  first_set = zone['$sets'][0]
+  adr_set = zone.set[first_set]
+  return adr_set
+
 

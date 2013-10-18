@@ -353,10 +353,12 @@ class Resource(object):
     self._rcatalog.clear()
     self._r_catalog()  # invoke the specific resource method
 
-  def prop_copy(self, p_name):
+  def propcopy(self, p_name):
     """
-    performs a 'deepcopy' of the property :p_name: from the
-    resource :has: into the :should:
+    proptery from :has: to :should:
+
+    performs a 'deepcopy' of the property; used to make
+    changes to list, dict type properties
     """
     self.should[p_name] = deepcopy(self.has[p_name])
     return self.should[p_name]
@@ -689,3 +691,12 @@ class Resource(object):
 
     # return lists (added, removed)
     return (list(should - has), list(has - should))  
+
+  def _xml_list_property_add_del_names(self, xml, prop_name, element_name):
+    """
+    utility method use to process :list: properties.  this will add/delete
+    items give the propery type and associated XML element name
+    """
+    (adds,dels) = Resource.diff_list( self.has.get(prop_name,[]), self.should[prop_name])
+    for this in adds: xml.append(E(element_name, E.name(this)))
+    for this in dels: xml.append(E(element_name, JXML.DEL, E.name(this)))    

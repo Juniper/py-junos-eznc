@@ -45,7 +45,7 @@ pp(r)
 # now remove a few items from the app_list
 # first make a copy of the existing list
 
-r.prop_copy('app_list')
+r.propcopy('app_list')
 
 # then remove a few
 r['app_list'].remove("TCP-9162")
