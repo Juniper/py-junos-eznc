@@ -101,5 +101,6 @@ print jdev.ez.cu.diff()
 
 # now discard these changes
 
+print "Rolling back ..."
 jdev.ez.cu.rollback()
 
