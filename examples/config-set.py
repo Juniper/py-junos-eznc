@@ -25,6 +25,10 @@ set system host-name jeremy
 set system domain-name jeremy.com
 """
 
+### This works on Junos 11.4 or later.
+### I will also be adding this functionality to the "eznc"
+### module, tracking github issue#13
+
 rpc_cmd = E('load-configuration', dict(format="text", action="set"),
   E('configuration-set', set_commands )
 )
