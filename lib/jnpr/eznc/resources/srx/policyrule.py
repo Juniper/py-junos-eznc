@@ -42,7 +42,7 @@ class PolicyRule( Resource ):
     """
       converts Junos XML to native Python
     """
-    Resource.set_ea_status( as_xml, to_py )
+    Resource._r_has_xml_status( as_xml, to_py )
     Resource.copyifexists(as_xml,'description',to_py)
 
     x_match = as_xml.find('match')
@@ -68,8 +68,8 @@ class PolicyRule( Resource ):
 
   def _xml_change_action(self, xml):
     xml.append(E.then(E(self.should['action'])))
-    pass
-
+    return True
+    
   def _xml_change_count(self, xml):
     xml.append(E.then(
       Resource.xmltag_set_or_del('count', self.should['count'])

@@ -103,6 +103,3 @@ print jdev.ez.cu.diff()
 
 jdev.ez.cu.rollback()
 
-# and close the session
-
-jdev.close()
