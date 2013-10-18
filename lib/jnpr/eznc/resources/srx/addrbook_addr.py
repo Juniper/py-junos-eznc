@@ -71,4 +71,14 @@ class ZoneAddrBookAddr( Resource ):
   def _r_catalog(self):
     """
     """
-    raise RuntimeError("Need to implement!")
+    get = E.security(E.zones(
+      E('security-zone', 
+        E.name(self.P._name),
+        E('address-book')
+      )
+    ))
+    got = self.J.rpc.get_config( get )
+    for addr in got.xpath('.//address'):
+      name = addr.find('name').text
+      self._rcatalog[name] = {}
+      self._xml_to_py( addr, self._rcatalog[name] )      
