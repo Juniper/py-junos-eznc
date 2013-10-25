@@ -1,10 +1,72 @@
 # ABOUT
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge or Junos XML.
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.
 
 # STATUS
 
 ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
+
+# QUICK EXAMPLE
+
+The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
+
+````python
+from jnpr.eznc import Netconf
+
+jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev.open()
+
+# invoke the RPC equivalent to "show chassis hardware"
+
+inv = jdev.rpc.get_chassis_inventory()
+
+print "model: %s" % inv.find('chassis/description').text
+print "serial-number: %s" % inv.find('chassis/serial-number').text
+
+# model: JUNOSV-FIREFLY
+# serial-number: cf2eaceba2b7
+
+jdev.close()
+
+````
+
+# QUICK INTRO TO JUNOS XML API
+
+To determine an XML API command, you use the `| display xml rpc` mechanism, as illustrated:
+````
+jeremy@jnpr-dc-fw> show chassis hardware | display xml rpc 
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
+    <rpc>
+        <get-chassis-inventory>
+        </get-chassis-inventory>
+    </rpc>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
+````
+
+The contents between the `rpc` elements is the XML command, in this case `get-chassis-inventory`.  As you can see from the above example, to invoke this API, simply swap the dashes ('-') to underbars ('_').  
+
+If the command has parameters, you do the same.  Here is an example retrieving the status of a given interface:
+````
+jeremy@jnpr-dc-fw> show interfaces ge-0/0/0 media | display xml rpc 
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
+    <rpc>
+        <get-interface-information>
+                <media/>
+                <interface-name>ge-0/0/0</interface-name>
+        </get-interface-information>
+    </rpc>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
+````
+The equivalent invocation with this module would look like this:
+````python
+rsp = jdev.rpc.get_interface_information(media=True, interface_name='ge-0/0/0')
+````
 
 # SUPPORTED PRODUCTS
 
@@ -22,9 +84,9 @@ The first pass of this module is targeting resource abstractions for the SRX fir
  * Source NAT address pools, rule-sets, and rules
  * Static NAT rule-sets and rules
  
-# HACKING
+# INSTALLATION
 
-If you'd like to hack on this code or try it out, you will need to install the [ncclient](https://github.com/juniper/ncclient) module from the Juniper github repo directly.  You will then need to install this module and source the `env-setup.sh` file.  This will set your `PYTHONPATH` variable so it picks up the local module.
+See [here](INSTALL.md) for installation instructions.
 
 
 # DEPENDENCIES
