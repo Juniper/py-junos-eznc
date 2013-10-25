@@ -3,6 +3,7 @@ import pdb
 
 # stdlib
 import os
+from inspect import isclass
 
 # 3rd-party packages
 from lxml import etree
@@ -12,7 +13,7 @@ import jinja2
 # local modules
 from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
-from .ez import Manager as EzMgr
+from .resources import Resource 
 
 DEFAULT_TEMPLATE_PATH = '.'
 
@@ -119,12 +120,12 @@ class Netconf(object):
     self._auth_password = kvargs.get('password')
     self._conn = None
     self._j2ldr = _Jinja2ldr
+    self._manages = []
 
     # public attributes
 
     self.connected = False
     self.rpc = _RpcMetaExec( self )
-    self.ez = EzMgr( self )
 
   ##### -----------------------------------------------------------------------
   ##### Basic device methods
@@ -231,4 +232,30 @@ class Netconf(object):
       filename = filename + '.xml'
 
     return self._j2ldr.get_template( filename, parent, globals )
+
+  ### ---------------------------------------------------------------------------
+  ### dealing with bind aspects
+  ### ---------------------------------------------------------------------------
+
+  def bind(self, **kvargs):
+    """
+    Entry point for adding things to the :Binder:
+    """
+
+    # first verify that the names do not conflict with
+    # existing object attribute names
+
+    for name in kvargs.keys():
+      if hasattr(self, name):
+        raise ValueError("requested attribute name %s already exists" % name)
+
+    # now instantiate items and bind to this :Netconf:
+    for name,thing in kvargs.items():
+      new_inst = thing(self)
+      self.__dict__[name] = new_inst
+      self._manages.append( name )
+
+  @property
+  def manages(self):
+    return self._manages
 

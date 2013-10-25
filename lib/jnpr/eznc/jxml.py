@@ -46,6 +46,9 @@ def rpc_error( rpc_xml ):
   """
   remove_namespaces( rpc_xml )
 
+  if 'rpc-reply' == rpc_xml.tag:
+    rpc_xml = rpc_xml[0]
+
   def find_strip(x):
     ele = rpc_xml.find(x)
     return ele.text.strip() if None != ele else None

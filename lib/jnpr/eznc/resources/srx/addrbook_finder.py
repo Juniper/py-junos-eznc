@@ -8,7 +8,7 @@ class ZoneAddrFinder(object):
 
   class ZoneAddrFinderResults(object):
     """
-    results are the tuple (addr-name, netaddr-obj)
+    Helper-class to hold the results of a :ZoneAddrFind.find(): invocation
     """
     def __init__(self, ab, find, results):
       self._ab = ab
@@ -52,6 +52,10 @@ class ZoneAddrFinder(object):
       """
       return "%s(%s in %s)" % (self.__class__.__name__, self._find, self._ab.name)
 
+  ### -------------------------------------------------------------------------
+  ### CONSTRUCTOR
+  ### -------------------------------------------------------------------------
+
   def __init__(self, given):
     """
     Constructor takes either a :Zone: or :ZoneAdressBook: objet
@@ -80,7 +84,16 @@ class ZoneAddrFinder(object):
     Given an ip or ip_prefix locate the matching address book address 
     and address-set items.
     """
+
+    # if the caller hasn't explicity invoked :compile(): to create the 
+    # netaddr objects, then do that now.
+
     if self._index is None: self.compile()
+
+    # convert the provided :addr: into a netaddr object and then 
+    # to a subnet match to find address entries.  the matching
+    # values will be sorted with longest prefix matching to be
+    # last in the list
 
     ip = netaddr.IPNetwork(addr).ip
     in_net = lambda i: ip & i[1].netmask == i[1].network                # is ip in the subnet?
@@ -88,8 +101,13 @@ class ZoneAddrFinder(object):
     r = sorted(filter(in_net, self._index), cmp=by_pflen)               # find/sort
     if r is None: return None
 
+    # now that we have some matching entries, we should find which
+    # address-set items uses the items
+
     results = ZoneAddrFinder.ZoneAddrFinderResults(self._ab, addr, r)
     if sets is True: results.sets = self.find_sets( results )
+
+    # return the results object
     return results
 
   def find_sets(self, r):

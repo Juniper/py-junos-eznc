@@ -1,7 +1,3 @@
-# debuggin
-import pdb
-from lxml import etree
-
 # 3rd-party modules
 from lxml.builder import E 
 
@@ -16,13 +12,6 @@ class ZoneAddrBookAddr( Resource ):
   ~! WARNING !~
   This resource is managed only as a child of the :ZoneAddrBook:
   resource.  Do not create a manager instance of this class directly
-
-  Notes
-  -------------------------------------------------------------------
-    :self._name: is the address entry name
-
-    :self.P: is the parent ZoneAddrBook object, whose _name is the 
-    security zone 
   """
   PROPERTIES = [
     'description',
