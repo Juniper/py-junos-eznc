@@ -116,7 +116,7 @@ class Netconf(object):
 
     self._hostname = kvargs['host']
     self._auth_user = kvargs['user']
-    self._auth_password = kvargs['password']
+    self._auth_password = kvargs.get('password')
     self._conn = None
     self._j2ldr = _Jinja2ldr
 

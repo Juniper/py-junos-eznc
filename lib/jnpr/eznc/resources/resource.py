@@ -356,6 +356,10 @@ class Resource(object):
     self._rcatalog.clear()
     self._r_catalog()  # invoke the specific resource method
 
+  def refresh(self):
+    self.list_refresh()
+    self.catalog_refresh()
+    
   def propcopy(self, p_name):
     """
     proptery from :has: to :should:

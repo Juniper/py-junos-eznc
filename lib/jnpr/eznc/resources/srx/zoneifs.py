@@ -81,7 +81,10 @@ class ZoneInterface( HostInbSvcMixin, Resource ):
   def _r_list(self):
     """
     """
+    self._rlist = self.P['$ifs_list']
 
   def _r_catalog(self):
     """
     """
+    raise RuntimeError("Need to implement!")
+

@@ -47,8 +47,7 @@ class ZoneAddrBookAddr( Resource ):
   def _xml_to_py(self, as_xml, to_py ):
     Resource._r_has_xml_status( as_xml, to_py )
     Resource.copyifexists( as_xml, 'description', to_py )
-    e = as_xml.find('ip-prefix')
-    if e is not None: to_py['ip_prefix'] = e.text    
+    to_py['ip_prefix'] = as_xml.find('ip-prefix').text
 
   ##### -----------------------------------------------------------------------
   ##### XML writing
@@ -74,11 +73,11 @@ class ZoneAddrBookAddr( Resource ):
     get = E.security(E.zones(
       E('security-zone', 
         E.name(self.P._name),
-        E('address-book')
+        E('address-book', E('address'))
       )
     ))
     got = self.J.rpc.get_config( get )
-    for addr in got.xpath('.//address'):
+    for addr in got.xpath('.//address-book/address'):
       name = addr.find('name').text
       self._rcatalog[name] = {}
       self._xml_to_py( addr, self._rcatalog[name] )      
