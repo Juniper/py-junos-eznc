@@ -63,10 +63,11 @@ jeremy@jnpr-dc-fw> show interfaces ge-0/0/0 media | display xml rpc
     </cli>
 </rpc-reply>
 ````
-The equivalent invocation with this module would look like this:
+The equivalent python would look like this:
 ````python
 rsp = jdev.rpc.get_interface_information(media=True, interface_name='ge-0/0/0')
 ````
+Here the `media` parameter does not take a value, so you simple assign it to `True`.
 
 # SUPPORTED PRODUCTS
 
