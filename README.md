@@ -2,7 +2,9 @@
 
 STATUS: ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge. There are three basic "layers" to this module:
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  This module is not specifically tied to any version of Junos or any Junos product family. 
+
+There are three basic "layers" to this module: Resources, Utilities, and RPC Metaprogramming
 
 #### Managing "Resources" as Abstractions
 
@@ -12,9 +14,9 @@ Resources are defined as elements of the Junos configuration that you want to ma
 
 An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  Examples of these libraries include: filesystem, routing-engine, and config.  The config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
 
-#### Junos XML RPC 
+#### RPC Metaprogramming 
 
-You should always have the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.
+You should always have the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.  The term "metaprogramming" basically means that this module will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them from your program, rathan that pre-coding them as part of the module distribution.  Said another way, if Junos provides thousands of RPCs, this module does *not* contain thousands of RPC functions.  It metaprogramms only the RPCs that you use, keeping the size of this module small, and the portability flexible.  
 
 # QUICK EXAMPLE
 
