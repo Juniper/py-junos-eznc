@@ -2,6 +2,8 @@
 
 Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.  To access a resource you must bind a class of that resource to a Netconf instance, and this creates a "Resource Manager".
 
+### Binding a Resource Manager
+
 To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
 
 ````python
@@ -20,7 +22,7 @@ trust_ab = jdev.ab["TRUST"]
 
 Selecting a resource is make by using the `[<name>]` mechanism.  This returns a specific resource, in this case the address-book for the TRUST zone.
 
-### More about Resource Managers
+### Resource Manager Properties
 
 All resource managers maintain two properties: a list of names that it manages, and a catalog of those resources.  The list is a Python list, and the catalog is a Python dictionary where the key is a name of the resource and the value is a dictorany of resource properties.  This list and catalog is retrieved by accessing the attributes as properties:
 
@@ -33,4 +35,23 @@ pprint( jdev.ab.list )
 ## in dictionary format.
 
 pprint( jdev.ab.catalog )
+````
+Once you've accessed either `list` or `catalog` the values are cached.  If you need to refresh these properties you can explicity refresh the list or the catalog, or both, as illustrated:
+
+````python
+# selectively refresh
+
+jdev.ab.list_refresh()
+jdev.ab.catalog_refresh()
+
+# or refresh both
+
+jdev.ab.refresh()
+````
+
+
+
+
+
+
 
