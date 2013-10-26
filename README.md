@@ -10,9 +10,13 @@ There are three basic "layers" to this module: Resources, Utilities, and RPC Met
 
 Resources are defined as elements of the Junos configuration that you want to manage as discrete items.  For example, a SRX security zone has an address-book, that it turn contains a list of address items and a list of address-sets.  The purpose of the "resource" abstraction is to enable the programmer to manage these items as simple Python objects, and not requiring kownledge of the underlying Junos/XML. 
 
+For the catalog of Resources provided by this module, see [here](docs/RESOURCE_CATALOG.md).
+
 #### Utility "Libraries"
 
 An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  Examples of these libraries include: filesystem, routing-engine, and config.  The config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
+
+For the catalog of Utility libraries provided by this module, see [here](docs/UTILS_CATALOG.md).
 
 #### RPC Metaprogramming 
 
