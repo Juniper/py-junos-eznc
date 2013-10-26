@@ -1,4 +1,4 @@
-# RPC Metaprogramming
+# Using RPC Metaprogramming
 
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
 
