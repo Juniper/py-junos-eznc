@@ -2,7 +2,7 @@
 
 STATUS: ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  This module is not specifically tied to any version of Junos or any Junos product family. 
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  This module is not specifically tied to any version of Junos or any Junos product family. This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  
 
 There are three basic "layers" to this module: Resources, Utilities, and RPC Metaprogramming
 
@@ -10,7 +10,10 @@ There are three basic "layers" to this module: Resources, Utilities, and RPC Met
 
 Resources are defined as elements of the Junos configuration that you want to manage as discrete items.  For example, a SRX security zone has an address-book, that it turn contains a list of address items and a list of address-sets.  The purpose of the resource abstraction is to enable the programmer to manage these items as simple Python objects, and not requiring kownledge of the underlying Junos/XML. 
 
+Resources can be Junos product family specifc.  Security Zones, for example, would be found only on SRX products.
+
 For the catalog of Resources provided by this module, see [here](docs/RESOURCE_CATALOG.md).
+
 For a quick intro on using Resources, see [here](#intro-to-resources).
 
 
@@ -19,11 +22,14 @@ For a quick intro on using Resources, see [here](#intro-to-resources).
 An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  Examples of these libraries include: filesystem, routing-engine, and config.  The config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
 
 For the catalog of Utility libraries provided by this module, see [here](docs/UTILS_CATALOG.md).
+
 For a quick intro on using utility libraries, see [here](#intro-to-utilities).
 
 #### RPC Metaprogramming 
 
-You should always have the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.  The term "metaprogramming" basically means that this module will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them from your program, rathan that pre-coding them as part of the module distribution.  Said another way, if Junos provides thousands of RPCs, this module does *not* contain thousands of RPC functions.  It metaprogramms only the RPCs that you use, keeping the size of this module small, and the portability flexible.  
+You should always have the ability to "do anything" that the Junos/XML API provides.  This module attempts to make accessing Junos at this low-level "easy".  The term "metaprogramming" basically means that this module will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them from your program, rather that pre-coding them as part of the module distribution.  Said another way, if Junos provides thousands of RPCs, this module does *not* contain thousands of RPC functions.  It metaprogramms only the RPCs that you use, keeping the size of this module small, and the portability flexible.
+
+For a quick intro on using RPC metaprogramming, see [here](#intro-meta-programming).
 
 # INSTALLATION
 
@@ -97,10 +103,6 @@ The equivalent python would look like this:
 rsp = jdev.rpc.get_interface_information( media=True, interface_name='ge-0/0/0' )
 ````
 Here the `media` parameter does not take a value, so you simple assign it to `True`.  Again, for parameter names that contain dashesh, you swap them for underbars; `interface-name` becomes `interface_name`.
-
-# SUPPORTED PRODUCTS
-
-This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  There are specific _Resources_ that are platform/function specific.
 
 ## Intro to Resources
 
