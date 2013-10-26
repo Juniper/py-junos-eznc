@@ -18,7 +18,7 @@ class ConfigUtils(object):
     commit a configuration.  returns either :True: or
     raises an RPCError exception
 
-    :kvargs: 
+    kvargs 
       confirm = [True | <timeout-minutes>]
       comment = <comment log string>
     """
@@ -76,10 +76,13 @@ class ConfigUtils(object):
   ### show | compare rollback <number|0*>
   ### -------------------------------------------------------------------------
 
-  def diff( self, rb_id=0 ):
+  def diff( self, **kvargs ):
     """
     retrieve a diff-format report of the candidate config against
     either the current active config, or a different rollback.
+
+    kvargs
+      'rollback' is a number [0..50]
     """
 
     rb_id = kvargs.get('rollback', 0)
