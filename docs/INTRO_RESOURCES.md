@@ -1,6 +1,10 @@
 # Using Resources
 
-Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.  To access a resource you must bind a class of that resource to a Netconf instance, and this creates a "Resource Manager".
+Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.
+
+## Resource Managers
+
+To access a resource you must bind a class of that resource to a Netconf instance, and this creates a Resource Manager.
 
 ### Binding a Resource Manager
 
@@ -49,9 +53,57 @@ jdev.ab.catalog_refresh()
 jdev.ab.refresh()
 ````
 
+## Resources
 
+A resources is selected from a resource manager using the `[<name>]` mechanism, as previous illustrated.  You manage the specific configuration elements of the resource by reading and writing "properties".  You access these properties using the `[<property-name>]` meachism.  For example, a Zone address-book item has a property called "ip_prefix".  You can read and write the value, as illustrated:
 
+````python
+# select the specific address resource called "JEREMY-HOST" in the "TRUST" zone
 
+jeremy = jdev.ab["TRUST"].addr["JEREMY-HOST"]
+
+# display the current value
+
+print jeremy['ip_prefix']
+#>>> '192.168.1.1/32'
+
+# now change it to "192.168.100.1/32"
+jeremy['ip_prefix'] = "192.168.100.1/32"
+
+# write the change to the Junos device
+jeremy.write()
+````
+
+### Resource Attribute Properties
+
+Each resource provides instance attribute properties:
+
+  * name - the name of the resource
+  * properties - a list of properties you can read/write
+  * manages - a list of other resources managed by this resource 
+  * exists - True/False if resource exists in Junos config
+  * active - True/False if resource is active in Junos config
+  * xml - The actual Junos XML associated with this resource (typically for debug)
+
+The following are also properties that provide "short-cuts" to other objects:
+
+  * J - the Junos Netconf object instance
+  * M - the instance to the resource manager
+  * P - the instance to the resource parent
+
+### Resource Methods
+
+You can use the following methods on any resource.  These methods will read/write the Junos device, but changes are not committed.  You must explicity commit changes, typically by the ConfigUtils library.
+
+  * read() - reads the resource config from the Junos device
+  * write() - writes the modified resource properties to the Junos device
+  * delete() - removes the resource from the Junos config
+  * rename() - renames the resource in the Junos config
+  * activate() - activates the resource in the Junos config
+  * deactivate() - deactivates the resource in the Junos config
+  * reorder() - changes the ordering of the resource in the Junos config
+
+_NOTE_: Each resource maitains separate read and write dictionary caches.  When you invoke the `read()` method, the Junos device is read and the read cache is loaded.  When you modify the resource properites using the `[<property-name>]` mechaism, you are storing values into the write-cache, but not directly to the device.  You write-back to the device using the `write()` method.  In this way you can update many resource properties with a single `write()`
 
 
 
