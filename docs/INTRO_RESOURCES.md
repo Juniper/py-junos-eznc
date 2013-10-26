@@ -103,7 +103,7 @@ You can use the following methods on any resource.  These methods will read/writ
   * deactivate() - deactivates the resource in the Junos config
   * reorder() - changes the ordering of the resource in the Junos config
 
-_NOTE_: Each resource maitains separate read and write dictionary caches.  When you invoke the `read()` method, the Junos device is read and the read cache is loaded.  When you modify the resource properites using the `[<property-name>]` mechaism, you are storing values into the write-cache, but not directly to the device.  You write-back to the device using the `write()` method.  In this way you can update many resource properties with a single `write()`
+_NOTE: Each resource maitains separate read and write dictionary caches.  When you invoke the `read()` method, the Junos device is read and the read-cache is loaded.  When you modify the resource properites using the `[<property-name>]` mechaism, you are storing values into the write-cache, but not directly to the device.  You write back to the Junos device using the `write()` method.  In this way you can update many resource properties with a single `write()`_
 
 
 
