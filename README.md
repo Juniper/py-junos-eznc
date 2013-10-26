@@ -60,7 +60,7 @@ jdev.bind( ab=ZoneAddrBook )
 # this will load the contents of the address book from the
 # Junos SRX device
 
-this_ab = jdev.ab["DEFAULT-PROTECT-DC-ST1"]
+this_ab = jdev.ab["TRUST"]
 
 # an address book manages two resources, the list of address 
 # items, and the list of address-sets.  You can see what 
@@ -111,8 +111,8 @@ jeremy.write()
 # the candidate configuration
 # [edit]
 # jeremy@jnpr-dc-fw# show | compare 
-# [edit security zones security-zone DEFAULT-PROTECT-DC-ST1 address-book]
-#        address MYACCESS-ST-AS-B { ... }
+# [edit security zones security-zone TRUST address-book]
+#        address BOB-HOST { ... }
 # +      address JEREMY-HOST {
 # +          description "Jeremy's laptop computer";
 # +          192.168.1.1/32;
