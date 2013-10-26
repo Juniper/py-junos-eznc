@@ -22,6 +22,10 @@ For the catalog of Utility libraries provided by this module, see [here](docs/UT
 
 You should always have the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.  The term "metaprogramming" basically means that this module will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them from your program, rathan that pre-coding them as part of the module distribution.  Said another way, if Junos provides thousands of RPCs, this module does *not* contain thousands of RPC functions.  It metaprogramms only the RPCs that you use, keeping the size of this module small, and the portability flexible.  
 
+# INSTALLATION
+
+See [here](INSTALL.md) for installation instructions.
+
 # QUICK EXAMPLE
 
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
@@ -49,7 +53,7 @@ jdev.close()
 
 ````
 
-## QUICK INTRO TO JUNOS XML API
+## Intro to RPC Metaprogramming
 
 It is very easy to determine an XML API command.  On a Junos CLI you use the `| display xml rpc` mechanism, as illustrated:
 ````
@@ -95,26 +99,9 @@ Here the `media` parameter does not take a value, so you simple assign it to `Tr
 
 This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  There are specific _Resources_ that are platform/function specific.
 
-## QUICK INTRO TO RESOURCES
+## Intro to Resources
 
-## QUICK INTRO TO UTILITIES
-
-### SRX
-
-The first pass of this module is targeting resource abstractions for the SRX firewall products.  These resource abstractions include:
-
- * Security zone interfaces
- * Security zone address-book items and sets
- * Security policy contexts and rule-sets
- * Security screens
- * Security application items and sets
- * Source NAT address pools, rule-sets, and rules
- * Static NAT rule-sets and rules
- 
-# INSTALLATION
-
-See [here](INSTALL.md) for installation instructions.
-
+## Intro to Utilities
 
 # DEPENDENCIES
 
