@@ -1,3 +1,3 @@
-# Resources
+# Using Resources
 
 **work in progress**
