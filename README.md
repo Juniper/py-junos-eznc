@@ -1,5 +1,7 @@
 # ABOUT
 
+STATUS: ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
+
 A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge. There are three basic "layers" to this module:
 
 #### Managing "Resources" as Abstractions
@@ -12,11 +14,7 @@ An application will often want to perform common fucntions, and again wihtout re
 
 #### Junos XML RPC 
 
-You always want the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.
-
-# STATUS
-
-___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
+You should always have the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.
 
 # QUICK EXAMPLE
 
@@ -32,6 +30,9 @@ jdev.open()
 
 inv = jdev.rpc.get_chassis_inventory()
 
+# use XPath expressions to extract the data from the Junos/XML response
+# the :inv: variable is an lxml Element object
+
 print "model: %s" % inv.find('chassis/description').text
 print "serial-number: %s" % inv.find('chassis/serial-number').text
 
@@ -42,9 +43,9 @@ jdev.close()
 
 ````
 
-# QUICK INTRO TO JUNOS XML API
+## QUICK INTRO TO JUNOS XML API
 
-To determine an XML API command, you use the `| display xml rpc` mechanism, as illustrated:
+It is very easy to determine an XML API command.  On a Junos CLI you use the `| display xml rpc` mechanism, as illustrated:
 ````
 jeremy@jnpr-dc-fw> show chassis hardware | display xml rpc 
 <rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
@@ -58,7 +59,10 @@ jeremy@jnpr-dc-fw> show chassis hardware | display xml rpc
 </rpc-reply>
 ````
 
-The contents between the `rpc` elements is the XML command, in this case `get-chassis-inventory`.  As you can see from the above example, to invoke this API, simply swap the dashes ('-') to underbars ('_').  
+The contents between the `rpc` elements is the XML RPC command, in this case `get-chassis-inventory`.  As you can see from the above [QUICK EXAMPLE](#quick-example), to invoke this API, use the Netconf object `rpc` attribute and invoke a method name corresponding to the XML RPC command.  If the command has dashes ('-') then swap to underbars ('_').  
+````python
+inv = jdev.rpc.get_chassis_inventory()
+````
 
 If the command has parameters, you do the same.  Here is an example retrieving the status of a given interface:
 ````
@@ -77,13 +81,17 @@ jeremy@jnpr-dc-fw> show interfaces ge-0/0/0 media | display xml rpc
 ````
 The equivalent python would look like this:
 ````python
-rsp = jdev.rpc.get_interface_information(media=True, interface_name='ge-0/0/0')
+rsp = jdev.rpc.get_interface_information( media=True, interface_name='ge-0/0/0' )
 ````
-Here the `media` parameter does not take a value, so you simple assign it to `True`.
+Here the `media` parameter does not take a value, so you simple assign it to `True`.  Again, for parameter names that contain dashesh, you swap them for underbars; `interface-name` becomes `interface_name`.
 
 # SUPPORTED PRODUCTS
 
 This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  There are specific _Resources_ that are platform/function specific.
+
+## QUICK INTRO TO RESOURCES
+
+## QUICK INTRO TO UTILITIES
 
 ### SRX
 
