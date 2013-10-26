@@ -1,6 +1,6 @@
 # ABOUT
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge. There are three "layers" to the microframework:
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of the microframework is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge. There are three basic "layers" to this module:
 
 #### Managing "Resources" as Abstractions
 
@@ -12,10 +12,8 @@ An application will often want to perform common fucntions, and again wihtout re
 
 #### Junos XML RPC 
 
-You always want the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos XML API "easy", should you need to program at this lower-level.  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.
+You always want the ability to "do anything" that the Junos/XML API provides.  This Python module attempts to make accessing the Junos as this low-level "easy".  The [QUICK EXAMPLE](#quick-example) below illustrates this mechanism.
 
-
-For the 
 # STATUS
 
 ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
