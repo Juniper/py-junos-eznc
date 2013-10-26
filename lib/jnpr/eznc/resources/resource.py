@@ -165,13 +165,6 @@ class Resource(object):
     return self._manager
 
   @property
-  def E(self):
-    """
-    returns the :ez: attribute of the associated Junos object
-    """
-    return self._junos.ez
-  
-  @property
   def P(self):
     """
     returns the parent of the associated Junos object
