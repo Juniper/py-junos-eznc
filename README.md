@@ -121,6 +121,39 @@ jeremy.write()
 
 For more details on the Resource framework, see [here](docs/INTRO_RESOURCES.md).
 
+### Utility Libraries
+
+Utility libraries are collections of functions.  The following illustrates the ConfigUtils library on checking configuration changes and displaying the diff.  This example is a continuation of the prior section.
+````python
+from jnpr.eznc.utils import ConfigUtils
+
+# now bind the ConfigUtils to this Netconf instance, creating an attribute
+# called :cu:
+
+jdev.bind(cu=ConfigUtils)
+
+# now use the ConfigUtils to do a "commit check".  If the candidate configuration is
+# OK, then this will return :True: and if not will return a dictionary of error information
+
+jdev.cu.commit_check()
+#>>> True
+
+# we can obtain a copy of the "diff" string, which is the equivalent of the Junos CLI
+# command "show | compare"
+
+print jdev.cu.diff()
+#>>> [edit security zones security-zone DEFAULT-PROTECT-DC-ST1 address-book]
+#>>>        address MYACCESS-ST-AS-B { ... }
+#>>> +      address JEREMY-HOST {
+#>>> +          description "Jeremy's laptop computer";
+#>>> +          192.168.1.1/32;
+#>>> +      }
+
+# now we can either commit these changes or discard them.  showing how to
+# discard them using the rollback function.
+
+jdev.cu.rollback()
+````
 ### RPC Metaprogramming
 
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
