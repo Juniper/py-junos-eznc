@@ -142,8 +142,8 @@ jdev.cu.commit_check()
 # command "show | compare"
 
 print jdev.cu.diff()
-#>>> [edit security zones security-zone DEFAULT-PROTECT-DC-ST1 address-book]
-#>>>        address MYACCESS-ST-AS-B { ... }
+#>>> [edit security zones security-zone TRUST address-book]
+#>>>        address BOB-HOST { ... }
 #>>> +      address JEREMY-HOST {
 #>>> +          description "Jeremy's laptop computer";
 #>>> +          192.168.1.1/32;
