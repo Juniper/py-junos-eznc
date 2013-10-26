@@ -37,6 +37,90 @@ See [here](INSTALL.md) for installation instructions.
 
 ## QUICK EXAMPLES
 
+### Resource Abstrations
+
+The following code example illustrates how to use the SRX "ZoneAddrBook" resource to add a new address item to a zone's address book.
+
+````python
+from pprint import pprint
+
+from jnpr.eznc import Netconf
+from jnpr.eznc.resources.srx import ZoneAddrBook
+
+jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev.open()
+
+# bind an AddrBook class to this Netconf instance.  this
+# will create an instance of the AddrBook automatically
+# and create an attribute called 'ab' on the Netconf instance
+
+jdev.bind( ab=ZoneAddrBook )
+
+# now select the address book for a specific security zone
+# this will load the contents of the address book from the
+# Junos SRX device
+
+this_ab = jdev.ab["DEFAULT-PROTECT-DC-ST1"]
+
+# an address book manages two resources, the list of address 
+# items, and the list of address-sets.  You can see what 
+# a specific resource manages by looking at the :manages:
+# property
+
+pprint( this_ab.manages )
+#>>> ['addr', 'set']
+
+# lets add a new address item called 'JEREMY-HOST' with
+# and IP address of '192.168.1.1'
+
+jeremy = this_ab.addr['JEREMY-HOST']
+
+# does this address item already exist?  all resources
+# have a property called :exists: that returns True or False
+# indicating whether or not the resource exists in the 
+# Junos configuration
+
+pprint( jeremy.exists )
+#>>> False
+
+# each resource has a list of properties that you can
+# read/write.  You can see this list by examining the
+# :properties: attribute
+
+pprint( jeremy.properties )
+#>>> ['_exists', '_active', 'description', 'ip_prefix']
+
+# the :_exists: and :_active: items are 'meta-properties'
+# controlled by the resource framework; so don't touch 
+# these.  The other properties :description: and
+# :ip_prefix: are for you to control.  So let's set
+# these for our new address
+
+jeremy['description'] = "Jeremy's laptop computer"
+jeremy['ip_prefix'] = '192.168.1.1'
+
+# now store these values to the Junos devices.  this 
+# action does *NOT* commit the configuration, only
+# sets the values, much like doing the "set" commands
+# at the Junos CLI
+
+jeremy.write()
+
+# if we were to examine the Junos CLI configuration
+# we can see that the change has been loaded into 
+# the candidate configuration
+# [edit]
+# jeremy@jnpr-dc-fw# show | compare 
+# [edit security zones security-zone DEFAULT-PROTECT-DC-ST1 address-book]
+#        address MYACCESS-ST-AS-B { ... }
+# +      address JEREMY-HOST {
+# +          description "Jeremy's laptop computer";
+# +          192.168.1.1/32;
+# +      }
+````
+
+For more details on the Resource framework, see [here](docs/INTRO_RESOURCES.md).
+
 ### RPC Metaprogramming
 
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
