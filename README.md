@@ -14,7 +14,7 @@ Resources can be Junos product family specifc.  Security Zones, for example, wou
 
 For the catalog of Resources provided by this module, see [here](docs/RESOURCE_CATALOG.md).
 
-For a quick intro on using Resources, see [here](#intro-to-resources).
+For a quick intro on using Resources, see [here](docs/INTRO_RESOURCES.md).
 
 
 #### Utility Libraries
@@ -23,19 +23,21 @@ An application will often want to perform common fucntions, and again wihtout re
 
 For the catalog of Utility libraries provided by this module, see [here](docs/UTILS_CATALOG.md).
 
-For a quick intro on using utility libraries, see [here](#intro-to-utilities).
+For a quick intro on using utility libraries, see [here](docs/INTRO_UTILS.md).
 
 #### RPC Metaprogramming 
 
 You should always have the ability to "do anything" that the Junos/XML API provides.  This module attempts to make accessing Junos at this low-level "easy".  The term "metaprogramming" basically means that this module will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them from your program, rather that pre-coding them as part of the module distribution.  Said another way, if Junos provides thousands of RPCs, this module does *not* contain thousands of RPC functions.  It metaprogramms only the RPCs that you use, keeping the size of this module small, and the portability flexible.
 
-For a quick intro on using RPC metaprogramming, see [here](#intro-meta-programming).
+For a quick intro on using RPC metaprogramming, see [here](docs/INTRO_META.md).
 
 # INSTALLATION
 
 See [here](INSTALL.md) for installation instructions.
 
-# QUICK EXAMPLE
+## QUICK EXAMPLES
+
+### RPC Metaprogramming
 
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
 
@@ -61,52 +63,7 @@ print "serial-number: %s" % inv.find('chassis/serial-number').text
 jdev.close()
 
 ````
-
-## Intro to RPC Metaprogramming
-
-It is very easy to determine an XML API command.  On a Junos CLI you use the `| display xml rpc` mechanism, as illustrated:
-````
-jeremy@jnpr-dc-fw> show chassis hardware | display xml rpc 
-<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
-    <rpc>
-        <get-chassis-inventory>
-        </get-chassis-inventory>
-    </rpc>
-    <cli>
-        <banner></banner>
-    </cli>
-</rpc-reply>
-````
-
-The contents between the `rpc` elements is the XML RPC command, in this case `get-chassis-inventory`.  As you can see from the above [QUICK EXAMPLE](#quick-example), to invoke this API, use the Netconf object `rpc` attribute and invoke a method name corresponding to the XML RPC command.  If the command has dashes ('-') then swap to underbars ('_').  
-````python
-inv = jdev.rpc.get_chassis_inventory()
-````
-
-If the command has parameters, you do the same.  Here is an example retrieving the status of a given interface:
-````
-jeremy@jnpr-dc-fw> show interfaces ge-0/0/0 media | display xml rpc 
-<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
-    <rpc>
-        <get-interface-information>
-                <media/>
-                <interface-name>ge-0/0/0</interface-name>
-        </get-interface-information>
-    </rpc>
-    <cli>
-        <banner></banner>
-    </cli>
-</rpc-reply>
-````
-The equivalent python would look like this:
-````python
-rsp = jdev.rpc.get_interface_information( media=True, interface_name='ge-0/0/0' )
-````
-Here the `media` parameter does not take a value, so you simple assign it to `True`.  Again, for parameter names that contain dashesh, you swap them for underbars; `interface-name` becomes `interface_name`.
-
-## Intro to Resources
-
-## Intro to Utilities
+For more information on RPC metaprogramming, see [here](docs/INTRO_META.md).
 
 # DEPENDENCIES
 
