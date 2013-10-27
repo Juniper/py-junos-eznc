@@ -33,7 +33,23 @@ For a quick intro on using RPC metaprogramming, see [here](docs/INTRO_META.md).
 
 # INSTALLATION
 
-See [here](INSTALL.md) for installation instructions.
+I am currently in the process of building a "proper" setup.py file.  In the meantime, please bear with me.
+
+To install this module, you will first need to download and install the [ncclient](https://github.com/juniper/ncclient) module from the Juniper github repo directly.  Follow the instructions there for details.
+
+Once you've done that, you can then install this module using:
+
+````shell
+[py-junos-eznc] python setup.py install
+````
+
+Once you've done that you should be able to verify the installation via the python shell:
+
+````python
+import jnpr.eznc
+
+print jnpr.eznc.VERSION
+````
 
 ## QUICK EXAMPLES
 
@@ -50,9 +66,9 @@ from jnpr.eznc.resources.srx import ZoneAddrBook
 jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
-# bind an AddrBook class to this Netconf instance.  this
-# will create an instance of the AddrBook automatically
-# and create an attribute called 'ab' on the Netconf instance
+# bind a ZoneAddrBook resource manager to this Netconf instance.
+# you get to chose the attribute name, in this example, we will
+# use the attribute 'ab'.
 
 jdev.bind( ab=ZoneAddrBook )
 
@@ -60,20 +76,20 @@ jdev.bind( ab=ZoneAddrBook )
 # this will load the contents of the address book from the
 # Junos SRX device
 
-this_ab = jdev.ab["TRUST"]
+trust_ab = jdev.ab["TRUST"]
 
 # an address book manages two resources, the list of address 
 # items, and the list of address-sets.  You can see what 
 # a specific resource manages by looking at the :manages:
 # property
 
-pprint( this_ab.manages )
+pprint( trust_ab.manages )
 #>>> ['addr', 'set']
 
 # lets add a new address item called 'JEREMY-HOST' with
 # and IP address of '192.168.1.1'
 
-jeremy = this_ab.addr['JEREMY-HOST']
+jeremy = trust_ab.addr['JEREMY-HOST']
 
 # does this address item already exist?  all resources
 # have a property called :exists: that returns True or False
