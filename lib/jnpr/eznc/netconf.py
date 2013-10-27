@@ -14,6 +14,7 @@ import jinja2
 from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
 from .resources import Resource 
+from .facts import *
 
 DEFAULT_TEMPLATE_PATH = '.'
 
@@ -99,6 +100,30 @@ class Netconf(object):
     self._logfile = value
     return self._logfile
 
+  ### ---------------------------------------------------------------------------
+  ### property: facts
+  ### ---------------------------------------------------------------------------
+
+  @property
+  def facts(self):
+    return self._facts
+
+  @facts.setter
+  def facts(self, value):
+    raise RuntimeError("facts is read-only!")
+
+  ### ---------------------------------------------------------------------------
+  ### property: manages
+  ### ---------------------------------------------------------------------------
+
+  @property
+  def manages(self):
+    """
+    returns a list of Resource Managers/Utilities attached to this isinstance
+    using the :bind(): method
+    """
+    return self._manages
+  
   ##### -----------------------------------------------------------------------
   ##### CONSTRUCTOR
   ##### -----------------------------------------------------------------------
@@ -121,6 +146,7 @@ class Netconf(object):
     self._conn = None
     self._j2ldr = _Jinja2ldr
     self._manages = []
+    self._facts = {}
 
     # public attributes
 
@@ -142,6 +168,8 @@ class Netconf(object):
       hostkey_verify=False )
 
     self.connected = True
+
+    self.facts_refresh()
 
   def close( self ):
     """
@@ -255,7 +283,15 @@ class Netconf(object):
       self.__dict__[name] = new_inst
       self._manages.append( name )
 
-  @property
-  def manages(self):
-    return self._manages
 
+  ### ---------------------------------------------------------------------------
+  ### facts
+  ### ---------------------------------------------------------------------------    
+
+  def facts_refresh(self):
+    """
+    reload the facts from the Junos device into :facts: property
+    """
+    for gather in FACT_LIST:
+      gather(self, self._facts)
+      

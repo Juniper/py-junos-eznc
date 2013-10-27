@@ -133,6 +133,7 @@ class ConfigUtils(object):
     try:
       self._junos.rpc.unlock_configuration()
     except Exception as err:
+      # :err: is from ncclient
       raise UnlockError(rsp = JXML.remove_namespaces(err.xml))
 
     return True
