@@ -52,6 +52,46 @@ print jnpr.eznc.VERSION
 
 ## QUICK EXAMPLES
 
+### FACTS
+
+Each managed Junos/NETCONF instance maintains a dictionary of "facts".  These facts are loaded when your program opens a connetion to the device.  Facts are generally static pieces of information, such as the software version or serial-number.  
+
+The following example simply dumps the facts to the screen:
+
+````python
+from pprint import pprint
+from jnpr.eznc import Netconf
+
+jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev.open()
+
+pprint(jdev.facts)
+#>>> {'RE0': {'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+#>>>          'model': 'JUNOSV-FIREFLY RE',
+#>>>          'status': 'Testing',
+#>>>          'up_time': '2 days, 3 hours, 33 minutes, 50 seconds'},
+#>>>  'domain': 'wfs.com',
+#>>>  'fqdn': 'jnpr-dc-fw.wfs.com',
+#>>>  'hardwaremodel': 'JUNOSV-FIREFLY',
+#>>>  'hostname': 'jnpr-dc-fw',
+#>>>  'ifd_style': 'CLASSIC',
+#>>>  'personality': 'SRX_BRANCH',
+#>>>  'serialnumber': 'cf2eaceba2b7',
+#>>>  'switch_style': 'NONE',
+#>>>  'version': '12.1X44-D10.4',
+#>>>  'virtual': True}
+
+jdev.close()
+````
+
+If you need to refresh the facts for any reason, you can invoke the `facts_refresh()` method on the Netconf instance, as illustrated:
+
+````python
+jdev.facts_refresh()
+````
+
+_NOTE: Presently all fact retrieval functions are defined in the `facts` directory of this module.  In future versions of this code, you will be able to add your own facts in arbitrary locations._
+
 ### Resource Abstrations
 
 The following code example illustrates how to use the SRX "ZoneAddrBook" resource to add a new address item to a zone's address book.
