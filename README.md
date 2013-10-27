@@ -12,18 +12,17 @@ Resources are defined as elements of the Junos configuration that you want to ma
 
 Resources can be Junos product family specifc.  Security Zones, for example, would be found only on SRX products.
 
-For the catalog of Resources provided by this module, see [here](docs/RESOURCE_CATALOG.md).
-
 For a quick intro on using Resources, see [here](docs/INTRO_RESOURCES.md).
 
+For the catalog of Resources provided by this module, see [here](docs/RESOURCE_CATALOG.md).
 
 #### Utility Libraries
 
 An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  Examples of these libraries include: filesystem, routing-engine, and config.  The config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
 
-For the catalog of Utility libraries provided by this module, see [here](docs/UTILS_CATALOG.md).
-
 For a quick intro on using utility libraries, see [here](docs/INTRO_UTILS.md).
+
+For the catalog of Utility libraries provided by this module, see [here](docs/UTILS_CATALOG.md).
 
 #### RPC Metaprogramming 
 
