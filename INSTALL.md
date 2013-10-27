@@ -1,3 +1,20 @@
 ### Installation
 
-If you'd like to hack on this code or try it out, you will need to install the [ncclient](https://github.com/juniper/ncclient) module from the Juniper github repo directly.  You will then need to install this module and source the `env-setup.sh` file.  This will set your `PYTHONPATH` variable so it picks up the local module.
+I am currently in the process of building a "proper" setup.py file.  In the meantime, please bear with me.
+
+To install this module, you will first need to download and install the [ncclient](https://github.com/juniper/ncclient) module from the Juniper github repo directly.  Follow the instructions there for details.
+
+Once you've done that, you can then install this module using:
+
+````shell
+[py-junos-eznc] python setup.py install
+````
+
+Once you've done that you should be able to verify the installation via the python shell:
+
+````python
+import jnpr.eznc
+
+print jnpr.eznc.VERSION
+````
+
