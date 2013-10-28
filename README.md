@@ -1,16 +1,16 @@
 # ABOUT
 
-STATUS: ___WORK IN PROGRESS - UNDER ACTIVE DEVELOPMENT___
+STATUS: ___WORK IN PROGRESS - ETA FOR "EARLY ADOPTER" RELEASE IS 01-NOV-2013___
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  This module is not specifically tied to any version of Junos or any Junos product family. This goal of this module is to provide a general purpose set of utilities and resources.  The module has been designed so that future contributors can easily "plug-in" thier extensions.  This module should work with __ALL__ Junos based products.  
+A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  
+
+This module is not specifically tied to any version of Junos or any Junos product family. It provides a general purpose set of utilities and resources abstrations.  It has been designed so that future contributors can easily "plug-in" thier extensions. 
 
 There are three basic "layers" to this module: Resources, Utilities, and RPC Metaprogramming
 
-#### Managing Resources as Abstractions
+#### Managing Resources Abstractions
 
-Resources are defined as elements of the Junos configuration that you want to manage as discrete items.  For example, a SRX security zone has an address-book, that it turn contains a list of address items and a list of address-sets.  The purpose of the resource abstraction is to enable the programmer to manage these items as simple Python objects, and not requiring kownledge of the underlying Junos/XML. 
-
-Resources can be Junos product family specifc.  Security Zones, for example, would be found only on SRX products.
+Resources are defined as elements of the Junos configuration that you want to manage as discrete items.  For example, a SRX security zone has an address-book, that it turn contains a list of address items and a list of address-sets.  The purpose of the resource abstraction is to enable the programmer to manage these items as simple Python objects, and not requiring kownledge of the underlying Junos/XML.  Resources can be Junos product family specifc.  Security Zones, for example, would be found only on SRX products.
 
 For a quick intro on using Resources, see [here](docs/INTRO_RESOURCES.md).
 
@@ -18,7 +18,7 @@ For the catalog of Resources provided by this module, see [here](docs/RESOURCE_C
 
 #### Utility Libraries
 
-An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  Examples of these libraries include: filesystem, routing-engine, and config.  The config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
+An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  The ConfigUtils library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
 
 For a quick intro on using utility libraries, see [here](docs/INTRO_UTILS.md).
 
