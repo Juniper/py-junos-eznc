@@ -100,11 +100,59 @@ class ConfigUtils(object):
   ### helper on loading configs
   ### -------------------------------------------------------------------------
 
-  def load(self):
+  def load(self, *vargs, **kvargs):
     """
     loads configuration into the device
+
+    vargs (optional)
+      is the content to load, as it would be provided to the 
+      Netconf.rpc.load_config() method.  if the contents is
+      a string, then you must specify kvargs['format']
+
+    kvargs['path'] 
+      path to file of configuration.  the path extension will be used
+      to determine the format of the contents.
+        ['conf','text','txt'] is curly-text-style
+        ['set'] is set-style
+        ['xml'] is XML
+      the format can specific set by using kvarg['format']
+
+    kvargs['format']
+      determines the format of the contents.  options are
+      ['xml','set','text'] for XML/etree, set-style, curly-brace-style
+
+    kvargs['template_path']
+      path to a jinja2 template file.  used in conjection with the
+      kvargs['template_vars'] option, this will perform a templating
+      render and then load the result.  The template extension will
+      be used to determine the format-style of the contents, or you 
+      can override using kvargs['format']
+
+    kvargs['template']
+      jinja2 Template.  same description as kvargs['template_path'],
+      except this option you provide the actual Template, rather than
+      a path to the template file
+
+    kvargs['template_vars']
+      used in conjection with the other template options.  this option
+      contains a dictionary of variables to render into the template
     """
-    raise RuntimeError("need to implement!")
+    rpc_xattrs = {'format':'xml'}      # junos attributes, default to XML
+    rpc_contents = None
+
+    if 'format' in kvargs:
+      if kvargs['format'] == 'set': 
+        rpc_xattrs['action'] = 'set'
+        kvargs['format'] = 'text'
+      rpc_xattrs['format'] = kvargs['format']
+
+    if len(vargs):
+      # caller is providing the content directly.
+      rpc_contents = vargs[0]
+      if isinstance(rpc_contents,str) and not 'format' in kvargs:
+        raise RuntimeError("You must define the format of the contents")
+
+    return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
 
   ### -------------------------------------------------------------------------
   ### config exclusive

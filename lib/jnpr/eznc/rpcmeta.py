@@ -39,16 +39,31 @@ class _RpcMetaExec(object):
   ##### load_config
   ##### -----------------------------------------------------------------------
 
-  def load_config( self, config_xml, options=None ):
+  def load_config( self, contents, **options ):
     """
-      loads :config_xml: onto the Junos device.
+    loads :contents: onto the Junos device, does not commit the change.
 
-      :options: is a dict, creates attributes for the RPC
+    :options: is a dictionary of XML attributes to set within the
+    <load-configuration> RPC.  The :contents: are interpreted
+    by the :options: as follows:
+
+      format='text' and action='set', then :contents: is a string
+      containing a series of "set" commands
+
+      format='text', then :contents: is a string containing Junos
+      configuration in curly-brace/text format
+
+      <otherwise> :contents: is XML structure
     """
-    rpc = E('load-configuration')
-    etree.SubElement(rpc, 'configuration').append( config_xml )
-    if len(options): 
-      for k,v in options.items(): rpc.attrib[k] = v
+    rpc = E('load-configuration', options)
+
+    if ('action' in options) and (options['action'] == 'set'):
+      rpc.append(E('configuration-set', contents ))
+    elif ('format' in options) and (options['format'] == 'text'):
+      rpc.append(E('configuration-text', contents ))
+    else:
+      # otherwise, it's just XML Element
+      etree.SubElement(rpc,'configuration').append( contents )
 
     return self._junos.execute( rpc )
 

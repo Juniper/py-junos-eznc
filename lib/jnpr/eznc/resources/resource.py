@@ -517,8 +517,7 @@ class Resource(object):
     top_xml = xml.getroottree().getroot()
 
     try:
-      attrs = dict(action='replace')
-      result = self._junos.rpc.load_config( top_xml, attrs )
+      result = self._junos.rpc.load_config( top_xml, action='replace' )
     except Exception as err:
       # see if this is OK or just a warning
       if len(err.rsp.xpath('.//error-severity[. = "error"]')):

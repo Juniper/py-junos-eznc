@@ -15,10 +15,10 @@ login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)
 jdev.open()
 
-jdev.ez( cu=ConfigUtils )
-jdev.ez( apps=ApplicationSet )
+jdev.bind( cu=ConfigUtils )
+jdev.bind( apps=ApplicationSet )
 
-r = jdev.ez.apps['WWSS-A2A-WEB-INTRA']
+r = jdev.apps['WWSS-A2A-WEB-INTRA']
 
 # print the contents of the object
 pp(r)
@@ -58,7 +58,7 @@ r['app_list'].append("TCP-21")
 r.write()
 
 # show the diff
-print jdev.ez.cu.diff()
+print jdev.cu.diff()
 
 # [edit applications application-set WWSS-A2A-WEB-INTRA]
 #      application TCP-9171 { ... }
@@ -67,4 +67,5 @@ print jdev.ez.cu.diff()
 # -    application TCP-9162;
 
 # you can rollback the changes:
-# jdev.ez.cu.rollback()
+print "rolling back changes ..."
+jdev.cu.rollback()
