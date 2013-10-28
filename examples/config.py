@@ -16,16 +16,6 @@ jdev.open()
 
 jdev.bind( cu=ConfigUtils )
 
-# make changes using the 'set' style
-
-print "Making changes using 'set' style ... "
-set_commands = """
-set system host-name jeremy
-set system domain-name jeremy.com
-"""
-
-rsp = jdev.cu.load( set_commands, format='set' )
-
 def show_diff_and_rollback():
   # dump the diff:
   print jdev.cu.diff()
@@ -37,9 +27,14 @@ def show_diff_and_rollback():
   print "Rolling back...."
   jdev.cu.rollback()
 
-show_diff_and_rollback()
+set_commands = """
+set system host-name jeremy
+set system domain-name jeremy.com
+"""
 
-print "Making changes using 'curly-text' style ..."
+print "Making changes using 'set' style ... "
+rsp = jdev.cu.load( set_commands, format='set' )
+show_diff_and_rollback()
 
 # make changes using the 'text-curly' style
 conf_change = """
@@ -49,5 +44,11 @@ system {
 }
 """
 
+print "Making changes using 'curly-text' style ..."
 rsp = jdev.cu.load( conf_change, format='text')
+show_diff_and_rollback()
+
+print "Loading config from file ..."
+# now load something from a file:
+rsp = jdev.cu.load( path="config-example.conf" )
 show_diff_and_rollback()

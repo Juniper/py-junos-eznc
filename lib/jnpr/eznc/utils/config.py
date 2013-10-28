@@ -1,4 +1,9 @@
 # utils/config.py
+import pdb
+import os
+
+# 3rd-party modules
+from lxml import etree
 
 # package modules
 from ..exception import *
@@ -100,14 +105,27 @@ class ConfigUtils(object):
   ### helper on loading configs
   ### -------------------------------------------------------------------------
 
+  def _lformat_byext( self, path ):
+    ext = os.path.splitext(path)[1]
+    if ext == '.xml': return 'xml'
+    if ext in ['.conf','.text','.txt']: return 'text'
+    if ext in ['.set']: return 'set'
+    raise ValueError("Unknown file contents from extension: %s" % ext)
+
+  def _lset_format(self, kvargs, rpc_xattrs):
+    # when format is given, setup the xml attrs appropriately
+    if kvargs['format'] == 'set': 
+      rpc_xattrs['action'] = 'set'
+      kvargs['format'] = 'text'      
+    rpc_xattrs['format'] = kvargs['format']         
+
   def load(self, *vargs, **kvargs):
     """
     loads configuration into the device
 
     vargs (optional)
-      is the content to load, as it would be provided to the 
-      Netconf.rpc.load_config() method.  if the contents is
-      a string, then you must specify kvargs['format']
+      is the content to load.  if the contents is a string, then you 
+      must specify kvargs['format'].   
 
     kvargs['path'] 
       path to file of configuration.  the path extension will be used
@@ -140,17 +158,25 @@ class ConfigUtils(object):
     rpc_xattrs = {'format':'xml'}      # junos attributes, default to XML
     rpc_contents = None
 
-    if 'format' in kvargs:
-      if kvargs['format'] == 'set': 
-        rpc_xattrs['action'] = 'set'
-        kvargs['format'] = 'text'
-      rpc_xattrs['format'] = kvargs['format']
+    if 'format' in kvargs: 
+      self._lset_format(kvargs, rpc_xattrs)
 
     if len(vargs):
       # caller is providing the content directly.
       rpc_contents = vargs[0]
       if isinstance(rpc_contents,str) and not 'format' in kvargs:
         raise RuntimeError("You must define the format of the contents")
+
+    if 'path' in kvargs:
+      # then this is a static-config file.  load that as our rpc_contents
+      rpc_contents = open(kvargs['path']).read()
+      if 'format' not in kvargs:
+        # we use the extension to determine the format
+        kvargs['format'] = self._lformat_byext(kvargs['path'])
+        self._lset_format( kvargs, rpc_xattrs )      
+      if rpc_xattrs['format'] == 'xml':
+        # covert the XML string into XML structure
+        rpc_contents = etree.XML(rpc_contents)
 
     return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
 
