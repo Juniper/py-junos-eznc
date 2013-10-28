@@ -1,5 +1,40 @@
-import pdb
 import re
+import pdb
+
+class version_info(object):  
+  def __init__(self, verstr ):
+    """verstr - version string"""
+    m1 = re.match('(.*)([RBIXS])(.*)', verstr)
+    self.type = m1.group(2)
+    self.major = tuple(map(int,m1.group(1).split('.'))) # creates tuyple
+    after_type = m1.group(3).split('.')
+    self.minor = after_type[0]
+    self.build = int(after_type[1])
+    self.as_tuple = self.major + tuple([self.minor, self.build])
+
+  def __repr__(self):
+    retstr = "junos.versino_info(major={major}, type={type}, minor={minor}, build={build})".format(
+      major=self.major,
+      type=self.type,
+      minor=self.minor,
+      build=self.build
+    )
+    return retstr
+
+  def _cmp_tuple(self,other):
+    if self.type == 'I': raise RuntimeError("Internal Build")
+    bylen = {
+      2: (self.as_tuple[0:2]),
+      4: self.as_tuple
+    }
+    return bylen[len(other)]
+
+  def __lt__(self,other): return self._cmp_tuple(other) < other
+  def __le__(self,other): return self._cmp_tuple(other) <= other
+  def __gt__(self,other): return self._cmp_tuple(other) > other
+  def __ge__(self,other): return self._cmp_tuple(other) >= other
+  def __eq__(self,other): return self._cmp_tuple(other) == other  
+  def __ne__(self,other): return self._cmp_tuple(other) != other
 
 def software_version(junos, facts):
   
@@ -39,3 +74,5 @@ def software_version(junos, facts):
   else:
     pkginfo = x_swver.xpath('.//package-information[name = "junos"]/comment')[0].text    
     facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
+
+  facts['version_info'] = version_info(facts['version'])
