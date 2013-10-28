@@ -1,6 +1,3 @@
-
-import pdb
-
 # stdlib
 import os
 from inspect import isclass
@@ -16,16 +13,33 @@ from .exception import RpcError
 from .resources import Resource 
 from .facts import *
 
-DEFAULT_TEMPLATE_PATH = '.'
+_MODULEPATH = os.path.dirname(__file__)
 
-class _RelativeEnvironment(jinja2.Environment):
-  """Override join_path() to enable relative template paths."""
-  def join_path(self, template, parent):
-      pdb.set_trace()
-      return os.path.join(os.path.dirname(parent), template)
+class _MyTemplateLoader(jinja2.BaseLoader):
+  """
+  Create a jinja2 template loader class that can be used to 
+  load templates from all over the filesystem, but defaults
+  to the CWD and the 'templates' directory of the module
+  """
+  def __init__(self):
+    self.paths = ['.', os.path.join(_MODULEPATH,'templates')]
 
-_Jinja2ldr = _RelativeEnvironment(
-  loader=jinja2.FileSystemLoader( DEFAULT_TEMPLATE_PATH.split(':') ))
+  def get_source(self, environment, template):
+
+    def _in_path(dir): 
+      return os.path.exists(os.path.join(dir,template))
+
+    path = filter(_in_path, self.paths)
+    if not path:
+      raise jinja2.TemplateNotFound(template)
+
+    path = os.path.join(path[0],template)
+    mtime = os.path.getmtime(path)
+    with file(path) as f:
+      source = f.read().decode('utf-8')
+    return source, path, lambda: mtime == os.path.getmtime(path)    
+
+_Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 class Netconf(object):
 
@@ -250,7 +264,7 @@ class Netconf(object):
   ### Template: retrieves a Jinja2 template
   ### ---------------------------------------------------------------------------
 
-  def Template( self, filename, parent=None, globals=None ):
+  def Template( self, filename, parent=None, gvars=None ):
 
     # templates are XML files, and the assumption here is that they will
     # have .xml extensions.  if the caller doesn't include any extension
@@ -259,7 +273,7 @@ class Netconf(object):
     if os.path.splitext(filename)[1] == '':
       filename = filename + '.xml'
 
-    return self._j2ldr.get_template( filename, parent, globals )
+    return self._j2ldr.get_template( filename, parent, gvars )
 
   ### ---------------------------------------------------------------------------
   ### dealing with bind aspects

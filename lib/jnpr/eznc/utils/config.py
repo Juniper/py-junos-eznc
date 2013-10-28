@@ -105,19 +105,7 @@ class ConfigUtils(object):
   ### helper on loading configs
   ### -------------------------------------------------------------------------
 
-  def _lformat_byext( self, path ):
-    ext = os.path.splitext(path)[1]
-    if ext == '.xml': return 'xml'
-    if ext in ['.conf','.text','.txt']: return 'text'
-    if ext in ['.set']: return 'set'
-    raise ValueError("Unknown file contents from extension: %s" % ext)
-
-  def _lset_format(self, kvargs, rpc_xattrs):
-    # when format is given, setup the xml attrs appropriately
-    if kvargs['format'] == 'set': 
-      rpc_xattrs['action'] = 'set'
-      kvargs['format'] = 'text'      
-    rpc_xattrs['format'] = kvargs['format']         
+  
 
   def load(self, *vargs, **kvargs):
     """
@@ -158,27 +146,96 @@ class ConfigUtils(object):
     rpc_xattrs = {'format':'xml'}      # junos attributes, default to XML
     rpc_contents = None
 
+    ### -----------------------------------------------------------------------
+    ### private helpers ...
+
+    def _lformat_byext( path ):
+      """ determine the format style from the file extension """
+      ext = os.path.splitext(path)[1]
+      if ext == '.xml': return 'xml'
+      if ext in ['.conf','.text','.txt']: return 'text'
+      if ext in ['.set']: return 'set'
+      raise ValueError("Unknown file contents from extension: %s" % ext)
+
+    def _lset_format(kvargs, rpc_xattrs):
+      """ setup the kvargs/rpc_xattrs """
+      # when format is given, setup the xml attrs appropriately
+      if kvargs['format'] == 'set': 
+        rpc_xattrs['action'] = 'set'
+        kvargs['format'] = 'text'      
+      rpc_xattrs['format'] = kvargs['format']       
+
+    def _lset_fromfile(path):
+      """ setup the kvargs/rpc_xattrs based on path """
+      if 'format' not in kvargs:
+        # we use the extension to determine the format
+        kvargs['format'] = _lformat_byext(path)
+        _lset_format( kvargs, rpc_xattrs )      
+      if rpc_xattrs['format'] == 'xml':
+        # covert the XML string into XML structure
+        rpc_contents = etree.XML(rpc_contents)
+
+    ### end-of: private helpers
+    ### -----------------------------------------------------------------------
+
     if 'format' in kvargs: 
-      self._lset_format(kvargs, rpc_xattrs)
+      _lset_format(kvargs, rpc_xattrs)
+
+    ### -----------------------------------------------------------------------
+    ### if contents are provided as vargs[0], then process that as XML or str
+    ### -----------------------------------------------------------------------
 
     if len(vargs):
       # caller is providing the content directly.
       rpc_contents = vargs[0]
       if isinstance(rpc_contents,str) and not 'format' in kvargs:
         raise RuntimeError("You must define the format of the contents")
+      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+
+      #~! UNREACHABLE !~#
+
+    ### -----------------------------------------------------------------------
+    ### if path is provided, use the static-config file
+    ### -----------------------------------------------------------------------
 
     if 'path' in kvargs:
       # then this is a static-config file.  load that as our rpc_contents
       rpc_contents = open(kvargs['path']).read()
-      if 'format' not in kvargs:
-        # we use the extension to determine the format
-        kvargs['format'] = self._lformat_byext(kvargs['path'])
-        self._lset_format( kvargs, rpc_xattrs )      
-      if rpc_xattrs['format'] == 'xml':
-        # covert the XML string into XML structure
-        rpc_contents = etree.XML(rpc_contents)
+      _lset_fromfile(kvargs['path'])
+      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
 
-    return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+      #~! UNREACHABLE !~#
+
+    ### -----------------------------------------------------------------------
+    ### if template_path is provided, then jinja2 load the template, and
+    ### render the results.  if template_vars are provided, use those
+    ### in the render process.
+    ### -----------------------------------------------------------------------
+
+    if 'template_path' in kvargs:
+      path = kvargs['template_path']
+      template = self._junos.Template(path)
+      rpc_contents = template.render(kvargs.get('template_vars', {}))
+      _lset_fromfile(path)
+      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+
+      #~! UNREACHABLE !~#
+
+    ### -----------------------------------------------------------------------
+    ### if template is provided, then this is a pre-loaded jinja2 Template
+    ### object.  Use the template.filename to determine the format style
+    ### -----------------------------------------------------------------------
+
+    if 'template' in kvargs:
+      template = kvargs['template']
+      path = template.filename
+      rpc_contents = template.render(kvargs.get('template_vars', {}))
+      _lset_fromfile(path)
+      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+
+      #~! UNREACHABLE !~#
+
+    raise RuntimeError("Unhandled load request")
 
   ### -------------------------------------------------------------------------
   ### config exclusive

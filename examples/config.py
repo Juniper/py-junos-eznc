@@ -52,3 +52,13 @@ print "Loading config from file ..."
 # now load something from a file:
 rsp = jdev.cu.load( path="config-example.conf" )
 show_diff_and_rollback()
+
+print "Loading from template file ..."
+tvars = dict(host_name='jeremy', domain_name='jeremy.net')
+rsp = jdev.cu.load( template_path="config-example-template.conf", template_vars=tvars )
+show_diff_and_rollback()
+
+print "Loading from Template ..."
+template = jdev.Template('config-example-template.conf')
+rsp = jdev.cu.load( template=template, template_vars=tvars )
+show_diff_and_rollback()
