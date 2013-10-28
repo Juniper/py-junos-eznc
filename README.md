@@ -79,9 +79,24 @@ pprint(jdev.facts)
 #>>>  'serialnumber': 'cf2eaceba2b7',
 #>>>  'switch_style': 'NONE',
 #>>>  'version': '12.1X44-D10.4',
+#>>>  'version_info': junos.versino_info(major=(12, 1), type=X, minor=44-D10, build=4),
 #>>>  'virtual': True}
 
 jdev.close()
+````
+
+The 'version_info' can be used for version comparions.  For example:
+````python
+
+# Is this version earlier than "11.4"?
+
+jdev.facts['version_info'] < (11,4)
+#>>> False
+
+# Is this version later that "12.0"?
+
+jdev.facts['version_info'] > (12,0)
+#>>> True
 ````
 
 If you need to refresh the facts for any reason, you can invoke the `facts_refresh()` method on the Netconf instance, as illustrated:
