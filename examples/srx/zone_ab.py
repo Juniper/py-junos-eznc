@@ -4,27 +4,24 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from exampleutils import *
-from jnpr.eznc import Netconf as Junos
+from jnpr.eznc import Netconf 
 from jnpr.eznc.resources.srx import ZoneAddrBook
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.utils import Config
 
-login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
-
-jdev = Junos(**login)
+jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.ez( cu=ConfigUtils )     
-jdev.ez( ab=ZoneAddrBook )
+jdev.bind( cu=Config )     
+jdev.bind( ab=ZoneAddrBook )
 
-cu = jdev.ez.cu
-ab = jdev.ez.ab
+cu = jdev.cu
+ab = jdev.ab
 
 z_name = "OUTSIDE-DC-ST1"
-zone = jdev.ez.ab[z_name]
+zone = ab[z_name]
 
 def test_addr():
   # grab the first address book entry, and change it's
@@ -34,16 +31,20 @@ def test_addr():
   addr = zone.addr[first_addr]
   addr(ip_prefix="1.1.1.1")
   addr.write()
-
   print cu.diff()
   cu.rollback()
-
-  return addr
 
 def test_addr_set():
   # let's take a look at the address-set
   first_set = zone['$sets'][0]
   adr_set = zone.set[first_set]
-  return adr_set
+  adr_set.propcopy('addr_list')
+  adr_set['addr_list'].pop()
+  adr_set.write()
+  print cu.diff()
+  cu.rollback()
+
+test_addr()
+test_addr_set()
 
 

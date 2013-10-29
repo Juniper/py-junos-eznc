@@ -4,30 +4,27 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from exampleutils import *
-from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc import Netconf
+from jnpr.eznc.utils import Config
 from jnpr.eznc.resources.srx import PolicyContext
 
-login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
-
-jdev = Junos(**login)
+jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.ez( cu=ConfigUtils )   
+jdev.bind( cu=Config )   
 
 # now add the PolicyContext, this will auto-load the associated
 # rules resource class PolicyRule
 
-jdev.ez( pc=PolicyContext )
+jdev.bind( pc=PolicyContext )
 
 # now access a policy PolicyContext.  The policy context is
 # tuple (from-zone-name, to-zone-name)
 
-r = jdev.ez.pc[("OUTSIDE-DC-ST1","PII-SOX-DC-ST1")]
+r = jdev.pc[("OUTSIDE-DC-ST1","PII-SOX-DC-ST1")]
 
 # dump the contents:
 pp(r)
@@ -82,7 +79,7 @@ rule['match_apps'].append(" TCP-99")
 rule.write()
 
 # display the changes:
-print jdev.ez.cu.diff()
+print jdev.cu.diff()
 
 # [edit security policies from-zone OUTSIDE-DC-ST1 to-zone PII-SOX-DC-ST1 policy 655 match]
 # -      application TCP-3389;
@@ -94,7 +91,7 @@ rule.reorder(before="105")
 
 # and see the change:
 
-print jdev.ez.cu.diff()
+print jdev.cu.diff()
 # [edit security policies from-zone OUTSIDE-DC-ST1 to-zone PII-SOX-DC-ST1]
 #      policy 103 { ... }
 # !     policy 655 { ... }
@@ -102,5 +99,5 @@ print jdev.ez.cu.diff()
 # now discard these changes
 
 print "Rolling back ..."
-jdev.ez.cu.rollback()
+jdev.cu.rollback()
 

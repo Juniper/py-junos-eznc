@@ -11,7 +11,11 @@ from .nat_proxy_arp import NatProxyArp
 
 class NatStaticRule( Resource ):
   """
-  [edit security nat static rule-set <ruleset-name> rule <rule-name>]
+  [edit security nat static rule-set <ruleset_name> rule <rule_name>]
+
+  Resource namevar:
+    rule_name, string.  The ruleset_name is obtained from the resource parent.
+
   """
 
   PROPERTIES = [
@@ -53,14 +57,24 @@ class NatStaticRule( Resource ):
 
   def _xml_hook_build_change_begin( self, xml ):
     if 'nat_port' not in self.should:
+      # if 'nat_port' is not provided, then default to the 
+      # 'match_dst_port' value
       self.should['nat_port'] = self['match_dst_port']
 
     if 'match_dst_addr' in self.should and 'proxy_interface' in self.has:
+      # if we are changing the 'match_dst_addr' and we also have a proxy
+      # interface, then we need to update the proxy_interface value to the
+      # new match_dst_addr value.  start by deleting the existing one:
+      namevar = (self['proxy_interface'], self.has['match_dst_addr'])
+      NatProxyArp(self._junos, namevar).delete()
+
       if 'proxy_interface' not in self.should:
-        # force a flush on the proxy-interface.  this is really a hack
-        # @@@ need to fix this correctly
+        # if the 'proxy_interface' value was not actually changed, then
+        # simply copy the current one into :should:  this will trigger
+        # the flush/create in the property-writer below
         self.should['proxy_interface'] = self.has['proxy_interface']
 
+    # build up some XML that will be used by the property-writers
     match = E('static-nat-rule-match')
     xml.append(match)
     then = E.then(E('static-nat', E('prefix')))
@@ -89,9 +103,12 @@ class NatStaticRule( Resource ):
     return True
 
   def _xml_change_proxy_interface(self, xml):
-    proxy_arp = NatProxyArp(self._junos, self.should['proxy_interface'], P=self)
-    proxy_arp['ip_prefix'] = self['match_dst_addr']
-    proxy_arp.write()
+    # this is really always going to be a 'create a new resource'.  if the
+    # caller is changing the 'match_dst_addr' value, then the existing entry
+    # will be removed by the "hook" function.
+    namevar = (self.should['proxy_interface'], self['match_dst_addr'])
+    parp = NatProxyArp(self._junos, namevar)
+    parp.write(touch=True)
     return True
 
   ##### -----------------------------------------------------------------------

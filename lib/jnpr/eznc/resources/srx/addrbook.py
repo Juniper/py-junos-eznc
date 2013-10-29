@@ -24,14 +24,15 @@ class ZoneAddrBook( Resource ):
     '$sets'           # read-only address-sets
   ]
   def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-
-    if True == self.is_mgr: 
+    if name is None:
+      # resource-manager
+      Resource.__init__( self, junos, name, **kvargs )
       return
 
     self.addr = ZoneAddrBookAddr( junos, parent=self )
     self.set = ZoneAddrBookSet( junos, parent=self )
     self._manages = ['addr','set']
+    Resource.__init__( self, junos, name, **kvargs )
 
   def _xml_at_top(self):
     return E.security(E.zones(

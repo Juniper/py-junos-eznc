@@ -9,7 +9,7 @@ from lxml import etree
 from ..exception import *
 from .. import jxml as JXML
 
-class ConfigUtils(object):
+class Config(object):
 
   def __init__(self, junos):
     self._junos = junos

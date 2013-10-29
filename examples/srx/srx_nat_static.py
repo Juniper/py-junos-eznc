@@ -3,10 +3,9 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
 from jnpr.eznc.resources.srx.nat import NatStaticRuleSet
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.utils import Config
 
 # create a junos device and open a connection
 
@@ -15,7 +14,7 @@ jdev.open()
 
 # now metabind some resource managers
 
-jdev.bind( cu=ConfigUtils )
+jdev.bind( cu=Config )
 jdev.bind( nat=NatStaticRuleSet )
 
 # create a static NAT ruleset called 'outside' and map it on the from-zone "OUTSIDE-DC-STD1"

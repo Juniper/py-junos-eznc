@@ -82,7 +82,7 @@ class NatSrcRule( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    self._rlist = self.P['rules']
+    self._rlist = self.P['$rules']
 
   def _r_catalog(self):
     get = E.security(E.nat(E.source(

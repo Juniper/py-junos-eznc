@@ -1,5 +1,8 @@
+import pdb
+
 # stdlib
 import os
+import types
 from inspect import isclass
 
 # 3rd-party packages
@@ -67,7 +70,7 @@ class Netconf(object):
     """
       The login user accessing the Junos device
     """
-    return self._user
+    return self._auth_user
 
   ### ---------------------------------------------------------------------------
   ### property: password
@@ -144,12 +147,14 @@ class Netconf(object):
 
   def __init__(self, *vargs, **kvargs):
     """
-      Required args:
-        user: login user name
-        host: host-name or ip-addr
+    kvargs['user'] -- REQUIRED
+      login user-name
 
-      Optional args:
-        password: login user password; if not provided, assumes ssh-keys
+    kvargs['password'] -- OPTIONAL
+      login password.  if not provided, assumed ssh-keys are enforced
+
+    kvargs['host'] -- REQUIRED
+      device hostname or ipaddress
     """
 
     # private attributes
@@ -173,8 +178,8 @@ class Netconf(object):
 
   def open( self, *vargs, **kvargs ):
     """
-      opens a connection to the device using existing login/auth 
-      information.  No additional options are supported; at this time
+    opens a connection to the device using existing login/auth 
+    information.  No additional options are supported; at this time
     """
     # open connection using ncclient transport
     self._conn =  netconf_ssh.connect( host=self.hostname,
@@ -182,31 +187,29 @@ class Netconf(object):
       hostkey_verify=False )
 
     self.connected = True
-
     self.facts_refresh()
 
   def close( self ):
     """
-      closes the connection to the device
+    closes the connection to the device
     """
     self._conn.close_session()
     self.connected = False
 
   def execute( self, rpc_cmd, **kvargs ):
     """
-      executes the :rpc_cmd: and returns the result.  the result is an
-      lxml Element following <rpc-reply> unless the caller specifies
-      a :to_py: param
+    Executes an XML RPC and returns results as either XML or native python
 
-      :rpc_cmd: can either be an Element or xml-as-string.  In either case
+    rpc_cmd 
+      can either be an XML Element or xml-as-string.  In either case
       the command starts with the specific command element, i.e., not the
       <rpc> element itself
 
-      KNOWN options for kvargs:
-        :to_py: is a caller provided function that takes the response and
-                will convert the results to native python types.  all kvargs
-                will be passed to this function as well in the form:
-                :to_py:( self, rpc_rsp_e, **kvargs )
+    kvargs['to_py']
+      is a caller provided function that takes the response and
+      will convert the results to native python types.  all kvargs
+      will be passed to this function as well in the form:
+      :to_py:( self, rpc_rsp, **kvargs )
     """
 
     if isinstance(rpc_cmd, str):
@@ -252,6 +255,23 @@ class Netconf(object):
   ### ---------------------------------------------------------------------------
 
   def cli(self, command, format='text'):
+    """
+    Executes the CLI command and returns the CLI text output by default.
+
+    command
+      The CLI command to execute, e.g. "show version"
+
+    format
+      The return format, by default is text.  You can optionally select
+      'xml' to return the XML structure.
+
+    Notes:
+      You can also use this method to obtain the XML RPC command for a given
+      CLI command by using the pipe filter "| display xml rpc".  When you do
+      this, the return value is the XML RPC command.  For example if you
+      provide as the command "show version | display xml rpc", you will get
+      back the XML Element <get-software-information>
+    """
     try:
       rsp = self.rpc.cli( command, format)
       if rsp.tag == 'output': return rsp.text
@@ -279,15 +299,33 @@ class Netconf(object):
   ### dealing with bind aspects
   ### ---------------------------------------------------------------------------
 
-  def bind(self, **kvargs):
+  def bind(self, *vargs, **kvargs):
     """
-    Entry point for adding things to the :Binder:
+    Used to attach things to this Netconf instance
+
+    vargs
+      a list of functions that will get bound as instance methods to 
+      this Netconf instance
+
+    kvargs
+      name/class pairs that will create resource-managers bound as 
+      instance attributes to this Netconf instance
     """
+    if len(vargs):
+      for fn in vargs:
+        # check for name clashes before binding
+        if hasattr(self, fn.__name__):
+          raise ValueError("request attribute name %s already exists" % fn.__name__)
+      for fn in vargs:
+        # bind as instance method, majik.
+        self.__dict__[fn.__name__] = types.MethodType(fn,self,self.__class__)
+      return
 
     # first verify that the names do not conflict with
     # existing object attribute names
 
     for name in kvargs.keys():
+      # check for name-clashes before binding
       if hasattr(self, name):
         raise ValueError("requested attribute name %s already exists" % name)
 
@@ -296,7 +334,6 @@ class Netconf(object):
       new_inst = thing(self)
       self.__dict__[name] = new_inst
       self._manages.append( name )
-
 
   ### ---------------------------------------------------------------------------
   ### facts

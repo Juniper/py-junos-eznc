@@ -22,12 +22,14 @@ class NatSrcRuleSet( Resource ):
   ]
 
   def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-    if True == self.is_mgr: 
+    if name is None:
+      # resource-manager
+      Resource.__init__( self, junos, name, **kvargs )
       return
 
     self.rule = NatSrcRule( junos, M=self, parent=self )
     self._manages = ['rule']
+    Resource.__init__( self, junos, name, **kvargs )
 
   ##### -----------------------------------------------------------------------
   ##### XML read

@@ -18,27 +18,18 @@ class Application( Resource ):
     'timeout'
   ]
 
-  def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
+  ##### -----------------------------------------------------------------------
+  ##### XML readers
+  ##### -----------------------------------------------------------------------
 
   def _xml_at_top(self):
-    """
-      configuration to retrieve resource
-    """
     return E.applications(E.application(E.name( self._name )))
 
   def _xml_at_res(self, xml):
-    """
-      return Element at resource
-    """
     return xml.find('.//application')
 
   def _xml_to_py(self, has_xml, has_py ):
-    """
-      converts Junos XML to native Python
-    """
-    Resource.set_ea_status( has_xml, has_py )
-
+    Resource._r_has_xml_status( has_xml, has_py )
     Resource.copyifexists( has_xml, 'description', has_py )
     has_py['protocol'] = has_xml.find('protocol').text
     has_py['dest_port'] = has_xml.find('destination-port').text
@@ -66,3 +57,13 @@ class Application( Resource ):
   def _xml_change_timeout( self, xml ):
     xml.append(E('inactivity-timeout', str(self['timeout'])))
     return True
+
+  ##### -----------------------------------------------------------------------
+  ##### Manager List, Catalog
+  ##### -----------------------------------------------------------------------
+
+  def _r_list(self):
+    raise RuntimeError("Need to implement!")
+
+  def _r_catalog(self):
+    raise RuntimeError("Need to implement!")    

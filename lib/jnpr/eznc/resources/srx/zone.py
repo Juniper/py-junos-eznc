@@ -29,12 +29,15 @@ class Zone( HostInbSvcMixin, Resource ):
     '$ifs_list'
   ]
   def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-    if True == self.is_mgr: return
+    if name is None:
+      # resource-manager
+      Resource.__init__( self, junos, name, **kvargs )
+      return
 
     self.ifs = ZoneInterface( junos, parent=self )
     self.ab = ZoneAddrBook( junos, name, parent=self )
     self._manages = ['ifs','ab']
+    Resource.__init__( self, junos, name, **kvargs )
 
   ##### -----------------------------------------------------------------------
   ##### XML reading

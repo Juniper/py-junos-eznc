@@ -20,21 +20,45 @@ class Resource(object):
     P_JUNOS_ACTIVE
   ]
 
-  def __init__(self, junos, namekey=None, **kvargs ):
+  def __init__(self, junos, namevar=None, **kvargs ):
+    """
+    Resource or Resource-Manager constructor.  All managed resources
+    and resource-managers inherit from this class.
+
+    junos
+      Instance of Netconf, this is bound to the Resource for 
+      device access
+
+    namevar
+      If not None, identifies a specific resource by 'name'.  The
+      format of the name is resource dependent.  Most resources take
+      a single string name, while others use tuples for compound names.
+      refer to each resource for the 'namevar' definition
+
+      If namevar is None, then the instance is a Resource-Manager (RM).
+      The RM is then used to select specific resources by name using
+      the __getitem__ overload.
+
+    kvargs['P'] or kvargs['parent']
+      Instance to the resource parent.  This is set when resources have
+      hierarchical relationships, like rules within rulesets
+
+    kvargs['M']
+      Instance to the resource manager.
+    """
     self._junos = junos
-    self._name = namekey
-    self._parent = kvargs.get('parent')
+    self._name = namevar
+    self._parent = kvargs.get('parent') or kvargs.get('P')
     self._opts = kvargs
     self._manager = kvargs.get('M')
 
-    # resource manager list and catalog
-    self._rlist = []
-    self._rcatalog = {}
-
-    # if we are creating the manager, i.e. not a specific named item,
-    # then return now.
-
-    if not namekey: return
+    if not namevar: 
+      # then this is a resource-manager instance. setup the list and
+      # catalog attributes, but do not load them now.  when the caller
+      # invokes the properties, they will auto-load when empty.
+      self._rlist = []
+      self._rcatalog = {}      
+      return
 
     # otherwise, a resource includes public attributes:
 
@@ -43,9 +67,14 @@ class Resource(object):
     if self.__class__ != Resource: 
       self.properties.extend(self.__class__.PROPERTIES)
 
+    # setup resource cache-attributes
+
     self.has = {}
     self.should = {}
     self._is_new = False
+
+    # now load the properties from the device.
+    self.read()
 
   ##### -----------------------------------------------------------------------
   ##### PROPERTIES
@@ -205,19 +234,23 @@ class Resource(object):
   ### write
   ### -------------------------------------------------------------------------
 
-  def write(self):
+  def write(self, **kvargs):
     """
     write resource configuration stored in :should: back to device
+
+    kvargs['touch']
+      if True, then write() will skip the check to see if any
+      items exist in :should:
     """
     if self.is_mgr: raise RuntimeError("Not on a manager!")
 
-    # if there is nothing to write, then return False
-    if not len(self.should): return False
+    if not len(self.should) and 'touch' not in kvargs:
+      return False
 
     # if this resource did not previously exist,
     # then mark it now into :should:
 
-    if not self.should.has_key(P_JUNOS_EXISTS): 
+    if P_JUNOS_EXISTS not in self.should:
       self._r_set_exists( self.should, True )
 
     if self.is_new:
@@ -376,14 +409,17 @@ class Resource(object):
     if self.is_mgr: 
       self._opts['M'] = self
       res = self.__class__( self._junos, namekey, **self._opts )
-      res.read()
       return res
 
-    # if the property is already set in :should:
-    # then return that before returning the value from :has:
+    if namekey in self.should:   
+      return self.should[namekey]
 
-    if self.should.get(namekey): return self.should[namekey]
-    if self.has.get(namekey):    return self.has[namekey]
+    if namekey in self.has:    
+      return self.has[namekey]
+
+    if namekey in self.properties: 
+      # it's a valid property, just not set in the resource
+      return None
 
     raise ValueError("Unknown property request: %s" % namekey)
 
@@ -662,16 +698,6 @@ class Resource(object):
     """
     as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
     as_py[P_JUNOS_EXISTS] = True    
-
-  @classmethod
-  def set_ea_status( klass, as_xml, as_py ):
-    """
-      set the 'exists' and 'active' :has: values
-    """
-    print "~~DEPRECIATED~~[set_ea_status]~~"
-    as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get('inactive') else True
-    as_py[P_JUNOS_EXISTS] = True
-
 
   @classmethod
   def xml_set_or_delete( klass, xml, ele_name, value):

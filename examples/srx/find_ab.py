@@ -6,10 +6,8 @@ from lxml import etree
 import sys
 
 # for the example ...
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
 from jnpr.eznc.resources.srx import Zone, ZoneAddrFinder
-from jnpr.eznc.utils import ConfigUtils
 
 def die(msg):
   print "-" * 50
@@ -23,27 +21,21 @@ except:
  die("You must specify the ip-addr to locate")
 
 
-login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
-
-jdev = Junos(**login)
+jdev = Junos(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.ez( cu=ConfigUtils )     
-jdev.ez( zone=Zone )
+jdev.bind( zone=Zone )
 
-cu = jdev.ez.cu
-zone_mgr = jdev.ez.zone
+zone_mgr = jdev.zone
 
 z_name = zone_mgr.list[0]
 zone = zone_mgr[z_name]
 
 print "Reading zone address book ..."
 zone.ab.read()
-
-
 
 print "Searching for address: " + find_addr
 f = ZoneAddrFinder(zone)

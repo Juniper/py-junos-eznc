@@ -3,10 +3,9 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
 from jnpr.eznc.resources.srx.nat import NatSrcPool, NatSrcRuleSet
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.utils import Config
 
 # create a junos device and open a connection
 
@@ -16,16 +15,16 @@ jdev.open()
 
 # now metabind some resource managers
 
-jdev.ez( cu=ConfigUtils )
-jdev.ez( np=NatSrcPool )
-jdev.ez( nr=NatSrcRuleSet )
+jdev.bind( cu=Config )
+jdev.bind( np=NatSrcPool )
+jdev.bind( nr=NatSrcRuleSet )
 
 # create a NAT source pool called 'POOL-A' with
 # an address range from 198.18.0.1/32 to 198.18.0.10/32
 # here showing the technique to change property values
 # by making a "call" into the resource
 
-r = jdev.ez.np["POOL-A"]
+r = jdev.np["POOL-A"]
 r(addr_from="198.18.0.1", addr_to="198.18.0.10")
 r.write()
 
@@ -36,7 +35,7 @@ r.write()
 # here showing the technique to change property
 #v values by accessing resource like a dictionary
 
-rs = jdev.ez.nr["OUTBOUND_NAT"]
+rs = jdev.nr["OUTBOUND_NAT"]
 rs['zone_from'] = 'JMET-DC-ST1'
 rs['zone_to'] = 'OUTSIDE-DC-ST1'
 rs.write()
@@ -52,7 +51,7 @@ rule.write()
 
 # now let's take a look at the config diff:
 
-print jdev.ez.cu.diff()
+print jdev.cu.diff()
 # [edit security]
 # +   nat {
 # +       source {
@@ -82,4 +81,4 @@ print jdev.ez.cu.diff()
 # +   }
 
 print "rollback config to discard changes ..."
-jdev.ez.cu.rollback()
+#jdev.cu.rollback()

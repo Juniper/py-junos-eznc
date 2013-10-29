@@ -1,11 +1,9 @@
 import pdb
-
 from pprint import pprint as pp 
 
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
 from jnpr.eznc.resources.srx import ApplicationSet
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.utils import Config
 from jnpr.eznc.exception import *
 
 from lxml.builder import E 
@@ -15,7 +13,7 @@ login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)
 jdev.open()
 
-jdev.bind( cu=ConfigUtils )
+jdev.bind( cu=Config )
 jdev.bind( apps=ApplicationSet )
 
 r = jdev.apps['WWSS-A2A-WEB-INTRA']

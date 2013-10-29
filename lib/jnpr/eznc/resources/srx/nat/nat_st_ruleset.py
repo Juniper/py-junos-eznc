@@ -22,11 +22,14 @@ class NatStaticRuleSet( Resource ):
   ]
 
   def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-    if self.is_mgr is True: return
+    if name is None:
+      # resource-manager
+      Resource.__init__( self, junos, name, **kvargs )
+      return
 
     self.rule = NatStaticRule( junos, M=self, parent=self )
     self._manages = ['rule']
+    Resource.__init__( self, junos, name, **kvargs )
 
   ##### -----------------------------------------------------------------------
   ##### XML read

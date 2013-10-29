@@ -24,14 +24,17 @@ class PolicyContext( Resource ):
   ]
 
   def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-    if True == self.is_mgr: return
+    if name is None:
+      # resource-manager
+      Resource.__init__( self, junos, name, **kvargs )
+      return
 
     # specific instance will manage policy rules    
     self.rule = PolicyRule( junos, M=self, parent=self )
     self._manages = ['rule']    
     self._name_from_zone = name[0]
     self._name_to_zone = name[1]
+    Resource.__init__(self,junos,name,**kvargs)
 
   def _xml_at_top(self):
     return E.security( E.policies(

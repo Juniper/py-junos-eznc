@@ -4,17 +4,22 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.utils import ConfigUtils
 
 login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)
 jdev.open()
 
 def show_sroute(jdev, *vargs, **kvargs):
+  """
+  given a route destination, provide a dictionary of information 
+  about that route that includes the interface and security-zone
 
-  route = kvargs.get('route') or vargs[0][0]
+  kvargs['route'] or vargs[0]
+    the route to lookup
+  """
+
+  route = kvargs.get('route') or vargs[0]
 
   # do a 'show route' to determine the next-hop interface
   # if the route is unknown, then return found=False
@@ -28,7 +33,7 @@ def show_sroute(jdev, *vargs, **kvargs):
   # feed that into a show interface to obtain the
   # security zone
 
-  nh_via = nh_via[0]
+  nh_via = nh_via[0] # first child
   nh_ifs = nh_via.text
   nh_proto = nh_via.xpath('ancestor::rt-entry/protocol-name')[0].text
   dest = nh_via.xpath('ancestor::rt/rt-destination')[0].text
@@ -46,4 +51,16 @@ def show_sroute(jdev, *vargs, **kvargs):
 
   return got
 
-jdev.ez(sroute=show_sroute)
+jdev.bind(show_sroute)
+
+print "now call jdev.show_sroute(...) with the route you want to find"
+
+# >>> jdev.show_sroute("23.171.140.0/24")
+# {'interface': 'ge-0/0/1.371', 'found': True, 
+#  'destination': '23.171.140.0/22', 'protocol': 'Direct', 'zone': 'DEFAULT-PROTECT-DC-ST1'}
+#
+# --or--
+#
+# >>> jdev.show_sroute(route="23.171.140.0/24")
+# {'interface': 'ge-0/0/1.371', 'found': True, 
+#  'destination': '23.171.140.0/22', 'protocol': 'Direct', 'zone': 'DEFAULT-PROTECT-DC-ST1'}

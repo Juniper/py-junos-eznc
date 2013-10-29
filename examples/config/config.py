@@ -4,9 +4,8 @@ from lxml import etree
 from lxml.builder import E 
 
 # for the example ...
-from exampleutils import *
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.utils import ConfigUtils
+from jnpr.eznc.utils import Config
 
 # create a junos device and open a connection
 
@@ -14,7 +13,7 @@ login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)
 jdev.open()
 
-jdev.bind( cu=ConfigUtils )
+jdev.bind( cu=Config )
 
 def show_diff_and_rollback():
   # dump the diff:

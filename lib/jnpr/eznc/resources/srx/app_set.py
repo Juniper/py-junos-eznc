@@ -10,8 +10,7 @@ from ... import jxml as JXML
 
 class ApplicationSet( Resource ):
   """
-    SRX application resource:
-    [edit applications application-set <name>]
+  [edit applications application-set <name>]
   """
 
   PROPERTIES = [
@@ -20,31 +19,17 @@ class ApplicationSet( Resource ):
     'appset_list',  'appset_list_adds', 'appset_list_dels'
   ]
 
-  def __init__(self, junos, name=None, **kvargs ):
-    Resource.__init__( self, junos, name, **kvargs )
-
   def _xml_at_top(self):
-    """
-      configuration to retrieve resource
-    """
     return E.applications(E('application-set', (E.name( self._name ))))
 
   def _xml_at_res(self, xml):
-    """
-      return Element at resource
-    """
     return xml.find('.//application-set')
 
   def _xml_to_py(self, has_xml, has_py ):
-    """
-      converts Junos XML to native Python
-    """
-    Resource.set_ea_status( has_xml, has_py )
-
+    Resource._r_has_xml_status( has_xml, has_py )    
+    Resource.copyifexists( has_xml, 'description', has_py )
     has_py['app_list'] = []
     has_py['appset_list'] = []
-
-    Resource.copyifexists( has_xml, 'description', has_py )
 
     # each of the <application> elements
     for this in has_xml.xpath('application'):
@@ -106,14 +91,12 @@ class ApplicationSet( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-
     got = self._junos.rpc.get_config(
       E.applications(E('application-set', JXML.NAMES_ONLY)))
 
     self._rlist = [ this.text for this in got.xpath('.//name')]
 
   def _r_catalog(self):
-
     got = self._junos.rpc.get_config(
       E.applications(E('application-set')))
 
@@ -122,6 +105,3 @@ class ApplicationSet( Resource ):
       this_py = {}
       self._xml_to_py( this, this_py )
       self._rcatalog[name] = this_py
-
-
-
