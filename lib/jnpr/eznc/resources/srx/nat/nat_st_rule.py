@@ -55,6 +55,12 @@ class NatStaticRule( Resource ):
     if 'nat_port' not in self.should:
       self.should['nat_port'] = self['match_dst_port']
 
+    if 'match_dst_addr' in self.should and 'proxy_interface' in self.has:
+      if 'proxy_interface' not in self.should:
+        # force a flush on the proxy-interface.  this is really a hack
+        # @@@ need to fix this correctly
+        self.should['proxy_interface'] = self.has['proxy_interface']
+
     match = E('static-nat-rule-match')
     xml.append(match)
     then = E.then(E('static-nat', E('prefix')))

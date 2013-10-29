@@ -1,4 +1,3 @@
-
 # 3rd-party modules
 from lxml.builder import E 
 
@@ -38,7 +37,8 @@ class NatProxyArp( Resource ):
 
 
   def _xml_change_ip_prefix(self, xml):
-    xml.append(E('address', JXML.REPLACE, E.name( self.should['ip_prefix'])))
+    xml.attrib['replace'] = 'replace'
+    xml.append(E('address', E.name( self.should['ip_prefix'])))
     return True
 
   ##### -----------------------------------------------------------------------
