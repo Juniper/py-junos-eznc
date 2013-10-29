@@ -1,14 +1,12 @@
 # Using Resources
 
-Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.
+Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.  There are two ways to access a resource: directly or via a resource-manager.  The common approach would be to use a resource-manager, so that topic is discussed first.
 
 ## Resource Managers
 
-To access a resource you must bind a class of that resource to a Netconf instance, and this creates a Resource Manager.
-
 ### Binding a Resource Manager
 
-To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
+To bind a resource manager to a Netconf instance, you use the Netconf.bind() method.  To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
 
 ````python
 from jnpr.eznc.resources.srx import ZoneAddrBook
@@ -55,7 +53,23 @@ jdev.ab.refresh()
 
 ## Resources
 
-A resources is selected from a resource manager using the `[<name>]` mechanism, as previous illustrated.  You manage the specific configuration elements of the resource by reading and writing "properties".  You access these properties using the `[<property-name>]` meachism.  For example, a Zone address-book item has a property called "ip_prefix".  You can read and write the value, as illustrated:
+There are two ways to access a resource.  The common way is by using a resource-manager, and selecting the resource by name using the `[<name>]` mechanism, as previous illustrated.  
+
+Alternatively, you can select a specific resource without using a manager by directly instantiating the resource.  For example, selecting the "TRUST" zone directly, you would do the following:
+
+````python
+from jnpr.eznc import Netconf
+from jnpr.eznc.resources.srx import Zone
+
+jdev = Netconf(user='jeremy',password='jeremy1',host='vsrx_cyan')
+jdev.open()
+
+trust_zone = Zone(jdev, "TRUST")
+
+# now do things with the trust_zone instance ...
+````
+
+You manage the specific configuration elements of the resource by reading and writing "properties".  You access these properties using the `[<property-name>]` meachism.  For example, a Zone address-book item has a property called "ip_prefix".  You can read and write the value, as illustrated:
 
 ````python
 # select the specific address resource called "JEREMY-HOST" in the "TRUST" zone
@@ -71,6 +85,12 @@ print jeremy['ip_prefix']
 jeremy['ip_prefix'] = "192.168.100.1/32"
 
 # write the change to the Junos device
+jeremy.write()
+````
+
+Alternatively you can modify the resource properites using the _call_ mechanism, as illustrated:
+````python
+jeremy(ip_prefix="192.168.100.1/32", description="Jeremy laptop")
 jeremy.write()
 ````
 
