@@ -73,7 +73,9 @@ class ConfigUtils(object):
     try:
       self._junos.rpc.commit_configuration( check=True )
     except Exception as err:
-      return JXML.rpc_error( err.rsp )
+      # :err: is from ncclient, so extract the XML data
+      # and convert into dictionary
+      return JXML.rpc_error( err.xml )
 
     return True
 
