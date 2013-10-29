@@ -16,6 +16,7 @@ class ZoneAddrFinder(object):
       self._results = results
       self.sets = []
 
+    @property
     def lpm(self):
       """
       The longest-prefix-matching address is the last one in the results list.  This 

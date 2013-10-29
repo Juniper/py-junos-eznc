@@ -34,33 +34,24 @@ zone_mgr = jdev.zone
 z_name = zone_mgr.list[0]
 zone = zone_mgr[z_name]
 
-print "Reading zone address book ..."
+print "Reading zone %s address book ..." % z_name
 zone.ab.read()
 
-print "Searching for address: " + find_addr
-f = ZoneAddrFinder(zone)
-r = f.find(find_addr)
+def do_find_addr( find_addr ):
+  print "Searching for address: " + find_addr
+  f = ZoneAddrFinder(zone)
+  r = f.find(find_addr)
 
-print "\nAll items:"
-pp(r.items)
-# ['NET-23.170.40.0/24',
-#  'NET-23.170.40.80/29',
-#  'GCS-ST1-FOOSET-KOFAX',
-#  'DEFAULT-PROTECT-NETS',
-#  'DEFAULT-PROTECT-WINDOWS']
+  print "\nAll items:"
+  pp(r.items)
 
-print "\nJust matching address items:"
-pp(r.addrs)
-# ['NET-23.170.40.0/24', 'NET-23.170.40.80/29']
+  print "\nJust matching address items:"
+  pp(r.addrs)
 
-print "\nJust matching address sets:"
-pp(r.sets)
-# ['GCS-ST1-FOOSET-KOFAX',
-#  'DEFAULT-PROTECT-NETS',
-#  'DEFAULT-PROTECT-WINDOWS']
+  print "\nLongest-Prefix-Match:"
+  pp(r.lpm)
 
+  print "\nJust matching address sets:"
+  pp(r.sets)
 
-
-
-
-
+do_find_addr( find_addr )
