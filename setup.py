@@ -1,12 +1,13 @@
 import os
-from setuptools import setup, find_packages
+import sys
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+sys.path.insert(0,'lib')
+from setuptools import setup, find_packages
+from jnpr.eznc import VERSION
 
 setup(
     name = "junos-eznc",
-    version = "0.0.1",
+    version = VERSION,
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
     description = ( "Making Junos automation via NETCONF 'easy'" ),
