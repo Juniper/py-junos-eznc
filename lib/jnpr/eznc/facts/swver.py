@@ -9,7 +9,7 @@ class version_info(object):
     self.major = tuple(map(int,m1.group(1).split('.'))) # creates tuyple
     after_type = m1.group(3).split('.')
     self.minor = after_type[0]
-    self.build = int(after_type[1])
+    self.build = int(after_type[1]) if self.type != 'I' else after_type[1]
     self.as_tuple = self.major + tuple([self.minor, self.build])
 
   def __repr__(self):

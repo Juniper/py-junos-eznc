@@ -6,7 +6,7 @@ def chassis(junos, facts):
   rsp = junos.rpc.get_chassis_inventory()
   x_ch = rsp.find('chassis')
 
-  facts['hardwaremodel'] = x_ch.find('description').text
+  facts['model'] = x_ch.find('description').text
   facts['serialnumber'] = x_ch.find('serial-number').text
 
   got = junos.rpc.get_config(

@@ -2,7 +2,7 @@ import re
 
 def personality( junos, facts ):
   
-  model = facts['hardwaremodel']
+  model = facts['model']
   examine = model if model != 'Virtual Chassis' else facts['RE0']['model']
         
   if re.match("^(EX)|(QFX)", examine):
@@ -14,7 +14,7 @@ def personality( junos, facts ):
     persona = 'MX'
   elif re.match("SRX(\d){3}", examine):
     persona = 'SRX_BRANCH'
-  elif re.match("junosv-firefly", examine, re.IGNORECASE):
+  elif re.match("firefly", examine, re.IGNORECASE):
     facts['virtual'] = True
     persona = 'SRX_BRANCH'
   elif re.match("SRX(\d){4}", examine):
