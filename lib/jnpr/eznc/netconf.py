@@ -1,3 +1,5 @@
+import pdb
+
 # stdlib
 import os
 import types
@@ -13,6 +15,7 @@ from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
 from .resources import Resource 
 from .facts import *
+from . import jxml as JXML
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -225,7 +228,12 @@ class Netconf(object):
     # will will be raised directly to the caller ... for now ...
     # @@@ need to trap this and re-raise accordingly.
 
-    rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
+    try:
+      rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
+    except Exception as err:
+      # err is an NCError from ncclient
+      rsp = JXML.remove_namespaces( err.xml )
+      raise RpcError(cmd=rpc_cmd_e, rsp=rsp)
 
     # for RPCs that have embedded rpc-errors, need to check for those now
 
