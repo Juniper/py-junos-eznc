@@ -24,9 +24,7 @@ class SharedAddrBookAddr( Resource ):
 
   def _xml_at_top(self):
     xml = self.P._xml_at_top()
-    xml.find('.//address-book').append(
-      E.address(self._name)
-    )
+    xml.find('.//address-book').append(E.address(self._name))
     return xml
 
   ##### -----------------------------------------------------------------------
@@ -54,21 +52,14 @@ class SharedAddrBookAddr( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    The parent keeps a property on this list, so just use it, yo!
-    """
+    # The parent keeps a property on this list, so just use it, yo!
     self._rlist = self.P['$addrs']
 
   def _r_catalog(self):
-    raise RuntimeError("FIX ME!")
-    get = E.security(E.zones(
-      E('security-zone', 
-        E.name(self.P._name),
-        E('address-book', E('address'))
-      )
-    ))
+    get = self.P._xml_at_top()
+    get.find('.//address-book').append(E('address'))
     got = self.J.rpc.get_config( get )
     for addr in got.xpath('.//address-book/address'):
       name = addr.find('name').text
       self._rcatalog[name] = {}
-      self._xml_to_py( addr, self._rcatalog[name] )      
+      self._xml_to_py( addr, self._rcatalog[name] )

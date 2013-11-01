@@ -7,7 +7,7 @@ import sys
 
 # for the example ...
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.resources.srx import Zone, ZoneAddrFinder
+from jnpr.eznc.resources.srx import SharedAddrBook, AddrBookFinder
 
 def die(msg):
   print "-" * 50
@@ -15,31 +15,35 @@ def die(msg):
   print "-" * 50
   exit(1)
 
+def show_help():
+  print "%s <ab_name> <ip_addr>" % sys.argv[0]
+  exit(1)
+
+if len(sys.argv) != 3:
+  show_help()
+
 try:  
-  find_addr = sys.argv[1]
+  book_name = sys.argv[1]
+  find_addr = sys.argv[2]
 except:
  die("You must specify the ip-addr to locate")
 
 
-jdev = Junos(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev = Junos(user='jeremy', host='vsrx_x46', password='jeremy1')
 jdev.open()
 
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.bind( zone=Zone )
+jdev.bind( ab=SharedAddrBook )
 
-zone_mgr = jdev.zone
-
-z_name = zone_mgr.list[0]
-zone = zone_mgr[z_name]
-
-print "Reading zone %s address book ..." % z_name
-zone.ab.read()
+book = jdev.ab[book_name]
+if not book.exists:
+  die("Book %s does not exist on this device!" % book_name )
 
 def do_find_addr( find_addr ):
   print "Searching for address: " + find_addr
-  f = ZoneAddrFinder(zone)
+  f = AddrBookFinder(book)
   r = f.find(find_addr)
 
   print "\nAll items:"
@@ -53,5 +57,6 @@ def do_find_addr( find_addr ):
 
   print "\nJust matching address sets:"
   pp(r.sets)
+  return r
 
-do_find_addr( find_addr )
+results = do_find_addr( find_addr )

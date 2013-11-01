@@ -15,7 +15,7 @@ def personality( junos, facts ):
     persona = 'MX'
   elif re.match("SRX\s?(\d){3}", examine):
     persona = 'SRX_BRANCH'
-  elif re.match("firefly", examine, re.IGNORECASE):
+  elif re.search("firefly", examine, re.IGNORECASE):
     facts['virtual'] = True
     persona = 'SRX_BRANCH'
   elif re.match("SRX\s?(\d){4}", examine):

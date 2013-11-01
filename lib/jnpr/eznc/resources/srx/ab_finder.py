@@ -1,77 +1,72 @@
 # resources/srx/addrbook_finder.py
 import netaddr
 
-from .zone import Zone
-from .addrbook import ZoneAddrBook
+#from .zone import Zone
+#from .addrbook import ZoneAddrBook
 
-class ZoneAddrFinder(object):
+class AddrBookFinderResults(object):
+  """
+  Helper-class to hold the results of a :ZoneAddrFind.find(): invocation
+  """
+  def __init__(self, ab, find, results):
+    self._ab = ab
+    self._find = find
+    self._results = results
+    self.sets = []
 
-  class ZoneAddrFinderResults(object):
+  @property
+  def lpm(self):
     """
-    Helper-class to hold the results of a :ZoneAddrFind.find(): invocation
+    The longest-prefix-matching address is the last one in the results list.  This 
+    fact is a result of the :ZoneAddrFinder.find(): sorted call.
     """
-    def __init__(self, ab, find, results):
-      self._ab = ab
-      self._find = find
-      self._results = results
-      self.sets = []
+    return self._results[-1][0]
 
-    @property
-    def lpm(self):
-      """
-      The longest-prefix-matching address is the last one in the results list.  This 
-      fact is a result of the :ZoneAddrFinder.find(): sorted call.
-      """
-      return self._results[-1][0]
+  @property
+  def items(self):
+    """
+    Return a list of the matching address items and sets
+    """
+    return self.addrs + self.sets
 
-    @property
-    def items(self):
-      """
-      Return a list of the matching address items and sets
-      """
-      return self.addrs + self.sets
+  @property
+  def addrs(self):
+    """
+    Return a list of the matching address items
+    """
+    # return a list of names
+    return [x[0] for x in self._results]
 
-    @property
-    def addrs(self):
-      """
-      Return a list of the matching address items
-      """
-      # return a list of names
-      return [x[0] for x in self._results]
+  @property
+  def matching(self):
+    """
+    Returns the string value of the original querried address presented to
+    the find() method
+    """
+    return self._find
 
-    @property
-    def matching(self):
-      """
-      Returns the string value of the original querried address presented to
-      :ZoneAddrFinder.find():
-      """
-      return self._find
+  def __repr__(self):
+    """
+    Provides the matching value and the zone name associated with this results
+    """
+    return "%s(%s in %s)" % (self.__class__.__name__, self._find, self._ab.name)
 
-    def __repr__(self):
-      """
-      Provides the matching value and the zone name associated with this results
-      """
-      return "%s(%s in %s)" % (self.__class__.__name__, self._find, self._ab.name)
+class AddrBookFinder(object):
 
   ### -------------------------------------------------------------------------
   ### CONSTRUCTOR
   ### -------------------------------------------------------------------------
 
-  def __init__(self, given):
+  def __init__(self, addr_book):
     """
-    Constructor takes either a :Zone: or :ZoneAdressBook: objet
+    addr_book
+      Either a ZoneAddrBook or SharedAddrBook instance
     """
-    if isinstance(given,Zone):
-      self._ab = given.ab
-    elif isinstance(given,ZoneAddrBook):
-      self._ab = given
-    else:
-      raise ValueError("given is of unknown type, must be Zone or ZoneAddressBook")
-
+    self._ab = addr_book
     self._index = None
 
   def __repr__(self):
-    return "ZoneAddrFinder(%s)" % self._ab.name
+    return "AddrBookFinder(%s)" % self._ab.name
 
   def compile(self):
     """
@@ -105,7 +100,7 @@ class ZoneAddrFinder(object):
     # now that we have some matching entries, we should find which
     # address-set items uses the items
 
-    results = ZoneAddrFinder.ZoneAddrFinderResults(self._ab, addr, r)
+    results = AddrBookFinderResults(self._ab, addr, r)
     if sets is True: results.sets = self.find_sets( results )
 
     # return the results object
@@ -113,7 +108,7 @@ class ZoneAddrFinder(object):
 
   def find_sets(self, r):
     """
-    Given a :ZoneAddrFinderResults: object, which contains the list of matching
+    Given a :AddrBookFinderResults: object, which contains the list of matching
     address items, locate the list of address-set objects that use those items
     """
     catalog = self._ab.set.catalog

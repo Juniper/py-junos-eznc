@@ -58,28 +58,15 @@ class SharedAddrBookSet( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    list of address-book address-sets.  this list is managed by the
-    parent object, so just use that, yo!
-    """
+    # list of address-book address-sets.  this list is managed by the
+    # parent object, so just use that, yo!    
     self._rlist = self.P['$sets']
 
   def _r_catalog(self):
-    """
-    catalog each of the address-sets
-    """
-    raise RuntimeError("FIX ME!")
-    get = E.security(E.zones(
-      E('security-zone', 
-        E.name(self.P._name),
-        E('address-book', 
-          E('address-set')
-        )
-      )
-    ))
+    get = self.P._xml_at_top()
+    get.find('.//address-book').append(E('address-set'))    
     got = self.J.rpc.get_config(get)
     for adrset in got.xpath('.//address-set'):
       name = adrset.find('name').text
       self._rcatalog[name] = {}
       self._xml_to_py( adrset, self._rcatalog[name] )
-

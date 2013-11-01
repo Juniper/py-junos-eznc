@@ -5,4 +5,4 @@ from .policy_rule import PolicyRule
 from .zone import Zone
 from .shared_ab import SharedAddrBook
 from .zone_ab import ZoneAddrBook
-#from .addrbook_finder import ZoneAddrFinder
+from .ab_finder import AddrBookFinder
