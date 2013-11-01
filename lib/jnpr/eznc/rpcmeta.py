@@ -20,7 +20,7 @@ class _RpcMetaExec(object):
   ##### get_config
   ##### -----------------------------------------------------------------------
 
-  def get_config( self, filter_xml=None, options=None ):
+  def get_config( self, filter_xml=None, options={} ):
     """
       retrieve configuration from the Junos device  
 
@@ -29,7 +29,7 @@ class _RpcMetaExec(object):
 
       :options: is a dict, creates attributes for the RPC
     """
-    rpc = E('get-configuration')
+    rpc = E('get-configuration', options)
     if filter_xml != None:
       etree.SubElement(rpc, 'configuration').append( filter_xml )
     return self._junos.execute( rpc )

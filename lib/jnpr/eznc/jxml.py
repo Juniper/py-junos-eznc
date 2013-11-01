@@ -31,6 +31,11 @@ AFTER = {'insert': 'after'}
 
 NAMES_ONLY = {'recurse': "false"}
 
+# for <get-configuration>, attributes to retrieve from apply-groups
+INHERIT = {'inherit': 'inherit'}
+INHERIT_GROUPS = {'inherit':'inherit', 'groups':'groups'}
+INHERIT_DEFAULTS = {'inherit':'defaults', 'groups':'groups'}
+
 def remove_namespaces( xml ):
   for elem in xml.getiterator():
     i = elem.tag.find('}')

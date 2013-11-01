@@ -1,4 +1,5 @@
 from lxml.builder import E
+from ..import jxml as JXML
 
 def chassis(junos, facts):
   """
@@ -13,7 +14,8 @@ def chassis(junos, facts):
     E.system(
       E('host-name'),
       E('domain-name')
-    )
+    ),
+    JXML.INHERIT
   )
 
   hostname = got.find('.//host-name')
