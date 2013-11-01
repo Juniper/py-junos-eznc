@@ -261,6 +261,7 @@ For more information on RPC metaprogramming, see [here](docs/INTRO_META.md).
   * [ncclient](https://github.com/juniper/ncclient) (_Juniper edition_) - NETCONF base library
   * [lxml](http://lxml.de/index.html) - XML programming library
   * [jinja2](http://jinja.pocoo.org/docs) - templating library
+  * [netaddr](https://pypi.python.org/pypi/netaddr/) - Network IPv4,IPv6 address library
 
 # LICENSE
 
