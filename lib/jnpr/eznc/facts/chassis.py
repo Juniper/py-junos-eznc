@@ -2,10 +2,29 @@ from lxml.builder import E
 from ..import jxml as JXML
 
 def chassis(junos, facts):
-  """
+  """ 
+  Obtain basic chassis facts:
+    model : product model
+    2RE : True if in a multi-routing-engine system
+    serialnumber : serial number 
+    hostname : host 
+    fqdn : fully-qualified domain-name
+    domain : domain-name
+
+  NOTES:
+  (1) if in a 2RE system, this routine will only load the information
+      from the first chassis item.
+  (2) hostname, domain, and fqdn are retrieved from configuration data;
+      inherited configs are checked.
   """
   rsp = junos.rpc.get_chassis_inventory()
-  x_ch = rsp.find('chassis')
+
+  if rsp.tag == 'multi-routing-engine-results':
+    facts['2RE'] = True
+    x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
+  else:
+    facts['2RE'] = False
+    x_ch = rsp.find('chassis')
 
   facts['model'] = x_ch.find('description').text
   facts['serialnumber'] = x_ch.find('serial-number').text

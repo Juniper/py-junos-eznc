@@ -8,7 +8,19 @@ class version_info(object):
     self.major = tuple(map(int,m1.group(1).split('.'))) # creates tuyple
     after_type = m1.group(3).split('.')
     self.minor = after_type[0]
-    self.build = int(after_type[1]) if self.type != 'I' else after_type[1]
+    if 'X' == self.type:
+      # assumes form similar to "45-D10", so extract the bits from this
+      xm = re.match("(\d+)-(\w)(.*)", self.minor)
+      self.minor = tuple([int(xm.group(1)), xm.group(2), int(xm.group(3))])
+      if len(after_type) < 2:
+        self.build = None
+      else:
+        self.build = int(after_type[1])
+    elif 'I' == self.type:
+      self.build = after_type[1]        # assumes that we have a build/spin, but not numeric
+    else:
+      self.build = int(after_type[1])   # assumes numeric build/spin
+
     self.as_tuple = self.major + tuple([self.minor, self.build])
 
   def __repr__(self):

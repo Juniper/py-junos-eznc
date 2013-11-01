@@ -7,7 +7,7 @@ from lxml import etree
 from jnpr.eznc import Netconf
 from jnpr.eznc.exception import *
 
-jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev = Netconf(user='jeremy', host='localhost', port=9001)
 jdev.open()
 
 ## now play around with jdev object ...
