@@ -3,5 +3,6 @@ from .app_set import ApplicationSet
 from .policy import PolicyContext
 from .policy_rule import PolicyRule
 from .zone import Zone
-from .addrbook import ZoneAddrBook
-from .addrbook_finder import ZoneAddrFinder
+from .shared_ab import SharedAddrBook
+from .zone_ab import ZoneAddrBook
+#from .addrbook_finder import ZoneAddrFinder

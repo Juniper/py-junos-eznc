@@ -155,11 +155,15 @@ class Netconf(object):
 
     kvargs['host'] -- REQUIRED
       device hostname or ipaddress
+
+    kvargs['port'] -- OPTIONAL
+      device login port (defaults to 830)
     """
 
     # private attributes
 
     self._hostname = kvargs['host']
+    self._port = kvargs.get('port', 830)
     self._auth_user = kvargs['user']
     self._auth_password = kvargs.get('password')
     self._conn = None
@@ -182,7 +186,7 @@ class Netconf(object):
     information.  No additional options are supported; at this time
     """
     # open connection using ncclient transport
-    self._conn =  netconf_ssh.connect( host=self.hostname,
+    self._conn =  netconf_ssh.connect( host=self.hostname, port=self._port,
       username=self._auth_user, password=self._auth_password,
       hostkey_verify=False )
 

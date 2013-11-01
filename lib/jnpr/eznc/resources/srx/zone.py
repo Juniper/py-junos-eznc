@@ -8,7 +8,7 @@ from lxml.builder import E
 # module packages
 from ... import jxml as JXML
 from .. import Resource
-from .addrbook import ZoneAddrBook
+from .zone_ab import ZoneAddrBook
 from .zone_ifs import ZoneInterface, HostInbSvcMixin
 
 class Zone( HostInbSvcMixin, Resource ):
