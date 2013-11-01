@@ -14,8 +14,6 @@
 
 """
 
-import pdb
-
 DEL = {'delete': 'delete'}              # Junos XML resource delete
 REN = {'rename': 'rename'}              # Junos XML resource rename
 ACTIVATE = {'active': 'active'}         # activate resource

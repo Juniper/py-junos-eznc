@@ -1,5 +1,4 @@
 import re
-import pdb
 
 class version_info(object):  
   def __init__(self, verstr ):

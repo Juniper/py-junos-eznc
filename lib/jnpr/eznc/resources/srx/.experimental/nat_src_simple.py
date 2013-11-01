@@ -1,6 +1,3 @@
-
-import pdb
-
 # local modules
 from .. import TemplateResource
 from ..resource import P_JUNOS_ACTIVE, P_JUNOS_EXISTS

@@ -1,5 +1,4 @@
 import re
-import pdb
 
 def personality( junos, facts ):
   

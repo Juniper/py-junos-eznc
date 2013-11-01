@@ -1,5 +1,4 @@
 # debuggin
-import pdb
 from lxml import etree
 
 # 3rd-party modules
