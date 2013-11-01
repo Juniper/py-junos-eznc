@@ -1,6 +1,6 @@
 # Exceptions
 
-Exceptions are defined in the `exceptions.py` file.  You can use these:
+Specific Exception names are imported as shown:
 ```python
 from jnpr.eznc.exception import *
 ````
@@ -11,7 +11,7 @@ The following Exceptions are defined:
   * LockError - resulting from issuing a lock-configuration operation
   * UnlockError - resulting from issuing an unlock-configuration command
 
-The RpcError provides the following property attributes:
+All exceptions provide the following property attributes:
   * cmd - XML RPC command, lxml Element
   * rsp - XML RPC response, lxml Element
 
