@@ -255,6 +255,25 @@ jdev.close()
 ````
 For more information on RPC metaprogramming, see [here](docs/INTRO_META.md).
 
+# EXCEPTION HANDLING
+
+This module defines a set of Exceptions, and these are defined in the `exceptions.py` file.  The general use-case looks something like this:
+````python
+try:
+   jdev.rpc.i_did_something_goofy()
+except Exception as err:
+   # err has attributes you can look at to coorelate the command (cmd)
+   # and response (rsp).  Both of these are lxml Elements.  So here
+   # is an example of just dumping the error to the screen
+   
+   etree.dump( err.rsp )
+````
+
+There are specific Exceptions for configuration changes: locking, loading changes, unlocking, and commiting.  
+
+For more details on exceptions, see [here](docs/EXCEPTIONS.md).
+
+
 # DEPENDENCIES
 
   * [Python 2.7](http://www.python.org/) - could work with others, but I haven't tested it
