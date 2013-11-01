@@ -12,12 +12,12 @@ def personality( junos, facts ):
   elif re.match("^vMX", examine):
     facts['virtual'] = true
     persona = 'MX'
-  elif re.match("SRX\s?(\d){3}", examine):
+  elif re.match("SRX\s?(\d){3}$", examine):
     persona = 'SRX_BRANCH'
   elif re.search("firefly", examine, re.IGNORECASE):
     facts['virtual'] = True
     persona = 'SRX_BRANCH'
-  elif re.match("SRX\s?(\d){4}", examine):
+  elif re.match("SRX\s?(\d){4}$", examine):
     persona = 'SRX_HIGHEND'
   else:
     raise RuntimeError("Unknown device persona: %s" % examine)
