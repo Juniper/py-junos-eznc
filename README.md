@@ -72,7 +72,7 @@ pprint(jdev.facts)
 #>>>          'up_time': '2 days, 3 hours, 33 minutes, 50 seconds'},
 #>>>  'domain': 'wfs.com',
 #>>>  'fqdn': 'jnpr-dc-fw.wfs.com',
-#>>>  'hardwaremodel': 'JUNOSV-FIREFLY',
+#>>>  'model': 'FIREFLY-PERIMETER',
 #>>>  'hostname': 'jnpr-dc-fw',
 #>>>  'ifd_style': 'CLASSIC',
 #>>>  'personality': 'SRX_BRANCH',
