@@ -22,6 +22,6 @@ setup(
         "ncclient"
     ],
     dependency_links=[
-        "https://github.com/Juniper/ncclient.git"
+        "pip+https://github.com/Juniper/ncclient.git"
     ]
 )
