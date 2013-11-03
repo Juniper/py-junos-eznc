@@ -3,11 +3,10 @@ import sys
 
 sys.path.insert(0,'lib')
 from setuptools import setup, find_packages
-from jnpr.eznc import VERSION
 
 setup(
     name = "junos-eznc",
-    version = VERSION,
+    version = "0.0.1",
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
     description = ( "Making Junos automation via NETCONF 'easy'" ),
@@ -18,10 +17,10 @@ setup(
     packages=find_packages('lib'),
     install_requires=[
         "Paramiko",
-        "netaddr".
+        "netaddr",
         "lxml",
         "jinja2"
-    ]
+    ],
     dependency_links=[
         "git+https://github.com/Juniper/ncclient.git"
     ]
