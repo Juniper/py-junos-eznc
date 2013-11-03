@@ -1,7 +1,5 @@
 # ABOUT
 
-STATUS: ___WORK IN PROGRESS - ETA FOR "EARLY ADOPTER" RELEASE IS 01-NOV-2013___
-
 A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  
 
 This module is not specifically tied to any version of Junos or any Junos product family. It provides a general purpose set of utilities and resources abstrations.  It has been designed so that future contributors can easily "plug-in" thier extensions. 
