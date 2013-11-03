@@ -12,8 +12,17 @@ setup(
     author_email = "jschulman@juniper.net",
     description = ( "Making Junos automation via NETCONF 'easy'" ),
     license = "BSD-2",
-    keywords = "Junos NETCONF",
+    keywords = "Junos NETCONF networking automation",
     url = "http://www.github.com/jeremyschulman/py-junos-eznc",
+    package_dir={'':'lib'},    
     packages=find_packages('lib'),
-    package_dir={'':'lib'}
+    install_requires=[
+        "Paramiko",
+        "netaddr".
+        "lxml",
+        "jinja2"
+    ]
+    dependency_links=[
+        "git+https://github.com/Juniper/ncclient.git"
+    ]
 )
