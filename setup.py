@@ -19,9 +19,5 @@ setup(
         "netaddr",
         "lxml",
         "jinja2",
-        "ncclient"
     ],
-    dependency_links=[
-        "git+https://github.com/Juniper/ncclient.git"
-    ]
 )
