@@ -16,10 +16,10 @@ setup(
     package_dir={'':'lib'},    
     packages=find_packages('lib'),
     install_requires=[
-        "Paramiko",
         "netaddr",
         "lxml",
-        "jinja2"
+        "jinja2",
+        
     ],
     dependency_links=[
         "git+https://github.com/Juniper/ncclient.git"
