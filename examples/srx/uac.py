@@ -1,3 +1,7 @@
+import pdb
+
+from itertools import groupby
+
 class UAC(object):
   """
   SRX UAC helper utilities
@@ -35,8 +39,7 @@ class UAC(object):
     """ return a list of flow sessions based on the source ip_prefix """
     flows = self._flows_by_srcprefix(ip_prefix)
     return [ flow.find('session-identifier').text.strip() 
-      for flow in flows.xpath('flow-session')
-    ]
+      for flow in flows.xpath('flow-session') ]
 
   def user_flowids(self, user_name ):
     """ return a list of session flow IDs based on a user-name """
@@ -46,7 +49,12 @@ class UAC(object):
   def user_byteusage( self, user_name ):
     user = self.user( user_name )
     flows = self._flows_by_srcprefix(user['ipaddr'])
-    return reduce(lambda x,y: x+int(y.find('byte-cnt').text),flows.xpath('.//flow-information'),0)
+    sflows = sorted(flows.xpath('.//flow-information'),key=lambda x:x.find('direction').text.strip())
+    sums = {}
+    for fdir,gdata in groupby(sflows, lambda x: x.find('direction').text.strip()):
+      sums[fdir] = sum([int(f.find('byte-cnt').text) for f in gdata])
+    sums['total'] = sum(sums.values())
+    return sums
 
   def kill_user_flows(self, user_name):
     """ kill flow sessions based on a user-name """
