@@ -28,4 +28,5 @@ dev.open()
 dev.bind(uac=UAC)
 dev.uac.get_users()
 
-print dev.uac.user_names
+print "UAC users:"
+print dev.uac.usernames
