@@ -5,15 +5,10 @@ from lxml import etree
 
 # junos "ez" module
 from jnpr.eznc import Netconf
-from jnpr.eznc.exception import *
+from jnpr.eznc.utils import Config
+from jnpr.eznc.resources.srx import *
 
-jdev = Netconf(user='jeremy', host='vsrx_cyan')
-jdev.open()
+dev = Netconf(user='jeremy', host='jnpr-dc-fw').open()
 
 ## now play around with jdev object ...
-
-
-
-
-
-
+## when done, you should issue dev.close()
