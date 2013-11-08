@@ -1,14 +1,18 @@
+import pdb
 
 # 3rd-party modules
 from lxml.builder import E 
 
 # module packages
-from ..resource import Resource
+from .. import Resource
+from ... import jxml as JXML
 
 class Application( Resource ):
   """
-    SRX application resource:
-    [edit applications application <name>]
+  [edit applications application <name>]
+
+  Resource name: str
+    <name> is the application item name
   """
 
   PROPERTIES = [
@@ -31,9 +35,11 @@ class Application( Resource ):
   def _xml_to_py(self, has_xml, has_py ):
     Resource._r_has_xml_status( has_xml, has_py )
     Resource.copyifexists( has_xml, 'description', has_py )
-    has_py['protocol'] = has_xml.find('protocol').text
-    has_py['dest_port'] = has_xml.find('destination-port').text
-    has_py['timeout'] = int(has_xml.find('inactivity-timeout').text)
+    has_py['protocol'] = has_xml.findtext('protocol')
+    Resource.copyifexists( has_xml, 'destination-port', has_py, 'dest_port')
+    Resource.copyifexists( has_xml, 'inactivity-timeout', has_py, 'timeout')
+    if 'timeout' in has_py and has_py['timeout'] != 'never':
+      has_py['timeout'] = int(has_py['timeout'])
 
   ##### -----------------------------------------------------------------------
   ##### XML property writers
@@ -45,9 +51,9 @@ class Application( Resource ):
 
   def _xml_change_dest_port( self, xml ):
     """
-      destination-port could be a single value or a range.
-      handle the case where the value could be provided as either
-      a single int value or a string range, e.g. "1-27"
+    destination-port could be a single value or a range.
+    handle the case where the value could be provided as either
+    a single int value or a string range, e.g. "1-27"
     """
     value = self['dest_port']
     if isinstance(value,int): value = str(value)
@@ -63,7 +69,14 @@ class Application( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    raise RuntimeError("Need to implement!")
+    get = E.applications(E.application( JXML.NAMES_ONLY ))
+    got = self.N.rpc.get_config( get )
+    self._rlist = [app.text for app in got.xpath('applications/application/name')]
 
   def _r_catalog(self):
-    raise RuntimeError("Need to implement!")    
+    get = E.applications(E.application())
+    got = self.N.rpc.get_config( get )
+    for app in got.xpath('applications/application'):
+      name = app.findtext('name')
+      self._rcatalog[name] = {}
+      self._xml_to_py( app, self._rcatalog[name] )

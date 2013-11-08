@@ -8,14 +8,14 @@ from ... import jxml as JXML
 
 class PolicyContext( Resource ):
   """
-    SRX security policy context
-    [edit security policy from-zone <from_zone> to-zone <to_zone>]
+  [edit security policy from-zone <from_zone> to-zone <to_zone>]
 
-    Name:
-      tuple( from_zone, to_zone )
+  Resource name: tuple(from_zone, to_zone)
+    <from_zone>  is the name of the From zone
+    <to_zone> is the name of the To zone
 
-    Manages:
-      :rule: PolicyRule
+  Manages Resources:
+    rule, PolicyRule 
   """
 
   PROPERTIES = [

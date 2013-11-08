@@ -167,7 +167,7 @@ class Resource(object):
   @property
   def catalog(self):
     """
-      returns a dictionary of resources
+    returns a dictionary of resources
     """
     if not self.is_mgr: raise RuntimeError("Must be a manager!")
     if not len(self._rcatalog): self.catalog_refresh()
@@ -181,6 +181,14 @@ class Resource(object):
   def J(self):
     """
     returns the Junos object associated to this resource/manager
+    @@@ will be depreciating this in favor of 'N'
+    """
+    return self._junos
+
+  @property
+  def N(self):
+    """
+    returns the Netconf object bound to this resource/manager
     """
     return self._junos
 
@@ -370,17 +378,32 @@ class Resource(object):
     """
     reloads the managed resource list from the Junos device
     """
+    if not self.is_mgr: raise RuntimeError("Only on a manager!")    
     del self._rlist[:]
     self._r_list()      # invoke the specific resource method
 
   def catalog_refresh(self):
     """
-      reloads the resource catalog from the Junos device
+    reloads the resource catalog from the Junos device
     """
+    if not self.is_mgr: raise RuntimeError("Only on a manager!")    
     self._rcatalog.clear()
     self._r_catalog()  # invoke the specific resource method
 
+  def _r_catalog(self):
+    """
+    provide a 'default' catalog creator method that simply uses
+    the manager list and runs through each resource making
+    a refcopy to the :has: properties
+    """
+    zone_list = self.list
+    for name in zone_list:
+      r = self[name]
+      self._rcatalog[name] = r.has    
+
+
   def refresh(self):
+    if not self.is_mgr: raise RuntimeError("Only on a manager!")
     self.list_refresh()
     self.catalog_refresh()
     

@@ -12,12 +12,16 @@ from .zone_ab_set import ZoneAddrBookSet
 
 class ZoneAddrBook( Resource ):
   """
-    [edit security zone security-zone <zone> address-book]
+  [edit security zone security-zone <zone> address-book]
 
-    Resource manages two sub-resources:
-    .addr - specific address entries
-    .set - specific address sets
+  Resource name: str
+    The zone name
+
+  Resource manages:
+    addr, ZoneAddrBookAddr
+    set, ZoneAddrBookSet
   """
+
   PROPERTIES = [
     '$addrs',         # read-only addresss
     '$sets'           # read-only address-sets
@@ -61,11 +65,11 @@ class ZoneAddrBook( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    """
-    raise RuntimeError("Need to implement!")
+    # this list of zone addressbooks is really just the list of zones
+    got = self.N.rpc.get_zones_information(terse=True)
+    zones = got.findall('zones-security/zones-security-zonename')
+    self._rlist = [zone.text for zone in zones]    
+    self._rlist.remove('junos-host')
 
-  def _r_catalog(self):
-    """
-    """
-    raise RuntimeError("Need to implement!")
+  # using Resource._r_catalog()
+    

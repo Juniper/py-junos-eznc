@@ -139,7 +139,14 @@ class Netconf(object):
     using the :bind(): method
     """
     return self._manages
-  
+
+  ##### -----------------------------------------------------------------------
+  ##### OVERLOADS
+  ##### -----------------------------------------------------------------------
+
+  def __repr__(self):
+    return "Netconf(%s)" % self.hostname
+
   ##### -----------------------------------------------------------------------
   ##### CONSTRUCTOR
   ##### -----------------------------------------------------------------------
@@ -191,6 +198,7 @@ class Netconf(object):
 
     self.connected = True
     self.facts_refresh()
+    return self
 
   def close( self ):
     """

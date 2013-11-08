@@ -9,10 +9,13 @@ class ZoneAddrBookAddr( Resource ):
   """
   [edit security zone security-zone <zone> address-book address <name>]
 
-  ~! WARNING !~
-  This resource is managed only as a child of the :ZoneAddrBook:
-  resource.  Do not create a manager instance of this class directly
+  Resource name: str
+    <name> is the name of the address item
+
+  Managed by: ZoneAddrBook
+    <zone> is the name of the security zone
   """
+
   PROPERTIES = [
     'description',
     'ip_prefix',
@@ -51,14 +54,10 @@ class ZoneAddrBookAddr( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    The parent keeps a property on this list, so just use it, yo!
-    """
+    #  The parent keeps a property on this list, so just use it, yo!
     self._rlist = self.P['$addrs']
 
   def _r_catalog(self):
-    """
-    """
     get = E.security(E.zones(
       E('security-zone', 
         E.name(self.P._name),

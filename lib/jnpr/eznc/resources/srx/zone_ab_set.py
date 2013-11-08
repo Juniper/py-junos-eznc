@@ -9,17 +9,13 @@ class ZoneAddrBookSet( Resource ):
   """
   [edit security zone security-zone <zone> address-book address-set <name>]
 
-  ~! WARNING !~
-  This resource is managed only as a child of the :ZoneAddrBook:
-  resource.  Do not create a manager instance of this class directly
+  Resource name: str
+    <name> is the name of the address sets
 
-  Notes
-  -------------------------------------------------------------------
-    :self._name: is the address-set name
-
-    :self.P: is the parent ZoneAddrBook object, 
-      whose _name is the security zone 
+  Managed by: ZoneAddrBook
+    <zone> is the name of the secuirty zone
   """
+
   PROPERTIES = [
     'description',
     'addr_list',        # list of address items
@@ -68,16 +64,11 @@ class ZoneAddrBookSet( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    list of address-book address-sets.  this list is managed by the
-    parent object, so just use that, yo!
-    """
+    # list of address-book address-sets.  this list is managed by the
+    # parent object, so just use that, yo!
     self._rlist = self.P['$sets']
 
   def _r_catalog(self):
-    """
-    catalog each of the address-sets
-    """
     get = E.security(E.zones(
       E('security-zone', 
         E.name(self.P._name),

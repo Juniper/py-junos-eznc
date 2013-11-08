@@ -39,7 +39,15 @@ class HostInbSvcMixin(object):
 
 class ZoneInterface( HostInbSvcMixin, Resource ):
   """
+  [edit security zone security-zone <zone> interfaces <name>]
+
+  Resource name: str 
+    <name> is the interface name, e.g. 'ge-0/0/0.12'
+
+  Managed by: Zone
+    <zone> is the name of the security zone    
   """
+
   PROPERTIES = [
     'services',
     'protocols',
@@ -78,12 +86,6 @@ class ZoneInterface( HostInbSvcMixin, Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    """
-    """
     self._rlist = self.P['$ifs_list']
 
-  def _r_catalog(self):
-    """
-    """
-    raise RuntimeError("Need to implement!")
-
+  # using Resource._r_catalog()

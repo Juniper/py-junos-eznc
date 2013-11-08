@@ -6,6 +6,15 @@ from ..resource import Resource
 from ....eznc import jxml as JXML
 
 class PolicyRule( Resource ):
+  """
+  [edit security policy from-zone <from_zone> to-zone <to_zone> policy <policy_name>]
+
+  Resource name: str
+    <policy_name> is the name of the policy
+
+  Managed by: PolicyContext
+    <from_zone> and <to_zone> taken from parent resource
+  """
 
   PROPERTIES = [
     'description',
@@ -18,28 +27,19 @@ class PolicyRule( Resource ):
     'log_close'
   ]
 
-  def _xml_at_top(self):
-    """
-      configuration to retrieve resource
-    """
-    xml = self._parent._xml_at_top()
-    xml.find('.//policy').append(E.policy(E.name( self._name )))
-    return xml
-
   ### -------------------------------------------------------------------------
   ### XML reading
   ### -------------------------------------------------------------------------
 
+  def _xml_at_top(self):
+    xml = self._parent._xml_at_top()
+    xml.find('.//policy').append(E.policy(E.name( self._name )))
+    return xml
+
   def _xml_at_res(self, xml):
-    """
-      return the resource XML
-    """
     return xml.find('.//policy/policy')
 
   def _xml_to_py(self, as_xml, to_py ):
-    """
-      converts Junos XML to native Python
-    """
     Resource._r_has_xml_status( as_xml, to_py )
     Resource.copyifexists(as_xml,'description',to_py)
 

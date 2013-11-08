@@ -9,13 +9,11 @@ class SharedAddrBookAddr( Resource ):
   """
   [edit security address-book <ab_name> address <name>]
 
-  ~! WARNING !~
-  This resource is managed only as a child of the :SharedAddrBook:
-  resource.  Do not create a manager instance of this class directly
+  Resource name: str
+    <name> is the address item name
 
-  Resource name:
-    <name> - Address item name, string
-    <ab_name> - Address book name, taken from parent resource    
+  Managed by: SharedAddrBook
+    <ab_name> is the address book name, taken from parent resource    
   """
   PROPERTIES = [
     'description',

@@ -8,6 +8,9 @@ from ... import jxml as JXML
 class ApplicationSet( Resource ):
   """
   [edit applications application-set <name>]
+
+  Resource name: str
+    <name> is the application-set name
   """
 
   PROPERTIES = [
@@ -25,16 +28,14 @@ class ApplicationSet( Resource ):
   def _xml_to_py(self, has_xml, has_py ):
     Resource._r_has_xml_status( has_xml, has_py )    
     Resource.copyifexists( has_xml, 'description', has_py )
-    has_py['app_list'] = []
-    has_py['appset_list'] = []
+
 
     # each of the <application> elements
-    for this in has_xml.xpath('application'):
-      has_py['app_list'].append(this.find('name').text)
+    app_list = [this.findtext('name') for this in has_xml.xpath('application')]
+    set_list = [this.findtext('name') for this in has_xml.xpath('application-set')]
 
-    # sets can contain other sets too ...
-    for this in has_xml.xpath('application-set'):
-      has_py['appset_list'].append(this.find('name').text)
+    if len(app_list): has_py['app_list'] = app_list
+    if len(set_list): has_py['appset_list'] = set_list
 
   ##### -----------------------------------------------------------------------
   ##### XML property writers
@@ -88,17 +89,12 @@ class ApplicationSet( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    got = self._junos.rpc.get_config(
-      E.applications(E('application-set', JXML.NAMES_ONLY)))
-
+    got = self.N.rpc.get_config(E.applications(E('application-set', JXML.NAMES_ONLY)))
     self._rlist = [ this.text for this in got.xpath('.//name')]
 
   def _r_catalog(self):
-    got = self._junos.rpc.get_config(
-      E.applications(E('application-set')))
-
+    got = self.N.rpc.get_config(E.applications(E('application-set')))
     for this in got.xpath('.//application-set'):
-      name = this.find('name').text
-      this_py = {}
-      self._xml_to_py( this, this_py )
-      self._rcatalog[name] = this_py
+      name = this.findtext('name')
+      self._rcatalog[name] = {}
+      self._xml_to_py( this, self._rcatalog[name] )

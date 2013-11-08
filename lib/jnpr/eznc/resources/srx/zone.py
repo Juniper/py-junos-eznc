@@ -14,19 +14,21 @@ class Zone( HostInbSvcMixin, Resource ):
   """
   [edit security zone security-zone <zone>]
 
-  Name:
-    zone-name 
+  Resource Name: str
+    The zone name 
 
-  Manages:
-    :ifs:     ZoneInterface
-    :ab:      ZoneAddressBook
+  Manages resources:
+    ifs, ZoneInterface
+    ab, ZoneAddressBook
   """
+
   PROPERTIES = [
     'description',
     'services',
     'protocols',
     '$ifs_list'
   ]
+
   def __init__(self, junos, name=None, **kvargs ):
     if name is None:
       # resource-manager
@@ -77,9 +79,9 @@ class Zone( HostInbSvcMixin, Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    got = self.J.rpc.get_zones_information(terse=True)
+    got = self.N.rpc.get_zones_information(terse=True)
     zones = got.findall('zones-security/zones-security-zonename')
     self._rlist = [zone.text for zone in zones]
+    self._rlist.remove('junos-host')
 
-  def _r_catalog(self):
-    raise RuntimeError("Need to implement!")
+  # using Resource._r_catalog()
