@@ -5,7 +5,7 @@ from lxml import etree
 
 # junos "ez" module
 from jnpr.eznc import Netconf
-from jnpr.eznc.utils import Config
+from jnpr.eznc.utils import *
 from jnpr.eznc.resources.srx import *
 
 dev = Netconf(user='jeremy', host='jnpr-dc-fw').open()
