@@ -1,3 +1,6 @@
+# STATUS
+
+The repo is under active development on release 0.0.2.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  For tagged releases, please see [here](https://github.com/jeremyschulman/py-junos-eznc/tags).
 # ABOUT
 
 A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  
