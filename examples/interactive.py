@@ -12,3 +12,5 @@ dev = Netconf(user='jeremy', host='jnpr-dc-fw').open()
 
 ## now play around with jdev object ...
 ## when done, you should issue dev.close()
+
+dev.bind(fs=FS)
