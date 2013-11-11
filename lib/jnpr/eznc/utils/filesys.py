@@ -1,5 +1,3 @@
-import pdb
-
 from lxml.builder import E
 from .start_shell import StartShell
 
