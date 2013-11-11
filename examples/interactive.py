@@ -1,6 +1,6 @@
 import pdb
-from pprint import pprint as pp 
-from lxml.builder import E 
+from pprint import pprint as pp
+from lxml.builder import E
 from lxml import etree
 
 # junos "ez" module

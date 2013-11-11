@@ -23,6 +23,10 @@ class FS(object):
     storage_cleanup_check - returns a list of files to remove at cleanup
     symlink - create a symlink
     tgz - tar+gzip a directory
+
+  NOTES:
+    The following methods require 'start shell' priveldges:
+    [mkdir, rmdir, symlink]
   """
 
   def __init__(self,nc):
@@ -152,7 +156,7 @@ class FS(object):
   ### ls - file/dir listing
   ### -------------------------------------------------------------------------
 
-  def ls(self, path='.', followlink=True):
+  def ls(self, path='.', brief=False, followlink=True):
     """
     File listing, returns a dict of file information.  If the
     path is a symlink, then by default (:followlink):) will
@@ -185,10 +189,13 @@ class FS(object):
     files = xdir.xpath('file-information')
     results = FS._decode_dir(xdir, files)
 
-    results['files'] = {
-      f.findtext('file-name').strip():FS._decode_file(f)
-      for f in files
-    }
+    if brief is True:
+      results['files'] = [ f.findtext('file-name').strip() for f in files ]
+    else:
+      results['files'] = {
+        f.findtext('file-name').strip():FS._decode_file(f)
+        for f in files
+      }
 
     return results
 
@@ -300,16 +307,54 @@ class FS(object):
     rsp = self._nc.rpc.file_rename(source=from_path,destination=to_path)
     return rsp == True
 
+  def tgz(self, from_path, tgz_path):
+    """
+    create a file called :tgz_path: that is the tar-gzip of the given
+    directory specified :from_path:
+    """
+    rsp = self._nc.rpc.file_archive(compress=True, 
+      source=from_path, destination=tgz_path)
+
+    # if the rsp is True, then the command executed OK.    
+    if rsp is True: return True
+
+    # otherwise, return the error string to the caller
+    return rsp.text
+
   ### -------------------------------------------------------------------------
-  ### !!!!! SSH shell commands, requires that the user has 'start shell'
-  ### !!!!! priveldges
+  ### !!!!! methods that use SSH shell commands, requires that the user 
+  ### !!!!! has 'start shell' priveldges
   ### -------------------------------------------------------------------------
 
-  def _ssh_exec(self, command):  
+  def _ssh_exec(self,command):
     with StartShell(self._nc) as sh:
       got = sh.run(command)
       ok = sh.last_ok
-
     return (ok,got)
 
+  def rmdir(self, path):
+    """
+    ~| REQUIRES SHELL PRIVELDGES |~
+    executes the 'rmdir' command on path
+    returns True if OK, or error string
+    """
+    results = self._ssh_exec( "rmdir %s" % path )
+    return True if results[0] is True else ''.join(results[1][2:-1])
 
+  def mkdir(self, path):  
+    """
+    ~| REQUIRES SHELL PRIVELDGES |~
+    executes the 'mkdir -p' command on path
+    returns True if OK, or error string
+    """
+    results = self._ssh_exec("mkdir -p %s" % path)
+    return True if results[0] is True else ''.join(results[1][2:-1])
+
+  def symlink(self, from_path, to_path):
+    """
+    ~| REQUIRES SHELL PRIVELDGES |~
+    executes the 'ln -sf <from_path> <to_path>' command
+    returns True if OK, or error string
+    """
+    results = self._ssh_exec("ln -sf %s %s" % (from_path, to_path))
+    return True if results[0] is True else ''.join(results[1][2:-1])
