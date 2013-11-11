@@ -31,3 +31,13 @@ class SCP(object):
     closes the ssh/scp connection to the device
     """
     self._ssh.close()
+
+  ### -------------------------------------------------------------------------
+  ### CONTEXT MANAGER
+  ### -------------------------------------------------------------------------
+
+  def __enter__(self):
+    return self.open()
+
+  def __exit__(self,exc_ty,exc_val,exc_tb):
+    self.close()    
