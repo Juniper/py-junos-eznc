@@ -9,7 +9,7 @@ setup(
     version = "0.0.1",
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
-    description = ( "Making Junos automation via NETCONF 'easy'" ),
+    description = ( "Junos automation for non-programmers" ),
     license = "BSD-2",
     keywords = "Junos NETCONF networking automation",
     url = "http://www.github.com/jeremyschulman/py-junos-eznc",
