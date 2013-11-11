@@ -3,13 +3,14 @@ from scp import SCPClient
 
 class SCP(object):
   
-  def __init__(self, junos):
+  def __init__(self, junos, **scpargs):
     """
     constructor that wraps a paramiko 'scp' object.  
     """
     self._junos = junos
+    self._scpargs = scpargs
 
-  def open(self):
+  def open(self, **scpargs):
     """
     creates an instance of the scp object and return to caller for use
     """
@@ -24,7 +25,7 @@ class SCP(object):
       username=junos._auth_user,
       password=junos._auth_password,
     )    
-    return SCPClient(self._ssh.get_transport())
+    return SCPClient(self._ssh.get_transport(), **scpargs)
 
   def close(self):
     """
@@ -37,7 +38,7 @@ class SCP(object):
   ### -------------------------------------------------------------------------
 
   def __enter__(self):
-    return self.open()
+    return self.open(**self._scpargs)
 
   def __exit__(self,exc_ty,exc_val,exc_tb):
     self.close()    
