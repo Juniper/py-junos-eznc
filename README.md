@@ -277,8 +277,7 @@ For more details on exceptions, see [here](docs/EXCEPTIONS.md).
 
 # DEPENDENCIES
 
-This module has been tested with Python 2.6 and 2.7.  It has not been tested with Python 3.x, and will
-not likely work due to library dependencies.
+This module requires Python 2.7.  
 
   * [lxml](http://lxml.de/index.html) - XML programming library
   * [ncclient](https://github.com/juniper/ncclient) (_Juniper edition_) - NETCONF base library
