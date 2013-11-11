@@ -5,12 +5,9 @@ from lxml import etree
 
 # junos "ez" module
 from jnpr.eznc import Netconf
-from jnpr.eznc.utils import *
-from jnpr.eznc.resources.srx import *
 
 dev = Netconf(user='jeremy', host='jnpr-dc-fw').open()
 
-## now play around with jdev object ...
+## now play around with dev object ...
 ## when done, you should issue dev.close()
 
-dev.bind(fs=FS)
