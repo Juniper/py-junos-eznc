@@ -34,6 +34,9 @@ class FS(object):
   ### -------------------------------------------------------------------------
 
   def cat(self,path):
+    """
+    returns the contents of the file :path:
+    """
     try:
       rsp = self._nc.rpc.file_show(filename=path)
     except:
@@ -213,10 +216,7 @@ class FS(object):
       r['avail_block'] = int(ab.text)
       return r
 
-    return { _name(fs): _decode(fs)
-      for fs in rsp.xpath('filesystem')
-    }
-
+    return { _name(fs):_decode(fs) for fs in rsp.xpath('filesystem') }
 
   ### -------------------------------------------------------------------------
   ### storage_cleanup_check, storage_cleanip

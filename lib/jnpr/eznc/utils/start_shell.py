@@ -3,6 +3,8 @@ from select import select
 
 _JUNOS_PROMPT = '> '
 _SHELL_PROMPT = '% '
+_SELECT_WAIT = 0.1
+_RECVSZ = 1024
 
 class StartShell(object):
 
@@ -17,18 +19,17 @@ class StartShell(object):
     chan = self._chan
     got = []
     while True:
-      rd,wr,err = select([chan],[],[],0.1)
+      rd,wr,err = select([chan],[],[],_SELECT_WAIT)
       if rd:
-        data = chan.recv(1024)
-        if data:
-          got.append(data)
-          if data.endswith(this):
-            break
-    return ''.join(got)
+        data = chan.recv(_RECVSZ)
+        got.append(data)
+        if data.endswith(this):
+          break
+    return got
 
   def send(self,data):
     """
-    send a command :data: followed by a '\n' character
+    send the command :data: followed by a '\n' character
     """
     self._chan.send(data)
     self._chan.send('\n')
@@ -73,7 +74,7 @@ class StartShell(object):
 
     # use $? to get the exit code of the command
     self.send('echo $?')
-    rc = self.wait_for(this)
+    rc = ''.join(self.wait_for(this))
     self.last_ok = True if rc.find('0') > 0 else False
     
     return got
