@@ -19,5 +19,6 @@ setup(
         "netaddr",
         "lxml",
         "jinja2",
+        "scp"
     ],
 )
