@@ -1,24 +1,30 @@
 import pdb
 
 from lxml.builder import E
+from .start_shell import StartShell
 
 class FS(object):
   """
   Filesystem (FS) utilities:
+
     cat - show the contents of a file
-    copy - local file copy (not scp)
-    rename - local file rename
-    delete - local file delete
-    cwd - change working directory
-    pwd - get working directory
     checksum - calculate file checksum (md5,sha256,sha1)
+    copy - local file copy (not scp)
+    cwd - change working directory
+    ls - return file/dir listing
+    mkdir - create a directory
+    pwd - get working directory
+    rename - local file rename
+    rm - local file delete
+    rmdir - remove a directory
     stat - return file/dir information
-    list - return file/dir listing
     storage_usage - return storage usage
     storage_cleanup - perform storage storage_cleanup
     storage_cleanup_check - returns a list of files to remove at cleanup
-
+    symlink - create a symlink
+    tgz - tar+gzip a directory
   """
+
   def __init__(self,nc):
     """ nc, Netconf """
     self._nc = nc
@@ -140,10 +146,10 @@ class FS(object):
       return FS._decode_file(xdir.find('file-information'))
 
   ### -------------------------------------------------------------------------
-  ### list - file/dir listing
+  ### ls - file/dir listing
   ### -------------------------------------------------------------------------
 
-  def list(self, path, followlink=True):
+  def ls(self, path='.', followlink=True):
     """
     File listing, returns a dict of file information.  If the
     path is a symlink, then by default (:followlink):) will
@@ -211,30 +217,99 @@ class FS(object):
       for fs in rsp.xpath('filesystem')
     }
 
-  ### -------------------------------------------------------------------------
-  ### storage_cleanup
-  ### -------------------------------------------------------------------------
-
-  def storage_cleanup(self):
-    pass
 
   ### -------------------------------------------------------------------------
-  ### storage_cleanup_check
+  ### storage_cleanup_check, storage_cleanip
   ### -------------------------------------------------------------------------
 
-  def storage_cleanup_check(self):
-    rsp = self._nc.rpc.request_system_storage_cleanup(dry_run=True)
-    files = rsp.xpath('file-list/file')
-
+  @classmethod
+  def _decode_storage_cleanup(cls,files):
     _name = lambda f: f.findtext('file-name').strip()
     def _decode(f):
       return {
         'size' : int(f.findtext('size')),
         'ts_date' : f.findtext('date').strip()
       }
+
+    # return a dict of name/decode pairs for each file
     return { _name(f): _decode(f) for f in files }
 
+  def storage_cleanup_check(self):
+    """
+    Perform the 'request system storage cleanup dry-run' command
+    to return a :dict: of files/info that would be removed if 
+    the cleanup command was executed.
+    """
+    rsp = self._nc.rpc.request_system_storage_cleanup(dry_run=True)
+    files = rsp.xpath('file-list/file')
+    return FS._decode_storage_cleanup(files)
 
+  def storage_cleanup(self):
+    """
+    Perform the 'request system storage cleanup' command to remove
+    files from the filesystem.  Return a :dict: of file name/info 
+    on the files that were removed.
+    """
+    rsp = self._nc.rpc.request_system_storage_cleanup()
+    files = rsp.xpath('file-list/file')
+    return FS._decode_storage_cleanup(files)
+
+  ### -------------------------------------------------------------------------
+  ### rm - local file delete
+  ### -------------------------------------------------------------------------
     
+  def rm(self,path):
+    """
+    Performs a local file delete action, per Junos CLI command "file delete".
+    If the file does not exist, then this return returns False.
+    """
+    # the return value from this RPC will return either True if the delete
+    # was successful, or an XML structure otherwise.  So we can do a simple
+    # test to provide the return result to the caller.
+    rsp = self._nc.rpc.file_delete(path=path)
+    return rsp == True
+
+  ### -------------------------------------------------------------------------
+  ### cp - local file copy
+  ### -------------------------------------------------------------------------
+
+  def cp(self, from_path, to_path):
+    """
+    Perform a local file copy where :from_path: and :to_path: can be any 
+    valid Junos path argument.  Refer to the Junos "file copy" command
+    documentation for details.
+
+    Returns True if OK, False if file does not exist.
+    """
+    # this RPC returns True if it is OK.  If the file does not exist
+    # this RPC will generate an RpcError exception, so just return False
+    try:
+      self._nc.rpc.file_copy(source=from_path, destination=to_path)
+    except:
+      return False
+    return True
+    
+  ### -------------------------------------------------------------------------
+  ### mv - local file rename
+  ### -------------------------------------------------------------------------
+
+  def mv(self, from_path, to_path):
+    """
+    Perform a local file rename function, same as "file rename" Junos CLI.
+    """
+    rsp = self._nc.rpc.file_rename(source=from_path,destination=to_path)
+    return rsp == True
+
+  ### -------------------------------------------------------------------------
+  ### !!!!! SSH shell commands, requires that the user has 'start shell'
+  ### !!!!! priveldges
+  ### -------------------------------------------------------------------------
+
+  def _ssh_exec(self, command):  
+    with StartShell(self._nc) as sh:
+      got = sh.run(command)
+      ok = sh.last_ok
+
+    return (ok,got)
 
 
