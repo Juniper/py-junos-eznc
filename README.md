@@ -277,9 +277,13 @@ For more details on exceptions, see [here](docs/EXCEPTIONS.md).
 
 # DEPENDENCIES
 
-  * [Python 2.7](http://www.python.org/) - could work with others, but I haven't tested it
-  * [ncclient](https://github.com/juniper/ncclient) (_Juniper edition_) - NETCONF base library
+This module has been tested with Python 2.6 and 2.7.  It has not been tested with Python 3.x, and will
+not likely work due to library dependencies.
+
   * [lxml](http://lxml.de/index.html) - XML programming library
+  * [ncclient](https://github.com/juniper/ncclient) (_Juniper edition_) - NETCONF base library
+  * [paramiko](https://github.com/paramiko/paramiko) - SSH library (also used by ncclient)
+  * [scp](https://github.com/jbardin/scp.py) - SCP library
   * [jinja2](http://jinja.pocoo.org/docs) - templating library
   * [netaddr](https://pypi.python.org/pypi/netaddr/) - Network IPv4,IPv6 address library
 
