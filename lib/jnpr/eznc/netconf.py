@@ -117,6 +117,20 @@ class Netconf(object):
     return self._logfile
 
   ### ---------------------------------------------------------------------------
+  ### property: timeout
+  ### ---------------------------------------------------------------------------    
+
+  @property
+  def timeout(self):
+    """ the netconf timeout value """
+    return self._conn.timeout
+
+  @timeout.setter
+  def timeout(self, value):
+    """ set the netconf timeout value """
+    self._conn.timeout = value
+  
+  ### ---------------------------------------------------------------------------
   ### property: facts
   ### ---------------------------------------------------------------------------
 

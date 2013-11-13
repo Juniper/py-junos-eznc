@@ -1,7 +1,9 @@
 from lxml.builder import E
+
+from .ezutil import EzUtil
 from .start_shell import StartShell
 
-class FS(object):
+class FS(EzUtil):
   """
   Filesystem (FS) utilities:
 
@@ -27,10 +29,6 @@ class FS(object):
     [mkdir, rmdir, symlink]
   """
 
-  def __init__(self,nc):
-    """ nc, Netconf """
-    self._nc = nc
-
   ### -------------------------------------------------------------------------
   ### cat - show file contents
   ### -------------------------------------------------------------------------
@@ -40,7 +38,7 @@ class FS(object):
     returns the contents of the file :path:
     """
     try:
-      rsp = self._nc.rpc.file_show(filename=path)
+      rsp = self._dev.rpc.file_show(filename=path)
     except:
       return None
     return rsp.text
@@ -53,7 +51,7 @@ class FS(object):
     """
     change working directory to path
     """
-    self._nc.rpc.set_cli_working_directory(directory=path)
+    self._dev.rpc.set_cli_working_directory(directory=path)
 
   ### -------------------------------------------------------------------------
   ### pwd - return current working directory
@@ -63,7 +61,7 @@ class FS(object):
     """
     returns the current working directory
     """
-    rsp = self._nc.rpc(E.command("show cli directory"))
+    rsp = self._dev.rpc(E.command("show cli directory"))
     return rsp.findtext('./working-directory')
 
   ### -------------------------------------------------------------------------
@@ -78,9 +76,9 @@ class FS(object):
     None is returned.
     """
     cmd_map = {
-      'md5' : self._nc.rpc.get_checksum_information,
-      'sha256' : self._nc.rpc.get_sha256_checksum_information,
-      'sha1' : self._nc.rpc.get_sha1_checksum_information
+      'md5' : self._dev.rpc.get_checksum_information,
+      'sha256' : self._dev.rpc.get_sha256_checksum_information,
+      'sha1' : self._dev.rpc.get_sha1_checksum_information
     }
     rpc = cmd_map.get(calc)
     if rpc is None: raise ValueError("Unknown calculation method: '%s'" % calc)
@@ -135,7 +133,7 @@ class FS(object):
 
     @@@ MORE NEEDED @@@
     """
-    rsp = self._nc.rpc.file_list(detail=True, path=path)
+    rsp = self._dev.rpc.file_list(detail=True, path=path)
 
     # if there is an output tag, then it means that the path
     # was not found
@@ -161,7 +159,7 @@ class FS(object):
     recursively call this method to obtain the symlink specific
     information.
     """
-    rsp = self._nc.rpc.file_list(detail=True, path=path)
+    rsp = self._dev.rpc.file_list(detail=True, path=path)
 
     # if there is an output tag, then it means that the path
     # was not found, and we return :None:
@@ -202,7 +200,7 @@ class FS(object):
   ### -------------------------------------------------------------------------
 
   def storage_usage(self):
-    rsp = self._nc.rpc.get_system_storage()
+    rsp = self._dev.rpc.get_system_storage()
 
     _name = lambda fs: fs.findtext('filesystem-name').strip()
 
@@ -245,7 +243,7 @@ class FS(object):
     to return a :dict: of files/info that would be removed if 
     the cleanup command was executed.
     """
-    rsp = self._nc.rpc.request_system_storage_cleanup(dry_run=True)
+    rsp = self._dev.rpc.request_system_storage_cleanup(dry_run=True)
     files = rsp.xpath('file-list/file')
     return FS._decode_storage_cleanup(files)
 
@@ -255,7 +253,7 @@ class FS(object):
     files from the filesystem.  Return a :dict: of file name/info 
     on the files that were removed.
     """
-    rsp = self._nc.rpc.request_system_storage_cleanup()
+    rsp = self._dev.rpc.request_system_storage_cleanup()
     files = rsp.xpath('file-list/file')
     return FS._decode_storage_cleanup(files)
 
@@ -271,7 +269,7 @@ class FS(object):
     # the return value from this RPC will return either True if the delete
     # was successful, or an XML structure otherwise.  So we can do a simple
     # test to provide the return result to the caller.
-    rsp = self._nc.rpc.file_delete(path=path)
+    rsp = self._dev.rpc.file_delete(path=path)
     return rsp == True
 
   ### -------------------------------------------------------------------------
@@ -289,7 +287,7 @@ class FS(object):
     # this RPC returns True if it is OK.  If the file does not exist
     # this RPC will generate an RpcError exception, so just return False
     try:
-      self._nc.rpc.file_copy(source=from_path, destination=to_path)
+      self._dev.rpc.file_copy(source=from_path, destination=to_path)
     except:
       return False
     return True
@@ -302,7 +300,7 @@ class FS(object):
     """
     Perform a local file rename function, same as "file rename" Junos CLI.
     """
-    rsp = self._nc.rpc.file_rename(source=from_path,destination=to_path)
+    rsp = self._dev.rpc.file_rename(source=from_path,destination=to_path)
     return rsp == True
 
   def tgz(self, from_path, tgz_path):
@@ -310,7 +308,7 @@ class FS(object):
     create a file called :tgz_path: that is the tar-gzip of the given
     directory specified :from_path:
     """
-    rsp = self._nc.rpc.file_archive(compress=True, 
+    rsp = self._dev.rpc.file_archive(compress=True, 
       source=from_path, destination=tgz_path)
 
     # if the rsp is True, then the command executed OK.    
@@ -325,7 +323,7 @@ class FS(object):
   ### -------------------------------------------------------------------------
 
   def _ssh_exec(self,command):
-    with StartShell(self._nc) as sh:
+    with StartShell(self._dev) as sh:
       got = sh.run(command)
       ok = sh.last_ok
     return (ok,got)
