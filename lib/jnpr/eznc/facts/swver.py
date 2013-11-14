@@ -17,7 +17,10 @@ class version_info(object):
       else:
         self.build = int(after_type[1])
     elif 'I' == self.type:
-      self.build = after_type[1]        # assumes that we have a build/spin, but not numeric
+      try:
+        self.build = after_type[1]        # assumes that we have a build/spin, but not numeric
+      except:
+        self.build = None
     else:
       self.build = int(after_type[1])   # assumes numeric build/spin
 
@@ -69,19 +72,14 @@ def software_version(junos, facts):
   else:
     x_swver = junos.rpc.cli("show version",format='xml')
   
-  if x_swver[0].tag == 'multi-routing-engine-results':
-    raise RuntimeError("Multi-RE platform found -- IMPLEMENT ME!")
-    # swver_infos = swver.xpath('//software-information')
-    # swver_infos.each do |re_sw|
-    #   re_name = re_sw.xpath('preceding-sibling::re-name').text.upcase
-    #   re_sw.xpath('package-information[1]/comment').text =~ /\[(.*)\]/
-    #   ver_key = ('version_' + re_name).to_sym
-    #   facts[ver_key] = $1
-    # end
-    # master_id = f_master
-    # facts[:version] =
-    #   facts[("version_" + "RE" + master_id).to_sym] ||
-    #   facts[('version_' + "FPC" + master_id).to_sym]
+  if x_swver.tag == 'multi-routing-engine-results':
+    facts['2RE'] = True
+    for re_sw in x_swver.xpath('.//software-information'):
+      re_name = str.upper(re_sw.xpath('preceding-sibling::re-name')[0].text)
+      pkginfo = re_sw.xpath('package-information[1]/comment')[0].text
+      facts['version_'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
+
+    facts['version'] = facts['version_'+f_master]
   else:
     pkginfo = x_swver.xpath('.//package-information[name = "junos"]/comment')[0].text    
     facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]

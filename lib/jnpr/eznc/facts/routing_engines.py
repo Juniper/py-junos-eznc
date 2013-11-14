@@ -10,10 +10,10 @@ def routing_engines(junos, facts):
   master = []
   for re in re_info.xpath('.//route-engine'):
     x_re_name = re.xpath('ancestor::multi-routing-engine-item/re-name')
-    re_name = "RE" if not x_re_name else "RE_" + x_re_name[0].text
+    re_name = "RE" if not x_re_name else "RE" + x_re_name[0].text
     x_slot = re.find('slot')
     slot_id = x_slot.text if x_slot is not None else "0"
-    slot_name = re_name + "_" + slot_id
+    slot_name = re_name + slot_id
 
     re_fd = {}
     facts[slot_name] = re_fd

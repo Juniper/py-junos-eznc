@@ -5,7 +5,6 @@ def chassis(junos, facts):
   """ 
   Obtain basic chassis facts:
     model : product model
-    2RE : True if in a multi-routing-engine system
     serialnumber : serial number 
     hostname : host 
     fqdn : fully-qualified domain-name
