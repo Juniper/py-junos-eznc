@@ -305,6 +305,7 @@ class Netconf(object):
     try:
       rsp = self.rpc.cli( command, format)
       if rsp.tag == 'output': return rsp.text
+      if rsp.tag == 'configuration-information': return rsp.findtext('configuration-output')
       if rsp.tag == 'rpc': return rsp[0]
       return rsp
     except:
