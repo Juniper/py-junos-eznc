@@ -55,9 +55,12 @@ def software_version(junos, facts):
   f_persona = facts.get('personality')
   f_master = facts.get('master')
       
+  # ---------------------------------------------------------------------------
+  # run the right RPC to get the software information
+  # ---------------------------------------------------------------------------
+
   if f_persona == 'MX':
     x_swver = junos.cli("show version invoke-on all-routing-engines", format='xml')
-
   elif f_persona == 'SWITCH':
     ## most EX switches support the virtual-chassis feature, so the 'all-members' option would be valid
     ## in some products, this options is not valid (i.e. not vc-capable. so we're going to try for vc, and if that
@@ -70,18 +73,30 @@ def software_version(junos, facts):
     else:
       facts['vc_capable'] = True
   else:
-    x_swver = junos.rpc.cli("show version",format='xml')
+    x_swver = junos.rpc.cli("show version", format='xml')
+
+  # ---------------------------------------------------------------------------
+  # extract the version information out of the RPC response
+  # ---------------------------------------------------------------------------
   
   if x_swver.tag == 'multi-routing-engine-results':
     facts['2RE'] = True
+    
     for re_sw in x_swver.xpath('.//software-information'):
-      re_name = str.upper(re_sw.xpath('preceding-sibling::re-name')[0].text)
+      re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
+      m = re.search('(\d)', re_name)
+      re_name = m.group(0)
       pkginfo = re_sw.xpath('package-information[1]/comment')[0].text
-      facts['version_'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
+      facts['version_RE'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
 
-    facts['version'] = facts['version_'+f_master]
+    master = f_master[0] if isinstance(f_master,list) else f_master
+    facts['version'] = facts['version_'+master]
   else:
     pkginfo = x_swver.xpath('.//package-information[name = "junos"]/comment')[0].text    
     facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
+
+  # ---------------------------------------------------------------------------
+  # create a 'version_info' object based on the master version
+  # ---------------------------------------------------------------------------
 
   facts['version_info'] = version_info(facts['version'])

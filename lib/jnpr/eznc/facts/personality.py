@@ -7,11 +7,13 @@ def personality( junos, facts ):
 
   if re.match("^(EX)|(QFX)", examine):
     persona = 'SWITCH'
-  elif re.match("^MX", examine):
+  elif examine.startswith("MX"):
     persona = 'MX'
-  elif re.match("^vMX", examine):
+  elif examine.startswith("vMX"):
     facts['virtual'] = true
     persona = 'MX'
+  elif examine.startswith("M"):
+    persona = "M"
   elif re.match("SRX\s?(\d){3}$", examine):
     persona = 'SRX_BRANCH'
   elif re.search("firefly", examine, re.IGNORECASE):
