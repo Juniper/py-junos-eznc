@@ -7,11 +7,9 @@ from lxml import etree
 # package modules
 from ..exception import *
 from .. import jxml as JXML
+from .util import Util
 
-class Config(object):
-
-  def __init__(self, junos):
-    self._junos = junos
+class Config(Util):
 
   ### ---------------------------------------------------------------------------
   ### commit
@@ -48,7 +46,7 @@ class Config(object):
     # if there is a commit/check error, this will raise an execption
 
     try:
-      self._junos.rpc.commit_configuration( **rpc_args )
+      self.rpc.commit_configuration( **rpc_args )
     except Exception as err:
       # so the ncclient gives us something I don't want.  I'm going to convert
       # it and re-raise the commit error
@@ -70,7 +68,7 @@ class Config(object):
     structure will be returned
     """
     try:
-      self._junos.rpc.commit_configuration( check=True )
+      self.rpc.commit_configuration( check=True )
     except Exception as err:
       # :err: is from ncclient, so extract the XML data
       # and convert into dictionary
@@ -95,7 +93,7 @@ class Config(object):
     if rb_id < 0 or rb_id > 50:
       raise ValueError("Invalid rollback #"+str(rb_id))
 
-    rsp = self._junos.rpc.get_configuration(dict(
+    rsp = self.rpc.get_configuration(dict(
       compare='rollback', rollback=str(rb_id)
       ))
 
@@ -191,7 +189,7 @@ class Config(object):
       rpc_contents = vargs[0]
       if isinstance(rpc_contents,str) and not 'format' in kvargs:
         raise RuntimeError("You must define the format of the contents")
-      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+      return self.rpc.load_config( rpc_contents, **rpc_xattrs )
 
       #~! UNREACHABLE !~#
 
@@ -203,7 +201,7 @@ class Config(object):
       # then this is a static-config file.  load that as our rpc_contents
       rpc_contents = open(kvargs['path']).read()
       _lset_fromfile(kvargs['path'])
-      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+      return self.rpc.load_config( rpc_contents, **rpc_xattrs )
 
       #~! UNREACHABLE !~#
 
@@ -218,7 +216,7 @@ class Config(object):
       template = self._junos.Template(path)
       rpc_contents = template.render(kvargs.get('template_vars', {}))
       _lset_fromfile(path)
-      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+      return self.rpc.load_config( rpc_contents, **rpc_xattrs )
 
       #~! UNREACHABLE !~#
 
@@ -232,7 +230,7 @@ class Config(object):
       path = template.filename
       rpc_contents = template.render(kvargs.get('template_vars', {}))
       _lset_fromfile(path)
-      return self._junos.rpc.load_config( rpc_contents, **rpc_xattrs )
+      return self.rpc.load_config( rpc_contents, **rpc_xattrs )
 
       #~! UNREACHABLE !~#
 
@@ -247,7 +245,7 @@ class Config(object):
     attempts an exclusive lock on the candidate configuration
     """
     try:
-      self._junos.rpc.lock_configuration()
+      self.rpc.lock_configuration()
     except Exception as err:
       # :err: is from ncclient
       raise LockError(rsp = JXML.remove_namespaces(err.xml))
@@ -263,7 +261,7 @@ class Config(object):
     unlocks the candidate configuration
     """
     try:
-      self._junos.rpc.unlock_configuration()
+      self.rpc.unlock_configuration()
     except Exception as err:
       # :err: is from ncclient
       raise UnlockError(rsp = JXML.remove_namespaces(err.xml))
@@ -283,7 +281,7 @@ class Config(object):
     if rb_id < 0 or rb_id > 50:
       raise ValueError("Invalid rollback #"+str(rb_id))
 
-    self._junos.rpc.load_configuration(dict(
+    self.rpc.load_configuration(dict(
       compare='rollback', rollback=str(rb_id)
     ))
 
