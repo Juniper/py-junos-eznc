@@ -10,6 +10,18 @@ from .. import jxml as JXML
 from .util import Util
 
 class Config(Util):
+  """
+  Configuration Utilities:
+
+    commit - commit changes
+    commit_check - perform the commit check operation
+    diff - return the diff string between running and candidate config
+    load - load changes into the candidate config 
+    lock - take an exclusive lock on the candidate config
+    unlock - release the exclusive lock
+    rollback - perform the load rollback command 
+    
+  """
 
   ### ---------------------------------------------------------------------------
   ### commit
