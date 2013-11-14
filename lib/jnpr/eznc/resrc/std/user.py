@@ -101,13 +101,3 @@ class User( Resource ):
     got = self.N.rpc.get_config( get )
     self._rlist = [name.text for name in got.xpath('.//user/name')]
 
-  def _r_catalog(self):
-    raise RuntimeError("NEED TO IMPLEMENT!")
-
-    # get = E.applications(E.application())
-    # got = self.N.rpc.get_config( get )
-    # for app in got.xpath('applications/application'):
-    #   name = app.findtext('name')
-    #   self._rcatalog[name] = {}
-    #   self._xml_to_py( app, self._rcatalog[name] )
-
