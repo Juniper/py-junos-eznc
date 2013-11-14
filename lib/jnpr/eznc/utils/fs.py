@@ -1,9 +1,9 @@
 from lxml.builder import E
 
-from .ezutil import EzUtil
+from .util import Util
 from .start_shell import StartShell
 
-class FS(EzUtil):
+class FS(Util):
   """
   Filesystem (FS) utilities:
 
@@ -179,7 +179,7 @@ class FS(EzUtil):
       if not link_path: # then we are done
         return results
       else:
-        return results if followlink is False else self.list(path=link_path)
+        return results if followlink is False else self.ls(path=link_path)
 
     # if we are here, then it's a directory, include information on all files
     files = xdir.xpath('file-information')

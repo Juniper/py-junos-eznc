@@ -1,5 +1,9 @@
 # @@@ may remove these and have folks import the specific files directly, TBD
 
+import warnings
+
+warnings.warn("util imports will be removed in 0.0.3", DeprecationWarning)
+
 from .config import Config
 from .filesys import FS
-from .ncscp import SCP
+from .scp import SCP

@@ -1,4 +1,5 @@
 # stdlib
+import warnings
 from pprint import pformat
 from copy import deepcopy
 
@@ -183,27 +184,27 @@ class Resource(object):
     returns the Junos object associated to this resource/manager
     @@@ will be depreciating this in favor of 'N'
     """
+    warnings.warn("'J' property will be removed in 0.0.3", DeprecationWarning)    
     return self._junos
 
   @property
   def N(self):
-    """
-    returns the Netconf object bound to this resource/manager
-    """
+    """ returns the Netconf object bound to this resource/manager """
     return self._junos
+
+  @property 
+  def R(self):
+    """ returns the Netconf RPC meta object """
+    return self._junos.rpc
 
   @property
   def M(self):
-    """
-    returns the :Resource: manager associated to this resource
-    """
+    """ returns the :Resource: manager associated to this resource """
     return self._manager
 
   @property
   def P(self):
-    """
-    returns the parent of the associated Junos object
-    """
+    """ returns the parent of the associated Junos object """
     return self._parent
 
   ##### -----------------------------------------------------------------------

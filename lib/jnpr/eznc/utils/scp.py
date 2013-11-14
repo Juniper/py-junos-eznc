@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import paramiko
 from scp import SCPClient
 
