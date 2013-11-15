@@ -14,7 +14,7 @@ class UserSSHKey( Resource ):
     <key-value> : SSH public key string (usually something very long)
 
   Resource manager utilities:
-    load_key - allows you to load an ssh-key from a file or contents
+    load_key - allows you to load an ssh-key from a file or str
   """
 
   # there are no properties, since the name <key-value> constitutes the
@@ -84,3 +84,15 @@ class UserSSHKey( Resource ):
 
     new_key = self[(key_type, key_value)]
     return new_key.write( touch=True )
+
+  ##### -----------------------------------------------------------------------
+  ##### Manager List, Catalog
+  ##### -----------------------------------------------------------------------
+
+  def _r_list(self):
+    # the key list comes from the parent object.
+    self._rlist = self.P['$sshkeys']
+
+  def _r_catalog(self):
+    # no catalog but the keys
+    self._rcatalog = { k:None for k in self.list }

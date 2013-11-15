@@ -59,6 +59,12 @@ class Config(Util):
 
     try:
       self.rpc.commit_configuration( **rpc_args )
+    except RpcError as err:        # jnpr.eznc exception
+      if err.rsp.find('ok') is not None:
+        # this means there are warnings, but no errors
+        return True
+      else:
+        raise CommitError(cmd=err.cmd,rsp=err.rsp)
     except Exception as err:
       # so the ncclient gives us something I don't want.  I'm going to convert
       # it and re-raise the commit error
@@ -81,6 +87,12 @@ class Config(Util):
     """
     try:
       self.rpc.commit_configuration( check=True )
+    except RpcError as err:        # jnpr.eznc exception
+      if err.rsp.find('ok') is not None:
+        # this means there is a warning, but no errors
+        return True
+      else:
+        raise CommitError(cmd=err.cmd,rsp=err.rsp)      
     except Exception as err:
       # :err: is from ncclient, so extract the XML data
       # and convert into dictionary

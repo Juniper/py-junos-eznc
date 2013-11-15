@@ -19,8 +19,8 @@ class User( Resource ):
 
   PROPERTIES = [
     'uid',  
-    'description',    # the full-name field
-    'group',          # user class
+    'fullname',       # the full-name field
+    'userclass',      # user class
     'password',       # write-only clear-text password, will get crypt'd
     '$password',      # read-only crypt'd password
     '$sshkeys',       # names of ssh-keys
@@ -44,16 +44,15 @@ class User( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _xml_at_top(self):
-    return E.system(E.login(E.user(E.name(self._name ))))
+    return E.system(E.login(E.user(E.name( self._name ))))
 
   def _xml_at_res(self, xml):
     return xml.find('.//user')
 
   def _xml_to_py(self, has_xml, has_py ):
     Resource._r_has_xml_status( has_xml, has_py )
-    has_py['group'] = has_xml.findtext('class')
-
-    Resource.copyifexists( has_xml, 'full-name', has_py, 'description' )
+    has_py['userclass'] = has_xml.findtext('class')
+    Resource.copyifexists( has_xml, 'full-name', has_py, 'fullname' )
     
     Resource.copyifexists( has_xml, 'uid', has_py )
     if 'uid' in has_py: has_py['uid'] = int(has_py['uid'])
@@ -74,12 +73,12 @@ class User( Resource ):
   ##### XML property writers
   ##### -----------------------------------------------------------------------
 
-  def _xml_change_description(self, xml):
-    xml.append(E('full-name', self['description']))
+  def _xml_change_fullname(self, xml):
+    xml.append(E('full-name', self['fullname']))
     return True
 
-  def _xml_change_group(self, xml):
-    xml.append(E('class', self['group']))
+  def _xml_change_userclass(self, xml):
+    xml.append(E('class', self['userclass']))
     return True
 
   def _xml_change_password(self,xml):
