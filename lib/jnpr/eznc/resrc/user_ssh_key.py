@@ -2,8 +2,8 @@
 from lxml.builder import E
 
 # local module
-from .. import Resource
-from ... import jxml as JXML
+from . import Resource
+from .. import jxml as JXML
 
 class UserSSHKey( Resource ):
   """
