@@ -26,18 +26,7 @@ class User( Resource ):
     '$sshkeys',       # names of ssh-keys
   ]
 
-  ##### -----------------------------------------------------------------------
-  ##### CONSTRUCTOR
-  ##### -----------------------------------------------------------------------
-
-  def __init__(self, junos, name=None, **kvargs ):    
-    if name is None: # manager
-      Resource.__init__( self, junos, name, **kvargs )
-      return
-
-    self.sshkey = UserSSHKey( junos, parent=self )
-    self._manages = ['sshkey']
-    Resource.__init__( self, junos, name, **kvargs )
+  MANAGES = { 'sshkey' : UserSSHKey }
 
   ##### -----------------------------------------------------------------------
   ##### XML readers
@@ -51,7 +40,9 @@ class User( Resource ):
 
   def _xml_to_py(self, has_xml, has_py ):
     Resource._r_has_xml_status( has_xml, has_py )
+
     has_py['userclass'] = has_xml.findtext('class')
+
     Resource.copyifexists( has_xml, 'full-name', has_py, 'fullname' )
     
     Resource.copyifexists( has_xml, 'uid', has_py )
@@ -97,6 +88,6 @@ class User( Resource ):
 
   def _r_list(self):
     get = E.system(E.login(E.user( JXML.NAMES_ONLY )))
-    got = self.N.rpc.get_config( get )
+    got = self.R.get_config( get )
     self._rlist = [name.text for name in got.xpath('.//user/name')]
 

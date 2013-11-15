@@ -66,6 +66,14 @@ class Resource(object):
     if self.__class__ != Resource: 
       self.properties.extend(self.__class__.PROPERTIES)
 
+    # if this resource manages others, then hook that 
+    # into the :manages: list
+
+    if hasattr(self,'MANAGES'):
+      self._manages = self.MANAGES.keys()
+      for k,v in self.MANAGES.items():
+        self.__dict__[k] = v(junos,parent=self)
+
     # setup resource cache-attributes
 
     self.has = {}
