@@ -23,7 +23,7 @@ class User( Resource ):
     'userclass',      # user class
     'password',       # write-only clear-text password, will get crypt'd
     '$password',      # read-only crypt'd password
-    '$sshkeys',       # names of ssh-keys
+    '$sshkeys',       # read-only names of ssh-keys
   ]
 
   MANAGES = { 'sshkey' : UserSSHKey }
