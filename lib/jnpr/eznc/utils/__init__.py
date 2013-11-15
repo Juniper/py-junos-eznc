@@ -4,7 +4,7 @@ from .util import Util
 
 import warnings
 
-warnings.warn("util imports will be removed in 0.0.3", DeprecationWarning)
+warnings.warn("util imports [Config,FS,SCP] will be removed in 0.0.3", DeprecationWarning)
 
 from .config import Config
 from .filesys import FS

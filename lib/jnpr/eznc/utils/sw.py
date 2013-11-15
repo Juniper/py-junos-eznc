@@ -49,6 +49,11 @@ class SW(Util):
 
     return hashfile(open(package,'rb'),hashlib.sha256())
 
+  @classmethod
+  def progress(cls,dev,report):
+    """ simple progress report function """
+    print dev.hostname + ": " + report
+
   ### -------------------------------------------------------------------------
   ### put - SCP put the image onto the device
   ### -------------------------------------------------------------------------
