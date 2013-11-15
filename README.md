@@ -116,7 +116,7 @@ The following code example illustrates how to use the SRX "ZoneAddrBook" resourc
 from pprint import pprint
 
 from jnpr.eznc import Netconf
-from jnpr.eznc.resources.srx import ZoneAddrBook
+from jnpr.eznc.resrc.srx import ZoneAddrBook
 
 jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()

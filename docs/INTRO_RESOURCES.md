@@ -9,7 +9,7 @@ Resources provide abstrations on specific Junso configuration items without requ
 To bind a resource manager to a Netconf instance, you use the Netconf.bind() method.  To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
 
 ````python
-from jnpr.eznc.resources.srx import ZoneAddrBook
+from jnpr.eznc.resrc.srx import ZoneAddrBook
 
 jdev.bind( ab=ZoneAddrBook )
 ````
@@ -59,7 +59,7 @@ Alternatively, you can select a specific resource without using a manager by dir
 
 ````python
 from jnpr.eznc import Netconf
-from jnpr.eznc.resources.srx import Zone
+from jnpr.eznc.resrc.srx import Zone
 
 jdev = Netconf(user='jeremy',password='jeremy1',host='vsrx_cyan')
 jdev.open()
