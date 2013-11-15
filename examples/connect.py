@@ -20,7 +20,7 @@ ssh_config = paramiko.SSHConfig()
 ssh_config.parse(open(config_file,'r'))
 got_lkup = ssh_config.lookup( junos_hostname )
 
-from  getpass import getpass
+from getpass import getpass
 
 login = dict(
   host=got_lkup['hostname'],
