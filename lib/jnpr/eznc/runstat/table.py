@@ -99,14 +99,35 @@ class RunstatTable(Runstat):
   # ---------------------------------------------------------------------------
 
   def __getitem__(self,value):
-    """ select a specific table item by :name: and return the view or XML """
+    """
+    returns a table item.  if a table view is set (should be by default) then
+    the item will be converted to the view upon return.  if there is no table 
+    view, then the XML object will be returned.
+
+    :value:
+      when it is a string, this will perform a select based on the name
+      when it is a number, this will perform a select based by position.
+        nubers can be either positive or negative.
+        [0] is the first item (first xpath is actually 1)
+        [-1] is the last item
+    """
     self.assert_data()
 
     if self.ITER_XPATH is None:
       # this is a table of tables; i.e. not table of record views
       found = self.got
     else:
-      xpath = self.ITER_XPATH + '[normalize-space(%s)="' % self.NAME_XPATH + value + '"]'
+      if isinstance(value,str):
+        # find by name
+        xpath = self.ITER_XPATH + '[normalize-space(%s)="' % self.NAME_XPATH + value + '"]'
+      elif isinstance(value,int):
+        # find by index, assuming caller is using 0-index, and might use
+        # negative values to reference from end of list
+        xpath_pos = value + 1
+        if value < 0:
+          xpath_pos = len(self) + xpath_pos
+        xpath = '%s[%s]' % (self.ITER_XPATH, xpath_pos)
+
       found = self.got.xpath(xpath)
       if not len(found): return None
       found = found[0]
