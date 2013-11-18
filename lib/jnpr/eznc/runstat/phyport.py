@@ -1,11 +1,6 @@
 from . import RunstatTable, RunstatView
 
-__all__ = ['PhyPortTable','PhyPortView','PhyPortView2']
-
-class PhyPortTable( RunstatTable ):
-  GET_RPC = 'get_interface_information'
-  GET_ARGS = dict(media=True)
-  ITER_XPATH = 'physical-interface'
+__all__ = ['PhyPortTable','PhyPortView']
 
 class PhyPortView(RunstatView):
 
@@ -22,20 +17,29 @@ class PhyPortView(RunstatView):
     'tx_packets' : 'ethernet-mac-statistics/output-packets'
   }
 
-  FIELD_AS_INT = [
-    'mtu','rx_bytes','rx_packets',
-    'tx_bytes','tx_packets'
-  ]
+  FIELD_AS = dict(
+    mtu=int, 
+    rx_bytes=int, rx_packets=int,
+    tx_bytes=int, tx_packets=int
+  )
+
+class PhyPortTable( RunstatTable ):
+  GET_RPC = 'get_interface_information'
+  GET_ARGS = dict(media=True)
+  ITER_XPATH = 'physical-interface'
+  VIEW = PhyPortView
+
+### ---------------------------------------------------------------------------
+### PhyPortView2 - just a sample
+### ---------------------------------------------------------------------------
 
 class PhyPortView2( PhyPortView ):
   def __init__(self,as_xml):
     PhyPortView.__init__(self,as_xml)
 
-    new_fields = {
-      'rx_pps' : 'traffic-statistics/input-pps',
-      'tx_pps' : 'traffic-statistics/output-pps'
-    }
-
     with self.extend() as more:
-      more.field_xpath = dict(new_fields)
-      more.field_as_int = new_fields.keys()
+      more.field_xpath = {
+        'rx_pps' : 'traffic-statistics/input-pps',
+        'tx_pps' : 'traffic-statistics/output-pps'
+      }
+      more.field_as = dict(rx_pps=int, tx_pps=int)
