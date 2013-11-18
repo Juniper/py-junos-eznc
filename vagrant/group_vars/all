@@ -1,0 +1,50 @@
+---
+
+ubuntu_package:
+  - libxml2
+  - libxml2-dev
+  - libxslt1.1
+  - libxslt1-dev
+  - libgmp10
+  - libgmp-dev
+  - python-dev
+  - python-setuptools
+  - python-lxml
+  - python-yaml
+  - python-jinja2
+  - python-paramiko
+  - git
+
+debian_package:
+  - libxml2
+  - libxml2-dev
+  - libxslt1.1
+  - libxslt1-dev
+  - libgmp10
+  - libgmp-dev
+  - python-dev
+  - python-setuptools
+
+centos_package:
+  - libxml2
+  - libxml2-devel
+  - libxslt
+  - libxslt-devel
+  - gmp
+  - gmp-devel
+
+pip_package:
+  - lxml
+  - paramiko
+  - PyYAML
+  - jinja2
+  - scp
+
+ncclient:
+  url: https://github.com/Juniper/ncclient.git
+  installdir: /usr/local/lib/python2.7/dist-packages/ncclient-0.1a-py2.7.egg
+
+py-junos-eznc:
+  url: https://github.com/jeremyschulman/py-junos-eznc
+  installdir: /usr/local/lib/python2.7/dist-packages/junos_eznc-0.0.1-py2.7.egg
+

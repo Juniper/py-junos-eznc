@@ -34,3 +34,7 @@ nosetests.xml
 .pydevproject
 
 MANIFEST.*
+
+# Vagrant
+.vagrant
+vagrant_ansible*
