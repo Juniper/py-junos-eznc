@@ -10,6 +10,7 @@ class RunstatView(object):
 
   NAME_XPATH = 'name'
   FIELDS = {}
+  GROUPS = None
 
   ### -------------------------------------------------------------------------
   ### CONSTRUCTOR
@@ -20,7 +21,7 @@ class RunstatView(object):
     :table:
       instance of the RunstatTable
 
-    :as_xml:
+    :view_xml:
       this should be an lxml etree Elemenet object.  This 
       constructor also accepts a list with a single item/XML
     """
@@ -40,6 +41,14 @@ class RunstatView(object):
     self._xml = view_xml
     self.NAME_XPATH = table.NAME_XPATH
 
+    if self.GROUPS is not None:
+      self._groups = {}
+      for xg_name,xg_xpath in self.GROUPS.items():
+        xg_xml = view_xml.xpath(xg_xpath)
+        if not len(xg_xml):  # @@@ this is technically an error; need to trap it
+          continue
+        self._groups[xg_name] = xg_xml[0]
+
   ### -------------------------------------------------------------------------
   ### PROPERTIES
   ### -------------------------------------------------------------------------
@@ -49,6 +58,9 @@ class RunstatView(object):
     """ return the name of view item """
     if self.NAME_XPATH is None: return self._table.N.hostname
     return self._xml.findtext(self.NAME_XPATH).strip()
+
+  # ALIAS key <=> name
+  key = name
 
   @property
   def xml(self):
@@ -116,7 +128,11 @@ class RunstatView(object):
       found = item['table'](ncdev=self._table.N, table_xml=self._xml)
     else:
       as_type = item.get('as_type',str)
-      found = self._xml.xpath(item['xpath'])
+      if item.has_key('group'):
+        found = self._groups[item['group']].xpath(item['xpath'])
+      else:
+        found = self._xml.xpath(item['xpath'])
+
       if 0 == len(found): 
         # even for the case of numbers, do not set the value.  we 
         # want to detect "does not exist" vs. defaulting to 0
