@@ -28,7 +28,7 @@ BgpTableView = RSM.View({
     )
 }})
 
-BgpSummaryTable = RSM.TableGetter('get-bgp-summary-information',
+BgpSummaryTable = RSM.GetTable('get-bgp-summary-information',
   key = None,
   view = BgpTableView
 )

@@ -22,10 +22,10 @@ AlarmTableView = RSM.View(RSM.Fields()
 
 ###> show system alarms
 
-SysAlarmTable = RSM.TableGetter('get-system-alarm-information',
+SysAlarmTable = RSM.GetTable('get-system-alarm-information',
   key = None, view = AlarmTableView )
 
 ###> show chassis alarams
 
-ChassisAlarmTable = RSM.TableGetter('get-alarm-information',
+ChassisAlarmTable = RSM.GetTable('get-alarm-information',
   key = None, view = AlarmTableView )
