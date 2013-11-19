@@ -1,6 +1,6 @@
 from . import RunstatMaker as RSM
 
-PhyPortView = RSM.View('PhyPortView', fields={
+PhyPortView = RSM.View({
   'oper': { 
     'xpath': 'oper-status' },
   'admin': { 
@@ -23,9 +23,8 @@ PhyPortView = RSM.View('PhyPortView', fields={
     'xpath': 'ethernet-mac-statistics/output-packets', 'as_type': int }
 })
 
-PhyPortTable = RSM.TableRpc('PhyPortTable',
-  get={ 'rpc_cmd':'get_interface_information',
-        'rpc_arg': {'media': True },
-        'item':'physical-interface',
-        'view': PhyPortView }
+PhyPortTable = RSM.TableGetter('get-interface-information',
+  args =  {'media': True, 'interface-name': '[fgx]e*' },
+  item = 'physical-interface',
+  view = PhyPortView
 )

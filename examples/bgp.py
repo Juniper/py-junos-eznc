@@ -8,40 +8,35 @@ from jnpr.eznc.runstat.table import RunstatTable
 ##### in progress.
 ##### =========================================================================
 
-BgpTableView = RSM.View( 
-  fields={
+BgpTableView = RSM.View({
   'peers' : {
     'xpath':'bgp-peer',
-    'table' : RSM.Table(
-      item='bgp-peer',
-      name='peer-address', 
-      view = RSM.View(
-        fields={
-          'peer_as': {'xpath':'peer-as'},          
-          'description': {'xpath': 'description' },
-          'peer_state': {'xpath':'peer-state'},
-          'flap_count': {'xpath':'flap-count','as_type': int },
-          'ribs': {'xpath': 'bgp-rib',
-            'table': RSM.Table(
-              item='bgp-rib',
-              view=RSM.View(
-                fields={
-                  'act_pf_count': {'xpath':'active-prefix-count', 'as_type': int},
-                  'rx_pf_count': {'xpath':'received-prefix-count', 'as_type': int},
-                  'acc_pf_count': {'xpath': 'accepted-prefix-count', 'as_type': int},
-                  'sup_pf_count': {'xpath':'suppressed-prefix-count', 'as_type': int}
-                })
-            )}
-        })
-    )}
-})
+    'table' : RSM.Table('bgp-peer',
+      key='peer-address', 
+      view = RSM.View({
+        'peer_as': {'xpath':'peer-as'},          
+        'description': {'xpath': 'description' },
+        'peer_state': {'xpath':'peer-state'},
+        'flap_count': {'xpath':'flap-count','as_type': int },
+        'ribs': {
+          'xpath': 'bgp-rib',
+          'table': RSM.Table('bgp-rib', view=RSM.View({
+            'pf_act_count': {'xpath':'active-prefix-count', 'as_type': int},
+            'pf_rcv_count': {'xpath':'received-prefix-count', 'as_type': int},
+            'pf_acc_count': {'xpath': 'accepted-prefix-count', 'as_type': int},
+            'pf_supp_count': {'xpath':'suppressed-prefix-count', 'as_type': int}
+          }))
+        }
+      })
+    )
+}})
 
+BgpSummaryTable = RSM.TableGetter('get-bgp-summary-information',
+  key = None,
+  view = BgpTableView
+)
 
-class BgpTable( RunstatTable ):
-  GET_RPC = 'get_bgp_summary_information'
-  VIEW = BgpTableView
-  NAME_XPATH = None
-
+class TestBgpSummaryTable( BgpSummaryTable ):
   def get(self, **kvargs):
     # this is a hack for dev-test
     self._xml_got = etree.parse('/var/tmp/jsnap/bgp.xml').getroot()

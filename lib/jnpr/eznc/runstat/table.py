@@ -27,18 +27,31 @@ class RunstatTable(object):
 
   @property
   def N(self):
+    """ shortcut to the Netconf instance """
     return self._ncdev
 
   @property
   def R(self):
+    """ shortcut to the Netconf RPC metaexec instance """
     return self._ncdev.rpc
 
   @property
-  def got(self):
+  def xml(self):
+    """ 
+    returns the XML data received from the device.  for tables within
+    tables, this XML will be the parent XML element that contains the
+    table contents.
+    """
     return self._xml_got
 
   @property
+  def got(self):
+    """ returns the XML data recieved from the device """
+    return self.xml
+
+  @property
   def view(self):
+    """ returns the current view assigned to this table """
     return self._view
 
   @view.setter
@@ -56,6 +69,7 @@ class RunstatTable(object):
 
   @property
   def _iter_xpath(self):
+    """ internal use only """
     return self.got.xpath(self.ITER_XPATH) if self.got is not None else []
   
   ### -------------------------------------------------------------------------
@@ -63,15 +77,23 @@ class RunstatTable(object):
   ### -------------------------------------------------------------------------
 
   def assert_data(self):
+    """ ensure that the table has XML data """
     if self._xml_got is None: raise RuntimeError("No data")
 
   def get(self, **kvargs):
+    """ 
+    executes the 'get' command to load the XML data from the 
+    Netconf instance.  If you need to create a 'stub' for unit-testing
+    purposes, you want to create a subclass of your table and overload 
+    this methods.
+    """
     args = {}
     args.update(self.GET_ARGS)
     args.update(kvargs)
     self._xml_got = getattr(self.R,self.GET_RPC)(**args)
 
   def keys(self):
+    """ returns a list of table item names """
     if self.ITER_XPATH is None: return []
     return [n.findtext(self.NAME_XPATH).strip() for n in self._iter_xpath]
 
@@ -82,12 +104,16 @@ class RunstatTable(object):
   def __repr__(self):
     cname = self.__class__.__name__
     if self.ITER_XPATH is not None:
-      return "%s(%s): %s items" % (cname, self.N.hostname, len(self))
+      return "%s\n@%s: %s items" % (cname, self.N.hostname, len(self))
     else:
-      return "%s(%s): data=%s" % (cname, self.N.hostname, ('no','yes')[self.got is not None])
+      return "%s\n@%s: data=%s" % (cname, self.N.hostname, ('no','yes')[self.got is not None])
+
+  # ---------------------------------------------------------------------------
+  # len is the number of items in the table
+  # ---------------------------------------------------------------------------
 
   def __len__(self):
-    return len(self._iter_xpath)
+    return 1 if not self.ITER_XPATH else len(self._iter_xpath)
 
   # ---------------------------------------------------------------------------
   # [<name>]: select a table item based on <name>

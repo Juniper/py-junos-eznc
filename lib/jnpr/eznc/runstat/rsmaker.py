@@ -6,34 +6,35 @@ from .table import RunstatTable
 class RunstatMaker(object):
 
   @classmethod
-  def View(cls, cls_name=None, fields=None):
+  def View(cls, fields, view_name=None, ):
     """
     :name: name of new class object
     :field: dictionary of fields
     """
-    if cls_name is None: cls_name = 'RunstatView'
-    new_cls = type(cls_name, (RunstatView,), {})
+    if view_name is None: view_name = 'RunstatView'
+    new_cls = type(view_name, (RunstatView,), {})
     new_cls.FIELD_XPATH = fields
     new_cls.__module__ = __name__
     return new_cls
 
   @classmethod
-  def TableRpc(cls,cls_name,get):
-    new_cls = type(cls_name, (RunstatTable,), {} )
-    new_cls.GET_RPC = get['rpc_cmd']
-    new_cls.GET_ARGS = get.get('rpc_arg', {})
-    new_cls.ITER_XPATH = get['item']
-    new_cls.NAME_XPATH = get.get('name',RunstatTable.NAME_XPATH)
-    new_cls.VIEW = get.get('view')
+  def TableGetter(cls, cmd, args=None, item=None, key=RunstatTable.NAME_XPATH, view=None, getter_name=None ):
+    if getter_name is None: getter_name = "RunstatTableGetter." + cmd
+    new_cls = type(getter_name, (RunstatTable,), {} )
+    new_cls.GET_RPC = cmd
+    new_cls.GET_ARGS = args or {}
+    new_cls.ITER_XPATH = item
+    new_cls.NAME_XPATH = key 
+    new_cls.VIEW = view
     new_cls.__module__ = __name__
     return new_cls
 
   @classmethod
-  def Table(cls,cls_name=None, item=None, name='name',view=None):
-    if cls_name is None: cls_name = 'RunstatTable'
-    new_cls = type(cls_name, (RunstatTable,), {} )
+  def Table(cls, item, key=RunstatTable.NAME_XPATH, view=None, table_name=None):
+    if table_name is None: table_name = 'RunstatTable.' + item
+    new_cls = type(table_name, (RunstatTable,), {} )
     new_cls.ITER_XPATH = item
-    new_cls.NAME_XPATH = name
+    new_cls.NAME_XPATH = key 
     new_cls.VIEW = view
     new_cls.__module__ = __name__
     return new_cls

@@ -51,6 +51,11 @@ class RunstatView(object):
     if self.NAME_XPATH is None: return self._table.N.hostname
     return self._xml.findtext(self.NAME_XPATH).strip()
 
+  @property
+  def xml(self):
+    """ returns the XML associated to the item """
+    return self._xml
+  
   ### -------------------------------------------------------------------------
   ### METHODS
   ### -------------------------------------------------------------------------
@@ -98,7 +103,7 @@ class RunstatView(object):
 
   def __repr__(self):
     """ returns the name of the View with the associate item name """
-    return "%s(%s)" % (self.__class__.__name__, self.name)
+    return "%s\n@%s" % (self.__class__.__name__, self.name)
 
   def __getattr__(self,name):
     """ returns a view value by item :name: """
