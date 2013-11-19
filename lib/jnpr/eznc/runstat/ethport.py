@@ -27,3 +27,4 @@ EthPortTable = RSM.GetTable('get-interface-information',
   item = 'physical-interface',
   view = EthPortView
 )
+

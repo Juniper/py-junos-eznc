@@ -21,13 +21,11 @@ BgpTableView = RSM.View(RSM.Fields()
           .int('pf_rcv_count','received-prefix-count')
           .int('pf_acc_count','accepted-prefix-count')
           .int('pf_supp_count','suppressed-prefix-count')
-          .end)
+          .end )
       ))
       .end )
   ))
-  .end
-)
-
+  .end )
 
 BgpSummaryTable = RSM.GetTable('get-bgp-summary-information',
   key = None,
