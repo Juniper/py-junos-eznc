@@ -1,0 +1,28 @@
+language: python
+cache: apt
+
+python:
+  - "2.7"
+#  - "3.3" dependent on ncclient 3.3 support
+#  - "pypy"
+
+before_install:
+  - sudo apt-get install -qq libxml2 libxml2-dev libxslt1.1 libxslt1-dev libgmp10 libgmp-dev python-dev python-setuptools
+
+install:
+  - "pip install -r development.txt"
+  - "pip install ."
+
+script: nosetests
+
+notifications:
+  email: false
+
+#deploy:
+  #provider: pypi # http://about.travis-ci.org/docs/user/deployment/pypi/
+  #user:
+  #password: see http://about.travis-ci.org/docs/user/encryption-keys/
+  #on:
+    #tags: true #only deploy to pypi when tags are updated
+###
+### possibly recommended for deployment: http://about.travis-ci.org/docs/user/travis-pro/

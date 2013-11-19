@@ -1,0 +1,60 @@
+---
+
+- hosts: all
+  user: vagrant
+  tasks:
+     - group_by: key={{ ansible_distribution }}
+
+- hosts: Ubuntu
+  gather_facts: False
+  tasks:
+    - name: Install all prerequisites from vars
+      apt: pkg={{ item }} state=installed update_cache=yes
+      with_items:
+      - ${ubuntu_package}
+
+- hosts: Debian
+  gather_facts: False
+  tasks:
+    - name: Install all prerequisites from vars
+      apt: pkg={{ item }} state=installed update_cache=yes
+      with_items:
+      - ${debian_package}
+
+- hosts: CentOS
+  gather_facts: False
+  tasks:
+    - name: Install all prerequisites from vars
+      apt: pkg={{ item }} state=installed update_cache=yes
+      with_items:
+      - ${centos_package}
+    - name: Install pip prerequisites
+      pip: name={{ item }} state=present virtualenv=/home/vagrant/virtualenv
+      with_items:
+        - ${pip_package}
+
+- hosts: Fedora
+  gather_facts: False
+  tasks:
+    - name: Install all prerequisites from vars
+      apt: pkg={{ item }} state=installed update_cache=yes
+      with_items:
+      - ${fedora_package}
+
+- hosts: all
+  gather_facts: False
+  tasks:
+    - name: clone Juniper repos
+      git: repo={{ item.url }} dest=/home/vagrant/{{ item.path }} update=no
+      with_items:
+        -  { url: '${ncclient.url}', path: 'ncclient' }
+        -  { url: '${py-junos-eznc.url}', path: 'py-junos-eznc' }
+    - name: install Juniper python modules
+      command: /usr/bin/python setup.py install chdir=/home/vagrant/{{ item.path }} creates={{ item.installdir }}
+      with_items:
+        -  { installdir: '${ncclient.installdir}', path: 'ncclient' }
+        -  { installdir: '${py-junos-eznc.installdir}', path: 'py-junos-eznc' }
+
+
+
+
