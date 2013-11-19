@@ -4,10 +4,7 @@ from inspect import isclass
 # 3rd-party modules
 from lxml import etree
 
-# local module
-from .runstat import Runstat
-
-class RunstatTable(Runstat):
+class RunstatTable(object):
   """
   DOCUMENT-ME
   """
@@ -47,14 +44,13 @@ class RunstatTable(Runstat):
   @view.setter
   def view(self, cls):
     """ :cls: must either be a RunstatView or None """
+
     if cls is None:
       self._view = None
       return
 
     if not isclass(cls):
       raise ValueError("Must be given RunstatView class")
-    if not issubclass(cls,Runstat):
-      raise ValueError("Must be given RunstatView class, given: '%s'" % cls.__name__)
 
     self._view = cls
 

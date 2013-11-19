@@ -1,12 +1,8 @@
-from pdb import set_trace
-
 from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
 
-from .runstat import Runstat
-
-class RunstatView(Runstat):
+class RunstatView(object):
   """
   RunstatView is the base-class that makes extracting values from XML 
   data appear as objects with attributes.
@@ -106,26 +102,24 @@ class RunstatView(Runstat):
 
   def __getattr__(self,name):
     """ returns a view value by item :name: """
-    xpath = self.FIELD_XPATH.get(name)
-    if xpath is None:
+    item = self.FIELD_XPATH.get(name)
+    if item is None:
       raise ValueError("Unknown field: '%s'" % name)
 
-    field_as = self.FIELD_AS.get(name,str)
-    if issubclass(field_as, Runstat):
-      _xpath_dot = self._xml.getroottree().getpath(self._xml)
-      # then this is RunstatTable class.  once we have this,
-      found = field_as(ncdev=self._table.N, table_xml=self._xml)
-      found._xpath_dot = _xpath_dot
+    if item.has_key('table'):
+      found = item['table'](ncdev=self._table.N, table_xml=self._xml)
     else:
-      found = self._xml.xpath(xpath)
+      as_type = item.get('as_type',str)
+      found = self._xml.xpath(item['xpath'])
       if 0 == len(found): return None      
-      found = field_as(found[0].text.strip())
+      found = as_type(found[0].text.strip())
 
     return found
 
   def __getitem__(self,name):
     """ same as getattr """
     return getattr(self,name)
+
 
 
 

@@ -1,70 +1,46 @@
 from lxml import etree 
-from jnpr.eznc.runstat import *
+from jnpr.eznc.runstat import RunstatMaker as RSM
+from jnpr.eznc.runstat.table import RunstatTable
 
-# -----------------------------------------------------------------------------
-# toplevel bgp-peer table
-# -----------------------------------------------------------------------------
+##### =========================================================================
+##### Complex demo using the Runstat classes to handle run-state/status
+##### information from operational commands.  This is an experimental work
+##### in progress.
+##### =========================================================================
 
-class BgpPeerTableViewRibTableView( RunstatView ):
-  FIELD_XPATH = dict(
-    act_pf_count = 'active-prefix-count',
-    rx_pf_count = 'received-prefix-count',
-    acc_pf_count = 'accepted-prefix-count',
-    sup_pf_count = 'suppressed-prefix-count'
-  )
-  FIELD_AS = dict(
-    act_pf_count = int,
-    rx_pf_count = int,
-    acc_pf_count = int,
-    sup_pf_count = int
-  )
+BgpTableView = RSM.View( 
+  fields={
+  'peers' : {
+    'xpath':'bgp-peer',
+    'table' : RSM.Table(
+      item='bgp-peer',
+      name='peer-address', 
+      view = RSM.View(
+        fields={
+          'peer_as': {'xpath':'peer-as'},          
+          'description': {'xpath': 'description' },
+          'peer_state': {'xpath':'peer-state'},
+          'flap_count': {'xpath':'flap-count','as_type': int },
+          'ribs': {'xpath': 'bgp-rib',
+            'table': RSM.Table(
+              item='bgp-rib',
+              view=RSM.View(
+                fields={
+                  'act_pf_count': {'xpath':'active-prefix-count', 'as_type': int},
+                  'rx_pf_count': {'xpath':'received-prefix-count', 'as_type': int},
+                  'acc_pf_count': {'xpath': 'accepted-prefix-count', 'as_type': int},
+                  'sup_pf_count': {'xpath':'suppressed-prefix-count', 'as_type': int}
+                })
+            )}
+        })
+    )}
+})
 
-class BgpPeerTableViewRibTable( RunstatTable ):
-  ITER_XPATH = 'bgp-rib'
-  VIEW = BgpPeerTableViewRibTableView
-
-class BgpPeerTableView( RunstatView ):
-  FIELD_XPATH = dict(
-    peer_as='peer-as',
-    description='description',
-    peer_state='peer-state',
-    flap_count='flap-count',
-    ribs='bgp-rib'
-  )
-  FIELD_AS = dict(
-    flap_count=int,
-    ribs=BgpPeerTableViewRibTable
-  )
-
-class BgpPeerTable( RunstatTable ):
-  ITER_XPATH = 'bgp-peer'    
-  NAME_XPATH = 'peer-address'
-  VIEW = BgpPeerTableView
-
-# -----------------------------------------------------------------------------
-# toplevel bgp-rib table
-# -----------------------------------------------------------------------------
-
-class BgpRibTable( RunstatTable ):
-  ITER_XPATH = 'bgp-rib'    
-
-# -----------------------------------------------------------------------------
-# toplevel bgp table
-# -----------------------------------------------------------------------------
-
-class BgpTableView(RunstatView):
-  FIELD_XPATH = dict(
-    peers = 'bgp-peer',
-    ribs = 'bgp-rib'
-  )
-  FIELD_AS = dict(
-    peers = BgpPeerTable,
-    ribs = BgpRibTable
-  )
 
 class BgpTable( RunstatTable ):
   GET_RPC = 'get_bgp_summary_information'
   VIEW = BgpTableView
+  NAME_XPATH = None
 
   def get(self, **kvargs):
     # this is a hack for dev-test
