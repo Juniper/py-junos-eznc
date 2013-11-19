@@ -10,16 +10,13 @@ from jnpr.eznc.runstat.table import RunstatTable
 
 BgpTableView = RSM.View({
   'peers' : {
-    'xpath':'bgp-peer',
-    'table' : RSM.Table('bgp-peer',
-      key='peer-address', 
+    'table' : RSM.Table('bgp-peer', key='peer-address', 
       view = RSM.View({
         'peer_as': {'xpath':'peer-as'},          
         'description': {'xpath': 'description' },
         'peer_state': {'xpath':'peer-state'},
         'flap_count': {'xpath':'flap-count','as_type': int },
         'ribs': {
-          'xpath': 'bgp-rib',
           'table': RSM.Table('bgp-rib', view=RSM.View({
             'pf_act_count': {'xpath':'active-prefix-count', 'as_type': int},
             'pf_rcv_count': {'xpath':'received-prefix-count', 'as_type': int},

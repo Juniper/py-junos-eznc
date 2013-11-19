@@ -97,6 +97,16 @@ class RunstatTable(object):
     if self.ITER_XPATH is None: return []
     return [n.findtext(self.NAME_XPATH).strip() for n in self._iter_xpath]
 
+  def values(self):
+    """ 
+    returns list of table entry items().  
+    """
+    return [this.items() for this in self]
+
+  def items(self):
+    """ returns list of tuple(name,values) for each table entry """
+    return zip(self.keys(), self.values())
+
   ### -------------------------------------------------------------------------
   ### OVERLOADS
   ### -------------------------------------------------------------------------

@@ -10,7 +10,6 @@ class RunstatView(object):
 
   NAME_XPATH = 'name'
   FIELD_XPATH = {}
-  FIELD_AS = {}
 
   ### -------------------------------------------------------------------------
   ### CONSTRUCTOR
@@ -106,7 +105,9 @@ class RunstatView(object):
     return "%s\n@%s" % (self.__class__.__name__, self.name)
 
   def __getattr__(self,name):
-    """ returns a view value by item :name: """
+    """ 
+    returns a view item value, called as :obj.name:
+    """
     item = self.FIELD_XPATH.get(name)
     if item is None:
       raise ValueError("Unknown field: '%s'" % name)
@@ -116,13 +117,26 @@ class RunstatView(object):
     else:
       as_type = item.get('as_type',str)
       found = self._xml.xpath(item['xpath'])
-      if 0 == len(found): return None      
-      found = as_type(found[0].text.strip())
+      if 0 == len(found): 
+        # even for the case of numbers, do not set the value.  we 
+        # want to detect "does not exist" vs. defaulting to 0
+        # -- 2013-nov-19, JLS.
+        return None      
+      try:
+        # added exception handler to catch malformed xpath expressesion
+        # -- 2013-nov-19, JLS.
+        as_str = found[0] if isinstance(found[0],str) else found[0].text
+        found = as_type(as_str.strip())
+      except:
+        raise RuntimeError("Unable to handle field:'%s'" % name)
 
     return found
 
   def __getitem__(self,name):
-    """ same as getattr """
+    """ 
+    allow the caller to extract field values using :obj['name']:
+    the same way they would do :obj.name:
+    """
     return getattr(self,name)
 
 
