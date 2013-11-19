@@ -13,7 +13,7 @@ class RunstatMaker(object):
     """
     if view_name is None: view_name = 'RunstatView'
     new_cls = type(view_name, (RunstatView,), {})
-    new_cls.FIELD_XPATH = fields
+    new_cls.FIELDS = fields
     new_cls.__module__ = __name__
     return new_cls
 

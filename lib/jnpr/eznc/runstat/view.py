@@ -9,7 +9,7 @@ class RunstatView(object):
   """
 
   NAME_XPATH = 'name'
-  FIELD_XPATH = {}
+  FIELDS = {}
 
   ### -------------------------------------------------------------------------
   ### CONSTRUCTOR
@@ -54,14 +54,14 @@ class RunstatView(object):
   def xml(self):
     """ returns the XML associated to the item """
     return self._xml
-  
+   
   ### -------------------------------------------------------------------------
   ### METHODS
   ### -------------------------------------------------------------------------
 
   def keys(self):
     """ list of view keys, i.e. field names """
-    return self.FIELD_XPATH.keys()
+    return self.FIELDS.keys()
 
   def values(self):
     """ list of view values """
@@ -108,7 +108,7 @@ class RunstatView(object):
     """ 
     returns a view item value, called as :obj.name:
     """
-    item = self.FIELD_XPATH.get(name)
+    item = self.FIELDS.get(name)
     if item is None:
       raise ValueError("Unknown field: '%s'" % name)
 
