@@ -92,6 +92,9 @@ class RunstatTable(object):
     args.update(kvargs)
     self._xml_got = getattr(self.R,self.GET_RPC)(**args)
 
+    # returning self for call-chaining purposes, yo!
+    return self
+
   def keys(self):
     """ returns a list of table item names """
     if self.ITER_XPATH is None: return []
@@ -101,7 +104,12 @@ class RunstatTable(object):
     """ 
     returns list of table entry items().  
     """
-    return [this.items() for this in self]
+    if self.view is None:
+      # no View, so provide XML for each item
+      return [this for this in self]
+    else:
+      # view object for each item
+      return [this.items() for this in self]
 
   def items(self):
     """ returns list of tuple(name,values) for each table entry """
