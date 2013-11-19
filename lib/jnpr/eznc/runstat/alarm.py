@@ -4,20 +4,21 @@ from . import RunstatMaker as RSM
 ##### nice illustration of using the same View on different Tables
 ##### -------------------------------------------------------------------------
 
-AlarmTableView = RSM.View({
-  'alarms' : {'xpath':'alarm-summary/active-alarm-count', 'as_type': int },
-  'list' : {'table' : RSM.Table('alarm-detail',
-      key='alarm-short-description',
-      view=RSM.View({
-        'time' : {'xpath':'alarm-time'},
-        'time_epoc' : {'xpath':'alarm-time/@seconds', 'as_type': int},
-        'severity' : {'xpath':'alarm-class'},
-        'type' : {'xpath':'alarm-type'},
-        'description' : {'xpath':'alarm-description'},
-        'brief' : {'xpath':'alarm-short-description'}
-      })
-    )}
-  })
+AlarmTableView = RSM.View(RSM.Fields()
+  .int('count', 'alarm-summary/active-alarm-count')
+  .table('list', RSM.Table('alarm-detail',
+    key='alarm-short-description',
+    view=RSM.View(RSM.Fields()
+      .str('time','alarm-time')
+      .int('time_epoc', 'alarm-time/@seconds')
+      .str('severity''alarm-class')
+      .str('type''alarm-type')
+      .str('description','alarm-description')
+      .str('brief','alarm-short-description')
+      .end))
+  )
+  .end
+)
 
 ###> show system alarms
 
