@@ -2,6 +2,8 @@ from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
 
+from .rsmfields import RunstatMakerViewFields
+
 class RunstatView(object):
   """
   RunstatView is the base-class that makes extracting values from XML 
@@ -83,8 +85,18 @@ class RunstatView(object):
     """ list of tuple(key,value) """
     return zip(self.keys(), self.values())
 
+  def _extend_instance(self, more):
+    """ called from extend """
+    if hasattr(more,'fields'):
+      self.FIELDS = deepcopy(self.__class__.FIELDS)
+      self.FIELDS.update(more.fields.end)
+
+    if hasattr(more,'groups'):
+      self.GROUPS = deepcopy(self.__class__.GROUPS)
+      self.GROUPS.update(more.groups)
+
   @contextmanager
-  def extend(self):
+  def extend(self, fields=True, **kvargs):
     """ 
     provide the ability for subclassing objects to extend the
     definitions of the fields.  this is implemented as a 
@@ -92,21 +104,24 @@ class RunstatView(object):
     constructor:
 
       with self.extend() as more:
-        more.field_xpath = <dict>
-        more.field_as = <dict>      # optional
-
+        more.fields = <dict>
+        more.groups = <dict>   # optional
     """
-    self.FIELD_XPATH = deepcopy(self.__class__.FIELD_XPATH)
+    # -------------------------------------------------------------------------    
+    # create a new object class so we can attach stuff to it arbitrarily.  
+    # then pass that object to the caller, yo!
+    # -------------------------------------------------------------------------    
 
-    class MoreView(object): pass
-    more = MoreView()
+    more = type('RunstatViewMore',(object,),{})()
+    if fields is True:
+      more.fields = RunstatMakerViewFields()
+
+    # -------------------------------------------------------------------------
+    # callback through context manager
+    # -------------------------------------------------------------------------
+
     yield more
-
-    self.FIELD_XPATH.update(more.field_xpath)
-
-    if hasattr(more,'field_as'):
-      self.FIELD_AS = deepcopy(self.__class__.FIELD_AS)
-      self.FIELD_AS.update(more.field_as)
+    self._extend_instance(more)
 
   ### -------------------------------------------------------------------------
   ### OVERLOADS
@@ -133,11 +148,15 @@ class RunstatView(object):
       else:
         found = self._xml.xpath(item['xpath'])
 
+      if as_type is bool:
+        # handle the boolean flag case separately
+        return bool(len(found))
+
       if 0 == len(found): 
         # even for the case of numbers, do not set the value.  we 
         # want to detect "does not exist" vs. defaulting to 0
         # -- 2013-nov-19, JLS.
-        return None      
+        return None   
       try:
         # added exception handler to catch malformed xpath expressesion
         # -- 2013-nov-19, JLS.

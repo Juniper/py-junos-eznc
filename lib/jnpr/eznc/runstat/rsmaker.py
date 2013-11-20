@@ -1,50 +1,6 @@
 from .view import RunstatView
+from .rsmfields import RunstatMakerViewFields
 from .table import RunstatTable
-
-### ---------------------------------------------------------------------------
-### PRIVATE CLASSES
-### ---------------------------------------------------------------------------
-
-class _RunstatMakerViewFields(object):
-  """
-  Used to dynamically create a field dictionary used with the 
-  RunstatView class
-  """
-  def __init__(self):
-    self._fields = dict()
-
-  def _prockvargs(self, field, name, **kvargs):
-    if not len(kvargs): return
-    field[name].update(kvargs)
-
-  @property
-  def end(self):
-    return self._fields
- 
-  def str(self, name, xpath=None, **kvargs):
-    if xpath is None: xpath=name
-    field = {name:{'xpath': xpath}}
-    self._prockvargs( field, name, **kvargs )
-    self._fields.update(field)
-    return self
-
-  def astype(self,name,xpath=None,as_type=int, **kvargs):
-    if xpath is None: xpath=name    
-    field = {
-      name: {'xpath': xpath, 'as_type': as_type }
-    }
-    self._prockvargs(field,name,**kvargs)
-    self._fields.update( field )
-    return self
-
-  def int(self,name,xpath=None,**kvargs):
-    return self.astype(name,xpath, int, **kvargs)
-
-  def table(self, name, table ):
-    self._fields.update({
-      name: {'table': table }
-    })
-    return self
 
 class RunstatMaker(object):
   """
@@ -116,7 +72,7 @@ class RunstatMaker(object):
   @classmethod
   def Fields(cls):
     """ class method that wraps the object instance """
-    return _RunstatMakerViewFields()
+    return RunstatMakerViewFields()
 
 
 
