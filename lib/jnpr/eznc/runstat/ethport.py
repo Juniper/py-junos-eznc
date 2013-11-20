@@ -45,4 +45,14 @@ class EthPortView2(EthPortView):
     # call parent __init__ **after** the udpates
     EthPortView.__init__(self, **kvargs)
 
+##### The following shows how to declare a new class that
+##### extends from another class.  Most of the time you
+##### will want to do this, and not the runtime way ...
+##### but it's good to have options, yo!
 
+EthPortView4 = RSM.View( extends=EthPortView, 
+  fields = RSM.Fields()
+    .flag('present', 'ifdf-present', group='flags')
+    .flag('running', 'ifdf-running', group='flags')
+    .end,
+  groups = {'flags':'if-device-flags'})

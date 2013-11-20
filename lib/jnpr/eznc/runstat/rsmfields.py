@@ -14,6 +14,11 @@ class RunstatMakerViewFields(object):
   def end(self):
     return self._fields
 
+  @property
+  def the_end(self):
+    self = self._fields
+    return self    
+
   def str(self, name, xpath=None, **kvargs):
     """ field is a string """
     if xpath is None: xpath=name

@@ -1,3 +1,7 @@
+# stdlib
+from copy import deepcopy
+
+# module libs
 from .view import RunstatView
 from .rsmfields import RunstatMakerViewFields
 from .table import RunstatTable
@@ -48,24 +52,40 @@ class RunstatMaker(object):
     return new_cls
 
   @classmethod
-  def View(cls, fields, view_name=None, **kvargs):
+  def View(cls, fields, **kvargs):
     """
-    :fields: dictionary of fields
-      recommend you use the :Fields: mechanism to create these
-      rather than hardcoding the dictionary structures; since
-      they might change over time.
-
-    :view_name: to name the class (OPTIONAL)
+    :fields: 
+      dictionary of fields, structure of which is ~internal~ and should
+      not be defined explicitly. use the RunstatMaker.Fields() mechanism to 
+      create theserather than hardcoding the dictionary structures; 
+      since they might change over time.
 
     :kvargs:
-        'groups' is a dict of name/xpath 
-        @@@ document this more @@@
+      'view_name' to name the class.  this could be useful for debug
+      or eventual callback mechanisms.
 
+      'groups' is a dict of name/xpath assocaited to fields
+      this technique would be used to extract fields from 
+      node-set elements like port <if-device-flags>.
+
+      'extends' names the base View class to extend.  using this
+      technique you can add to existing defined Views.
     """
-    if view_name is None: view_name = 'RunstatView'
+
+    if not 'view_name' in kvargs: view_name = 'RunstatView'
     new_cls = type(view_name, (RunstatView,), {})
-    new_cls.FIELDS = fields
-    new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None    
+
+    if 'extends' in kvargs:
+      base_cls = kvargs['extends']
+      new_cls.FIELDS = deepcopy(base_cls.FIELDS)
+      new_cls.FIELDS.update(fields)
+      if 'groups' in kvargs:
+        new_cls.GROUPS = deepcopy(base_cls.GROUPS)
+        new_cls.GROUPS.update(kvargs['groups'])
+    else:
+      new_cls.FIELDS = fields
+      new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None    
+
     new_cls.__module__ = __name__
     return new_cls
 
