@@ -167,24 +167,25 @@ class Netconf(object):
 
   def __init__(self, *vargs, **kvargs):
     """
-    kvargs['user'] -- REQUIRED
-      login user-name
-
-    kvargs['password'] -- OPTIONAL
-      login password.  if not provided, assumed ssh-keys are enforced
+    vargs[0] -- ALTERNATIVE for kvargs['host']
 
     kvargs['host'] -- REQUIRED
       device hostname or ipaddress
+
+    kvargs['user'] -- OPTIONAL
+      login user-name, uses $USER if not provided
+
+    kvargs['password'] -- OPTIONAL
+      login password.  if not provided, assumed ssh-keys are enforced
 
     kvargs['port'] -- OPTIONAL
       device login port (defaults to 830)
     """
 
     # private attributes
-
-    self._hostname = kvargs['host']
+    self._hostname = vargs[0] if len(vargs) else kvargs['host']
     self._port = kvargs.get('port', 830)
-    self._auth_user = kvargs['user']
+    self._auth_user = kvargs['user'] if 'user' in kvargs else os.getenv('USER')
     self._auth_password = kvargs.get('password')
     self._conn = None
     self._j2ldr = _Jinja2ldr
