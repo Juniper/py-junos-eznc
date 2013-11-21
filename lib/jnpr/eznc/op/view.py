@@ -132,6 +132,10 @@ class RunstatView(object):
     updater = self._updater_class if all is True else self._updater_instance
     updater(more)
 
+  def asview(self, view_cls ):
+    """ create a new View object for this item """
+    return view_cls(self._table, self._xml)
+    
   ### -------------------------------------------------------------------------
   ### OVERLOADS
   ### -------------------------------------------------------------------------
