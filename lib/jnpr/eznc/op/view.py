@@ -85,7 +85,7 @@ class RunstatView(object):
     """ list of tuple(key,value) """
     return zip(self.keys(), self.values())
 
-  def _extend_instance(self, more):
+  def _updater_instance(self, more):
     """ called from extend """
     if hasattr(more,'fields'):
       self.FIELDS = deepcopy(self.__class__.FIELDS)
@@ -95,8 +95,16 @@ class RunstatView(object):
       self.GROUPS = deepcopy(self.__class__.GROUPS)
       self.GROUPS.update(more.groups)
 
+  def _updater_class(self,more):
+    """ called from extend """
+    if hasattr(more,'fields'):
+      self.FIELDS.update(more.fields.end)
+
+    if hasattr(more,'groups'):
+      self.GROUPS.update(more.groups)
+
   @contextmanager
-  def extend(self, fields=True, **kvargs):
+  def updater(self, fields=True, groups=False, all=True, **kvargs):
     """ 
     provide the ability for subclassing objects to extend the
     definitions of the fields.  this is implemented as a 
@@ -121,7 +129,8 @@ class RunstatView(object):
     # -------------------------------------------------------------------------
 
     yield more
-    self._extend_instance(more)
+    updater = self._updater_class if all is True else self._updater_instance
+    updater(more)
 
   ### -------------------------------------------------------------------------
   ### OVERLOADS
@@ -129,7 +138,7 @@ class RunstatView(object):
 
   def __repr__(self):
     """ returns the name of the View with the associate item name """
-    return "%s\n@%s" % (self.__class__.__name__, self.name)
+    return "%s:%s" % (self.__class__.__name__, self.name)
 
   def __getattr__(self,name):
     """ 
@@ -142,13 +151,13 @@ class RunstatView(object):
     if item.has_key('table'):
       found = item['table'](ncdev=self._table.N, table_xml=self._xml)
     else:
-      as_type = item.get('as_type',str)
+      astype = item.get('astype',str)
       if item.has_key('group'):
         found = self._groups[item['group']].xpath(item['xpath'])
       else:
         found = self._xml.xpath(item['xpath'])
 
-      if as_type is bool:
+      if astype is bool:
         # handle the boolean flag case separately
         return bool(len(found))
 
@@ -161,7 +170,7 @@ class RunstatView(object):
         # added exception handler to catch malformed xpath expressesion
         # -- 2013-nov-19, JLS.
         as_str = found[0] if isinstance(found[0],str) else found[0].text
-        found = as_type(as_str.strip())
+        found = astype(as_str.strip())
       except:
         raise RuntimeError("Unable to handle field:'%s'" % name)
 

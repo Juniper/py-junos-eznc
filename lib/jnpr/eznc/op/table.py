@@ -56,8 +56,7 @@ class RunstatTable(object):
 
   @view.setter
   def view(self, cls):
-    """ :cls: must either be a RunstatView or None """
-
+    """ assigns a new view to the table """
     if cls is None:
       self._view = None
       return
@@ -66,6 +65,14 @@ class RunstatTable(object):
       raise ValueError("Must be given RunstatView class")
 
     self._view = cls
+
+  @property 
+  def is_container(self):
+    """ 
+    True if this table does not have records, but is a container of fields
+    False otherwise
+    """
+    return self.ITER_XPATH is None
 
   @property
   def _iter_xpath(self):
@@ -97,7 +104,7 @@ class RunstatTable(object):
 
   def keys(self):
     """ returns a list of table item names """
-    if self.ITER_XPATH is None: return []
+    if self.is_container: return []
     return [n.findtext(self.NAME_XPATH).strip() for n in self._iter_xpath]
 
   def values(self):
@@ -121,17 +128,17 @@ class RunstatTable(object):
 
   def __repr__(self):
     cname = self.__class__.__name__
-    if self.ITER_XPATH is not None:
-      return "%s\n@%s: %s items" % (cname, self.N.hostname, len(self))
+    if self.is_container is not None:
+      return "%s:%s: %s items" % (cname, self.N.hostname, len(self))
     else:
-      return "%s\n@%s: data=%s" % (cname, self.N.hostname, ('no','yes')[self.got is not None])
+      return "%s:%s: data=%s" % (cname, self.N.hostname, ('no','yes')[self.got is not None])
 
   # ---------------------------------------------------------------------------
   # len is the number of items in the table
   # ---------------------------------------------------------------------------
 
   def __len__(self):
-    return 1 if not self.ITER_XPATH else len(self._iter_xpath)
+    return 1 if self.is_container else len(self._iter_xpath)
 
   # ---------------------------------------------------------------------------
   # [<name>]: select a table item based on <name>

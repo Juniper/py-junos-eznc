@@ -22,11 +22,21 @@ class RunstatMakerViewFields(object):
     self._fields.update(field)
     return self
 
-  def astype(self,name,xpath=None, as_type=int, **kvargs):
-    """ field is of type <as_type> provided by caller """
+  def astype(self,name,xpath=None, astype=int, **kvargs):
+    """
+    field string value will be passed to function :astype:
+
+    This is typically used to do simple type conversions,
+    but also works really well if you set :astype: to
+    a function that does a basic converstion like look
+    at the value and change it to a True/False.  For
+    example:
+
+      astype=lambda x: True if x == 'enabled' else False
+    """
     if xpath is None: xpath=name    
     field = {
-      name: {'xpath': xpath, 'as_type': as_type }
+      name: {'xpath': xpath, 'astype': astype }
     }
     self._prockvargs(field,name,**kvargs)
     self._fields.update( field )

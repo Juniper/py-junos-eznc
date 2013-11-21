@@ -37,7 +37,7 @@ class EthPortView2(EthPortView):
   """ extend the EthPortView at runtime """
 
   def __init__(self,**kvargs):    
-    with self.extend() as more:
+    with self.updater() as more:
       more.groups = {'flags':'if-device-flags'}
       more.fields.flag('present', 'ifdf-present', group='flags')
       more.fields.flag('running', 'ifdf-running', group='flags')
@@ -54,6 +54,6 @@ EthPortView4 = RSM.View( extends=EthPortView,
   fields = RSM.Fields()
     .flag('present', 'ifdf-present', group='flags')
     .flag('running', 'ifdf-running', group='flags')
-    .astype('loopback', as_type=lambda x: True if x == 'enabled' else False)
+    .astype('loopback', astype=lambda x: True if x == 'enabled' else False)
     .end,
   groups = {'flags':'if-device-flags'})
