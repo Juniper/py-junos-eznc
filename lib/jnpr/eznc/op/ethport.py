@@ -28,8 +28,8 @@ EthPortTable = RSM.GetTable('get-interface-information',
   view = EthPortView
 )
 
-##### The following shows how to declare a new class that
-##### extends from another class.
+##### The following shows how to declare a new View class that
+##### extends from another.
 
 EthPortView2 = RSM.View( extends=EthPortView, 
   fields = RSM.Fields()
