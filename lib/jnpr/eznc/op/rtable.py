@@ -1,6 +1,6 @@
 from . import RunstatMaker as RSM
 
-RouteTable = RSM.GetTable('get-route-information',
+Routes = RSM.GetTable('get-route-information',
   args_key = 'destination',
   item = 'route-table/rt',
   key = 'rt-destination',

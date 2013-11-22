@@ -16,6 +16,7 @@ class Config(Util):
     commit - commit changes
     commit_check - perform the commit check operation
     diff - return the diff string between running and candidate config
+    pdiff - prints the diff string (debug/helper)
     load - load changes into the candidate config 
     lock - take an exclusive lock on the candidate config
     unlock - release the exclusive lock
@@ -124,11 +125,12 @@ class Config(Util):
     diff_txt = rsp.find('configuration-output').text
     return None if diff_txt == "\n" else diff_txt
 
+  def pdiff(self, **kvargs):
+    print self.diff(**kvargs)
+    
   ### -------------------------------------------------------------------------
   ### helper on loading configs
-  ### -------------------------------------------------------------------------
-
-  
+  ### ------------------------------------------------------------------------- 
 
   def load(self, *vargs, **kvargs):
     """

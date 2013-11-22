@@ -74,6 +74,14 @@ class RunstatTable(object):
     """
     return self.ITER_XPATH is None
 
+  @property 
+  def can_refresh(self):
+    """
+    True if this table has an 'arg_key' that allows for simple retreval
+    of items based on names
+    """
+    return hasattr(self,'GET_KEY')
+
   @property
   def _iter_xpath(self):
     """ internal use only """
@@ -86,6 +94,16 @@ class RunstatTable(object):
   def assert_data(self):
     """ ensure that the table has XML data """
     if self._xml_got is None: raise RuntimeError("No data")
+
+  def _rpc_get(self, argkey=None, **kvargs):
+    args = {}                     # create empty <dict>
+    args.update(self.GET_ARGS)    # copy default args
+    args.update(kvargs)           # copy caller provided args
+
+    if hasattr(self, 'GET_KEY') and argkey is not None:
+      args.update({self.GET_KEY: argkey })
+
+    return getattr(self.R,self.GET_RPC)(**args)
 
   def get(self, *vargs, **kvargs):
     """ 
@@ -112,16 +130,11 @@ class RunstatTable(object):
       purposes, you want to create a subclass of your table and 
       overload this methods.
     """
-    args = {}
 
-    args.update(self.GET_ARGS)    # copy default args
-    args.update(kvargs)           # copy caller provided args
-
-    if hasattr(self, 'GET_KEY') and len(vargs):
-      args.update({self.GET_KEY: vargs[0] })
+    argkey = vargs[0] if len(vargs) else None
 
     # execute the Junos RPC to retrieve the table
-    self._xml_got = getattr(self.R,self.GET_RPC)(**args)
+    self._xml_got = self._rpc_get(argkey, **kvargs)
 
     # returning self for call-chaining purposes, yo!
     return self

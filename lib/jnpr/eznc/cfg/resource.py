@@ -427,19 +427,36 @@ class Resource(object):
     return self.should[p_name]
 
   ##### -----------------------------------------------------------------------
-  ##### OPERATOR OVERLOADING
+  ##### OVERLOADS
   ##### -----------------------------------------------------------------------
+
+    ### ---------------------------------------------------------------------
+    ### ITEMS: for read/write of resource managed properties
+    ### ---------------------------------------------------------------------
 
   def __getitem__( self, namekey ):
     """
-      implements [] to obtain property value.  value will come
-      from :should: if set or from :has: otherwise.
+    implements [] to obtain property value.  value will come
+    from :should: if set or from :has: otherwise.
     """
 
     if self.is_mgr: 
+      # ---------------------------------------------------------------      
+      # use is resource-manager accessing specific index/name
+      # to return resource instance
+      # ---------------------------------------------------------------      
+
       self._opts['M'] = self
+      if isinstance(namekey,int):
+        # index, not name
+        namekey = self.list[namekey]
+
       res = self.__class__( self._junos, namekey, **self._opts )
       return res
+
+    # ---------------------------------------------------------------
+    # use-case is resource instance for read property
+    # ---------------------------------------------------------------
 
     if namekey in self.should:   
       return self.should[namekey]
@@ -455,7 +472,7 @@ class Resource(object):
 
   def __setitem__(self, r_prop, value):
     """
-      implements []= to set property value into :should:
+    implements []= to set property value into :should:
     """
     if self.is_mgr: 
       raise RuntimeError("Not on a manager!")
@@ -463,6 +480,47 @@ class Resource(object):
       self.should[r_prop] = value
     else:
       raise ValueError("Uknown property request: %s" % r_prop)
+
+  def __call__(self, **kvargs):
+    """
+    alternative way to set property values as aggregation of
+    key/value pairs
+    """
+    if self.is_mgr: raise RuntimeError("Not on a manager!")
+    if not kvargs: return False
+
+    # validate property names first!
+    for p_name,p_val in kvargs.items():
+      if p_name not in self.properties:
+        raise ValueError("Unknown property: %s" % p_name)
+
+    # now cleared to add all the values
+    self.should.update( kvargs )
+    return True
+
+    ### ---------------------------------------------------------------------
+    ### ATTRIBUTE: for read/write of resource managed properties
+    ### ---------------------------------------------------------------------
+
+  def __getattr__(self,namekey):
+    """ 
+    returns property value, accessed as attribute <resource>.<property>
+    only for resource instance 
+    """
+    if self.is_mgr: raise RuntimeError("not on a resource-manager")
+    return self[namekey]
+
+  def __setattr__(self,name,value):
+    if hasattr(self,'properties') and name in self.properties:
+      # we can set this name/value in the resource property
+      self[name] = value
+    else:
+      # pass 'up' to standard setattr method
+      object.__setattr__(self,name,value)
+
+    ### ---------------------------------------------------------------------
+    ### PRINT/DEBUG
+    ### ---------------------------------------------------------------------
 
   def __repr__(self):
     """
@@ -477,23 +535,6 @@ class Resource(object):
       (mgr_name, self._name, pformat(self.has), pformat(self.should)) \
       if not self.is_mgr \
       else "Resource Manager: %s" % mgr_name
-
-  def __call__(self, **kvargs):
-    """
-      alternative way to set property values as aggregation of
-      key/value pairs
-    """
-    if self.is_mgr: raise RuntimeError("Not on a manager!")
-    if not kvargs: return False
-
-    # validate property names first!
-    for p_name,p_val in kvargs.items():
-      if p_name not in self.properties:
-        raise ValueError("Unknown property: %s" % p_name)
-
-    # now cleared to add all the values
-    self.should.update( kvargs )
-    return True
 
   ##### -----------------------------------------------------------------------
   ##### XML reading 

@@ -1,3 +1,4 @@
+import warnings
 from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
@@ -40,13 +41,15 @@ class RunstatView(object):
       raise ValueError("constructor only accecpts lxml.etree._Element")  
 
     self._table = table
-    self._xml = view_xml
     self.NAME_XPATH = table.NAME_XPATH
+    self._init_xml( view_xml )
 
+  def _init_xml(self, given_xml):
+    self._xml = given_xml
     if self.GROUPS is not None:
       self._groups = {}
       for xg_name,xg_xpath in self.GROUPS.items():
-        xg_xml = view_xml.xpath(xg_xpath)
+        xg_xml = self._xml.xpath(xg_xpath)
         if not len(xg_xml):  # @@@ this is technically an error; need to trap it
           continue
         self._groups[xg_name] = xg_xml[0]
@@ -136,6 +139,26 @@ class RunstatView(object):
     """ create a new View object for this item """
     return view_cls(self._table, self._xml)
     
+  def refresh(self):
+    """ 
+    ~~~ EXPERIMENTAL ~~~
+    refresh the data from the Junos device.  this only works if the table
+    provides an "args_key", does not update the original table, just this
+    specific view/item
+    """
+    warnings.warn("Experimental method: refresh")
+    
+    if self._table.can_refresh is not True:
+      raise RuntimeError("table does not support this feature")
+
+    # create a new table instance that gets only the specific named
+    # value of this view
+
+    tbl_xml = self._table._rpc_get(self.name)
+    new_xml = tbl_xml.xpath(self._table.ITER_XPATH)[0]
+    self._init_xml(new_xml)
+    return self
+
   ### -------------------------------------------------------------------------
   ### OVERLOADS
   ### -------------------------------------------------------------------------
