@@ -28,29 +28,10 @@ EthPortTable = RSM.GetTable('get-interface-information',
   view = EthPortView
 )
 
-##### this shows example of two things:
-##### (1) extending an existing view at runtime
-##### (2) using a 'flag' field to return True/False if the
-#####     xpath/element exists
-
-class EthPortView2(EthPortView):  
-  """ extend the EthPortView at runtime """
-
-  def __init__(self,**kvargs):    
-    with self.updater() as more:
-      more.groups = {'flags':'if-device-flags'}
-      more.fields.flag('present', 'ifdf-present', group='flags')
-      more.fields.flag('running', 'ifdf-running', group='flags')
-
-    # call parent __init__ **after** the udpates
-    EthPortView.__init__(self, **kvargs)
-
 ##### The following shows how to declare a new class that
-##### extends from another class.  Most of the time you
-##### will want to do this, and not the runtime way ...
-##### but it's good to have options, yo!
+##### extends from another class.
 
-EthPortView4 = RSM.View( extends=EthPortView, 
+EthPortView2 = RSM.View( extends=EthPortView, 
   fields = RSM.Fields()
     .flag('present', 'ifdf-present', group='flags')
     .flag('running', 'ifdf-running', group='flags')
