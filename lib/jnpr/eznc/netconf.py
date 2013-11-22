@@ -11,7 +11,7 @@ import jinja2
 # local modules
 from .rpcmeta import _RpcMetaExec
 from .exception import RpcError
-from .resources import Resource 
+from .cfg import Resource 
 from .facts import *
 from . import jxml as JXML
 

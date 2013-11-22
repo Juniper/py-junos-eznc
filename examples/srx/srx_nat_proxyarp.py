@@ -5,7 +5,7 @@ from lxml import etree
 
 # for the example ...
 from jnpr.eznc import Netconf
-from jnpr.eznc.resources.srx.nat import NatProxyArp
+from jnpr.eznc.cfg.srx.nat import NatProxyArp
 from jnpr.eznc.utils import Config
 
 # create a junos device and open a connection

@@ -7,7 +7,7 @@ import sys
 
 # for the example ...
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.resources.srx import SharedAddrBook, AddrBookFinder
+from jnpr.eznc.cfg.srx import SharedAddrBook, AddrBookFinder
 
 def die(msg):
   print "-" * 50

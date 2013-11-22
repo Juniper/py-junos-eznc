@@ -2,7 +2,7 @@ import pdb
 from pprint import pprint as pp 
 
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.resources.srx import ApplicationSet
+from jnpr.eznc.cfg.srx import ApplicationSet
 from jnpr.eznc.utils import Config
 from jnpr.eznc.exception import *
 

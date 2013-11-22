@@ -5,7 +5,7 @@ from lxml import etree
 
 # for the example ...
 from jnpr.eznc import Netconf
-from jnpr.eznc.resources.srx.nat import NatSrcPool
+from jnpr.eznc.cfg.srx.nat import NatSrcPool
 from jnpr.eznc.utils import Config
 
 jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')

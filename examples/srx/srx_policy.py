@@ -6,7 +6,7 @@ from lxml import etree
 # for the example ...
 from jnpr.eznc import Netconf
 from jnpr.eznc.utils import Config
-from jnpr.eznc.resources.srx import PolicyContext
+from jnpr.eznc.cfg.srx import PolicyContext
 
 jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()

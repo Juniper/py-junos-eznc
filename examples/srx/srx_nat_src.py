@@ -4,7 +4,7 @@ from lxml import etree
 
 # for the example ...
 from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.resources.srx.nat import NatSrcPool, NatSrcRuleSet
+from jnpr.eznc.cfg.srx.nat import NatSrcPool, NatSrcRuleSet
 from jnpr.eznc.utils import Config
 
 # create a junos device and open a connection

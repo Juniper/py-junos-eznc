@@ -2,7 +2,7 @@
 from lxml.builder import E 
 
 # module packages
-from ..resource import Resource
+from .. import Resource
 from .policy_rule import PolicyRule
 from ... import jxml as JXML
 

@@ -22,7 +22,7 @@ EthPortView = RSM.View(RSM.Fields()
   }
 )
 
-EthPorts = RSM.GetTable('get-interface-information',
+EthPortTable = RSM.GetTable('get-interface-information',
   args =  {'media': True, 'interface_name': '[fgx]e*' },
   args_key = 'interface_name',
   item = 'physical-interface',

@@ -2,7 +2,7 @@
 from lxml.builder import E 
 
 # module packages
-from ...resource import Resource
+from ... import Resource
 from .... import jxml as JXML
 
 class NatSrcPool( Resource ):
@@ -17,7 +17,7 @@ class NatSrcPool( Resource ):
 
   def _xml_at_top(self):
     """
-      configuration to retrieve resource
+    configuration to retrieve resource
     """
     return E.security(E.nat(E.source(E.pool(E.name( self.name )))))
 
@@ -27,13 +27,13 @@ class NatSrcPool( Resource ):
 
   def _xml_at_res(self, xml):
     """
-      return Element at resource
+    return Element at resource
     """
     return xml.find('.//pool')
 
   def _xml_to_py(self, as_xml, to_py ):
     """
-      converts Junos XML to native Python
+    converts Junos XML to native Python
     """
     Resource._r_has_xml_status( as_xml, to_py )
     to_py['addr_from'] = as_xml.find('address/name').text

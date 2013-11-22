@@ -2,7 +2,7 @@
 from lxml.builder import E 
 
 # module packages
-from ...resource import Resource
+from ... import Resource
 from .... import jxml as JXML
 
 class NatSrcRule( Resource ):
