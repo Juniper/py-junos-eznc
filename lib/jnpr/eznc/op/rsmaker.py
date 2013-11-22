@@ -30,11 +30,12 @@ class RunstatMaker(object):
   """
 
   @classmethod
-  def GetTable(cls, cmd, args=None, item=None, key=RunstatTable.NAME_XPATH, view=None, getter_name=None ):
+  def GetTable(cls, cmd, args=None, args_key=None, item=None, key=RunstatTable.NAME_XPATH, view=None, getter_name=None ):
     if getter_name is None: getter_name = "RunstatGetTable." + cmd
     new_cls = type(getter_name, (RunstatTable,), {} )
     new_cls.GET_RPC = cmd
     new_cls.GET_ARGS = args or {}
+    if args_key is not None: new_cls.GET_KEY = args_key
     new_cls.ITER_XPATH = item
     new_cls.NAME_XPATH = key 
     new_cls.VIEW = view

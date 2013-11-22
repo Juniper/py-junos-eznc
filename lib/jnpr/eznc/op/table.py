@@ -87,16 +87,40 @@ class RunstatTable(object):
     """ ensure that the table has XML data """
     if self._xml_got is None: raise RuntimeError("No data")
 
-  def get(self, **kvargs):
+  def get(self, *vargs, **kvargs):
     """ 
-    executes the 'get' command to load the XML data from the 
-    Netconf instance.  If you need to create a 'stub' for unit-testing
-    purposes, you want to create a subclass of your table and overload 
-    this methods.
+    Retrieve the XML table data from the Netconf instance and
+    returns back the Table instance - for call-chaining purposes.  
+
+    ALIAS: read    
+
+    :vargs:
+      [0] is the table :arg_key: value.  This is used so that
+      the caller can retrieve just one item from the table without
+      having to know the Junos RPC argument.
+
+    :kvargs:
+      these are the name/value pairs relating to the specific Junos
+      XML command attached to the table.  For example, if the RPC 
+      is 'get-route-information', there are parameters such as
+      'table' and 'destination'.  Any valid RPC argument can be
+      passed to :kvargs: to further filter the results of the :get():
+      operation.  neato!
+
+    NOTES:
+      If you need to create a 'stub' for unit-testing
+      purposes, you want to create a subclass of your table and 
+      overload this methods.
     """
     args = {}
-    args.update(self.GET_ARGS)
-    args.update(kvargs)
+
+    args.update(self.GET_ARGS)    # copy default args
+    args.update(kvargs)           # copy caller provided args
+
+    if hasattr(self, 'GET_KEY') and len(vargs):
+      args.update({self.GET_KEY: vargs[0] })
+
+    # execute the Junos RPC to retrieve the table
     self._xml_got = getattr(self.R,self.GET_RPC)(**args)
 
     # returning self for call-chaining purposes, yo!
@@ -121,6 +145,12 @@ class RunstatTable(object):
   def items(self):
     """ returns list of tuple(name,values) for each table entry """
     return zip(self.keys(), self.values())
+
+  ### -------------------------------------------------------------------------
+  ### ALIASES
+  ### -------------------------------------------------------------------------
+
+  read = get
 
   ### -------------------------------------------------------------------------
   ### OVERLOADS
