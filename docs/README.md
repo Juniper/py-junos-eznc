@@ -21,8 +21,8 @@ You can perform configuration changes in one of two ways: (1) structured Resourc
 
 Stuctured _Resources_ are defined as elements of the Junos configuration that you want to manage as discrete items.  For example, a SRX security zone has an address-book, that it turn contains a list of address items and a list of address-sets.  The purpose of the resource abstraction is to enable the user to manage these items as simple Python objects, and not requiring kownledge of the underlying Junos/XML.  Resources can be Junos product family specifc.  Security Zones, for example, would be found only on SRX products.
 
-* [Using Resources](cfg/README.md).
-* [Catalog of Resources](cfg/catalog.md).
+* [Using Resources](cfg/README.md)
+* [Catalog of Resources](cfg/catalog.md)
 
 Unstructued snippets are handed by the _Config_ utiilty library using the _load()_ routine. 
 
@@ -30,8 +30,8 @@ Unstructued snippets are handed by the _Config_ utiilty library using the _load(
 
 An application will often want to perform common fucntions, and again wihtout requiring knowledge of the underlying Junos/XML.  The Config library, for example, allows you to do things like "rolllback", "commit check" and "show | compare" to get a diff-patch output of candidate changes.
 
-* [Using Utilities](utils/README.md).
-* [Catalog of Utilities](utils/catalog.md).
+* [Using Utilities](utils/README.md)
+* [Catalog of Utilities](utils/catalog.md)
 
 ### RPC Metaprogramming 
 
