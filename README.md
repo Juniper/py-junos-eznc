@@ -2,14 +2,21 @@
 
 [![Build Status](https://travis-ci.org/jeremyschulman/py-junos-eznc.png?branch=master)](https://travis-ci.org/jeremyschulman/py-junos-eznc)
 
-The repo is under active development on release 0.0.2.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  For tagged releases, please see [here](https://github.com/jeremyschulman/py-junos-eznc/tags).
+The repo is under active development on release 0.0.2.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  This code is not yet in PyPi.
+
 # ABOUT
 
-A Python module that makes automating Junos devices over the NETCONF API "easy".  The goal of this "microframework" is to enable Netops/engineers the ability to create Python scripts without requiring "hardcore" programming knownledge.  
+_Junos EZNC_ is a Python library that provides a collection of modules to further Junos automation without requiring: (a) the user to be a "Software Programmer™", (b) sophisticated knowledge of Junos, or (b) complex understanding of the Junos XML API.
 
-This module is not specifically tied to any version of Junos or any Junos product family. It provides a general purpose set of utilities and resources abstrations.  It has been designed so that future contributors can easily "plug-in" thier extensions. 
+The primary motivators for creating this framework are:
 
-There are three basic "layers" to this module: Resources, Utilities, and RPC Metaprogramming
+### NoCLI - For "Non-Programmers"
+
+NoCLI = "Not Only CLI".  This means that "non-programmers", for example the _Network Engineer_, can use the native Python shell as their user-experience for managing Junos devices. The Python shell is an interactive environment that provides the necessary means to perform common automation tasks, such as conditional testing, for-loops, macros, and templates.  These building blocks are similar enough to other "shell" enviornments, like Bash, to enable the non-programmer to use the Python shell as a power-tool, rather than a programming language. 
+
+### Extensible Microframework - For "Programmers"
+
+There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos EZNC_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos EZNC_ is not specifically tied to any version of Junos or any Junos product family. 
 
 #### Managing Resources Abstractions
 
