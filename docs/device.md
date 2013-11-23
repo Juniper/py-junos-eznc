@@ -1,6 +1,8 @@
 ## Device Connection
 
-...to be written...
+````python
+from jnpr.junos import Device
+````
 
 ### Basic Session Management
 
