@@ -4,21 +4,32 @@ The repo is under active development on release 0.0.2.  If you take a clone, you
 
 ## ABOUT
 
-_Junos EZNC_ is a Python library that provides a collection of modules to further Junos automation without requiring: (a) the user to be a "Software Programmer™", (b) sophisticated knowledge of Junos, or (b) complex understanding of the Junos XML API.
+_Junos EZNC_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  This library was built for two types of users:
 
-The primary motivators for creating this framework:
+### For "Non-Programmers" - NoCLI
 
-### For "Non-Programmers", NoCLI
+NoCLI = _Not Only CLI_.  This means that "non-programmers", for example the _Network Engineer_, can use the native Python shell on their management server (laptop, tablet, phone, etc.) as their point-of-control for remotely managing Junos devices. 
 
-NoCLI = "Not Only CLI".  This means that "non-programmers", for example the _Network Engineer_, can use the native Python shell as their user-experience for managing Junos devices. The Python shell is an interactive environment that provides the necessary means to perform common automation tasks, such as conditional testing, for-loops, macros, and templates.  These building blocks are similar enough to other "shell" enviornments, like Bash, to enable the non-programmer to use the Python shell as a power-tool, rather than a programming language. 
+The Python shell is an interactive environment that provides the necessary means to perform common automation tasks, such as conditional testing, for-loops, macros, and templates.  These building blocks are similar enough to other "shell" enviornments, like Bash, to enable the non-programmer to use the Python shell as a power-tool, rather than a programming language.  From the Python shell a user can manage Junos devices using native hash tables, arrays, etc. rather than device-specific Junos XML or resorting to 'screen scraping' the actual CLI.
 
-### For "Programmers", an extensible microframework
+### For "Programmers" - Extensible microframework
 
 There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos EZNC_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos EZNC_ is not specifically tied to any version of Junos or any Junos product family. 
 
+## FEATURES
+
+_Junos EZNC_ is designed to provide the same capabilties as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabiltieis include, but are not limited to:
+
+* Provide "facts" about the device such as software-version, serial-number, etc.
+* Retrieve the "operational" or "run-state" information (think "show" commands)
+* Make configuration changes
+* Provide common utilities for tasks such as secure copy of files and software updates
+
+_Junos EZNC_ uses the Junos XML API via the NETCONF protocol.  This level of detail is generally shielded from the user.  At times, you may need to access the API, and this library provides an easy meta-programming mechanism to do so.  
+
 ## INSTALLATION
 
-This library is not yet in PyPi, so you will need to _git clone_ and run _python2.7 setup.py install_ or use _pip-2.7_ to install.  For complete instructions, see this [blog](http://forums.juniper.net/t5/Network-Automaniac/Python-for-Non-Programmers-Part-1/ba-p/216449). 
+This library is not yet in PyPi, so you will need to either _git clone_ and run _python2.7 setup.py install_ or use _pip-2.7_ to install.  For complete instructions, see this [blog](http://forums.juniper.net/t5/Network-Automaniac/Python-for-Non-Programmers-Part-1/ba-p/216449). 
 
 ## HELLO, WORLD
 
@@ -35,6 +46,7 @@ pprint( dev.facts )
 
 dev.close()
 ````
+
 ## DOCUMENTATION
 
 Please refer to the [_docs_](docs) directory.
