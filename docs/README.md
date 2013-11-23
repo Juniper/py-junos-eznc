@@ -4,7 +4,7 @@ Each managed Junos device is modeled as a _jnpr.junos.Device_ variable (aka "ins
 
 Each managed Junos instance maintains a dictionary (hash-table) of "facts".  These facts are loaded when you open a connetion to the device.  Facts are generally static pieces of information, such as the software version or serial-number.  These facts form the basis for other modules when creating abstractions.  For example, configuring VLANs on one Junos product family, may actually be different from another, at the XML API devel.  The purpose of _Junos EZ_ is to abstract those differences so the user has a consistent automation interface.
 
-* [Using Device](netconf.md)
+* [Using Device](device.md)
 
 ### Getting Operational Data
 
