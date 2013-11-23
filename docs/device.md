@@ -1,3 +1,3 @@
-# Netconf
+# jnpr.junos.Device
 
 ...to be written...
