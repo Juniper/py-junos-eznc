@@ -13,7 +13,7 @@ Operational data, or sometimes called "Run-State" data, refers to the current ru
 _Junos EZNC_ provides access to this information using two basic concepts: a "table" and a "view".  You can think of a "table" as the collection of data, and the "view" as the fields of specific data that you want to examine.  The _Junos EZNC_ library will contain table and view definitions contributed by the community.  As as user/developer you can easily create your own tables and views.
 
 * [Using Tables and Views](op/README.md)
-* [Catalog of Tables](op/catalog_tables.md)
+* [Catalog of Tables](op/catalog.md)
 
 ### Managing Configuration
 
