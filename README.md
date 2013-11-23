@@ -54,7 +54,8 @@ Example output for an SRX-210 device:
          'model': 'RE-SRX210H',
          'status': 'OK',
          'up_time': '10 minutes, 3 seconds'},
- 'fqdn': 'srx210',
+ 'domain': 'workflowsherpas.com'         
+ 'fqdn': 'srx210.workflowsherpas.com',
  'hostname': 'srx210',
  'ifd_style': 'CLASSIC',
  'model': 'SRX210H',
