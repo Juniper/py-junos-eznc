@@ -46,7 +46,24 @@ pprint( dev.facts )
 
 dev.close()
 ````
-
+Example output for an SRX-210 device:
+````python
+>>> pprint(dev.facts)
+{'2RE': False,
+ 'RE0': {'last_reboot_reason': '0x20:power-button soft power off',
+         'model': 'RE-SRX210H',
+         'status': 'OK',
+         'up_time': '10 minutes, 3 seconds'},
+ 'fqdn': 'srx210',
+ 'hostname': 'srx210',
+ 'ifd_style': 'CLASSIC',
+ 'model': 'SRX210H',
+ 'personality': 'SRX_BRANCH',
+ 'serialnumber': 'AD2909AA0096',
+ 'switch_style': 'VLAN',
+ 'version': '12.1X44-D10.4',
+ 'version_info': junos.versino_info(major=(12, 1), type=X, minor=(44, 'D', 10), build=4)}
+````
 ## DOCUMENTATION
 
 Please refer to the [_docs_](docs) directory.
