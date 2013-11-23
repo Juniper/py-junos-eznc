@@ -27,12 +27,12 @@ class RunstatTable(object):
 
   @property
   def N(self):
-    """ shortcut to the Netconf instance """
+    """ shortcut to the Device instance """
     return self._ncdev
 
   @property
   def R(self):
-    """ shortcut to the Netconf RPC metaexec instance """
+    """ shortcut to the Device RPC metaexec instance """
     return self._ncdev.rpc
 
   @property
@@ -107,7 +107,7 @@ class RunstatTable(object):
 
   def get(self, *vargs, **kvargs):
     """ 
-    Retrieve the XML table data from the Netconf instance and
+    Retrieve the XML table data from the Device instance and
     returns back the Table instance - for call-chaining purposes.  
 
     ALIAS: read    

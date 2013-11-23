@@ -3,7 +3,7 @@ from pprint import pprint as pprint
 import paramiko
 import os, sys
 
-from jnpr.eznc import Netconf
+from jnpr.junos import Device as Netconf
 
 # local import
 from uac import UAC

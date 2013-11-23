@@ -66,7 +66,7 @@ class ZoneAddrBook( Resource ):
 
   def _r_list(self):
     # this list of zone addressbooks is really just the list of zones
-    got = self.N.rpc.get_zones_information(terse=True)
+    got = self.R.get_zones_information(terse=True)
     zones = got.findall('zones-security/zones-security-zonename')
     self._rlist = [zone.text for zone in zones]    
     self._rlist.remove('junos-host')

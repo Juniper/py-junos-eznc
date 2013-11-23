@@ -79,7 +79,7 @@ class Zone( HostInbSvcMixin, Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    got = self.N.rpc.get_zones_information(terse=True)
+    got = self.R.get_zones_information(terse=True)
     zones = got.findall('zones-security/zones-security-zonename')
     self._rlist = [zone.text for zone in zones]
     self._rlist.remove('junos-host')

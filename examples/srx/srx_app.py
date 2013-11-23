@@ -1,10 +1,10 @@
 import pdb
 from pprint import pprint as pp 
 
-from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.cfg.srx import ApplicationSet
-from jnpr.eznc.utils import Config
-from jnpr.eznc.exception import *
+from jnpr.junos import Device as Junos
+from jnpr.junos.cfg.srx import ApplicationSet
+from jnpr.junos.utils import Config
+from jnpr.junos.exception import *
 
 from lxml.builder import E 
 from lxml import etree

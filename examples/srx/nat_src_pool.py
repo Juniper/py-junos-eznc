@@ -4,11 +4,11 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from jnpr.eznc import Netconf
-from jnpr.eznc.cfg.srx.nat import NatSrcPool
-from jnpr.eznc.utils import Config
+from jnpr.junos import Device
+from jnpr.junos.cfg.srx.nat import NatSrcPool
+from jnpr.junos.utils import Config
 
-jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev = Device(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 jdev.bind(cu=Config)

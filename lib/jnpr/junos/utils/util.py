@@ -5,7 +5,7 @@ class Util(object):
     self._dev = dev
 
   def __repr__(self):
-    return "jnpr.eznc.utils.%s(%s)" % (self.__class__.__name__, self._dev.hostname)
+    return "jnpr.junos.utils.%s(%s)" % (self.__class__.__name__, self._dev.hostname)
 
   ### -------------------------------------------------------------------------
   ### property: dev
@@ -13,7 +13,7 @@ class Util(object):
 
   @property
   def dev(self):
-    """ return the Netconf device object """
+    """ return the Device device object """
     return self._dev
 
   @dev.setter
@@ -26,7 +26,7 @@ class Util(object):
 
   @property
   def rpc(self):
-    """ return the Netconf RPC meta object """
+    """ return the Device RPC meta object """
     return self._dev.rpc
 
   @rpc.setter

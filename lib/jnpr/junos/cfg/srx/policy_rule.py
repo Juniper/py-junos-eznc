@@ -3,7 +3,7 @@ from lxml.builder import E
 
 # local packages
 from .. import Resource
-from ....eznc import jxml as JXML
+from .... import jxml as JXML
 
 class PolicyRule( Resource ):
   """

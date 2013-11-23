@@ -25,7 +25,7 @@ class Resource(object):
     and resource-managers inherit from this class.
 
     junos
-      Instance of Netconf, this is bound to the Resource for 
+      Instance of Device, this is bound to the Resource for 
       device access
 
     namevar
@@ -196,13 +196,13 @@ class Resource(object):
     return self._junos
 
   @property
-  def N(self):
-    """ returns the Netconf object bound to this resource/manager """
+  def D(self):
+    """ returns the Device object bound to this resource/manager """
     return self._junos
 
   @property 
   def R(self):
-    """ returns the Netconf RPC meta object """
+    """ returns the Device RPC meta object """
     return self._junos.rpc
 
   @property

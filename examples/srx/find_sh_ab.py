@@ -6,8 +6,8 @@ from lxml import etree
 import sys
 
 # for the example ...
-from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.cfg.srx import SharedAddrBook, AddrBookFinder
+from jnpr.junos import Device as Junos
+from jnpr.junos.cfg.srx import SharedAddrBook, AddrBookFinder
 
 def die(msg):
   print "-" * 50

@@ -149,7 +149,7 @@ class SW(Util):
 
     :progress:
       if provided, this is a callback function with a function prototype given
-      the Netconf instance and the report string, e.g.
+      the Device instance and the report string, e.g.
         
         def myprogress(dev, report):
           print "host: %s, report: %s" % (dev.hostname, report)

@@ -3,9 +3,9 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.cfg.srx.nat import NatSrcPool, NatSrcRuleSet
-from jnpr.eznc.utils import Config
+from jnpr.junos import Device as Junos
+from jnpr.junos.cfg.srx.nat import NatSrcPool, NatSrcRuleSet
+from jnpr.junos.utils import Config
 
 # create a junos device and open a connection
 

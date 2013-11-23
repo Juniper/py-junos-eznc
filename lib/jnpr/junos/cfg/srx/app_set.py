@@ -89,11 +89,11 @@ class ApplicationSet( Resource ):
   ##### -----------------------------------------------------------------------
 
   def _r_list(self):
-    got = self.N.rpc.get_config(E.applications(E('application-set', JXML.NAMES_ONLY)))
+    got = self.R.get_config(E.applications(E('application-set', JXML.NAMES_ONLY)))
     self._rlist = [ this.text for this in got.xpath('.//name')]
 
   def _r_catalog(self):
-    got = self.N.rpc.get_config(E.applications(E('application-set')))
+    got = self.R.get_config(E.applications(E('application-set')))
     for this in got.xpath('.//application-set'):
       name = this.findtext('name')
       self._rcatalog[name] = {}

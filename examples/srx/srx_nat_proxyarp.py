@@ -4,13 +4,13 @@ from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from jnpr.eznc import Netconf
-from jnpr.eznc.cfg.srx.nat import NatProxyArp
-from jnpr.eznc.utils import Config
+from jnpr.junos import Device
+from jnpr.junos.cfg.srx.nat import NatProxyArp
+from jnpr.junos.utils import Config
 
 # create a junos device and open a connection
 
-jdev = Netconf(user='jeremy', password='jeremy1', host='vsrx_cyan')
+jdev = Device(user='jeremy', password='jeremy1', host='vsrx_cyan')
 jdev.open()
 
 # create a config utility object

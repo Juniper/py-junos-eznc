@@ -159,7 +159,7 @@ class Device(object):
   ##### -----------------------------------------------------------------------
 
   def __repr__(self):
-    return "Netconf(%s)" % self.hostname
+    return "Device(%s)" % self.hostname
 
   ##### -----------------------------------------------------------------------
   ##### CONSTRUCTOR
@@ -333,15 +333,15 @@ class Device(object):
 
   def bind(self, *vargs, **kvargs):
     """
-    Used to attach things to this Netconf instance
+    Used to attach things to this Device instance
 
     vargs
       a list of functions that will get bound as instance methods to 
-      this Netconf instance
+      this Device instance
 
     kvargs
       name/class pairs that will create resource-managers bound as 
-      instance attributes to this Netconf instance
+      instance attributes to this Device instance
     """
     if len(vargs):
       for fn in vargs:
@@ -361,7 +361,7 @@ class Device(object):
       if hasattr(self, name):
         raise ValueError("requested attribute name %s already exists" % name)
 
-    # now instantiate items and bind to this :Netconf:
+    # now instantiate items and bind to this :Device:
     for name,thing in kvargs.items():
       new_inst = thing(self)
       self.__dict__[name] = new_inst

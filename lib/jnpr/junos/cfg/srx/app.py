@@ -70,12 +70,12 @@ class Application( Resource ):
 
   def _r_list(self):
     get = E.applications(E.application( JXML.NAMES_ONLY ))
-    got = self.N.rpc.get_config( get )
+    got = self.R.get_config( get )
     self._rlist = [app.text for app in got.xpath('applications/application/name')]
 
   def _r_catalog(self):
     get = E.applications(E.application())
-    got = self.N.rpc.get_config( get )
+    got = self.R.get_config( get )
     for app in got.xpath('applications/application'):
       name = app.findtext('name')
       self._rcatalog[name] = {}
