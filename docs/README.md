@@ -1,16 +1,16 @@
-### Junos Device
+### Device Connection
 
-Each managed Junos device is modeled as a _Netconf_ variable (aka "instance").  The general process is you create a variable for each device, providing at least the host-name.  You can optionally provide a user-name (defaults to $USER) and a password (defaults to using ssh-keys).  You then open a connection to the device, perform automation activities on it, and finally close the connection.
+Each managed Junos device is modeled as a _jnpr.junos.Device_ variable (aka "instance").  The general process is you create a variable for each device, providing at least the host-name.  You can optionally provide a user-name (defaults to $USER) and a password (defaults to using ssh-keys).  You then open a connection to the device, perform automation activities on it, and finally close the connection.
 
-Each managed Junos instance maintains a dictionary of "facts".  These facts are loaded when you open a connetion to the device.  Facts are generally static pieces of information, such as the software version or serial-number.  These facts form the basis for other modules when creating abstractions.  For example, configuring VLANs on one Junos product family, may actually be different from another, at the XML API devel.  The value of _Junos EZNC_ is to abstract those differences so the user has a consistent automation interface.
+Each managed Junos instance maintains a dictionary (hash-table) of "facts".  These facts are loaded when you open a connetion to the device.  Facts are generally static pieces of information, such as the software version or serial-number.  These facts form the basis for other modules when creating abstractions.  For example, configuring VLANs on one Junos product family, may actually be different from another, at the XML API devel.  The purpose of _Junos EZ_ is to abstract those differences so the user has a consistent automation interface.
 
-* [Using Netconf](netconf.md)
+* [Using Device](netconf.md)
 
 ### Getting Operational Data
 
 Operational data, or sometimes called "Run-State" data, refers to the current running conditions of the device, and not its configuration.  For example, you may _configure_ an interface to use OSFP, but the neighbor connection status is operational data.  From the Junos CLI, operational data is displayed using "show" commands, e.g. _"show ospf neighbor"_.
 
-_Junos EZNC_ provides access to this information using two basic concepts: a "table" and a "view".  You can think of a "table" as the collection of data, and the "view" as the fields of specific data that you want to examine.  The _Junos EZNC_ library will contain table and view definitions contributed by the community.  As as user/developer you can easily create your own tables and views.
+_Junos EZ_ provides access to this information using two basic concepts: a "table" and a "view".  You can think of a "table" as the collection of data, and the "view" as the fields of specific data that you want to examine.  The _Junos EZ_ library will contain table and view definitions contributed by the community.  As as user/developer you can easily create your own tables and views.
 
 * [Using Tables and Views](op/README.md)
 * [Catalog of Tables](op/catalog.md)
