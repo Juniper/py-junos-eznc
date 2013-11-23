@@ -4,7 +4,7 @@ from lxml import etree
 
 # for the example ...
 from exampleutils import *
-from jnpr.eznc import Netconf as Junos
+from jnpr.junos import Device as Junos
 
 login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)

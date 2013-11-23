@@ -1,5 +1,5 @@
 
-from jnpr.eznc.utils import Util
+from jnpr.junos.utils import Util
 
 class PortUtils(Util):
   

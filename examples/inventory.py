@@ -1,6 +1,6 @@
-from jnpr.eznc import Netconf
+from jnpr.junos import Device
 
-jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev = Device(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 inv = jdev.rpc.get_chassis_inventory()
