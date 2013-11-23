@@ -1,3 +1,3 @@
-### jnpr.junos.Device
+### Device
 
 ...to be written...
