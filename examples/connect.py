@@ -3,7 +3,7 @@ from pprint import pprint as pprint
 import paramiko
 import os, sys
 
-from jnpr.eznc import Netconf
+import jnpr.junos as junos
 
 if len(sys.argv) < 3:
   print "you must provide a Junos user and target hostname"
@@ -28,5 +28,5 @@ login = dict(
   user=user_name, password=getpass()
 )
 
-dev = Netconf(**login).open()
+dev = junos.Device(**login).open()
 

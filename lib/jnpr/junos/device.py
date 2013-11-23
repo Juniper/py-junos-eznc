@@ -43,7 +43,7 @@ class _MyTemplateLoader(jinja2.BaseLoader):
 
 _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
-class Netconf(object):
+class Device(object):
 
   ##### -------------------------------------------------------------------------
   ##### PROPERTIES
@@ -56,7 +56,7 @@ class Netconf(object):
   @property
   def hostname(self):
     """
-      The hostname/ip-addr of the Junos device
+    The hostname/ip-addr of the Junos device
     """
     return self._hostname
 
@@ -67,7 +67,7 @@ class Netconf(object):
   @property
   def user(self):
     """
-      The login user accessing the Junos device
+    The login user accessing the Junos device
     """
     return self._auth_user
 
