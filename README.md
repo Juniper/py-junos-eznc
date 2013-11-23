@@ -4,7 +4,9 @@ The repo is under active development on release 0.0.2.  If you take a clone, you
 
 ## ABOUT
 
-_Junos EZNC_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  This library was built for two types of users:
+_Junos EZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
+
+This library was built for two types of users:
 
 ### For "Non-Programmers" - NoCLI
 
@@ -14,18 +16,18 @@ The Python shell is an interactive environment that provides the necessary means
 
 ### For "Programmers" - Extensible microframework
 
-There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos EZNC_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos EZNC_ is not specifically tied to any version of Junos or any Junos product family. 
+There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos EZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos EZ_ is not specifically tied to any version of Junos or any Junos product family. 
 
 ## FEATURES
 
-_Junos EZNC_ is designed to provide the same capabilties as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabiltieis include, but are not limited to:
+_Junos EZ_ is designed to provide the same capabilties as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabiltieis include, but are not limited to:
 
 * Provide "facts" about the device such as software-version, serial-number, etc.
 * Retrieve the "operational" or "run-state" information (think "show" commands)
 * Make configuration changes
 * Provide common utilities for tasks such as secure copy of files and software updates
 
-_Junos EZNC_ uses the Junos XML API via the NETCONF protocol.  This level of detail is generally shielded from the user.  At times, you may need to access the API, and this library provides an easy meta-programming mechanism to do so.  
+_Junos EZ_ uses the Junos XML API via the NETCONF protocol.  This level of detail is generally shielded from the user.  At times, you may need to access the API, and this library provides an easy meta-programming mechanism to do so.  
 
 ## INSTALLATION
 
@@ -37,9 +39,9 @@ The following is a quick "hello, world" example to ensure that the softare was i
 
 ````python
 from pprint import pprint
-from jnpr.eznc import Netconf
+from jnpr.junos import Device
 
-dev = Netconf(host='my_host_or_ipaddr', user='jeremy', password='jeremy123' )
+dev = Device(host='my_host_or_ipaddr', user='jeremy', password='jeremy123' )
 dev.open()
 
 pprint( dev.facts )
