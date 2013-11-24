@@ -110,3 +110,13 @@ Additionally each item provides a number of routines for configuration managemen
   * activate() - activates the resource in the Junos config
   * deactivate() - deactivates the resource in the Junos config
   * reorder() - changes the ordering of the resource in the Junos config
+
+For example, to deactivate a user account:
+````python
+>>> me.deactivate()
+True
+>>> me.active
+False
+````
+Note that the act of deactivating a resource performs the change to the Junos device; i.e. you do **not** need to issue a separate _write()_.  This is true for all of these routines.
+
