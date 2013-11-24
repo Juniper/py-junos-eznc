@@ -76,7 +76,7 @@ RunstatGetTable.get-route-information:jnpr-dc-fw: 2 items
 You can treat a _Table_ like a Python dictonary, so you have the following routines:
 
 * keys() - get a list of table item names
-* values() - get a list of tuples(name/value) for each field in each record
+* values() - get a list of table View tuples(name/value) for each field in each record
 * items() - a tuple composite of keys() and values()
 
 ````python
@@ -110,3 +110,7 @@ RunstatView:192.168.56.10/32
 ### Defining Your Own Tables
 
 The _Junos EZ_ library will contain a growing number of table definitons.  The _Junos EZ_ library was designed so that you can quickly define you own tables; it is assumed that what **you** want will not be in the library, and **you** do not need to wait.  Generally speaking it should take you less than 10 minutes to define a new Table and assocaited View, once you get the hang of it.  Take a look at the existing tables in the [_op directory_](../../lib/junos/op) for guidance.  
+
+### Changing the Table View
+
+You can change the default Table View using the _Table.view_ property.  This will be discussed in the [View documentation](views.md).
