@@ -95,4 +95,4 @@ And by using the _View.asview()_ routine:
 
 ### Creating Your Own Views
 
-It is very easy to create your own Views.  Take a look at the existing code in the [_ops directory_](https://github.com/jeremyschulman/py-junos-eznc/tree/master/lib/jnpr/junos/op).  Additional documentation will be written on this topic in the near future.  The _Junos EZ_ library was written so that it would take you less than 10 minutes to write your own Views.
+It is very easy to create your own Views.  Take a look at the existing code in the [_op directory_](https://github.com/jeremyschulman/py-junos-eznc/tree/master/lib/jnpr/junos/op).  Additional documentation will be written on this topic in the near future.  The _Junos EZ_ library was written so that it would take you less than 10 minutes to write your own Views.
