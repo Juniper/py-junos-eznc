@@ -3,12 +3,54 @@
 ````python
 from jnpr.junos import Device
 ````
+For complete documentation, you can use the Python shell `help(Device)`
 
-### Basic Session Management
+### Opening a Connection
+
+To create a _Device_ variable you must provide at least the target host-name.  You can optionally provide the user name, and if omitted will default to the `$USER` environment value.  You can optinally provide a password, and if omitted will assume that ssh-keys are enforce.
+
+````python
+from jnpr.junos import Device
+
+dev = Device('jnpr-dc-fw')                          
+dev = Device('jnpr-dc-fw', user='jeremy')           
+dev = Device('jnpr-dc-fw', user='jeremy', password='logmein')
+````
+
+Once you've created the Device, you then open a connection:
+````python
+dev.open()
+````
+
+If an error occurs in the proces, an Exception will be raised.  
+
+You can _call-chain_ the Device create and connection open together:
+````python
+dev = Device('jnpr-dc-fw').open()
+````
+
+#### Changing the RPC timeout
+
+The default timeout for an RPC to transact is 30 seconds.  You may need to change this value for long running requests.  Specifically if you perform a software-upgrade you *MUST* change this value.  You can read/write the timeout value as a Device property:
+
+````python
+# read the value
+>>> dev.timeout
+30
+
+# change the value to 10 minutes
+>>> dev.timeout = 10*60
+````
+### Closing a Device Connection
+
+You should explicity close the Device connection when you are done, as a matter of proper "hygenine".
+````python
+dev.close()
+````
 
 ### Associating Widgets to a Device
 
-We'll use the term _"widget"_ to refer to anything that we want to associated with a Device instance.  This could be a configuration _Resource_, a _Util_ library, a Operational data _Table_, or other items defined in the _Junos EZ_ library.
+We'll use the term _"widget"_ to refer to anything that we want associated with a Device variable.  This could be a configuration _Resource_, a Utility library, a Operational data _Table_, or other items defined in the _Junos EZ_ library.
 
 There are two ways you can associated a widget with a Device: (1) as a standalone variable, or (2) as a bound property.
 
@@ -46,4 +88,6 @@ that device around for later use.  This way you don't need to keep creating widg
 ````
 ### Remote Procedure Call (RPC)
 
+At times you may want to directly access the Junos XML API command/respnse.  Use the _Device.rpc_ metaprogramming object to execute an RPC and return back the XML response.  
 
+* [Using RPC](metarpc.md)
