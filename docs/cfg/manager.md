@@ -23,6 +23,18 @@ You can get a list of Resource item names by accessing the _Resource.list_.
 ['jeremy', 'kim']
 ````
 
+#### Accessing a Specific Resource Item
+
+You can access a resource item either by name or by index.  The index works the same as a list, so 0 is the first one, and -1 is the last one.
+````python
+>>> this = users['jeremy']
+>>> this.name
+'jeremy'
+>>> this = users[-1]
+>>> this.name
+'kim'
+````
+
 #### Getting the Catalog of Resources
 
 You can get a catalog of Resource items by accessing the _Resource.catalog_.  A catalog is a Python dictionary where the key is the resource name and the value is the set of resource property values.
@@ -51,7 +63,6 @@ Using the catalog is handy when looking for items.  For example, let's say you w
 ['kim']
 ````
 
-#### Accessing a Specific Resource
 
 
 
