@@ -3,7 +3,7 @@
 ````python
 from jnpr.junos import Device
 ````
-For complete documentation, you can use the Python shell `help(Device)`
+This page provides an overview of _Device_, and for complete documentation you can use the Python shell `help(Device)`
 
 ### Opening a Connection
 
