@@ -15,33 +15,43 @@ Alteratively you can use the _Device.bind_ to attach the manager widget, as desc
 >>> dev.users
 Resource Manager: User
 ````
+#### Getting a List of Resource Names
 
-Selecting a resource is make by using the `[<name>]` mechanism.  This returns a specific resource, in this case the address-book for the TRUST zone.
-
-### Resource Manager Properties
-
-All resource managers maintain two properties: a list of names that it manages, and a catalog of those resources.  The list is a Python list, and the catalog is a Python dictionary where the key is a name of the resource and the value is a dictorany of resource properties.  This list and catalog is retrieved by accessing the attributes as properties:
-
+You can get a list of Resource item names by accessing the _Resource.list_.
 ````python
-## pretty-print the list of address-book items; this would actually print a list of security zone names
-
-pprint( jdev.ab.list )
-
-## pretty-print the catalog of address-books; this would effectively dump all address-book information
-## in dictionary format.
-
-pprint( jdev.ab.catalog )
+>>> users.list
+['jeremy', 'kim']
 ````
-Once you've accessed either `list` or `catalog` the values are cached.  If you need to refresh these properties you can explicity refresh the list or the catalog, or both, as illustrated:
 
+#### Getting the Catalog of Resources
+
+You can get a catalog of Resource items by accessing the _Resource.catalog_.  A catalog is a Python dictionary where the key is the resource name and the value is the set of resource property values.
 ````python
-# selectively refresh
-
-jdev.ab.list_refresh()
-jdev.ab.catalog_refresh()
-
-# or refresh both
-
-jdev.ab.refresh()
+>>> pprint(users.catalog)
+{'jeremy': {'$password': '$1$n/RPB3fZ$RGPy8hymoTa8G5oGiJMdr.',
+            '$sshkeys': [('ssh-rsa',
+                          'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAm2JAEXQ<snip>')],
+            '_active': False,
+            '_exists': True,
+            'fullname': 'Jeremy Schulman',
+            'uid': 3000,
+            'userclass': 'super-user'},
+ 'kim': {'$password': 'WqaaliqOgnXZM',
+         '$sshkeys': [('ssh-dsa',
+                       'ssh-dss AAAAB3NzaC1kc3MAAACBAMr4aHSXUBBss9XiW6<snip>')],
+         '_active': True,
+         '_exists': True,
+         'fullname': 'Kimmy Jones',
+         'uid': 2004,
+         'userclass': 'read-only'}}
 ````
+Using the catalog is handy when looking for items.  For example, let's say you want to the list of user names if their userclass property is read-only.
+````python
+>>> [name for name in users.catalog if users.catalog[name]['userclass'] == 'read-only']
+['kim']
+````
+
+#### Accessing a Specific Resource
+
+
 
