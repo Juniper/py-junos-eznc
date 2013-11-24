@@ -10,11 +10,15 @@ The concept of a table is nothing new, taking it from the world of databases.  S
 
 Each table has a collection of items (database 'records').  Each item has a unique key (name).  The item data can be examined as a _View_.
 
+* [Using Tables](tables.md)
+
 #### Views
 
 Think of a view the same way you would think of the Junos CLI options "brief","terse","detail","extensive".  The underlying data (table record) that Junos provides is the same.  The Junos CLI simply applies a different "view" to that data and renders the data in human readable form (aka. "CLI output").
 
 The purpose of a _View_ in the _Junos EZ_ library is to present the table item feilds in a native Python syntax.  By doing this, the user does not need to know anything specific about Junos or the underlying Junos XML API.
+
+* [Using Views](views.md)
 
 ### Example
 
