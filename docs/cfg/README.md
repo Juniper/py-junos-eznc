@@ -1,6 +1,26 @@
 # Using Resources
 
-Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.  There are two ways to access a resource: directly or via a resource-manager.  The common approach would be to use a resource-manager, so that topic is discussed first.
+A _Resource_ is a structured approach for making Junos configuration change without requiring specific knowledge of the underlying Junos/XML.  Each _Resource_ is defined by a unique name-identifier, and a collection of property values you can read/write.
+
+For example, consider managing the authorized login users on a Junos device.  This configuration is located under `[edit system login user <name>]`.  Each login user has a unique name and a collection of property values, such as class, uid, full-name, etc.  Let's say I wanted to access the user "jeremy".  
+
+Here is brief example with _Junos EZ_ using the _User_ Resource; assume that _dev_ is a connected _Device_ variable.
+
+````python
+# import the User resource
+>>> from jnpr.junos.cfg.user import User
+
+# access the login user 'jeremy' from this device
+>>> me = Users(dev, 'jeremy')
+
+# now show some of the User properties
+>>> me.fullname
+'Jeremy L. Schulman'
+>>> me.userclass
+'super-user'
+````
+
+
 
 ## Resource Managers
 
