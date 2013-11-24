@@ -7,9 +7,11 @@ Utilities are collections of routines that serve a common purpose.  The collecti
 * SW - softawre upgrade
 * FS - filesystem utils
 
-A Utility library is a Widget in the _Junos EZ_, so associating one to a _Device_ variable is the same process as described [here](../device.md).
+For a complete list of utility libraries, you can take a look at the [_utils directory_](../../lib/jnpr/junos/utils).
 
-Each Utility library should be fully documented, so you can use the Python help() routine.
+A utility library is a Widget in the _Junos EZ_, so associating one to a _Device_ variable is the same process as described [here](../device.md).
+
+Each utility library should be fully documented, so you can use the Python help() routine.
 
 Here is an example to check the Junos candidate configuraiton for any uncommitted changes.
 ````python
