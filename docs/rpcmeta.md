@@ -3,9 +3,9 @@
 The following code illustrates a basic example of opening a NETCONF connection to a device, retrieving the inventory, and displaying the model and serial-number information.
 
 ````python
-from jnpr.eznc import Netconf
+from jnpr.junos import Device
 
-jdev = Netconf(user='jeremy', host='vsrx_cyan', password='jeremy1')
+jdev = Device(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()
 
 # invoke the RPC equivalent to "show chassis hardware"
