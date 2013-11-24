@@ -7,7 +7,7 @@ As a standalone variable:
 >>> from jnpr.junos.op.ethport import *
 >>> eths = EthPortTable(dev)
 >>> eths.get()
-RunstatGetTable.get-interface-information:vsrx_cyan: 3 items
+RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
 >>> eths.keys()
 ['ge-0/0/0', 'ge-0/0/1', 'ge-0/0/2']
 ````
@@ -16,12 +16,12 @@ and as a bound property:
 >>> from jnpr.junos.op.ethport import *
 >>> eths = EthPortTable(dev)
 >>> eths.get()
-RunstatGetTable.get-interface-information:vsrx_cyan: 3 items
+RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
 >>> eths.keys()
 ['ge-0/0/0', 'ge-0/0/1', 'ge-0/0/2']
 >>> dev.bind(eths=EthPortTable)
 >>> dev.eths.get()
-RunstatGetTable.get-interface-information:vsrx_cyan: 3 items
+RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
 >>> dev.eths.keys()
 ['ge-0/0/0', 'ge-0/0/1', 'ge-0/0/2']
 ````
@@ -77,3 +77,38 @@ So we can see that this command takes an argument `<destination>`.  Since the _R
 RunstatGetTable.get-route-information:jnpr-dc-fw: 2 items
 ````
 
+### Access Table Items
+
+You can treat a _Table_ like a Python dictonary, so you have the following routines:
+
+* keys() - get a list of table item names
+* values() - get a list of tuples(name/value) for each field in each record
+* items() - a tuple composite of keys() and values()
+
+````python
+>>> routes.keys()
+['192.168.56.0/24', '192.168.56.10/32']
+>>> 
+>>> pprint( routes.values() )
+[[('via', 'ge-0/0/0.0'), ('protocol', 'Direct')],
+ [('via', 'ge-0/0/0.0'), ('protocol', 'Local')]]
+>>> 
+>>> pprint( routes.items() )
+[('192.168.56.0/24', [('via', 'ge-0/0/0.0'), ('protocol', 'Direct')]),
+ ('192.168.56.10/32', [('via', 'ge-0/0/0.0'), ('protocol', 'Local')])]
+>>> 
+````
+
+You can get a _View_ of a table item by making a selection either by name (key) or index.  
+
+````python
+# get the first route in the table:
+>>> first = routes[0]
+>>> first
+RunstatView:192.168.56.0/24
+
+# get a named route from the table:
+>>> this = routes['192.168.56.10/32']
+>>> this
+RunstatView:192.168.56.10/32
+````
