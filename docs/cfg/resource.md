@@ -1,102 +1,8 @@
-# Using Resources
+## Resource Item
 
-Resources provide abstrations on specific Junso configuration items without requiring specific knowledge of the underlying Junos/XML.  There are two ways to access a resource: directly or via a resource-manager.  The common approach would be to use a resource-manager, so that topic is discussed first.
+Each resource item has a unique _name_ and a collection of _properties_.  
 
-## Resource Managers
-
-### Binding a Resource Manager
-
-To bind a resource manager to a Netconf instance, you use the Netconf.bind() method.  To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
-
-````python
-from jnpr.eznc.cfg.srx import ZoneAddrBook
-
-jdev.bind( ab=ZoneAddrBook )
-````
-
-The `bind` method takes a key/value pair - the key is the name of the attribute you want to bind to the Netconf instance (so you get to pick the name) and the value is the class of the Resource, in this example `ZoneAddrBook`.  
-
-Every resource has a name.  For the case of the ZoneAddrBook, the name is the security zone name.  So if we want to select the address-book for the zone called "TRUST", we would do the following:
-
-````python
-trust_ab = jdev.ab["TRUST"]
-````
-
-Selecting a resource is make by using the `[<name>]` mechanism.  This returns a specific resource, in this case the address-book for the TRUST zone.
-
-### Resource Manager Properties
-
-All resource managers maintain two properties: a list of names that it manages, and a catalog of those resources.  The list is a Python list, and the catalog is a Python dictionary where the key is a name of the resource and the value is a dictorany of resource properties.  This list and catalog is retrieved by accessing the attributes as properties:
-
-````python
-## pretty-print the list of address-book items; this would actually print a list of security zone names
-
-pprint( jdev.ab.list )
-
-## pretty-print the catalog of address-books; this would effectively dump all address-book information
-## in dictionary format.
-
-pprint( jdev.ab.catalog )
-````
-Once you've accessed either `list` or `catalog` the values are cached.  If you need to refresh these properties you can explicity refresh the list or the catalog, or both, as illustrated:
-
-````python
-# selectively refresh
-
-jdev.ab.list_refresh()
-jdev.ab.catalog_refresh()
-
-# or refresh both
-
-jdev.ab.refresh()
-````
-
-## Resources
-
-There are two ways to access a resource.  The common way is by using a resource-manager, and selecting the resource by name using the `[<name>]` mechanism, as previous illustrated.  
-
-Alternatively, you can select a specific resource without using a manager by directly instantiating the resource.  For example, selecting the "TRUST" zone directly, you would do the following:
-
-````python
-from jnpr.eznc import Netconf
-from jnpr.eznc.cfg.srx import Zone
-
-jdev = Netconf(user='jeremy',password='jeremy1',host='vsrx_cyan')
-jdev.open()
-
-trust_zone = Zone(jdev, "TRUST")
-
-# now do things with the trust_zone instance ...
-````
-
-You manage the specific configuration elements of the resource by reading and writing "properties".  You access these properties using the `[<property-name>]` meachism.  For example, a Zone address-book item has a property called "ip_prefix".  You can read and write the value, as illustrated:
-
-````python
-# select the specific address resource called "JEREMY-HOST" in the "TRUST" zone
-
-jeremy = jdev.ab["TRUST"].addr["JEREMY-HOST"]
-
-# display the current value
-
-print jeremy['ip_prefix']
-#>>> '192.168.1.1/32'
-
-# now change it to "192.168.100.1/32"
-jeremy['ip_prefix'] = "192.168.100.1/32"
-
-# write the change to the Junos device
-jeremy.write()
-````
-
-Alternatively you can modify the resource properites using the _call_ mechanism, as illustrated:
-````python
-jeremy(ip_prefix="192.168.100.1/32", description="Jeremy laptop")
-jeremy.write()
-````
-
-### Resource Attribute Properties
-
-Each resource provides instance attribute properties:
+You can access the following item variables:
 
   * name - the name of the resource
   * properties - a list of properties you can read/write
@@ -105,16 +11,97 @@ Each resource provides instance attribute properties:
   * active - True/False if resource is active in Junos config
   * xml - The actual Junos XML associated with this resource (typically for debug)
 
-The following are also properties that provide "short-cuts" to other objects:
+````python
+>>> from jnpr.junos.cfg.user import User
+>>> me = User(dev,'jeremy')
 
-  * N - the Junos Netconf object instance
-  * M - the instance to the resource manager
-  * P - the instance to the resource parent
-  * R - the RPC metaexec instance
+# What is this resource name?
+>>> me.name
+'jeremy'
 
-### Resource Methods
+# what properties can I read/write?
+>>> me.properties
+['_exists', '_active', 'uid', 'fullname', 'userclass', 'password', '$password', '$sshkeys']
 
-You can use the following methods on any resource.  These methods will read/write the Junos device, but changes are not committed.  You must explicity commit changes, typically by the ConfigUtils library.
+# is this resource active configuration?
+>>> me.active
+True
+````
+
+### Reading and Writing Resource Properites
+
+Each resource item has separate read and write caches (Python dictionaries).  When the resource read from the Junos device the read-cache is loaded.  When you modify the resource properites you are storing values into the write-cache, but not directly to the device.  
+
+For example, in the debug output of the _User_ resource, the "HAS" dictionary is the read-cache, and teh "SHOULD" dictionary is the write-cache.  The following shows that I haven't cahnged the write-cache.
+````python
+>>> me
+NAME: User: jeremy
+HAS: {'$password': '$1$n/RPB3fZ$RGPy8hymoTa8G5oGiJMdr.',
+ '$sshkeys': [('ssh-rsa',
+               'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE<snip>')],
+ '_active': True,
+ '_exists': True,
+ 'fullname': 'Jeremy L. Schulman',
+ 'uid': 2001,
+ 'userclass': 'super-user'}
+SHOULD:{}
+````
+
+Any property that begins with a dollar-sign($) is read-only.
+
+Reading can be done either as an attribute or as a dictionary lookup.  If the property is read-only, you must use the dictionary method.
+````python
+>>> me.fullname
+'Jeremy L. Schulman'
+
+>>> me['fullname']
+'Jeremy L. Schulman'
+````
+
+Writing can be done in one of three ways: (1) as attribute, (2) as dictionary or (3) as call paramter.  The following are all equivalent:
+````python
+>>> me.fullname = "Jeremy Schulman"
+>>> me['fullname'] = "Jeremy Schulman"
+>>> me(fullname="Jeremy Schulman")
+````
+The benefit of the call method is you can make multiple changes at once.  Note the write-cache "SHOULD" contains the new values.
+````python
+>>> me(fullname="Jeremy Schulman", uid=3000)
+
+>>> me
+NAME: User: jeremy
+HAS: {'$password': '$1$n/RPB3fZ$RGPy8hymoTa8G5oGiJMdr.',
+ '$sshkeys': [('ssh-rsa',
+               'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE<snip>')],
+ '_active': True,
+ '_exists': True,
+ 'fullname': 'Jeremy L. Schulman',
+ 'uid': 2001,
+ 'userclass': 'super-user'}
+SHOULD:{'fullname': 'Jeremy Schulman', 'uid': 3000}
+````
+The write-cache is stored to the Junos device when you issue the _wirte()_, and the values are then put into the read-cache.
+````python
+>>> me.write()
+True
+>>> me
+NAME: User: jeremy
+HAS: {'$password': '$1$n/RPB3fZ$RGPy8hymoTa8G5oGiJMdr.',
+ '$sshkeys': [('ssh-rsa',
+               'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAA<snip>')],
+ '_active': True,
+ '_exists': True,
+ 'fullname': 'Jeremy Schulman',
+ 'uid': 3000,
+ 'userclass': 'super-user'}
+SHOULD:{}
+````
+
+The changes are written into the **Junos candidate configuration**, so you still need to issue a "commit" before these changes become active.  The recommended approach for this is to use the _Config_ utils, as documented [here](../utils/config.md).
+
+### Resource Item Routines
+
+Additionally each item provides a number of routines for configuration management:
 
   * read() - reads the resource config from the Junos device
   * write() - writes the modified resource properties to the Junos device
@@ -123,8 +110,3 @@ You can use the following methods on any resource.  These methods will read/writ
   * activate() - activates the resource in the Junos config
   * deactivate() - deactivates the resource in the Junos config
   * reorder() - changes the ordering of the resource in the Junos config
-
-_NOTE: Each resource maitains separate read and write dictionary caches.  When you invoke the `read()` method, the Junos device is read and the read-cache is loaded.  When you modify the resource properites using the `[<property-name>]` mechaism, you are storing values into the write-cache, but not directly to the device.  You write back to the Junos device using the `write()` method.  In this way you can update many resource properties with a single `write()`_
-
-
-
