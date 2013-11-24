@@ -34,5 +34,5 @@ An application will often want to perform common fucntions, and again wihtout re
 
 You should always have the ability to "do anything" that the Junos/XML API provides.  Each _Device_ variable has an _rpc_ property to make accessing Junos at this low-level "easy".  The _Junos EZ_ library utilities "metaprogramming" to do what you want only when you need it (on-demand).  The term "metaprogramming" basically means that the _rpc_ will dynamically create Junos XML Remote Procdure Calls (RPCs) as you invoke them, rather than pre-coding them as part of the _Junos EZ_ library.  Said another way, if a Junos device provides thousands of RPCs, _Junos EZ_ does *not* contain thousands of RPC functions.  It "meta-programms" only the RPCs that you use, keeping the size of this module small, and the portability flexible.
 
-* [Using Device RPC](docs/rpcmeta.md).
+* [Using Device RPC](rpcmeta.md).
 
