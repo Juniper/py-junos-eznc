@@ -13,12 +13,6 @@ RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
 ````
 and as a bound property:
 ````python
->>> from jnpr.junos.op.ethport import *
->>> eths = EthPortTable(dev)
->>> eths.get()
-RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
->>> eths.keys()
-['ge-0/0/0', 'ge-0/0/1', 'ge-0/0/2']
 >>> dev.bind(eths=EthPortTable)
 >>> dev.eths.get()
 RunstatGetTable.get-interface-information:jnpr-dc-fw: 3 items
@@ -33,7 +27,7 @@ You use the _Table.get()_ routine to load the table data from the Junos device. 
 There are cases, however, that knowing a little bit more comes in handy.  You **can** pass any valid Junos command argument to the _Table.get()_ routine.  For example, the _RouteTable_ will load all of the routes, equivalent to the command "show routes":
 
 ````python
->>> from jnpr.junos.op.rtable import RouteTable
+>>> from jnpr.junos.op.routes import RouteTable
 >>> routes = RouteTable(dev).get()
 >>> routes
 RunstatGetTable.get-route-information:jnpr-dc-fw: 147 items
