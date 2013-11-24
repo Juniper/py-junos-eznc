@@ -106,3 +106,7 @@ RunstatView:192.168.56.0/24
 >>> this
 RunstatView:192.168.56.10/32
 ````
+
+### Defining Your Own Tables
+
+The _Junos EZ_ library will contain a growing number of table definitons.  The _Junos EZ_ library was designed so that you can quickly define you own tables; it is assumed that what **you** want will not be in the library, and **you** do not need to wait.  Generally speaking it should take you less than 10 minutes to define a new Table and assocaited View, once you get the hang of it.  Take a look at the existing tables in the [_op directory_](../../lib/junos/op) for guidance.  
