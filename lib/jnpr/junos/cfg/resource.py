@@ -421,10 +421,6 @@ class Resource(object):
   ##### OVERLOADS
   ##### -----------------------------------------------------------------------
 
-  def __len__(self):
-    if not self.is_mgr: raise RuntimeError("only on a resource-manager")
-    return len(self.list)
-    
     ### ---------------------------------------------------------------------
     ### ITEMS: for read/write of resource managed properties
     ### ---------------------------------------------------------------------
@@ -479,7 +475,8 @@ class Resource(object):
   def __call__(self, **kvargs):
     """
     alternative way to set property values as aggregation of
-    key/value pairs
+    key/value pairs.  this will automatically call :write():
+    when completed.
     """
     if self.is_mgr: raise RuntimeError("Not on a manager!")
     if not kvargs: return False
@@ -491,7 +488,7 @@ class Resource(object):
 
     # now cleared to add all the values
     self.should.update( kvargs )
-    return True
+    return self.write()
 
     ### ---------------------------------------------------------------------
     ### ATTRIBUTE: for read/write of resource managed properties
