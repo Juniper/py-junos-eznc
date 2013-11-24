@@ -90,4 +90,4 @@ that device around for later use.  This way you don't need to keep creating widg
 
 At times you may want to directly access the Junos XML API command/respnse.  Use the _Device.rpc_ metaprogramming object to execute an RPC and return back the XML response.  
 
-* [Using RPC](metarpc.md)
+* [Using RPC](rpcmeta.md)
