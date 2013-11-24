@@ -1,4 +1,4 @@
-## Using Resources
+# Configuration Resources
 
 A _Resource_ is a structured approach for making Junos configuration change without requiring specific knowledge of the underlying Junos/XML.  Each _Resource_ is defined by a unique name-identifier, and a collection of property values you can read/write.
 
@@ -23,12 +23,11 @@ Let's say I wanted to access the user "jeremy".  Here is brief example with _Jun
 >>> me.userclass
 'super-user'
 ````
-
-
+There are a few different ways to access a resource.  The first way, as illustrated above, is to directly request a resource specifically by device.  The second way is *not* to provide a unique name (like 'jeremy').  In doing this, you create a _Resource Manager_.  A Resource Manager allows you to then access a specific resource by name.  The benefit of using a Resource Manager is that you can obtain a list of resource names as well as their catalog of properites.  This makes it very handy to quickly examnine what exists in the Junos configuration.
 
 ## Resource Managers
 
-### Binding a Resource Manager
+### Accessing a Resource Manager
 
 To bind a resource manager to a Netconf instance, you use the Netconf.bind() method.  To use the ZoneAddrBook, resource, for example, you would create a resource manager as follows:
 
