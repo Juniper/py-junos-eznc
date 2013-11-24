@@ -111,7 +111,7 @@ jeremy@jnpr-dc-fw> show chassis hardware | display xml
 </rpc-reply>
 ````
 
-The result of the RPC command is an lxml Element, set at the first element after the _<rpc-reply>_.  In the above example, that would be _<chassis-inventory>_.  Given that, any XPath expression is relative.  So to extract the chassis serial-number, the XPath expression is simply 'chassis/serial-number'.
+The result of the RPC command is an lxml Element, set at the first element after the `<rpc-reply>`.  In the above example, that would be `<chassis-inventory>`.  Given that, any XPath expression is relative.  So to extract the chassis serial-number, the XPath expression is simply 'chassis/serial-number'.
 
 ````python
 inv = jdev.rpc.get_chassis_inventory()
@@ -121,3 +121,7 @@ print "serial-number: %s" % inv.findtext('chassis/serial-number')
 ````
 
 Since the response variable is an LXML Element, you can use any routine available from that library.  For details, refer to the [lxml documentation](http://lxml.de/).
+
+If XML and XPath are new to you, I would recommend the W3Schools for a quick primer.
+* [XML](http://www.w3schools.com/xml)
+* [XPath](http://www.w3schools.com/xpath)
