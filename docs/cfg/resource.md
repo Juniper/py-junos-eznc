@@ -97,7 +97,7 @@ HAS: {'$password': '$1$n/RPB3fZ$RGPy8hymoTa8G5oGiJMdr.',
 SHOULD:{}
 ````
 
-The changes are written into the **Junos candidate configuration**, so you still need to issue a "commit" before these changes become active.  The recommended approach for this is to use the _Config_ utils, as documented [here](../utils/config.md).
+The changes are written into the **Junos candidate configuration**, so you still need to issue a "commit" before these changes become active.  The recommended approach for this is to use the _Config_ utils.  For more on Utilities, refer to the [documentation](../utils/README.md).
 
 ### Resource Item Routines
 
