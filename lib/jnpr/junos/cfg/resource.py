@@ -187,15 +187,6 @@ class Resource(object):
   ### -------------------------------------------------------------------------
 
   @property
-  def J(self):
-    """
-    returns the Junos object associated to this resource/manager
-    @@@ will be depreciating this in favor of 'N'
-    """
-    warnings.warn("'J' property will be removed in 0.0.3", DeprecationWarning)    
-    return self._junos
-
-  @property
   def D(self):
     """ returns the Device object bound to this resource/manager """
     return self._junos
@@ -430,6 +421,10 @@ class Resource(object):
   ##### OVERLOADS
   ##### -----------------------------------------------------------------------
 
+  def __len__(self):
+    if not self.is_mgr: raise RuntimeError("only on a resource-manager")
+    return len(self.list)
+    
     ### ---------------------------------------------------------------------
     ### ITEMS: for read/write of resource managed properties
     ### ---------------------------------------------------------------------
