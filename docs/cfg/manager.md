@@ -9,7 +9,7 @@ Creating a Resource Manager is a similar process as a Resource Item, simply just
 >>> users
 Resource Manager: User
 ````
-Alteratively you can use the _Device.bind_ to attach the manager widget, as described [here](../device.md).
+Alteratively you can use the _Device.bind_ to attach the manager widget, as described [here](../device.md#associating-widgets-to-a-device).
 ````python
 >>> dev.bind(users=User)
 >>> dev.users
