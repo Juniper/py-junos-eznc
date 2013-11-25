@@ -774,15 +774,16 @@ class Resource(object):
   @classmethod
   def xml_set_or_delete( klass, xml, ele_name, value):
     """
-      HELPER function to either set a value or remove the element
+    HELPER function to either set a value or remove the element
     """
+    if value is not None and not isinstance(value,str): value = str(value)
     xml.append(E(ele_name,(value if value else JXML.DEL )))
 
   @classmethod
   def xmltag_set_or_del( klass, ele_name, value):
     """
-      HELPER function creates an XML element tag read-only 
-      that includes the DEL attribute depending on :value:
+    HELPER function creates an XML element tag read-only 
+    that includes the DEL attribute depending on :value:
     """
     return E(ele_name, ({} if value else JXML.DEL ))
 
