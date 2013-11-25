@@ -26,7 +26,7 @@ class PhyPortSwitch( PhyPortBase ):
     ethopts = has_xml.find('ether-options')
     if ethopts is None: return
 
-    has_py['loopback'] = bool(ethopts.find('loopback') is not None)
+    if ethopts.find('loopback'): has_py['loopback'] = True
 
     speed = ethopts.find('speed')
     if speed is not None:

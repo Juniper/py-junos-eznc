@@ -13,13 +13,13 @@ class PhyPortBase( Resource ):
   """
 
   PROPERTIES = [
-    'admin',
-    'description',
+    'admin',              # True
+    'description',        # str
     'speed',              # ['10m','100m','1g','10g']
     'duplex',             # ['full','half']
-    'mtu',
-    'loopback',
-    '$unit_count'
+    'mtu',                # int
+    'loopback',           # True
+    '$unit_count'         # number of units defined
   ]
 
   PORT_DUPLEX = {
