@@ -65,3 +65,11 @@ class PhyPortBase( Resource ):
   def _xml_change_mtu(self,xml):
     Resource.xml_set_or_delete(xml, 'mtu', self.mtu )
     return True
+
+  ##### -----------------------------------------------------------------------
+  ##### Manager List, Catalog
+  ##### -----------------------------------------------------------------------
+
+  def _r_list(self):
+    got = self.R.get_interface_information(media=True, interface_name="[xgf]e*")
+    self._rlist = [name.text.strip() for name in got.xpath('physical-interface/name')]    

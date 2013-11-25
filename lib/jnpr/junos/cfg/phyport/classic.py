@@ -17,7 +17,7 @@ class PhyPortClassic( PhyPortBase ):
 
     Resource.copyifexists(has_xml, 'speed', has_py)
     Resource.copyifexists(has_xml, 'link-mode', has_py, 'duplex' )
-    has_py['loopback'] = bool(has_xml.find('gigether-options/loopback') is not None)
+    if has_xml.find('gigether-options/loopback') is not None: has_py['loopback'] = True
     has_py['$unit_count'] = len(has_xml.findall('unit'))
 
     ## normalizers
