@@ -203,26 +203,36 @@ class RunstatTable(object):
     """
     self.assert_data()
 
+    use_view = self.view
+
+    def get_xpath(find_value):
+      if isinstance(find_value,str):
+        # find by name
+        xpath = self.ITER_XPATH + '[normalize-space(%s)="' % self.NAME_XPATH + find_value + '"]'
+      elif isinstance(find_value,int):
+        # find by index, assuming caller is using 0-index, and might use
+        # negative values to reference from end of list
+        xpath_pos = find_value + 1
+        if find_value < 0:
+          xpath_pos = len(self) + xpath_pos
+        xpath = '%s[%s]' % (self.ITER_XPATH, xpath_pos)
+      return xpath
+
     if self.ITER_XPATH is None:
       # this is a table of tables; i.e. not table of record views
       found = self.got
     else:
-      if isinstance(value,str):
-        # find by name
-        xpath = self.ITER_XPATH + '[normalize-space(%s)="' % self.NAME_XPATH + value + '"]'
-      elif isinstance(value,int):
-        # find by index, assuming caller is using 0-index, and might use
-        # negative values to reference from end of list
-        xpath_pos = value + 1
-        if value < 0:
-          xpath_pos = len(self) + xpath_pos
-        xpath = '%s[%s]' % (self.ITER_XPATH, xpath_pos)
+      if isinstance(value,tuple):
+        # tuple(name,view_cls)
+        use_view = value[1]        
+        value = value[0]
 
+      xpath = get_xpath(value)
       found = self.got.xpath(xpath)
       if not len(found): return None
       found = found[0]
 
-    return self.view(table=self, view_xml=found) if self.view is not None else found
+    return use_view(table=self, view_xml=found) if use_view is not None else found
 
   # ---------------------------------------------------------------------------
   # iterate though each item in the talbe, not applicable for composite table

@@ -528,6 +528,15 @@ class Resource(object):
       if not self.is_mgr \
       else "Resource Manager: %s" % mgr_name
 
+    ### ---------------------------------------------------------------------
+    ### ITERATOR
+    ### ---------------------------------------------------------------------
+
+  def __iter__(self):
+    """ iterate through each Resource in the Manager list """
+    for name in self.list:
+      yield self[name]
+
   ##### -----------------------------------------------------------------------
   ##### XML reading 
   ##### -----------------------------------------------------------------------
