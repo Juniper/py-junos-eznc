@@ -1,11 +1,18 @@
-from . import RunstatMaker as RSM
+from . import RunstatMaker as _RSM
+
+# internally used shortcuts
+
+_VIEW = _RSM.View
+_FIELDS = _RSM.Fields
+_GET = _RSM.GetTable 
+_TABLE = _RSM.Table 
 
 ##### -------------------------------------------------------------------------
 ##### illustrates the use of field groups; optimization around collecting
 ##### from XML child node-sets
 ##### -------------------------------------------------------------------------
 
-EthPortView = RSM.View(RSM.Fields()
+EthPortView = _VIEW(_FIELDS()
   .str('oper', 'oper-status')
   .str('admin','admin-status')
   .int('mtu')
@@ -22,7 +29,7 @@ EthPortView = RSM.View(RSM.Fields()
   }
 )
 
-EthPortTable = RSM.GetTable('get-interface-information',
+EthPortTable = _GET('get-interface-information',
   args =  {'media': True, 'interface_name': '[fgx]e*' },
   args_key = 'interface_name',
   item = 'physical-interface',
@@ -32,8 +39,8 @@ EthPortTable = RSM.GetTable('get-interface-information',
 ##### The following shows how to declare a new View class that
 ##### extends from another.
 
-EthPortView2 = RSM.View( extends=EthPortView, 
-  fields = RSM.Fields()
+EthPortView2 = _VIEW( extends=EthPortView, 
+  fields = _FIELDS()
     .flag('present', 'ifdf-present', group='flags')
     .flag('running', 'ifdf-running', group='flags')
     .astype('loopback', astype=lambda x: True if x == 'enabled' else False)
