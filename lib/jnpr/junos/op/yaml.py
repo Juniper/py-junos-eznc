@@ -25,7 +25,9 @@ class _RunstatYAML(object):
     self.item_views = []        # list of views to build
     self.item_tables = []       # list of tables to build
 
-    self.views = {}
+    self.gettables = {}          # built get-tables
+    self.views = {}             # built view classes
+    self.tables = {}            # built table classes
 
   ##### -----------------------------------------------------------------------
   ##### Create a View class from YAML definition
@@ -43,12 +45,6 @@ class _RunstatYAML(object):
       kvargs = {}
       kvargs.update(group)
 
-      if f_name in self.yaml_dict:
-        # this is a table reference
-        print "TABLE-FIELD: %s" % f_name
-        raise RuntimeError("need to implement")
-        continue
-
       if isinstance(f_data,dict):
         # for now, the only thing we are handling is the 
         # astype mechanism. nab the type looking at __builtins__
@@ -57,13 +53,21 @@ class _RunstatYAML(object):
         this = f_data.items()[0]
         kvargs['astype'] = __builtins__.get(this[1], str)
         fields.astype( f_name, this[0], **kvargs)
-      else:
-        xpath = f_name if f_data is True else f_data
-        fields.str(f_name,xpath,**kvargs)
+        continue
+
+      if f_data in self.yaml_dict:
+        cls_tbl = self.tables.get(f_data, self.build_table( f_data ))
+        fields.table( f_name, cls_tbl )
+        continue        
+
+      xpath = f_name if f_data is True else f_data
+      fields.str(f_name,xpath,**kvargs)
 
   ### -------------------------------------------------------------------------
 
   def build_view(self, view_name):
+    if view_name in self.views: return self.views[view_name]
+
     view_dict = self.yaml_dict[view_name]
     kvargs = { 'view_name' : view_name }
 
@@ -78,34 +82,55 @@ class _RunstatYAML(object):
 
     cls = _VIEW( fields.end, **kvargs )
     self.views[view_name] = cls
-    self.item_views.remove(view_name)
     return cls
 
   ##### -----------------------------------------------------------------------
   ##### Create a Get-Table from YAML definition
   ##### -----------------------------------------------------------------------
 
-  def build_gettable( self, tbl_name):
-    tbl_dict = self.yaml_dict[tbl_name]
+  def build_gettable( self, table_name):
+    if table_name in self.gettables: return self.gettables[table_name]
+
+    tbl_dict = self.yaml_dict[table_name]
     kvargs = deepcopy(tbl_dict)
 
     rpc = kvargs.pop('rpc')
-    kvargs['table_name'] = tbl_name
+    kvargs['table_name'] = table_name
 
     if 'view' in tbl_dict:
       view_name = tbl_dict['view']
       cls_view = self.views.get( view_name, self.build_view( view_name ))
       kvargs['view'] = cls_view
 
-    return _GET(rpc, **kvargs)
+    cls = _GET(rpc, **kvargs)
+    self.gettables[table_name] = cls
+    return cls
 
   ##### -----------------------------------------------------------------------
   ##### Create a Table class from YAML definition
   ##### -----------------------------------------------------------------------
 
-  def _create_table(yaml_dict, name,data):
-  #  print "creating table: %s" % this[0]
-    pass
+  def build_table(self, table_name ):
+    if table_name in self.tables: return self.tables[table_name]
+
+    tbl_dict = self.yaml_dict[table_name]
+
+    table_item = tbl_dict.pop('item')
+    kvargs = deepcopy(tbl_dict)
+    kvargs['table_name'] = table_name
+
+    if 'view' in tbl_dict:
+      view_name = tbl_dict['view']
+      cls_view = self.views.get( view_name, self.build_view( view_name ))
+      kvargs['view'] = cls_view
+
+    cls = _TABLE(table_item, **kvargs)
+    self.tables[table_name] = cls
+    return cls
+
+  ##### -----------------------------------------------------------------------
+  ##### Primary builders ...
+  ##### -----------------------------------------------------------------------
 
   def sortitems(self):
     for k,v in self.yaml_dict.items():
@@ -130,10 +155,11 @@ class _RunstatYAML(object):
     # let the system build out accordingly.  Then we see what we've got
     # left at the end.
 
-    gettables = map( self.build_gettable, self.item_gettables )
+    map( self.build_gettable, self.item_gettables )
+    map( self.build_table, self.item_tables )
     map( self.build_view, self.item_views )
 
-    return gettables + self.views.values()
+    return self.gettables.values() + self.views.values() + self.tables.values()
 
 ##### -------------------------------------------------------------------------
 ##### main public routine

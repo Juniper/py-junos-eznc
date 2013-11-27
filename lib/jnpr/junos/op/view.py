@@ -186,7 +186,7 @@ class RunstatView(object):
       raise ValueError("Unknown field: '%s'" % name)
 
     if item.has_key('table'):
-      found = item['table'](ncdev=self._table.N, table_xml=self._xml)
+      found = item['table'](ncdev=self.D, table_xml=self._xml)
     else:
       astype = item.get('astype',str)
       if item.has_key('group'):
