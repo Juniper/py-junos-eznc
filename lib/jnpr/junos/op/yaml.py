@@ -25,9 +25,7 @@ class _RunstatYAML(object):
     self.item_views = []        # list of views to build
     self.item_tables = []       # list of tables to build
 
-    self.gettables = {}          # built get-tables
-    self.views = {}             # built view classes
-    self.tables = {}            # built table classes
+    self.catalog = {}           # catalog of built classes
 
   ##### -----------------------------------------------------------------------
   ##### Create a View class from YAML definition
@@ -56,7 +54,8 @@ class _RunstatYAML(object):
         continue
 
       if f_data in self.yaml_dict:
-        cls_tbl = self.tables.get(f_data, self.build_table( f_data ))
+        # f_data is the table name
+        cls_tbl = self.catalog.get(f_data, self.build_table( f_data ))
         fields.table( f_name, cls_tbl )
         continue        
 
@@ -66,7 +65,7 @@ class _RunstatYAML(object):
   ### -------------------------------------------------------------------------
 
   def build_view(self, view_name):
-    if view_name in self.views: return self.views[view_name]
+    if view_name in self.catalog: return self.catalog[view_name]
 
     view_dict = self.yaml_dict[view_name]
     kvargs = { 'view_name' : view_name }
@@ -81,7 +80,7 @@ class _RunstatYAML(object):
       self.add_view_fields( view_dict, fg_name, fields )
 
     cls = _VIEW( fields.end, **kvargs )
-    self.views[view_name] = cls
+    self.catalog[view_name] = cls
     return cls
 
   ##### -----------------------------------------------------------------------
@@ -89,7 +88,7 @@ class _RunstatYAML(object):
   ##### -----------------------------------------------------------------------
 
   def build_gettable( self, table_name):
-    if table_name in self.gettables: return self.gettables[table_name]
+    if table_name in self.catalog: return self.catalog[table_name]
 
     tbl_dict = self.yaml_dict[table_name]
     kvargs = deepcopy(tbl_dict)
@@ -99,11 +98,11 @@ class _RunstatYAML(object):
 
     if 'view' in tbl_dict:
       view_name = tbl_dict['view']
-      cls_view = self.views.get( view_name, self.build_view( view_name ))
+      cls_view = self.catalog.get( view_name, self.build_view( view_name ))
       kvargs['view'] = cls_view
 
     cls = _GET(rpc, **kvargs)
-    self.gettables[table_name] = cls
+    self.catalog[table_name] = cls
     return cls
 
   ##### -----------------------------------------------------------------------
@@ -111,7 +110,7 @@ class _RunstatYAML(object):
   ##### -----------------------------------------------------------------------
 
   def build_table(self, table_name ):
-    if table_name in self.tables: return self.tables[table_name]
+    if table_name in self.catalog: return self.catalog[table_name]
 
     tbl_dict = self.yaml_dict[table_name]
 
@@ -121,11 +120,11 @@ class _RunstatYAML(object):
 
     if 'view' in tbl_dict:
       view_name = tbl_dict['view']
-      cls_view = self.views.get( view_name, self.build_view( view_name ))
+      cls_view = self.catalog.get( view_name, self.build_view( view_name ))
       kvargs['view'] = cls_view
 
     cls = _TABLE(table_item, **kvargs)
-    self.tables[table_name] = cls
+    self.catalog[table_name] = cls
     return cls
 
   ##### -----------------------------------------------------------------------
@@ -151,15 +150,11 @@ class _RunstatYAML(object):
     self.yaml_dict = _yaml.load(open(path,'r'))
     self.sortitems()
 
-    # we know we have a get-table, so start with that first, and 
-    # let the system build out accordingly.  Then we see what we've got
-    # left at the end.
-
     map( self.build_gettable, self.item_gettables )
     map( self.build_table, self.item_tables )
     map( self.build_view, self.item_views )
 
-    return self.gettables.values() + self.views.values() + self.tables.values()
+    return self.catalog
 
 ##### -------------------------------------------------------------------------
 ##### main public routine

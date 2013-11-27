@@ -4,5 +4,5 @@ from .yaml import loadyaml
 # import the definitions from the YAML file in this directory and
 # make them part of this module, yo!
 
-for each in loadyaml(join(dirname(__file__),'phyport.yml')):
-  globals()[each.__name__] = each
+_yml_file = 'phyport.yml'
+globals().update( loadyaml(join(dirname(__file__),_yml_file)) )

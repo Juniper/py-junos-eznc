@@ -11,7 +11,7 @@ PhyPortView:
   fields:
     oper : oper-status
     admin : admin-status
-    mtu: mtu
+    mtu: { mtu : int }
     link_mode: link-mode
     speed: speed
     macaddr: current-physical-address

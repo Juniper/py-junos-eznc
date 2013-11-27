@@ -1,8 +1,8 @@
-from os.path import dirname,join
+from os.path import dirname,join,basename
 from .yaml import loadyaml
 
 # import the definitions from the YAML file in this directory and
 # make them part of this module, yo!
 
-for each in loadyaml(join(dirname(__file__),'routes.yml')):
-  globals()[each.__name__] = each
+_yml_file = 'routes.yml'
+globals().update( loadyaml(join(dirname(__file__),_yml_file)) )
