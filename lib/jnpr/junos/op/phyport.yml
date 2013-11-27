@@ -11,9 +11,9 @@ PhyPortView:
   fields:
     oper : oper-status
     admin : admin-status
-    mtu: True
+    mtu: mtu
     link_mode: link-mode
-    speed: True
+    speed: speed
     macaddr: current-physical-address
 
 ### ---------------------------------------------------------------------------
@@ -33,6 +33,9 @@ PhyPortStatsView:
   groups:
     ts: traffic-statistics
     rxerrs: input-error-list
+
+  # fields that are part of groups are called
+  # "fields_<group-name>"
 
   fields_ts:
     rx_bytes: { input-bytes: int }
