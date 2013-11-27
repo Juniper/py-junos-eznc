@@ -58,5 +58,5 @@ class PhyPortSwitch( PhyPortBase ):
     return True
 
   def _xml_change_loopback(self, xml):
-    Resource.xml_set_or_delete(self._ethopts, 'loopback', self.loopback)
+    self._ethopts.append(Resource.xmltag_set_or_del('loopback', self.loopback))
     return True
