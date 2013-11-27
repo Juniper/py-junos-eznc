@@ -1,0 +1,47 @@
+---
+PhyPortTable:
+  rpc: get-interface-information
+  args:
+    interface_name: '[fgx]e*'
+  args_key: interface_name
+  item: physical-interface
+  view: PhyPortView
+
+PhyPortView:
+  fields:
+    oper : oper-status
+    admin : admin-status
+    mtu: True
+    link_mode: link-mode
+    speed: True
+    macaddr: current-physical-address
+
+### ---------------------------------------------------------------------------
+### get extensive information
+### ---------------------------------------------------------------------------
+
+PhyPortStatsTable:
+  rpc: get-interface-information
+  args:
+    extensive: True
+    interface_name: '[fgx]e*'
+  args_key: interface_name
+  item: physical-interface
+  view: PhyPortStatsView
+
+PhyPortStatsView:
+  groups:
+    ts: traffic-statistics
+    rxerrs: input-error-list
+
+  fields_ts:
+    rx_bytes: { input-bytes: int }
+    rx_packets: { input-packets: int }
+    tx_bytes: { output-bytes: int }
+    tx_packets: { output-packets: int }
+
+  fields_rxerrs:
+    rx_err_input: { input-errors: int }
+    rx_err_drops: { input-drops: int }
+
+

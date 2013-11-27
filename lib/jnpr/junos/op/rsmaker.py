@@ -30,9 +30,9 @@ class RunstatMaker(object):
   """
 
   @classmethod
-  def GetTable(cls, cmd, args=None, args_key=None, item=None, key=RunstatTable.NAME_XPATH, view=None, getter_name=None ):
-    if getter_name is None: getter_name = "RunstatGetTable." + cmd
-    new_cls = type(getter_name, (RunstatTable,), {} )
+  def GetTable(cls, cmd, args=None, args_key=None, item=None, key=RunstatTable.NAME_XPATH, view=None, table_name=None ):
+    if table_name is None: table_name = "RunstatGetTable." + cmd
+    new_cls = type(table_name, (RunstatTable,), {} )
     new_cls.GET_RPC = cmd
     new_cls.GET_ARGS = args or {}
     if args_key is not None: new_cls.GET_KEY = args_key
@@ -73,7 +73,7 @@ class RunstatMaker(object):
       technique you can add to existing defined Views.
     """
 
-    if not 'view_name' in kvargs: view_name = 'RunstatView'
+    view_name = kvargs.get('view_name','RunstatView')
     new_cls = type(view_name, (RunstatView,), {})
 
     if 'extends' in kvargs:
