@@ -26,7 +26,7 @@ class RunstatTable(object):
   ### -------------------------------------------------------------------------
 
   @property
-  def N(self):
+  def D(self):
     """ shortcut to the Device instance """
     return self._ncdev
 
@@ -110,7 +110,7 @@ class RunstatTable(object):
     Retrieve the XML table data from the Device instance and
     returns back the Table instance - for call-chaining purposes.  
 
-    ALIAS: read    
+    ALIAS: read, __call__    
 
     :vargs:
       [0] is the table :arg_key: value.  This is used so that
@@ -172,9 +172,12 @@ class RunstatTable(object):
   def __repr__(self):
     cname = self.__class__.__name__
     if self.is_container is not None:
-      return "%s:%s: %s items" % (cname, self.N.hostname, len(self))
+      return "%s:%s: %s items" % (cname, self.D.hostname, len(self))
     else:
-      return "%s:%s: data=%s" % (cname, self.N.hostname, ('no','yes')[self.got is not None])
+      return "%s:%s: data=%s" % (cname, self.D.hostname, ('no','yes')[self.got is not None])
+
+  # make callable alias to :get(): 
+  __call__ = get
 
   # ---------------------------------------------------------------------------
   # len is the number of items in the table

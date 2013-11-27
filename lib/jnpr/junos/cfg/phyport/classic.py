@@ -38,6 +38,6 @@ class PhyPortClassic( PhyPortBase ):
 
   def _xml_change_loopback(self, xml):
     opts = E('gigether-options')
-    Resource.xml_set_or_delete(opts, 'loopback', self.loopback)
+    opts.append(Resource.xmltag_set_or_del('loopback', self.loopback))
     xml.append(opts)
     return True

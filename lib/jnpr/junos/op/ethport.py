@@ -43,6 +43,7 @@ EthPortView2 = _VIEW( extends=EthPortView,
   fields = _FIELDS()
     .flag('present', 'ifdf-present', group='flags')
     .flag('running', 'ifdf-running', group='flags')
-    .astype('loopback', astype=lambda x: True if x == 'enabled' else False)
+    .astype('loopback', astype=lambda x: bool(x == 'enabled'))
     .end,
-  groups = {'flags':'if-device-flags'})
+  groups = {'flags':'if-device-flags'}
+)

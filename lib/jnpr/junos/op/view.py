@@ -59,9 +59,19 @@ class RunstatView(object):
   ### -------------------------------------------------------------------------
 
   @property 
+  def T(self):
+    """ return the Table instance for the View """
+    return self._table
+
+  @property
+  def D(self):
+    """ return the Device instance for this View """
+    return self.T.D 
+    
+  @property 
   def name(self):
     """ return the name of view item """
-    if self.NAME_XPATH is None: return self._table.N.hostname
+    if self.NAME_XPATH is None: return self._table.D.hostname
     return self._xml.findtext(self.NAME_XPATH).strip()
 
   # ALIAS key <=> name
