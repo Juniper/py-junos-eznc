@@ -16,10 +16,10 @@ _FIELDS = _RSM.Fields
 _GET = _RSM.GetTable 
 _TABLE = _RSM.Table 
 
-class _RunstatYAML(object):
+class RunstatCatalogLoader(object):
 
   def __init__(self):
-    self.yaml_dict = None       # YAML data
+    self.file_dict = None       # YAML data
 
     self.item_gettables = []    # list of the get-tables
     self.item_views = []        # list of views to build
@@ -53,7 +53,7 @@ class _RunstatYAML(object):
         fields.astype( f_name, this[0], **kvargs)
         continue
 
-      if f_data in self.yaml_dict:
+      if f_data in self.file_dict:
         # f_data is the table name
         cls_tbl = self.catalog.get(f_data, self.build_table( f_data ))
         fields.table( f_name, cls_tbl )
@@ -67,7 +67,7 @@ class _RunstatYAML(object):
   def build_view(self, view_name):
     if view_name in self.catalog: return self.catalog[view_name]
 
-    view_dict = self.yaml_dict[view_name]
+    view_dict = self.file_dict[view_name]
     kvargs = { 'view_name' : view_name }
 
     # if there are field groups, then get that now.
@@ -90,7 +90,7 @@ class _RunstatYAML(object):
   def build_gettable( self, table_name):
     if table_name in self.catalog: return self.catalog[table_name]
 
-    tbl_dict = self.yaml_dict[table_name]
+    tbl_dict = self.file_dict[table_name]
     kvargs = deepcopy(tbl_dict)
 
     rpc = kvargs.pop('rpc')
@@ -112,7 +112,7 @@ class _RunstatYAML(object):
   def build_table(self, table_name ):
     if table_name in self.catalog: return self.catalog[table_name]
 
-    tbl_dict = self.yaml_dict[table_name]
+    tbl_dict = self.file_dict[table_name]
 
     table_item = tbl_dict.pop('item')
     kvargs = deepcopy(tbl_dict)
@@ -132,7 +132,7 @@ class _RunstatYAML(object):
   ##### -----------------------------------------------------------------------
 
   def sortitems(self):
-    for k,v in self.yaml_dict.items():
+    for k,v in self.file_dict.items():
       if 'rpc' in v:
         self.item_gettables.append(k)
       elif 'view' in v:
@@ -140,14 +140,12 @@ class _RunstatYAML(object):
       else:
         self.item_views.append(k)
 
-  def load(self, path):
-    # if no extension is given, default to '.yml'
-    if os.path.splitext(path)[1] == '': path += '.yml'
+  def parse( self, file_dict ):
 
     # load the yaml data and extract the item names.  these names will
     # become the new class definitions
 
-    self.yaml_dict = _yaml.load(open(path,'r'))
+    self.file_dict = file_dict
     self.sortitems()
 
     map( self.build_gettable, self.item_gettables )
@@ -161,4 +159,6 @@ class _RunstatYAML(object):
 ##### -------------------------------------------------------------------------
 
 def loadyaml( path ):
-  return _RunstatYAML().load(path)
+  # if no extension is given, default to '.yml'
+  if os.path.splitext(path)[1] == '': path += '.yml'  
+  return RunstatCatalogLoader().parse( _yaml.load( open(path, 'r' )))
