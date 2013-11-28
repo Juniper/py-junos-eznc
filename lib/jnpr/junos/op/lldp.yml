@@ -1,0 +1,15 @@
+---
+LLDPNeighborTable:
+  rpc: get-lldp-neighbors-information
+  item: lldp-neighbor-information
+  key: lldp-local-interface
+  view: LLDPNeighborView
+
+LLDPNeighborView:
+  fields:
+    local_int: lldp-local-interface
+    local_parent: lldp-local-parent-interface-name
+    remote_type: lldp-remote-chassis-id-subtype
+    remote_chassis-id: lldp-remote-chassis-id
+    remote_port-desc: lldp-remote-port-description
+    remote_sysname: lldp-remote-system-name
