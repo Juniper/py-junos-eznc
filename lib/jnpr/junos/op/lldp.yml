@@ -1,11 +1,11 @@
 ---
-lldpNeighborTable:
+LLDPNeighborTable:
   rpc: get-lldp-neighbors-information
   item: lldp-neighbor-information
   key: lldp-local-interface
-  view: lldpNeighborView
+  view: LLDPNeighborView
 
-lldpNeighborView:
+LLDPNeighborView:
   fields:
     local_int: lldp-local-interface
     local_parent: lldp-local-parent-interface-name
