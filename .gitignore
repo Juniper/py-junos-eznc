@@ -34,7 +34,7 @@ nosetests.xml
 .project
 .pydevproject
 
-MANIFEST.*
+MANIFEST
 
 # Vagrant
 .vagrant
