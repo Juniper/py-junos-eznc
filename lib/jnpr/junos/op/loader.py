@@ -57,13 +57,24 @@ class RunstatLoader(object):
 
   def _add_dictfield(self, fields, f_name, f_dict, kvargs ):
     """ add a field based on its associated dictionary """
-    # for now, the only thing we are handling is the 
-    # astype mechanism. nab the type looking at __builtins__
-    # this is kinda a @@@ hack @@@, so we should revisit this.
-    # if the user input is bad, then AttributeError exception.
-    this = f_dict.items()[0]
-    kvargs['astype'] = __builtins__.get(this[1], str)
-    fields.astype( f_name, this[0], **kvargs)
+    # at present if a field is a <dict> then there is one
+    # item, the xpath value and the option control.  typically
+    # the option would be a bultin class type like :int:
+    # however, as this framework expands in capability, this
+    # will be enhaced, yo!
+
+    xpath, opt = f_dict.items()[0]
+
+    # flag is alias for bool
+    if 'flag' == opt: opt = 'bool'   
+
+    astype = __builtins__.get(opt)
+    if astype is not None:
+      kvargs['astype'] = astype
+      fields.astype( f_name, xpath, **kvargs)
+      return
+    else:
+      raise RuntimeError("Dont know what to do with: %s" % f_name)
 
   def _add_view_fields(self, view_dict, fields_name, fields):
     """ add a group of fields to the view """
