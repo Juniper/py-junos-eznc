@@ -2,9 +2,7 @@
 
 The repo is under active development on release 0.0.3.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
-Early Adopter version 0.0.2 is now in PyPi: 
-
-    pip install junos-eznc
+Early Adopter version 0.0.2 is now in PyPi, see [Installation](#installation).
 
 ## ABOUT
 
@@ -33,7 +31,9 @@ _Junos EZ_ uses the Junos XML API via the NETCONF protocol.  This level of detai
 
 ## INSTALLATION
 
-This library is not yet in PyPi, so you will need to either _git clone_ and run _python2.7 setup.py install_ or use _pip-2.7_ to install.  For complete instructions, see this [blog](http://forums.juniper.net/t5/Network-Automaniac/Python-for-Non-Programmers-Part-1/ba-p/216449). 
+    pip-2.7 install git+https://github.com/Juniper/ncclient.git
+    pip-2.7 install junos-eznc
+ 
 
 ## HELLO, WORLD
 
