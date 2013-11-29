@@ -8,6 +8,7 @@
 *.egg-info
 dist
 build
+README
 eggs
 parts
 var
