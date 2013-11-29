@@ -16,6 +16,7 @@ setup(
     url = "http://www.github.com/jeremyschulman/py-junos-eznc",
     package_dir={'':'lib'},    
     packages=find_packages('lib'),
+    package_data={'jnpr.junos.op': ['*.yml']},
     install_requires=[
         "netaddr",
         "lxml",
