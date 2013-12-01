@@ -4,13 +4,12 @@ from lxml import etree
 from lxml.builder import E 
 
 # for the example ...
-from jnpr.eznc import Netconf as Junos
-from jnpr.eznc.utils import Config
+from jnpr.junos import Device 
+from jnpr.junos.utils import Config
 
 # create a junos device and open a connection
 
-login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
-jdev = Junos(**login)
+jdev = Device('jnpr-dc-fw')
 jdev.open()
 
 jdev.bind( cu=Config )

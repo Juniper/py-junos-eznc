@@ -239,7 +239,7 @@ class Config(Util):
 
     if 'template_path' in kvargs:
       path = kvargs['template_path']
-      template = self._junos.Template(path)
+      template = self.dev.Template(path)
       rpc_contents = template.render(kvargs.get('template_vars', {}))
       _lset_fromfile(path)
       return self.rpc.load_config( rpc_contents, **rpc_xattrs )

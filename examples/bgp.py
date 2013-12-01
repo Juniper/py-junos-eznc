@@ -1,5 +1,5 @@
 from lxml import etree 
-from jnpr.eznc.runstat import RunstatMaker as RSM
+from jnpr.junos.runstat import RunstatMaker as RSM
 
 ##### =========================================================================
 ##### Complex demo using the Runstat classes to handle run-state/status
