@@ -27,7 +27,7 @@ class version_info(object):
     self.as_tuple = self.major + tuple([self.minor, self.build])
 
   def __repr__(self):
-    retstr = "junos.versino_info(major={major}, type={type}, minor={minor}, build={build})".format(
+    retstr = "junos.version_info(major={major}, type={type}, minor={minor}, build={build})".format(
       major=self.major,
       type=self.type,
       minor=self.minor,
