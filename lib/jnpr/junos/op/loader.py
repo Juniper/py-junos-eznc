@@ -55,26 +55,47 @@ class RunstatLoader(object):
   ##### Create a View class from YAML definition
   ##### -----------------------------------------------------------------------
 
+  def _fieldfunc_True(self, value_rhs):
+    return lambda x: x == value_rhs
+
+  def _fieldfunc_False(self, value_rhs):
+    return lambda x: x != value_rhs
+
   def _add_dictfield(self, fields, f_name, f_dict, kvargs ):
     """ add a field based on its associated dictionary """
-    # at present if a field is a <dict> then there is one
-    # item, the xpath value and the option control.  typically
-    # the option would be a bultin class type like :int:
+    # at present if a field is a <dict> then there is **one
+    # item** - { the xpath value : the option control }.  typically
+    # the option would be a bultin class type like 'int'
     # however, as this framework expands in capability, this
     # will be enhaced, yo!
 
-    xpath, opt = f_dict.items()[0]
+    xpath, opt = f_dict.items()[0]       # get first/only key,value
+    if 'flag' == opt: opt = 'bool'       # flag is alias for bool
 
-    # flag is alias for bool
-    if 'flag' == opt: opt = 'bool'   
+    # first check to see if the option is a built-in Python
+    # type, most commonly would be 'int' for numbers, like counters
 
     astype = __builtins__.get(opt)
     if astype is not None:
       kvargs['astype'] = astype
       fields.astype( f_name, xpath, **kvargs)
       return
-    else:
-      raise RuntimeError("Dont know what to do with: %s" % f_name)
+
+    # next check to see if this is a "field-function"
+    # operator in the form "func=value", like "True=enabled"
+
+    if isinstance(opt,str) and opt.find('=') > 0:
+      field_cmd,value_rhs = opt.split('=')
+      fn_field = '_fieldfunc_' + field_cmd
+      if not hasattr(self, fn_field): 
+        raise ValueError("Unknown field-func: '%'" % field_cmd)
+      kvargs['astype'] = getattr(self,fn_field)(value_rhs)
+      fields.astype( f_name, xpath, **kvargs )
+      return
+
+    raise RuntimeError("Dont know what to do with field: '%s'" % f_name)
+
+  # ---[ END: _add_dictfield ] ------------------------------------------------
 
   def _add_view_fields(self, view_dict, fields_name, fields):
     """ add a group of fields to the view """
