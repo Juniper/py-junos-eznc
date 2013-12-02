@@ -72,7 +72,12 @@ class RunstatView(object):
   def name(self):
     """ return the name of view item """
     if self.NAME_XPATH is None: return self._table.D.hostname
-    return self._xml.findtext(self.NAME_XPATH).strip()
+    if isinstance(self.NAME_XPATH,str):
+      # simple key
+      return self._xml.findtext(self.NAME_XPATH).strip()
+    else:
+      # composite key
+      return tuple([self.xml.findtext(i).strip() for i in self.NAME_XPATH])
 
   # ALIAS key <=> name
   key = name

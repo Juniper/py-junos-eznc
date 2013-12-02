@@ -21,6 +21,13 @@ class RunstatTable(object):
     self._xml_got = table_xml
     self.view = self.VIEW
 
+    if self.is_container:
+      self.keys = self._keys_container
+    elif isinstance(self.NAME_XPATH, str):
+      self.keys = self._keys_simple
+    elif isinstance(self.NAME_XPATH, list):
+      self.keys = self._keys_composite
+
   ### -------------------------------------------------------------------------
   ### PROPERTIES
   ### -------------------------------------------------------------------------
@@ -139,10 +146,21 @@ class RunstatTable(object):
     # returning self for call-chaining purposes, yo!
     return self
 
-  def keys(self):
-    """ returns a list of table item names """
-    if self.is_container: return []
-    return [n.findtext(self.NAME_XPATH).strip() for n in self._iter_xpath]
+  # -----------------------------------------------------------------
+  # handle keys() for either simple (str) or composite (n x str)
+  # -----------------------------------------------------------------
+
+  def _keys_composite(self):
+    """ composite keys return a tuple of key-items """
+    # self.NAME_XPATH is a list
+    _tkey = lambda this: tuple([this.findtext(k) for k in self.NAME_XPATH])
+    return [_tkey(item) for item in self._iter_xpath]
+
+  def _keys_simple(self):
+    return [n.findtext(self.NAME_XPATH).strip() for n in self._iter_xpath]    
+
+  def _keys_container(self):
+    return []
 
   def values(self):
     """ 
@@ -171,7 +189,7 @@ class RunstatTable(object):
 
   def __repr__(self):
     cname = self.__class__.__name__
-    if self.is_container is not None:
+    if not self.is_container:
       return "%s:%s: %s items" % (cname, self.D.hostname, len(self))
     else:
       return "%s:%s: data=%s" % (cname, self.D.hostname, ('no','yes')[self.got is not None])
@@ -198,37 +216,52 @@ class RunstatTable(object):
     view, then the XML object will be returned.
 
     :value:
-      when it is a string, this will perform a select based on the name
-      when it is a number, this will perform a select based by position.
+      when it is a string, this will perform a select based on the key-name
+      when it is a tuple, this will perform a select based on the compsite key-name
+      when it is an int, this will perform a select based by position.
         nubers can be either positive or negative.
         [0] is the first item (first xpath is actually 1)
         [-1] is the last item
+      when it is a dict, this will perform a select using:
+        {key: <keyvalue>, view: <viewclass> }
+        and <keyvalue> takes on the above definition (str,tuple,int)
     """
     self.assert_data()
 
     use_view = self.view
 
     def get_xpath(find_value):
-      if isinstance(find_value,str):
-        # find by name
-        xpath = self.ITER_XPATH + '[normalize-space(%s)="' % self.NAME_XPATH + find_value + '"]'
-      elif isinstance(find_value,int):
+      if isinstance(find_value,int):
         # find by index, assuming caller is using 0-index, and might use
         # negative values to reference from end of list
         xpath_pos = find_value + 1
         if find_value < 0:
           xpath_pos = len(self) + xpath_pos
-        xpath = '%s[%s]' % (self.ITER_XPATH, xpath_pos)
-      return xpath
+        xpath = '%s[%s]' % (self.ITER_XPATH, xpath_pos)        
+        return xpath
 
-    if self.ITER_XPATH is None:
-      # this is a table of tables; i.e. not table of record views
+      # create an XPath normalized key=value filter expression
+      xnkv = '[normalize-space({})="{}"]'
+
+      if isinstance(find_value,str):
+        # find by name, simple key
+        return self.ITER_XPATH + xnkv.format(self.NAME_XPATH, find_value)
+
+      if isinstance(find_value,tuple):
+        # composite key (value1, value2, ...) will create an
+        # iterative xpath of the fmt statement for each key/value pair
+        xpf = ''.join([xnkv.format(k,v) for k,v in zip(self.NAME_XPATH, find_value)])
+        return self.ITER_XPATH + xpf    
+
+    # ---[END: get_xpath ] --------------------------------------------------------
+
+    if self.is_container:
+      # this is a container; i.e. not table of record/views
       found = self.got
     else:
-      if isinstance(value,tuple):
-        # tuple(name,view_cls)
-        use_view = value[1]        
-        value = value[0]
+      if isinstance(value,dict):
+        use_view = value['view']
+        value = value['key']
 
       xpath = get_xpath(value)
       found = self.got.xpath(xpath)
