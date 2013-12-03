@@ -140,8 +140,13 @@ class RunstatLoader(object):
     kvargs = { 'view_name' : view_name }
 
     # if there are field groups, then get that now.
-    if 'groups' in view_dict: 
-      kvargs['groups'] = view_dict['groups']
+    if 'groups' in view_dict: kvargs['groups'] = view_dict['groups']
+
+    # if this view extends another ...
+    if 'extends' in view_dict:
+      base_cls =  self.catalog.get(view_dict['extends'])
+      # @@@ should check for base_cls is None!
+      kvargs['extends'] = base_cls
 
     fields = _FIELDS()
     fg_list = [name for name in view_dict if name.startswith('fields')]
