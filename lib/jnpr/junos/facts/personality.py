@@ -10,8 +10,11 @@ def personality( junos, facts ):
   elif examine.startswith("MX"):
     persona = 'MX'
   elif examine.startswith("vMX"):
-    facts['virtual'] = true
+    facts['virtual'] = True
     persona = 'MX'
+  elif examine.startswith("VJX"):
+    facts['virtual'] = True
+    persona = 'SRX_BRANCH'
   elif examine.startswith("M"):
     persona = "M"
   elif re.match("SRX\s?(\d){4}", examine):
