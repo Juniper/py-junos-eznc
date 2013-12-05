@@ -1,0 +1,22 @@
+---
+CfgPhyPortTable:
+  get: interfaces/interface
+
+CfgPortUnitTable:
+  get: interfaces/interface/unit
+  key_interface: name
+
+CfgSecPolicyContextTable:
+  get: security/policies/policy 
+  key:
+    - from-zone-name
+    - to-zone-name
+
+CfgSecPolicyRuleTable:
+  get: security/policies/policy/policy 
+  key_policy:
+    - from-zone-name
+    - to-zone-name
+
+CfgOspfTable:
+  get: protocols/ospf/area

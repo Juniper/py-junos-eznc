@@ -30,8 +30,14 @@ class _RpcMetaExec(object):
       :options: is a dict, creates attributes for the RPC
     """
     rpc = E('get-configuration', options)
+
     if filter_xml != None:
-      etree.SubElement(rpc, 'configuration').append( filter_xml )
+      # wrap the provided filter with toplevel <configuration> if 
+      # it does not already have one
+      
+      at_here = rpc if 'configuration' == filter_xml.tag else E('configuration')
+      at_here.append( filter_xml )
+
     return self._junos.execute( rpc )
 
   ##### -----------------------------------------------------------------------
