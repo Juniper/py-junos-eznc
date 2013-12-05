@@ -216,12 +216,12 @@ class RunstatLoader(object):
       else:
         self._item_views.append(k)
 
-  def load( self, file_dict ):
+  def load( self, catalog_dict ):
 
     # load the yaml data and extract the item names.  these names will
     # become the new class definitions
 
-    self._catalog_dict = file_dict
+    self._catalog_dict = catalog_dict
     self._sortitems()
 
     map( self._build_gettable, self._item_gettables )
