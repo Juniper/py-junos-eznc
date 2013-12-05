@@ -77,7 +77,7 @@ class ZoneAddrBookSet( Resource ):
         )
       )
     ))
-    got = self.J.rpc.get_config(get)
+    got = self.D.rpc.get_config(get)
     for adrset in got.xpath('.//address-set'):
       name = adrset.find('name').text
       self._rcatalog[name] = {}

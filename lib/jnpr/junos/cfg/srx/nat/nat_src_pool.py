@@ -75,12 +75,12 @@ class NatSrcPool( Resource ):
     get = E.security( E.nat( E.source(
       E.pool(JXML.NAMES_ONLY))))
 
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     self._rlist = [name.text for name in got.xpath('.//pool/name')]
 
   def _r_catalog(self):
     get = E.security( E.nat( E.source( E.pool )))
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     for pool in got.xpath('.//pool'):
       name = pool.find('name').text
       self._rcatalog[name] = {}

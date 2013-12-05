@@ -64,7 +64,7 @@ class ZoneAddrBookAddr( Resource ):
         E('address-book', E('address'))
       )
     ))
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     for addr in got.xpath('.//address-book/address'):
       name = addr.find('name').text
       self._rcatalog[name] = {}

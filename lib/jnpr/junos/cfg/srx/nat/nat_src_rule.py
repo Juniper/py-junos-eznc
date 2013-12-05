@@ -87,7 +87,7 @@ class NatSrcRule( Resource ):
         E.name(self.P._name),
       )
     )))
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     for rule in got.xpath('.//rule'):
       name = rule.find('name').text
       self._rcatalog[name] = {}

@@ -6,7 +6,7 @@ from lxml import etree
 # for the example ...
 from jnpr.junos import Device
 from jnpr.junos.cfg.srx.nat import NatProxyArp
-from jnpr.junos.utils import Config
+from jnpr.junos.utils.config import Config
 
 # create a junos device and open a connection
 

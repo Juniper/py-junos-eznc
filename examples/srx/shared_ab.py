@@ -6,7 +6,7 @@ from lxml import etree
 # for the example ...
 from jnpr.junos import Device 
 from jnpr.junos.cfg.srx import ZoneAddrBook
-from jnpr.junos.utils import Config
+from jnpr.junos.utils.config import Config
 
 jdev = Device(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev.open()

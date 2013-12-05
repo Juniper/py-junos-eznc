@@ -74,14 +74,14 @@ class NatStaticRuleSet( Resource ):
     get = E.security(E.nat(E.static(
       E('rule-set', JXML.NAMES_ONLY)
     )))
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     self._rlist = [name.text for name in got.xpath('.//name')]
 
   def _r_catalog(self):
     get = E.security(E.nat(E.static(
       E('rule-set')
     )))
-    got = self.J.rpc.get_config( get )
+    got = self.D.rpc.get_config( get )
     for ruleset in got.xpath('.//rule-set'):
       name = ruleset.find("name").text
       self._rcatalog[name] = {}

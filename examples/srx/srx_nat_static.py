@@ -5,7 +5,7 @@ from lxml import etree
 # for the example ...
 from jnpr.junos import Device as Junos
 from jnpr.junos.cfg.srx.nat import NatStaticRuleSet
-from jnpr.junos.utils import Config
+from jnpr.junos.utils.config import Config
 
 # create a junos device and open a connection
 

@@ -141,7 +141,7 @@ class PolicyRule( Resource ):
     self._rlist = [ this.text for this in got.xpath('.//policy/policy/name') ]
 
   def _r_catalog( self ):
-    got = self.J.rpc.get_config(self.P._xml_at_top())
+    got = self.D.rpc.get_config(self.P._xml_at_top())
     policies = got.find('.//security/policies/policy')
     for pol in policies.findall('policy'):
       name = pol.find('name').text

@@ -3,7 +3,7 @@ from pprint import pprint as pp
 
 from jnpr.junos import Device as Junos
 from jnpr.junos.cfg.srx import ApplicationSet
-from jnpr.junos.utils import Config
+from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import *
 
 from lxml.builder import E 
