@@ -93,9 +93,6 @@ class RunstatLoader(object):
       fields.astype( f_name, xpath, **kvargs )
       return
 
-    import pdb
-    pdb.set_trace()
-
     raise RuntimeError("Dont know what to do with field: '%s'" % f_name)
 
   # ---[ END: _add_dictfield ] ------------------------------------------------
