@@ -6,11 +6,12 @@ class Table(object):
   ##### CONSTRUCTOR
   ##### -----------------------------------------------------------------------
 
-  def __init__(self, dev, data_dict):
+  def __init__(self, dev):
     self._dev = dev
-    self._data_dict = data_dict
+    self._data_dict = self.DEFINE  # crutch
     self.NAME_XPATH = self._data_dict.get('key','name')    
     self.ITER_XPATH = self._data_dict['get']
+    self.view = self._data_dict.get('view')
     self.xml = None
 
   ##### -----------------------------------------------------------------------
@@ -27,15 +28,12 @@ class Table(object):
     return a list of the keys required when invoking :get(): 
     and :get_keys(): 
     """
-#    return [k[4:] for k in self._data_dict.keys() if k.startswith('key_')]
     return self._data_dict.get('required_keys')
 
   @property 
   def keys_required(self):
     """ True/False - if this Table requires keys """
     return self.required_keys is not None
-
-
 
   ##### -----------------------------------------------------------------------
   ##### PRIVATE METHODS
@@ -219,8 +217,6 @@ class Table(object):
     """
 #    self.assert_data()
 
-    use_view = getattr(self, 'view', lambda table,view_xml: view_xml)
-
     item_xpath = self._data_dict['get']
     namekey_xpath = self._data_dict.get('key','name')
 
@@ -253,6 +249,9 @@ class Table(object):
     xpath = get_xpath( value )
     found = self.xml.xpath( xpath )
     if not len(found): return None
+
+    as_xml = lambda table,view_xml: view_xml
+    use_view = self.view or as_xml
 
     return use_view( table=self, view_xml=found[0] ) 
 
