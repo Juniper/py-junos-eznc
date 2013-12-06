@@ -9,3 +9,9 @@ this = pc.keys()[0]
 pr = Table(dev,data['CfgSecPolicyRuleTable'])
 phys = Table(dev,data['CfgPhyPortTable'])
 ab = Table(dev,data['CfgZoneAddrBookItemTable'])
+
+globals().update(opload('testviews'))
+
+pr.view = CfgPRView
+pr.get(policy=this, namesonly=False)
+

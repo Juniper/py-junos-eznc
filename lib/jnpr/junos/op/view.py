@@ -191,32 +191,49 @@ class RunstatView(object):
       raise ValueError("Unknown field: '%s'" % name)
 
     if item.has_key('table'):
-      found = item['table'](ncdev=self.D, table_xml=self._xml)
+      # if this is a sub-table, then return that now
+      return item['table'](ncdev=self.D, table_xml=self._xml)
+
+    # otherwise, not a sub-table, and handle the field
+    astype = item.get('astype',str)
+    if item.has_key('group'):
+      found = self._groups[item['group']].xpath(item['xpath'])
     else:
-      astype = item.get('astype',str)
-      if item.has_key('group'):
-        found = self._groups[item['group']].xpath(item['xpath'])
-      else:
-        found = self._xml.xpath(item['xpath'])
+      found = self._xml.xpath(item['xpath'])
 
-      if astype is bool:
-        # handle the boolean flag case separately
-        return bool(len(found))
+    len_found = len(found)
 
-      if 0 == len(found): 
-        # even for the case of numbers, do not set the value.  we 
-        # want to detect "does not exist" vs. defaulting to 0
-        # -- 2013-nov-19, JLS.
-        return None   
-      try:
-        # added exception handler to catch malformed xpath expressesion
-        # -- 2013-nov-19, JLS.
-        as_str = found[0] if isinstance(found[0],str) else found[0].text
-        found = astype(as_str.strip())
-      except:
-        raise RuntimeError("Unable to handle field:'%s'" % name)
+    if astype is bool:
+      # handle the boolean flag case separately
+      return bool(len_found)
 
-    return found
+    if not len_found: 
+      # even for the case of numbers, do not set the value.  we 
+      # want to detect "does not exist" vs. defaulting to 0
+      # -- 2013-nov-19, JLS.
+      return None   
+
+    try:
+      # added exception handler to catch malformed xpath expressesion
+      # -- 2013-nov-19, JLS.
+      # added support to handle multiple xpath values, i.e. a list of
+      # things that have the same xpath expression (common in configs)
+      # -- 2031-dec-06, JLS
+      # added support to use the element tag if the text is empty
+      def _munch(x):
+        as_str = x if isinstance(x,str) else x.text
+        if as_str is not None: as_str = as_str.strip()
+        if not as_str: as_str = x.tag     # use 'not' to test for empty
+        return astype(as_str)
+
+      if 1 == len_found: return _munch( found[0] )
+      return [_munch(this) for this in found ]
+
+    except:
+      raise RuntimeError("Unable to handle field:'%s'" % name)
+
+    # and if we are here, then we didn't handle the field.
+    raise RuntimeError("Unable to handle field:'%s'" % name)
 
   def __getitem__(self,name):
     """ 

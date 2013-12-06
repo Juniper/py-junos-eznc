@@ -30,3 +30,4 @@ CfgZoneAddrBookItemTable:
   get: security/zones/security-zone/address-book/address
   required_keys:
     security_zone: name
+  view: CfgZoneAddrBookItemView

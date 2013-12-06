@@ -75,7 +75,7 @@ class RunstatLoader(object):
     # first check to see if the option is a built-in Python
     # type, most commonly would be 'int' for numbers, like counters
 
-    astype = __builtins__.get(opt)
+    astype = __builtins__.get(opt) or globals().get(opt)
     if astype is not None:
       kvargs['astype'] = astype
       fields.astype( f_name, xpath, **kvargs)
@@ -92,6 +92,9 @@ class RunstatLoader(object):
       kvargs['astype'] = getattr(self,fn_field)(value_rhs)
       fields.astype( f_name, xpath, **kvargs )
       return
+
+    import pdb
+    pdb.set_trace()
 
     raise RuntimeError("Dont know what to do with field: '%s'" % f_name)
 
