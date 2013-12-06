@@ -4,7 +4,8 @@ CfgPhyPortTable:
 
 CfgPortUnitTable:
   get: interfaces/interface/unit
-  key_interface: name
+  required_keys:
+    interface: name
 
 CfgSecPolicyContextTable:
   get: security/policies/policy 
@@ -14,9 +15,18 @@ CfgSecPolicyContextTable:
 
 CfgSecPolicyRuleTable:
   get: security/policies/policy/policy 
-  key_policy:
-    - from-zone-name
-    - to-zone-name
+  required_keys:
+    policy:
+      - from-zone-name
+      - to-zone-name
 
 CfgOspfTable:
   get: protocols/ospf/area
+
+CfgZoneTable:
+  get: security/zones/security-zone
+
+CfgZoneAddrBookItemTable:
+  get: security/zones/security-zone/address-book/address
+  required_keys:
+    security_zone: name
