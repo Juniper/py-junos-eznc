@@ -178,10 +178,18 @@ class Table(object):
   ### values - return Table data item values
   ### -------------------------------------------------------------------------    
 
+  def items(self):
+    """ returns list of tuple(name,values) for each table entry """
+    return zip(self.keys(), self.values())
+
   def values(self):
-    """ return a list of data item values """
-    as_xml = self.xml.xpath(self._data_dict['get'])
-    return as_xml
+    """ returns list of table entry items() """
+    if self.view is None:
+      # no View, so provide XML for each item
+      return [this for this in self]
+    else:
+      # view object for each item
+      return [this.items() for this in self]
 
   ##### -----------------------------------------------------------------------
   ##### OVERLOADS
@@ -258,9 +266,8 @@ class Table(object):
   def __iter__(self):
     """ iterate over each time in the table """
 #    self.assert_data()
-
-    # if a view is set then use it, if not give back the xml
-    view_as = getattr(self,'view', lambda t,x: x )
+    as_xml = lambda table,view_xml: view_xml
+    view_as = self.view or as_xml
 
     for this in self.xml.xpath(self.ITER_XPATH):
       yield view_as( self, this )
