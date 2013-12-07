@@ -111,6 +111,9 @@ class Table(object):
     for field_xpath in self._data_dict['get_fields']:
       dot.append(E(field_xpath))
 
+  def _assert_data(self):
+    if self.xml is None: raise RuntimeError("Table is empty")
+    
   ### -------------------------------------------------------------------------
   ### get - retrieve Table data
   ### -------------------------------------------------------------------------
@@ -175,7 +178,7 @@ class Table(object):
     return self._keys_composite( xpath, key_value )
 
   ### -------------------------------------------------------------------------
-  ### values - return Table data item values
+  ### items() and values() 
   ### -------------------------------------------------------------------------    
 
   def items(self):
@@ -223,7 +226,7 @@ class Table(object):
         {key: <keyvalue>, view: <viewclass> }
         and <keyvalue> takes on the above definition (str,tuple,int)
     """
-#    self.assert_data()
+    self._assert_data()
 
     item_xpath = self._data_dict['get']
     namekey_xpath = self._data_dict.get('key','name')
@@ -265,7 +268,8 @@ class Table(object):
 
   def __iter__(self):
     """ iterate over each time in the table """
-#    self.assert_data()
+    self._assert_data()
+
     as_xml = lambda table,view_xml: view_xml
     view_as = self.view or as_xml
 

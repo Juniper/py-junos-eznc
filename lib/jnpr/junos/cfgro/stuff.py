@@ -10,5 +10,8 @@ zones.get()
 pc = srx['policyContextTable'](dev)
 pc.get()
 
+addrs = srx['abitemTable'](dev)
+
 rules = srx['policyRuleTable'](dev)
 rules.get( policy=pc[0].name, namesonly=False )
+
