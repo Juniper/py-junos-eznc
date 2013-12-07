@@ -1,0 +1,66 @@
+---
+### ---------------------------------------------------------------------------
+### SRX zones and interfaces
+### ---------------------------------------------------------------------------
+
+zoneTable:
+  get: security/zones/security-zone
+
+zoneIfsTable:
+  get: security/zones/security-zone/interfaces
+  required_keys:
+    security_zone: name
+
+### ---------------------------------------------------------------------------
+### SRX zone address book item table
+### ---------------------------------------------------------------------------
+
+abitemTable:
+  get: security/zones/security-zone/address-book/address
+  required_keys:
+    security_zone: name
+  view: abitemView
+
+abitemView:
+  fields:
+    ip_prefix: ip-prefix
+
+### ---------------------------------------------------------------------------
+### SRX zone-to-zone security policy
+### ---------------------------------------------------------------------------
+
+policyContextTable:
+  get: security/policies/policy
+  key:
+    - from-zone-name
+    - to-zone-name  
+  view: policyContextView
+
+policyContextView:
+  fields:
+    from_zone: from-zone-name
+    to_zone: to-zone-name
+
+### ---------------------------------------------------------------------------
+### SRX zone-to-zone security policy rules
+### ---------------------------------------------------------------------------
+
+policyRuleTable:
+  get: security/policies/policy/policy 
+  required_keys:
+    policy:
+      - from-zone-name
+      - to-zone-name
+  view: policyRuleView
+
+policyRuleView:
+  groups:
+    match: match
+    then: then
+  fields_match:
+    match_src: source-address
+    match_dst: destination-address
+    match_app: application
+  fields_then:
+    log_init : { log/session-init: flag }
+    action : deny | permit  

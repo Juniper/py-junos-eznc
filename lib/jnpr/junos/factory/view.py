@@ -41,7 +41,7 @@ class RunstatView(object):
       raise ValueError("constructor only accecpts lxml.etree._Element")  
 
     self._table = table
-    self.NAME_XPATH = table.NAME_XPATH
+    self.NAME_XPATH = table.ITEM_NAME_XPATH
     self._init_xml( view_xml )
 
   def _init_xml(self, given_xml):
@@ -192,7 +192,7 @@ class RunstatView(object):
 
     if item.has_key('table'):
       # if this is a sub-table, then return that now
-      return item['table'](ncdev=self.D, table_xml=self._xml)
+      return item['table'](self.D, self._xml)
 
     # otherwise, not a sub-table, and handle the field
     astype = item.get('astype',str)

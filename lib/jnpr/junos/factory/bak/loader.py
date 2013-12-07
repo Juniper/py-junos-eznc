@@ -2,17 +2,6 @@
 # stdlib
 from copy import deepcopy
 
-# local
-from .table import Table 
-
-def ConfigLoaderMakeTableClass(table_name=None, data_dict={} ):
-  if table_name is None: table_name = "CfgGetTable"
-  new_cls = type(table_name, (Table,), {} )
-  new_cls.DEFINE = deepcopy(data_dict)
-  new_cls.__module__ = __name__
-  return new_cls
-
-_MKTBL = ConfigLoaderMakeTableClass
 
 class ConfigLoader(object):
   def __init__(self):

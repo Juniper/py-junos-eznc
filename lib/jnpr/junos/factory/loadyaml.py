@@ -1,14 +1,9 @@
-"""
-This file contains the routine 'loadyaml' that is used to load YAML files containing Table and View
-definitions.  
-"""
 # stdlib
-from __future__ import absolute_import    # needed since this file is called 'yaml' and importing yaml
 import yaml
 import os.path
 
 # local module
-from .loader import RunstatLoader 
+from .factory_loader import RunstatLoader 
 
 __all__ = ['loadyaml']
 

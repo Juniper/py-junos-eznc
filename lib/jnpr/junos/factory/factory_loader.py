@@ -8,7 +8,7 @@ refer to the .yml files in this jnpr.junos.op directory.
 from copy import deepcopy
 
 # locally
-from . import RunstatMaker as _RSM
+from .rsmaker import RunstatMaker as _RSM
 
 __all__ = ['RunstatLoader']
 

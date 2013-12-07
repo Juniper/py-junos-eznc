@@ -4,7 +4,8 @@ from copy import deepcopy
 # module libs
 from .view import RunstatView
 from .rsmfields import RunstatMakerViewFields
-from .table import RunstatTable
+from .table import Table
+from .optable import OpTable
 
 class RunstatMaker(object):
   """
@@ -30,24 +31,24 @@ class RunstatMaker(object):
   """
 
   @classmethod
-  def GetTable(cls, cmd, args=None, args_key=None, item=None, key=RunstatTable.NAME_XPATH, view=None, table_name=None ):
-    if table_name is None: table_name = "RunstatGetTable." + cmd
-    new_cls = type(table_name, (RunstatTable,), {} )
+  def GetTable(cls, cmd, args=None, args_key=None, item=None, key=OpTable.ITEM_NAME_XPATH, view=None, table_name=None ):
+    if table_name is None: table_name = "OpTable." + cmd
+    new_cls = type(table_name, (OpTable,), {} )
     new_cls.GET_RPC = cmd
     new_cls.GET_ARGS = args or {}
     if args_key is not None: new_cls.GET_KEY = args_key
-    new_cls.ITER_XPATH = item
-    new_cls.NAME_XPATH = key 
+    new_cls.ITEM_XPATH = item
+    new_cls.ITEM_NAME_XPATH = key 
     new_cls.VIEW = view
     new_cls.__module__ = __name__
     return new_cls
 
   @classmethod
-  def Table(cls, item, key=RunstatTable.NAME_XPATH, view=None, table_name=None):
-    if table_name is None: table_name = 'RunstatTable.' + item
-    new_cls = type(table_name, (RunstatTable,), {} )
-    new_cls.ITER_XPATH = item
-    new_cls.NAME_XPATH = key 
+  def Table(cls, item, key=Table.ITEM_NAME_XPATH, view=None, table_name=None):
+    if table_name is None: table_name = 'Table.' + item
+    new_cls = type(table_name, (Table,), {} )
+    new_cls.ITEM_XPATH = item
+    new_cls.ITEM_NAME_XPATH = key 
     new_cls.VIEW = view
     new_cls.__module__ = __name__
     return new_cls
