@@ -192,8 +192,10 @@ class Device(object):
     self._manages = []
     self._facts = {}
 
-    # public attributes
+    if not self._hostname:
+      raise ValueError("Hostname cannot be empty")
 
+    # public attributes
     self.connected = False
     self.rpc = _RpcMetaExec( self )
 
