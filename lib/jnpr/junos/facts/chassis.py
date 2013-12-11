@@ -38,6 +38,7 @@ def chassis(junos, facts):
 
   hostname = got.find('.//host-name')
   if hostname is not None: facts['hostname'] = hostname.text
+  else: facts['hostname'] = None
   facts['fqdn'] = facts['hostname']
 
   domain = got.find('.//domain-name')
