@@ -3,20 +3,19 @@ from setup import *
 dev = Device('jnpr-dc-fw').open()
 
 globals().update( loadyaml( '../op/ethport' ))
-
 eths = EthPortTable(dev)
 
-#srx = loadyaml('srx')
+srx = loadyaml('srx')
 
-#zones = srx['zoneTable'](dev)
+zones = srx['zoneTable'](dev)
+zones.get()
 
-# zones.get()
+pctx = srx['policyContextTable'](dev)
+pctx.get()
 
-# pc = srx['policyContextTable'](dev)
-# pc.get()
+addrs = srx['abitemTable'](dev)
+addrs.get(security_zone='OUTSIDE-DC-ST1')
 
-# addrs = srx['abitemTable'](dev)
-
-# rules = srx['policyRuleTable'](dev)
-# rules.get( policy=pc[0].name, namesonly=False )
+rules = srx['policyRuleTable'](dev)
+rules.get( policy=pctx[0].name, namesonly=False )
 

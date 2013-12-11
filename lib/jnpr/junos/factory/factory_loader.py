@@ -8,16 +8,18 @@ refer to the .yml files in this jnpr.junos.op directory.
 from copy import deepcopy
 
 # locally
-from .rsmaker import RunstatMaker as _RSM
+from .factory_cls import *
+from .viewfields import *
 
 __all__ = ['RunstatLoader']
 
 # internally used shortcuts
 
-_VIEW = _RSM.View
-_FIELDS = _RSM.Fields
-_GET = _RSM.GetTable 
-_TABLE = _RSM.Table 
+_VIEW = FactoryView
+_FIELDS = ViewFields
+_GET = FactoryOpTable 
+_TABLE = FactoryTable
+_CFGTBL = FactoryCfgTable
 
 class RunstatLoader(object):
   """
@@ -45,7 +47,8 @@ class RunstatLoader(object):
   def __init__(self):
     self._catalog_dict = None       # YAML data
 
-    self._item_gettables = []    # list of the get-tables
+    self._item_optables = []    # list of the get/op-tables
+    self._item_cfgtables = []   # list of get/cfg-tables
     self._item_views = []        # list of views to build
     self._item_tables = []       # list of tables to build
 
@@ -161,7 +164,7 @@ class RunstatLoader(object):
   ##### Create a Get-Table from YAML definition
   ##### -----------------------------------------------------------------------
 
-  def _build_gettable( self, table_name):
+  def _build_optable( self, table_name):
     """ build a new Get-Table definition """
     if table_name in self.catalog: return self.catalog[table_name]
 
@@ -203,6 +206,20 @@ class RunstatLoader(object):
     self.catalog[table_name] = cls
     return cls
 
+  def _build_cfgtable( self, table_name):
+    """ build a new Config-Table definition """
+    if table_name in self.catalog: return self.catalog[table_name]
+    tbl_dict = self._catalog_dict[table_name]
+
+    if 'view' in tbl_dict:
+      # transpose name to class
+      view_name = tbl_dict['view']      
+      tbl_dict['view'] = self.catalog.get( view_name, self._build_view( view_name ))
+
+    cls = _CFGTBL( table_name, tbl_dict )
+    self.catalog[table_name] = cls
+    return cls
+
   ##### -----------------------------------------------------------------------
   ##### Primary builders ...
   ##### -----------------------------------------------------------------------
@@ -210,13 +227,15 @@ class RunstatLoader(object):
   def _sortitems(self):
     for k,v in self._catalog_dict.items():
       if 'rpc' in v:
-        self._item_gettables.append(k)
+        self._item_optables.append(k)
+      elif 'get' in v:
+        self._item_cfgtables.append(k)
       elif 'view' in v:
         self._item_tables.append(k)
       else:
         self._item_views.append(k)
 
-  def load( self, catalog_dict ):
+  def load( self, catalog_dict, envrion={} ):
 
     # load the yaml data and extract the item names.  these names will
     # become the new class definitions
@@ -224,7 +243,8 @@ class RunstatLoader(object):
     self._catalog_dict = catalog_dict
     self._sortitems()
 
-    map( self._build_gettable, self._item_gettables )
+    map( self._build_optable, self._item_optables )
+    map( self._build_cfgtable, self._item_cfgtables )
     map( self._build_table, self._item_tables )
     map( self._build_view, self._item_views )
 

@@ -3,11 +3,11 @@ from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
 
-from .rsmfields import RunstatMakerViewFields
+from .viewfields import ViewFields
 
-class RunstatView(object):
+class View(object):
   """
-  RunstatView is the base-class that makes extracting values from XML 
+  View is the base-class that makes extracting values from XML 
   data appear as objects with attributes.
   """
 
@@ -170,7 +170,7 @@ class RunstatView(object):
     # value of this view
 
     tbl_xml = self._table._rpc_get(self.name)
-    new_xml = tbl_xml.xpath(self._table.ITER_XPATH)[0]
+    new_xml = tbl_xml.xpath(self._table.ITEM_XPATH)[0]
     self._init_xml(new_xml)
     return self
 

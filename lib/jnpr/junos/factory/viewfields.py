@@ -1,4 +1,4 @@
-class RunstatMakerViewFields(object):
+class ViewFields(object):
   """
   Used to dynamically create a field dictionary used with the 
   RunstatView class

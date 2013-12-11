@@ -11,8 +11,8 @@ class CfgTable(Table):
     Table.__init__(self, dev)       # call parent constructor
 
     self._data_dict = self.DEFINE  # crutch
-    self.NAME_XPATH = self._data_dict.get('key','name')    
-    self.ITER_XPATH = self._data_dict['get']
+    self.ITEM_NAME_XPATH = self._data_dict.get('key','name')    
+    self.ITEM_XPATH = self._data_dict['get']
     self.view = self._data_dict.get('view')
 
   ##### -----------------------------------------------------------------------
