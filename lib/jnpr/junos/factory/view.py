@@ -11,7 +11,7 @@ class View(object):
   data appear as objects with attributes.
   """
 
-  NAME_XPATH = 'name'
+  ITEM_NAME_XPATH = 'name'
   FIELDS = {}
   GROUPS = None
 
@@ -41,7 +41,7 @@ class View(object):
       raise ValueError("constructor only accecpts lxml.etree._Element")  
 
     self._table = table
-    self.NAME_XPATH = table.ITEM_NAME_XPATH
+    self.ITEM_NAME_XPATH = table.ITEM_NAME_XPATH
     self._init_xml( view_xml )
 
   def _init_xml(self, given_xml):
@@ -71,13 +71,13 @@ class View(object):
   @property 
   def name(self):
     """ return the name of view item """
-    if self.NAME_XPATH is None: return self._table.D.hostname
-    if isinstance(self.NAME_XPATH,str):
+    if self.ITEM_NAME_XPATH is None: return self._table.D.hostname
+    if isinstance(self.ITEM_NAME_XPATH,str):
       # simple key
-      return self._xml.findtext(self.NAME_XPATH).strip()
+      return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
     else:
       # composite key
-      return tuple([self.xml.findtext(i).strip() for i in self.NAME_XPATH])
+      return tuple([self.xml.findtext(i).strip() for i in self.ITEM_NAME_XPATH])
 
   # ALIAS key <=> name
   key = name
