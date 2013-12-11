@@ -11,7 +11,7 @@ from copy import deepcopy
 from .factory_cls import *
 from .viewfields import *
 
-__all__ = ['RunstatLoader']
+__all__ = ['FactoryLoader']
 
 # internally used shortcuts
 
@@ -21,7 +21,7 @@ _GET = FactoryOpTable
 _TABLE = FactoryTable
 _CFGTBL = FactoryCfgTable
 
-class RunstatLoader(object):
+class FactoryLoader(object):
   """
   Used to load a <dict> of data that contains Table and View definitions.
 

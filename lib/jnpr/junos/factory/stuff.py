@@ -2,8 +2,8 @@ from setup import *
 
 dev = Device('jnpr-dc-fw').open()
 
-ETH = loadyaml( '../op/ethport' ))
-eths = ETH['EthPortTable'](dev)
+ETH = loadyaml( '../op/ethport' )
+dev.bind(eths = ETH['EthPortTable'] )
 
 SRX = loadyaml('../cfgro/srx')
 
