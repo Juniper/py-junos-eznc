@@ -37,6 +37,7 @@ class _RpcMetaExec(object):
       
       at_here = rpc if 'configuration' == filter_xml.tag else E('configuration')
       at_here.append( filter_xml )
+      rpc.append( at_here )
 
     return self._junos.execute( rpc )
 
