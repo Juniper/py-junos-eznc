@@ -1,6 +1,8 @@
 # stdlib
 import os
 import types
+import socket
+import sys
 from inspect import isclass
 
 # 3rd-party packages
