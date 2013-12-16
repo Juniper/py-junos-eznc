@@ -18,7 +18,6 @@ RouteTableView:
     # fields taken from the group 'entry'
     protocol: protocol-name
     via: nh/via | nh/nh-local-interface
-    nexthop: nh/to
 
 ### ------------------------------------------------------
 ### show route summary
