@@ -201,6 +201,33 @@ class Device(object):
   ##### Basic device methods
   ##### -----------------------------------------------------------------------
 
+  def probe( self, *vargs, **kvargs ):
+    """
+    probes self._hostname to see if it is reachable/listening on self._port
+
+    kvargs['probe_timeout'] -- OPTIONAL
+      specify how long socket will wait (defaults to 2 seconds)
+    """
+    probe_timeout = kvargs.get('probe_timeout', 2)
+    try:
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.settimeout(probe_timeout)
+      s.connect( (self._hostname, self._port) )
+      s.shutdown(socket.SHUT_RDWR)
+      s.close()
+      return (True, "Connection successful")
+    except socket.timeout:
+      return (False, "The connection timed out")
+    except socket.gaierror:
+      return (False, "The hostname could not be resolved or other address error")
+    except socket.error:
+      if "Connection refused" in sys.exc_info()[1]:
+        return (False, "Connection Refused")
+      else:
+        return (False, "General socket error")
+    except:
+      return (False, sys.exc_info())
+
   def open( self, *vargs, **kvargs ):
     """
     opens a connection to the device using existing login/auth 
