@@ -1,5 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/junos-eznc.png)](http://badge.fury.io/py/junos-eznc)
-[![Build Status](https://travis-ci.org/jeremyschulman/py-junos-eznc.png?branch=master)](https://travis-ci.org/jeremyschulman/py-junos-eznc)
+[![Build Status](https://travis-ci.org/routeoflastresort/py-junos-eznc.png?branch=master)](https://travis-ci.org/jeremyschulman/py-junos-eznc)
 [![Dependency Status](https://gemnasium.com/jeremyschulman/py-junos-eznc.png)](https://gemnasium.com/jeremyschulman/py-junos-eznc)
 
 The repo is under active development on release 0.0.3.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
