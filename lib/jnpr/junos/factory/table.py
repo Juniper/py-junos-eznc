@@ -179,11 +179,12 @@ class Table(object):
     view, then the XML object will be returned.
 
     :value:
-      when it is a string, this will perform a select based on the key-name
-      when it is a tuple, this will perform a select based on the compsite key-name
-      when it is an int, this will perform a select based by position, like <list>
+      when it is a <string>, this will perform a select based on the key-name
+      when it is a <tuple>, this will perform a select based on the compsite key-name
+      when it is an <int>, this will perform a select based by position, like <list>
         [0] is the first item 
         [-1] is the last item
+      when it is a <slice> then this will return a <list> of View widgets
     """
     self._assert_data()
 
