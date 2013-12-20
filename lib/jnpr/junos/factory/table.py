@@ -192,6 +192,9 @@ class Table(object):
       # recursively call this method using that key, yo!
       return self.__getitem__(self.key_list[value])
 
+    if isinstance(value,slice):
+      # implements the 'slice' mechanism
+      return [self.__getitem__(key) for key in self.key_list[value]]
 
     # ---[ get_xpath ] --------------------------------------------------------
 
