@@ -10,6 +10,7 @@ class Table(object):
     self._dev = dev 
     self.xml = xml
     self.view = self.VIEW
+    self._key_list = []
 
   ##### -------------------------------------------------------------------------
   ##### PROPERTIES
