@@ -45,4 +45,6 @@ def chassis(junos, facts):
   if domain is not None: 
     facts['domain'] = domain.text
     facts['fqdn'] += '.%s' % facts['domain']    
+  else:
+    facts['domain'] = None
 

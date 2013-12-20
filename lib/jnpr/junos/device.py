@@ -183,7 +183,11 @@ class Device(object):
     """
 
     # private attributes
-    self._hostname = vargs[0] if len(vargs) else kvargs['host']
+    try:
+      self._hostname = vargs[0] if len(vargs) else kvargs['host']
+    except:
+      raise ValueError("You must provide the 'host' value")
+      
     self._port = kvargs.get('port', 830)
     self._auth_user = kvargs['user'] if 'user' in kvargs else os.getenv('USER')
     self._auth_password = kvargs.get('password')
