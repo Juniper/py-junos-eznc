@@ -87,7 +87,11 @@ def software_version(junos, facts):
       m = re.search('(\d)', re_name)
       re_name = m.group(0)
       pkginfo = re_sw.xpath('package-information[1]/comment')[0].text
-      facts['version_RE'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
+
+      try:
+        facts['version_RE'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
+      except:
+        facts['version_RE'+re_name] = "0.0I0.0"
 
     master = f_master[0] if isinstance(f_master,list) else f_master
     facts['version'] = facts['version_'+master]

@@ -77,7 +77,8 @@ class View(object):
       return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
     else:
       # composite key
-      return tuple([self.xml.findtext(i).strip() for i in self.ITEM_NAME_XPATH])
+#      return tuple([self.xml.findtext(i).strip() for i in self.ITEM_NAME_XPATH])
+      return tuple([self.xml.xpath(i)[0].text.strip() for i in self.ITEM_NAME_XPATH])
 
   # ALIAS key <=> name
   key = name

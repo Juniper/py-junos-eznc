@@ -18,6 +18,7 @@ RouteTableView:
     # fields taken from the group 'entry'
     protocol: protocol-name
     via: nh/via | nh/nh-local-interface
+    age: { age/@seconds : int }
 
 ### ------------------------------------------------------
 ### show route summary

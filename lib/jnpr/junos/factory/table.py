@@ -61,7 +61,8 @@ class Table(object):
 
   def _keys_composite(self, xpath, key_list):
     """ composite keys return a tuple of key-items """
-    _tkey = lambda this: tuple([this.findtext(k) for k in key_list ])
+#    _tkey = lambda this: tuple([this.findtext(k) for k in key_list ])
+    _tkey = lambda this: tuple([this.xpath(k)[0].text for k in key_list ])
     return [_tkey(item) for item in self.xml.xpath(xpath)]
 
   def _keys_simple(self, xpath):
@@ -161,7 +162,7 @@ class Table(object):
         # turn this into an XPath position value (1's based)
         xpath_pos = find_value + 1
         if find_value < 0: xpath_pos = len(self) + xpath_pos
-        xpath = '%s[%s]' % (item_xpath, xpath_pos)        
+        xpath = '%s[%s]' % (item_xpath, xpath_pos)    
         return xpath
 
       # otherwise we are using key=value name lookup
