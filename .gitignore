@@ -36,6 +36,9 @@ nosetests.xml
 
 MANIFEST
 
+# Testing
+.tox
+
 # Vagrant
 .vagrant
 vagrant_ansible*

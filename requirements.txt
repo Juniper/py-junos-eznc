@@ -3,4 +3,5 @@ git+git://github.com/Juniper/ncclient.git#egg=ncclient
 paramiko
 scp
 jinja2
+PyYAML
 netaddr
