@@ -1,5 +1,5 @@
 """
-Pythonifier for the 'xcvr' YAML file
+Pythonifier for Xcvr Table/View
 """
 from ..factory import loadyaml
 _YAML_ = __file__.replace('.py','.yml')
