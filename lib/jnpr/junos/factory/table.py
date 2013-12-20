@@ -1,6 +1,9 @@
 # stdlib
 from inspect import isclass
 
+# 3rd-party
+from lxml import etree
+
 class Table(object):
   ITEM_XPATH = None
   ITEM_NAME_XPATH = 'name'
@@ -149,6 +152,14 @@ class Table(object):
     # implemented by either OpTable or CfgTable
     # @@@ perhaps this should raise an exception rather than just 'pass', ??
     pass
+
+  ## --------------------------------------------------------------------------
+  ## savexml - saves the table XML to a local file
+  ## --------------------------------------------------------------------------
+
+  def savexml(self, path, timestamp=False ):
+    filename = path  # @@@ will update this with timestamp, etc.
+    return etree.ElementTree(self.xml).write(file(filename,'w'))
 
   ##### -------------------------------------------------------------------------
   ##### OVERLOADS
