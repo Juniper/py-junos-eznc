@@ -58,7 +58,7 @@ class Device(object):
     """
     The hostname/ip-addr of the Junos device
     """
-    return self._hostname
+    return self._hostname if (self._hostname != 'localhost') else self.facts.get('hostname')
 
   ### ---------------------------------------------------------------------------
   ### property: user

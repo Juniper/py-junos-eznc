@@ -192,11 +192,11 @@ class Table(object):
       # recursively call this method using that key, yo!
       return self.__getitem__(self.key_list[value])
 
-    namekey_xpath, item_xpath = self._keyspec()
 
     # ---[ get_xpath ] --------------------------------------------------------
 
     def get_xpath(find_value):
+      namekey_xpath, item_xpath = self._keyspec()      
       xnkv = '[normalize-space({})="{}"]'
 
       if isinstance(find_value,str):
@@ -211,11 +211,14 @@ class Table(object):
 
     # ---[END: get_xpath ] --------------------------------------------------------
 
-    xpath = get_xpath( value )
-    found = self.xml.xpath( xpath )
+    found = self.xml.xpath(get_xpath( value ))
     if not len(found): return None
 
     as_xml = lambda table,view_xml: view_xml
     use_view = self.view or as_xml
 
     return use_view( table=self, view_xml=found[0] ) 
+
+  def __contains__(self,key):
+    """ membership for use with 'in' """
+    return bool(key in self.key_list)
