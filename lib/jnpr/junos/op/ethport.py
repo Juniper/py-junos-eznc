@@ -2,5 +2,6 @@
 Pythonifier for EthPort Table/View
 """
 from ..factory import loadyaml
-_YAML_ = __file__.replace('.py','.yml')
+from os.path import splitext
+_YAML_ = splitext(__file__)[0] + '.yml'
 globals().update(loadyaml(_YAML_))
