@@ -1,3 +1,6 @@
+# 3rd-party
+from lxml import etree
+
 # local
 from .table import Table
 
@@ -11,6 +14,10 @@ class OpTable(Table):
     """ 
     Retrieve the XML table data from the Device instance and
     returns back the Table instance - for call-chaining purposes.  
+
+    If the Table was created with a :path: rather than a Device,
+    then this method will load the XML from that file.  In this
+    case, the *vargs, and **kvargs are not used.
 
     ALIAS: __call__    
 
@@ -32,6 +39,9 @@ class OpTable(Table):
       purposes, you want to create a subclass of your table and 
       overload this methods.
     """
+    if self._path is not None:
+      self.xml = etree.parse(self._path).getroot()
+      return self
 
     argkey = vargs[0] if len(vargs) else None
 

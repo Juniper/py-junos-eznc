@@ -6,11 +6,17 @@ class Table(object):
   ITEM_NAME_XPATH = 'name'
   VIEW = None
 
-  def __init__(self, dev, xml=None):
+  def __init__(self, dev=None, xml=None, path=None):
+    """
+    :dev: Device instance
+    :xml: lxml Element instance 
+    :path: file path to XML, to be used rather than :dev:
+    """
     self._dev = dev 
     self.xml = xml
     self.view = self.VIEW
     self._key_list = []
+    self._path = path
 
   ##### -------------------------------------------------------------------------
   ##### PROPERTIES
@@ -152,11 +158,13 @@ class Table(object):
 
   def __repr__(self):
     cls_name = self.__class__.__name__
+    source = self.D.hostname if self.D is not None else self._path
+
     if self.xml is None:
-      return "%s:%s - Table empty" % (cls_name, self.D.hostname)
+      return "%s:%s - Table empty" % (cls_name, source)
     else:
       n_items = len(self.keys())
-      return "%s:%s: %s items" % (cls_name, self.D.hostname,n_items)
+      return "%s:%s: %s items" % (cls_name, source, n_items)
 
   def __len__(self):
     self._assert_data()    
