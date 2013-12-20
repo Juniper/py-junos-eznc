@@ -18,10 +18,12 @@ class Table(object):
 
   @property 
   def D(self):
+    """ the Device instance """
     return self._dev
 
   @property 
   def RPC(self):
+    """ the Device.rpc instance """
     return self.D.rpc
 
   @property
@@ -53,6 +55,11 @@ class Table(object):
     """
     return self.ITEM_XPATH is None    
 
+  @property
+  def key_list(self):
+    """ the list of keys, as property for caching """
+    return self._key_list
+  
   ##### -------------------------------------------------------------------------
   ##### PRIVATE METHODS
   ##### -------------------------------------------------------------------------  
@@ -77,11 +84,12 @@ class Table(object):
   ##### PUBLIC METHODS
   ##### -------------------------------------------------------------------------    
 
-  def items(self):
-    """ returns list of tuple(name,values) for each table entry """
-    return zip(self.keys(), self.values())
 
-  def keys(self):
+  ## --------------------------------------------------------------------------
+  ## keys
+  ## --------------------------------------------------------------------------
+
+  def _keys(self):
     """ return a list of data item keys from the Table XML """
 
     self._assert_data()
@@ -96,6 +104,18 @@ class Table(object):
     # ok, so it's a list, which means we need to extract tuple values
     return self._keys_composite( xpath, key_value )
 
+  def keys(self):
+    # if the key_list has been cached, then use it
+    if len(self.key_list): return self.key_list
+
+    # otherwise, build the list of keys into the cache
+    self._key_list = self._keys()
+    return self._key_list
+
+  ## --------------------------------------------------------------------------
+  ## values
+  ## --------------------------------------------------------------------------
+
   def values(self):
     """ returns list of table entry items() """
 
@@ -107,7 +127,21 @@ class Table(object):
       # view object for each item
       return [this.items() for this in self]
 
+  ## --------------------------------------------------------------------------
+  ## items
+  ## --------------------------------------------------------------------------
+
+  def items(self):
+    """ returns list of tuple(name,values) for each table entry """
+    return zip(self.keys(), self.values())
+
+  ## --------------------------------------------------------------------------
+  ## get - loads the data from source
+  ## --------------------------------------------------------------------------
+
   def get(self, *vargs, **kvargs):
+    # implemented by either OpTable or CfgTable
+    # @@@ perhaps this should raise an exception rather than just 'pass', ??
     pass
 
   ##### -------------------------------------------------------------------------
@@ -147,27 +181,22 @@ class Table(object):
     :value:
       when it is a string, this will perform a select based on the key-name
       when it is a tuple, this will perform a select based on the compsite key-name
-      when it is an int, this will perform a select based by position.
-        nubers can be either positive or negative.
-        [0] is the first item (first xpath is actually 1)
+      when it is an int, this will perform a select based by position, like <list>
+        [0] is the first item 
         [-1] is the last item
     """
     self._assert_data()
 
+    if isinstance(value,int):
+      # if selection by index, then grab the key at this index and
+      # recursively call this method using that key, yo!
+      return self.__getitem__(self.key_list[value])
+
     namekey_xpath, item_xpath = self._keyspec()
 
-    def get_xpath(find_value):
-      if isinstance(find_value,int):
-        # find by index, assuming caller is using 0-index, and might use
-        # negative values to reference from end of list.  need to 
-        # turn this into an XPath position value (1's based)
-        xpath_pos = find_value + 1
-        if find_value < 0: xpath_pos = len(self) + xpath_pos
-        xpath = '%s[%s]' % (item_xpath, xpath_pos)    
-        return xpath
+    # ---[ get_xpath ] --------------------------------------------------------
 
-      # otherwise we are using key=value name lookup
-      # create an XPath normalized key=value filter expression
+    def get_xpath(find_value):
       xnkv = '[normalize-space({})="{}"]'
 
       if isinstance(find_value,str):
