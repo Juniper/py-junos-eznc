@@ -86,7 +86,7 @@ This module requires Python 2.7.
 
 ## LICENSE
 
-BSD-2
+Apache 2.0
   
 # CONTRIBUTORS
 

@@ -11,7 +11,7 @@ setup(
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
     description = ( "Junos 'EZ' automation for non-programmers" ),
-    license = "BSD-2",
+    license = "Apache 2.0",
     keywords = "Junos NETCONF networking automation",
     url = "http://www.github.com/jeremyschulman/py-junos-eznc",
     package_dir={'':'lib'},    
