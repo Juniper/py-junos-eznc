@@ -2,8 +2,6 @@
 
 The repo is under active development on release 0.0.3.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
-Early Adopter version 0.0.2 is now in PyPi, see [Installation](#installation).
-
 ## ABOUT
 
 _Junos EZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
