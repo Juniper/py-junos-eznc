@@ -1,8 +1,13 @@
 # stdlib
 from inspect import isclass
+from time import time
+from datetime import datetime
+import os
 
 # 3rd-party
 from lxml import etree
+
+_TSFMT = "%Y%m%d%H%M%S"
 
 class Table(object):
   ITEM_XPATH = None
@@ -157,9 +162,18 @@ class Table(object):
   ## savexml - saves the table XML to a local file
   ## --------------------------------------------------------------------------
 
-  def savexml(self, path, timestamp=False ):
-    filename = path  # @@@ will update this with timestamp, etc.
-    return etree.ElementTree(self.xml).write(file(filename,'w'))
+  def savexml(self, path, hostname=False, timestamp=False ):
+    fname, fext = os.path.splitext(path)
+
+    if hostname is True:
+      fname += "_%s" % self.D.hostname
+
+    if timestamp is True:
+      tsfmt = datetime.fromtimestamp(time()).strftime(_TSFMT)
+      fname += "_%s" % tsfmt
+
+    path = fname + fext
+    return etree.ElementTree(self.xml).write(file(path,'w'))
 
   ##### -------------------------------------------------------------------------
   ##### OVERLOADS

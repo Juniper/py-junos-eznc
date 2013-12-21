@@ -2,11 +2,11 @@ import sys
 from pprint import pprint as pp
 import jnpr.junos as junos
 
-if len(sys.argv) < 3:
-  # argv[1] = user-name
-  # argv[2] = host-name
-  print "you must provide a Junos user and target hostname"
-  sys.exit(1)
+# if len(sys.argv) < 3:
+#   # argv[1] = user-name
+#   # argv[2] = host-name
+#   print "you must provide a Junos user and target hostname"
+#   sys.exit(1)
 
 def sshconf_find(host):
   import os, paramiko
@@ -19,15 +19,19 @@ def sshconf_find(host):
   ssh_config.parse(open(config_file,'r'))
   return ssh_config.lookup( host )
 
-def connect(user, host):
-  from getpass import getpass  
+def connect(user, host, passwd=None):
+  from getpass import getpass 
+
   got_lkup = sshconf_find( host )
+  password = passwd if passwd is not None else getpass()
+
   login = dict(
     host=got_lkup['hostname'],
     port=got_lkup.get('port',830),
-    user=user, password=getpass()
+    user=user, password=password
   )
   return junos.Device(**login).open()
 
-dev = connect(sys.argv[1], sys.argv[2])
+if len(sys.argv) > 1:
+  dev = connect(sys.argv[1], sys.argv[2])
 
