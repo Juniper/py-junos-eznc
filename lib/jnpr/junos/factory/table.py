@@ -162,15 +162,31 @@ class Table(object):
   ## savexml - saves the table XML to a local file
   ## --------------------------------------------------------------------------
 
-  def savexml(self, path, hostname=False, timestamp=False ):
+  def savexml(self, path, hostname=False, timestamp=False, tsfmt=_TSFMT ):
+    """
+    save a copy of the table XML data to a local file
+
+    :path:
+      output XML file
+
+    :hostname:
+      if True, will append the hostname to the :path:
+
+    :timestamp:
+      if True, will append the timestamp to the :path:
+
+    :tsfmt:
+      allows you to override the timestamp format.  the format is defined
+      by strftime()      
+    """
     fname, fext = os.path.splitext(path)
 
     if hostname is True:
       fname += "_%s" % self.D.hostname
 
     if timestamp is True:
-      tsfmt = datetime.fromtimestamp(time()).strftime(_TSFMT)
-      fname += "_%s" % tsfmt
+      tsfmt_val = datetime.fromtimestamp(time()).strftime(tsfmt)
+      fname += "_%s" % tsfmt_val
 
     path = fname + fext
     return etree.ElementTree(self.xml).write(file(path,'w'))
