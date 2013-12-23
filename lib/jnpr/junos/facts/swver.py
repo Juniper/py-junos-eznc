@@ -50,30 +50,23 @@ class version_info(object):
   def __eq__(self,other): return self._cmp_tuple(other) == other  
   def __ne__(self,other): return self._cmp_tuple(other) != other
 
+def _get_swver(dev,facts):
+  try:
+    return dev.rpc.cli("show version invoke-on all-routing-engines", format='xml')
+  except:
+    try:
+      facts['vc_capable'] = True      
+      return dev.rpc.cli("show version all-members", format='xml')
+    except:
+      facts['vc_capable'] = False
+      return dev.rpc.get_software_information()
+
 def software_version(junos, facts):
   
   f_persona = facts.get('personality')
   f_master = facts.get('master')
       
-  # ---------------------------------------------------------------------------
-  # run the right RPC to get the software information
-  # ---------------------------------------------------------------------------
-
-  if f_persona == 'MX' or facts['2RE'] is True:
-    x_swver = junos.cli("show version invoke-on all-routing-engines", format='xml')
-  elif f_persona == 'SWITCH':
-    ## most EX switches support the virtual-chassis feature, so the 'all-members' option would be valid
-    ## in some products, this options is not valid (i.e. not vc-capable. so we're going to try for vc, and if that
-    ## throws an exception we'll rever to non-VC
-    try:
-      x_swver = junos.rpc.cli("show version all-members", format='xml')
-    except:
-      facts['vc_capable'] = False
-      x_swver = junos.rpc.cli("show version", format='xml')
-    else:
-      facts['vc_capable'] = True
-  else:
-    x_swver = junos.rpc.cli("show version", format='xml')
+  x_swver = _get_swver(junos,facts)
 
   # ---------------------------------------------------------------------------
   # extract the version information out of the RPC response
@@ -86,7 +79,7 @@ def software_version(junos, facts):
 
     facts['2RE'] = True
     versions = []
-   
+
     for re_sw in x_swver.xpath('.//software-information'):
       re_name = re_sw.xpath('preceding-sibling::re-name')[0].text.replace('node','RE')
       pkginfo = re_sw.findtext('package-information[1]/comment')

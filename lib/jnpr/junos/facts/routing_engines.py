@@ -48,8 +48,9 @@ def routing_engines(junos, facts):
       primary = cluster_st.xpath('.//redundancy-group-status[.="primary"]')[0]
       node = primary.xpath('preceding-sibling::device-name[1]')[0].text
       master.append(node.replace('node','RE'))
+      facts['srx_cluster'] = True
     except:
-      # no cluster
+      facts['srx_cluster'] = False
       pass
 
   len_master = len(master)
