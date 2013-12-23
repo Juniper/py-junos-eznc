@@ -4,6 +4,7 @@ from .personality import personality
 from .swver import software_version
 from .ifd_style import ifd_style
 from .switch_style import switch_style
+from .session import *
 
 FACT_LIST = [
   chassis,
@@ -12,6 +13,7 @@ FACT_LIST = [
   software_version,
   ifd_style,
   switch_style,
+  session
 ]
 
 __all__ = ['FACT_LIST']
