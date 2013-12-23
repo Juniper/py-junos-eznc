@@ -409,7 +409,7 @@ class Device(object):
     """
     start = datetime.datetime.now()
     end = start + datetime.timedelta(seconds=timeout)
-    failed = False
+    probe_ok = True
 
     while datetime.datetime.now() < end:
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -424,6 +424,6 @@ class Device(object):
           pass
     else:
       elapsed = datetime.datetime.now() - start
-      failed = True
+      probe_ok = False
 
-    return not failed
+    return probe_ok
