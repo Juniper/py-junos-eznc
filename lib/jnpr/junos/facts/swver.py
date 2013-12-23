@@ -59,7 +59,7 @@ def software_version(junos, facts):
   # run the right RPC to get the software information
   # ---------------------------------------------------------------------------
 
-  if f_persona == 'MX':
+  if f_persona == 'MX' or facts['2RE'] is True:
     x_swver = junos.cli("show version invoke-on all-routing-engines", format='xml')
   elif f_persona == 'SWITCH':
     ## most EX switches support the virtual-chassis feature, so the 'all-members' option would be valid

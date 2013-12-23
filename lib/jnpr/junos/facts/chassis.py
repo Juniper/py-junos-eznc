@@ -26,7 +26,12 @@ def chassis(junos, facts):
     x_ch = rsp.find('chassis')
 
   facts['model'] = x_ch.find('description').text
-  facts['serialnumber'] = x_ch.find('serial-number').text
+  try:
+    facts['serialnumber'] = x_ch.find('serial-number').text
+  except:
+    # if the toplevel chassis does not have a serial-number, then
+    # check the Backplane chassis-module
+    facts['serialnumber'] = x_ch.xpath('chassis-module[name="Backplane"]/serial-number')[0].text
 
   got = junos.rpc.get_config(
     E.system(

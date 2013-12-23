@@ -9,8 +9,10 @@ def routing_engines(junos, facts):
   re_info = junos.rpc.get_route_engine_information()
 
   master = []
+  re_list = re_info.xpath('.//route-engine')
+  if len(re_list) > 1: facts['2RE'] = True
 
-  for re in re_info.xpath('.//route-engine'):
+  for re in re_list:
     x_re_name = re.xpath('ancestor::multi-routing-engine-item/re-name')
 
     if not x_re_name:
