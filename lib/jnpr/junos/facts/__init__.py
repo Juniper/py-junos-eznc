@@ -7,8 +7,8 @@ from .switch_style import switch_style
 
 FACT_LIST = [
   chassis,
+  personality,  
   routing_engines,
-  personality,
   software_version,
   ifd_style,
   switch_style,

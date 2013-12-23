@@ -80,21 +80,31 @@ def software_version(junos, facts):
   # ---------------------------------------------------------------------------
   
   if x_swver.tag == 'multi-routing-engine-results':
+    # we need to find/identify each of the routing-engine (CPU) 
+    # versions.  Also need to deal with the difference in naming convesions
+    # between the SRX (node<n>) and traditional (RE<n>)
+
     facts['2RE'] = True
-    
+    versions = []
+   
     for re_sw in x_swver.xpath('.//software-information'):
-      re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
-      m = re.search('(\d)', re_name)
-      re_name = m.group(0)
-      pkginfo = re_sw.xpath('package-information[1]/comment')[0].text
+      re_name = re_sw.xpath('preceding-sibling::re-name')[0].text.replace('node','RE')
+      pkginfo = re_sw.findtext('package-information[1]/comment')
 
       try:
-        facts['version_RE'+re_name] = re.findall(r'\[(.*)\]', pkginfo)[0]
+        versions.append((re_name.upper(), re.findall(r'\[(.*)\]', pkginfo)[0]))
       except:
-        facts['version_RE'+re_name] = "0.0I0.0"
+        versions.append((re_name.upper(), "0.0I0.0"))
 
-    master = f_master[0] if isinstance(f_master,list) else f_master
-    facts['version'] = facts['version_'+master]
+    # now add the versions to the facts <dict>
+    for re_ver in versions: facts['version_' + re_ver[0]] = re_ver[1]
+
+    if f_master is not None:
+      master = f_master[0] if isinstance(f_master,list) else f_master
+      facts['version'] = facts['version_'+master]
+    else:
+      facts['version'] = versions[0][1]
+
   else:
     pkginfo = x_swver.xpath('.//package-information[name = "junos"]/comment')[0].text    
     facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]

@@ -3,6 +3,12 @@ import os
 import types
 from inspect import isclass
 
+# stdlib, in support of the the 'probe' method
+import socket
+import datetime
+import time
+import sys
+
 # 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
@@ -382,3 +388,42 @@ class Device(object):
     for gather in FACT_LIST:
       gather(self, self._facts)
       
+  ### ---------------------------------------------------------------------------
+  ### probe
+  ### ---------------------------------------------------------------------------  
+
+  def probe(self, timeout=5, intvtimeout=1):
+    """ 
+    probe the device to determine if the Device can accept a remote connection.
+    this method is meant to be called *prior* to :open():
+    this method will not work with ssh-jumphost enviornments.
+
+    :timeout: 
+      the probe will report True/False if the device report connectivity
+      within this timeout (secodns)
+
+    :intvtimeout: 
+      timeout interval on the socket connection.  generally you should not change
+      this value, but you can if you want to twiddle the frequency of the socket
+      attempts on the connection
+    """
+    start = datetime.datetime.now()
+    end = start + datetime.timedelta(seconds=timeout)
+    failed = False
+
+    while datetime.datetime.now() < end:
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.settimeout(intvtimeout)
+      try:
+          s.connect( (self.hostname, self._port) )
+          s.shutdown(socket.SHUT_RDWR)
+          s.close()
+          break
+      except:
+          time.sleep(1)
+          pass
+    else:
+      elapsed = datetime.datetime.now() - start
+      failed = True
+
+    return not failed
