@@ -72,8 +72,6 @@ Example output for an SRX-210 device:
 
 Please refer to the _Junos PyEZ_ project page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
 
-_Note: The github /docs directory is being migrated to that project page._
-
 ## LICENSE
 
 Apache 2.0
