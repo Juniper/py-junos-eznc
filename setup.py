@@ -10,7 +10,7 @@ requirements = [ 'netaddr >= 0.7.10', 'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
 setup(
     name = "junos-eznc",
     namespace_packages = ['jnpr'],
-    version = "0.0.2",
+    version = "0.0.3",
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
     description = ( "Junos 'EZ' automation for non-programmers" ),
