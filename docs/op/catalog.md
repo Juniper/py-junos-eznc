@@ -1,3 +1,0 @@
-# Catalog of Tables
-
-... to be written ...
