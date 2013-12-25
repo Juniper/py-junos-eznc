@@ -17,6 +17,7 @@ class SW(Util):
     sha256 - (class method) to compute SHA-256 hexdigest
     install - perform the entire software installation process
     reboot - reboots the system for the new image to take effect    
+    poweroff - shutdown the system
 
   Helpers called from install, but you can use these individually if needed:
     put - SCP put package file onto Junos device
@@ -199,6 +200,17 @@ class SW(Util):
   def reboot(self, in_min=0):    
     """ perform a system reboot, with optional delay (in minutes) """
     rsp = self.rpc(E('request-reboot', E('in', str(in_min))))
+    return rsp.findtext('request-reboot-status').strip()
+
+  ### -------------------------------------------------------------------------
+  ### poweroff - system shutdown
+  ###
+  ### @@@ - need to broader support to multi-RE devices
+  ### -------------------------------------------------------------------------
+
+  def poweroff(self, in_min=0):    
+    """ perform a system shutdown, with optional delay (in minutes) """
+    rsp = self.rpc(E('request-power-off', E('in', str(in_min))))
     return rsp.findtext('request-reboot-status').strip()
 
   ### -------------------------------------------------------------------------
