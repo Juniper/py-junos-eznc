@@ -19,7 +19,10 @@ setup(
     url = "http://www.github.com/jeremyschulman/py-junos-eznc",
     package_dir={'':'lib'},    
     packages=find_packages('lib'),
-    package_data={'jnpr.junos.op': ['*.yml']},
+    package_data={
+        'jnpr.junos.op': ['*.yml'],
+        'jnpr.junos.cfgro': ['*.yml']
+    },
     install_requires=requirements,
     classifiers=[
         'Development Status :: 3 - Alpha',
