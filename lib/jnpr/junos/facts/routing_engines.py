@@ -40,19 +40,6 @@ def routing_engines(junos, facts):
 
   # --[ end for-each 're' ]----------------------------------------------------
 
-  if facts['personality'].startswith('SRX'):
-    # we should check the 'cluster status' on redundancy group 0 to see who is 
-    # master.  we use a try/except block for cases when SRX is not clustered
-    try:
-      cluster_st = junos.rpc.get_chassis_cluster_status(redundancy_group="0")
-      primary = cluster_st.xpath('.//redundancy-group-status[.="primary"]')[0]
-      node = primary.xpath('preceding-sibling::device-name[1]')[0].text
-      master.append(node.replace('node','RE'))
-      facts['srx_cluster'] = True
-    except:
-      facts['srx_cluster'] = False
-      pass
-
   len_master = len(master)
   if len_master > 1:
     facts['master'] = master

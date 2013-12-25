@@ -3,6 +3,7 @@ import re
 def personality( junos, facts ):
   
   model = facts['model']
+
   examine = model if model != 'Virtual Chassis' else facts['RE0']['model']
 
   if re.match("^(EX)|(QFX)", examine):

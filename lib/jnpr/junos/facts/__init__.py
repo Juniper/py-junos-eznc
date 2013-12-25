@@ -5,11 +5,13 @@ from .swver import software_version
 from .ifd_style import ifd_style
 from .switch_style import switch_style
 from .session import *
+from .srx_cluster import srx_cluster
 
 FACT_LIST = [
   chassis,
+  routing_engines,  
   personality,  
-  routing_engines,
+  srx_cluster,
   software_version,
   ifd_style,
   switch_style,

@@ -73,16 +73,19 @@ def software_version(junos, facts):
   # ---------------------------------------------------------------------------
   
   if x_swver.tag == 'multi-routing-engine-results':
-    # we need to find/identify each of the routing-engine (CPU) 
-    # versions.  Also need to deal with the difference in naming convesions
-    # between the SRX (node<n>) and traditional (RE<n>)
+    # we need to find/identify each of the routing-engine (CPU) versions.  
 
     facts['2RE'] = True
     versions = []
 
     for re_sw in x_swver.xpath('.//software-information'):
-      re_name = re_sw.xpath('preceding-sibling::re-name')[0].text.replace('node','RE')
-      pkginfo = re_sw.findtext('package-information[1]/comment')
+      re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
+
+      # handle the cases where the "RE name" could be things like 
+      # "FPC<n>" or "ndoe<n>", and normalize to "RE<n>".
+      re_name = re.sub(r'(\w+)(\d+)','RE\\2',re_name)
+
+      pkginfo = re_sw.findtext('package-information[name="junos"]/comment')
 
       try:
         versions.append((re_name.upper(), re.findall(r'\[(.*)\]', pkginfo)[0]))
@@ -99,6 +102,7 @@ def software_version(junos, facts):
       facts['version'] = versions[0][1]
 
   else:
+    # single-RE
     pkginfo = x_swver.xpath('.//package-information[name = "junos"]/comment')[0].text    
     facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
 
