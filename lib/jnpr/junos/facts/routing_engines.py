@@ -1,9 +1,6 @@
-from string import maketrans
 import re as RE
 
 def routing_engines(junos, facts):
-
-  tr = maketrans('-','_')
 
   re_facts = ['mastership-state','status','model','up-time','last-reboot-reason']
   re_info = junos.rpc.get_route_engine_information()
@@ -32,7 +29,7 @@ def routing_engines(junos, facts):
     for factoid in re_facts:
       x_f = re.find(factoid)
       if x_f is not None:
-        re_fd[factoid.translate(tr)] = x_f.text
+        re_fd[factoid.replace('-','_')] = x_f.text
 
     if 'mastership_state' in re_fd:
       if facts[re_name]['mastership_state'] == 'master':
