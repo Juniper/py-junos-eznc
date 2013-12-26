@@ -19,11 +19,11 @@ def sshconf_find(host):
   ssh_config.parse(open(config_file,'r'))
   return ssh_config.lookup( host )
 
-def connect(user, host, passwd=None):
+def connect(host, user, password=None):
   from getpass import getpass 
 
   got_lkup = sshconf_find( host )
-  password = passwd if passwd is not None else getpass()
+  if password is None: password = getpass('password: ')
 
   login = dict(
     host=got_lkup['hostname'],
@@ -33,5 +33,5 @@ def connect(user, host, passwd=None):
   return junos.Device(**login).open()
 
 if len(sys.argv) > 1:
-  dev = connect(sys.argv[1], sys.argv[2])
+  dev = connect(sys.argv[2], sys.argv[1])
 

@@ -12,6 +12,7 @@ import sys
 # 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
+import paramiko
 import jinja2
 
 # local modules
@@ -171,6 +172,16 @@ class Device(object):
   ##### CONSTRUCTOR
   ##### -----------------------------------------------------------------------
 
+  def _sshconf_lkup(self):
+    sshconf_path = os.path.join(os.getenv('HOME'),'.ssh/config')
+    if not os.path.exists(sshconf_path): return
+
+    sshconf = paramiko.SSHConfig()
+    sshconf.parse(open(sshconf_path,'r'))
+    found = sshconf.lookup(self._hostname)
+    self._hostname = found['hostname']
+    self._port = found.get('port',self._port)
+
   def __init__(self, *vargs, **kvargs):
     """
     vargs[0] -- ALTERNATIVE for kvargs['host']
@@ -192,9 +203,11 @@ class Device(object):
     try:
       self._hostname = vargs[0] if len(vargs) else kvargs['host']
     except:
-      raise ValueError("You must provide the 'host' value")
-      
+      raise ValueError("You must provide the 'host' value")      
     self._port = kvargs.get('port', 830)
+
+    self._sshconf_lkup()
+
     self._auth_user = kvargs['user'] if 'user' in kvargs else os.getenv('USER')
     self._auth_password = kvargs.get('password')
     self._conn = None

@@ -3,11 +3,13 @@ import re
 class version_info(object):  
   def __init__(self, verstr ):
     """verstr - version string"""
-    m1 = re.match('(.*)([RBIXS])(.*)', verstr)
+    m1 = re.match('(.*?)([RBIXS])(.*)', verstr)
     self.type = m1.group(2)
+
     self.major = tuple(map(int,m1.group(1).split('.'))) # creates tuyple
     after_type = m1.group(3).split('.')
     self.minor = after_type[0]
+
     if 'X' == self.type:
       # assumes form similar to "45-D10", so extract the bits from this
       xm = re.match("(\d+)-(\w)(.*)", self.minor)
@@ -22,7 +24,10 @@ class version_info(object):
       except:
         self.build = None
     else:
-      self.build = int(after_type[1])   # assumes numeric build/spin
+      try:
+        self.build = int(after_type[1])   # assumes numeric build/spin
+      except:
+        self.build = after_type[0]  # non-numeric
 
     self.as_tuple = self.major + tuple([self.minor, self.build])
 
