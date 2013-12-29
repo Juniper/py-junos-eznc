@@ -39,7 +39,10 @@ class OpTable(Table):
       purposes, you want to create a subclass of your table and 
       overload this methods.
     """
+    self._key_list = []
+
     if self._path is not None:
+      # for loading from local file-path
       self.xml = etree.parse(self._path).getroot()
       return self
 
