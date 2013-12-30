@@ -134,6 +134,8 @@ class CfgTable(Table):
     if self.keys_required is True and not len(kvargs):
       raise ValueError("This table has required-keys\n", self.required_keys)
 
+    self._key_list = []
+    
     # determine if we need to get only the names of keys, or all of the
     # hierarchical data from the config.  The caller can explicity set
     # :namesonly: in the call, or request a specific items.  A specific
