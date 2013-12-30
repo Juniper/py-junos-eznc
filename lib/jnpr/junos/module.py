@@ -5,7 +5,7 @@ directories within the Junos PyEZ microframework
 from os.path import dirname as _dirname
 from os.path import join as _join
 
-MODULEPATH = _dirname(__file__)
-CFG = _join(MODULEPATH,'cfg')
-OP = _join(MODULEPATH,'op')
-CFGRO = _join(MODULEPATH,'cfgro')
+MODULEDIR = _dirname(__file__)
+CFGDIR = _join(MODULEPATH,'cfg')
+OPDIR = _join(MODULEPATH,'op')
+CFGRODIR = _join(MODULEPATH,'cfgro')

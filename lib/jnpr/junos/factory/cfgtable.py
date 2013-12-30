@@ -118,15 +118,15 @@ class CfgTable(Table):
     Retrieve configuration data for this table.  By default only the 
     keys of the table is loaded.  This behavior can be overriden by 
     either requesting a sepcifc table item, or by calling with
-    :namekeys=False:
+    kvargs['values']=True
 
     :vargs:
       [0] identifies a unique item in the table, 
       same as calling with :kvargs['key']: value
 
     RESERVED :kvargs:
-      'namesonly' - True*/False, when set to False will cause all data
-      to be retrieved, not just the namekeys.  
+      'values' - True/False*, when set to True will cause all data item
+      values to be retrieved, not just the name-keys.  
 
       'key' - used to retrieve the contents of the table record, and not 
       just the list of keys (default) [when namesonly=True]
@@ -134,7 +134,7 @@ class CfgTable(Table):
     if self.keys_required is True and not len(kvargs):
       raise ValueError("This table has required-keys\n", self.required_keys)
 
-    self._key_list = []
+    self._clearkeys()
     
     # determine if we need to get only the names of keys, or all of the
     # hierarchical data from the config.  The caller can explicity set
@@ -145,9 +145,8 @@ class CfgTable(Table):
     # simply to test for the existance of an item in the config, yo!
     # this 'featuure' doesn't work yet, but looking into it. 
 
-    namesonly = kvargs.get('namesonly')
-    if namesonly is None:
-      namesonly = not (len(vargs) or ('key' in kvargs))
+    b_values = kvargs.get('values')
+    namesonly = (not (len(vargs) or ('key' in kvargs))) if b_values is None else not(b_values)
 
     get_cmd = self._buildxml(namesonly=namesonly)    
 

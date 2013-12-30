@@ -94,10 +94,12 @@ class Table(object):
     """ returns tuple (keyname-xpath, item-xpath) """    
     return (self.ITEM_NAME_XPATH, self.ITEM_XPATH)
 
+  def _clearkeys(self):
+    self._key_list = []
+    
   ##### -------------------------------------------------------------------------
   ##### PUBLIC METHODS
   ##### -------------------------------------------------------------------------    
-
 
   ## --------------------------------------------------------------------------
   ## keys

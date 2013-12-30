@@ -1,12 +1,16 @@
 ---
+##### =========================================================================
+##### SAMPLE SRX config-read-only tables/views
+##### =========================================================================
+
 ### ---------------------------------------------------------------------------
 ### SRX zones and interfaces
 ### ---------------------------------------------------------------------------
 
-zoneTable:
+ZoneTable:
   get: security/zones/security-zone
 
-zoneIfsTable:
+ZoneIfsTable:
   get: security/zones/security-zone/interfaces
   required_keys:
     security_zone: name
@@ -15,7 +19,7 @@ zoneIfsTable:
 ### SRX zone address book item table
 ### ---------------------------------------------------------------------------
 
-abitemTable:
+ABitemTable:
   get: security/zones/security-zone/address-book/address
   required_keys:
     security_zone: name
@@ -29,7 +33,7 @@ abitemView:
 ### SRX zone-to-zone security policy
 ### ---------------------------------------------------------------------------
 
-policyContextTable:
+PolicyContextTable:
   get: security/policies/policy
   key:
     - from-zone-name
@@ -45,7 +49,7 @@ policyContextView:
 ### SRX zone-to-zone security policy rules
 ### ---------------------------------------------------------------------------
 
-policyRuleTable:
+PolicyRuleTable:
   get: security/policies/policy/policy 
   required_keys:
     policy:
