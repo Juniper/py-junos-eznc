@@ -96,7 +96,7 @@ class Table(object):
 
   def _clearkeys(self):
     self._key_list = []
-    
+
   ##### -------------------------------------------------------------------------
   ##### PUBLIC METHODS
   ##### -------------------------------------------------------------------------    
@@ -164,31 +164,45 @@ class Table(object):
   ## savexml - saves the table XML to a local file
   ## --------------------------------------------------------------------------
 
-  def savexml(self, path, hostname=False, timestamp=False, tsfmt=_TSFMT ):
+  def savexml(self, path, hostname=False, timestamp=False, append=None):
     """
-    save a copy of the table XML data to a local file
+    Save a copy of the table XML data to a local file.  The name of the
+    output file (:path:) can include the name of the Device host, the
+    timestamp of this action, as well as any user-defined appended value.
+    These 'add-ons' will be added to the :path: value prior to the file
+    extension in the order (hostname,timestamp,append), separated by
+    underscore (_).
+
+    For example, if both hostname=True and append='BAZ1', then when
+    :path: = '/var/tmp/foo.xml' and the Device.hostname is "srx123", the 
+    final file-path will be "/var/tmp/foo_srx123_BAZ1.xml"
 
     :path:
-      output XML file
+      file-path to write the XML file on the local filesystem
 
     :hostname:
       if True, will append the hostname to the :path:
 
     :timestamp:
-      if True, will append the timestamp to the :path:
+      if True, will append the timestamp to the :path: using the default
+        timestamp format
+      if <str> the timestamp will use the value as the timestamp format as
+        defied by strftime()
 
-    :tsfmt:
-      allows you to override the timestamp format.  the format is defined
-      by strftime()      
+    :append:
+      any <str> value that you'd like appended to the :path: value preceeding the
+      filename extension.
     """
     fname, fext = os.path.splitext(path)
 
-    if hostname is True:
-      fname += "_%s" % self.D.hostname
+    if hostname is True: fname += "_%s" % self.D.hostname
 
-    if timestamp is True:
+    if timestamp is not False:
+      tsfmt = _TSFMT if timestamp is True else timestamp
       tsfmt_val = datetime.fromtimestamp(time()).strftime(tsfmt)
       fname += "_%s" % tsfmt_val
+
+    if append is not None: fname += "_%s" % append
 
     path = fname + fext
     return etree.ElementTree(self.xml).write(file(path,'w'))
