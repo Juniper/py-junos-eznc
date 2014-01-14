@@ -5,7 +5,7 @@ from lxml.builder import E
 
 # for the example ...
 from jnpr.junos import Device 
-from jnpr.junos.utils import Config
+from jnpr.junos.utils.config import Config
 
 # create a junos device and open a connection
 
