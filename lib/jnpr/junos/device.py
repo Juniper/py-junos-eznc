@@ -179,8 +179,9 @@ class Device(object):
     sshconf = paramiko.SSHConfig()
     sshconf.parse(open(sshconf_path,'r'))
     found = sshconf.lookup(self._hostname)
-    self._hostname = found['hostname']
-    self._port = found.get('port',self._port)
+    self._hostname = found.get('hostname', self._hostname)
+    self._port = found.get('port', self._port)
+
 
   def __init__(self, *vargs, **kvargs):
     """
