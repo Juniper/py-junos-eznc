@@ -173,6 +173,7 @@ class Config(Util):
 
     ### -----------------------------------------------------------------------
     ### private helpers ...
+    ### -----------------------------------------------------------------------
 
     def _lformat_byext( path ):
       """ determine the format style from the file extension """
@@ -196,10 +197,8 @@ class Config(Util):
         # we use the extension to determine the format
         kvargs['format'] = _lformat_byext(path)
         _lset_format( kvargs, rpc_xattrs )      
-      if rpc_xattrs['format'] == 'xml':
-        # covert the XML string into XML structure
-        rpc_contents = etree.XML(rpc_contents)
 
+    ### -----------------------------------------------------------------------
     ### end-of: private helpers
     ### -----------------------------------------------------------------------
 
@@ -227,6 +226,10 @@ class Config(Util):
       # then this is a static-config file.  load that as our rpc_contents
       rpc_contents = open(kvargs['path']).read()
       _lset_fromfile(kvargs['path'])
+      if rpc_xattrs['format'] == 'xml':
+        # covert the XML string into XML structure
+        rpc_contents = etree.XML(rpc_contents)
+
       return self.rpc.load_config( rpc_contents, **rpc_xattrs )
 
       #~! UNREACHABLE !~#

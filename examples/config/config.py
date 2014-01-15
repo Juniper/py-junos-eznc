@@ -9,7 +9,7 @@ from jnpr.junos.utils.config import Config
 
 # create a junos device and open a connection
 
-jdev = Device('jnpr-dc-fw')
+jdev = Device('192.168.10.41',user='jeremy',password='jeremy123')
 jdev.open()
 
 jdev.bind( cu=Config )
@@ -60,3 +60,9 @@ print "Loading from Template ..."
 template = jdev.Template('config-example-template.conf')
 rsp = jdev.cu.load( template=template, template_vars=tvars )
 show_diff_and_rollback()
+
+print "Loading changes from XML file ..."
+rsp = jdev.cu.load( path='config-example.xml' )
+show_diff_and_rollback()
+
+
