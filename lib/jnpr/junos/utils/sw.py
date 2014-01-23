@@ -9,12 +9,20 @@ from lxml.builder import E
 from .util import Util
 from .scp import SCP 
 
+__all__ = ['SW']
+
+def _hashfile(afile, hasher,blocksize=65536):
+  buf = afile.read(blocksize)
+  while len(buf) > 0:
+      hasher.update(buf)
+      buf = afile.read(blocksize)
+  return hasher.hexdigest()      
+
 class SW(Util):
   """
   Softawre Utility class, used to perform a software upgrade and associated functions.
 
   Primary methods:
-    sha256 - (class method) to compute SHA-256 hexdigest
     install - perform the entire software installation process
     reboot - reboots the system for the new image to take effect    
     poweroff - shutdown the system
@@ -31,24 +39,34 @@ class SW(Util):
   """
 
   @classmethod
-  def sha256(cls,package):
+  def local_sha256(cls,package):
     """
-    computes the SHA-256 value on the package file.  This value should then be
-    passed to the :install(): method.  This method would generally be used if 
-    the same file was being loaded on a number of devices; thereby not re-calculating 
-    the sha256 hexdigest each time the file was loaded onto a different box.
+    computes the SHA-256 value on the package file.
 
     :package:
       complete path to the package (*.tgz) file on the local server      
     """
-    def hashfile(afile, hasher,blocksize=65536):
-      buf = afile.read(blocksize)
-      while len(buf) > 0:
-          hasher.update(buf)
-          buf = afile.read(blocksize)
-      return hasher.hexdigest()      
+    return _hashfile(open(package,'rb'),hashlib.sha256())
 
-    return hashfile(open(package,'rb'),hashlib.sha256())
+  @classmethod
+  def local_md5(cls,package):
+    """
+    computes the MD5 checksum value on the local package file.  
+
+    :package:
+      complete path to the package (*.tgz) file on the local server      
+    """
+    return _hashfile(open(package,'rb'),hashlib.md5())
+
+  @classmethod
+  def local_sha1(cls,package):
+    """
+    computes the SHA1 checksum value on the local package file.  
+
+    :package:
+      complete path to the package (*.tgz) file on the local server      
+    """
+    return _hashfile(open(package,'rb'),hashlib.sha1())    
 
   @classmethod
   def progress(cls,dev,report):
@@ -91,11 +109,32 @@ class SW(Util):
   ### pkgadd - used to perform the 'request system software add ...'
   ### -------------------------------------------------------------------------
 
-  def pkgadd(self, remote_package ):    
-    """ issue the 'request system software add' command on the package """
+  def pkgadd(self, remote_package, **kvargs ):    
+    """ 
+    Issue the 'request system software add' command on the package.  No 
+    validate is auto-set.  If you want to validate the image, do that 
+    using the specific :validate(): method.  Also, if you want to
+    reboot the device, suggest using the :reboot(): method rather
+    than kvargs['reboot']=True.
 
-    rsp = self.rpc.request_package_add( no_validate=True, 
-      package_name=remote_package )
+    :remote_package:
+      the file-path to the install package
+
+    :kvargs:
+      any additional parameters to the 'request' command can
+      be passed within kvargs, following the RPC syntax
+      methodology (dash-2-underscore,etc.)  For example,
+      're0' = True
+      're1' = True
+    """
+
+    args = dict(no_validate=True, package_name=remote_package)
+    args.update(kvargs)
+
+    dev_to = self.dev.timeout     # store device/rpc timeout
+    self.dev.timeout = 60*60      # hardset to 1 hr for long running process
+    rsp = self.rpc.request_package_add(**args)
+    self.dev.timeout = dev_to     # restore original timeout
 
     got = rsp.getparent()
     rc = int(got.findtext('package-result').strip())
@@ -111,14 +150,20 @@ class SW(Util):
     errcode = int(rsp.findtext('package-result'))
     return True if 0 == errcode else rsp.findtext('output').strip()
 
+  def remote_checksum(self, remote_package):
+    """ computes the MD5 checksum on the remote device """
+    rsp = self.rpc.get_checksum_information(path=remote_package)
+    return rsp.findtext('.//checksum').strip()    
+
   ### -------------------------------------------------------------------------
   ### install - complete installation process, but not reboot
   ### -------------------------------------------------------------------------
 
-  def install(self, package, remote_path='/var/tmp', validate=False, sha256=None, cleanfs=True, progress=None):
+  def install(self, package, remote_path='/var/tmp', progress=None,
+    validate=False, checksum=None, cleanfs=True, no_copy=False):
     """
     Performs the complete installation of the :package: that includes the following steps:
-      (1) computes the SHA-256 checksum if not provided in :sha256:
+      (1) computes the MD5 checksum if not provided in :checksum:
       (2) performs a storage cleanup if :cleanfs: is True
       (3) SCP copies the package to the :remote_path: directory
       (4) validates the package if :validate: is True
@@ -138,10 +183,10 @@ class SW(Util):
     :validate:
       determines whether or not to perform a config validation against the new image
 
-    :sha256:
-      SHA-256 hexdigest of the package file.  If this is not provided, then this
+    :checksum:
+      MD5 hexdigest of the package file.  If this is not provided, then this
       method will perform the calculation.  If you are planning on using the
-      same image for multiple updates, you should consider using the :sha256():
+      same image for multiple updates, you should consider using the :local_md5():
       method to precalculate this value and then provide to this method.
 
     :cleanfs:
@@ -160,26 +205,36 @@ class SW(Util):
     
     rpc = self.rpc
 
-    if sha256 is None: 
-      _progress('computing local SHA-256 on: %s' % package)
-      sha256 = SW.sha256(package)
+    ### -----------------------------------------------------------------------
+    ### perform a 'safe-copy' of the image to the remote device
+    ### -----------------------------------------------------------------------
 
-    if cleanfs is True:
-      _progress('cleaning filesystem ...')
-      rpc.request_system_storage_cleanup()
+    if no_copy is False:
+      if checksum is None: 
+        _progress('computing local checksum on: %s' % package)
+        checksum = SW.local_md5(package)
 
-    self.put( package, remote_path, progress)
+      if cleanfs is True:
+        _progress('cleaning filesystem ...')
+        rpc.request_system_storage_cleanup()
 
-    # validate checksum:
-    remote_package = remote_path + '/' + path.basename(package)
-    _progress('computing remote SHA-256 on: %s' % remote_package)
-    rsp = rpc.get_sha256_checksum_information(path=remote_package)
-    remote_sha256 = rsp.findtext('.//checksum').strip()
+      # we want to give the caller an override so we don't always
+      # need to copy the file, but the default is to do this, yo!
+      self.put( package, remote_path, progress)
 
-    if remote_sha256 != sha256:
-      _progress("SHA-256 check failed.")
-      return False
-    _progress("SHA-256 check passed.")
+      # validate checksum:
+      remote_package = remote_path + '/' + path.basename(package)
+      _progress('computing remote checksum on: %s' % remote_package)
+      remote_checksum = self.remote_checksum(remote_package)
+
+      if remote_checksum != checksum:
+        _progress("checksum check failed.")
+        return False
+      _progress("checksum check passed.")
+
+    ### -----------------------------------------------------------------------
+    ### at this point, the file exists on the remote device
+    ### -----------------------------------------------------------------------
 
     if validate is True:
       _progress("validating software against current config, please be patient ...")
@@ -193,25 +248,45 @@ class SW(Util):
 
   ### -------------------------------------------------------------------------
   ### rebbot - system reboot
-  ###
-  ### @@@ - need to broader support to multi-RE devices
   ### -------------------------------------------------------------------------
 
   def reboot(self, in_min=0):    
-    """ perform a system reboot, with optional delay (in minutes) """
-    rsp = self.rpc(E('request-reboot', E('in', str(in_min))))
-    return rsp.findtext('request-reboot-status').strip()
+    """ 
+    Perform a system reboot, with optional delay (in minutes).  
+
+    If the device is an MX with dual-RE installed, then both RE will be
+    rebooted.
+    """
+    cmd = E('request-reboot', E('in', str(in_min)))
+
+    _facts = self.dev.facts
+    if _facts['personality'] == 'MX' and (_facts.has_key('RE0') and _facts.has_key('RE1')):
+      cmd.append(E('both-routing-engines'))
+
+    rsp = self.rpc(cmd)
+    got = rsp.getparent().findtext('.//request-reboot-status').strip()
+    return got
 
   ### -------------------------------------------------------------------------
   ### poweroff - system shutdown
-  ###
-  ### @@@ - need to broader support to multi-RE devices
   ### -------------------------------------------------------------------------
 
   def poweroff(self, in_min=0):    
-    """ perform a system shutdown, with optional delay (in minutes) """
-    rsp = self.rpc(E('request-power-off', E('in', str(in_min))))
-    return rsp.findtext('request-reboot-status').strip()
+    """
+    Perform a system shutdown, with optional delay (in minutes) .
+
+    If the device is an MX with dual-RE installed, then both RE will be
+    rebooted.    
+    """
+    cmd = E('request-power-off', E('in', str(in_min)))
+
+    _facts = self.dev.facts
+    if _facts['personality'] == 'MX' and (_facts.has_key('RE0') and _facts.has_key('RE1')):
+      cmd.append(E('both-routing-engines'))
+
+    rsp = self.rpc(cmd)
+    got = rsp.getparent().findtext('.//request-reboot-status').strip()
+    return got
 
   ### -------------------------------------------------------------------------
   ### rollback - clears the install request
