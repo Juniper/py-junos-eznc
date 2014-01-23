@@ -11,6 +11,7 @@ PhyPortView:
   fields:
     oper : oper-status
     admin : admin-status
+    description: description
     mtu: { mtu : int }
     link_mode: link-mode
     speed: speed
