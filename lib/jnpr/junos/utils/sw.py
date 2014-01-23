@@ -38,6 +38,10 @@ class SW(Util):
                 images on the device
   """
 
+  ##### -----------------------------------------------------------------------
+  ##### CLASS METHODS
+  ##### -----------------------------------------------------------------------
+
   @classmethod
   def local_sha256(cls,package):
     """
@@ -81,13 +85,18 @@ class SW(Util):
     """
     SCP 'put' the package file from the local server to the remote device.
 
+    :package:
+      file path to the package file on the local file system
+
     :remote_path:
       the directory on the device where the package will be copied to
 
     :progress:
-      callback function to indicate progress.  see :install(): for details
+      callback function to indicate progress.  You can use :SW.progress:
+      for basic reporting.  See that class method for details.
     """
     def _progress(report): 
+      # report progress only if a progress callback was provided
       if progress is not None: progress(self._dev, report)
 
     def _scp_progress(_path, _total, _xfrd):
@@ -101,6 +110,8 @@ class SW(Util):
       if 0 == (pct % 10) and pct != _scp_progress.by10pct:
         _scp_progress.by10pct = pct
         _progress("%s: %s / %s (%s%%)" % (_path,_xfrd,_total,str(pct)))
+
+    # execute the secure-copy with the Python SCP module
 
     with SCP(self._dev, progress=_scp_progress) as scp:
       scp.put(package, remote_path)
@@ -123,9 +134,7 @@ class SW(Util):
     :kvargs:
       any additional parameters to the 'request' command can
       be passed within kvargs, following the RPC syntax
-      methodology (dash-2-underscore,etc.)  For example,
-      're0' = True
-      're1' = True
+      methodology (dash-2-underscore,etc.)
     """
 
     args = dict(no_validate=True, package_name=remote_package)
@@ -154,6 +163,50 @@ class SW(Util):
     """ computes the MD5 checksum on the remote device """
     rsp = self.rpc.get_checksum_information(path=remote_package)
     return rsp.findtext('.//checksum').strip()    
+
+  ### -------------------------------------------------------------------------
+  ### safe_copy - copies the package and performs checksum
+  ### -------------------------------------------------------------------------
+
+  def safe_copy(self, package, **kvargs):
+    """
+    Copy the install package safely to the remote device.  By default
+    this means to clean the filesystem to make space, perform the 
+    secure-copy, and then verify the MD5 checksum.
+
+    For :kvargs: values, please refer to the :install(): method.
+    """
+    remote_path = kvargs.get('remote_path','/var/tmp')
+    progress = kvargs.get('progress')
+    checksum = kvargs.get('checksum')
+    cleanfs = kvargs.get('cleanfs', True)
+
+    def _progress(report): 
+      if progress is not None: progress(self._dev, report)
+
+    if checksum is None: 
+      _progress('computing local checksum on: %s' % package)
+      checksum = SW.local_md5(package)
+
+    if cleanfs is True:
+      _progress('cleaning filesystem ...')
+      self.rpc.request_system_storage_cleanup()
+
+    # we want to give the caller an override so we don't always
+    # need to copy the file, but the default is to do this, yo!
+    self.put( package, remote_path, progress)
+
+    # validate checksum:
+    remote_package = remote_path + '/' + path.basename(package)
+    _progress('computing remote checksum on: %s' % remote_package)
+    remote_checksum = self.remote_checksum(remote_package)
+
+    if remote_checksum != checksum:
+      _progress("checksum check failed.")
+      return False
+    _progress("checksum check passed.")    
+
+    return True
 
   ### -------------------------------------------------------------------------
   ### install - complete installation process, but not reboot
@@ -210,31 +263,15 @@ class SW(Util):
     ### -----------------------------------------------------------------------
 
     if no_copy is False:
-      if checksum is None: 
-        _progress('computing local checksum on: %s' % package)
-        checksum = SW.local_md5(package)
-
-      if cleanfs is True:
-        _progress('cleaning filesystem ...')
-        rpc.request_system_storage_cleanup()
-
-      # we want to give the caller an override so we don't always
-      # need to copy the file, but the default is to do this, yo!
-      self.put( package, remote_path, progress)
-
-      # validate checksum:
-      remote_package = remote_path + '/' + path.basename(package)
-      _progress('computing remote checksum on: %s' % remote_package)
-      remote_checksum = self.remote_checksum(remote_package)
-
-      if remote_checksum != checksum:
-        _progress("checksum check failed.")
-        return False
-      _progress("checksum check passed.")
+      copy_ok = self.safe_copy(package, remote_path=remote_path, progress=progress,
+        cleanfs=cleanfs, checksum=checksum)
+      if copy_ok is False: return False
 
     ### -----------------------------------------------------------------------
     ### at this point, the file exists on the remote device
     ### -----------------------------------------------------------------------
+
+    remote_package = remote_path + '/' + path.basename(package)
 
     if validate is True:
       _progress("validating software against current config, please be patient ...")
