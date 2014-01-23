@@ -38,6 +38,10 @@ class SW(Util):
                 images on the device
   """
 
+  def __init__(self, dev):
+    Util.__init__(self, dev)
+    self._both_RE = bool(dev.facts['personality'] == "MX" and dev.facts.get('version_2RE') is True)
+
   ##### -----------------------------------------------------------------------
   ##### CLASS METHODS
   ##### -----------------------------------------------------------------------
@@ -216,11 +220,14 @@ class SW(Util):
     validate=False, checksum=None, cleanfs=True, no_copy=False):
     """
     Performs the complete installation of the :package: that includes the following steps:
-      (1) computes the MD5 checksum if not provided in :checksum:
+    When no_copy is False (default-case)
+      (1) computes the local MD5 checksum if not provided in :checksum:
       (2) performs a storage cleanup if :cleanfs: is True
       (3) SCP copies the package to the :remote_path: directory
-      (4) validates the package if :validate: is True
-      (5) installs the package
+      (4) computes the remote MD5 checksum and matches it to the local value
+    Then:
+      (5) validates the package if :validate: is True
+      (6) installs the package
 
     You can get a progress report on this process by providing a :progress: callback;
     see description below.
@@ -279,9 +286,15 @@ class SW(Util):
       if v_ok is not True:
         return v_ok # will be the string of output
 
-    _progress("installing software ... this could take some time, please be patient ...")
-    rsp = self.pkgadd( remote_package )
-    return rsp
+    if self._both_RE is False:
+      _progress("installing software ... please be patient ...")
+      return self.pkgadd( remote_package )
+    else:
+      _progress("installing software on RE1 ... please be patient ...")
+      re1_rsp = self.pkgadd( remote_package, re1=True )
+      _progress("installing software on RE0 ... please be patient ...")
+      re0_rsp = self.pkgadd( remote_package, re0=True )
+      return re1_rsp and re0_rsp
 
   ### -------------------------------------------------------------------------
   ### rebbot - system reboot
@@ -296,8 +309,7 @@ class SW(Util):
     """
     cmd = E('request-reboot', E('in', str(in_min)))
 
-    _facts = self.dev.facts
-    if _facts['personality'] == 'MX' and (_facts.has_key('RE0') and _facts.has_key('RE1')):
+    if self._both_RE is True:
       cmd.append(E('both-routing-engines'))
 
     rsp = self.rpc(cmd)
@@ -317,8 +329,7 @@ class SW(Util):
     """
     cmd = E('request-power-off', E('in', str(in_min)))
 
-    _facts = self.dev.facts
-    if _facts['personality'] == 'MX' and (_facts.has_key('RE0') and _facts.has_key('RE1')):
+    if self._both_RE is True:
       cmd.append(E('both-routing-engines'))
 
     rsp = self.rpc(cmd)
