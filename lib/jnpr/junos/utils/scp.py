@@ -22,8 +22,12 @@ class SCP(object):
     self._ssh = paramiko.SSHClient()
     self._ssh.load_system_host_keys()
     self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    self._ssh.connect( hostname = junos.hostname, 
-      port=(22,junos._port)[junos.hostname=='localhost'],
+
+    # use junos._hostname since this will be correct if we are going
+    # through a jumphost.
+
+    self._ssh.connect( hostname = junos._hostname, 
+      port=(22,int(junos._port))[junos._hostname=='localhost'],
       username=junos._auth_user,
       password=junos._auth_password,
     )    
