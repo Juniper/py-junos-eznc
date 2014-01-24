@@ -1,5 +1,6 @@
 # stdlib
 import hashlib
+import re
 from os import path
 
 # 3rd-party modules
@@ -40,7 +41,10 @@ class SW(Util):
 
   def __init__(self, dev):
     Util.__init__(self, dev)
-    self._both_RE = bool(dev.facts['personality'] == "MX" and dev.facts.get('version_2RE') is True)
+    self._RE_list = [x for x in dev.facts.keys() if x.startswith('version_RE')]
+    self._multi_RE = bool(len(self._RE_list) > 1)
+    self._multi_MX = bool(dev.facts['personality'] == "MX" and self._multi_RE is True)
+    self._multi_VC = bool(self._multi_RE is True and dev.facts.get('vc_capable') is True)
 
   ##### -----------------------------------------------------------------------
   ##### CLASS METHODS
@@ -193,8 +197,11 @@ class SW(Util):
       checksum = SW.local_md5(package)
 
     if cleanfs is True:
+      dto = self.dev.timeout
+      self.dev.timeout = 5 * 60
       _progress('cleaning filesystem ...')
       self.rpc.request_system_storage_cleanup()
+      self.dev.timeout = dto
 
     # we want to give the caller an override so we don't always
     # need to copy the file, but the default is to do this, yo!
@@ -286,15 +293,27 @@ class SW(Util):
       if v_ok is not True:
         return v_ok # will be the string of output
 
-    if self._both_RE is False:
+    if self._multi_RE is False:
+      # simple case of device with only one RE
       _progress("installing software ... please be patient ...")
       return self.pkgadd( remote_package )
     else:
-      _progress("installing software on RE1 ... please be patient ...")
-      re1_rsp = self.pkgadd( remote_package, re1=True )
-      _progress("installing software on RE0 ... please be patient ...")
-      re0_rsp = self.pkgadd( remote_package, re0=True )
-      return re1_rsp and re0_rsp
+      # we need to update multiple devices
+      if self._multi_MX is True:
+        ok = True
+        _progress("installing software on RE0 ... please be patient ...")
+        ok &= self.pkgadd( remote_package, re0=True )
+        _progress("installing software on RE1 ... please be patient ...")
+        ok &= self.pkgadd( remote_package, re1=True )
+        return ok
+      elif self._multi_VC is True:
+        ok = True
+        # extract the VC number out of the 'version_RE<n>' string
+        vc_members = [re.search('(\d+)',x).group(1) for x in self._RE_list]
+        for vc_id in vc_members:
+          _progress("installing software on VC member: {} ... please be patient ...".format(vc_id))
+          ok &= self.pkgadd( remote_package, member=vc_id)
+        return ok
 
   ### -------------------------------------------------------------------------
   ### rebbot - system reboot
@@ -309,7 +328,7 @@ class SW(Util):
     """
     cmd = E('request-reboot', E('in', str(in_min)))
 
-    if self._both_RE is True:
+    if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
     rsp = self.rpc(cmd)
@@ -329,7 +348,7 @@ class SW(Util):
     """
     cmd = E('request-power-off', E('in', str(in_min)))
 
-    if self._both_RE is True:
+    if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
     rsp = self.rpc(cmd)

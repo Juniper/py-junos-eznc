@@ -1,1 +1,1 @@
-export PYTHONPATH=`pwd`/lib
+export PYTHONPATH=`pwd`/lib:$PYTHONPATH
