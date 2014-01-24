@@ -99,7 +99,6 @@ def software_version(junos, facts):
 
     # now add the versions to the facts <dict>
     for re_ver in versions: facts['version_' + re_ver[0]] = re_ver[1]
-    if len(versions) == 2: facts['version_2RE'] = True
 
     if f_master is not None:
       master = f_master[0] if isinstance(f_master,list) else f_master
