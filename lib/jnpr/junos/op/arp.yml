@@ -1,0 +1,12 @@
+---
+ArpTable:
+  rpc: get-arp-table-information
+  item: arp-table-entry
+  key: mac-address
+  view: ArpView
+
+ArpView:
+  fields:
+    mac_address: mac-address
+    ip_address: ip-address
+    interface_name: interface-name
