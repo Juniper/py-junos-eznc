@@ -1,0 +1,17 @@
+---
+BgpPeerTable:
+  rpc: get-bgp-summary-information
+  item: bgp-peer
+  key: peer-address
+  view: BgpPeerView
+
+BgpPeerView:
+  fields:
+    peer_address: peer-address
+    peer_as: peer-as
+    input_messages: input-messages
+    output_messages: output-messages
+    route_queue_count: route-queue-count
+    flap_count: flap-count
+    description: description
+    peer_state: peer-state
