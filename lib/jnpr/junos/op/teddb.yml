@@ -1,0 +1,34 @@
+### ------------------------------------------------------
+#### show ted database
+#### ------------------------------------------------------
+
+TedTable:
+ rpc: get-ted-database-information
+ item: ted-database
+ key: ted-database-id
+ view: TedView
+
+TedView:
+ fields:
+  type: ted-database-type
+  age: ted-database-age
+  link-in: ted-database-link-in
+  link-out: ted-database-link-out
+  protocol: ted-database-protocol
+  link: _linkTable
+  
+_linkTable:
+ item: ted-link
+ key: ted-link-local-ifindex
+ view: _linkView
+ 
+_linkView:
+ fields:
+  remoteRTR: ted-link-to
+  remoteIfI: ted-link-remote-ifindex
+  remoteADD: ted-link-remote-address
+  localIfI: ted-link-local-ifindex
+  localADD: ted-link-local-address
+  
+
+
