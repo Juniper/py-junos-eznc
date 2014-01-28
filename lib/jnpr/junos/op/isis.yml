@@ -1,0 +1,35 @@
+IsisAdjacencyTable:
+  rpc: get-isis-adjacency-information
+  args:
+    extensive: True
+  item: isis-adjacency
+  key:
+    - interface-name
+    - system-name
+  view: IsisAdjacencyView
+
+IsisAdjacencyView:
+  fields:
+    interface_name: interface-name
+    system_name: system-name
+    level: level
+    adjacency_state: adjacency-state
+    holdtime: holdtime
+    circuit_type: circuit-type
+    ip_address: ip-address
+    interface_priority: interface-priority
+    adjacency_flag: adjacency-flag
+    adjacency_topologies: adjacency-topologies
+    adjacency_restart_capable: adjacency-restart-capable
+    adjacency_advertisement: adjacency-advertisement
+    adjacency_log: _IsisAdjacencyLogTable
+
+_IsisAdjacencyLogTable:
+  item: isis-adjacency-log
+  view: _IsisAdjacencyLogView
+
+_IsisAdjacencyLogView:
+  fields:
+    when: adjacency-when
+    state: adjacency-state
+    event: adjacency-event
