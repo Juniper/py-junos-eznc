@@ -31,4 +31,12 @@ _linkView:
   localADD: ted-link-local-address
   
 
+TedSummaryTable:
+  rpc: get-ted-database-information
+  item: ted-database-summary
+  view: TedSummaryView
 
+TedSummaryView:
+  fields:
+    iso-count: ted-database-iso-count
+    inet-count: ted-database-inet-count
