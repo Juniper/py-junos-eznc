@@ -1,0 +1,43 @@
+---
+LdpNeighborTable:
+  rpc: get-ldp-neighbor-information
+  args:
+    extensive: True
+  item: ldp-neighbor
+  key: 
+    - interface-name
+    - ldp-neighbor-address
+  view: LdpNeighborView
+
+LdpNeighborView:
+  fields:
+    interface_name: interface-name
+    neighbor_address: ldp-neighbor-address
+    label_space_id: ldp-label-space-id
+    remaining_time: ldp-remaining-time
+    transport_address: ldp-transport-address
+    config_sequence: ldp-config-sequence
+    up_time: ldp-up-time
+    reference_count: ldp-reference-count
+    holdtime: ldp-holdtime
+    proposed_local_holdtime: ldp-proposed-local-holdtime
+    proposed_peer_holdtime: ldp-proposed-peer-holdtime
+    hello_interval: ldp-hello-interval
+    hello_flags: _LdpNeighborHelloFlagsTable
+    types: _LdpNeighborTypesTable
+
+_LdpNeighborHelloFlagsTable:
+  item: ldp-neighbor-hello-flags
+  view: _LdpNeighborHelloFlagsView
+
+_LdpNeighborHelloFlagsView:
+  fields:
+    flag: ldp-neighbor-hello-flag
+
+_LdpNeighborTypesTable:
+  item: ldp-neighbor-types
+  view: _LdpNeighborTypesView
+
+_LdpNeighborTypesView:
+  fields:
+    type: ldp-neighbor-type

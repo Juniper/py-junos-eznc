@@ -90,7 +90,7 @@ def software_version(junos, facts):
       # "FPC<n>" or "ndoe<n>", and normalize to "RE<n>".
       re_name = re.sub(r'(\w+)(\d+)','RE\\2',re_name)
 
-      pkginfo = re_sw.findtext('package-information[name="junos"]/comment')
+      pkginfo = re_sw.xpath('package-information[name="junos"]/comment')[0].text    
 
       try:
         versions.append((re_name.upper(), re.findall(r'\[(.*)\]', pkginfo)[0]))
