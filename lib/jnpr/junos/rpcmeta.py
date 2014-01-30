@@ -106,8 +106,13 @@ class _RpcMetaExec(object):
       if kvargs:
         for arg_name, arg_value in kvargs.items():
           arg_name = re.sub('_','-',arg_name)               
-          arg = etree.SubElement( rpc, arg_name )
-          if arg_value != True: arg.text = arg_value
+          if isinstance(arg_value, (tuple, list)):
+            for a in arg_value:
+              arg = etree.SubElement( rpc, arg_name )
+              if a != True: arg.text = a
+          else:
+            arg = etree.SubElement( rpc, arg_name )
+            if arg_value != True: arg.text = arg_value
 
       # vargs[0] is a dict, command options like format='text'
       if vargs:
