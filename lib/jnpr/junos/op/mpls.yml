@@ -1,0 +1,31 @@
+### ------------------------------------------------------
+### show mpls lsp ingress
+### ------------------------------------------------------
+
+MplsIngressTable:
+  rpc: get-mpls-lsp-information
+  item: rsvp-session-data
+  args:
+    ingress: True
+  view: MplsIngressView
+
+MplsIngressView:
+  fields:
+    type: session-type
+    count: count
+    lsp: _MplsIngressLsp
+
+_MplsIngressLsp:
+  item: rsvp-session/mpls-lsp
+  view: _MplsRsvpLspView
+
+_MplsIngressLspView:
+  fields:
+    dst_addr: destination-address
+    src_addr: source-address
+    state: lsp-state
+    route_count: route-count
+    active_path: active-path
+    primary: { is-primary: flag }
+    name: name
+    descr: lsp-description

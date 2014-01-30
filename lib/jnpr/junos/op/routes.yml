@@ -22,6 +22,46 @@ RouteTableView:
     nexthop: nh/to
 
 ### ------------------------------------------------------
+### show route <destination> exact
+### ------------------------------------------------------
+
+RtExactTable:
+  rpc: get-route-information
+  args:
+    exact: True
+  args_key: destination
+  item: route-table
+  key: table-name
+  view: RtExactView
+ 
+RtExactView:
+  fields:
+    routes: _RtDstTable
+    dests: { destination-count : int }
+    total: { total-route-count : int }
+    active: { active-route-count : int }
+    holddown: { holddown-route-count : int }
+    hidden: { hidden-route-count : int }
+    table: table-name
+
+_RtDstTable:
+  item: rt
+  key: rt-destination
+  view: _CurSelView
+
+_CurSelView:
+  groups:
+    nh: 'rt-entry[current-active]/nh[selected-next-hop]'
+  fields_nh:
+    to: to
+    via: via | nh-local-interface
+    lsp: lsp-name
+    proto: ../protocol-name
+    age: { ../age/@seconds : int }
+  fields:
+    table: ../table-name
+
+### ------------------------------------------------------
 ### show route summary
 ### ------------------------------------------------------
 
