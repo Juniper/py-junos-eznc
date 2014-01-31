@@ -17,7 +17,7 @@ MplsIngressView:
 
 _MplsIngressLsp:
   item: rsvp-session/mpls-lsp
-  view: _MplsRsvpLspView
+  view: _MplsIngressLspView
 
 _MplsIngressLspView:
   fields:
