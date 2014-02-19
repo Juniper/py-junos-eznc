@@ -3,7 +3,7 @@ import re
 class version_info(object):  
   def __init__(self, verstr ):
     """verstr - version string"""
-    m1 = re.match('(.*?)([RBIXS])(.*)', verstr)
+    m1 = re.match('(.*?)([RBIXS-])(.*)', verstr)
     self.type = m1.group(2)
 
     self.major = tuple(map(int,m1.group(1).split('.'))) # creates tuyple
@@ -18,7 +18,8 @@ class version_info(object):
         self.build = None
       else:
         self.build = int(after_type[1])
-    elif 'I' == self.type:
+    elif ('I' == self.type) or ('-' == self.type):
+      self.type = 'I'
       try:
         self.build = after_type[1]        # assumes that we have a build/spin, but not numeric
       except:
@@ -40,8 +41,7 @@ class version_info(object):
     )
     return retstr
 
-  def _cmp_tuple(self,other):
-    if self.type == 'I': raise RuntimeError("Internal Build")
+  def _cmp_tuple(self,other):    
     bylen = {
       2: (self.as_tuple[0:2]),
       4: self.as_tuple
