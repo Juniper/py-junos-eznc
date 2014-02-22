@@ -286,8 +286,6 @@ class Device(object):
       rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
     except Exception as err:
       # err is an NCError from ncclient
-      import pdb
-      pdb.set_trace()
       rsp = JXML.remove_namespaces( err.xml )
       raise RpcError(cmd=rpc_cmd_e, rsp=rsp)
 
