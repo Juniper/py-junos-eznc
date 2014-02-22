@@ -4,13 +4,14 @@ import sys
 sys.path.insert(0,'lib')
 from setuptools import setup, find_packages
 
-requirements = [ 'netaddr', 'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
+requirements = [ 'nccleint >= 0.4.0', 'netaddr', 
+                 'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
                  'scp >= 0.7.0', 'PyYAML >= 3.10' ]
 
 setup(
     name = "junos-eznc",
     namespace_packages = ['jnpr'],
-    version = "0.0.4",
+    version = "0.0.5.dev",
     author = "Jeremy Schulman",
     author_email = "jschulman@juniper.net",
     description = ( "Junos 'EZ' automation for non-programmers" ),

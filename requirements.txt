@@ -1,5 +1,5 @@
 lxml
-git+git://github.com/Juniper/ncclient.git#egg=ncclient
+ncclient
 paramiko
 scp
 jinja2
