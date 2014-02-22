@@ -194,10 +194,14 @@ class Device(object):
       login user-name, uses $USER if not provided
 
     kvargs['password'] -- OPTIONAL
+    kvargs['passwd'] -- OPTIONAL
       login password.  if not provided, assumed ssh-keys are enforced
 
     kvargs['port'] -- OPTIONAL
       device login port (defaults to 830)
+
+    kvargs['gather_facts'] -- optional 
+      if :False: then the facts are not gathered on call to :open():
     """
 
     # private attributes
@@ -209,8 +213,10 @@ class Device(object):
 
     self._sshconf_lkup()
 
-    self._auth_user = kvargs['user'] if 'user' in kvargs else os.getenv('USER')
-    self._auth_password = kvargs.get('password')
+    self._auth_user = kvargs.get('user') or os.getenv('USER')
+    self._auth_password = kvargs.get('password') or kvargs.get('passwd')
+    self._gather_facts = kvargs.get('gather_facts', True)
+
     self._conn = None
     self._j2ldr = _Jinja2ldr
     self._manages = []
@@ -236,7 +242,10 @@ class Device(object):
       hostkey_verify=False )
 
     self.connected = True
-    self.facts_refresh()
+
+    if self._gather_facts is not False:
+      self.facts_refresh()
+
     return self
 
   def close( self ):
@@ -277,6 +286,8 @@ class Device(object):
       rpc_rsp_e = self._conn.rpc( rpc_cmd_e )._NCElement__doc
     except Exception as err:
       # err is an NCError from ncclient
+      import pdb
+      pdb.set_trace()
       rsp = JXML.remove_namespaces( err.xml )
       raise RpcError(cmd=rpc_cmd_e, rsp=rsp)
 
