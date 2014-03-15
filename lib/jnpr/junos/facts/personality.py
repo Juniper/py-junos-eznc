@@ -4,7 +4,13 @@ def personality( junos, facts ):
   
   model = facts['model']
 
-  examine = model if model != 'Virtual Chassis' else facts['RE0']['model']
+  if model != 'Virtual Chassis':
+    examine = model
+  else:
+    for fact in facts:
+      if re.match("^RE\d", fact):
+        examine = facts[fact]['model']
+        break
 
   if re.match("^(EX)|(QFX)", examine):
     persona = 'SWITCH'
