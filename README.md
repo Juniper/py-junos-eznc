@@ -3,6 +3,10 @@
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
+## NOTICE
+
+As of release 0.5.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.1 or later.  
+
 ## ABOUT
 
 _Junos PyEZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
