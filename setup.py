@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0,'lib')
 from setuptools import setup, find_packages
 
-requirements = [ 'nccleint >= 0.4.0', 'netaddr', 
+requirements = [ 'nccleint >= 0.4.1', 'netaddr', 
                  'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
                  'scp >= 0.7.0', 'PyYAML >= 3.10' ]
 
