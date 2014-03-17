@@ -1,9 +1,9 @@
 import os
 import sys
 
-sys.path.insert(0,'lib')
+#sys.path.insert(0,'lib')
 from setuptools import setup, find_packages
-import pkg_resources
+#import pkg_resources
 
 requirements = [ 'ncclient >= 0.4.1', 'netaddr', 
                  'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
