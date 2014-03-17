@@ -239,7 +239,7 @@ class Device(object):
     # open connection using ncclient transport
     self._conn =  netconf_ssh.connect( host=self.hostname, port=self._port,
       username=self._auth_user, password=self._auth_password,
-      hostkey_verify=False )
+      hostkey_verify=False, device_params={'name':'junos'} )
 
     self.connected = True
 
