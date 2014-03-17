@@ -276,8 +276,11 @@ class Config(Util):
     try:
       self.rpc.lock_configuration()
     except Exception as err:
-      # :err: is from ncclient
-      raise LockError(rsp = JXML.remove_namespaces(err.xml))
+      if isinstance(err, RpcError):
+        raise LockError(rsp=err.rsp)
+      else:
+        # :err: is from ncclient
+        raise LockError(rsp = JXML.remove_namespaces(err.xml))
 
     return True
 
@@ -292,8 +295,11 @@ class Config(Util):
     try:
       self.rpc.unlock_configuration()
     except Exception as err:
+      if isinstance(err, RpcError):
+        raise LockError(rsp=err.rsp)
+      else:      
       # :err: is from ncclient
-      raise UnlockError(rsp = JXML.remove_namespaces(err.xml))
+        raise UnlockError(rsp = JXML.remove_namespaces(err.xml))
 
     return True
 
