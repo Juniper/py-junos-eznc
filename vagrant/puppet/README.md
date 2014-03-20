@@ -12,6 +12,7 @@ Prerequisites
 
 - **[vagrant](http://www.vagrantup.com) 1.5**
 - **[virtualbox](http://www.virtualbox.org) 4.3**
+- rsync on host
 
 The first part of the provisioning process is a shell script to install Puppet.  These are provided at https://github.com/hashicorp/puppet-bootstrap/
 
@@ -38,10 +39,10 @@ debian.sh
 
 Guest Operating Systems
 ---------------
-Fedora 20
-Ubuntu 13.10
-Debian 7.4
-FreeBSD 9.2
+- Fedora 20
+- Ubuntu 13.10
+- Debian 7.4
+- FreeBSD 9.2
 
 
 Usage
