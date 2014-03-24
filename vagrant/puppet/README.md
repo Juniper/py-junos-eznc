@@ -39,8 +39,12 @@ debian.sh
 
 Guest Operating Systems
 ---------------
-- Fedora 20
+- Ubuntu 12.04
+- Ubuntu 12.10
 - Ubuntu 13.10
+- Fedora 19
+- Fedora 20
+- CentOS 6.5
 - Debian 7.4
 - FreeBSD 9.2
 
