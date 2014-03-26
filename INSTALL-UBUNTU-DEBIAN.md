@@ -35,7 +35,7 @@ Enjoy!
 
 Development code can be installed directly from GitHub based on any branch, commit, or tag.
 
-** Packages from Step 2 are required. **
+***Packages from Step 2 are required.***
 
     sudo apt-get install -y git
 	sudo pip install git+https://github.com/Juniper/py-junos-eznc.git
