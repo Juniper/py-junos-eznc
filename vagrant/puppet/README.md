@@ -1,7 +1,7 @@
 Vagrant/Puppet
 =======
 
-This example uses Puppet to install PyEz with PIP using either PiPy or Git.
+This example uses Puppet to install PyEz with PIP using either PyPi or Git.
 
 ----------
 
@@ -13,14 +13,30 @@ Prerequisites
 - **[vagrant](http://www.vagrantup.com) 1.5**
 - **[virtualbox](http://www.virtualbox.org) 4.3**
 - rsync on host
+ 
 
-The first part of the provisioning process is a shell script to install Puppet.  These are provided at https://github.com/hashicorp/puppet-bootstrap/
+Once Vagrant brings up the guest OS, two provisioners are executed in the following order:
 
-Some editing of the files is necessary.  For example, centos_6_x.sh can be changed to fedora-20.sh with the following update:
+1. Shell
+  1. Install Puppet
+2. Execute Puppet manifest
+  1. Install dependencies with system package manager
+  2. Install PyEZ with pip
+
+
+For the script provisioner to install Puppet the required shell script must be present (as defined in the Vagrantfile). 
+
+These are provided at https://github.com/hashicorp/puppet-bootstrap/
+
+Some editing of the files is necessary.  
+
+For example, centos_6_x.sh can be changed to fedora-20.sh with the following update:
 ```
 REPO_URL="https://yum.puppetlabs.com/fedora/f20/products/x86_64/puppetlabs-release-20-10.noarch.rpm"
 ```
 
+
+In testing the Debian script had to be modified.  A diff is provided below.
 
 debian.sh
 ```
