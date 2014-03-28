@@ -331,9 +331,13 @@ class SW(Util):
     if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
-    rsp = self.rpc(cmd)
-    got = rsp.getparent().findtext('.//request-reboot-status').strip()
-    return got
+    try:
+      rsp = self.rpc(cmd)
+      got = rsp.getparent().findtext('.//request-reboot-status').strip()
+      return got
+    except Exception as err:
+        if err.rsp.findtext('.//error-severity') != 'warning':
+          raise err
 
   ### -------------------------------------------------------------------------
   ### poweroff - system shutdown
@@ -351,9 +355,12 @@ class SW(Util):
     if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
-    rsp = self.rpc(cmd)
-    got = rsp.getparent().findtext('.//request-reboot-status').strip()
-    return got
+    try:
+      rsp = self.rpc(cmd)
+      return rsp.getparent().findtext('.//request-reboot-status').strip()
+    except Exception as err:
+        if err.rsp.findtext('.//error-severity') != 'warning':
+          raise err
 
   ### -------------------------------------------------------------------------
   ### rollback - clears the install request
