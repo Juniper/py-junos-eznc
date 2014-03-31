@@ -24,6 +24,8 @@ def personality( junos, facts ):
     persona = 'SRX_BRANCH'
   elif examine.startswith("M"):
     persona = "M"
+  elif examine.startswith("T"):
+    persona = "T"
   elif re.match("SRX\s?(\d){4}", examine):
     persona = 'SRX_HIGHEND'    
   elif re.match("SRX\s?(\d){3}", examine):
