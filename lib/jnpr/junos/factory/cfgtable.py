@@ -1,5 +1,5 @@
 from lxml.builder import E
-from .table import Table
+from jnpr.junos.factory.table import Table
 
 class CfgTable(Table):
 

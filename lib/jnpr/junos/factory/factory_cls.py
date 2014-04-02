@@ -2,12 +2,12 @@
 from copy import deepcopy 
 
 # local
-from .cfgtable import CfgTable 
-from .optable import OpTable
-from .table import Table
+from jnpr.junos.factory.cfgtable import CfgTable
+from jnpr.junos.factory.optable import OpTable
+from jnpr.junos.factory.table import Table
 
-from .view import View
-from .viewfields import ViewFields
+from jnpr.junos.factory.view import View
+from jnpr.junos.factory.viewfields import ViewFields
 
 def FactoryCfgTable(table_name=None, data_dict={} ):
   if table_name is None: table_name = "CfgTable"

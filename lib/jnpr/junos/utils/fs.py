@@ -1,7 +1,7 @@
 from lxml.builder import E
 
-from .util import Util
-from .start_shell import StartShell
+from jnpr.junos.utils.util import Util
+from jnpr.junos.utils.start_shell import StartShell
 
 class FS(Util):
   """

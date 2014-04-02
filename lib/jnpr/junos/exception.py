@@ -1,5 +1,5 @@
 from lxml import etree
-from . import jxml
+from jnpr.junos import jxml
 
 class RpcError( Exception ):
 

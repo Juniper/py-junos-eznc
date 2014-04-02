@@ -2,7 +2,7 @@
 from lxml import etree
 
 # local
-from .table import Table
+from jnpr.junos.factory.table import Table
 
 class OpTable(Table):
 

@@ -16,11 +16,11 @@ import paramiko
 import jinja2
 
 # local modules
-from .rpcmeta import _RpcMetaExec
-from .exception import RpcError
-from .cfg import Resource 
-from .facts import *
-from . import jxml as JXML
+from jnpr.junos.rpcmeta import _RpcMetaExec
+from jnpr.junos .exception import RpcError
+from jnpr.junos.cfg import Resource
+from jnpr.junos.facts import *
+from jnpr.junos import jxml as JXML
 
 _MODULEPATH = os.path.dirname(__file__)
 
