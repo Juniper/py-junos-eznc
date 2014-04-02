@@ -3,44 +3,40 @@
 @author: rsherman
 '''
 import unittest
-import mock
-from mock import MagicMock, patch, PropertyMock, sentinel
-
-from jnpr.junos import Device
+from mock import MagicMock, patch
+import os
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
-         'version_info': 'junos.version_info(major=(12, 1), type=X,'
-                         ' minor=(46, \'D\', 10), build=2)',
-         '2RE': False, 'serialnumber': '123456789102', 'fqdn': 'firefly',
-         'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D10.2',
-         'HOME': '/cf/var/home/rick', 'srx_cluster': False,
-         'model': 'FIREFLY-PERIMETER',
-         'RE0': {'status': 'Testing',
-                 'last_reboot_reason': 'Router rebooted after a '
-                                       'normal shutdown.',
-                 'model': 'FIREFLY-PERIMETER RE',
-                 'up_time': '1 minute, 10 seconds'},
-         'personality': 'SRX_BRANCH'}
+from jnpr.junos.facts.swver import version_info
 
+facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
+          'version_info': version_info('12.1X46-D15.3'),
+          '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
+          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
+          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
+          'model': 'FIREFLY-PERIMETER',
+          'RE0': {'status': 'Testing',
+                    'last_reboot_reason': 'Router rebooted after a '
+                                        'normal shutdown.',
+                    'model': 'FIREFLY-PERIMETER RE',
+                    'up_time': '6 hours, 29 minutes, 30 seconds'},
+          'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 class TestDevice(unittest.TestCase):
 
-    def setUp(self):
-        self.dev = Device(host='1.1.1.1', user='rick', password='password123')
-        self.dev.connected = True
-        self.dev._facts = facts
-        self.device_params = {'name': 'junos'}
+    @patch('ncclient.manager.connect')
+    def setUp(self, mock_connect):
+        mock_connect.side_effect = self.mock_manager
+        from jnpr.junos import Device
+        self.dev = Device(host='1.1.1.1', user='rick', password='password123',
+                          gather_facts=False)
+        self.dev.open()
 
-        self.device_handler = make_device_handler(self.device_params)
-
-        self.session = SSHSession(self.device_handler)
-        self.dev._conn = Manager(self.session, self.device_handler)
-
-    def tearDown(self):
-        self.session._connected = False
+    @patch('ncclient.operations.session.CloseSession.request')
+    def tearDown(self, mock_session):
+        self.dev.close()
 
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
@@ -56,14 +52,14 @@ class TestDevice(unittest.TestCase):
         self.dev.logfile = None
         self.assertFalse(self.dev._logfile)
 
-    @patch.object(Device, 'facts_refresh')
-    def test_device_open(self, mock_facts_refresh):
-        with patch('jnpr.junos.device.netconf_ssh') as mock_netconf_ssh:
-            self.dev.open()
-            self.assertEqual(self.dev.connected, True)
+    def test_device_open(self):
+        self.assertEqual(self.dev.connected, True)
 
-    def test_device_facts(self):
-        assert self.dev.facts == facts
+    @patch('jnpr.junos.Device.execute')
+    def test_device_facts(self, mock_execute):
+        mock_execute.side_effect = self.mock_manager
+        self.dev.facts_refresh()
+        assert self.dev.facts['version'] == facts['version']
 
     def test_device_hostname(self):
         assert self.dev.hostname == '1.1.1.1'
@@ -86,7 +82,7 @@ class TestDevice(unittest.TestCase):
         assert self.dev.timeout == 10
 
     def test_device_cli(self):
-        self.dev.execute = mock.MagicMock(name='execute')
+        self.dev.execute = MagicMock(name='execute')
         self.dev.cli('show version')
         assert self.dev.execute.call_args[0][0].text == 'show version'
 
@@ -96,19 +92,14 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(val, 'invalid command: show version')
 
     def test_device_execute(self):
-        self.dev.execute = mock.MagicMock(name='execute')
+        self.dev.execute = MagicMock(name='execute')
         self.dev.execute('<get-software-information/>')
-        assert self.dev.execute.call_args[0][
-            0] == '<get-software-information/>'
+        self.assertEqual(self.dev.execute.call_args[0][
+            0], '<get-software-information/>')
 
     def test_device_rpcmeta(self):
-        assert self.dev.rpc.get_software_information.func_doc == \
+        assert self.dev.rpc.get_software_information.func_doc ==\
             'get-software-information'
-
-    def test_device_close(self):
-        self.dev._conn = mock.MagicMock(name='close')
-        self.dev.close()
-        self.assertEqual(self.dev.connected, False)
 
     def test_device_probe_timeout_zero(self):
         with patch('jnpr.junos.device.socket') as mock_socket:
@@ -137,3 +128,44 @@ class TestDevice(unittest.TestCase):
     def test_device_template(self):
         self.dev._j2ldr = MagicMock()
         self.dev.Template('test')
+
+    def test_device_close(self):
+        def close_conn():
+            self.dev.connected = False
+        self.dev.close = MagicMock(name='close')
+        self.dev.close.side_effect = close_conn
+        self.dev.close()
+        self.assertEqual(self.dev.connected, False)
+
+
+    def read_file(self, fname):
+        from ncclient.xml_ import NCElement
+
+        fpath = os.path.join(os.path.dirname(__file__), fname)
+        foo = open(fpath).read()
+
+        rpc_reply = NCElement(foo, self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
+        return rpc_reply
+
+ 
+    def mock_manager(self, *args, **kwargs):
+        from jnpr.junos.exception import RpcError
+        if kwargs:
+            device_params = kwargs['device_params']
+            device_handler = make_device_handler(device_params)
+            session = SSHSession(device_handler)
+            return Manager(session, device_handler)
+
+        elif args:
+            if args[0].tag == 'command':
+                if args[0].text == 'show cli directory':
+                    return self.read_file('show-cli-directory.xml')
+                else:
+                    raise RpcError
+
+            else:
+                return self.read_file(args[0].tag + '.xml')
+
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'TestDevice.testName']
+    unittest.main()
