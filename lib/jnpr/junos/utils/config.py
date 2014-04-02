@@ -5,9 +5,9 @@ import os
 from lxml import etree
 
 # package modules
-from ..exception import *
-from .. import jxml as JXML
-from .util import Util
+from jnpr.junos.exception import *
+from jnpr.junos import jxml as JXML
+from jnpr.junos.utils.util import Util
 
 class Config(Util):
   """

@@ -7,8 +7,8 @@ from os import path
 from lxml.builder import E
 
 # local modules
-from .util import Util
-from .scp import SCP 
+from jnpr.junos.utils.util import Util
+from jnpr.junos.utils.scp import SCP
 
 __all__ = ['SW']
 
@@ -384,7 +384,7 @@ class SW(Util):
     returns a dictionary of file listing information for current and rollback
     Junos install packages.  This information comes from the /packages directory.
     """
-    from .fs import FS 
+    from jnpr.junos.utils.fs import FS
     fs = FS(self.dev)
     pkgs = fs.ls('/packages') 
     return dict(current=pkgs['files'].get('junos'), rollback=pkgs['files'].get('junos.old'))

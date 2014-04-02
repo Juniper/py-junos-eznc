@@ -3,7 +3,7 @@ import yaml
 import os.path
 
 # local module
-from .factory_loader import FactoryLoader 
+from jnpr.junos.factory.factory_loader import FactoryLoader
 
 __all__ = ['loadyaml']
 

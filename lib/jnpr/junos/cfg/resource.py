@@ -7,7 +7,7 @@ from copy import deepcopy
 from lxml.builder import E 
 
 # package modules
-from .. import jxml as JXML
+from jnpr.junos import jxml as JXML
 
 P_JUNOS_EXISTS = '_exists'
 P_JUNOS_ACTIVE = '_active'
