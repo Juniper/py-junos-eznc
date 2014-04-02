@@ -3,13 +3,14 @@
 @author: rsherman
 '''
 import unittest
-from mock import MagicMock, patch
+from mock import MagicMock, patch, mock_open
 import os
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 from jnpr.junos.facts.swver import version_info
+from jnpr.junos import Device
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
           'version_info': version_info('12.1X46-D15.3'),
@@ -24,12 +25,35 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
                     'up_time': '6 hours, 29 minutes, 30 seconds'},
           'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
+
+class Test_MyTemplateLoader(unittest.TestCase):
+    def setUp(self):
+        from jnpr.junos.device import _MyTemplateLoader
+        self.template_loader = _MyTemplateLoader()
+
+    @patch('__builtin__.filter')
+    def test_temp_load_get_source_filter_false(self, filter_mock):
+        filter_mock.return_value = False
+        try:
+            self.template_loader.get_source(None, None)
+        except Exception as ex:
+            import jinja2
+            self.assertEqual(type(ex), jinja2.exceptions.TemplateNotFound)
+
+    @patch('__builtin__.filter')
+    @patch('jnpr.junos.device.os.path')
+    def test_temp_load_get_source_filter_true(self, filter_mock, os_path_mock):
+        #cant use @patch here as with statement will have exit
+        m = mock_open()
+        with patch('__builtin__.file', m, create=True):
+            filter_mock.return_value = True
+            self.template_loader.get_source(None, None)
+
 class TestDevice(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         mock_connect.side_effect = self.mock_manager
-        from jnpr.junos import Device
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
@@ -46,11 +70,32 @@ class TestDevice(unittest.TestCase):
                 self.dev.logfile = handle
                 self.assertEqual(self.dev.logfile, handle)
 
+    def test_device_host_mand_param(self):
+        self.assertRaises(ValueError, Device, user='rick', password='password123',
+                          gather_facts=False)
+
     def test_device_property_logfile_close(self):
         self.dev._logfile = MagicMock()
         self.dev._logfile.close.return_value = 0
         self.dev.logfile = None
         self.assertFalse(self.dev._logfile)
+
+    def test_device_property_logfile_exception(self):
+        try:
+            self.dev.logfile = True
+        except Exception as ex:
+            self.assertEqual(type(ex), ValueError)
+
+    def test_device_repr(self):
+        localdev = Device(host='1.1.1.1', user='rick', password='password123',
+                          gather_facts=False)
+        self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
+
+    @patch('jnpr.junos.device.os')
+    @patch('__builtin__.open')
+    def test_device__sshconf_lkup(self, os_mock, open_mock):
+        os_mock.path.exists.return_value = True
+        self.dev._sshconf_lkup()
 
     def test_device_open(self):
         self.assertEqual(self.dev.connected, True)
@@ -81,6 +126,16 @@ class TestDevice(unittest.TestCase):
         self.dev.timeout = 10
         assert self.dev.timeout == 10
 
+    def test_device_manages(self):
+        self.assertEqual(self.dev.manages, [],
+                         'By default manages will be empty list')
+
+    def test_device_set_facts_exception(self):
+        try:
+            self.dev.facts = 'test'
+        except RuntimeError as ex:
+            self.assertEqual(RuntimeError, type(ex))
+
     def test_device_cli(self):
         self.dev.execute = MagicMock(name='execute')
         self.dev.cli('show version')
@@ -96,6 +151,24 @@ class TestDevice(unittest.TestCase):
         self.dev.execute('<get-software-information/>')
         self.assertEqual(self.dev.execute.call_args[0][
             0], '<get-software-information/>')
+
+    def test_device_execute_real_call(self):
+        with patch('jnpr.junos.device.JXML.remove_namespaces', return_value=None) as jxml:
+            class MyException(Exception):
+                xml = 'test'
+            self.dev._conn.rpc = MagicMock(side_effect=MyException)
+            from jnpr.junos.exception import RpcError
+            self.assertRaises(RpcError, self.dev.execute, '<get-software-information/>')
+
+    def test_device_execute_ValueError(self):
+        self.assertRaises(ValueError, self.dev.execute, None)
+
+    def test_device_execute_rpc_errs(self):
+        mock = MagicMock()
+        mock.__len__ = lambda x: 1
+        self.dev._conn.rpc = mock
+        from lxml import etree
+        self.dev.execute(etree.Element("test"))
 
     def test_device_rpcmeta(self):
         assert self.dev.rpc.get_software_information.func_doc ==\
@@ -123,6 +196,9 @@ class TestDevice(unittest.TestCase):
         self.dev.bind()
         mock = MagicMock()
         mock.__name__ = 'magic mock'
+        #for *args
+        self.dev.bind(mock)
+        #for **kwargs
         self.dev.bind(kw=mock)
 
     def test_device_template(self):
