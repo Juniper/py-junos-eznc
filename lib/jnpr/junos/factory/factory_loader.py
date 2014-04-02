@@ -8,8 +8,8 @@ refer to the .yml files in this jnpr.junos.op directory.
 from copy import deepcopy
 
 # locally
-from .factory_cls import *
-from .viewfields import *
+from jnpr.junos.factory.factory_cls import *
+from jnpr.junos.factory.viewfields import *
 
 __all__ = ['FactoryLoader']
 

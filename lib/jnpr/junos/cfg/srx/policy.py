@@ -2,9 +2,9 @@
 from lxml.builder import E 
 
 # module packages
-from .. import Resource
-from .policy_rule import PolicyRule
-from ... import jxml as JXML
+from jnpr.junos.cfg.srx.policy_rule import PolicyRule
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
 
 class PolicyContext( Resource ):
   """

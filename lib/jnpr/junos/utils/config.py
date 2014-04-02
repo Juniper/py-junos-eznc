@@ -5,9 +5,9 @@ import os
 from lxml import etree
 
 # package modules
-from ..exception import *
-from .. import jxml as JXML
-from .util import Util
+from jnpr.junos.exception import *
+from jnpr.junos import jxml as JXML
+from jnpr.junos.utils.util import Util
 
 class Config(Util):
   """
@@ -152,6 +152,10 @@ class Config(Util):
       determines the format of the contents.  options are
       ['xml','set','text'] for XML/etree, set-style, curly-brace-style
 
+    kvargs['overwrite']
+      determines if the contents completely replace the existing
+      configuration.  options are [True/False], default: False
+
     kvargs['template_path']
       path to a jinja2 template file.  used in conjection with the
       kvargs['template_vars'] option, this will perform a templating
@@ -171,6 +175,12 @@ class Config(Util):
     rpc_xattrs = {'format':'xml'}      # junos attributes, default to XML
     rpc_contents = None
 
+    # support the ability to completely replace the Junos configuration
+    # note: this cannot be used if format='set', per Junos API.
+
+    overwrite = kvargs.get('overwrite',False)
+    if True == overwrite: rpc_xattrs['action'] = 'override'
+
     ### -----------------------------------------------------------------------
     ### private helpers ...
     ### -----------------------------------------------------------------------
@@ -187,6 +197,8 @@ class Config(Util):
       """ setup the kvargs/rpc_xattrs """
       # when format is given, setup the xml attrs appropriately
       if kvargs['format'] == 'set': 
+        if True == overwrite:
+          raise ValueError("conflicting args, cannot use 'set' with 'overwrite'")
         rpc_xattrs['action'] = 'set'
         kvargs['format'] = 'text'      
       rpc_xattrs['format'] = kvargs['format']       

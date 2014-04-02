@@ -2,8 +2,8 @@
 from lxml.builder import E 
 
 # module packages
-from ... import jxml as JXML
-from .. import Resource
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
 
 class ZoneAddrBookSet( Resource ):
   """

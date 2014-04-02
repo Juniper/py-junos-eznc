@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
 
-from .viewfields import ViewFields
+from jnpr.junos.factory.viewfields import ViewFields
 
 class View(object):
   """

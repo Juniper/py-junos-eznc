@@ -1,6 +1,6 @@
-from .. import Resource
-from .classic import PhyPortClassic 
-from .switch import PhyPortSwitch
+from jnpr.junos.cfg import Resource
+from jnpr.junos.cfg.phyport.classic import PhyPortClassic
+from jnpr.junos.cfg.phyport.switch import PhyPortSwitch
 
 __all__ = ['PhyPort']
 

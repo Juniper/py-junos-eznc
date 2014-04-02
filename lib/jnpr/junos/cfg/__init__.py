@@ -1,1 +1,1 @@
-from .resource import Resource
+from jnpr.junos.cfg.resource import Resource

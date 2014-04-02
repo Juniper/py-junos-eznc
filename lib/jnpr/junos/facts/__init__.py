@@ -1,11 +1,11 @@
-from .chassis import chassis
-from .routing_engines import routing_engines
-from .personality import personality
-from .swver import software_version
-from .ifd_style import ifd_style
-from .switch_style import switch_style
-from .session import *
-from .srx_cluster import srx_cluster
+from jnpr.junos.facts.chassis import chassis
+from jnpr.junos.facts.routing_engines import routing_engines
+from jnpr.junos.facts.personality import personality
+from jnpr.junos.facts.swver import software_version
+from jnpr.junos.facts.ifd_style import ifd_style
+from jnpr.junos.facts.switch_style import switch_style
+from jnpr.junos.facts.session import *
+from jnpr.junos.facts.srx_cluster import srx_cluster
 
 FACT_LIST = [
   chassis,

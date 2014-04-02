@@ -3,7 +3,7 @@ from lxml import etree
 from lxml.builder import E 
 
 # package modules
-from .. import jxml as JXML
+from jnpr.junos import jxml as JXML
 from .cfg import Resource, P_JUNOS_EXISTS, P_JUNOS_ACTIVE
 
 class TemplateResource( Resource ):

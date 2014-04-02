@@ -7,8 +7,8 @@ from os import path
 from lxml.builder import E
 
 # local modules
-from .util import Util
-from .scp import SCP 
+from jnpr.junos.utils.util import Util
+from jnpr.junos.utils.scp import SCP
 
 __all__ = ['SW']
 
@@ -331,9 +331,13 @@ class SW(Util):
     if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
-    rsp = self.rpc(cmd)
-    got = rsp.getparent().findtext('.//request-reboot-status').strip()
-    return got
+    try:
+      rsp = self.rpc(cmd)
+      got = rsp.getparent().findtext('.//request-reboot-status').strip()
+      return got
+    except Exception as err:
+        if err.rsp.findtext('.//error-severity') != 'warning':
+          raise err
 
   ### -------------------------------------------------------------------------
   ### poweroff - system shutdown
@@ -351,9 +355,12 @@ class SW(Util):
     if self._multi_MX is True:
       cmd.append(E('both-routing-engines'))
 
-    rsp = self.rpc(cmd)
-    got = rsp.getparent().findtext('.//request-reboot-status').strip()
-    return got
+    try:
+      rsp = self.rpc(cmd)
+      return rsp.getparent().findtext('.//request-reboot-status').strip()
+    except Exception as err:
+        if err.rsp.findtext('.//error-severity') != 'warning':
+          raise err
 
   ### -------------------------------------------------------------------------
   ### rollback - clears the install request
@@ -377,7 +384,7 @@ class SW(Util):
     returns a dictionary of file listing information for current and rollback
     Junos install packages.  This information comes from the /packages directory.
     """
-    from .fs import FS 
+    from jnpr.junos.utils.fs import FS
     fs = FS(self.dev)
     pkgs = fs.ls('/packages') 
     return dict(current=pkgs['files'].get('junos'), rollback=pkgs['files'].get('junos.old'))

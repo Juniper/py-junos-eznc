@@ -5,10 +5,10 @@ from lxml import etree
 from lxml.builder import E 
 
 # module packages
-from ... import jxml as JXML
-from .. import Resource
-from .shared_ab_addr import SharedAddrBookAddr
-from .shared_ab_set import SharedAddrBookSet
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
+from jnpr.junos.cfg.srx.shared_ab_addr import SharedAddrBookAddr
+from jnpr.junos.cfg.srx.shared_ab_set import SharedAddrBookSet
 
 class SharedAddrBook( Resource ):
   """

@@ -2,9 +2,9 @@
 from lxml.builder import E
 
 # local
-from .. import Resource
-from ... import JXML
-from .base import PhyPortBase
+from jnpr.junos.cfg import Resource
+from jnpr.junos import JXML
+from jnpr.junos.cfg.phyport.base import PhyPortBase
 
 class PhyPortSwitch( PhyPortBase ):
 
