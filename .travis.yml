@@ -13,7 +13,7 @@ install:
   - "pip install -r development.txt"
   - "pip install ."
 
-script: nosetests
+script: nosetests -v
 
 notifications:
   email: false
