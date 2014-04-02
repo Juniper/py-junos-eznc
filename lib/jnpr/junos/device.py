@@ -17,7 +17,7 @@ import jinja2
 
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos .exception import RpcError
+from jnpr.junos.exception import RpcError
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML

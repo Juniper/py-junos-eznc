@@ -5,10 +5,10 @@ from lxml import etree
 from lxml.builder import E 
 
 # module packages
-from ... import jxml as JXML
-from .. import Resource
-from .zone_ab_addr import ZoneAddrBookAddr
-from .zone_ab_set import ZoneAddrBookSet
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
+from jnpr.junos.cfg.srx.zone_ab_addr import ZoneAddrBookAddr
+from jnpr.junos.cfg.srx.zone_ab_set import ZoneAddrBookSet
 
 class ZoneAddrBook( Resource ):
   """

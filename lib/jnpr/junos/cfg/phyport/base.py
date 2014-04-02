@@ -2,7 +2,7 @@
 from lxml.builder import E
 
 # local module
-from .. import Resource
+from jnpr.junos.cfg.resource import Resource
 
 class PhyPortBase( Resource ):
   """

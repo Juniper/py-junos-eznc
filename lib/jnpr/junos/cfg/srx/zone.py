@@ -5,10 +5,10 @@ from lxml import etree
 from lxml.builder import E 
 
 # module packages
-from ... import jxml as JXML
-from .. import Resource
-from .zone_ab import ZoneAddrBook
-from .zone_ifs import ZoneInterface, HostInbSvcMixin
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
+from jnpr.junos.cfg.srx.zone_ab import ZoneAddrBook
+from jnpr.junos.cfg.srx.zone_ifs import ZoneInterface, HostInbSvcMixin
 
 class Zone( HostInbSvcMixin, Resource ):
   """

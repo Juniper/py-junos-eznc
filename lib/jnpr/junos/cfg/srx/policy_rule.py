@@ -2,8 +2,8 @@
 from lxml.builder import E 
 
 # local packages
-from .. import Resource
-from ... import jxml as JXML
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
 
 class PolicyRule( Resource ):
   """

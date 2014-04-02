@@ -1,5 +1,5 @@
 from lxml.builder import E
-from ..import jxml as JXML
+from jnpr.junos import jxml as JXML
 
 def chassis(junos, facts):
   """ 
