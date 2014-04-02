@@ -1,0 +1,22 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <directory-list root-path="/var/crash/*core*" junos:seconds="1395961676" junos:style="verbose">
+        <output>
+            /var/crash/*core*: No such file or directory
+        </output>
+        <output>
+            /var/tmp/*core*: No such file or directory
+        </output>
+        <output>
+            /var/tmp/pics/*core*: No such file or directory
+        </output>
+        <output>
+            /var/crash/kernel.*: No such file or directory
+        </output>
+        <output>
+            /tftpboot/corefiles/*core*: No such file or directory
+        </output>
+    </directory-list>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
