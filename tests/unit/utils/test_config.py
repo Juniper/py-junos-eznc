@@ -60,6 +60,18 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(AttributeError):
             self.conf.commit_check()
 
+    def test_config_diff(self):
+        self.conf.rpc.get_configuration = MagicMock()
+        self.conf.diff()
+
+    def test_config_load(self):
+        self.assertRaises(RuntimeError, self.conf.load)
+
+    def test_config_diff_exception(self):
+        self.conf.rpc.get_configuration = MagicMock()
+        self.assertRaises(ValueError, self.conf.diff, rollback=51)
+        self.assertRaises(ValueError, self.conf.diff, rollback=-1)
+
     def test_config_lock(self):
         self.conf.rpc.lock_configuration = MagicMock()
         self.assertTrue(self.conf.lock())
