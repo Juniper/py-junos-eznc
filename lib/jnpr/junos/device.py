@@ -173,6 +173,8 @@ class Device(object):
   ##### -----------------------------------------------------------------------
 
   def _sshconf_lkup(self):
+    home = os.getenv('HOME')
+    if not home: return      
     sshconf_path = os.path.join(os.getenv('HOME'),'.ssh/config')
     if not os.path.exists(sshconf_path): return
 

@@ -1,0 +1,8 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+	<rpc-error>
+		<error-severity>error-severity</error-severity>
+		<error-path>error-path</error-path>
+		<error-message>error-message</error-message>
+		<error-info>...</error-info>
+	</rpc-error>
+</rpc-reply>

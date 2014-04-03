@@ -1,5 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/junos-eznc.png)](http://badge.fury.io/py/junos-eznc)
-[![Build Status](https://travis-ci.org/jeremyschulman/py-junos-eznc.png)](https://travis-ci.org/jeremyschulman/py-junos-eznc)
+[![Build Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=unit-tests)](https://travis-ci.org/Juniper/py-junos-eznc)
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
