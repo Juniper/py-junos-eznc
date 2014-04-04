@@ -7,13 +7,13 @@ python:
 #  - "pypy"
 
 before_install:
-  - sudo apt-get install -qq libxml2 libxml2-dev libxslt1.1 libxslt1-dev libyaml-0-2 libyaml-dev libgmp10 libgmp-dev python-dev python-setuptools
+  - sudo apt-get install -qq python-dev libxml2-dev libxslt-dev
 
 install:
   - "pip install -r development.txt"
   - "pip install ."
 
-script: nosetests -v
+script: nosetests -v --with-coverage --cover-package=jnpr.junos
 
 notifications:
   email: false
