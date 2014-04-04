@@ -1,5 +1,4 @@
 __author__ = "Nitin Kumar, Rick Sherman"
-__copyright__ = "Juniper networks"
 __credits__ = "Jeremy Schulman"
 
 import unittest
@@ -79,8 +78,56 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff()
 
+    def test_config_pdiff(self):
+        self.conf.diff = MagicMock(return_value='')
+        self.conf.pdiff()
+
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
+
+    def test_config_load_vargs_len(self):
+        self.assertRaises(RuntimeError, self.conf.load,
+                          'test.xml')
+
+    def test_config_load_len_with_format(self):
+        self.conf.rpc.load_config = MagicMock(return_value=
+                                'rpc_contents')
+        self.assertEqual(self.conf.load('test.xml', format='set'),
+                         'rpc_contents')
+
+    @patch('__builtin__.open')
+    def test_config_load_lformat_byext_ValueError(self, mock_open):
+        self.conf.rpc.load_config = MagicMock(return_value=
+                                'rpc_contents')
+        self.assertRaises(ValueError, self.conf.load, path='test.jnpr')
+
+    def test_config_load_lset_format_ValueError(self):
+        self.conf.rpc.load_config = MagicMock(return_value=
+                                'rpc_contents')
+        self.assertRaises(ValueError, self.conf.load,
+                          'test.xml', format='set', overwrite=True)
+
+    @patch('__builtin__.open')
+    @patch('jnpr.junos.utils.config.etree.XML')
+    def test_config_load_path(self, mock_etree, mock_open):
+        self.conf.dev.Template = MagicMock()
+        mock_etree.return_value = 'rpc_contents'
+        self.conf.rpc.load_config = MagicMock(return_value =
+                                              mock_etree.return_value)
+        self.assertEqual(self.conf.load(path='test.xml'), 'rpc_contents')
+
+    def test_config_load_template_path(self):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.dev.Template = MagicMock()
+        self.conf.load(template_path='test.xml')
+
+    def test_config_load_template(self):
+        class Temp:
+            filename = 'abc.xml'
+            render = MagicMock()
+        self.conf.rpc.load_config = MagicMock()
+
+        self.conf.load(template=Temp)
 
     def test_config_diff_exception(self):
         self.conf.rpc.get_configuration = MagicMock()
@@ -90,6 +137,12 @@ class TestConfig(unittest.TestCase):
     def test_config_lock(self):
         self.conf.rpc.lock_configuration = MagicMock()
         self.assertTrue(self.conf.lock())
+
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_lock_LockError(self, mock_jxml):
+        ex = RpcError(rsp='ok')
+        self.conf.rpc.lock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(LockError, self.conf.lock)
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_lock_exception(self, mock_jxml):
@@ -101,6 +154,12 @@ class TestConfig(unittest.TestCase):
     def test_config_unlock(self):
         self.conf.rpc.unlock_configuration = MagicMock()
         self.assertTrue(self.conf.unlock())
+
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_unlock_LockError(self, mock_jxml):
+        ex = RpcError(rsp='ok')
+        self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(LockError, self.conf.unlock)
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_unlock_exception(self, mock_jxml):
