@@ -6,7 +6,8 @@ import unittest
 
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import RpcError, LockError, UnlockError
+from jnpr.junos.exception import RpcError, LockError,\
+    UnlockError, CommitError
 
 from mock import MagicMock, patch, PropertyMock
 
@@ -34,30 +35,44 @@ class TestConfig(unittest.TestCase):
         ex = RpcError(rsp='ok')
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertTrue(self.conf.commit())
-        ex = RpcError(rsp='not')
+        import xml.etree.ElementTree as ET
+        xmldata="""<data><company name="Juniper">
+            <code>pyez</code>
+            <year>2013</year>
+            </company></data>"""
+        root = ET.fromstring(xmldata)
+        el = root.find('company')
+        ex = RpcError(rsp=el)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(CommitError):
             self.conf.commit()
 
     def test_commit_check(self):
         self.conf.rpc.commit_configuration = MagicMock()
         self.assertTrue(self.conf.commit_check())
 
-    @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
     def test_commit_check_exception(self, mock_jxml):
         class MyException(Exception):
                 xml = 'test'
         self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
-        with self.assertRaises(AttributeError):
-            self.conf.commit_check()
+        #with self.assertRaises(AttributeError):
+        self.conf.commit_check()
 
     def test_config_commit_check_exception_RpcError(self):
         ex = RpcError(rsp='ok')
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertTrue(self.conf.commit_check())
-        ex = RpcError(rsp='not')
+        import xml.etree.ElementTree as ET
+        xmldata="""<data><company name="Juniper">
+            <code>pyez</code>
+            <year>2013</year>
+            </company></data>"""
+        root = ET.fromstring(xmldata)
+        el = root.find('company')
+        ex = RpcError(rsp=el)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(CommitError):
             self.conf.commit_check()
 
     def test_config_diff(self):
