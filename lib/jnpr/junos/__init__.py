@@ -1,4 +1,4 @@
-from .device import Device
+from jnpr.junos.device import Device
 import jxml
 import jxml as JXML  
 

@@ -2,9 +2,9 @@
 from lxml.builder import E 
 
 # module packages
-from ... import Resource
-from .... import jxml as JXML
-from .nat_src_rule import NatSrcRule
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
+from jnpr.junos.cfg.srx.nat.nat_src_rule import NatSrcRule
 
 class NatSrcRuleSet( Resource ):
   """
