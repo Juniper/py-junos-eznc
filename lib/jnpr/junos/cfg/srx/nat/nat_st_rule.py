@@ -2,9 +2,9 @@
 from lxml.builder import E 
 
 # module packages
-from ... import Resource
-from .... import jxml as JXML
-from .nat_proxy_arp import NatProxyArp
+from jnpr.junos.cfg import Resource
+from jnpr.junos import jxml as JXML
+from jnpr.junos.cfg.srx.nat.nat_proxy_arp import NatProxyArp
 
 class NatStaticRule( Resource ):
   """

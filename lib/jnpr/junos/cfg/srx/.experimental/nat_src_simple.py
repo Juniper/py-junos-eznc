@@ -1,7 +1,7 @@
 # local modules
-from .. import TemplateResource
-from ..resource import P_JUNOS_ACTIVE, P_JUNOS_EXISTS
-from ... import jxml as JXML
+from jnpr.junos.cfg.template_resource import TemplateResource
+from jnpr.junos.cfg.resource import P_JUNOS_ACTIVE, P_JUNOS_EXISTS
+from jnpr.junos import jxml as JXML
 from .j2 import _J2LDR
 
 # template files located in the ./templates directory

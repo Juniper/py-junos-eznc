@@ -4,7 +4,7 @@ from lxml.builder import E
 
 # package modules
 from jnpr.junos import jxml as JXML
-from .cfg import Resource, P_JUNOS_EXISTS, P_JUNOS_ACTIVE
+from jnpr.junos.cfg.resource import Resource, P_JUNOS_EXISTS, P_JUNOS_ACTIVE
 
 class TemplateResource( Resource ):
 
