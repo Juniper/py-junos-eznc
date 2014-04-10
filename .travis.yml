@@ -13,7 +13,7 @@ install:
   - "pip install -r development.txt"
   - "pip install ."
 
-script: nosetests -v --with-coverage --cover-package=jnpr.junos
+script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
 notifications:
   email: false
