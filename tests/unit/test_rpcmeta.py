@@ -2,6 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
+from nose.plugins.attrib import attr
 
 from jnpr.junos.device import Device
 from jnpr.junos.rpcmeta import _RpcMetaExec
@@ -9,6 +10,8 @@ from jnpr.junos.rpcmeta import _RpcMetaExec
 from mock import patch
 from lxml import etree
 
+
+@attr('unit')
 class Test_RpcMetaExec(unittest.TestCase):
 
     def setUp(self):
