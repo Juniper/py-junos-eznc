@@ -2,14 +2,17 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
+from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError
 
-from mock import MagicMock, patch, PropertyMock
+from mock import MagicMock, patch
 
+
+@attr('unit')
 class TestConfig(unittest.TestCase):
     def setUp(self):
         self.dev = Device(host='1.1.1.1')

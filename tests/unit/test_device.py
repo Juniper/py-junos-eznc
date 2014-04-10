@@ -3,6 +3,7 @@
 @author: rsherman
 '''
 import unittest
+from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
 
@@ -27,6 +28,7 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
           'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
+@attr('unit')
 class Test_MyTemplateLoader(unittest.TestCase):
     def setUp(self):
         from jnpr.junos.device import _MyTemplateLoader
@@ -48,6 +50,8 @@ class Test_MyTemplateLoader(unittest.TestCase):
         with patch('__builtin__.file', m, create=True):
             self.template_loader.get_source(None, None)
 
+
+@attr('unit')
 class TestDevice(unittest.TestCase):
 
     @patch('ncclient.manager.connect')

@@ -3,14 +3,15 @@
 @author: rsherman
 '''
 import unittest
+from nose.plugins.attrib import attr
 
-
+@attr('functional')
 class TestCore(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
         from jnpr.junos import Device
-        self.dev = Device(host='10.0.0.31', user='rick', password='password123')
+        self.dev = Device(host='snuggums.englab.juniper.net', user='jenkins', password='password123')
         self.dev.open()
 
     @classmethod
@@ -21,7 +22,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(self.dev.connected, True)
 
     def test_device_facts(self):
-        assert self.dev.facts['hostname'] == 'firefly'
+        assert self.dev.facts['hostname'] == 'snuggums'
 
     def test_device_get_timeout(self):
         assert self.dev.timeout == 30
@@ -31,12 +32,12 @@ class TestCore(unittest.TestCase):
         assert self.dev.timeout == 35
 
     def test_device_cli(self):
-        self.assertIn('firefly', self.dev.cli('show version'))
+        self.assertIn('qfx5100', self.dev.cli('show version'))
 
     def test_device_rpc(self):
         sw = self.dev.rpc.get_software_information()
-        hostname = sw.findtext('host-name')
-        self.assertEqual(hostname, 'firefly')
+        hostname = sw.findtext('.//host-name')
+        self.assertEqual(hostname, 'snuggums')
 
 
 if __name__ == "__main__":
