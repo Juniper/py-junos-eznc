@@ -1,6 +1,6 @@
 from jnpr.junos.device import Device
-import jxml
-import jxml as JXML  
+from . import jxml
+from . import jxml as JXML
 
 __version__ = '0.0.5'
 
