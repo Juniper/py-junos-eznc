@@ -253,6 +253,9 @@ class Table(object):
     """
     self._assert_data()
 
+    # Load key list
+    self.keys()
+
     if isinstance(value,int):
       # if selection by index, then grab the key at this index and
       # recursively call this method using that key, yo!
@@ -290,4 +293,6 @@ class Table(object):
 
   def __contains__(self,key):
     """ membership for use with 'in' """
+    # Load key list
+    self.keys()
     return bool(key in self.key_list)
