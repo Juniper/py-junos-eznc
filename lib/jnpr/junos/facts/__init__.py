@@ -8,14 +8,14 @@ from jnpr.junos.facts.session import *
 from jnpr.junos.facts.srx_cluster import srx_cluster
 
 FACT_LIST = [
-  chassis,
-  routing_engines,  
-  personality,  
-  srx_cluster,
-  software_version,
-  ifd_style,
-  switch_style,
-  session
+    chassis,
+    routing_engines,
+    personality,
+    srx_cluster,
+    software_version,
+    ifd_style,
+    switch_style,
+    session
 ]
 
 __all__ = ['FACT_LIST']
