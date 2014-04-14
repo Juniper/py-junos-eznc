@@ -252,15 +252,16 @@ class Table(object):
       when it is a <slice> then this will return a <list> of View widgets
     """
     self._assert_data()
+    keys = self.keys()
 
     if isinstance(value,int):
       # if selection by index, then grab the key at this index and
       # recursively call this method using that key, yo!
-      return self.__getitem__(self.key_list[value])
+      return self.__getitem__(keys[value])
 
     if isinstance(value,slice):
       # implements the 'slice' mechanism
-      return [self.__getitem__(key) for key in self.key_list[value]]
+      return [self.__getitem__(key) for key in keys[value]]
 
     # ---[ get_xpath ] --------------------------------------------------------
 
@@ -290,4 +291,4 @@ class Table(object):
 
   def __contains__(self,key):
     """ membership for use with 'in' """
-    return bool(key in self.key_list)
+    return bool(key in self.keys())
