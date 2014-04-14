@@ -1,8 +1,9 @@
 """
   facts['HOME'] = login home directory
 """
-from lxml.builder import E 
+from lxml.builder import E
 
-def session(dev,facts):
-  facts['HOME'] = dev.rpc(E.command("show cli directory")).findtext('./working-directory')
 
+def session(dev, facts):
+    facts['HOME'] = dev.rpc(
+        E.command("show cli directory")).findtext('./working-directory')
