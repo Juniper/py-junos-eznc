@@ -1,0 +1,176 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1D0/junos">
+    <multi-routing-engine-results>
+
+        <multi-routing-engine-item>
+
+            <re-name>scc-re0</re-name>
+
+            <route-engine-information xmlns="http://xml.juniper.net/junos/14.1D0/junos-chassis">
+                <route-engine>
+                    <slot>0</slot>
+                    <mastership-state>master</mastership-state>
+                    <mastership-priority>master (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="38">38 degrees C / 100 degrees F</temperature>
+                    <cpu-temperature junos:celsius="55">55 degrees C / 131 degrees F</cpu-temperature>
+                    <memory-dram-size>2048</memory-dram-size>
+                    <memory-installed-size>2048</memory-installed-size>
+                    <memory-buffer-utilization>30</memory-buffer-utilization>
+                    <cpu-user>85</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>14</cpu-system>
+                    <cpu-interrupt>1</cpu-interrupt>
+                    <cpu-idle>0</cpu-idle>
+                    <model>RE-4.0</model>
+                    <serial-number>P13004100274</serial-number>
+                    <start-time junos:seconds="1397581367">2014-04-15 10:02:47 PDT</start-time>
+                    <up-time junos:seconds="17020">4 hours, 43 minutes, 40 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>1.10</load-average-one>
+                    <load-average-five>0.57</load-average-five>
+                    <load-average-fifteen>0.34</load-average-fifteen>
+                </route-engine>
+                <route-engine>
+                    <slot>1</slot>
+                    <mastership-state>backup</mastership-state>
+                    <mastership-priority>backup (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="38">38 degrees C / 100 degrees F</temperature>
+                    <cpu-temperature junos:celsius="42">42 degrees C / 107 degrees F</cpu-temperature>
+                    <memory-dram-size>2048</memory-dram-size>
+                    <memory-installed-size>2048</memory-installed-size>
+                    <memory-buffer-utilization>26</memory-buffer-utilization>
+                    <cpu-user>25</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>25</cpu-system>
+                    <cpu-interrupt>2</cpu-interrupt>
+                    <cpu-idle>48</cpu-idle>
+                    <model>RE-4.0</model>
+                    <serial-number>P13004100124</serial-number>
+                    <start-time junos:seconds="1397581361">2014-04-15 10:02:41 PDT</start-time>
+                    <up-time junos:seconds="17009">4 hours, 43 minutes, 29 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>1.16</load-average-one>
+                    <load-average-five>0.45</load-average-five>
+                    <load-average-fifteen>0.21</load-average-fifteen>
+                </route-engine>
+            </route-engine-information>
+        </multi-routing-engine-item>
+
+        <multi-routing-engine-item>
+
+            <re-name>lcc0-re0</re-name>
+
+            <route-engine-information xmlns="http://xml.juniper.net/junos/14.1D0/junos-chassis">
+                <route-engine>
+                    <slot>0</slot>
+                    <mastership-state>master</mastership-state>
+                    <mastership-priority>master (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="40">40 degrees C / 104 degrees F</temperature>
+                    <cpu-temperature junos:celsius="47">47 degrees C / 116 degrees F</cpu-temperature>
+                    <memory-dram-size>3584</memory-dram-size>
+                    <memory-installed-size>4096</memory-installed-size>
+                    <memory-buffer-utilization>16</memory-buffer-utilization>
+                    <cpu-user>0</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>2</cpu-system>
+                    <cpu-interrupt>0</cpu-interrupt>
+                    <cpu-idle>97</cpu-idle>
+                    <model>RE-A-2000</model>
+                    <serial-number>1000702809</serial-number>
+                    <start-time junos:seconds="1397581240">2014-04-15 10:00:40 PDT</start-time>
+                    <up-time junos:seconds="17146">4 hours, 45 minutes, 46 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>0.03</load-average-one>
+                    <load-average-five>0.19</load-average-five>
+                    <load-average-fifteen>0.15</load-average-fifteen>
+                </route-engine>
+                <route-engine>
+                    <slot>1</slot>
+                    <mastership-state>backup</mastership-state>
+                    <mastership-priority>backup (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="39">39 degrees C / 102 degrees F</temperature>
+                    <cpu-temperature junos:celsius="47">47 degrees C / 116 degrees F</cpu-temperature>
+                    <memory-dram-size>3584</memory-dram-size>
+                    <memory-installed-size>4096</memory-installed-size>
+                    <memory-buffer-utilization>15</memory-buffer-utilization>
+                    <cpu-user>0</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>0</cpu-system>
+                    <cpu-interrupt>1</cpu-interrupt>
+                    <cpu-idle>99</cpu-idle>
+                    <model>RE-A-2000</model>
+                    <serial-number>1000697652</serial-number>
+                    <start-time junos:seconds="1397581189">2014-04-15 09:59:49 PDT</start-time>
+                    <up-time junos:seconds="17187">4 hours, 46 minutes, 27 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>0.03</load-average-one>
+                    <load-average-five>0.15</load-average-five>
+                    <load-average-fifteen>0.10</load-average-fifteen>
+                </route-engine>
+            </route-engine-information>
+        </multi-routing-engine-item>
+
+        <multi-routing-engine-item>
+
+            <re-name>lcc1-re0</re-name>
+
+            <route-engine-information xmlns="http://xml.juniper.net/junos/14.1D0/junos-chassis">
+                <route-engine>
+                    <slot>0</slot>
+                    <mastership-state>master</mastership-state>
+                    <mastership-priority>master (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="42">42 degrees C / 107 degrees F</temperature>
+                    <cpu-temperature junos:celsius="51">51 degrees C / 123 degrees F</cpu-temperature>
+                    <memory-dram-size>3584</memory-dram-size>
+                    <memory-installed-size>4096</memory-installed-size>
+                    <memory-buffer-utilization>15</memory-buffer-utilization>
+                    <cpu-user>0</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>2</cpu-system>
+                    <cpu-interrupt>1</cpu-interrupt>
+                    <cpu-idle>97</cpu-idle>
+                    <model>RE-A-2000</model>
+                    <serial-number>1000697686</serial-number>
+                    <start-time junos:seconds="1397581203">2014-04-15 10:00:03 PDT</start-time>
+                    <up-time junos:seconds="17182">4 hours, 46 minutes, 22 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>0.03</load-average-one>
+                    <load-average-five>0.19</load-average-five>
+                    <load-average-fifteen>0.14</load-average-fifteen>
+                </route-engine>
+                <route-engine>
+                    <slot>1</slot>
+                    <mastership-state>backup</mastership-state>
+                    <mastership-priority>backup (default)</mastership-priority>
+                    <status>OK</status>
+                    <temperature junos:celsius="39">39 degrees C / 102 degrees F</temperature>
+                    <cpu-temperature junos:celsius="44">44 degrees C / 111 degrees F</cpu-temperature>
+                    <memory-dram-size>3584</memory-dram-size>
+                    <memory-installed-size>4096</memory-installed-size>
+                    <memory-buffer-utilization>15</memory-buffer-utilization>
+                    <cpu-user>0</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>0</cpu-system>
+                    <cpu-interrupt>0</cpu-interrupt>
+                    <cpu-idle>99</cpu-idle>
+                    <model>RE-A-2000</model>
+                    <serial-number>1000697696</serial-number>
+                    <start-time junos:seconds="1397581226">2014-04-15 10:00:26 PDT</start-time>
+                    <up-time junos:seconds="17148">4 hours, 45 minutes, 48 seconds</up-time>
+                    <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+                    <load-average-one>0.03</load-average-one>
+                    <load-average-five>0.15</load-average-five>
+                    <load-average-fifteen>0.12</load-average-fifteen>
+                </route-engine>
+            </route-engine-information>
+        </multi-routing-engine-item>
+
+    </multi-routing-engine-results>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

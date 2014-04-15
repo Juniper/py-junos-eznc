@@ -1,0 +1,50 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/14.2I0/junos-chassis">
+        <route-engine>
+            <slot>0</slot>
+            <mastership-state>master</mastership-state>
+            <mastership-priority>master (default)</mastership-priority>
+            <status>OK</status>
+            <temperature junos:celsius="28">28 degrees C / 82 degrees F</temperature>
+            <cpu-temperature junos:celsius="29">29 degrees C / 84 degrees F</cpu-temperature>
+            <memory-dram-size>3313</memory-dram-size>
+            <memory-installed-size>16384</memory-installed-size>
+            <memory-buffer-utilization>28</memory-buffer-utilization>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>3</cpu-system>
+            <cpu-interrupt>1</cpu-interrupt>
+            <cpu-idle>96</cpu-idle>
+            <model>RE-S-1800x2</model>
+            <serial-number>9009127879</serial-number>
+            <start-time junos:seconds="1397530013">2014-04-14 19:46:53 PDT</start-time>
+            <up-time junos:seconds="60720">16 hours, 52 minutes</up-time>
+            <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+            <load-average-one>0.11</load-average-one>
+            <load-average-five>0.13</load-average-five>
+            <load-average-fifteen>0.13</load-average-fifteen>
+        </route-engine>
+        <route-engine>
+            <slot>1</slot>
+            <mastership-state>backup</mastership-state>
+            <mastership-priority>backup (default)</mastership-priority>
+            <status>OK</status>
+            <temperature junos:celsius="27">27 degrees C / 80 degrees F</temperature>
+            <memory-dram-size>3313</memory-dram-size>
+            <memory-buffer-utilization>23</memory-buffer-utilization>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>0</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>99</cpu-idle>
+            <model>RE-S-1800x2</model>
+            <serial-number>9009132008</serial-number>
+            <start-time junos:seconds="1396679276">2014-04-04 23:27:56 PDT</start-time>
+            <up-time junos:seconds="911446">10 days, 13 hours, 10 minutes, 46 seconds</up-time>
+            <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+        </route-engine>
+    </route-engine-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
