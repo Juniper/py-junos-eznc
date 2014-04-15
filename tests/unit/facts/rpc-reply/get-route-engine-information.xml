@@ -1,0 +1,77 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1I0/junos">
+    <multi-routing-engine-results>
+
+        <multi-routing-engine-item>
+
+            <re-name>node0</re-name>
+
+            <route-engine-information xmlns="http://xml.juniper.net/junos/12.1I0/junos-chassis">
+                <route-engine>
+                    <status>OK</status>
+                    <temperature junos:celsius="44">44 degrees C / 111 degrees F</temperature>
+                    <memory-system-total>1024</memory-system-total>
+                    <memory-system-total-used>543</memory-system-total-used>
+                    <memory-system-total-util>53</memory-system-total-util>
+                    <memory-control-plane>560</memory-control-plane>
+                    <memory-control-plane-used>325</memory-control-plane-used>
+                    <memory-control-plane-util>58</memory-control-plane-util>
+                    <memory-data-plane>464</memory-data-plane>
+                    <memory-data-plane-used>218</memory-data-plane-used>
+                    <memory-data-plane-util>47</memory-data-plane-util>
+                    <cpu-user>33</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>66</cpu-system>
+                    <cpu-interrupt>0</cpu-interrupt>
+                    <cpu-idle>0</cpu-idle>
+                    <model>RE-SRX210H</model>
+                    <serial-number>AAAW9949</serial-number>
+                    <start-time junos:seconds="1392168413">2014-02-11 17:26:53 PST</start-time>
+                    <up-time junos:seconds="5423535">62 days, 18 hours, 32 minutes, 15 seconds</up-time>
+                    <last-reboot-reason>0x200:normal shutdown</last-reboot-reason>
+                    <load-average-one>1.09</load-average-one>
+                    <load-average-five>1.18</load-average-five>
+                    <load-average-fifteen>1.16</load-average-fifteen>
+                </route-engine>
+            </route-engine-information>
+        </multi-routing-engine-item>
+
+
+        <multi-routing-engine-item>
+
+            <re-name>node1</re-name>
+
+            <route-engine-information xmlns="http://xml.juniper.net/junos/12.1I0/junos-chassis">
+                <route-engine>
+                    <status>OK</status>
+                    <temperature junos:celsius="44">44 degrees C / 111 degrees F</temperature>
+                    <memory-system-total>1024</memory-system-total>
+                    <memory-system-total-used>543</memory-system-total-used>
+                    <memory-system-total-util>53</memory-system-total-util>
+                    <memory-control-plane>560</memory-control-plane>
+                    <memory-control-plane-used>325</memory-control-plane-used>
+                    <memory-control-plane-util>58</memory-control-plane-util>
+                    <memory-data-plane>464</memory-data-plane>
+                    <memory-data-plane-used>218</memory-data-plane-used>
+                    <memory-data-plane-util>47</memory-data-plane-util>
+                    <cpu-user>33</cpu-user>
+                    <cpu-background>0</cpu-background>
+                    <cpu-system>66</cpu-system>
+                    <cpu-interrupt>0</cpu-interrupt>
+                    <cpu-idle>0</cpu-idle>
+                    <model>RE-SRX210H</model>
+                    <serial-number>AAAW9949</serial-number>
+                    <start-time junos:seconds="1392168413">2014-02-11 17:26:53 PST</start-time>
+                    <up-time junos:seconds="5423535">62 days, 18 hours, 32 minutes, 15 seconds</up-time>
+                    <last-reboot-reason>0x200:normal shutdown</last-reboot-reason>
+                    <load-average-one>1.09</load-average-one>
+                    <load-average-five>1.18</load-average-five>
+                    <load-average-fifteen>1.16</load-average-fifteen>
+                </route-engine>
+            </route-engine-information>
+        </multi-routing-engine-item>
+
+    </multi-routing-engine-results>
+    <cli>
+        <banner>{primary:node0}</banner>
+    </cli>
+</rpc-reply>
