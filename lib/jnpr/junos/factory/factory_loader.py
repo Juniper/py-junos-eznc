@@ -1,5 +1,5 @@
 """
-This file contains the RunstatLoader class that is used to dynamically
+This file contains the FactoryLoader class that is used to dynamically
 create Runstat Table and View objects from a <dict> of data.  The <dict> can
 originate from any kind of source: YAML, JSON, program.  For examples of YAML
 refer to the .yml files in this jnpr.junos.op directory.
@@ -17,235 +17,246 @@ __all__ = ['FactoryLoader']
 
 _VIEW = FactoryView
 _FIELDS = ViewFields
-_GET = FactoryOpTable 
+_GET = FactoryOpTable
 _TABLE = FactoryTable
 _CFGTBL = FactoryCfgTable
 
+
 class FactoryLoader(object):
-  """
-  Used to load a <dict> of data that contains Table and View definitions.
 
-  The primary method is :load(): which will return a <dict> of item-name and
-  item-class definitions.  
+    """
+    Used to load a <dict> of data that contains Table and View definitions.
 
-  If you want to import these definitions directly into your namespace, (like a module)
-  you would do the following:
+    The primary method is :load(): which will return a <dict> of item-name and
+    item-class definitions.
 
-    loader = RunstatLoader()
-    catalog = loader.load( <catalog_dict> )
-    globals().update( catalog )
+    If you want to import these definitions directly into your namespace,
+    (like a module) you would do the following:
 
-  If you did not want to do this, you can access the items as the catalog.  For 
-  example, if your <catalog_dict> contained a Table called MyTable, then you could do
-  something like:
+      loader = FactoryLoader()
+      catalog = loader.load( <catalog_dict> )
+      globals().update( catalog )
 
-    MyTable = catalog['MyTable']
-    table = MyTable(dev)
-    table.get()
-    ...
-  """  
-  def __init__(self):
-    self._catalog_dict = None       # YAML data
+    If you did not want to do this, you can access the items as the catalog.
+    For example, if your <catalog_dict> contained a Table called MyTable, then
+    you could do something like:
 
-    self._item_optables = []    # list of the get/op-tables
-    self._item_cfgtables = []   # list of get/cfg-tables
-    self._item_views = []        # list of views to build
-    self._item_tables = []       # list of tables to build
+      MyTable = catalog['MyTable']
+      table = MyTable(dev)
+      table.get()
+      ...
+    """
 
-    self.catalog = {}           # catalog of built classes
+    def __init__(self):
+        self._catalog_dict = None       # YAML data
 
-  ##### -----------------------------------------------------------------------
-  ##### Create a View class from YAML definition
-  ##### -----------------------------------------------------------------------
+        self._item_optables = []    # list of the get/op-tables
+        self._item_cfgtables = []   # list of get/cfg-tables
+        self._item_views = []        # list of views to build
+        self._item_tables = []       # list of tables to build
 
-  def _fieldfunc_True(self, value_rhs):
-    return lambda x: x == value_rhs
+        self.catalog = {}           # catalog of built classes
 
-  def _fieldfunc_False(self, value_rhs):
-    return lambda x: x != value_rhs
+    # -----------------------------------------------------------------------
+    # Create a View class from YAML definition
+    # -----------------------------------------------------------------------
 
-  def _add_dictfield(self, fields, f_name, f_dict, kvargs ):
-    """ add a field based on its associated dictionary """
-    # at present if a field is a <dict> then there is **one
-    # item** - { the xpath value : the option control }.  typically
-    # the option would be a bultin class type like 'int'
-    # however, as this framework expands in capability, this
-    # will be enhaced, yo!
+    def _fieldfunc_True(self, value_rhs):
+        return lambda x: x == value_rhs
 
-    xpath, opt = f_dict.items()[0]       # get first/only key,value
-    if 'flag' == opt: opt = 'bool'       # flag is alias for bool
+    def _fieldfunc_False(self, value_rhs):
+        return lambda x: x != value_rhs
 
-    # first check to see if the option is a built-in Python
-    # type, most commonly would be 'int' for numbers, like counters
+    def _add_dictfield(self, fields, f_name, f_dict, kvargs):
+        """ add a field based on its associated dictionary """
+        # at present if a field is a <dict> then there is **one
+        # item** - { the xpath value : the option control }.  typically
+        # the option would be a bultin class type like 'int'
+        # however, as this framework expands in capability, this
+        # will be enhaced, yo!
 
-    astype = __builtins__.get(opt) or globals().get(opt)
-    if astype is not None:
-      kvargs['astype'] = astype
-      fields.astype( f_name, xpath, **kvargs)
-      return
+        xpath, opt = f_dict.items()[0]       # get first/only key,value
+        if 'flag' == opt:
+            opt = 'bool'       # flag is alias for bool
 
-    # next check to see if this is a "field-function"
-    # operator in the form "func=value", like "True=enabled"
+        # first check to see if the option is a built-in Python
+        # type, most commonly would be 'int' for numbers, like counters
 
-    if isinstance(opt,str) and opt.find('=') > 0:
-      field_cmd,value_rhs = opt.split('=')
-      fn_field = '_fieldfunc_' + field_cmd
-      if not hasattr(self, fn_field): 
-        raise ValueError("Unknown field-func: '%'" % field_cmd)
-      kvargs['astype'] = getattr(self,fn_field)(value_rhs)
-      fields.astype( f_name, xpath, **kvargs )
-      return
+        astype = __builtins__.get(opt) or globals().get(opt)
+        if astype is not None:
+            kvargs['astype'] = astype
+            fields.astype(f_name, xpath, **kvargs)
+            return
 
-    raise RuntimeError("Dont know what to do with field: '%s'" % f_name)
+        # next check to see if this is a "field-function"
+        # operator in the form "func=value", like "True=enabled"
 
-  # ---[ END: _add_dictfield ] ------------------------------------------------
+        if isinstance(opt, str) and opt.find('=') > 0:
+            field_cmd, value_rhs = opt.split('=')
+            fn_field = '_fieldfunc_' + field_cmd
+            if not hasattr(self, fn_field):
+                raise ValueError("Unknown field-func: '%'" % field_cmd)
+            kvargs['astype'] = getattr(self, fn_field)(value_rhs)
+            fields.astype(f_name, xpath, **kvargs)
+            return
 
-  def _add_view_fields(self, view_dict, fields_name, fields):
-    """ add a group of fields to the view """
-    fields_dict = view_dict[fields_name]
-    try:
-      # see if this is a 'fields_<group>' collection, and if so
-      # then we automatically setup using the group mechanism
-      mark = fields_name.index('_')
-      group = {'group':fields_name[mark+1:]}
-    except:
-      # otherwise, no group, just standard 'fields'
-      group={}
+        raise RuntimeError("Dont know what to do with field: '%s'" % f_name)
 
-    for f_name, f_data in fields_dict.items():  
-      # each field could have its own unique set of properties
-      # so create a kvargs <dict> each time.  but copy in the
-      # groups <dict> (single item) generically.
-      kvargs = {}
-      kvargs.update(group)
+    # ---[ END: _add_dictfield ] ---------------------------------------------
 
-      if isinstance(f_data,dict):
-        self._add_dictfield( fields, f_name, f_data, kvargs )
-        continue
+    def _add_view_fields(self, view_dict, fields_name, fields):
+        """ add a group of fields to the view """
+        fields_dict = view_dict[fields_name]
+        try:
+            # see if this is a 'fields_<group>' collection, and if so
+            # then we automatically setup using the group mechanism
+            mark = fields_name.index('_')
+            group = {'group': fields_name[mark + 1:]}
+        except:
+            # otherwise, no group, just standard 'fields'
+            group = {}
 
-      if f_data in self._catalog_dict:
-        # f_data is the table name
-        cls_tbl = self.catalog.get(f_data, self._build_table( f_data ))
-        fields.table( f_name, cls_tbl )
-        continue        
+        for f_name, f_data in fields_dict.items():
+            # each field could have its own unique set of properties
+            # so create a kvargs <dict> each time.  but copy in the
+            # groups <dict> (single item) generically.
+            kvargs = {}
+            kvargs.update(group)
 
-      # if we are here, then it means that the field is a string value
-      xpath = f_name if f_data is True else f_data
-      fields.str(f_name,xpath,**kvargs)
+            if isinstance(f_data, dict):
+                self._add_dictfield(fields, f_name, f_data, kvargs)
+                continue
 
-  ### -------------------------------------------------------------------------
+            if f_data in self._catalog_dict:
+                # f_data is the table name
+                cls_tbl = self.catalog.get(f_data, self._build_table(f_data))
+                fields.table(f_name, cls_tbl)
+                continue
 
-  def _build_view(self, view_name):
-    """ build a new View definition """
-    if view_name in self.catalog: return self.catalog[view_name]
+            # if we are here, then it means that the field is a string value
+            xpath = f_name if f_data is True else f_data
+            fields.str(f_name, xpath, **kvargs)
 
-    view_dict = self._catalog_dict[view_name]
-    kvargs = { 'view_name' : view_name }
+    # -------------------------------------------------------------------------
 
-    # if there are field groups, then get that now.
-    if 'groups' in view_dict: kvargs['groups'] = view_dict['groups']
+    def _build_view(self, view_name):
+        """ build a new View definition """
+        if view_name in self.catalog:
+            return self.catalog[view_name]
 
-    # if this view extends another ...
-    if 'extends' in view_dict:
-      base_cls =  self.catalog.get(view_dict['extends'])
-      # @@@ should check for base_cls is None!
-      kvargs['extends'] = base_cls
+        view_dict = self._catalog_dict[view_name]
+        kvargs = {'view_name': view_name}
 
-    fields = _FIELDS()
-    fg_list = [name for name in view_dict if name.startswith('fields')]
-    for fg_name in fg_list: 
-      self._add_view_fields( view_dict, fg_name, fields )
+        # if there are field groups, then get that now.
+        if 'groups' in view_dict:
+            kvargs['groups'] = view_dict['groups']
 
-    cls = _VIEW( fields.end, **kvargs )
-    self.catalog[view_name] = cls
-    return cls
+        # if this view extends another ...
+        if 'extends' in view_dict:
+            base_cls = self.catalog.get(view_dict['extends'])
+            # @@@ should check for base_cls is None!
+            kvargs['extends'] = base_cls
 
-  ##### -----------------------------------------------------------------------
-  ##### Create a Get-Table from YAML definition
-  ##### -----------------------------------------------------------------------
+        fields = _FIELDS()
+        fg_list = [name for name in view_dict if name.startswith('fields')]
+        for fg_name in fg_list:
+            self._add_view_fields(view_dict, fg_name, fields)
 
-  def _build_optable( self, table_name):
-    """ build a new Get-Table definition """
-    if table_name in self.catalog: return self.catalog[table_name]
+        cls = _VIEW(fields.end, **kvargs)
+        self.catalog[view_name] = cls
+        return cls
 
-    tbl_dict = self._catalog_dict[table_name]
-    kvargs = deepcopy(tbl_dict)
+    # -----------------------------------------------------------------------
+    # Create a Get-Table from YAML definition
+    # -----------------------------------------------------------------------
 
-    rpc = kvargs.pop('rpc')
-    kvargs['table_name'] = table_name
+    def _build_optable(self, table_name):
+        """ build a new Get-Table definition """
+        if table_name in self.catalog:
+            return self.catalog[table_name]
 
-    if 'view' in tbl_dict:
-      view_name = tbl_dict['view']
-      cls_view = self.catalog.get( view_name, self._build_view( view_name ))
-      kvargs['view'] = cls_view
+        tbl_dict = self._catalog_dict[table_name]
+        kvargs = deepcopy(tbl_dict)
 
-    cls = _GET(rpc, **kvargs)
-    self.catalog[table_name] = cls
-    return cls
+        rpc = kvargs.pop('rpc')
+        kvargs['table_name'] = table_name
 
-  ##### -----------------------------------------------------------------------
-  ##### Create a Table class from YAML definition
-  ##### -----------------------------------------------------------------------
+        if 'view' in tbl_dict:
+            view_name = tbl_dict['view']
+            cls_view = self.catalog.get(view_name, self._build_view(view_name))
+            kvargs['view'] = cls_view
 
-  def _build_table(self, table_name ):
-    """ build a new Table definition """
-    if table_name in self.catalog: return self.catalog[table_name]
+        cls = _GET(rpc, **kvargs)
+        self.catalog[table_name] = cls
+        return cls
 
-    tbl_dict = self._catalog_dict[table_name]
+    # -----------------------------------------------------------------------
+    # Create a Table class from YAML definition
+    # -----------------------------------------------------------------------
 
-    table_item = tbl_dict.pop('item')
-    kvargs = deepcopy(tbl_dict)
-    kvargs['table_name'] = table_name
+    def _build_table(self, table_name):
+        """ build a new Table definition """
+        if table_name in self.catalog:
+            return self.catalog[table_name]
 
-    if 'view' in tbl_dict:
-      view_name = tbl_dict['view']
-      cls_view = self.catalog.get( view_name, self._build_view( view_name ))
-      kvargs['view'] = cls_view
+        tbl_dict = self._catalog_dict[table_name]
 
-    cls = _TABLE(table_item, **kvargs)
-    self.catalog[table_name] = cls
-    return cls
+        table_item = tbl_dict.pop('item')
+        kvargs = deepcopy(tbl_dict)
+        kvargs['table_name'] = table_name
 
-  def _build_cfgtable( self, table_name):
-    """ build a new Config-Table definition """
-    if table_name in self.catalog: return self.catalog[table_name]
-    tbl_dict = self._catalog_dict[table_name]
+        if 'view' in tbl_dict:
+            view_name = tbl_dict['view']
+            cls_view = self.catalog.get(view_name, self._build_view(view_name))
+            kvargs['view'] = cls_view
 
-    if 'view' in tbl_dict:
-      # transpose name to class
-      view_name = tbl_dict['view']      
-      tbl_dict['view'] = self.catalog.get( view_name, self._build_view( view_name ))
+        cls = _TABLE(table_item, **kvargs)
+        self.catalog[table_name] = cls
+        return cls
 
-    cls = _CFGTBL( table_name, tbl_dict )
-    self.catalog[table_name] = cls
-    return cls
+    def _build_cfgtable(self, table_name):
+        """ build a new Config-Table definition """
+        if table_name in self.catalog:
+            return self.catalog[table_name]
+        tbl_dict = self._catalog_dict[table_name]
 
-  ##### -----------------------------------------------------------------------
-  ##### Primary builders ...
-  ##### -----------------------------------------------------------------------
+        if 'view' in tbl_dict:
+            # transpose name to class
+            view_name = tbl_dict['view']
+            tbl_dict['view'] = self.catalog.get(
+                view_name,
+                self._build_view(view_name))
 
-  def _sortitems(self):
-    for k,v in self._catalog_dict.items():
-      if 'rpc' in v:
-        self._item_optables.append(k)
-      elif 'get' in v:
-        self._item_cfgtables.append(k)
-      elif 'view' in v:
-        self._item_tables.append(k)
-      else:
-        self._item_views.append(k)
+        cls = _CFGTBL(table_name, tbl_dict)
+        self.catalog[table_name] = cls
+        return cls
 
-  def load( self, catalog_dict, envrion={} ):
+    # -----------------------------------------------------------------------
+    # Primary builders ...
+    # -----------------------------------------------------------------------
 
-    # load the yaml data and extract the item names.  these names will
-    # become the new class definitions
+    def _sortitems(self):
+        for k, v in self._catalog_dict.items():
+            if 'rpc' in v:
+                self._item_optables.append(k)
+            elif 'get' in v:
+                self._item_cfgtables.append(k)
+            elif 'view' in v:
+                self._item_tables.append(k)
+            else:
+                self._item_views.append(k)
 
-    self._catalog_dict = catalog_dict
-    self._sortitems()
+    def load(self, catalog_dict, envrion={}):
 
-    map( self._build_optable, self._item_optables )
-    map( self._build_cfgtable, self._item_cfgtables )
-    map( self._build_table, self._item_tables )
-    map( self._build_view, self._item_views )
+        # load the yaml data and extract the item names.  these names will
+        # become the new class definitions
 
-    return self.catalog
+        self._catalog_dict = catalog_dict
+        self._sortitems()
+
+        map(self._build_optable, self._item_optables)
+        map(self._build_cfgtable, self._item_cfgtables)
+        map(self._build_table, self._item_tables)
+        map(self._build_view, self._item_views)
+
+        return self.catalog

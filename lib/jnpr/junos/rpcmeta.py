@@ -2,148 +2,154 @@ import re
 from lxml import etree
 from lxml.builder import E
 
+
 class _RpcMetaExec(object):
 
-  ##### -----------------------------------------------------------------------
-  ##### CONSTRUCTOR
-  ##### -----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
+    # CONSTRUCTOR
+    # -----------------------------------------------------------------------
 
-  def __init__(self, junos):
-    """
-      ~PRIVATE CLASS~
-      creates an RPC meta-executor object bound to the provided
-      ez-netconf :junos: object
-    """
-    self._junos = junos
+    def __init__(self, junos):
+        """
+          ~PRIVATE CLASS~
+          creates an RPC meta-executor object bound to the provided
+          ez-netconf :junos: object
+        """
+        self._junos = junos
 
-  ##### -----------------------------------------------------------------------
-  ##### get_config
-  ##### -----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
+    # get_config
+    # -----------------------------------------------------------------------
 
-  def get_config( self, filter_xml=None, options={} ):
-    """
-      retrieve configuration from the Junos device  
+    def get_config(self, filter_xml=None, options={}):
+        """
+          retrieve configuration from the Junos device
 
-      :filter_xml: is options, defines what to retrieve.  if omitted
-      then the entire configuration is returned
+          :filter_xml: is options, defines what to retrieve.  if omitted
+          then the entire configuration is returned
 
-      :options: is a dict, creates attributes for the RPC
-    """
-    rpc = E('get-configuration', options)
+          :options: is a dict, creates attributes for the RPC
+        """
+        rpc = E('get-configuration', options)
 
-    if filter_xml != None:
-      # wrap the provided filter with toplevel <configuration> if 
-      # it does not already have one
-      
-      at_here = rpc if 'configuration' == filter_xml.tag else E('configuration')
-      at_here.append( filter_xml )
-      rpc.append( at_here )
+        if filter_xml is not None:
+            # wrap the provided filter with toplevel <configuration> if
+            # it does not already have one
 
-    return self._junos.execute( rpc )
+            at_here = rpc if 'configuration' == filter_xml.tag else E(
+                'configuration')
+            at_here.append(filter_xml)
+            rpc.append(at_here)
 
-  ##### -----------------------------------------------------------------------
-  ##### load_config
-  ##### -----------------------------------------------------------------------
+        return self._junos.execute(rpc)
 
-  def load_config( self, contents, **options ):
-    """
-    loads :contents: onto the Junos device, does not commit the change.
+    # -----------------------------------------------------------------------
+    # load_config
+    # -----------------------------------------------------------------------
 
-    :options: is a dictionary of XML attributes to set within the
-    <load-configuration> RPC.  The :contents: are interpreted
-    by the :options: as follows:
+    def load_config(self, contents, **options):
+        """
+        loads :contents: onto the Junos device, does not commit the change.
 
-      format='text' and action='set', then :contents: is a string
-      containing a series of "set" commands
+        :options: is a dictionary of XML attributes to set within the
+        <load-configuration> RPC.  The :contents: are interpreted
+        by the :options: as follows:
 
-      format='text', then :contents: is a string containing Junos
-      configuration in curly-brace/text format
+          format='text' and action='set', then :contents: is a string
+          containing a series of "set" commands
 
-      <otherwise> :contents: is XML structure
-    """
-    rpc = E('load-configuration', options)
+          format='text', then :contents: is a string containing Junos
+          configuration in curly-brace/text format
 
-    if ('action' in options) and (options['action'] == 'set'):
-      rpc.append(E('configuration-set', contents ))
-    elif ('format' in options) and (options['format'] == 'text'):
-      rpc.append(E('configuration-text', contents ))
-    else:
-      # otherwise, it's just XML Element
-      etree.SubElement(rpc,'configuration').append( contents )
+          <otherwise> :contents: is XML structure
+        """
+        rpc = E('load-configuration', options)
 
-    return self._junos.execute( rpc )
+        if ('action' in options) and (options['action'] == 'set'):
+            rpc.append(E('configuration-set', contents))
+        elif ('format' in options) and (options['format'] == 'text'):
+            rpc.append(E('configuration-text', contents))
+        else:
+            # otherwise, it's just XML Element
+            etree.SubElement(rpc, 'configuration').append(contents)
 
-  ##### -----------------------------------------------------------------------
-  ##### cli
-  ##### -----------------------------------------------------------------------
+        return self._junos.execute(rpc)
 
-  def cli( self, command, format='text' ):
-    rpc = E('command', command)
-    if 'text' == format: rpc.attrib['format'] = 'text'    
-    return self._junos.execute( rpc )
+    # -----------------------------------------------------------------------
+    # cli
+    # -----------------------------------------------------------------------
 
-  ##### -----------------------------------------------------------------------
-  ##### method missing
-  ##### -----------------------------------------------------------------------
+    def cli(self, command, format='text'):
+        rpc = E('command', command)
+        if 'text' == format:
+            rpc.attrib['format'] = 'text'
+        return self._junos.execute(rpc)
 
-  def __getattr__( self, rpc_cmd_name ):
-    """
-      metaprograms a function to execute the :rpc_cmd_name:
+    # -----------------------------------------------------------------------
+    # method missing
+    # -----------------------------------------------------------------------
 
-      the caller will be passing (*vargs, **kvargs) on
-      execution of the meta function; these are the specific
-      rpc command arguments(**kvargs) and options bound
-      as XML attributes (*vargs)
-    """
-    
-    rpc_cmd = re.sub('_','-', rpc_cmd_name)
+    def __getattr__(self, rpc_cmd_name):
+        """
+          metaprograms a function to execute the :rpc_cmd_name:
 
-    def _exec_rpc(*vargs, **kvargs):
-      # create the rpc as XML command
-      rpc = etree.Element( rpc_cmd )
+          the caller will be passing (*vargs, **kvargs) on
+          execution of the meta function; these are the specific
+          rpc command arguments(**kvargs) and options bound
+          as XML attributes (*vargs)
+        """
 
-      # kvargs are the command parameter/values
-      if kvargs:
-        for arg_name, arg_value in kvargs.items():
-          arg_name = re.sub('_','-',arg_name)               
-          if isinstance(arg_value, (tuple, list)):
-            for a in arg_value:
-              arg = etree.SubElement( rpc, arg_name )
-              if a != True: arg.text = a
-          else:
-            arg = etree.SubElement( rpc, arg_name )
-            if arg_value != True: arg.text = arg_value
+        rpc_cmd = re.sub('_', '-', rpc_cmd_name)
 
-      # vargs[0] is a dict, command options like format='text'
-      if vargs:
-        for k,v in vargs[0].items():
-          if v != True: rpc.attrib[k] = v
+        def _exec_rpc(*vargs, **kvargs):
+            # create the rpc as XML command
+            rpc = etree.Element(rpc_cmd)
 
-      # now invoke the command against the
-      # associated :junos: device and return
-      # the results per :junos:execute()
+            # kvargs are the command parameter/values
+            if kvargs:
+                for arg_name, arg_value in kvargs.items():
+                    arg_name = re.sub('_', '-', arg_name)
+                    if isinstance(arg_value, (tuple, list)):
+                        for a in arg_value:
+                            arg = etree.SubElement(rpc, arg_name)
+                            if a is not True:
+                                arg.text = a
+                    else:
+                        arg = etree.SubElement(rpc, arg_name)
+                        if arg_value is not True:
+                            arg.text = arg_value
 
-      return self._junos.execute(rpc)
+            # vargs[0] is a dict, command options like format='text'
+            if vargs:
+                for k, v in vargs[0].items():
+                    if v is not True:
+                        rpc.attrib[k] = v
 
-    # metabind help() and the function name to the :rpc_cmd_name:
-    # provided by the caller ... that's about all we can do, yo!
+            # now invoke the command against the
+            # associated :junos: device and return
+            # the results per :junos:execute()
 
-    _exec_rpc.__doc__ = rpc_cmd
-    _exec_rpc.__name__ = rpc_cmd_name
+            return self._junos.execute(rpc)
 
-    # return the metafunction that the caller will in-turn invoke
-    return _exec_rpc
+        # metabind help() and the function name to the :rpc_cmd_name:
+        # provided by the caller ... that's about all we can do, yo!
 
-  ##### -----------------------------------------------------------------------
-  ##### callable
-  ##### -----------------------------------------------------------------------
+        _exec_rpc.__doc__ = rpc_cmd
+        _exec_rpc.__name__ = rpc_cmd_name
 
-  def __call__( self, rpc_cmd, **kvargs ):
-    """
-      callable will execute the provided :rpc_cmd: against the
-      attached :junos: object and return the RPC response per 
-      :junos:execute()
+        # return the metafunction that the caller will in-turn invoke
+        return _exec_rpc
 
-      kvargs is simply passed 'as-is' to :junos:execute()
-    """
-    return self._junos.execute( rpc_cmd, **kvargs )
+    # -----------------------------------------------------------------------
+    # callable
+    # -----------------------------------------------------------------------
+
+    def __call__(self, rpc_cmd, **kvargs):
+        """
+          callable will execute the provided :rpc_cmd: against the
+          attached :junos: object and return the RPC response per
+          :junos:execute()
+
+          kvargs is simply passed 'as-is' to :junos:execute()
+        """
+        return self._junos.execute(rpc_cmd, **kvargs)

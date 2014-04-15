@@ -2,7 +2,7 @@
 from lxml import etree
 
 # 3rd-party modules
-from lxml.builder import E 
+from lxml.builder import E
 
 # module packages
 from jnpr.junos.cfg import Resource
@@ -10,66 +10,69 @@ from jnpr.junos import jxml as JXML
 from jnpr.junos.cfg.srx.zone_ab_addr import ZoneAddrBookAddr
 from jnpr.junos.cfg.srx.zone_ab_set import ZoneAddrBookSet
 
-class ZoneAddrBook( Resource ):
-  """
-  [edit security zone security-zone <zone> address-book]
 
-  Resource name: str
-    The zone name
+class ZoneAddrBook(Resource):
 
-  Resource manages:
-    addr, ZoneAddrBookAddr
-    set, ZoneAddrBookSet
-  """
+    """
+    [edit security zone security-zone <zone> address-book]
 
-  PROPERTIES = [
-    '$addrs',         # read-only addresss
-    '$sets'           # read-only address-sets
-  ]
-  def __init__(self, junos, name=None, **kvargs ):
-    if name is None:
-      # resource-manager
-      Resource.__init__( self, junos, name, **kvargs )
-      return
+    Resource name: str
+      The zone name
 
-    self.addr = ZoneAddrBookAddr( junos, parent=self )
-    self.set = ZoneAddrBookSet( junos, parent=self )
-    self._manages = ['addr','set']
-    Resource.__init__( self, junos, name, **kvargs )
+    Resource manages:
+      addr, ZoneAddrBookAddr
+      set, ZoneAddrBookSet
+    """
 
-  def _xml_at_top(self):
-    return E.security(E.zones(
-      E('security-zone', 
-        E.name( self._name ),
-        E('address-book',
-          E('address', JXML.NAMES_ONLY),
-          E('address-set', JXML.NAMES_ONLY)
-        )
-      )
-    ))
+    PROPERTIES = [
+        '$addrs',         # read-only addresss
+        '$sets'           # read-only address-sets
+    ]
 
-  ##### -----------------------------------------------------------------------
-  ##### XML reading
-  ##### -----------------------------------------------------------------------
-  
-  def _xml_at_res(self, xml):
-    return xml.find('.//address-book')
+    def __init__(self, junos, name=None, **kvargs):
+        if name is None:
+            # resource-manager
+            Resource.__init__(self, junos, name, **kvargs)
+            return
 
-  def _xml_to_py(self, as_xml, to_py ):
-    Resource._r_has_xml_status( as_xml, to_py )
-    to_py['$addrs'] = [name.text for name in as_xml.xpath('address/name')]
-    to_py['$sets'] = [name.text for name in as_xml.xpath('address-set/name')]
+        self.addr = ZoneAddrBookAddr(junos, parent=self)
+        self.set = ZoneAddrBookSet(junos, parent=self)
+        self._manages = ['addr', 'set']
+        Resource.__init__(self, junos, name, **kvargs)
 
-  ##### -----------------------------------------------------------------------
-  ##### Manager List, Catalog
-  ##### -----------------------------------------------------------------------
+    def _xml_at_top(self):
+        return E.security(E.zones(
+            E('security-zone',
+              E.name(self._name),
+              E('address-book',
+                E('address', JXML.NAMES_ONLY),
+                E('address-set', JXML.NAMES_ONLY)
+                )
+              )
+        ))
 
-  def _r_list(self):
-    # this list of zone addressbooks is really just the list of zones
-    got = self.R.get_zones_information(terse=True)
-    zones = got.findall('zones-security/zones-security-zonename')
-    self._rlist = [zone.text for zone in zones]    
-    self._rlist.remove('junos-host')
+    # -----------------------------------------------------------------------
+    # XML reading
+    # -----------------------------------------------------------------------
 
-  # using Resource._r_catalog()
-    
+    def _xml_at_res(self, xml):
+        return xml.find('.//address-book')
+
+    def _xml_to_py(self, as_xml, to_py):
+        Resource._r_has_xml_status(as_xml, to_py)
+        to_py['$addrs'] = [name.text for name in as_xml.xpath('address/name')]
+        to_py['$sets'] = [
+            name.text for name in as_xml.xpath('address-set/name')]
+
+    # -----------------------------------------------------------------------
+    # Manager List, Catalog
+    # -----------------------------------------------------------------------
+
+    def _r_list(self):
+        # this list of zone addressbooks is really just the list of zones
+        got = self.R.get_zones_information(terse=True)
+        zones = got.findall('zones-security/zones-security-zonename')
+        self._rlist = [zone.text for zone in zones]
+        self._rlist.remove('junos-host')
+
+    # using Resource._r_catalog()
