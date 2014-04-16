@@ -25,7 +25,7 @@ pip-log.txt
 .coverage
 .tox
 nosetests.xml
-tests/unit/cover*
+tests/unit/cover
 
 # Translations
 *.mo
