@@ -15,17 +15,17 @@ from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
-          'version_info': version_info('12.1X46-D15.3'),
-          '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
-          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
-          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
-          'model': 'FIREFLY-PERIMETER',
-          'RE0': {'status': 'Testing',
-                    'last_reboot_reason': 'Router rebooted after a '
-                                        'normal shutdown.',
-                    'model': 'FIREFLY-PERIMETER RE',
-                    'up_time': '6 hours, 29 minutes, 30 seconds'},
-          'vc_capable': False, 'personality': 'SRX_BRANCH'}
+         'version_info': version_info('12.1X46-D15.3'),
+         '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
+         'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
+         'HOME': '/cf/var/home/rick', 'srx_cluster': False,
+         'model': 'FIREFLY-PERIMETER',
+         'RE0': {'status': 'Testing',
+                 'last_reboot_reason': 'Router rebooted after a '
+                 'normal shutdown.',
+                 'model': 'FIREFLY-PERIMETER RE',
+                 'up_time': '6 hours, 29 minutes, 30 seconds'},
+         'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
 @attr('unit')
@@ -74,7 +74,8 @@ class TestDevice(unittest.TestCase):
                 self.assertEqual(self.dev.logfile, handle)
 
     def test_device_host_mand_param(self):
-        self.assertRaises(ValueError, Device, user='rick', password='password123',
+        self.assertRaises(ValueError, Device, user='rick',
+                          password='password123',
                           gather_facts=False)
 
     def test_device_property_logfile_close(self):
@@ -164,11 +165,13 @@ class TestDevice(unittest.TestCase):
         self.dev.execute('<get-system-core-dumps/>', to_py=self._do_nothing)
 
     def test_device_execute_exception(self):
-        with patch('jnpr.junos.device.JXML.remove_namespaces', return_value=None):
+        with patch('jnpr.junos.device.JXML.remove_namespaces',
+                   return_value=None):
             class MyException(Exception):
                 xml = 'test'
             self.dev._conn.rpc = MagicMock(side_effect=MyException)
-            self.assertRaises(RpcError, self.dev.execute, '<get-software-information/>')
+            self.assertRaises(RpcError, self.dev.execute,
+                              '<get-software-information/>')
 
     def test_device_execute_rpc_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
@@ -242,20 +245,23 @@ class TestDevice(unittest.TestCase):
         self.dev.close()
         self.assertEqual(self.dev.connected, False)
 
-
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
-        fpath = os.path.join(os.path.dirname(__file__),'rpc-reply', fname)
+        fpath = os.path.join(os.path.dirname(__file__),
+                             'rpc-reply', fname)
         foo = open(fpath).read()
 
-        if (fname == 'get-rpc-error.xml' or fname == 'get-index-error.xml' or fname == 'get-system-core-dumps.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler.transform_reply())
+        if (fname == 'get-rpc-error.xml' or
+                fname == 'get-index-error.xml' or
+                fname == 'get-system-core-dumps.xml'):
+            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+                                  .transform_reply())
         else:
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
+            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+                                  .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
- 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             device_params = kwargs['device_params']

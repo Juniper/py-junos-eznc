@@ -28,7 +28,7 @@ class Test_RpcMetaExec(unittest.TestCase):
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_load_config_option_action(self, mock_execute_fn):
-        set_commands="""
+        set_commands = """
             set system host-name test_rpc
             set system domain-name test.juniper.net
         """
@@ -36,7 +36,7 @@ class Test_RpcMetaExec(unittest.TestCase):
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_option_format(self, mock_execute_fn):
-        set_commands="""
+        set_commands = """
             set system host-name test_rpc
             set system domain-name test.juniper.net
         """

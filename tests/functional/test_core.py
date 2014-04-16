@@ -5,13 +5,15 @@
 import unittest
 from nose.plugins.attrib import attr
 
+
 @attr('functional')
 class TestCore(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
         from jnpr.junos import Device
-        self.dev = Device(host='snuggums.englab.juniper.net', user='jenkins', password='password123')
+        self.dev = Device(host='snuggums.englab.juniper.net',
+                          user='jenkins', password='password123')
         self.dev.open()
 
     @classmethod
