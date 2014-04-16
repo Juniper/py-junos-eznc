@@ -42,13 +42,13 @@ class TestRoutingEngines(unittest.TestCase):
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
-        fpath = os.path.join(os.path.dirname(__file__),\
+        fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
 
-        rpc_reply = NCElement(foo, self.dev._conn.\
+        rpc_reply = NCElement(foo, self.dev._conn.
                               _device_handler.transform_reply()).\
-                              _NCElement__doc[0]
+            _NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):

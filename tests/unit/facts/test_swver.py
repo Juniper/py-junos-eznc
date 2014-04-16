@@ -23,26 +23,28 @@ class TestVersionInfo(unittest.TestCase):
         self.assertEqual(version_info('11.4R7').build, '7')
 
     def test_version_info_repr(self):
-        self.assertEqual(repr(version_info('11.4R7.5')), \
-        'junos.version_info(major=(11, 4), type=R, minor=7, build=5)')
+        self.assertEqual(repr(version_info('11.4R7.5')),
+                         'junos.version_info(major=(11, 4), '
+                         'type=R, minor=7, build=5)')
 
     def test_version_info_lt(self):
-        self.assertTrue(version_info('13.3-20131120')<(14, 1))
+        self.assertTrue(version_info('13.3-20131120') < (14, 1))
 
     def test_version_info_lt_eq(self):
-        self.assertTrue(version_info('13.3-20131120')<=(14, 1))
+        self.assertTrue(version_info('13.3-20131120') <= (14, 1))
 
     def test_version_info_gt(self):
-        self.assertTrue(version_info('13.3-20131120')>(12, 1))
+        self.assertTrue(version_info('13.3-20131120') > (12, 1))
 
     def test_version_info_gt_eq(self):
-        self.assertTrue(version_info('13.3-20131120')>=(12, 1))
+        self.assertTrue(version_info('13.3-20131120') >= (12, 1))
 
     def test_version_info_eq(self):
-        self.assertTrue(version_info('13.3-20131120')==(13, 3))
+        self.assertTrue(version_info('13.3-20131120') == (13, 3))
 
     def test_version_info_not_eq(self):
-        self.assertTrue(version_info('13.3-20131120')!=(15, 3))
+        self.assertTrue(version_info('13.3-20131120') != (15, 3))
+
 
 @attr('unit')
 class TestSrxCluster(unittest.TestCase):
@@ -69,7 +71,6 @@ class TestSrxCluster(unittest.TestCase):
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '12.3R6.6')
 
-
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.facts.swver.re.findall')
     def test_swver_exception_handling(self,  mock_re_findall, mock_execute):
@@ -82,13 +83,13 @@ class TestSrxCluster(unittest.TestCase):
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
-        fpath = os.path.join(os.path.dirname(__file__),\
+        fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
 
-        rpc_reply = NCElement(foo, self.dev._conn.\
-                              _device_handler.transform_reply()).\
-                              _NCElement__doc[0]
+        rpc_reply = NCElement(foo, self.dev._conn.
+                              _device_handler.transform_reply())\
+            ._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):

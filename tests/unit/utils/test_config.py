@@ -30,7 +30,8 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(AttributeError):
             class MyException(Exception):
                 xml = 'test'
-            self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
+            self.conf.rpc.commit_configuration = \
+                MagicMock(side_effect=MyException)
             self.conf.commit()
 
     def test_config_commit_exception_RpcError(self):
@@ -38,7 +39,7 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertTrue(self.conf.commit())
         import xml.etree.ElementTree as ET
-        xmldata="""<data><company name="Juniper">
+        xmldata = """<data><company name="Juniper">
             <code>pyez</code>
             <year>2013</year>
             </company></data>"""
@@ -66,7 +67,7 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertTrue(self.conf.commit_check())
         import xml.etree.ElementTree as ET
-        xmldata="""<data><company name="Juniper">
+        xmldata = """<data><company name="Juniper">
             <code>pyez</code>
             <year>2013</year>
             </company></data>"""
@@ -93,20 +94,20 @@ class TestConfig(unittest.TestCase):
                           'test.xml')
 
     def test_config_load_len_with_format(self):
-        self.conf.rpc.load_config = MagicMock(return_value=
-                                'rpc_contents')
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
         self.assertEqual(self.conf.load('test.xml', format='set'),
                          'rpc_contents')
 
     @patch('__builtin__.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
-        self.conf.rpc.load_config = MagicMock(return_value=
-                                'rpc_contents')
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
         self.assertRaises(ValueError, self.conf.load, path='test.jnpr')
 
     def test_config_load_lset_format_ValueError(self):
-        self.conf.rpc.load_config = MagicMock(return_value=
-                                'rpc_contents')
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
         self.assertRaises(ValueError, self.conf.load,
                           'test.xml', format='set', overwrite=True)
 
@@ -115,8 +116,8 @@ class TestConfig(unittest.TestCase):
     def test_config_load_path(self, mock_etree, mock_open):
         self.conf.dev.Template = MagicMock()
         mock_etree.return_value = 'rpc_contents'
-        self.conf.rpc.load_config = MagicMock(return_value =
-                                              mock_etree.return_value)
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=mock_etree.return_value)
         self.assertEqual(self.conf.load(path='test.xml'), 'rpc_contents')
 
     def test_config_load_template_path(self):
