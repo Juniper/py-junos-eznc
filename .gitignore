@@ -43,3 +43,9 @@ MANIFEST
 # Vagrant
 .vagrant
 vagrant_ansible*
+
+# Chef
+vagrant/chef
+
+# Puppet
+vagrant/puppet/*.sh
