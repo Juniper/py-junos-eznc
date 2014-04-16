@@ -1,6 +1,6 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -19,11 +19,12 @@ cu = Config(jdev)
 # select a proxy-arp entry, using direct resource access
 entry = NatProxyArp(jdev, ('ge-0/0/1.124', '198.18.11.5'))
 
+
 def doit():
-  if not entry.exists:
-    print "creating entry"
-    entry.write(touch=True)
-    print cu.diff()
+    if not entry.exists:
+        print "creating entry"
+        entry.write(touch=True)
+        print cu.diff()
 # [edit security]
 # +   nat {
 # +       proxy-arp {
@@ -34,9 +35,9 @@ def doit():
 # +           }
 # +       }
 # +   }
-    print "rollback...."
-    cu.rollback()
-  else:
-    print "entry exists"
+        print "rollback...."
+        cu.rollback()
+    else:
+        print "entry exists"
 
-doit()  
+doit()

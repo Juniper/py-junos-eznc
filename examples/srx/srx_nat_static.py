@@ -1,5 +1,5 @@
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -14,20 +14,24 @@ jdev.open()
 
 # now metabind some resource managers
 
-jdev.bind( cu=Config )
-jdev.bind( nat=NatStaticRuleSet )
+jdev.bind(cu=Config)
+jdev.bind(nat=NatStaticRuleSet)
 
-# create a static NAT ruleset called 'outside' and map it on the from-zone "OUTSIDE-DC-STD1"
+# create a static NAT ruleset called 'outside' and map it on the from-zone
+# "OUTSIDE-DC-STD1"
 
 nat = jdev.nat["outside"]
 nat(zone_from="OUTSIDE-DC-ST1")
 nat.write()
 
-# now create a rule within that ruleset called "foo" to static NAT 198.18.11.5 to 10.0.0.4
-# for port 80.  Also enable proxy-arp on interface reth0.213"
+# now create a rule within that ruleset called "foo" to static NAT 198.18.11.5
+#  to 10.0.0.4 for port 80.  Also enable proxy-arp on interface reth0.213"
 
 r = nat.rule["foo"]
-r(match_dst_addr="198.18.11.5", match_dst_port="80", nat_addr="10.0.0.4", nat_port="80")
+r(match_dst_addr="198.18.11.5",
+    match_dst_port="80",
+    nat_addr="10.0.0.4",
+  nat_port="80")
 r(proxy_interface="reth0.213")
 r.write()
 
@@ -65,5 +69,3 @@ print jdev.cu.diff()
 
 print "rollback config ..."
 jdev.cu.rollback()
-
-

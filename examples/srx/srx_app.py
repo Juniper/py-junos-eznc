@@ -1,20 +1,20 @@
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 
 from jnpr.junos import Device as Junos
 from jnpr.junos.cfg.srx import ApplicationSet
 from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import *
 
-from lxml.builder import E 
+from lxml.builder import E
 from lxml import etree
 
 login = dict(user='jeremy', host='vsrx_cyan', password='jeremy1')
 jdev = Junos(**login)
 jdev.open()
 
-jdev.bind( cu=Config )
-jdev.bind( apps=ApplicationSet )
+jdev.bind(cu=Config)
+jdev.bind(apps=ApplicationSet)
 
 r = jdev.apps['WWSS-A2A-WEB-INTRA']
 

@@ -1,5 +1,5 @@
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -15,9 +15,9 @@ jdev.open()
 
 # now metabind some resource managers
 
-jdev.bind( cu=Config )
-jdev.bind( np=NatSrcPool )
-jdev.bind( nr=NatSrcRuleSet )
+jdev.bind(cu=Config)
+jdev.bind(np=NatSrcPool)
+jdev.bind(nr=NatSrcRuleSet)
 
 # create a NAT source pool called 'POOL-A' with
 # an address range from 198.18.0.1/32 to 198.18.0.10/32
@@ -33,14 +33,14 @@ r.write()
 # using HTTP (port-80), let's assume this is a compelely
 # new ruleset, so we must set the zone-context
 # here showing the technique to change property
-#v values by accessing resource like a dictionary
+# v values by accessing resource like a dictionary
 
 rs = jdev.nr["OUTBOUND_NAT"]
 rs['zone_from'] = 'JMET-DC-ST1'
 rs['zone_to'] = 'OUTSIDE-DC-ST1'
 rs.write()
 
-# access the ruleset :rule: manager to setup 
+# access the ruleset :rule: manager to setup
 # the specific rule, called "WWW".  since this
 # object defaults the match addrs to 0/0, all
 # we need to do is set the pool.
@@ -81,4 +81,4 @@ print jdev.cu.diff()
 # +   }
 
 print "rollback config to discard changes ..."
-#jdev.cu.rollback()
+# jdev.cu.rollback()

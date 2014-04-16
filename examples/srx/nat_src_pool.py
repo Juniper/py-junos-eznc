@@ -1,6 +1,6 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -14,20 +14,21 @@ jdev.open()
 jdev.bind(cu=Config)
 mgr = NatSrcPool(jdev)
 
+
 def doit():
-  make_pools = dict(
-    this_pool =  dict(addr_from="1.1.1.1", addr_to="1.1.1.10"),
-    that_pool =  dict(addr_from='2.2.2.2', addr_to="2.2.2.10"),
-    goober_pool =  dict(addr_from="3.3.3.3", addr_to="3.3.3.10")
-  )
+    make_pools = dict(
+        this_pool=dict(addr_from="1.1.1.1", addr_to="1.1.1.10"),
+        that_pool=dict(addr_from='2.2.2.2', addr_to="2.2.2.10"),
+        goober_pool=dict(addr_from="3.3.3.3", addr_to="3.3.3.10")
+    )
 
-  for pool_name, pool_vars in make_pools.items():
-    print "creating pool name: %s" % pool_name
-    r = mgr[pool_name]
-    r(**pool_vars)
-    r.write()
+    for pool_name, pool_vars in make_pools.items():
+        print "creating pool name: %s" % pool_name
+        r = mgr[pool_name]
+        r(**pool_vars)
+        r.write()
 
-  print jdev.cu.diff()
+    print jdev.cu.diff()
 # [edit security]
 # +   nat {
 # +       source {
@@ -48,8 +49,8 @@ def doit():
 # +           }
 # +       }
 # +   }
-  
-  print "rolling back..."
-  jdev.cu.rollback()
+
+    print "rolling back..."
+    jdev.cu.rollback()
 
 doit()

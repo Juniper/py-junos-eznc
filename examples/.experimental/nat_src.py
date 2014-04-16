@@ -1,6 +1,6 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -17,41 +17,44 @@ jdev.open()
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.ez( cu=ConfigUtils )     
+jdev.ez(cu=ConfigUtils)
 
 # define a resource manager for simple source-NAT use-cases
 
-rmgr = NatSourceSimple( jdev )
+rmgr = NatSourceSimple(jdev)
 
 # if you want to see the resource properties, you could do:
 # >>> print NatSourceSimple.PROPERTIES
-# ['zone_from', 'zone_to', 'match_src_addr', 'match_dst_addr', 'pool_from_addr', 'pool_to_addr']
+# ['zone_from', 'zone_to', 'match_src_addr', 'match_dst_addr',
+#                                    'pool_from_addr', 'pool_to_addr']
 
 # define some default properties we'll use:
 
-##### -------------------------------------------------------------------------
-##### now create a super-simple config that all uses the same name "oubound-all"
-##### name for the rule-set name, the rule name, and the pool name
-##### -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# now create a super-simple config that all uses the same name "oubound-all"
+# name for the rule-set name, the rule name, and the pool name
+# -------------------------------------------------------------------------
+
 
 def create_general():
-  # access the resource with the name
+    # access the resource with the name
 
-  r = rmgr["outbound-all"]
+    r = rmgr["outbound-all"]
 
-  # set properties; the pool address range.  
-  r['zone_from'] = 'OUTSIDE-DC-ST1'
-  r['zone_to'] = 'PII-SOX-DC-ST1'
-  r['pool_from_addr'] = '198.18.0.1'
-  r['pool_to_addr'] = '198.18.0.10'
+    # set properties; the pool address range.
+    r['zone_from'] = 'OUTSIDE-DC-ST1'
+    r['zone_to'] = 'PII-SOX-DC-ST1'
+    r['pool_from_addr'] = '198.18.0.1'
+    r['pool_to_addr'] = '198.18.0.10'
 
-  # use the default values for everything else ...
-  # the match source/address defaults to '0.0.0.0/32'
+    # use the default values for everything else ...
+    # the match source/address defaults to '0.0.0.0/32'
 
-  # now write the config to the device, this does not commit, just loads the changes ..
+    # now write the config to the device, this does not commit, just loads the
+    # changes ..
 
-  r.write()
-  return r
+    r.write()
+    return r
 
 r = create_general()
 
@@ -87,34 +90,34 @@ print jdev.ez.cu.diff()
 # +   }
 
 
-##### -------------------------------------------------------------------------
-##### create a more specific example.  we'll use the same rule-set, but a 
-##### different rule name and pool name
-##### -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# create a more specific example.  we'll use the same rule-set, but a
+# different rule name and pool name
+# -------------------------------------------------------------------------
 
 def create_specific():
-  # create a name with specific properties:
+    # create a name with specific properties:
 
-  specific_name = dict(
-    ruleset_name='my_ruleset-all', 
-    rule_name='more_specific', 
-    pool_name='just_10_192')
+    specific_name = dict(
+        ruleset_name='my_ruleset-all',
+        rule_name='more_specific',
+        pool_name='just_10_192')
 
-  # set up a resource object from the manager
+    # set up a resource object from the manager
 
-  r = rmgr[ specific_name ]
+    r = rmgr[specific_name]
 
-  # now set the properties we want to write ...
+    # now set the properties we want to write ...
 
-  r['zone_from'] = 'PCI-APP-DC-ST1'
-  r['zone_to'] = 'OUTSIDE-DC-ST1'
-  r['match_src_addr'] = '10.192.0.0/16'
-  r['pool_from_addr'] = '200.18.0.1'
-  r['pool_to_addr'] = '208.18.0.20'
+    r['zone_from'] = 'PCI-APP-DC-ST1'
+    r['zone_to'] = 'OUTSIDE-DC-ST1'
+    r['match_src_addr'] = '10.192.0.0/16'
+    r['pool_from_addr'] = '200.18.0.1'
+    r['pool_to_addr'] = '208.18.0.20'
 
-  # and store them to the device
-  r.write()
-  return r
+    # and store them to the device
+    r.write()
+    return r
 
 r = create_specific()
 
@@ -173,9 +176,9 @@ print jdev.ez.cu.diff()
 # +   }
 
 # if you want to commit these changes you could do:
-#dev.ez.cu.commit_check()
-#jdev.ez.cu.commit()
+# dev.ez.cu.commit_check()
+# jdev.ez.cu.commit()
 
 # or if you want to discard the changes:
-#print "Rollback now ..."
-#jdev.ez.cu.rollback()
+# print "Rollback now ..."
+# jdev.ez.cu.rollback()
