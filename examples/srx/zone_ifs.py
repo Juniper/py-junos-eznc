@@ -1,6 +1,6 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -14,8 +14,8 @@ jdev.open()
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.bind( cu=Config ) 
-jdev.bind( zone=Zone )    
+jdev.bind(cu=Config)
+jdev.bind(zone=Zone)
 
 cu = jdev.cu
 
@@ -24,5 +24,3 @@ zone = jdev.zone[z_name]
 
 first_ifs = zone.ifs.list[0]
 ifs = zone.ifs[first_ifs]
-
-

@@ -1,5 +1,5 @@
 
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -21,7 +21,7 @@ print jdev.cli("show version")
 # JUNOS Software Release [12.1X44-D10.4]
 
 
-# you can also obtain the XML RPC for the associated command by 
+# you can also obtain the XML RPC for the associated command by
 # doing this:
 
 print "showing as XML RPC command:"
@@ -36,12 +36,12 @@ etree.dump(xml_cmd)
 
 # you can then take that output then feed it back into the :rpc: metaexec
 
-cmd_rsp = jdev.rpc( xml_cmd )
+cmd_rsp = jdev.rpc(xml_cmd)
 
 # now dump the XML response output;
 
 print "showing as XML RPC response:"
-etree.dump( cmd_rsp )
+etree.dump(cmd_rsp)
 
 # showing as XML RPC response:
 # <software-information>
@@ -57,13 +57,13 @@ etree.dump( cmd_rsp )
 # of course, you could have gotten the exact same thing:
 print "And again another way ..."
 
-xml_rsp = jdev.cli( "show version", format='xml' )
+xml_rsp = jdev.cli("show version", format='xml')
 etree.dump(xml_rsp)
 
 # but the 'rigth' way to invoke XML commands is to use
 # the :rpc: as the metaexec as intented, such as:
 
-xml_rsp = jdev.rpc.get_software_information();
+xml_rsp = jdev.rpc.get_software_information()
 print "And again using meta rpc"
 etree.dump(xml_rsp)
 
