@@ -218,11 +218,12 @@ class Device(object):
             self._hostname = vargs[0] if len(vargs) else kvargs['host']
         except:
             raise ValueError("You must provide the 'host' value")
+
         self._port = kvargs.get('port', 830)
+        self._auth_user = kvargs.get('user') or os.getenv('USER')
 
         self._sshconf_lkup()
 
-        self._auth_user = self._auth_user or kvargs.get('user') or os.getenv('USER')
         self._auth_password = kvargs.get('password') or kvargs.get('passwd')
         self._gather_facts = kvargs.get('gather_facts', True)
 
