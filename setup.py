@@ -12,7 +12,7 @@ requirements = ['ncclient >= 0.4.1', 'netaddr',
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="0.0.5",
+    version="0.1.0",
     author="Jeremy Schulman",
     author_email="jschulman@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
