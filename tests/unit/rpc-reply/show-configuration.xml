@@ -1,0 +1,154 @@
+<configuration-information>
+<configuration-output>
+## Last commit: 2014-03-24 16:34:32 UTC by rick
+version 12.1X46-D15.3;
+system {
+    host-name firefly;
+    root-authentication {
+        encrypted-password "$1$kmSqRIU6$9EogG7ow0DWiww9mev8.b."; ## SECRET-DATA
+    }
+    login {
+        user rick {
+            uid 2000;
+            class super-user;
+            authentication {
+                encrypted-password "$1$wDDri7eJ$2Ot4pfE29PgVbeutIveov1"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+        web-management {
+            http {
+                interface ge-0/0/0.0;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            family inet {
+                address 10.0.0.31/24;
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family inet {
+                address 192.168.2.1/24;
+            }
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 10.0.0.1;
+    }
+}
+security {
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ping-death;
+            }
+            ip {
+                source-route-option;
+                tear-drop;
+            }
+            tcp {
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    queue-size 2000; ## Warning: 'queue-size' is deprecated
+                    timeout 20;
+                }
+                land;
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone trust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone untrust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone untrust to-zone trust {
+            policy default-deny {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    deny;
+                }
+            }
+        }
+    }
+    zones {
+        security-zone trust {
+            tcp-rst;
+        }
+        security-zone untrust {
+            screen untrust-screen;
+            interfaces {
+                ge-0/0/0.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            http;
+                            https;
+                            ssh;
+                            telnet;
+                            dhcp;
+                            netconf;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</configuration-output>
+</configuration-information>

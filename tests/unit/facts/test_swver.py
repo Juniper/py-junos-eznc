@@ -28,22 +28,22 @@ class TestVersionInfo(unittest.TestCase):
                          'type=R, minor=7, build=5)')
 
     def test_version_info_lt(self):
-        self.assertTrue(version_info('13.3-20131120') < (14, 1))
+        self.assertLess(version_info('13.3-20131120'), (14, 1))
 
     def test_version_info_lt_eq(self):
-        self.assertTrue(version_info('13.3-20131120') <= (14, 1))
+        self.assertLessEqual(version_info('13.3-20131120'), (14, 1))
 
     def test_version_info_gt(self):
-        self.assertTrue(version_info('13.3-20131120') > (12, 1))
+        self.assertGreater(version_info('13.3-20131120'), (12, 1))
 
     def test_version_info_gt_eq(self):
-        self.assertTrue(version_info('13.3-20131120') >= (12, 1))
+        self.assertGreaterEqual(version_info('13.3-20131120'), (12, 1))
 
     def test_version_info_eq(self):
-        self.assertTrue(version_info('13.3-20131120') == (13, 3))
+        self.assertEqual(version_info('13.3-20131120'), (13, 3))
 
     def test_version_info_not_eq(self):
-        self.assertTrue(version_info('13.3-20131120') != (15, 3))
+        self.assertNotEqual(version_info('13.3-20131120'), (15, 3))
 
 
 @attr('unit')
