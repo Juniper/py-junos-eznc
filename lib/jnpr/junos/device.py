@@ -190,6 +190,7 @@ class Device(object):
         found = sshconf.lookup(self._hostname)
         self._hostname = found.get('hostname', self._hostname)
         self._port = found.get('port', self._port)
+        self._auth_user = found.get('user')
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -221,7 +222,7 @@ class Device(object):
 
         self._sshconf_lkup()
 
-        self._auth_user = kvargs.get('user') or os.getenv('USER')
+        self._auth_user = self._auth_user or kvargs.get('user') or os.getenv('USER')
         self._auth_password = kvargs.get('password') or kvargs.get('passwd')
         self._gather_facts = kvargs.get('gather_facts', True)
 
