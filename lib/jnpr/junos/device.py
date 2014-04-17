@@ -220,9 +220,13 @@ class Device(object):
             raise ValueError("You must provide the 'host' value")
 
         self._port = kvargs.get('port', 830)
-        self._auth_user = kvargs.get('user') or os.getenv('USER')
 
+        # user will default to $USER
+        self._auth_user = os.getenv('USER')
+        # user can get updated by ssh_config
         self._sshconf_lkup()
+        # but if user is explit from call, then use it.
+        self._auth_user = kvargs.get('user') or self._auth_user
 
         self._auth_password = kvargs.get('password') or kvargs.get('passwd')
         self._gather_facts = kvargs.get('gather_facts', True)
