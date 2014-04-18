@@ -1,9 +1,7 @@
 import os
 import sys
 
-# sys.path.insert(0,'lib')
 from setuptools import setup, find_packages
-#import pkg_resources
 
 requirements = ['ncclient >= 0.4.1', 'netaddr',
                 'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
@@ -12,7 +10,7 @@ requirements = ['ncclient >= 0.4.1', 'netaddr',
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="0.1.0",
+    version="0.1.1",
     author="Jeremy Schulman",
     author_email="jschulman@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
@@ -27,7 +25,7 @@ setup(
     },
     install_requires=requirements,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
