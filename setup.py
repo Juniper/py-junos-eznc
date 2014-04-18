@@ -2,10 +2,9 @@ import os
 import sys
 
 from setuptools import setup, find_packages
+from pip.req import parse_requirements
 
-requirements = ['ncclient >= 0.4.1', 'netaddr',
-                'jinja2 >= 2.7.1', 'lxml >= 3.2.4',
-                'scp >= 0.7.0', 'PyYAML >= 3.10']
+requirements = [str(x.req) for x in parse_requirements('requirements.txt')]
 
 setup(
     name="junos-eznc",
