@@ -1,7 +1,6 @@
-'''
+__author__ = "Rick Sherman, Nitin Kumar"
+__credits__ = "Jeremy Schulman"
 
-@author: rsherman
-'''
 import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
