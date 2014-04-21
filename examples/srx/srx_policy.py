@@ -1,6 +1,6 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
@@ -14,17 +14,17 @@ jdev.open()
 # meta-toolbox the config-utils package onto this object,
 # this gives us access to: jdev.ez.cu.<functions>
 
-jdev.bind( cu=Config )   
+jdev.bind(cu=Config)
 
 # now add the PolicyContext, this will auto-load the associated
 # rules resource class PolicyRule
 
-jdev.bind( pc=PolicyContext )
+jdev.bind(pc=PolicyContext)
 
 # now access a policy PolicyContext.  The policy context is
 # tuple (from-zone-name, to-zone-name)
 
-r = jdev.pc[("OUTSIDE-DC-ST1","PII-SOX-DC-ST1")]
+r = jdev.pc[("OUTSIDE-DC-ST1", "PII-SOX-DC-ST1")]
 
 # dump the contents:
 pp(r)
@@ -61,18 +61,19 @@ rule = r.rule["655"]
 #  '_exists': True,
 #  'action': 'permit',
 #  'match_apps': ['TCP-3281'],
-#  'match_dsts': ['HOST-SUGARGATE.CORP', 'HOST-TAKKA.CORP', 'HOST-ULTROS.CORP'],
+#  'match_dsts': ['HOST-SUGARGATE.CORP', 'HOST-TAKKA.CORP',
+#                'HOST-ULTROS.CORP'],
 #  'match_srcs': ['JNPR-VPN-USER-SUBS',
 #                 'RTINO-VP2-DESKTOP-NETS',
 #                 'RTINO-RC3-DESKTOP-NETS',
 #                 'OFFSHORE-DC-ACCESS']}
 # SHOULD:{}
 
-# we can modify the contents, like adding a few new apps.  we 
+# we can modify the contents, like adding a few new apps.  we
 # copy what is there first, and then add to it
 
 rule.propcopy('match_apps')
-rule['match_apps'].append( "TCP-21")
+rule['match_apps'].append("TCP-21")
 rule['match_apps'].append(" TCP-99")
 
 # write the rule back to the device
@@ -81,7 +82,8 @@ rule.write()
 # display the changes:
 print jdev.cu.diff()
 
-# [edit security policies from-zone OUTSIDE-DC-ST1 to-zone PII-SOX-DC-ST1 policy 655 match]
+# [edit security policies from-zone OUTSIDE-DC-ST1 to-zone PII-SOX-DC-ST1
+#        policy 655 match]
 # -      application TCP-3389;
 # +      application [ TCP-3389 TCP-99 TCP-21 ];
 
@@ -100,4 +102,3 @@ print jdev.cu.diff()
 
 print "Rolling back ..."
 jdev.cu.rollback()
-

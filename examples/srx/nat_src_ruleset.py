@@ -1,10 +1,10 @@
 # for debugging ...
 import pdb
-from pprint import pprint as pp 
+from pprint import pprint as pp
 from lxml import etree
 
 # for the example ...
-from jnpr.junos import Device 
+from jnpr.junos import Device
 from jnpr.junos.cfg.srx.nat import NatSrcRuleSet
 from jnpr.junos.utils.config import Config
 
@@ -32,6 +32,3 @@ print cu.diff()
 
 print "rollback..."
 cu.rollback()
-
-
-

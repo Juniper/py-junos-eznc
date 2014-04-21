@@ -1,0 +1,22 @@
+{
+  "author": "Rick Sherman, Juniper Networks",
+  "checksums": {
+    "manifests\\init.pp": "1e6680acb92445e71521c777a5a7f8f4",
+    "Rakefile": "f37e6131fe7de9a49b09d31596f5fbf1",
+    "spec\\spec_helper.rb": "3ea886dd135e120afa31e0aab12e85b0",
+    "tests\\init.pp": "0d9ec1e464c5abf75c385f087294680d",
+    "manifests\\params.pp": "d9cf5d5f8d01a35f01c391ebb787345c",
+    "spec\\spec.opts": "a600ded995d948e393fbe2320ba8e51c",
+    "Modulefile": "cccc2dde1144f9fd5f1beea464358281",
+    "README.markdown": "99dd9fd290347d0e074a4d6fb9c9e652"
+  },
+  "dependencies": [],
+  "description": "",
+  "license": "Apache 2.0",
+  "name": "juniper-pyez",
+  "project_page": "",
+  "source": "",
+  "summary": "",
+  "types": [],
+  "version": "0.1.0"
+}
