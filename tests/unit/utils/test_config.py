@@ -25,6 +25,17 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.assertTrue(self.conf.commit(confirm=True))
 
+    def test_config_commit_confirm_timeout(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(confirm=10)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(**{'confirm-timeout': '10', 'confirmed': True})
+
+    def test_config_commit_comment(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(comment='Test')
+        self.conf.rpc.commit_configuration.assert_called_with(log='Test')
+
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_commit_exception(self, mock_jxml):
         with self.assertRaises(AttributeError):
@@ -81,10 +92,13 @@ class TestConfig(unittest.TestCase):
     def test_config_diff(self):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff()
+        self.conf.rpc.get_configuration.\
+            assert_called_with({'compare': 'rollback', 'rollback': '0'})
 
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='')
         self.conf.pdiff()
+        self.conf.diff.assert_any_call()
 
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
@@ -113,25 +127,41 @@ class TestConfig(unittest.TestCase):
 
     @patch('__builtin__.open')
     @patch('jnpr.junos.utils.config.etree.XML')
-    def test_config_load_path(self, mock_etree, mock_open):
+    def test_config_load_path_xml(self, mock_etree, mock_open):
         self.conf.dev.Template = MagicMock()
         mock_etree.return_value = 'rpc_contents'
         self.conf.rpc.load_config = \
             MagicMock(return_value=mock_etree.return_value)
         self.assertEqual(self.conf.load(path='test.xml'), 'rpc_contents')
 
+    @patch('__builtin__.open')
+    def test_config_load_path_text(self, mock_open):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.load(path='test.conf')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    @patch('__builtin__.open')
+    def test_config_load_path_set(self, mock_open):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.load(path='test.set')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
     def test_config_load_template_path(self):
         self.conf.rpc.load_config = MagicMock()
         self.conf.dev.Template = MagicMock()
         self.conf.load(template_path='test.xml')
+        self.conf.dev.Template.assert_called_with('test.xml')
 
     def test_config_load_template(self):
         class Temp:
             filename = 'abc.xml'
             render = MagicMock()
         self.conf.rpc.load_config = MagicMock()
-
         self.conf.load(template=Temp)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'xml')
 
     def test_config_diff_exception(self):
         self.conf.rpc.get_configuration = MagicMock()

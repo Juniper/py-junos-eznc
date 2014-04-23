@@ -1,0 +1,4 @@
+system {
+  host-name {{ host_name }};
+  domain-name {{ domain_name }};
+}
