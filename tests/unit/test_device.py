@@ -263,7 +263,18 @@ class TestDevice(unittest.TestCase):
             self.dev.bind(kw=mock)
 
     def test_device_template(self):
-        self.dev.Template('templates/config-example')
+        # Try to load the template relative to module base
+        try:
+            template = self.dev.Template('tests/unit/templates/config-example')
+        except:
+            # Try to load the template relative to test base
+            try:
+                template = self.dev.Template('templates/config-example')
+            except:
+                raise
+        self.assertEqual(template.render({'host_name': '1',
+                               'domain_name': '2'}),
+                               'system {\n  host-name 1;\n  domain-name 2;\n}')
 
     def test_device_close(self):
         def close_conn():
