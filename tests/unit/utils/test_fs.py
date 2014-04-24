@@ -63,7 +63,7 @@ class TestFS(unittest.TestCase):
                                   .transform_reply())._NCElement__doc
         else:
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc
+                                  .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
@@ -77,23 +77,3 @@ class TestFS(unittest.TestCase):
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':
                     return self._read_file('show-cli-directory.xml')
-
-
-
-
-    # @patch('paramiko.SSHClient')
-    # def test_scp_open(self, mock_connect):
-    #     from scp import SCPClient
-    #     self.dev.bind(scp=SCP)
-    #     assert isinstance(self.dev.scp.open(), SCPClient)
-    #
-    # @patch('paramiko.SSHClient')
-    # def test_scp_close(self, mock_connect):
-    #     self.dev.bind(scp=SCP)
-    #     self.dev.scp.open()
-    #     self.assertIsNone(self.dev.scp.close())
-    #
-    # @patch('paramiko.SSHClient')
-    # def test_scp_context(self, mock_connect):
-    #     with SCP(self.dev) as scp:
-    #         scp.get('addrbook.conf')
