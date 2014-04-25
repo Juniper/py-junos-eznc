@@ -1,0 +1,14 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1D0/junos">
+    <system-storage-cleanup-information>
+        <file-list junos:style="normal">
+            <file>
+                	<file-name>/var/abc.txt</file-name>
+                	<size junos:format="11B">11</size>
+                	<date>Apr 25 10:38</date>
+            </file>
+        </file-list>
+    </system-storage-cleanup-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
