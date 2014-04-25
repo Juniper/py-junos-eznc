@@ -170,6 +170,20 @@ class TestFS(unittest.TestCase):
                                'avail': '2F', 'used': '481M',
                                'total': '4F'}})
 
+    @patch('jnpr.junos.Device.execute')
+    def test_storage_cleanup(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertDictEqual(self.fs.storage_cleanup(),
+                             {'/var/abc.txt':
+                              {'ts_date': 'Apr 25 10:38', 'size': 11}})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_storage_cleanup_check(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertDictEqual(self.fs.storage_cleanup_check(),
+                             {'/var/abc.txt':
+                              {'ts_date': 'Apr 25 10:38', 'size': 11}})
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
         fpath = os.path.join(os.path.dirname(__file__),
@@ -213,3 +227,5 @@ class TestFS(unittest.TestCase):
                     return self._read_file('show-cli-directory.xml')
             elif args[0].tag == 'get-system-storage':
                 return self._read_file('get-system-storage.xml')
+            elif args[0].tag == 'request-system-storage-cleanup':
+                return self._read_file('request-system-storage-cleanup.xml')
