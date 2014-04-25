@@ -85,8 +85,8 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertDictEqual(self.fs.stat(path),
-                         {'path': '/var', 'type': 'dir', 'file_count': 1,
-                          'size': 2})
+                             {'path': '/var', 'type': 'dir', 'file_count': 1,
+                              'size': 2})
 
     def test_stat_return_none(self):
         path = 'test/abc'
@@ -111,15 +111,16 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertDictEqual(self.fs.ls(path),
-                         {'files':
+                             {'files':
                               {'abc': {'permissions_text': 'drwxr-xr-x',
                                        'ts_date': 'Feb 17 15:30',
                                        'ts_epoc': '1392651039',
                                        'owner': 'root', 'path': 'abc',
                                        'size': 2, 'type': 'dir',
                                        'permissions': 555}},
-                          'path': '/var', 'type': 'dir', 'file_count': 1,
-                          'size': 2})
+                                 'path': '/var', 'type': 'dir',
+                                 'file_count': 1,
+                                 'size': 2})
 
     def test_ls_return_none(self):
         path = 'test/abc'
@@ -132,7 +133,7 @@ class TestFS(unittest.TestCase):
         path = 'test/abc'
         self.assertTrue(self.fs.rm(path))
         self.fs.dev.rpc.file_delete.assert_called_once_with(
-            path = 'test/abc')
+            path='test/abc')
         self.fs.dev.rpc.file_delete = MagicMock(return_value=False)
         self.assertFalse(self.fs.rm(path))
 
@@ -163,12 +164,11 @@ class TestFS(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.assertDictEqual(self.fs.storage_usage(),
                              {'/dev/abc':
-                                  {'avail_block': 234234,
-                                   'used_blocks': 2346455, 'used_pct': '1',
-                                   'mount': '/', 'total_blocks': 567431,
-                                   'avail': '2F', 'used': '481M',
-                                   'total': '4F'}})
-
+                              {'avail_block': 234234,
+                               'used_blocks': 2346455, 'used_pct': '1',
+                               'mount': '/', 'total_blocks': 567431,
+                               'avail': '2F', 'used': '481M',
+                               'total': '4F'}})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -196,17 +196,16 @@ class TestFS(unittest.TestCase):
             #     return self._read_file('dir_list_detail.xml')
 
             if 'path' in kwargs:
-                if kwargs['path']=='test/stat/decode_dir':
+                if kwargs['path'] == 'test/stat/decode_dir':
                     return self._read_file('file-list_dir.xml')
-                elif kwargs['path']=='test/stat/decode_file':
+                elif kwargs['path'] == 'test/stat/decode_file':
                     return self._read_file('file-list_file.xml')
-                elif kwargs['path']=='test/checksum':
+                elif kwargs['path'] == 'test/checksum':
                     return self._read_file('checksum.xml')
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
-
 
         elif args:
             if args[0].tag == 'command':
@@ -214,6 +213,3 @@ class TestFS(unittest.TestCase):
                     return self._read_file('show-cli-directory.xml')
             elif args[0].tag == 'get-system-storage':
                 return self._read_file('get-system-storage.xml')
-
-
-
