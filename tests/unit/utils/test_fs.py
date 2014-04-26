@@ -30,10 +30,10 @@ class TestFS(unittest.TestCase):
         self.assertIsNone(self.fs.cat(path))
 
     def test_cat(self):
-        self.fs._dev.rpc.file_show = MagicMock()
-        path = 'test/report'
-        self.fs.cat(path)
-        self.fs._dev.rpc.file_show.assert_called_with(filename='test/report')
+        self.fs._dev.rpc.file_show = MagicMock(side_effect=self._mock_manager)
+        path = 'test/cat.txt'
+        self.assertIn('testing cat functionality', self.fs.cat(path))
+        self.fs._dev.rpc.file_show.assert_called_with(filename='test/cat.txt')
 
     def test_cwd(self):
         self.fs._dev.rpc.set_cli_working_directory = MagicMock()
@@ -47,10 +47,6 @@ class TestFS(unittest.TestCase):
         mock_execute.side_effect = MagicMock(side_effect=self._mock_manager)
         self.fs.pwd()
         self.assertEqual(self.fs.pwd(), '/cf/var/home/rick')
-
-    # def test_pwd(self):
-    #     self.fs.dev.rpc = MagicMock(side_effect=self._mock_manager)
-    #     self.fs.pwd()
 
     def test_checksum_return_none(self):
         path = 'test/report'
@@ -128,16 +124,21 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list.find.return_value = 'output'
         self.assertIsNone(self.fs.ls(path))
 
-    def test_rm(self):
+    def test_rm_return_true(self):
         self.fs.dev.rpc.file_delete = MagicMock(return_value=True)
         path = 'test/abc'
         self.assertTrue(self.fs.rm(path))
         self.fs.dev.rpc.file_delete.assert_called_once_with(
             path='test/abc')
+
+    def test_rm_return_false(self):
+        path = 'test/abc'
         self.fs.dev.rpc.file_delete = MagicMock(return_value=False)
         self.assertFalse(self.fs.rm(path))
+        self.fs.dev.rpc.file_delete.assert_called_once_with(
+            path='test/abc')
 
-    def test_copy(self):
+    def test_copy_return_true(self):
         self.fs.dev.rpc.file_copy = MagicMock()
         initial = 'test/abc'
         final = 'test/xyz'
@@ -145,10 +146,17 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_copy.assert_called_once_with(
             source='test/abc',
             destination='test/xyz')
+
+    def test_copy_return_false(self):
+        initial = 'test/abc'
+        final = 'test/xyz'
         self.fs.dev.rpc.file_copy = MagicMock(side_effect=Exception)
         self.assertFalse(self.fs.cp(initial, final))
+        self.fs.dev.rpc.file_copy.assert_called_once_with(
+            source='test/abc',
+            destination='test/xyz')
 
-    def test_move(self):
+    def test_move_return_true(self):
         self.fs.dev.rpc.file_rename = MagicMock(return_value=True)
         initial = 'test/abc'
         final = 'test/xyz'
@@ -156,8 +164,15 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_rename.assert_called_once_with(
             source='test/abc',
             destination='test/xyz')
+
+    def test_move_return_false(self):
+        initial = 'test/abc'
+        final = 'test/xyz'
         self.fs.dev.rpc.file_rename = MagicMock(return_value=False)
         self.assertFalse(self.fs.mv(initial, final))
+        self.fs.dev.rpc.file_rename.assert_called_once_with(
+            source='test/abc',
+            destination='test/xyz')
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_usage(self, mock_execute):
@@ -216,6 +231,9 @@ class TestFS(unittest.TestCase):
                     return self._read_file('file-list_file.xml')
                 elif kwargs['path'] == 'test/checksum':
                     return self._read_file('checksum.xml')
+            if 'filename' in kwargs:
+                if kwargs['filename'] == 'test/cat.txt':
+                    return self._read_file('file-show.xml')
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
