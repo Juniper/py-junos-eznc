@@ -174,6 +174,22 @@ class TestFS(unittest.TestCase):
             source='test/abc',
             destination='test/xyz')
 
+    def test_tgz_return_true(self):
+        src = 'test/tgz.txt'
+        dst = 'test/xyz'
+        self.fs.dev.rpc.file_archive = MagicMock(return_value=True)
+        self.assertTrue(self.fs.tgz(src, dst))
+        self.fs.dev.rpc.file_archive.assert_called_once_with(
+            source='test/tgz.txt',
+            destination='test/xyz', compress=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_tgz_return_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        src = 'test/tgz.txt'
+        dst = 'test/xyz'
+        self.assertIn('testing tgz', self.fs.tgz(src, dst))
+
     @patch('jnpr.junos.Device.execute')
     def test_storage_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -247,3 +263,5 @@ class TestFS(unittest.TestCase):
                 return self._read_file('get-system-storage.xml')
             elif args[0].tag == 'request-system-storage-cleanup':
                 return self._read_file('request-system-storage-cleanup.xml')
+            elif args[0].tag == 'file-archive':
+                return self._read_file('file-archive.xml')
