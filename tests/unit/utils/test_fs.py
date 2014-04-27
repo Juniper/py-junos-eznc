@@ -11,7 +11,7 @@ from ncclient.transport import SSHSession
 from jnpr.junos import Device
 from jnpr.junos.utils.fs import FS
 
-from mock import patch, MagicMock
+from mock import patch, MagicMock, call
 
 
 @attr('unit')
@@ -189,6 +189,37 @@ class TestFS(unittest.TestCase):
         src = 'test/tgz.txt'
         dst = 'test/xyz'
         self.assertIn('testing tgz', self.fs.tgz(src, dst))
+
+    @patch('jnpr.junos.utils.fs.StartShell')
+    def test_rmdir(self, mock_StartShell):
+        path = 'test/rmdir'
+        print self.fs.rmdir(path)
+        calls = [
+            call().__enter__(),
+            call().__enter__().run('rmdir test/rmdir'),
+            call().__exit__(None, None, None)]
+        mock_StartShell.assert_has_calls(calls)
+
+    @patch('jnpr.junos.utils.fs.StartShell')
+    def test_mkdir(self, mock_StartShell):
+        path = 'test/mkdir'
+        print self.fs.mkdir(path)
+        calls = [
+            call().__enter__(),
+            call().__enter__().run('mkdir -p test/mkdir'),
+            call().__exit__(None, None, None)]
+        mock_StartShell.assert_has_calls(calls)
+
+    @patch('jnpr.junos.utils.fs.StartShell')
+    def test_symlink(self, mock_StartShell):
+        src = 'test/tgz.txt'
+        dst = 'test/xyz'
+        print self.fs.symlink(src, dst)
+        calls = [
+            call().__enter__(),
+            call().__enter__().run('ln -sf test/tgz.txt test/xyz'),
+            call().__exit__(None, None, None)]
+        mock_StartShell.assert_has_calls(calls)
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_usage(self, mock_execute):
