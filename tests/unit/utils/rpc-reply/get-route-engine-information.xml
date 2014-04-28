@@ -1,0 +1,31 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/12.1X46/junos-chassis">
+        <route-engine>
+            <status>Testing</status>
+            <memory-system-total>2048</memory-system-total>
+            <memory-system-total-used>819</memory-system-total-used>
+            <memory-system-total-util>40</memory-system-total-util>
+            <memory-control-plane>1150</memory-control-plane>
+            <memory-control-plane-used>460</memory-control-plane-used>
+            <memory-control-plane-util>40</memory-control-plane-util>
+            <memory-data-plane>898</memory-data-plane>
+            <memory-data-plane-used>350</memory-data-plane-used>
+            <memory-data-plane-util>39</memory-data-plane-util>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>0</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>100</cpu-idle>
+            <model>FIREFLY-PERIMETER RE</model>
+            <start-time junos:seconds="1395839720">2014-03-26 13:15:20 UTC</start-time>
+            <up-time junos:seconds="23370">6 hours, 29 minutes, 30 seconds</up-time>
+            <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+            <load-average-one>0.00</load-average-one>
+            <load-average-five>0.00</load-average-five>
+            <load-average-fifteen>0.00</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
