@@ -124,6 +124,39 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list.find.return_value = 'output'
         self.assertIsNone(self.fs.ls(path))
 
+    @patch('jnpr.junos.utils.fs.FS._decode_file')
+    def test_ls_link_path_false(self, mock_decode_file):
+        mock_decode_file.get.return_value = False
+        path = 'test/stat/decode_file'
+        self.fs.dev.rpc.file_list = \
+            MagicMock(side_effect=self._mock_manager)
+        op = self.fs.ls(path, followlink=False)
+        mock_decode_file.assert_has_calls(call().get('link'))
+
+    def test_ls_brief_true(self):
+        path = 'test/stat/decode_dir'
+        self.fs.dev.rpc.file_list = \
+            MagicMock(side_effect=self._mock_manager)
+        self.assertDictEqual(self.fs.ls(path, brief=True),
+                             {'files': ['abc'], 'path': '/var',
+                              'type': 'dir', 'file_count': 1, 'size': 2})
+
+    def test_ls_calling___decode_dir_type_symbolic_link(self):
+        path = 'test/stat/decode_symbolic_link'
+        self.fs.dev.rpc.file_list = \
+            MagicMock(side_effect=self._mock_manager)
+        self.assertDictEqual(self.fs.ls(path),
+                             {'files':
+                              {'abc': {'permissions_text': 'drwxr-xr-x',
+                                       'ts_date': 'Feb 17 15:30',
+                                       'link': 'symlink test',
+                                       'ts_epoc': '1392651039',
+                                       'owner': 'root', 'path': 'abc',
+                                       'size': 2, 'type': 'link',
+                                       'permissions': 555}},
+                              'path': '/var', 'type': 'dir', 'file_count': 1,
+                              'size': 2})
+
     def test_rm_return_true(self):
         self.fs.dev.rpc.file_delete = MagicMock(return_value=True)
         path = 'test/abc'
@@ -278,6 +311,8 @@ class TestFS(unittest.TestCase):
                     return self._read_file('file-list_file.xml')
                 elif kwargs['path'] == 'test/checksum':
                     return self._read_file('checksum.xml')
+                elif kwargs['path'] == 'test/stat/decode_symbolic_link':
+                    return self._read_file('file-list_symlink.xml')
             if 'filename' in kwargs:
                 if kwargs['filename'] == 'test/cat.txt':
                     return self._read_file('file-show.xml')
