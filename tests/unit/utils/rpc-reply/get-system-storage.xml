@@ -1,0 +1,15 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junosjunos">
+    <system-storage-information junos:style="brief">
+        <filesystem>
+            <filesystem-name>/dev/abc</filesystem-name>
+            <total-blocks junos:format="4F">567431</total-blocks>
+            <used-blocks junos:format="481M">2346455</used-blocks>
+            <available-blocks junos:format="2F">234234</available-blocks>
+            <used-percent> 1</used-percent>
+            <mounted-on>/</mounted-on>
+        </filesystem>
+    </system-storage-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

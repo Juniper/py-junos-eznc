@@ -1,0 +1,8 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <cli>
+        <working-directory>/cf/var/home/rick</working-directory>
+    </cli>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

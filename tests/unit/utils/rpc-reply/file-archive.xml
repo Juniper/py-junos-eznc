@@ -1,0 +1,23 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+    <output>
+        testing tgz
+    </output>
+    <rpc>
+        <file>
+            <file-fetch>
+                <source-filename>/var/tmp//abckLjq</source-filename>
+            </file-fetch>
+        </file>
+    </rpc>
+    <rpc>
+        <file>
+            <file-put>
+                <source-filename>/var/tmp//abckLjq</source-filename>
+                <destination-filename>abc.tar</destination-filename>
+            </file-put>
+        </file>
+    </rpc>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

@@ -1,0 +1,21 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/junos">
+    <directory-list root-path="/var" junos:seconds="1234" junos:style="verbose">
+        <directory name="/var">
+            <directory-name>/var</directory-name>
+            <total-file-blocks>123</total-file-blocks>
+            <file-information>
+                <file-name>abc</file-name>
+                <file-symlink-target junos:format="/">symlink test</file-symlink-target>
+                <file-permissions junos:format="drwxr-xr-x">555</file-permissions>
+                <file-owner>root</file-owner>
+                <file-group>xyz</file-group>
+                <file-links>1</file-links>
+                <file-size>2</file-size>
+                <file-date junos:format="Feb 17 15:30">1392651039</file-date>
+            </file-information>
+        </directory>
+    </directory-list>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

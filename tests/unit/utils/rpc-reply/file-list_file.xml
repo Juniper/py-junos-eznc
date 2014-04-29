@@ -1,0 +1,20 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/junos">
+    <directory-list root-path="/var/abc.sh" junos:seconds="1398421636" junos:style="verbose">
+        <directory name="">
+            <file-information>
+                <file-name>/var/abc.sh</file-name>
+                <file-executable junos:format="*"/>
+                <file-permissions junos:format="-rwxr-xr-x">755</file-permissions>
+                <file-owner>pqr</file-owner>
+                <file-group>abc</file-group>
+                <file-links>1</file-links>
+                <file-size>2</file-size>
+                <file-date junos:format="Mar 13 06:54">1394693680</file-date>
+            </file-information>
+            <total-files>1</total-files>
+        </directory>
+    </directory-list>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
