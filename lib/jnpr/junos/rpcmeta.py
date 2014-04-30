@@ -35,11 +35,10 @@ class _RpcMetaExec(object):
         if filter_xml is not None:
             # wrap the provided filter with toplevel <configuration> if
             # it does not already have one
-
-            at_here = rpc if 'configuration' == filter_xml.tag else E(
-                'configuration')
+            cfg_tag = 'configuration'
+            at_here = rpc if cfg_tag == filter_xml.tag else E(cfg_tag)
             at_here.append(filter_xml)
-            rpc.append(at_here)
+            if at_here is not rpc: rpc.append(at_here)
 
         return self._junos.execute(rpc)
 
