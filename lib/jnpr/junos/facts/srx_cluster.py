@@ -21,7 +21,7 @@ def srx_cluster(junos, facts):
             './/redundancy-group-status[.="primary"]')[0]
         node = primary.xpath(
             'preceding-sibling::device-name[1]')[0].text.replace('node', 'RE')
-        if not facts.get('master'): 
+        if not facts.get('master'):
             facts['master'] = node
         elif node not in facts['master']:
             facts['master'].append(node)

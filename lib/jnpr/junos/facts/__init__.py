@@ -12,7 +12,7 @@ FACT_LIST = [
     routing_engines,
     personality,
     software_version,
-    srx_cluster,    
+    srx_cluster,
     ifd_style,
     switch_style,
     session
