@@ -11,8 +11,8 @@ FACT_LIST = [
     chassis,
     routing_engines,
     personality,
-    srx_cluster,
     software_version,
+    srx_cluster,    
     ifd_style,
     switch_style,
     session
