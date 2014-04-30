@@ -28,7 +28,7 @@ class TestSrxCluster(unittest.TestCase):
     def test_srx_cluster(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['personality'] = 'SRX'
-        self.facts['master'] = 'RE0'
+        self.facts['master'] = ['RE0']
         srx_cluster(self.dev, self.facts)
         self.assertTrue(self.facts['srx_cluster'])
 
@@ -40,7 +40,6 @@ class TestSrxCluster(unittest.TestCase):
     def test_srx_cluster_no_node(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['personality'] = 'SRX'
-        self.facts['master'] = ''
         srx_cluster(self.dev, self.facts)
         self.assertTrue(self.facts['srx_cluster'])
 
@@ -48,7 +47,7 @@ class TestSrxCluster(unittest.TestCase):
     def test_srx_cluster_node(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['personality'] = 'SRX'
-        self.facts['master'] = 'RE1'
+        self.facts['master'] = ['RE1']
         srx_cluster(self.dev, self.facts)
         self.assertTrue(self.facts['srx_cluster'])
 
