@@ -1,7 +1,6 @@
 import re
 
-
-def switch_style(junos, facts):
+def facts_switch_style(junos, facts):
     persona = facts['personality']
 
     if persona in ['MX', 'SRX_HIGHEND']:
