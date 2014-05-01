@@ -1,5 +1,6 @@
 from lxml.builder import E
 from jnpr.junos import jxml as JXML
+from jnpr.junos.exception import ConnectNotMasterError
 
 
 def chassis(junos, facts):
@@ -18,6 +19,10 @@ def chassis(junos, facts):
         inherited configs are checked.
     """
     rsp = junos.rpc.get_chassis_inventory()
+    if rsp.tag == 'output':
+        # this means that there was an error; due to the
+        # fact that this connection is not on the master
+        raise ConnectNotMasterError(junos)
 
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
