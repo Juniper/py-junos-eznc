@@ -5,7 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
-from jnpr.junos.facts.ifd_style import ifd_style
+from jnpr.junos.facts.ifd_style import facts_ifd_style as ifd_style
 
 
 @attr('unit')

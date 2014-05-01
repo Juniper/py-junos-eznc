@@ -5,7 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
-from jnpr.junos.facts.switch_style import switch_style
+from jnpr.junos.facts.switch_style import facts_switch_style as switch_style
 
 
 @attr('unit')

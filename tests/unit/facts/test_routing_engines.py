@@ -7,7 +7,7 @@ from mock import patch
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.routing_engines import routing_engines
+from jnpr.junos.facts.routing_engines import facts_routing_engines as routing_engines
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
