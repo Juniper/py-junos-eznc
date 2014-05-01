@@ -1,6 +1,5 @@
 import re
 
-
 class version_info(object):
 
     def __init__(self, verstr):
@@ -85,14 +84,22 @@ def _get_swver(dev, facts):
             return dev.rpc.get_software_information()
 
 
-def software_version(junos, facts):
+def facts_software_version(junos, facts):
+    """
+    The following facts are required:
+        facts['personality']
+        facts['master']
 
+    The following facts are assigned:
+        facts['hostname']
+        facts['version']
+        facts['version_<RE#>'] for each RE in dual-RE, cluster or VC system
+        facts['version_info'] for master RE
+    """
     f_persona = facts.get('personality')
     f_master = facts.get('master')
 
     x_swver = _get_swver(junos, facts)
-
-
 
     # ------------------------------------------------------------------------
     # extract the version information out of the RPC response
@@ -104,11 +111,9 @@ def software_version(junos, facts):
         facts['2RE'] = True
         versions = []
 
-        if facts.get('hostname') is None:
-            xpath = './multi-routing-engine-item[re-name="{}"]/software-information/host-name'.format(
-                f_master.lower())
-            facts['hostname'] = x_swver.findtext(xpath)
-            facts['fqdn'] = facts['hostname']        
+        xpath = './multi-routing-engine-item[re-name="{}"]/software-information/host-name'.format(
+            f_master.lower())
+        facts['hostname'] = x_swver.findtext(xpath)    
 
         for re_sw in x_swver.xpath('.//software-information'):
             re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
@@ -141,9 +146,7 @@ def software_version(junos, facts):
 
     else:
         # single-RE
-        if facts.get('hostname') is None:
-            facts['hostname'] = x_swver.findtext('host-name')
-            facts['fqdn'] = facts['hostname']
+        facts['hostname'] = x_swver.findtext('host-name')
 
         pkginfo = x_swver.xpath(
             './/package-information[name = "junos"]/comment')[0].text

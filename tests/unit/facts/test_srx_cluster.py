@@ -7,7 +7,7 @@ from mock import patch
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.srx_cluster import srx_cluster
+from jnpr.junos.facts.srx_cluster import facts_srx_cluster as srx_cluster
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
