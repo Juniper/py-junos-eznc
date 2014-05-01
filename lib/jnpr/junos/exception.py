@@ -1,7 +1,6 @@
 from lxml import etree
 from jnpr.junos import jxml
 
-
 class RpcError(Exception):
     """
     Parent class for all junos-pyez RPC Exceptions
@@ -64,14 +63,35 @@ class PermissionError(RpcError):
 #### ================================================================
 #### ================================================================
 
-class ConnectError(object):
+class ConnectError(Exception):
     """
     Parent class for all connection related exceptions
     """
+
+    @property
+    def user(self):
+        """ login user-name """
+        return self.dev.user
+
+    @property
+    def host(self):
+        """ login host name/ipaddr """
+        return self.dev.hostname
+
+    @property
+    def port(self):
+        """ login SSH port """
+        return self.dev._port
+    
     def __init__(self, dev):
         self.dev = dev
         # @@@ need to attach attributes for each access
         # @@@ to user-name, host, jump-host, etc.
+
+    def __repr__(self):
+        return "{}({})".format(
+            self.__class__.__name__, 
+            self.dev.hostname )
 
 class ConnectAuthError(ConnectError): 
     """
@@ -81,19 +101,19 @@ class ConnectAuthError(ConnectError):
 
 class ConnectTimeoutError(ConnectError):
     """
-    Generated if the NETCONF session fails to connect 
-    after a sepcific timeout
+    Generated if the NETCONF session fails to connect, could
+    be due to the fact the device is not ip reachable; bad
+    ipaddr or just due to routing
     """
     pass
 
-class ConnectUnreachableError(ConnectError):
+class ConnectUnknownHostError(ConnectError):
     """
-    Generated if the specified host is not reachable;
-    could be due to routing, bad host-name, ip-addr, etc.
+    Generated if the specific hostname does not DNS resolve
     """
     pass
 
-class ConnectNetconfError(ConnectError):
+class ConnectRefusedError(ConnectError):
     """
     Generated if the specified host denies the NETCONF; could
     be that the serivces is not enabled, or the host has
