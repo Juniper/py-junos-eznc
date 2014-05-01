@@ -55,7 +55,9 @@ class PermissionError(RpcError):
     Generated in response to invoking an RPC for which the
     auth user does not have user-class permissions.
     """
-    pass
+    def __init__(self, cmd=None, rsp=None):
+        RpcError.__init__(self, cmd=cmd, rsp=rsp)
+        self.message = rsp.findtext('.//bad-element')
 
 #### ================================================================
 #### ================================================================
