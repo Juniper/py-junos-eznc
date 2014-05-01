@@ -1,5 +1,6 @@
 from lxml.builder import E
 from jnpr.junos import jxml as JXML
+from jnpr.junos.exception import ConnectNotMasterError
 
 
 def chassis(junos, facts):
@@ -18,6 +19,10 @@ def chassis(junos, facts):
         inherited configs are checked.
     """
     rsp = junos.rpc.get_chassis_inventory()
+    if rsp.tag == 'output':
+        # this means that there was an error; due to the
+        # fact that this connection is not on the master
+        raise ConnectNotMasterError(junos)
 
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
@@ -35,21 +40,29 @@ def chassis(junos, facts):
         facts['serialnumber'] = x_ch.xpath(
             'chassis-module[name="Backplane"]/serial-number')[0].text
 
-    got = junos.rpc.get_config(
-        E.system(
-            E('host-name'),
-            E('domain-name')
-        ),
-        JXML.INHERIT
-    )
-
-    hostname = got.find('.//host-name')
-    facts['hostname'] = hostname.text if hostname is not None else 'Amnesiac'
-    facts['fqdn'] = facts['hostname']
-
-    domain = got.find('.//domain-name')
-    if domain is not None:
-        facts['domain'] = domain.text
-        facts['fqdn'] += '.%s' % facts['domain']
-    else:
+    try:
+        got = junos.rpc.get_config(
+            E.system(
+                E('host-name'),
+                E('domain-name')
+            ),
+            JXML.INHERIT )
+    except Exception:
+        # this means that the user does not have the
+        # access to retreive this section of the configuration;
+        # likely a read-only user. so we are going to silently
+        # ignore this for now, and just not fill in the values
         facts['domain'] = None
+        facts['hostname'] = None
+        facts['fqdn'] = None
+    else:
+        hostname = got.find('.//host-name')
+        facts['hostname'] = hostname.text if hostname is not None else 'Amnesiac'
+        facts['fqdn'] = facts['hostname']
+
+        domain = got.find('.//domain-name')
+        if domain is not None:
+            facts['domain'] = domain.text
+            facts['fqdn'] += '.%s' % facts['domain']
+        else:
+            facts['domain'] = None

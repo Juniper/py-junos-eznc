@@ -92,6 +92,8 @@ def software_version(junos, facts):
 
     x_swver = _get_swver(junos, facts)
 
+
+
     # ------------------------------------------------------------------------
     # extract the version information out of the RPC response
     # ------------------------------------------------------------------------
@@ -101,6 +103,12 @@ def software_version(junos, facts):
 
         facts['2RE'] = True
         versions = []
+
+        if facts.get('hostname') is None:
+            xpath = './multi-routing-engine-item[re-name="{}"]/software-information/host-name'.format(
+                f_master.lower())
+            facts['hostname'] = x_swver.findtext(xpath)
+            facts['fqdn'] = facts['hostname']        
 
         for re_sw in x_swver.xpath('.//software-information'):
             re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
@@ -133,6 +141,10 @@ def software_version(junos, facts):
 
     else:
         # single-RE
+        if facts.get('hostname') is None:
+            facts['hostname'] = x_swver.findtext('host-name')
+            facts['fqdn'] = facts['hostname']
+
         pkginfo = x_swver.xpath(
             './/package-information[name = "junos"]/comment')[0].text
         facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
