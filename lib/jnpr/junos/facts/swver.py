@@ -113,7 +113,12 @@ def facts_software_version(junos, facts):
 
         xpath = './multi-routing-engine-item[re-name="{}"]/software-information/host-name'.format(
             f_master.lower())
-        facts['hostname'] = x_swver.findtext(xpath)    
+        facts['hostname'] = x_swver.findtext(xpath)
+        if facts['hostname'] is None:
+            # then there the re-name is not what we are expecting; we should 
+            # handle this better, eh?  For now, just assume there is one
+            # software-information element and take that host-name. @@@ hack.
+            facts['hostname'] = x_swver.findtext('.//software-information/host-name')
 
         for re_sw in x_swver.xpath('.//software-information'):
             re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
