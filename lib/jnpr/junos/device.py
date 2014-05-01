@@ -284,6 +284,13 @@ class Device(object):
 
             if err.message.find('not open') > 0:
                 raise EzErrors.ConnectTimeoutError(self)
+            else:
+                # otherwise raise a generic connection
+                # error for now.  tag the new exception
+                # with the original for debug
+                cnx = EzErrors.ConnectError(self)
+                cnx._orig = err
+                raise cnx
 
         except socket.gaierror:
             # invalid DNS name, so unreachable
