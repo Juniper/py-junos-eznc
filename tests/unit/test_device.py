@@ -6,7 +6,6 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
-from lxml.builder import E
 from lxml import etree
 
 from ncclient.manager import Manager, make_device_handler
