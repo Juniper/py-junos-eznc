@@ -8,7 +8,7 @@ Facts Required:
 """
 
 
-def srx_cluster(junos, facts):
+def facts_srx_cluster(junos, facts):
     if not facts['personality'].startswith('SRX'):
         return
 
@@ -21,7 +21,9 @@ def srx_cluster(junos, facts):
             './/redundancy-group-status[.="primary"]')[0]
         node = primary.xpath(
             'preceding-sibling::device-name[1]')[0].text.replace('node', 'RE')
-        if node not in facts['master']:
+        if not facts.get('master'):
+            facts['master'] = node
+        elif node not in facts['master']:
             facts['master'].append(node)
         facts['srx_cluster'] = True
     except:

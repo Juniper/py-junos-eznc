@@ -85,8 +85,18 @@ def _get_swver(dev, facts):
             return dev.rpc.get_software_information()
 
 
-def software_version(junos, facts):
+def facts_software_version(junos, facts):
+    """
+    The following facts are required:
+        facts['personality']
+        facts['master']
 
+    The following facts are assigned:
+        facts['hostname']
+        facts['version']
+        facts['version_<RE#>'] for each RE in dual-RE, cluster or VC system
+        facts['version_info'] for master RE
+    """
     f_persona = facts.get('personality')
     f_master = facts.get('master')
 
@@ -102,6 +112,16 @@ def software_version(junos, facts):
         facts['2RE'] = True
         versions = []
 
+        xpath = './multi-routing-engine-item[re-name="{}"]/software-information/host-name'.format(
+            f_master.lower())
+        facts['hostname'] = x_swver.findtext(xpath)
+        if facts['hostname'] is None:
+            # then there the re-name is not what we are expecting; we should
+            # handle this better, eh?  For now, just assume there is one
+            # software-information element and take that host-name. @@@ hack.
+            facts['hostname'] = x_swver.findtext(
+                './/software-information/host-name')
+
         for re_sw in x_swver.xpath('.//software-information'):
             re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
 
@@ -110,7 +130,8 @@ def software_version(junos, facts):
             re_name = re.sub(r'(\w+)(\d+)', 'RE\\2', re_name)
 
             pkginfo = re_sw.xpath(
-                'package-information[name="junos"]/comment')[0].text
+                'package-information[normalize-space(name)="junos"]/comment'
+            )[0].text
 
             try:
                 versions.append(
@@ -133,8 +154,11 @@ def software_version(junos, facts):
 
     else:
         # single-RE
+        facts['hostname'] = x_swver.findtext('host-name')
+
         pkginfo = x_swver.xpath(
-            './/package-information[name = "junos"]/comment')[0].text
+            './/package-information[normalize-space(name)="junos"]/comment'
+        )[0].text
         facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
 
     # ------------------------------------------------------------------------

@@ -3,7 +3,11 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
+
 import os
+import sys
+from cStringIO import StringIO
+from contextlib import contextmanager
 
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
@@ -12,7 +16,11 @@ from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-from mock import patch, MagicMock, call
+from jnpr.junos.exception import RpcError
+from lxml import etree
+
+from mock import patch, MagicMock, call, mock_open
+
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
@@ -37,52 +45,88 @@ class TestSW(unittest.TestCase):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
+        self.dev._facts = facts
         self.sw = self.get_sw()
 
     @patch('jnpr.junos.Device.execute')
     def get_sw(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.dev.facts_refresh()
         return SW(self.dev)
 
     @patch('ncclient.operations.session.CloseSession.request')
     def tearDown(self, mock_session):
         self.dev.close()
 
+    def test_sw_hashfile(self):
+        with patch('__builtin__.open', mock_open(), create=True) as m:
+            import jnpr.junos.utils.sw
+            with open('foo') as h:
+                h.read.side_effect = ('abc', 'a', '')
+                jnpr.junos.utils.sw._hashfile(h, MagicMock())
+                self.assertEqual(h.read.call_count, 3)
+
     @patch('jnpr.junos.Device.execute')
-    def test_sw_constructor(self, mock_execute):
+    def test_sw_constructor_multi_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.dev.facts_refresh()
         self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_RE)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_constructor_multi_mx(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_MX)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_constructor_multi_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_VC)
 
     @patch('__builtin__.open')
-    def test_sw_local_sha256(self, mock_open):
+    def test_sw_local_sha256(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha256(package),
                          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934'
                          'ca495991b7852b855')
 
     @patch('__builtin__.open')
-    def test_sw_local_md5(self, mock_open):
+    def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_md5(package),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
     @patch('__builtin__.open')
-    def test_sw_local_sha1(self, mock_open):
+    def test_sw_local_sha1(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha1(package),
                          'da39a3ee5e6b4b0d3255bfef95601890afd80709')
 
-    @patch('jnpr.junos.utils.sw.SCP')
-    def test_sw_put(self, mock_scp):
+    def test_sw_progress(self):
+        with self.capture(SW.progress, self.dev, 'running') as output:
+            self.assertEqual('1.1.1.1: running\n', output)
+
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    def test_sw_put(self, mock_scp_put, mock_scp):
+        #mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
-        self.assertIn(call().__enter__().put('test.tgz', '/var/tmp'),
-                      mock_scp.mock_calls)
+        self.assertIn(call('test.tgz', '/var/tmp'),
+                      mock_scp_put.mock_calls)
+
+    @patch('jnpr.junos.utils.scp.SCP.__exit__')
+    @patch('jnpr.junos.utils.scp.SCP.__init__')
+    @patch('jnpr.junos.utils.scp.SCP.__enter__')
+    def test_sw_put_progress(self, mock_enter, mock_scp, mock_exit):
+        package = 'test.tgz'
+        mock_scp.side_effect = self._fake_scp
+        self.sw.put(package, progress=self._myprogress)
+        self.assertEqual(mock_scp.call_args_list[0][1]['progress'].by10pct, 50)
+
+    def _fake_scp(self, *args, **kwargs):
+        progress = kwargs['progress']
+        progress('test.tgz', 100, 50)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_pkgadd(self, mock_execute):
@@ -103,12 +147,8 @@ class TestSW(unittest.TestCase):
         self.sw.put = MagicMock()
         SW.local_md5 = MagicMock()
 
-        def myprogress(dev, report):
-            pass
-        self.assertTrue(self.sw.safe_copy(package, progress=myprogress,
-                                          cleanfs=True,
-                                          checksum=
-                                          '96a35ab371e1ca10408c3caecdbd8a67'))
+        self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress, cleanfs=True,
+                                          checksum='96a35ab371e1ca10408c3caecdbd8a67'))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy_return_false(self, mock_execute):
@@ -118,9 +158,7 @@ class TestSW(unittest.TestCase):
         self.sw.put = MagicMock()
         SW.local_md5 = MagicMock()
 
-        def myprogress(dev, report):
-            pass
-        self.assertFalse(self.sw.safe_copy(package, progress=myprogress,
+        self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
                                            cleanfs=True))
         SW.local_md5.assert_called_with(package)
 
@@ -129,12 +167,9 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock(return_value=
-                                 '96a35ab371e1ca10408c3caecdbd8a67')
+        SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
 
-        def myprogress(dev, report):
-            pass
-        self.assertTrue(self.sw.safe_copy(package, progress=myprogress,
+        self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
                                           cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
@@ -142,13 +177,34 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'install.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock(return_value=
-                                 '96a35ab371e1ca10408c3caecdbd8a67')
-
-        def myprogress(dev, report):
-            pass
-        self.assertTrue(self.sw.install(package, progress=myprogress,
+        SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
+        self.assertTrue(self.sw.install(package, progress=self._myprogress,
                                         cleanfs=True))
+
+    @patch('jnpr.junos.utils.sw.SW.safe_copy')
+    def test_sw_safe_install_copy_fail(self, mock_copy):
+        mock_copy.return_value = False
+        self.assertFalse(self.sw.install('file'))
+
+    @patch('jnpr.junos.utils.sw.SW.validate')
+    def test_sw_install_validate(self, mock_validate):
+        mock_validate.return_value = False
+        self.assertFalse(self.sw.install('file', validate=True, no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_multi_mx(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        self.assertTrue(self.sw.install('file', no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_multi_vc(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._multi_RE = True
+        self.sw._multi_VC = True
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        self.assertTrue(self.sw.install('file', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -170,10 +226,33 @@ class TestSW(unittest.TestCase):
         self.assertIn('Shutdown NOW', self.sw.reboot())
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_exception(self, mock_execute):
+        rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.reboot)
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_poweroff(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
         self.assertIn('Shutdown NOW', self.sw.poweroff())
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_poweroff_exception(self, mock_execute):
+        rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.poweroff)
+
+    def _myprogress(self, dev, report):
+        pass
+
+    @contextmanager
+    def capture(self, command, *args, **kwargs):
+        out, sys.stdout = sys.stdout, StringIO()
+        command(*args, **kwargs)
+        sys.stdout.seek(0)
+        yield sys.stdout.read()
+        sys.stdout = out
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -181,18 +260,7 @@ class TestSW(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
-        if (fname == 'get-rpc-error.xml' or
-                fname == 'get-index-error.xml' or
-                fname == 'get-system-core-dumps.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
-        elif (fname == 'show-configuration.xml' or
-              fname == 'show-system-alarms.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc
-        else:
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc[0]
+        rpc_reply = NCElement(foo, self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
@@ -206,19 +274,4 @@ class TestSW(unittest.TestCase):
             return Manager(session, device_handler)
 
         elif args:
-            # print args[0].tag, args[0].text
-            if args[0].tag == 'command':
-                if args[0].text == 'show cli directory':
-                    return self._read_file('show-cli-directory.xml')
-                elif args[0].text == 'show configuration':
-                    return self._read_file('show-configuration.xml')
-                elif args[0].text == 'show system alarms':
-                    return self._read_file('show-system-alarms.xml')
-                elif args[0].text == 'show system uptime | display xml rpc':
-                    return self._read_file('show-system-uptime-rpc.xml')
-                else:
-                    raise RpcError
-
-            else:
-                # print args[0].tag
-                return self._read_file(args[0].tag + '.xml')
+            return self._read_file(args[0].tag + '.xml')

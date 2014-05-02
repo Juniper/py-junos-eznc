@@ -24,6 +24,14 @@ This means that "non-programmers", for example the _Network Engineer_, can use t
 
 There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos PyEZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos PyEZ_ is not specifically tied to any version of Junos or any Junos product family. 
 
+### Support
+
+For questions and general support, please visit our [Google Group](https://groups.google.com/forum/#!forum/junos-python-ez)
+
+For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+
+Issues and bugs can be opened in the repository.
+
 ## FEATURES
 
 _Junos PyEZ_ is designed to provide the same capabilties as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabiltieis include, but are not limited to:

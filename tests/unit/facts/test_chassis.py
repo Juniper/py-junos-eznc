@@ -7,7 +7,7 @@ from mock import patch
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.chassis import chassis
+from jnpr.junos.facts.chassis import facts_chassis as chassis
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession

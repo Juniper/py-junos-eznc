@@ -12,18 +12,18 @@ import sys
 # 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
+import ncclient.transport.errors as NcErrors
 import paramiko
 import jinja2
 
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos.exception import RpcError
+from jnpr.junos import exception as EzErrors
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 
 _MODULEPATH = os.path.dirname(__file__)
-
 
 class _MyTemplateLoader(jinja2.BaseLoader):
 
@@ -250,13 +250,58 @@ class Device(object):
         opens a connection to the device using existing login/auth
         information.  No additional options are supported; at this time
         """
-        # open connection using ncclient transport
-        self._conn = netconf_ssh.connect(host=self.hostname,
-                                         port=self._port,
-                                         username=self._auth_user,
-                                         password=self._auth_password,
-                                         hostkey_verify=False,
-                                         device_params={'name': 'junos'})
+        try:
+            ts_start = datetime.datetime.now()
+
+            # open connection using ncclient transport
+            self._conn = netconf_ssh.connect(
+                host=self.hostname,
+                port=self._port,
+                username=self._auth_user,
+                password=self._auth_password,
+                hostkey_verify=False,
+                device_params={'name': 'junos'})
+
+        except NcErrors.AuthenticationError as err:
+            # bad authentication credentials
+            raise EzErrors.ConnectAuthError(self)
+
+        except NcErrors.SSHError as err:
+            # this is a bit of a hack for now, since we want to 
+            # know if the connection was refused or we simply could
+            # not open a connection due to reachability.  so using
+            # a timestamp to differentiate the two conditions for now
+            # if the diff is < 3 sec, then assume the host is 
+            # reachable, but NETCONF connection is refushed. 
+
+            ts_err = datetime.datetime.now()
+            diff_ts = ts_err - ts_start
+            if diff_ts.seconds < 3:
+                raise EzErrors.ConnectRefusedError(self)
+
+            # at this point, we assume that the connection
+            # has timeed out due to ip-reachability issues
+
+            if err.message.find('not open') > 0:
+                raise EzErrors.ConnectTimeoutError(self)
+            else:
+                # otherwise raise a generic connection
+                # error for now.  tag the new exception
+                # with the original for debug
+                cnx = EzErrors.ConnectError(self)
+                cnx._orig = err
+                raise cnx
+
+        except socket.gaierror:
+            # invalid DNS name, so unreachable
+            raise EzErrors.ConnectUnknownError(self)
+
+        except Exception as err:
+            # anything else, we will re-raise as a
+            # generic ConnectError
+            cnx_err = EzErrors.ConnectError(self)
+            cnx_err._orig = err 
+            raise cnx_err
 
         self.connected = True
 
@@ -306,13 +351,15 @@ class Device(object):
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
-            raise RpcError(cmd=rpc_cmd_e, rsp=rsp)
+            # see if this is a permission error
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
+            raise e(cmd=rpc_cmd_e, rsp=rsp)
 
         # for RPCs that have embedded rpc-errors, need to check for those now
 
         rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
         if len(rpc_errs):
-            raise RpcError(rpc_cmd_e, rpc_rsp_e, rpc_errs)
+            raise EzErrors.RpcError(rpc_cmd_e, rpc_rsp_e, rpc_errs)
 
         # skip the <rpc-reply> element and pass the caller first child element
         # generally speaking this is what they really want. If they want to

@@ -1,7 +1,6 @@
 import re
 
-
-def personality(junos, facts):
+def facts_personality(junos, facts):
 
     model = facts['model']
 

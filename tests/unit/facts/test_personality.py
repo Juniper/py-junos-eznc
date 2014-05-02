@@ -5,7 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
-from jnpr.junos.facts.personality import personality
+from jnpr.junos.facts.personality import facts_personality as personality
 
 
 @attr('unit')
