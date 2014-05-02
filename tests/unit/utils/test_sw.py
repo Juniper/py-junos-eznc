@@ -5,7 +5,6 @@ import unittest
 from nose.plugins.attrib import attr
 
 import os
-
 import sys
 from cStringIO import StringIO
 from contextlib import contextmanager
@@ -16,9 +15,11 @@ from jnpr.junos.utils.sw import SW
 from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from jnpr.junos.exception import RpcError
 
-from mock import patch, MagicMock, call
+from jnpr.junos.exception import RpcError
+from lxml import etree
+
+from mock import patch, MagicMock, call, mock_open
 
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
@@ -56,6 +57,14 @@ class TestSW(unittest.TestCase):
     def tearDown(self, mock_session):
         self.dev.close()
 
+    def test_sw_hashfile(self):
+        with patch('__builtin__.open', mock_open(), create=True) as m:
+            import jnpr.junos.utils.sw
+            with open('foo') as h:
+                h.read.side_effect = ('abc', 'a', '')
+                jnpr.junos.utils.sw._hashfile(h, MagicMock())
+                self.assertEqual(h.read.call_count, 3)
+
     @patch('jnpr.junos.Device.execute')
     def test_sw_constructor_multi_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -75,20 +84,20 @@ class TestSW(unittest.TestCase):
         self.assertFalse(self.sw._multi_VC)
 
     @patch('__builtin__.open')
-    def test_sw_local_sha256(self, mock_open):
+    def test_sw_local_sha256(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha256(package),
                          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934'
                          'ca495991b7852b855')
 
     @patch('__builtin__.open')
-    def test_sw_local_md5(self, mock_open):
+    def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_md5(package),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
     @patch('__builtin__.open')
-    def test_sw_local_sha1(self, mock_open):
+    def test_sw_local_sha1(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha1(package),
                          'da39a3ee5e6b4b0d3255bfef95601890afd80709')
@@ -169,9 +178,33 @@ class TestSW(unittest.TestCase):
         package = 'install.tgz'
         self.sw.put = MagicMock()
         SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
-
         self.assertTrue(self.sw.install(package, progress=self._myprogress,
                                         cleanfs=True))
+
+    @patch('jnpr.junos.utils.sw.SW.safe_copy')
+    def test_sw_safe_install_copy_fail(self, mock_copy):
+        mock_copy.return_value = False
+        self.assertFalse(self.sw.install('file'))
+
+    @patch('jnpr.junos.utils.sw.SW.validate')
+    def test_sw_install_validate(self, mock_validate):
+        mock_validate.return_value = False
+        self.assertFalse(self.sw.install('file', validate=True, no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_multi_mx(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        self.assertTrue(self.sw.install('file', no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_multi_vc(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._multi_RE = True
+        self.sw._multi_VC = True
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        self.assertTrue(self.sw.install('file', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -192,17 +225,23 @@ class TestSW(unittest.TestCase):
         self.sw._multi_MX = True
         self.assertIn('Shutdown NOW', self.sw.reboot())
 
-#     @patch('jnpr.junos.Device.execute')
-#     def test_sw_reboot_exception(self, mock_execute):
-#         mock_execute.side_effect = RpcError('broken')
-#         self.sw.reboot()
-#         #self.assertIn('Shutdown NOW', self.sw.reboot())
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_exception(self, mock_execute):
+        rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.reboot)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_poweroff(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
         self.assertIn('Shutdown NOW', self.sw.poweroff())
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_poweroff_exception(self, mock_execute):
+        rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.poweroff)
 
     def _myprogress(self, dev, report):
         pass
