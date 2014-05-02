@@ -1,0 +1,27 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <rpc>
+        <select-choice>
+            <choice-item>
+                <name>yes</name>
+                <help>Perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <choice-item>
+                <name>no</name>
+                <help>Don't perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <default>no</default>
+            <prompt>Reboot the system ? [yes,no] (no) </prompt>
+        </select-choice>
+    </rpc>
+   <request-reboot-results>
+        <request-reboot-status reboot-time="1399024467">
+            Shutdown NOW!
+            [pid 17221]
+        </request-reboot-status>
+    </request-reboot-results>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
