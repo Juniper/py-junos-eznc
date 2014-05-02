@@ -1,0 +1,12 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1I0/junos">
+    <checksum-information>
+        <file-checksum>
+            <computation-method>MD5</computation-method>
+            <input-file>safecopy.tgz</input-file>
+            <checksum>96a35ab371e1ca10408c3caecdbd8a67</checksum>
+        </file-checksum>
+    </checksum-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
