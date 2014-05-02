@@ -351,7 +351,9 @@ class Device(object):
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
-            raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rsp)
+            # see if this is a permission error
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
+            raise e(cmd=rpc_cmd_e, rsp=rsp)
 
         # for RPCs that have embedded rpc-errors, need to check for those now
 
