@@ -1,5 +1,6 @@
 import re
 
+
 class version_info(object):
 
     def __init__(self, verstr):
@@ -115,10 +116,11 @@ def facts_software_version(junos, facts):
             f_master.lower())
         facts['hostname'] = x_swver.findtext(xpath)
         if facts['hostname'] is None:
-            # then there the re-name is not what we are expecting; we should 
+            # then there the re-name is not what we are expecting; we should
             # handle this better, eh?  For now, just assume there is one
             # software-information element and take that host-name. @@@ hack.
-            facts['hostname'] = x_swver.findtext('.//software-information/host-name')
+            facts['hostname'] = x_swver.findtext(
+                './/software-information/host-name')
 
         for re_sw in x_swver.xpath('.//software-information'):
             re_name = re_sw.xpath('preceding-sibling::re-name')[0].text
@@ -128,7 +130,8 @@ def facts_software_version(junos, facts):
             re_name = re.sub(r'(\w+)(\d+)', 'RE\\2', re_name)
 
             pkginfo = re_sw.xpath(
-                'package-information[name="junos"]/comment')[0].text
+                'package-information[normalize-space(name)="junos"]/comment'
+            )[0].text
 
             try:
                 versions.append(
@@ -154,7 +157,8 @@ def facts_software_version(junos, facts):
         facts['hostname'] = x_swver.findtext('host-name')
 
         pkginfo = x_swver.xpath(
-            './/package-information[name = "junos"]/comment')[0].text
+            './/package-information[normalize-space(name)="junos"]/comment'
+        )[0].text
         facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
 
     # ------------------------------------------------------------------------
