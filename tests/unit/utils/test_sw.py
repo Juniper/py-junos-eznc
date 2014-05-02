@@ -90,12 +90,65 @@ class TestSW(unittest.TestCase):
         package = 'test.tgz'
         self.assertTrue(self.sw.pkgadd(package))
 
-    # @patch('jnpr.junos.Device.execute')
-    # def test_sw_safe_copy(self, mock_execute):
-    #     package = 'test.tgz'
-    #     mock_execute.side_effect = self._mock_manager
-    #     with patch('__builtin__.open') as my_mock:
-    #         self.sw.safe_copy(package)
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'package.tgz'
+        self.assertTrue(self.sw.validate(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_safe_copy(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'safecopy.tgz'
+        self.sw.put = MagicMock()
+        SW.local_md5 = MagicMock()
+
+        def myprogress(dev, report):
+            pass
+        self.assertTrue(self.sw.safe_copy(package, progress=myprogress,
+                                          cleanfs=True,
+                                          checksum=
+                                          '96a35ab371e1ca10408c3caecdbd8a67'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_safe_copy_return_false(self, mock_execute):
+        # not passing checksum value, will get random from magicmock
+        mock_execute.side_effect = self._mock_manager
+        package = 'safecopy.tgz'
+        self.sw.put = MagicMock()
+        SW.local_md5 = MagicMock()
+
+        def myprogress(dev, report):
+            pass
+        self.assertFalse(self.sw.safe_copy(package, progress=myprogress,
+                                           cleanfs=True))
+        SW.local_md5.assert_called_with(package)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_safe_copy_checksum_none(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'safecopy.tgz'
+        self.sw.put = MagicMock()
+        SW.local_md5 = MagicMock(return_value=
+                                 '96a35ab371e1ca10408c3caecdbd8a67')
+
+        def myprogress(dev, report):
+            pass
+        self.assertTrue(self.sw.safe_copy(package, progress=myprogress,
+                                          cleanfs=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_safe_install(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'install.tgz'
+        self.sw.put = MagicMock()
+        SW.local_md5 = MagicMock(return_value=
+                                 '96a35ab371e1ca10408c3caecdbd8a67')
+
+        def myprogress(dev, report):
+            pass
+        self.assertTrue(self.sw.install(package, progress=myprogress,
+                                        cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -110,13 +163,24 @@ class TestSW(unittest.TestCase):
         self.assertDictEqual(self.sw.inventory,
                              {'current': None, 'rollback': None})
 
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertIn('Shutdown NOW', self.sw.reboot())
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_poweroff(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertIn('Shutdown NOW', self.sw.poweroff())
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
-
         if (fname == 'get-rpc-error.xml' or
                 fname == 'get-index-error.xml' or
                 fname == 'get-system-core-dumps.xml'):
@@ -142,6 +206,7 @@ class TestSW(unittest.TestCase):
             return Manager(session, device_handler)
 
         elif args:
+            # print args[0].tag, args[0].text
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':
                     return self._read_file('show-cli-directory.xml')
