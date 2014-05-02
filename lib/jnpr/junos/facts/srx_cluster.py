@@ -8,7 +8,7 @@ Facts Required:
 """
 
 
-def srx_cluster(junos, facts):
+def facts_srx_cluster(junos, facts):
     if not facts['personality'].startswith('SRX'):
         return
 

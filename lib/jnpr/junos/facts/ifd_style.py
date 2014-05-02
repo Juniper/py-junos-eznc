@@ -1,4 +1,4 @@
-def ifd_style(junos, facts):
+def facts_ifd_style(junos, facts):
     persona = facts['personality']
     if persona == 'SWITCH':
         facts['ifd_style'] = 'SWITCH'

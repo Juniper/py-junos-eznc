@@ -5,6 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
+from lxml import etree
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -110,17 +111,29 @@ class TestDevice(unittest.TestCase):
     @patch('ncclient.manager.connect')
     @patch('jnpr.junos.Device.execute')
     def test_device_open(self, mock_connect, mock_execute):
-        mock_connect.side_effect = self._mock_manager
-        mock_execute.side_effect = self._mock_manager
-        self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
-        self.dev2.open()
-        self.assertEqual(self.dev2.connected, True)
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:        
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """          
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
 
     @patch('jnpr.junos.Device.execute')
-    def test_device_facts(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.dev.facts_refresh()
-        assert self.dev.facts['version'] == facts['version']
+    def test_device_facts(self, mock_execute):          
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """          
+            self.dev.facts_refresh()
+            assert self.dev.facts['version'] == facts['version']
 
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
@@ -189,13 +202,21 @@ class TestDevice(unittest.TestCase):
                                           to_py=self._do_nothing), 'Nothing')
 
     def test_device_execute_exception(self):
-        with patch('jnpr.junos.device.JXML.remove_namespaces',
-                   return_value=None):
-            class MyException(Exception):
-                xml = 'test'
-            self.dev._conn.rpc = MagicMock(side_effect=MyException)
-            self.assertRaises(RpcError, self.dev.execute,
-                              '<get-software-information/>')
+        class MyException(Exception):
+            rpc_err = """
+<rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+<error-severity>error</error-severity>
+<error-info>
+<bad-element>get-bgp-summary-information</bad-element>
+</error-info>
+<error-message>permission denied</error-message>
+</rpc-error>                
+            """
+            xml = etree.XML(rpc_err)
+
+        self.dev._conn.rpc = MagicMock(side_effect=MyException)
+        self.assertRaises(RpcError, self.dev.execute, 
+            '<get-software-information/>')
 
     def test_device_execute_rpc_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)

@@ -1,7 +1,6 @@
 import re as RE
 
-
-def routing_engines(junos, facts):
+def facts_routing_engines(junos, facts):
 
     re_facts = [
         'mastership-state',

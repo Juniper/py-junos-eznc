@@ -1,23 +1,25 @@
 from lxml.builder import E
 from jnpr.junos import jxml as JXML
+from jnpr.junos.exception import ConnectNotMasterError
 
-
-def chassis(junos, facts):
+def facts_chassis(junos, facts):
     """
-    Obtain basic chassis facts:
-      model : product model
-      serialnumber : serial number
-      hostname : host
-      fqdn : fully-qualified domain-name
-      domain : domain-name
+    The following facts are assigned:
+      facts['model'] : product model
+      facts['serialnumber'] : serial number
 
     NOTES:
-    (1) if in a 2RE system, this routine will only load the information
-        from the first chassis item.
-    (2) hostname, domain, and fqdn are retrieved from configuration data;
-        inherited configs are checked.
+        (1) if in a 2RE system, this routine will only load the information
+            from the first chassis item.
+        (2) hostname, domain, and fqdn are retrieved from configuration data;
+            inherited configs are checked.
     """
     rsp = junos.rpc.get_chassis_inventory()
+    if rsp.tag == 'output':
+        # this means that there was an error; due to the
+        # fact that this connection is not on the master
+        # @@@ need to validate on VC-member
+        raise ConnectNotMasterError(junos)
 
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
@@ -35,21 +37,4 @@ def chassis(junos, facts):
         facts['serialnumber'] = x_ch.xpath(
             'chassis-module[name="Backplane"]/serial-number')[0].text
 
-    got = junos.rpc.get_config(
-        E.system(
-            E('host-name'),
-            E('domain-name')
-        ),
-        JXML.INHERIT
-    )
 
-    hostname = got.find('.//host-name')
-    facts['hostname'] = hostname.text if hostname is not None else 'Amnesiac'
-    facts['fqdn'] = facts['hostname']
-
-    domain = got.find('.//domain-name')
-    if domain is not None:
-        facts['domain'] = domain.text
-        facts['fqdn'] += '.%s' % facts['domain']
-    else:
-        facts['domain'] = None
