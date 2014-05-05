@@ -294,7 +294,7 @@ class Device(object):
 
         except socket.gaierror:
             # invalid DNS name, so unreachable
-            raise EzErrors.ConnectUnknownError(self)
+            raise EzErrors.ConnectUnknownHostError(self)
 
         except Exception as err:
             # anything else, we will re-raise as a
