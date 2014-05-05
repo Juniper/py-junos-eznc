@@ -27,22 +27,22 @@ class TestVersionInfo(unittest.TestCase):
                          'type=R, minor=7, build=5)')
 
     def test_version_info_lt(self):
-        self.assertTrue(version_info('13.3-20131120') < (14, 1))
+        self.assertLess(version_info('13.3-20131120'), (14, 1))
 
     def test_version_info_lt_eq(self):
-        self.assertTrue(version_info('13.3-20131120') <= (14, 1))
+        self.assertLessEqual(version_info('13.3-20131120'), (14, 1))
 
     def test_version_info_gt(self):
-        self.assertTrue(version_info('13.3-20131120') > (12, 1))
+        self.assertGreater(version_info('13.3-20131120'), (12, 1))
 
     def test_version_info_gt_eq(self):
-        self.assertTrue(version_info('13.3-20131120') >= (12, 1))
+        self.assertGreaterEqual(version_info('13.3-20131120'), (12, 1))
 
     def test_version_info_eq(self):
-        self.assertTrue(version_info('13.3-20131120') == (13, 3))
+        self.assertEqual(version_info('13.3-20131120'), (13, 3))
 
     def test_version_info_not_eq(self):
-        self.assertTrue(version_info('13.3-20131120') != (15, 3))
+        self.assertNotEqual(version_info('13.3-20131120'), (15, 3))
 
 
 @attr('unit')
@@ -63,6 +63,14 @@ class TestSrxCluster(unittest.TestCase):
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '12.3R6.6')
 
+    @patch('jnpr.junos.Device.execute')
+    def test_swver_hostname_none(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.facts['master'] = 'RE5'
+        self.facts['version_RE5'] = '15.3R6.6'
+        software_version(self.dev, self.facts)
+        self.assertEqual(self.facts['version'], '15.3R6.6')
+
 # --> JLS, there should always be a facts['master'] assigned.
     # @patch('jnpr.junos.Device.execute')
     # def test_swver_master_none(self, mock_execute):
@@ -73,7 +81,7 @@ class TestSrxCluster(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.facts.swver.re.findall')
-    def test_swver_exception_handling(self,  mock_re_findall, mock_execute):
+    def test_swver_exception_handling(self, mock_re_findall, mock_execute):
         mock_execute.side_effect = self._mock_manager
         mock_re_findall.side_effect = IndexError
         self.facts['master'] = 'RE0'

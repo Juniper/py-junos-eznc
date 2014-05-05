@@ -1,0 +1,16 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+    <multi-routing-engine-results>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>member1</re-name>
+            
+            <output>ERROR: cannot locate jroute-14.2I20140424_0657_ramas: rollback aborted</output>
+            <package-result>1</package-result>
+        </multi-routing-engine-item>
+        
+    </multi-routing-engine-results>
+    <cli>
+        <banner>{master:member1-re0}</banner>
+    </cli>
+</rpc-reply>

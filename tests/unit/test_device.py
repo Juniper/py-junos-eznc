@@ -1,7 +1,6 @@
-'''
+__author__ = "Rick Sherman, Nitin Kumar"
+__credits__ = "Jeremy Schulman"
 
-@author: rsherman
-'''
 import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
@@ -10,10 +9,13 @@ from lxml import etree
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+import ncclient.transport.errors as NcErrors
 
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
+from jnpr.junos import exception as EzErrors
+
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
@@ -66,6 +68,55 @@ class TestDevice(unittest.TestCase):
     def tearDown(self, mock_session):
         self.dev.close()
 
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectAuthError(self, mock_manager):
+        mock_manager.connect.side_effect = NcErrors.AuthenticationError
+        with self.assertRaises(EzErrors.ConnectAuthError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectRefusedError(self, mock_manager):
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        with self.assertRaises(EzErrors.ConnectRefusedError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    @patch('jnpr.junos.device.datetime')
+    def test_device_ConnectTimeoutError(self, mock_datetime, mock_manager):
+        NcErrors.SSHError.message = 'cannot open'
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        from datetime import timedelta, datetime
+        currenttime = datetime.now()
+        mock_datetime.datetime.now.side_effect = [currenttime,
+                                                  currenttime + timedelta(minutes=4)]
+        with self.assertRaises(EzErrors.ConnectTimeoutError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    @patch('jnpr.junos.device.datetime')
+    def test_device_diff_err_message(self, mock_datetime, mock_manager):
+        NcErrors.SSHError.message = 'why are you trying :)'
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        from datetime import timedelta, datetime
+        currenttime = datetime.now()
+        mock_datetime.datetime.now.side_effect = [currenttime,
+                                                  currenttime + timedelta(minutes=4)]
+        with self.assertRaises(EzErrors.ConnectError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectUnknownHostError(self, mock_manager):
+        import socket
+        mock_manager.connect.side_effect = socket.gaierror
+        with self.assertRaises(EzErrors.ConnectUnknownHostError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_other_error(self, mock_manager):
+        mock_manager.connect.side_effect = TypeError
+        with self.assertRaises(EzErrors.ConnectError):
+            self.dev.open()
+
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch('__builtin__.open', mock):
@@ -98,9 +149,22 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.device.os')
     @patch('__builtin__.open')
-    def test_device__sshconf_lkup(self, os_mock, open_mock):
+    @patch('paramiko.config.SSHConfig.lookup')
+    def test_device__sshconf_lkup(self, os_mock, open_mock, mock_paramiko):
         os_mock.path.exists.return_value = True
         self.dev._sshconf_lkup()
+        mock_paramiko.assert_called_any()
+
+    @patch('os.getenv')
+    def test_device__sshconf_lkup_path_not_exists(self, mock_env):
+        mock_env.return_value = '/home/test'
+        self.assertIsNone(self.dev._sshconf_lkup())
+
+    @patch('os.getenv')
+    def test_device__sshconf_lkup_home_not_defined(self, mock_env):
+        mock_env.return_value = None
+        self.assertIsNone(self.dev._sshconf_lkup())
+        mock_env.assert_called_with('HOME')
 
     @patch('ncclient.manager.connect')
     @patch('jnpr.junos.Device.execute')
@@ -130,24 +194,24 @@ class TestDevice(unittest.TestCase):
             assert self.dev.facts['version'] == facts['version']
 
     def test_device_hostname(self):
-        assert self.dev.hostname == '1.1.1.1'
+        self.assertEqual(self.dev.hostname, '1.1.1.1')
 
     def test_device_user(self):
-        assert self.dev.user == 'rick'
+        self.assertEqual(self.dev.user, 'rick')
 
     def test_device_get_password(self):
-        assert self.dev.password is None
+        self.assertIsNone(self.dev.password)
 
     def test_device_set_password(self):
         self.dev.password = 'secret'
-        assert self.dev._password == 'secret'
+        self.assertEqual(self.dev._password, 'secret')
 
     def test_device_get_timeout(self):
-        assert self.dev.timeout == 30
+        self.assertEqual(self.dev.timeout, 30)
 
     def test_device_set_timeout(self):
         self.dev.timeout = 10
-        assert self.dev.timeout == 10
+        self.assertEqual(self.dev.timeout, 10)
 
     def test_device_manages(self):
         self.assertEqual(self.dev.manages, [],
@@ -159,10 +223,26 @@ class TestDevice(unittest.TestCase):
         except RuntimeError as ex:
             self.assertEqual(RuntimeError, type(ex))
 
-    def test_device_cli(self):
-        self.dev.execute = MagicMock(name='execute')
-        self.dev.cli('show version')
-        assert self.dev.execute.call_args[0][0].text == 'show version'
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.dev.cli('show cli directory').tag, 'cli')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_conf_info(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertIn('ge-0/0/0', self.dev.cli('show configuration'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_output(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertIn('Alarm', self.dev.cli('show system alarms'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_rpc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.dev.cli('show system uptime | display xml rpc')\
+                         .tag, 'get-system-uptime-information')
 
     def test_device_cli_exception(self):
         self.dev.rpc.cli = MagicMock(side_effect=AttributeError)
@@ -171,11 +251,13 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.dev.execute('<get-system-core-dumps/>')
+        self.assertEqual(self.dev.execute('<get-system-core-dumps/>').tag,
+                         'directory-list')
 
     def test_device_execute_topy(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.dev.execute('<get-system-core-dumps/>', to_py=self._do_nothing)
+        self.assertEqual(self.dev.execute('<get-system-core-dumps/>',
+                                          to_py=self._do_nothing), 'Nothing')
 
     def test_device_execute_exception(self):
         class MyException(Exception):
@@ -206,8 +288,8 @@ class TestDevice(unittest.TestCase):
         self.assertRaises(ValueError, self.dev.execute, None)
 
     def test_device_rpcmeta(self):
-        assert self.dev.rpc.get_software_information.func_doc ==\
-            'get-software-information'
+        self.assertEqual(self.dev.rpc.get_software_information.func_doc,
+                         'get-software-information')
 
     def test_device_probe_timeout_zero(self):
         with patch('jnpr.junos.device.socket'):
@@ -227,14 +309,19 @@ class TestDevice(unittest.TestCase):
                 mock_time.return_value = None
                 self.assertFalse(self.dev.probe(.01))
 
-    def test_device_bind(self):
+    def test_device_bind_varg(self):
         self.dev.bind()
         mock = MagicMock()
-        mock.__name__ = 'magic mock'
-        #for *args
+        mock.__name__ = 'magic_mock'
         self.dev.bind(mock)
-        #for **kwargs
+        self.assertEqual(self.dev.magic_mock.__name__, 'magic_mock')
+
+    def test_device_bind_kvarg(self):
+        self.dev.bind()
+        mock = MagicMock()
+        mock.return_value = 'Test'
         self.dev.bind(kw=mock)
+        self.assertEqual(self.dev.kw, 'Test')
 
     def test_device_bind_varg_exception(self):
         with self.assertRaises(ValueError):
@@ -255,8 +342,18 @@ class TestDevice(unittest.TestCase):
             self.dev.bind(kw=mock)
 
     def test_device_template(self):
-        self.dev._j2ldr = MagicMock()
-        self.dev.Template('test')
+        # Try to load the template relative to module base
+        try:
+            template = self.dev.Template('tests/unit/templates/config-example')
+        except:
+            # Try to load the template relative to test base
+            try:
+                template = self.dev.Template('templates/config-example')
+            except:
+                raise
+        self.assertEqual(template.render({'host_name': '1',
+                               'domain_name': '2'}),
+                               'system {\n  host-name 1;\n  domain-name 2;\n}')
 
     def test_device_close(self):
         def close_conn():
@@ -278,6 +375,10 @@ class TestDevice(unittest.TestCase):
                 fname == 'get-system-core-dumps.xml'):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
+        elif (fname == 'show-configuration.xml' or
+              fname == 'show-system-alarms.xml'):
+            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+                                  .transform_reply())._NCElement__doc
         else:
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc[0]
@@ -294,6 +395,12 @@ class TestDevice(unittest.TestCase):
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':
                     return self._read_file('show-cli-directory.xml')
+                elif args[0].text == 'show configuration':
+                    return self._read_file('show-configuration.xml')
+                elif args[0].text == 'show system alarms':
+                    return self._read_file('show-system-alarms.xml')
+                elif args[0].text == 'show system uptime | display xml rpc':
+                    return self._read_file('show-system-uptime-rpc.xml')
                 else:
                     raise RpcError
 
@@ -301,8 +408,5 @@ class TestDevice(unittest.TestCase):
                 return self._read_file(args[0].tag + '.xml')
 
     def _do_nothing(self, *args, **kwargs):
-        return
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'TestDevice.testName']
-    unittest.main()
+        return 'Nothing'
+    

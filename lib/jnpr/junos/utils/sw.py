@@ -132,7 +132,7 @@ class SW(Util):
 
         # execute the secure-copy with the Python SCP module
 
-        with SCP(self._dev, progress=_scp_progress) as scp:
+        with SCP(self._dev, progress=_scp_progress) as scp:            
             scp.put(package, remote_path)
 
     # -------------------------------------------------------------------------

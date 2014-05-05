@@ -1,0 +1,8 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+    <file-content filename="abc" junos:seconds="1398535374" filesize="213" encoding="text">
+        testing cat functionality
+    </file-content>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

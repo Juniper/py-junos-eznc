@@ -1,0 +1,4 @@
+[run]
+omit =
+    lib/jnpr/junos/cfg/phyport/*
+    lib/jnpr/junos/cfg/srx/*

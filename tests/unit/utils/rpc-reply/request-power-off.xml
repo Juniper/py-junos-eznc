@@ -1,0 +1,33 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+    <xnm:warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+        <message>
+            This command will not halt the other routing-engine.
+            If planning to switch off power, use the both-routing-engines option.
+        </message>
+    </xnm:warning>
+    <rpc>
+        <select-choice>
+            <choice-item>
+                <name>yes</name>
+                <help>Perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <choice-item>
+                <name>no</name>
+                <help>Don't perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <default>no</default>
+            <prompt>Power Off the system ? [yes,no] (no) </prompt>
+        </select-choice>
+    </rpc>
+    <request-reboot-results>
+        <request-reboot-status reboot-time="1399024467">
+            Shutdown NOW!
+            [pid 17221]
+        </request-reboot-status>
+    </request-reboot-results>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

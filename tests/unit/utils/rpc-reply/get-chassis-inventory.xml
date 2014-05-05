@@ -1,0 +1,33 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <chassis-inventory xmlns="http://xml.juniper.net/junos/12.1X46/junos-chassis">
+        <chassis junos:style="inventory">
+            <name>Chassis</name>
+            <serial-number>aaf5fe5f9b88</serial-number>
+            <description>FIREFLY-PERIMETER</description>
+            <chassis-module>
+                <name>Midplane</name>
+            </chassis-module>
+            <chassis-module>
+                <name>System IO</name>
+            </chassis-module>
+            <chassis-module>
+                <name>Routing Engine</name>
+                <description>FIREFLY-PERIMETER RE</description>
+            </chassis-module>
+            <chassis-module>
+                <name>FPC 0</name>
+                <description>Virtual FPC</description>
+                <chassis-sub-module>
+                    <name>PIC 0</name>
+                    <description>Virtual GE</description>
+                </chassis-sub-module>
+            </chassis-module>
+            <chassis-module>
+                <name>Power Supply 0</name>
+            </chassis-module>
+        </chassis>
+    </chassis-inventory>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

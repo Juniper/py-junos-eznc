@@ -27,4 +27,9 @@ class Test_JXML(unittest.TestCase):
                 </xsl:stylesheet>"""
         import xml.etree.ElementTree as ET
         root = ET.fromstring(xmldata)
-        remove_namespaces(root)
+        test = remove_namespaces(root)
+        for elem in test.getiterator():
+            i = elem.tag.find('}')
+            if i > 0:
+                i = i + 1
+        self.assertLessEqual(i, 0)

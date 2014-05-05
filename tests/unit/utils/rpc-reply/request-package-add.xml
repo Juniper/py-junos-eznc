@@ -1,0 +1,32 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/10.4R3/junos">
+    <pipe>
+    <more-no-more/>
+    </pipe>
+    <cli>
+        <ignore-signals>
+            hup
+        </ignore-signals>
+    </cli>
+    <output>
+        /var/tmp/incoming-package.31020                       1742 kB 1742 kBps
+        Package contains junos-11.1R3.5.tgz ; renaming ...
+        Formatting alternate root (/dev/ad0s1a)...
+        /dev/ad0s1a: 299.7MB (613792 sectors) block size 16384, fragment size 2048
+                using 4 cylinder groups of 74.94MB, 4796 blks, 9600 inodes.
+        super-block backups (for fsck -b #) at:
+         32, 153504, 306976, 460448
+        Removing /var/tmp/junos-11.1R3.5.tgz
+        Installing package '/altroot/cf/packages/install-tmp/junos-11.1R3.5-domestic' ...
+        Verified junos-boot-srxsme-11.1R3.5.tgz signed by PackageProduction_11_1_0
+        Verified junos-srxsme-11.1R3.5-domestic signed by PackageProduction_11_1_0
+        Saving boot file package in /var/sw/pkg/junos-boot-srxsme-11.1R3.5.tgz
+        JUNOS 11.1R3.5 will become active at next reboot
+        WARNING: A reboot is required to load this software correctly
+        WARNING:     Use the 'request system reboot' command
+        WARNING:         when software installation is complete
+        Saving state for rollback ...
+    </output>
+        <package-result>
+            0
+        </package-result>
+</rpc-reply>
