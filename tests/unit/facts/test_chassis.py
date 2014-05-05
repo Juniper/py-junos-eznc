@@ -3,11 +3,13 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from mock import patch
+from mock import patch, MagicMock
+from lxml import etree
 import os
 
 from jnpr.junos import Device
 from jnpr.junos.facts.chassis import facts_chassis as chassis
+from jnpr.junos.exception import ConnectNotMasterError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -29,6 +31,12 @@ class TestChassis(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         chassis(self.dev, self.facts)
         self.assertTrue(self.facts['2RE'])
+
+    def test_chassis_exception_ConnectNotMasterError(self):
+        xmldata = etree.XML('<rpc-reply><output>test</output></rpc-reply>')
+        self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
+        with self.assertRaises(ConnectNotMasterError):
+            chassis(self.dev, self.facts)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

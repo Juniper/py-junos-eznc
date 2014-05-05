@@ -9,10 +9,13 @@ from lxml import etree
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+import ncclient.transport.errors as NcErrors
 
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
+from jnpr.junos import exception as EzErrors
+
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
@@ -65,6 +68,55 @@ class TestDevice(unittest.TestCase):
     def tearDown(self, mock_session):
         self.dev.close()
 
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectAuthError(self, mock_manager):
+        mock_manager.connect.side_effect = NcErrors.AuthenticationError
+        with self.assertRaises(EzErrors.ConnectAuthError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectRefusedError(self, mock_manager):
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        with self.assertRaises(EzErrors.ConnectRefusedError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    @patch('jnpr.junos.device.datetime')
+    def test_device_ConnectTimeoutError(self, mock_datetime, mock_manager):
+        NcErrors.SSHError.message = 'cannot open'
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        from datetime import timedelta, datetime
+        currenttime = datetime.now()
+        mock_datetime.datetime.now.side_effect = [currenttime,
+                                                  currenttime + timedelta(minutes=4)]
+        with self.assertRaises(EzErrors.ConnectTimeoutError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    @patch('jnpr.junos.device.datetime')
+    def test_device_diff_err_message(self, mock_datetime, mock_manager):
+        NcErrors.SSHError.message = 'why are you trying :)'
+        mock_manager.connect.side_effect = NcErrors.SSHError
+        from datetime import timedelta, datetime
+        currenttime = datetime.now()
+        mock_datetime.datetime.now.side_effect = [currenttime,
+                                                  currenttime + timedelta(minutes=4)]
+        with self.assertRaises(EzErrors.ConnectError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_ConnectUnknownHostError(self, mock_manager):
+        import socket
+        mock_manager.connect.side_effect = socket.gaierror
+        with self.assertRaises(EzErrors.ConnectUnknownHostError):
+            self.dev.open()
+
+    @patch('jnpr.junos.device.netconf_ssh')
+    def test_device_other_error(self, mock_manager):
+        mock_manager.connect.side_effect = TypeError
+        with self.assertRaises(EzErrors.ConnectError):
+            self.dev.open()
+
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch('__builtin__.open', mock):
@@ -104,9 +156,15 @@ class TestDevice(unittest.TestCase):
         mock_paramiko.assert_called_any()
 
     @patch('os.getenv')
-    def test_device__sshconf_lkup_false(self, mock_env):
+    def test_device__sshconf_lkup_path_not_exists(self, mock_env):
         mock_env.return_value = '/home/test'
         self.assertIsNone(self.dev._sshconf_lkup())
+
+    @patch('os.getenv')
+    def test_device__sshconf_lkup_home_not_defined(self, mock_env):
+        mock_env.return_value = None
+        self.assertIsNone(self.dev._sshconf_lkup())
+        mock_env.assert_called_with('HOME')
 
     @patch('ncclient.manager.connect')
     @patch('jnpr.junos.Device.execute')
