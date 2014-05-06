@@ -59,3 +59,10 @@ class Test_RpcMetaExec(unittest.TestCase):
         self.rpc.system_users_information(set_data=('test',))
         self.assertEqual(mock_execute_fn.call_args[0][0][0].text,
                          'test')
+
+    @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_get_config(self, mock_execute_fn):
+        root = etree.XML('<root><a>test</a></root>')
+        self.rpc.get_config(root)
+        self.assertEqual(mock_execute_fn.call_args[0][0].tag,
+                         'get-configuration')
