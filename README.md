@@ -48,6 +48,20 @@ _Junos PyEZ_ is designed to provide the same capabilties as a user would have on
 Installation requires Python 2.7 and associate `pip` tool
 
     pip install junos-eznc
+	
+Installing from Git is also supported (OS must have git installed).
+
+	To install the latest MASTER code
+	pip install git+https://github.com/Juniper/py-junos-eznc.git
+	-or-
+	To install a specific version, brach, tag, etc.
+	pip install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
+	
+## UPGRADE
+
+Upgrading has the same requirements as installation and has the same format with the addition of -UPGRADE
+
+	pip install -U junos-eznc
 
 ## INSTALLATION PRIOR TO 0.0.5
 
