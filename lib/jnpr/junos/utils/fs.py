@@ -348,7 +348,8 @@ class FS(Util):
 
     def rmdir(self, path):
         """
-        ~| REQUIRES SHELL PRIVELDGES |~
+        *REQUIRES SHELL PRIVILEGES*
+
         executes the 'rmdir' command on path
         returns True if OK, or error string
         """
@@ -357,7 +358,8 @@ class FS(Util):
 
     def mkdir(self, path):
         """
-        ~| REQUIRES SHELL PRIVELDGES |~
+        *REQUIRES SHELL PRIVILEGES*
+
         executes the 'mkdir -p' command on path
         returns True if OK, or error string
         """
@@ -366,7 +368,8 @@ class FS(Util):
 
     def symlink(self, from_path, to_path):
         """
-        ~| REQUIRES SHELL PRIVELDGES |~
+        *REQUIRES SHELL PRIVILEGES*
+
         executes the 'ln -sf <from_path> <to_path>' command
         returns True if OK, or error string
         """

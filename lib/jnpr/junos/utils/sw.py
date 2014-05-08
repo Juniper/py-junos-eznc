@@ -40,7 +40,7 @@ class SW(Util):
     Other utils:
       rollback - same as 'request softare rollback'
       inventory - (property) provides file info for current and rollback
-                  images on the device
+      images on the device
     """
 
     def __init__(self, dev):
@@ -63,7 +63,7 @@ class SW(Util):
         computes the SHA-256 value on the package file.
 
         :package:
-          complete path to the package (*.tgz) file on the local server
+          complete path to the package (\*.tgz) file on the local server
         """
         return _hashfile(open(package, 'rb'), hashlib.sha256())
 
@@ -73,7 +73,7 @@ class SW(Util):
         computes the MD5 checksum value on the local package file.
 
         :package:
-          complete path to the package (*.tgz) file on the local server
+          complete path to the package (\*.tgz) file on the local server
         """
         return _hashfile(open(package, 'rb'), hashlib.md5())
 
@@ -83,7 +83,7 @@ class SW(Util):
         computes the SHA1 checksum value on the local package file.
 
         :package:
-          complete path to the package (*.tgz) file on the local server
+          complete path to the package (\*.tgz) file on the local server
         """
         return _hashfile(open(package, 'rb'), hashlib.sha1())
 
@@ -245,13 +245,13 @@ class SW(Util):
         Performs the complete installation of the :package: that includes the
         following steps:
         When no_copy is False (default-case)
-          (1) computes the local MD5 checksum if not provided in :checksum:
-          (2) performs a storage cleanup if :cleanfs: is True
-          (3) SCP copies the package to the :remote_path: directory
-          (4) computes remote MD5 checksum and matches it to the local value
-        Then:
-          (5) validates the package if :validate: is True
-          (6) installs the package
+
+        1. computes the local MD5 checksum if not provided in :checksum:
+        2. performs a storage cleanup if :cleanfs: is True
+        3. SCP copies the package to the :remote_path: directory
+        4. computes remote MD5 checksum and matches it to the local value
+        5. validates the package if :validate: is True
+        6. installs the package
 
         You can get a progress report on this process by providing a :progress:
         callback;

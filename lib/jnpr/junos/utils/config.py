@@ -145,12 +145,14 @@ class Config(Util):
           must specify kvargs['format'].
 
         kvargs['path']
-          path to file of configuration.  the path extension will be used
-          to determine the format of the contents.
-            ['conf','text','txt'] is curly-text-style
-            ['set'] is set-style
-            ['xml'] is XML
-          the format can specific set by using kvarg['format']
+            path to file of configuration.  the path extension will be used
+            to determine the format of the contents.
+
+                | ['conf','text','txt'] is curly-text-style
+                | ['set'] is set-style
+                | ['xml'] is XML
+
+            the format can specific set by using kvarg['format']
 
         kvargs['format']
           determines the format of the contents.  options are
