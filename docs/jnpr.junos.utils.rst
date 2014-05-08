@@ -1,10 +1,7 @@
-jnpr.junos.utils package
+jnpr.junos.utils
 ========================
 
-Submodules
-----------
-
-jnpr.junos.utils.config module
+jnpr.junos.utils.config
 ------------------------------
 
 .. automodule:: jnpr.junos.utils.config
@@ -12,7 +9,7 @@ jnpr.junos.utils.config module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.utils.fs module
+jnpr.junos.utils.fs
 --------------------------
 
 .. automodule:: jnpr.junos.utils.fs
@@ -20,7 +17,7 @@ jnpr.junos.utils.fs module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.utils.scp module
+jnpr.junos.utils.scp
 ---------------------------
 
 .. automodule:: jnpr.junos.utils.scp
@@ -28,7 +25,7 @@ jnpr.junos.utils.scp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.utils.start_shell module
+jnpr.junos.utils.start_shell
 -----------------------------------
 
 .. automodule:: jnpr.junos.utils.start_shell
@@ -36,7 +33,7 @@ jnpr.junos.utils.start_shell module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.utils.sw module
+jnpr.junos.utils.sw
 --------------------------
 
 .. automodule:: jnpr.junos.utils.sw
@@ -44,19 +41,10 @@ jnpr.junos.utils.sw module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.utils.util module
+jnpr.junos.utils.util
 ----------------------------
 
 .. automodule:: jnpr.junos.utils.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: jnpr.junos.utils
     :members:
     :undoc-members:
     :show-inheritance:

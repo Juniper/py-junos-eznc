@@ -1,17 +1,13 @@
-jnpr.junos.cfg.srx package
+jnpr.junos.cfg.srx
 ==========================
-
-Subpackages
------------
 
 .. toctree::
 
     jnpr.junos.cfg.srx.nat
 
-Submodules
-----------
 
-jnpr.junos.cfg.srx.ab_finder module
+
+jnpr.junos.cfg.srx.ab_finder
 -----------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.ab_finder
@@ -19,7 +15,7 @@ jnpr.junos.cfg.srx.ab_finder module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.app module
+jnpr.junos.cfg.srx.app
 -----------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.app
@@ -27,7 +23,7 @@ jnpr.junos.cfg.srx.app module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.app_set module
+jnpr.junos.cfg.srx.app_set
 ---------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.app_set
@@ -35,7 +31,7 @@ jnpr.junos.cfg.srx.app_set module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.policy module
+jnpr.junos.cfg.srx.policy
 --------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.policy
@@ -43,7 +39,7 @@ jnpr.junos.cfg.srx.policy module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.policy_rule module
+jnpr.junos.cfg.srx.policy_rule
 -------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.policy_rule
@@ -51,7 +47,7 @@ jnpr.junos.cfg.srx.policy_rule module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.shared_ab module
+jnpr.junos.cfg.srx.shared_ab
 -----------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.shared_ab
@@ -59,7 +55,7 @@ jnpr.junos.cfg.srx.shared_ab module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.shared_ab_addr module
+jnpr.junos.cfg.srx.shared_ab_addr
 ----------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.shared_ab_addr
@@ -67,7 +63,7 @@ jnpr.junos.cfg.srx.shared_ab_addr module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.shared_ab_set module
+jnpr.junos.cfg.srx.shared_ab_set
 ---------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.shared_ab_set
@@ -75,7 +71,7 @@ jnpr.junos.cfg.srx.shared_ab_set module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.zone module
+jnpr.junos.cfg.srx.zone
 ------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.zone
@@ -83,7 +79,7 @@ jnpr.junos.cfg.srx.zone module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.zone_ab module
+jnpr.junos.cfg.srx.zone_ab
 ---------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.zone_ab
@@ -91,7 +87,7 @@ jnpr.junos.cfg.srx.zone_ab module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.zone_ab_addr module
+jnpr.junos.cfg.srx.zone_ab_addr
 --------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.zone_ab_addr
@@ -99,7 +95,7 @@ jnpr.junos.cfg.srx.zone_ab_addr module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.zone_ab_set module
+jnpr.junos.cfg.srx.zone_ab_set
 -------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.zone_ab_set
@@ -107,7 +103,7 @@ jnpr.junos.cfg.srx.zone_ab_set module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.zone_ifs module
+jnpr.junos.cfg.srx.zone_ifs
 ----------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.zone_ifs

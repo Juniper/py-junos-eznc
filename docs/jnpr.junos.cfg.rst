@@ -1,18 +1,13 @@
-jnpr.junos.cfg package
+jnpr.junos.cfg
 ======================
-
-Subpackages
------------
 
 .. toctree::
 
     jnpr.junos.cfg.phyport
     jnpr.junos.cfg.srx
 
-Submodules
-----------
 
-jnpr.junos.cfg.resource module
+jnpr.junos.cfg.resource
 ------------------------------
 
 .. automodule:: jnpr.junos.cfg.resource
@@ -20,7 +15,7 @@ jnpr.junos.cfg.resource module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.template_resource module
+jnpr.junos.cfg.template_resource
 ---------------------------------------
 
 .. automodule:: jnpr.junos.cfg.template_resource
@@ -28,7 +23,7 @@ jnpr.junos.cfg.template_resource module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.user module
+jnpr.junos.cfg.user
 --------------------------
 
 .. automodule:: jnpr.junos.cfg.user
@@ -36,19 +31,10 @@ jnpr.junos.cfg.user module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.user_ssh_key module
+jnpr.junos.cfg.user_ssh_key
 ----------------------------------
 
 .. automodule:: jnpr.junos.cfg.user_ssh_key
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: jnpr.junos.cfg
     :members:
     :undoc-members:
     :show-inheritance:

@@ -9,7 +9,7 @@ Welcome to Junos PyEZ's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    jnpr.junos
 

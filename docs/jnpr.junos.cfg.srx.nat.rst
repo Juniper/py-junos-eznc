@@ -1,10 +1,9 @@
-jnpr.junos.cfg.srx.nat package
+jnpr.junos.cfg.srx.nat
 ==============================
 
-Submodules
-----------
 
-jnpr.junos.cfg.srx.nat.nat_proxy_arp module
+
+jnpr.junos.cfg.srx.nat.nat_proxy_arp
 -------------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_proxy_arp
@@ -12,7 +11,7 @@ jnpr.junos.cfg.srx.nat.nat_proxy_arp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.nat.nat_src_pool module
+jnpr.junos.cfg.srx.nat.nat_src_pool
 ------------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_src_pool
@@ -20,7 +19,7 @@ jnpr.junos.cfg.srx.nat.nat_src_pool module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.nat.nat_src_rule module
+jnpr.junos.cfg.srx.nat.nat_src_rule
 ------------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_src_rule
@@ -28,7 +27,7 @@ jnpr.junos.cfg.srx.nat.nat_src_rule module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.nat.nat_src_ruleset module
+jnpr.junos.cfg.srx.nat.nat_src_ruleset
 ---------------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_src_ruleset
@@ -36,7 +35,7 @@ jnpr.junos.cfg.srx.nat.nat_src_ruleset module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.nat.nat_st_rule module
+jnpr.junos.cfg.srx.nat.nat_st_rule
 -----------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_st_rule
@@ -44,7 +43,7 @@ jnpr.junos.cfg.srx.nat.nat_st_rule module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.srx.nat.nat_st_ruleset module
+jnpr.junos.cfg.srx.nat.nat_st_ruleset
 --------------------------------------------
 
 .. automodule:: jnpr.junos.cfg.srx.nat.nat_st_ruleset

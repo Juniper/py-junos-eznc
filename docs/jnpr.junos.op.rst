@@ -1,10 +1,9 @@
-jnpr.junos.op package
+jnpr.junos.op
 =====================
 
-Submodules
-----------
 
-jnpr.junos.op.arp module
+
+jnpr.junos.op.arp
 ------------------------
 
 .. automodule:: jnpr.junos.op.arp
@@ -12,7 +11,7 @@ jnpr.junos.op.arp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.bfd module
+jnpr.junos.op.bfd
 ------------------------
 
 .. automodule:: jnpr.junos.op.bfd
@@ -20,7 +19,7 @@ jnpr.junos.op.bfd module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.ethport module
+jnpr.junos.op.ethport
 ----------------------------
 
 .. automodule:: jnpr.junos.op.ethport
@@ -28,7 +27,7 @@ jnpr.junos.op.ethport module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.isis module
+jnpr.junos.op.isis
 -------------------------
 
 .. automodule:: jnpr.junos.op.isis
@@ -36,7 +35,7 @@ jnpr.junos.op.isis module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.lacp module
+jnpr.junos.op.lacp
 -------------------------
 
 .. automodule:: jnpr.junos.op.lacp
@@ -44,7 +43,7 @@ jnpr.junos.op.lacp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.ldp module
+jnpr.junos.op.ldp
 ------------------------
 
 .. automodule:: jnpr.junos.op.ldp
@@ -52,7 +51,7 @@ jnpr.junos.op.ldp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.lldp module
+jnpr.junos.op.lldp
 -------------------------
 
 .. automodule:: jnpr.junos.op.lldp
@@ -60,7 +59,7 @@ jnpr.junos.op.lldp module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.phyport module
+jnpr.junos.op.phyport
 ----------------------------
 
 .. automodule:: jnpr.junos.op.phyport
@@ -68,7 +67,7 @@ jnpr.junos.op.phyport module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.routes module
+jnpr.junos.op.routes
 ---------------------------
 
 .. automodule:: jnpr.junos.op.routes
@@ -76,19 +75,10 @@ jnpr.junos.op.routes module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.op.xcvr module
+jnpr.junos.op.xcvr
 -------------------------
 
 .. automodule:: jnpr.junos.op.xcvr
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: jnpr.junos.op
     :members:
     :undoc-members:
     :show-inheritance:

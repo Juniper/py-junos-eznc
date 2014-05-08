@@ -1,10 +1,8 @@
-jnpr.junos.factory package
+jnpr.junos.factory
 ==========================
+   
 
-Submodules
-----------
-
-jnpr.junos.factory.cfgtable module
+jnpr.junos.factory.cfgtable
 ----------------------------------
 
 .. automodule:: jnpr.junos.factory.cfgtable
@@ -12,7 +10,7 @@ jnpr.junos.factory.cfgtable module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.factory_cls module
+jnpr.junos.factory.factory_cls
 -------------------------------------
 
 .. automodule:: jnpr.junos.factory.factory_cls
@@ -20,7 +18,7 @@ jnpr.junos.factory.factory_cls module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.factory_loader module
+jnpr.junos.factory.factory_loader
 ----------------------------------------
 
 .. automodule:: jnpr.junos.factory.factory_loader
@@ -28,7 +26,7 @@ jnpr.junos.factory.factory_loader module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.optable module
+jnpr.junos.factory.optable
 ---------------------------------
 
 .. automodule:: jnpr.junos.factory.optable
@@ -36,7 +34,7 @@ jnpr.junos.factory.optable module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.table module
+jnpr.junos.factory.table
 -------------------------------
 
 .. automodule:: jnpr.junos.factory.table
@@ -44,7 +42,7 @@ jnpr.junos.factory.table module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.view module
+jnpr.junos.factory.view
 ------------------------------
 
 .. automodule:: jnpr.junos.factory.view
@@ -52,7 +50,7 @@ jnpr.junos.factory.view module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.factory.viewfields module
+jnpr.junos.factory.viewfields
 ------------------------------------
 
 .. automodule:: jnpr.junos.factory.viewfields

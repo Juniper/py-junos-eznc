@@ -1,10 +1,9 @@
-jnpr.junos.cfg.phyport package
+jnpr.junos.cfg.phyport
 ==============================
 
-Submodules
-----------
 
-jnpr.junos.cfg.phyport.base module
+
+jnpr.junos.cfg.phyport.base
 ----------------------------------
 
 .. automodule:: jnpr.junos.cfg.phyport.base
@@ -12,7 +11,7 @@ jnpr.junos.cfg.phyport.base module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.phyport.classic module
+jnpr.junos.cfg.phyport.classic
 -------------------------------------
 
 .. automodule:: jnpr.junos.cfg.phyport.classic
@@ -20,7 +19,7 @@ jnpr.junos.cfg.phyport.classic module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.cfg.phyport.switch module
+jnpr.junos.cfg.phyport.switch
 ------------------------------------
 
 .. automodule:: jnpr.junos.cfg.phyport.switch

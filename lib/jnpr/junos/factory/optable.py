@@ -18,7 +18,7 @@ class OpTable(Table):
 
         If the Table was created with a :path: rather than a Device,
         then this method will load the XML from that file.  In this
-        case, the *vargs, and **kvargs are not used.
+        case, the \*vargs, and \**kvargs are not used.
 
         ALIAS: __call__
 

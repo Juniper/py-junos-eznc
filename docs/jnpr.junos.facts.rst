@@ -1,10 +1,7 @@
-jnpr.junos.facts package
+jnpr.junos.facts
 ========================
 
-Submodules
-----------
-
-jnpr.junos.facts.chassis module
+jnpr.junos.facts.chassis
 -------------------------------
 
 .. automodule:: jnpr.junos.facts.chassis
@@ -12,7 +9,7 @@ jnpr.junos.facts.chassis module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.domain module
+jnpr.junos.facts.domain
 ------------------------------
 
 .. automodule:: jnpr.junos.facts.domain
@@ -20,7 +17,7 @@ jnpr.junos.facts.domain module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.ifd_style module
+jnpr.junos.facts.ifd_style
 ---------------------------------
 
 .. automodule:: jnpr.junos.facts.ifd_style
@@ -28,7 +25,7 @@ jnpr.junos.facts.ifd_style module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.personality module
+jnpr.junos.facts.personality
 -----------------------------------
 
 .. automodule:: jnpr.junos.facts.personality
@@ -36,7 +33,7 @@ jnpr.junos.facts.personality module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.routing_engines module
+jnpr.junos.facts.routing_engines
 ---------------------------------------
 
 .. automodule:: jnpr.junos.facts.routing_engines
@@ -44,7 +41,7 @@ jnpr.junos.facts.routing_engines module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.session module
+jnpr.junos.facts.session
 -------------------------------
 
 .. automodule:: jnpr.junos.facts.session
@@ -52,7 +49,7 @@ jnpr.junos.facts.session module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.srx_cluster module
+jnpr.junos.facts.srx_cluster
 -----------------------------------
 
 .. automodule:: jnpr.junos.facts.srx_cluster
@@ -60,7 +57,7 @@ jnpr.junos.facts.srx_cluster module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.switch_style module
+jnpr.junos.facts.switch_style
 ------------------------------------
 
 .. automodule:: jnpr.junos.facts.switch_style
@@ -68,19 +65,10 @@ jnpr.junos.facts.switch_style module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.facts.swver module
+jnpr.junos.facts.swver
 -----------------------------
 
 .. automodule:: jnpr.junos.facts.swver
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: jnpr.junos.facts
     :members:
     :undoc-members:
     :show-inheritance:

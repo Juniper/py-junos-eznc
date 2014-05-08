@@ -1,38 +1,33 @@
-jnpr.junos package
+jnpr.junos
 ==================
 
-Subpackages
------------
-
 .. toctree::
+   :maxdepth: 1
+   
+   jnpr.junos.cfg    
+   jnpr.junos.factory
+   jnpr.junos.facts
+   jnpr.junos.op
+   jnpr.junos.utils
 
-    jnpr.junos.cfg
-    jnpr.junos.cfgro
-    jnpr.junos.factory
-    jnpr.junos.facts
-    jnpr.junos.op
-    jnpr.junos.utils
 
-Submodules
-----------
-
-jnpr.junos.device module
+jnpr.junos.device
 ------------------------
 
 .. automodule:: jnpr.junos.device
     :members:
     :undoc-members:
     :show-inheritance:
-
-jnpr.junos.exception module
+	
+jnpr.junos.exception
 ---------------------------
 
 .. automodule:: jnpr.junos.exception
     :members:
     :undoc-members:
-    :show-inheritance:
+    :show-inheritance:	
 
-jnpr.junos.jxml module
+jnpr.junos.jxml
 ----------------------
 
 .. automodule:: jnpr.junos.jxml
@@ -40,27 +35,12 @@ jnpr.junos.jxml module
     :undoc-members:
     :show-inheritance:
 
-jnpr.junos.rpcmeta module
+jnpr.junos.rpcmeta
 -------------------------
 
 .. automodule:: jnpr.junos.rpcmeta
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-jnpr.junos.version module
--------------------------
-
-.. automodule:: jnpr.junos.version
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: jnpr.junos
-    :members:
-    :undoc-members:
-    :show-inheritance:
+	
+	.. autoclass:: jnpr.junos.rpcmeta._RpcMetaExec
+		:members:
+		:undoc-members:
+		:show-inheritance:
