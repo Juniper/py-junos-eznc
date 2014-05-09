@@ -88,7 +88,6 @@ def _get_swver(dev, facts):
 def facts_software_version(junos, facts):
     """
     The following facts are required:
-        facts['personality']
         facts['master']
 
     The following facts are assigned:
@@ -97,14 +96,18 @@ def facts_software_version(junos, facts):
         facts['version_<RE#>'] for each RE in dual-RE, cluster or VC system
         facts['version_info'] for master RE
     """
-    f_persona = facts.get('personality')
-    f_master = facts.get('master')
 
     x_swver = _get_swver(junos, facts)
+
+    if not facts['model']:
+        # try to extract the model from the version information
+        facts['model'] = x_swver.findtext('.//product-model')
 
     # ------------------------------------------------------------------------
     # extract the version information out of the RPC response
     # ------------------------------------------------------------------------
+
+    f_master = facts.get('master')    
 
     if x_swver.tag == 'multi-routing-engine-results':
         # we need to find/identify each of the routing-engine (CPU) versions.

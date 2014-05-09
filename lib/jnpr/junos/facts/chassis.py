@@ -14,27 +14,34 @@ def facts_chassis(junos, facts):
         (2) hostname, domain, and fqdn are retrieved from configuration data;
             inherited configs are checked.
     """
-    rsp = junos.rpc.get_chassis_inventory()
-    if rsp.tag == 'output':
-        # this means that there was an error; due to the
-        # fact that this connection is not on the master
-        # @@@ need to validate on VC-member
-        raise ConnectNotMasterError(junos)
-
-    if rsp.tag == 'multi-routing-engine-results':
-        facts['2RE'] = True
-        x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
-    else:
-        facts['2RE'] = False
-        x_ch = rsp.find('chassis')
-
-    facts['model'] = x_ch.find('description').text
     try:
-        facts['serialnumber'] = x_ch.find('serial-number').text
+        rsp = junos.rpc.get_chassis_inventory()
+        if rsp.tag == 'output':
+            # this means that there was an error; due to the
+            # fact that this connection is not on the master
+            # @@@ need to validate on VC-member
+            raise ConnectNotMasterError(junos)
+
+        if rsp.tag == 'multi-routing-engine-results':
+            facts['2RE'] = True
+            x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
+        else:
+            facts['2RE'] = False
+            x_ch = rsp.find('chassis')
+
+        facts['model'] = x_ch.find('description').text
+        try:
+            facts['serialnumber'] = x_ch.find('serial-number').text
+        except:
+            # if the toplevel chassis does not have a serial-number, then
+            # check the Backplane chassis-module
+            facts['serialnumber'] = x_ch.xpath(
+                'chassis-module[name="Backplane"]/serial-number')[0].text
     except:
-        # if the toplevel chassis does not have a serial-number, then
-        # check the Backplane chassis-module
-        facts['serialnumber'] = x_ch.xpath(
-            'chassis-module[name="Backplane"]/serial-number')[0].text
+        # this means that the RPC caused a trap.  this should generally
+        # never happen, but we'll trap it cleanly for now
+        facts['2RE'] = False
+        facts['model'] = ''
+        facts['serialnumber'] = ''
 
 

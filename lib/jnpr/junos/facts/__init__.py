@@ -11,8 +11,8 @@ from jnpr.junos.facts.domain import facts_domain
 FACT_LIST = [
     facts_chassis,
     facts_routing_engines,
+    facts_software_version,    
     facts_personality,
-    facts_software_version,
     facts_domain,
     facts_srx_cluster,
     facts_ifd_style,
