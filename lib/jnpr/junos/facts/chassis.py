@@ -16,32 +16,33 @@ def facts_chassis(junos, facts):
     """
     try:
         rsp = junos.rpc.get_chassis_inventory()
-        if rsp.tag == 'output':
-            # this means that there was an error; due to the
-            # fact that this connection is not on the master
-            # @@@ need to validate on VC-member
-            raise ConnectNotMasterError(junos)
-
-        if rsp.tag == 'multi-routing-engine-results':
-            facts['2RE'] = True
-            x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
-        else:
-            facts['2RE'] = False
-            x_ch = rsp.find('chassis')
-
-        facts['model'] = x_ch.find('description').text
-        try:
-            facts['serialnumber'] = x_ch.find('serial-number').text
-        except:
-            # if the toplevel chassis does not have a serial-number, then
-            # check the Backplane chassis-module
-            facts['serialnumber'] = x_ch.xpath(
-                'chassis-module[name="Backplane"]/serial-number')[0].text
+        if rsp.tag == 'error': raise RuntimeError()
     except:
         # this means that the RPC caused a trap.  this should generally
         # never happen, but we'll trap it cleanly for now
         facts['2RE'] = False
         facts['model'] = ''
-        facts['serialnumber'] = ''
+        facts['serialnumber'] = ''      
+        return  
 
+    if rsp.tag == 'output':
+        # this means that there was an error; due to the
+        # fact that this connection is not on the master
+        # @@@ need to validate on VC-member
+        raise ConnectNotMasterError(junos)
 
+    if rsp.tag == 'multi-routing-engine-results':
+        facts['2RE'] = True
+        x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
+    else:
+        facts['2RE'] = False
+        x_ch = rsp.find('chassis')
+
+    facts['model'] = x_ch.find('description').text
+    try:
+        facts['serialnumber'] = x_ch.find('serial-number').text
+    except:
+        # if the toplevel chassis does not have a serial-number, then
+        # check the Backplane chassis-module
+        facts['serialnumber'] = x_ch.xpath(
+            'chassis-module[name="Backplane"]/serial-number')[0].text

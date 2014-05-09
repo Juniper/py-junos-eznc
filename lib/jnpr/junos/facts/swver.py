@@ -99,7 +99,7 @@ def facts_software_version(junos, facts):
 
     x_swver = _get_swver(junos, facts)
 
-    if not facts['model']:
+    if not facts.get('model'):
         # try to extract the model from the version information
         facts['model'] = x_swver.findtext('.//product-model')
 
