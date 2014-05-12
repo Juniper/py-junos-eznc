@@ -246,7 +246,7 @@ class Config(Util):
 
         if 'path' in kvargs:
             # then this is a static-config file.  load that as our rpc_contents
-            rpc_contents = open(kvargs['path']).read()
+            rpc_contents = open(kvargs['path'], 'rU').read()
             _lset_fromfile(kvargs['path'])
             if rpc_xattrs['format'] == 'xml':
                 # covert the XML string into XML structure
