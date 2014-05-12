@@ -350,7 +350,7 @@ class Device(object):
           is a caller provided function that takes the response and
           will convert the results to native python types.  all kvargs
           will be passed to this function as well in the form:
-          :to_py:( self, rpc_rsp, **kvargs )
+          :to_py:( self, rpc_rsp, \**kvargs )
         """
 
         if isinstance(rpc_cmd, str):

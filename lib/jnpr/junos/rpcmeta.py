@@ -23,12 +23,12 @@ class _RpcMetaExec(object):
 
     def get_config(self, filter_xml=None, options={}):
         """
-          retrieve configuration from the Junos device
+        retrieve configuration from the Junos device
 
-          :filter_xml: is options, defines what to retrieve.  if omitted
-          then the entire configuration is returned
+        :filter_xml: is options, defines what to retrieve.  if omitted then the entire configuration is returned
 
-          :options: is a dict, creates attributes for the RPC
+        :options: is a dict, creates attributes for the RPC
+
         """
         rpc = E('get-configuration', options)
 
@@ -50,17 +50,15 @@ class _RpcMetaExec(object):
         """
         loads :contents: onto the Junos device, does not commit the change.
 
-        :options: is a dictionary of XML attributes to set within the
-        <load-configuration> RPC.  The :contents: are interpreted
-        by the :options: as follows:
+        :options: is a dictionary of XML attributes to set within the <load-configuration> RPC.
 
-          format='text' and action='set', then :contents: is a string
-          containing a series of "set" commands
+        The :contents: are interpreted by the :options: as follows:
 
-          format='text', then :contents: is a string containing Junos
-          configuration in curly-brace/text format
+        format='text' and action='set', then :contents: is a string containing a series of "set" commands
 
-          <otherwise> :contents: is XML structure
+        format='text', then :contents: is a string containing Junos configuration in curly-brace/text format
+
+        <otherwise> :contents: is XML structure
         """
         rpc = E('load-configuration', options)
 

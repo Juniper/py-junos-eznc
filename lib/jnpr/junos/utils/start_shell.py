@@ -30,7 +30,7 @@ class StartShell(object):
 
     def send(self, data):
         """
-        send the command :data: followed by a '\n' character
+        send the command :data: followed by a \'\\\\n\' character
         """
         self._chan.send(data)
         self._chan.send('\n')
