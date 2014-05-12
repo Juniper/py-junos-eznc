@@ -268,7 +268,11 @@ class Device(object):
     def open(self, *vargs, **kvargs):
         """
         opens a connection to the device using existing login/auth
-        information.  No additional options are supported; at this time
+        information.
+
+        kvargs['gather_facts']:
+            If set to True/False will override the device instance value
+            for only this open process
         """
         try:
             ts_start = datetime.datetime.now()
@@ -325,7 +329,8 @@ class Device(object):
 
         self.connected = True
 
-        if self._gather_facts is not False:
+        gather_facts = kvargs.get('gather_facts', self._gather_facts)
+        if gather_facts is True:
             self.facts_refresh()
 
         return self
