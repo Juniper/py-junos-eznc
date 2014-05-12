@@ -240,7 +240,8 @@ class SW(Util):
     # -------------------------------------------------------------------------
 
     def install(self, package, remote_path='/var/tmp', progress=None,
-                validate=False, checksum=None, cleanfs=True, no_copy=False):
+                validate=False, checksum=None, cleanfs=True, no_copy=False,
+                timeout=1800):
         """
         Performs the complete installation of the :package: that includes the
         following steps:
@@ -288,12 +289,21 @@ class SW(Util):
 
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
+
+        :timeout:
+          The amount of time (seconds) before declaring an RPC timeout.  This
+          argument was added since most of the time the "package add" RPC
+          takes a significant amount of time.  The default RPC timeout is 
+          generally around 30 seconds.  So this :timeout: value will be
+          used in the context of the SW installation process.  Defaults to
+          30 minutes (30*60=1800)
         """
         def _progress(report):
             if progress is not None:
                 progress(self._dev, report)
 
         rpc = self.rpc
+        dev = self.dev
 
         # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
@@ -312,18 +322,24 @@ class SW(Util):
 
         remote_package = remote_path + '/' + path.basename(package)
 
+        restore_timeout = dev.timeout      # for restoration later
+        dev.timeout = timeout              # set for long timeout
+
         if validate is True:
             _progress(
                 "validating software against current config,"
                 " please be patient ...")
             v_ok = self.validate(remote_package)
             if v_ok is not True:
+                dev.timeout = restore_timeout
                 return v_ok  # will be the string of output
 
         if self._multi_RE is False:
             # simple case of device with only one RE
             _progress("installing software ... please be patient ...")
-            return self.pkgadd(remote_package)
+            add_ok = self.pkgadd(remote_package)
+            dev.timeout = restore_timeout
+            return add_ok
         else:
             # we need to update multiple devices
             if self._multi_MX is True:
@@ -334,6 +350,7 @@ class SW(Util):
                 _progress(
                     "installing software on RE1 ... please be patient ...")
                 ok &= self.pkgadd(remote_package, re1=True)
+                dev.timeout = restore_timeout
                 return ok
             elif self._multi_VC is True:
                 ok = True
@@ -347,6 +364,7 @@ class SW(Util):
                         "installing software on VC member: {} ... please be"
                         " patient ...".format(vc_id))
                     ok &= self.pkgadd(remote_package, member=vc_id)
+                dev.timeout = restore_timeout
                 return ok
 
     # -------------------------------------------------------------------------
