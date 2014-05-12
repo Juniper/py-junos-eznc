@@ -71,5 +71,5 @@ class TestPersonality(unittest.TestCase):
 
     def test_invalid_series(self):
         self.facts['model'] = 'invalid'
-        with self.assertRaises(RuntimeError):
-            personality(self.dev, self.facts)
+        personality(self.dev, self.facts)
+        self.assertEqual(self.facts['personality'],'UNKNOWN')

@@ -2,6 +2,7 @@
 import os
 import types
 from inspect import isclass
+import platform
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -24,6 +25,7 @@ from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 
 _MODULEPATH = os.path.dirname(__file__)
+
 
 class _MyTemplateLoader(jinja2.BaseLoader):
 
@@ -55,6 +57,7 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class Device(object):
+    ON_JUNOS = platform.system().upper() == 'JUNOS'    
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -196,7 +199,7 @@ class Device(object):
         """
         vargs[0] -- ALTERNATIVE for kvargs['host']
 
-        kvargs['host'] -- REQUIRED
+        kvargs['host'] -- REQUIRED for off-box
           device hostname or ipaddress
 
         kvargs['user'] -- OPTIONAL
@@ -213,23 +216,40 @@ class Device(object):
           if :False: then the facts are not gathered on call to :open():
         """
 
-        # private attributes
-        try:
-            self._hostname = vargs[0] if len(vargs) else kvargs['host']
-        except:
-            raise ValueError("You must provide the 'host' value")
+        # ----------------------------------------
+        # setup instance connection/open variables
+        # ----------------------------------------
+
+        hostname = vargs[0] if len(vargs) else kvargs.get('host')
 
         self._port = kvargs.get('port', 830)
-
-        # user will default to $USER
-        self._auth_user = os.getenv('USER')
-        # user can get updated by ssh_config
-        self._sshconf_lkup()
-        # but if user is explit from call, then use it.
-        self._auth_user = kvargs.get('user') or self._auth_user
-
-        self._auth_password = kvargs.get('password') or kvargs.get('passwd')
         self._gather_facts = kvargs.get('gather_facts', True)
+
+        if self.__class__.ON_JUNOS is True and hostname is None:
+            # ---------------------------------
+            # running on a Junos device locally
+            # ---------------------------------            
+            self._auth_user = None
+            self._auth_password = None
+            self._hostname = 'localhost'
+        else:
+            # --------------------------            
+            # making a remote connection
+            # --------------------------
+            if hostname is None:
+                raise ValueError("You must provide the 'host' value")
+            self._hostname = hostname
+            # user will default to $USER
+            self._auth_user = os.getenv('USER')
+            # user can get updated by ssh_config
+            self._sshconf_lkup()
+            # but if user is explit from call, then use it.
+            self._auth_user = kvargs.get('user') or self._auth_user
+            self._auth_password = kvargs.get('password') or kvargs.get('passwd')
+        
+        # -----------------------------
+        # initialize instance variables
+        # ------------------------------
 
         self._conn = None
         self._j2ldr = _Jinja2ldr
@@ -255,7 +275,7 @@ class Device(object):
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
-                host=self.hostname,
+                host=self._hostname,
                 port=self._port,
                 username=self._auth_user,
                 password=self._auth_password,

@@ -8,7 +8,13 @@ def facts_routing_engines(junos, facts):
         'model',
         'up-time',
         'last-reboot-reason']
-    re_info = junos.rpc.get_route_engine_information()
+
+    try:
+        re_info = junos.rpc.get_route_engine_information()
+    except:
+        # this means that the RPC failed.  this should "never"
+        # happen, but we will trap it cleanly for now
+        return
 
     master = []
     re_list = re_info.xpath('.//route-engine')

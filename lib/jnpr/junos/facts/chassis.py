@@ -14,7 +14,17 @@ def facts_chassis(junos, facts):
         (2) hostname, domain, and fqdn are retrieved from configuration data;
             inherited configs are checked.
     """
-    rsp = junos.rpc.get_chassis_inventory()
+    try:
+        rsp = junos.rpc.get_chassis_inventory()
+        if rsp.tag == 'error': raise RuntimeError()
+    except:
+        # this means that the RPC caused a trap.  this should generally
+        # never happen, but we'll trap it cleanly for now
+        facts['2RE'] = False
+        facts['model'] = ''
+        facts['serialnumber'] = ''      
+        return  
+
     if rsp.tag == 'output':
         # this means that there was an error; due to the
         # fact that this connection is not on the master
@@ -36,5 +46,3 @@ def facts_chassis(junos, facts):
         # check the Backplane chassis-module
         facts['serialnumber'] = x_ch.xpath(
             'chassis-module[name="Backplane"]/serial-number')[0].text
-
-
