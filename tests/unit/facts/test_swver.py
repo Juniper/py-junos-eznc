@@ -64,6 +64,13 @@ class TestSrxCluster(unittest.TestCase):
         self.assertEqual(self.facts['version'], '12.3R6.6')
 
     @patch('jnpr.junos.Device.execute')
+    def test_swver_f_master_list(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.facts['master'] = ['RE0', 'RE1']
+        software_version(self.dev, self.facts)
+        self.assertEqual(self.facts['version'], '12.3R6.6')
+
+    @patch('jnpr.junos.Device.execute')
     def test_swver_hostname_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['master'] = 'RE5'
