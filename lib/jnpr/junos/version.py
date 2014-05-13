@@ -1,6 +1,6 @@
 #import time
 #__date__ = time.strftime("%Y-%b-%d")
 
-VERSION = "0.1.2"
-DATE = "2014-May-07"
+VERSION = "0.1.3.dev"
+DATE = "2014-May-09"
 

@@ -18,6 +18,9 @@ develop-eggs
 lib64
 env
 
+# Documentation
+docs/_build
+
 # Installer logs
 pip-log.txt
 #

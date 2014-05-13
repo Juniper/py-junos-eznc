@@ -35,7 +35,10 @@ def facts_personality(junos, facts):
     elif re.search("firefly", examine, re.IGNORECASE):
         facts['virtual'] = True
         persona = 'SRX_BRANCH'
+    elif 'olive' == examine:
+        facts['virtual'] = True
+        persona = 'OLIVE'
     else:
-        raise RuntimeError("Unknown device persona: %s" % examine)
+        persona = "UNKNOWN"
 
     facts['personality'] = persona
