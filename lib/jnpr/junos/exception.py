@@ -98,6 +98,12 @@ class ConnectError(Exception):
             self.__class__.__name__, 
             self.dev.hostname )
 
+class ProbeError(ConnectError):
+    """
+    Generated if auto_probe is enabled and the probe action fails
+    """
+    pass
+    
 class ConnectAuthError(ConnectError): 
     """
     Generated if the user-name, password is invalid

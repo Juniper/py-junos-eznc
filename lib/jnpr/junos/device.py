@@ -58,11 +58,12 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 class Device(object):
     ON_JUNOS = platform.system().upper() == 'JUNOS'    
+    auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
-
+    
     # ------------------------------------------------------------------------
     # property: hostname
     # ------------------------------------------------------------------------
@@ -214,6 +215,10 @@ class Device(object):
 
         kvargs['gather_facts'] -- optional
           if :False: then the facts are not gathered on call to :open():
+
+        kvargs['auto_probe'] -- OPTIONAL
+            if non-zero then this enables auto_probe at time of :open():
+            and defines the amount of time/seconds for the probe timeout
         """
 
         # ----------------------------------------
@@ -224,6 +229,7 @@ class Device(object):
 
         self._port = kvargs.get('port', 830)
         self._gather_facts = kvargs.get('gather_facts', True)
+        self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -273,7 +279,17 @@ class Device(object):
         kvargs['gather_facts']:
             If set to True/False will override the device instance value
             for only this open process
+
+        kvargs['auto_probe']:
+            if non-zero then this enables auto_probe and defines the amount 
+            of time/seconds for the probe timeout
         """
+
+        auto_probe = kvargs.get('auto_probe', self._auto_probe)
+        if auto_probe is not 0:
+            if not self.probe(auto_probe):
+                raise EzErrors.ProbeError(self)
+
         try:
             ts_start = datetime.datetime.now()
 
