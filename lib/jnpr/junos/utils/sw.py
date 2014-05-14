@@ -361,7 +361,7 @@ class SW(Util):
                         x).group(1) for x in self._RE_list]
                 for vc_id in vc_members:
                     _progress(
-                        "installing software on VC member: {} ... please be"
+                        "installing software on VC member: {0} ... please be"
                         " patient ...".format(vc_id))
                     ok &= self.pkgadd(remote_package, member=vc_id)
                 dev.timeout = restore_timeout

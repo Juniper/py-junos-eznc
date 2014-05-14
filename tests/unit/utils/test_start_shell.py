@@ -34,14 +34,13 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_run(self, mock_wait):
         self.shell._chan = MagicMock()
         self.shell.run('ls')
-        self.assertIn(call.send('echo $?'), self.shell._chan.mock_calls)
+        self.assertTrue(call.send('echo $?') in self.shell._chan.mock_calls)
 
     @patch('jnpr.junos.utils.start_shell.select')
     def test_startshell_wait_for(self, mock_select):
         mock_select.return_value = ['> ', 2, 3]
         self.shell._chan = MagicMock()
-        self.assertIn(call.endswith('> '),
-                      self.shell.wait_for('> ')[0].mock_calls)
+        self.assertTrue(call.endswith('> ') in self.shell.wait_for('> ')[0].mock_calls)
 
     @patch('jnpr.junos.utils.start_shell.StartShell.open')
     @patch('jnpr.junos.utils.start_shell.StartShell.close')

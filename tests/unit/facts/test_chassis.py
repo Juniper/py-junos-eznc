@@ -35,8 +35,7 @@ class TestChassis(unittest.TestCase):
     def test_chassis_exception_ConnectNotMasterError(self):
         xmldata = etree.XML('<rpc-reply><output>test</output></rpc-reply>')
         self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
-        with self.assertRaises(ConnectNotMasterError):
-            chassis(self.dev, self.facts)
+        self.assertRaises(ConnectNotMasterError, chassis, self.dev, self.facts)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

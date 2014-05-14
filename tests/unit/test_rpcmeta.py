@@ -19,7 +19,7 @@ class Test_RpcMetaExec(unittest.TestCase):
         self.rpc = _RpcMetaExec(self.dev)
 
     def test_rpcmeta_constructor(self):
-        self.assertIsInstance(self.rpc._junos, Device)
+        self.assertTrue(isinstance(self.rpc._junos, Device))
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_load_config(self, mock_execute_fn):

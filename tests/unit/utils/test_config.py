@@ -19,7 +19,7 @@ class TestConfig(unittest.TestCase):
         self.conf = Config(self.dev)
 
     def test_config_constructor(self):
-        self.assertIsInstance(self.conf._dev, Device)
+        self.assertTrue(isinstance(self.conf._dev, Device))
 
     def test_config_confirm(self):
         self.conf.rpc.commit_configuration = MagicMock()
@@ -38,12 +38,11 @@ class TestConfig(unittest.TestCase):
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_commit_exception(self, mock_jxml):
-        with self.assertRaises(AttributeError):
-            class MyException(Exception):
-                xml = 'test'
-            self.conf.rpc.commit_configuration = \
-                MagicMock(side_effect=MyException)
-            self.conf.commit()
+        class MyException(Exception):
+            xml = 'test'
+        self.conf.rpc.commit_configuration = \
+            MagicMock(side_effect=MyException)
+        self.assertRaises(AttributeError, self.conf.commit)
 
     def test_config_commit_exception_RpcError(self):
         ex = RpcError(rsp='ok')
@@ -58,8 +57,7 @@ class TestConfig(unittest.TestCase):
         el = root.find('company')
         ex = RpcError(rsp=el)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
-        with self.assertRaises(CommitError):
-            self.conf.commit()
+        self.assertRaises(CommitError, self.conf.commit)
 
     def test_commit_check(self):
         self.conf.rpc.commit_configuration = MagicMock()
@@ -86,8 +84,7 @@ class TestConfig(unittest.TestCase):
         el = root.find('company')
         ex = RpcError(rsp=el)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=ex)
-        with self.assertRaises(CommitError):
-            self.conf.commit_check()
+        self.assertRaises(CommitError, self.conf.commit_check)
 
     def test_config_diff(self):
         self.conf.rpc.get_configuration = MagicMock()

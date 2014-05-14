@@ -25,7 +25,7 @@ class TestScp(unittest.TestCase):
     def test_scp_close(self, mock_connect):
         self.dev.bind(scp=SCP)
         self.dev.scp.open()
-        self.assertIsNone(self.dev.scp.close())
+        self.assertEqual(self.dev.scp.close(), None)
 
     @patch('paramiko.SSHClient')
     def test_scp_context(self, mock_connect):

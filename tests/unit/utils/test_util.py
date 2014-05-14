@@ -24,9 +24,11 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(repr(self.util), 'jnpr.junos.utils.Util(1.1.1.1)')
 
     def test_dev_setter_exception(self):
-        with self.assertRaises(RuntimeError):
+        def mod_dev():
             self.util.dev = 'abc'
+        self.assertRaises(RuntimeError, mod_dev)
 
     def test_rpc_setter_exception(self):
-        with self.assertRaises(RuntimeError):
+        def mod_rpc():
             self.util.rpc = 'abc'
+        self.assertRaises(RuntimeError, mod_rpc)
