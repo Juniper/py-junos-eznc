@@ -98,6 +98,8 @@ class ConnectError(Exception):
             self.__class__.__name__, 
             self.dev.hostname )
 
+    __str__ = __repr__
+
 class ProbeError(ConnectError):
     """
     Generated if auto_probe is enabled and the probe action fails
