@@ -34,7 +34,7 @@ class TestSrxCluster(unittest.TestCase):
 
     def test_srx_cluster_none(self):
         self.facts['personality'] = 'MX'
-        self.assertIsNone(srx_cluster(self.dev, self.facts))
+        self.assertEqual(srx_cluster(self.dev, self.facts), None)
 
     @patch('jnpr.junos.Device.execute')
     def test_srx_cluster_no_node(self, mock_execute):

@@ -2,9 +2,8 @@ language: python
 cache: apt
 
 python:
+  - "2.6"
   - "2.7"
-#  - "3.3" dependent on ncclient 3.3 support
-#  - "pypy"
 
 before_install:
   - sudo apt-get install -qq python-dev libxml2-dev libxslt-dev
@@ -17,12 +16,3 @@ script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusiv
 
 notifications:
   email: false
-
-#deploy:
-  #provider: pypi # http://about.travis-ci.org/docs/user/deployment/pypi/
-  #user:
-  #password: see http://about.travis-ci.org/docs/user/encryption-keys/
-  #on:
-    #tags: true #only deploy to pypi when tags are updated
-###
-### possibly recommended for deployment: http://about.travis-ci.org/docs/user/travis-pro/

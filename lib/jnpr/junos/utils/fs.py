@@ -197,10 +197,7 @@ class FS(Util):
         if brief is True:
             results['files'] = [f.findtext('file-name').strip() for f in files]
         else:
-            results['files'] = {
-                f.findtext('file-name').strip(): FS._decode_file(f)
-                for f in files
-            }
+            results['files'] = dict((f.findtext('file-name').strip(), FS._decode_file(f)) for f in files)
 
         return results
 
@@ -228,7 +225,7 @@ class FS(Util):
             r['avail_block'] = int(ab.text)
             return r
 
-        return {_name(fs): _decode(fs) for fs in rsp.xpath('filesystem')}
+        return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
 
     # -------------------------------------------------------------------------
     ### storage_cleanup_check, storage_cleanip
@@ -245,7 +242,7 @@ class FS(Util):
             }
 
         # return a dict of name/decode pairs for each file
-        return {_name(f): _decode(f) for f in files}
+        return dict((_name(f), _decode(f)) for f in files)
 
     def storage_cleanup_check(self):
         """

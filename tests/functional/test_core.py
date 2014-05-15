@@ -34,7 +34,7 @@ class TestCore(unittest.TestCase):
         assert self.dev.timeout == 35
 
     def test_device_cli(self):
-        self.assertIn('srx210', self.dev.cli('show version'))
+        self.assertTrue('srx210' in self.dev.cli('show version'))
 
     def test_device_rpc(self):
         sw = self.dev.rpc.get_software_information()

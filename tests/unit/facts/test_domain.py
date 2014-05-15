@@ -38,5 +38,5 @@ class TestDomain(unittest.TestCase):
         """
         self.facts['hostname'] = 'test'
         facts_domain(self.dev, self.facts)
-        self.assertIsNone(self.facts['domain'])
+        self.assertEqual(self.facts['domain'], None)
         self.assertEqual(self.facts['fqdn'], 'test')

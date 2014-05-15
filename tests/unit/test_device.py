@@ -71,14 +71,12 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectAuthError(self, mock_manager):
         mock_manager.connect.side_effect = NcErrors.AuthenticationError
-        with self.assertRaises(EzErrors.ConnectAuthError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectAuthError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectRefusedError(self, mock_manager):
         mock_manager.connect.side_effect = NcErrors.SSHError
-        with self.assertRaises(EzErrors.ConnectRefusedError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectRefusedError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
     @patch('jnpr.junos.device.datetime')
@@ -89,8 +87,7 @@ class TestDevice(unittest.TestCase):
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
                                                   currenttime + timedelta(minutes=4)]
-        with self.assertRaises(EzErrors.ConnectTimeoutError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectTimeoutError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
     @patch('jnpr.junos.device.datetime')
@@ -101,21 +98,18 @@ class TestDevice(unittest.TestCase):
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
                                                   currenttime + timedelta(minutes=4)]
-        with self.assertRaises(EzErrors.ConnectError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectUnknownHostError(self, mock_manager):
         import socket
         mock_manager.connect.side_effect = socket.gaierror
-        with self.assertRaises(EzErrors.ConnectUnknownHostError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectUnknownHostError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_other_error(self, mock_manager):
         mock_manager.connect.side_effect = TypeError
-        with self.assertRaises(EzErrors.ConnectError):
-            self.dev.open()
+        self.assertRaises(EzErrors.ConnectError, self.dev.open)
 
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
@@ -158,23 +152,23 @@ class TestDevice(unittest.TestCase):
     @patch('os.getenv')
     def test_device__sshconf_lkup_path_not_exists(self, mock_env):
         mock_env.return_value = '/home/test'
-        self.assertIsNone(self.dev._sshconf_lkup())
+        self.assertEqual(self.dev._sshconf_lkup(), None)
 
     @patch('os.getenv')
     def test_device__sshconf_lkup_home_not_defined(self, mock_env):
         mock_env.return_value = None
-        self.assertIsNone(self.dev._sshconf_lkup())
+        self.assertEqual(self.dev._sshconf_lkup(), None)
         mock_env.assert_called_with('HOME')
 
     @patch('ncclient.manager.connect')
     @patch('jnpr.junos.Device.execute')
     def test_device_open(self, mock_connect, mock_execute):
-        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:        
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_cat.return_value = """
 
     domain jls.net
 
-            """          
+            """
             mock_connect.side_effect = self._mock_manager
             mock_execute.side_effect = self._mock_manager
             self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
@@ -182,14 +176,14 @@ class TestDevice(unittest.TestCase):
             self.assertEqual(self.dev2.connected, True)
 
     @patch('jnpr.junos.Device.execute')
-    def test_device_facts(self, mock_execute):          
+    def test_device_facts(self, mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.return_value = """
 
     domain jls.net
 
-            """          
+            """
             self.dev.facts_refresh()
             assert self.dev.facts['version'] == facts['version']
 
@@ -200,7 +194,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.user, 'rick')
 
     def test_device_get_password(self):
-        self.assertIsNone(self.dev.password)
+        self.assertEqual(self.dev.password, None)
 
     def test_device_set_password(self):
         self.dev.password = 'secret'
@@ -231,12 +225,12 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_conf_info(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('ge-0/0/0', self.dev.cli('show configuration'))
+        self.assertTrue('ge-0/0/0' in self.dev.cli('show configuration'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_output(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('Alarm', self.dev.cli('show system alarms'))
+        self.assertTrue('Alarm' in self.dev.cli('show system alarms'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
@@ -324,22 +318,24 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.kw, 'Test')
 
     def test_device_bind_varg_exception(self):
-        with self.assertRaises(ValueError):
+        def varg():
             self.dev.bind()
             mock = MagicMock()
             mock.__name__ = 'magic mock'
             #for *args
             self.dev.bind(mock)
             self.dev.bind(mock)
+        self.assertRaises(ValueError, varg)
 
     def test_device_bind_kvarg_exception(self):
-        with self.assertRaises(ValueError):
+        def kve():
             self.dev.bind()
             mock = MagicMock()
             mock.__name__ = 'magic mock'
             #for **kwargs
             self.dev.bind(kw=mock)
             self.dev.bind(kw=mock)
+        self.assertRaises(ValueError, kve)
 
     def test_device_template(self):
         # Try to load the template relative to module base
