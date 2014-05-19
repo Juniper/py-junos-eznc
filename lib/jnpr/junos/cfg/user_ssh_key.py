@@ -98,4 +98,4 @@ class UserSSHKey(Resource):
 
     def _r_catalog(self):
         # no catalog but the keys
-        self._rcatalog = {k: None for k in self.list}
+        self._rcatalog = dict((k, None) for k in self.list)

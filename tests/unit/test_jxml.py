@@ -32,4 +32,4 @@ class Test_JXML(unittest.TestCase):
             i = elem.tag.find('}')
             if i > 0:
                 i = i + 1
-        self.assertLessEqual(i, 0)
+        self.assertTrue(i <= 0)

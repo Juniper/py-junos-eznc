@@ -112,8 +112,7 @@ class TestSW(unittest.TestCase):
         #mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
-        self.assertIn(call('test.tgz', '/var/tmp'),
-                      mock_scp_put.mock_calls)
+        self.assertTrue(call('test.tgz', '/var/tmp') in mock_scp_put.mock_calls)
 
     @patch('jnpr.junos.utils.scp.SCP.__exit__')
     @patch('jnpr.junos.utils.scp.SCP.__init__')
@@ -216,14 +215,14 @@ class TestSW(unittest.TestCase):
     def test_sw_inventory(self):
         self.sw.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.sw.inventory,
+        self.assertEqual(self.sw.inventory,
                              {'current': None, 'rollback': None})
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
-        self.assertIn('Shutdown NOW', self.sw.reboot())
+        self.assertTrue('Shutdown NOW' in self.sw.reboot())
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
@@ -235,7 +234,7 @@ class TestSW(unittest.TestCase):
     def test_sw_poweroff(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
-        self.assertIn('Shutdown NOW', self.sw.poweroff())
+        self.assertTrue('Shutdown NOW' in self.sw.poweroff())
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_poweroff_exception(self, mock_execute):

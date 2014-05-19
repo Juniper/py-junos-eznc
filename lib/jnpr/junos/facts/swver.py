@@ -107,7 +107,7 @@ def facts_software_version(junos, facts):
     # extract the version information out of the RPC response
     # ------------------------------------------------------------------------
 
-    f_master = facts.get('master')    
+    f_master = facts.get('master')
 
     if x_swver.tag == 'multi-routing-engine-results':
         # we need to find/identify each of the routing-engine (CPU) versions.
@@ -115,15 +115,8 @@ def facts_software_version(junos, facts):
         facts['2RE'] = True
         versions = []
 
-        if isinstance(f_master, list):
-            xpath = './multi-routing-engine-item[re-name="{}"' \
-                    ']/software-information/host-name'.format(
-                        f_master[0].lower())
-        else:
-            xpath = './multi-routing-engine-item[re-name="{}"' \
-                    ']/software-information/host-name'.format(
-                        f_master.lower())
-
+        xpath = './multi-routing-engine-item[re-name="{0}"]/software-information/host-name'.format(
+            f_master.lower())
         facts['hostname'] = x_swver.findtext(xpath)
         if facts['hostname'] is None:
             # then there the re-name is not what we are expecting; we should

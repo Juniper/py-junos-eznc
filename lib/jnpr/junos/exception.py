@@ -1,6 +1,7 @@
 from lxml import etree
 from jnpr.junos import jxml
 
+
 class RpcError(Exception):
     """
     Parent class for all junos-pyez RPC Exceptions
@@ -21,6 +22,7 @@ class RpcError(Exception):
         """
         if None != self.rsp:
             return etree.tostring(self.rsp, pretty_print=True)
+
 
 class CommitError(RpcError):
     """
@@ -43,12 +45,13 @@ class LockError(RpcError):
 
 class UnlockError(RpcError):
     """
-    Generated in response to attempting to unlock the 
+    Generated in response to attempting to unlock the
     configuration database.
     """
     def __init__(self, rsp):
         RpcError.__init__(self, rsp=rsp)
         self.rpc_error = jxml.rpc_error(rsp)
+
 
 class PermissionError(RpcError):
     """
@@ -67,6 +70,7 @@ class PermissionError(RpcError):
 ####                    Connection Exceptions
 #### ================================================================
 #### ================================================================
+
 
 class ConnectError(Exception):
     """
@@ -87,22 +91,33 @@ class ConnectError(Exception):
     def port(self):
         """ login SSH port """
         return self.dev._port
-    
+
     def __init__(self, dev):
         self.dev = dev
         # @@@ need to attach attributes for each access
         # @@@ to user-name, host, jump-host, etc.
 
     def __repr__(self):
-        return "{}({})".format(
-            self.__class__.__name__, 
-            self.dev.hostname )
+        return "{0}({1})".format(
+            self.__class__.__name__,
+            self.dev.hostname)
 
-class ConnectAuthError(ConnectError): 
+    __str__ = __repr__
+
+
+class ProbeError(ConnectError):
+    """
+    Generated if auto_probe is enabled and the probe action fails
+    """
+    pass
+
+
+class ConnectAuthError(ConnectError):
     """
     Generated if the user-name, password is invalid
     """
     pass
+
 
 class ConnectTimeoutError(ConnectError):
     """
@@ -112,11 +127,13 @@ class ConnectTimeoutError(ConnectError):
     """
     pass
 
+
 class ConnectUnknownHostError(ConnectError):
     """
     Generated if the specific hostname does not DNS resolve
     """
     pass
+
 
 class ConnectRefusedError(ConnectError):
     """
@@ -125,6 +142,7 @@ class ConnectRefusedError(ConnectError):
     too many connections already.
     """
     pass
+
 
 class ConnectNotMasterError(ConnectError):
     """

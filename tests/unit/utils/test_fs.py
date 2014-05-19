@@ -27,12 +27,12 @@ class TestFS(unittest.TestCase):
 
     def test_cat_wrong_path_return_none(self):
         path = 'test/report'
-        self.assertIsNone(self.fs.cat(path))
+        self.assertEqual(self.fs.cat(path), None)
 
     def test_cat(self):
         self.fs._dev.rpc.file_show = MagicMock(side_effect=self._mock_manager)
         path = 'test/cat.txt'
-        self.assertIn('testing cat functionality', self.fs.cat(path))
+        self.assertTrue('testing cat functionality' in self.fs.cat(path))
         self.fs._dev.rpc.file_show.assert_called_with(filename='test/cat.txt')
 
     def test_cwd(self):
@@ -50,7 +50,7 @@ class TestFS(unittest.TestCase):
 
     def test_checksum_return_none(self):
         path = 'test/report'
-        self.assertIsNone(self.fs.checksum(path))
+        self.assertEqual(self.fs.checksum(path), None)
 
     def test_checksum_unknown_calc(self):
         path = 'test/report'
@@ -68,7 +68,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_file'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.stat(path),
+        self.assertEqual(self.fs.stat(path),
                              {'owner': 'pqr', 'path': '/var/abc.sh',
                               'permissions': 755,
                               'permissions_text': '-rwxr-xr-x', 'size': 2,
@@ -80,7 +80,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_dir'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.stat(path),
+        self.assertEqual(self.fs.stat(path),
                              {'path': '/var', 'type': 'dir', 'file_count': 1,
                               'size': 2})
 
@@ -88,13 +88,13 @@ class TestFS(unittest.TestCase):
         path = 'test/abc'
         self.fs.dev.rpc.file_list = MagicMock()
         self.fs.dev.rpc.file_list.find.return_value = 'output'
-        self.assertIsNone(self.fs.stat(path))
+        self.assertEqual(self.fs.stat(path), None)
 
     def test_ls_calling___decode_file(self):
         path = 'test/stat/decode_file'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.ls(path),
+        self.assertEqual(self.fs.ls(path),
                              {'owner': 'pqr', 'path': '/var/abc.sh',
                               'permissions': 755,
                               'permissions_text': '-rwxr-xr-x', 'size': 2,
@@ -106,7 +106,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_dir'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.ls(path),
+        self.assertEqual(self.fs.ls(path),
                              {'files':
                               {'abc': {'permissions_text': 'drwxr-xr-x',
                                        'ts_date': 'Feb 17 15:30',
@@ -122,7 +122,7 @@ class TestFS(unittest.TestCase):
         path = 'test/abc'
         self.fs.dev.rpc.file_list = MagicMock()
         self.fs.dev.rpc.file_list.find.return_value = 'output'
-        self.assertIsNone(self.fs.ls(path))
+        self.assertEqual(self.fs.ls(path), None)
 
     @patch('jnpr.junos.utils.fs.FS._decode_file')
     def test_ls_link_path_false(self, mock_decode_file):
@@ -137,7 +137,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_dir'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.ls(path, brief=True),
+        self.assertEqual(self.fs.ls(path, brief=True),
                              {'files': ['abc'], 'path': '/var',
                               'type': 'dir', 'file_count': 1, 'size': 2})
 
@@ -145,7 +145,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_symbolic_link'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertDictEqual(self.fs.ls(path),
+        self.assertEqual(self.fs.ls(path),
                              {'files':
                               {'abc': {'permissions_text': 'drwxr-xr-x',
                                        'ts_date': 'Feb 17 15:30',
@@ -221,7 +221,7 @@ class TestFS(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         src = 'test/tgz.txt'
         dst = 'test/xyz'
-        self.assertIn('testing tgz', self.fs.tgz(src, dst))
+        self.assertTrue('testing tgz' in self.fs.tgz(src, dst))
 
     @patch('jnpr.junos.utils.fs.StartShell')
     def test_rmdir(self, mock_StartShell):
@@ -257,7 +257,7 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_storage_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertDictEqual(self.fs.storage_usage(),
+        self.assertEqual(self.fs.storage_usage(),
                              {'/dev/abc':
                               {'avail_block': 234234,
                                'used_blocks': 2346455, 'used_pct': '1',
@@ -268,14 +268,14 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertDictEqual(self.fs.storage_cleanup(),
+        self.assertEqual(self.fs.storage_cleanup(),
                              {'/var/abc.txt':
                               {'ts_date': 'Apr 25 10:38', 'size': 11}})
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup_check(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertDictEqual(self.fs.storage_cleanup_check(),
+        self.assertEqual(self.fs.storage_cleanup_check(),
                              {'/var/abc.txt':
                               {'ts_date': 'Apr 25 10:38', 'size': 11}})
 
