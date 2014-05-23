@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import paramiko
+import logging
 from scp import SCPClient
 
 
@@ -12,6 +13,8 @@ class SCP(object):
         """
         self._junos = junos
         self._scpargs = scpargs
+        #to avoid message: No handlers could be found for logger "paramiko.transport"
+        logging.raiseExceptions = False
 
     def open(self, **scpargs):
         """
