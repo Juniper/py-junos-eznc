@@ -48,8 +48,6 @@ class SW(Util):
         self._RE_list = [
             x for x in dev.facts.keys() if x.startswith('version_RE')]
         self._multi_RE = bool(len(self._RE_list) > 1)
-        self._multi_MX = bool(
-            dev.facts['personality'] == "MX" and self._multi_RE is True)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True)
 
@@ -342,17 +340,7 @@ class SW(Util):
             return add_ok
         else:
             # we need to update multiple devices
-            if self._multi_MX is True:
-                ok = True
-                _progress(
-                    "installing software on RE0 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re0=True)
-                _progress(
-                    "installing software on RE1 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re1=True)
-                dev.timeout = restore_timeout
-                return ok
-            elif self._multi_VC is True:
+            if self._multi_VC is True:
                 ok = True
                 # extract the VC number out of the 'version_RE<n>' string
                 vc_members = [
@@ -366,6 +354,18 @@ class SW(Util):
                     ok &= self.pkgadd(remote_package, member=vc_id)
                 dev.timeout = restore_timeout
                 return ok
+            else:
+                # then this is a device with two RE that supports the "re0"
+                # and "re1" options to the command (M, MX tested only)
+                ok = True
+                _progress(
+                    "installing software on RE0 ... please be patient ...")
+                ok &= self.pkgadd(remote_package, re0=True)
+                _progress(
+                    "installing software on RE1 ... please be patient ...")
+                ok &= self.pkgadd(remote_package, re1=True)
+                dev.timeout = restore_timeout
+                return ok
 
     # -------------------------------------------------------------------------
     # rebbot - system reboot
@@ -375,14 +375,13 @@ class SW(Util):
         """
         Perform a system reboot, with optional delay (in minutes).
 
-        If the device is an MX with dual-RE installed, then both RE will be
-        rebooted.
+        If the device is equipped with dual-RE, then both RE will be
+        rebooted.  This code also hanldes EX/QFX VC.
         """
         cmd = E('request-reboot', E('in', str(in_min)))
 
-        if self._multi_MX is True:
+        if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
-
         try:
             rsp = self.rpc(cmd)
             got = rsp.getparent().findtext('.//request-reboot-status').strip()
@@ -399,14 +398,13 @@ class SW(Util):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
-        If the device is an MX with dual-RE installed, then both RE will be
-        rebooted.
+        If the device is equipped with dual-RE, then both RE will be
+        rebooted.  This code also hanldes EX/QFX VC.
         """
         cmd = E('request-power-off', E('in', str(in_min)))
 
-        if self._multi_MX is True:
+        if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
-
         try:
             rsp = self.rpc(cmd)
             return rsp.getparent().findtext('.//request-reboot-status').strip()
