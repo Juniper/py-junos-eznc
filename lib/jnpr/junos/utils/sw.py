@@ -132,6 +132,8 @@ class SW(Util):
         # check for the logger barncale for 'paramiko.transport'
         plog = logging.getLogger('paramiko.transport')
         if not plog.handlers: 
+            class NullHandler(logging.Handler):
+                def emit(self, record): pass
             plog.addHandler(logging.NullHandler())        
 
         # execute the secure-copy with the Python SCP module
