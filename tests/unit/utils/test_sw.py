@@ -72,12 +72,6 @@ class TestSW(unittest.TestCase):
         self.assertFalse(self.sw._multi_RE)
 
     @patch('jnpr.junos.Device.execute')
-    def test_sw_constructor_multi_mx(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.sw = SW(self.dev)
-        self.assertFalse(self.sw._multi_MX)
-
-    @patch('jnpr.junos.Device.execute')
     def test_sw_constructor_multi_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw = SW(self.dev)
