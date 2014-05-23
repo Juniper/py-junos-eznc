@@ -116,11 +116,11 @@ def facts_software_version(junos, facts):
         versions = []
 
         if isinstance(f_master, list):
-            xpath = './multi-routing-engine-item[re-name="{}"' \
+            xpath = './multi-routing-engine-item[re-name="{0}"' \
                     ']/software-information/host-name'.format(
             f_master[0].lower())
         else:
-            xpath = './multi-routing-engine-item[re-name="{}"' \
+            xpath = './multi-routing-engine-item[re-name="{0}"' \
                     ']/software-information/host-name'.format(
             f_master.lower())
 
