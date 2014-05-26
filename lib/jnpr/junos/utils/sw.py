@@ -134,7 +134,7 @@ class SW(Util):
         if not plog.handlers: 
             class NullHandler(logging.Handler):
                 def emit(self, record): pass
-            plog.addHandler(logging.NullHandler())        
+            plog.addHandler(NullHandler())
 
         # execute the secure-copy with the Python SCP module
         with SCP(self._dev, progress=_scp_progress) as scp:            
