@@ -90,7 +90,7 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff()
         self.conf.rpc.get_configuration.\
-            assert_called_with({'compare': 'rollback', 'rollback': '0'})
+            assert_called_with({'compare': 'rollback', 'rollback': '0', 'format':'text'})
 
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='')

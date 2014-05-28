@@ -123,7 +123,7 @@ class Config(Util):
             raise ValueError("Invalid rollback #" + str(rb_id))
 
         rsp = self.rpc.get_configuration(dict(
-            compare='rollback', rollback=str(rb_id)
+            compare='rollback', rollback=str(rb_id), format='text'
         ))
 
         diff_txt = rsp.find('configuration-output').text
