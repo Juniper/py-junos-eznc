@@ -7,10 +7,10 @@
 # items.
 # -------------------------------------------------------------------
 
-FpcInfoTable:
+FpcHwTable:
     rpc: get-chassis-inventory
     item: .//name[starts-with(.,'FPC')]/parent::*
-    view: _fpc_info_view
+    view: _fpc_hw_view
 
 # -------------------------------------------------------------------
 # View
@@ -20,7 +20,7 @@ FpcInfoTable:
 # bits of information from the FPC items
 # -------------------------------------------------------------------
 
-_fpc_info_view:
+_fpc_hw_view:
     fields:
         sn: serial-number
         pn: part-number
