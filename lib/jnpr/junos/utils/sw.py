@@ -159,6 +159,8 @@ class SW(Util):
           any additional parameters to the 'request' command can
           be passed within kvargs, following the RPC syntax
           methodology (dash-2-underscore,etc.)
+
+        .. todo:: Add way to notify user why installation failed.
         """
 
         args = dict(no_validate=True, package_name=remote_package)
@@ -172,7 +174,8 @@ class SW(Util):
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
-        return True if rc == 0 else got.findtext('output').strip()
+        #return True if rc == 0 else got.findtext('output').strip()
+        return True if rc == 0 else False
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
