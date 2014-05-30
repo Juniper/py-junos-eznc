@@ -33,6 +33,7 @@ def facts_chassis(junos, facts):
 
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
+        facts['RE_hw_mi'] = True
         x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
     else:
         facts['2RE'] = False
