@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.coverage',
+    'sphinx.ext.todo',    
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -97,6 +98,9 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
+
+# Produce todo output
+todo_include_todos = True
 
 
 # -- Options for HTML output ----------------------------------------------
