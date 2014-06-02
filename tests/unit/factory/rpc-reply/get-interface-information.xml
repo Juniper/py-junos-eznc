@@ -1,0 +1,155 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <interface-information xmlns="http://xml.juniper.net/junos/12.1X46/junos-interface" junos:style="normal">
+        <physical-interface>
+            <name>ge-0/0/0</name>
+            <admin-status junos:format="Enabled">up</admin-status>
+            <oper-status>up</oper-status>
+            <local-index>133</local-index>
+            <snmp-index>506</snmp-index>
+            <link-level-type>Ethernet</link-level-type>
+            <mtu>1514</mtu>
+            <source-filtering>disabled</source-filtering>
+            <link-mode>Full-duplex</link-mode>
+            <speed>1000mbps</speed>
+            <bpdu-error>none</bpdu-error>
+            <l2pt-error>none</l2pt-error>
+            <loopback>disabled</loopback>
+            <if-flow-control>enabled</if-flow-control>
+            <if-auto-negotiation>enabled</if-auto-negotiation>
+            <if-remote-fault>online</if-remote-fault>
+            <if-device-flags>
+                <ifdf-present/>
+                <ifdf-running/>
+            </if-device-flags>
+            <if-config-flags>
+                <iff-snmp-traps/>
+                <internal-flags>0x4000</internal-flags>
+            </if-config-flags>
+            <if-media-flags>
+                <ifmf-none/>
+            </if-media-flags>
+            <physical-interface-cos-information>
+                <physical-interface-cos-hw-max-queues>8</physical-interface-cos-hw-max-queues>
+                <physical-interface-cos-use-max-queues>8</physical-interface-cos-use-max-queues>
+            </physical-interface-cos-information>
+            <current-physical-address>00:0c:29:5f:9b:88</current-physical-address>
+            <hardware-physical-address>00:0c:29:5f:9b:88</hardware-physical-address>
+            <interface-flapped junos:seconds="18291">2014-05-21 07:52:41 UTC (05:04:51 ago)</interface-flapped>
+            <traffic-statistics junos:style="brief">
+                <input-bps>3064</input-bps>
+                <input-pps>3</input-pps>
+                <output-bps>4608</output-bps>
+                <output-pps>3</output-pps>
+            </traffic-statistics>
+            <active-alarms>
+                <interface-alarms>
+                    <alarm-not-present/>
+                </interface-alarms>
+            </active-alarms>
+            <active-defects>
+                <interface-alarms>
+                    <alarm-not-present/>
+                </interface-alarms>
+            </active-defects>
+            <ethernet-mac-statistics junos:style="brief">
+                <input-bytes>1636740</input-bytes>
+                <input-packets>14580</input-packets>
+                <output-bytes>533715</output-bytes>
+                <output-packets>4312</output-packets>
+            </ethernet-mac-statistics>
+            <ethernet-filter-statistics junos:style="brief">
+                <input-reject-count>3262</input-reject-count>
+                <output-packet-pad-count>0</output-packet-pad-count>
+                <output-packet-error-count>0</output-packet-error-count>
+            </ethernet-filter-statistics>
+            <ethernet-autonegotiation>
+                <autonegotiation-status>complete</autonegotiation-status>
+                <link-partner-status>OK</link-partner-status>
+                <link-partner-duplexity>full-duplex</link-partner-duplexity>
+                <flow-control>None</flow-control>
+                <local-info>
+                    <local-flow-control>None</local-flow-control>
+                    <local-remote-fault>Link OK</local-remote-fault>
+                </local-info>
+            </ethernet-autonegotiation>
+            <interface-transmit-statistics>Disabled</interface-transmit-statistics>
+        </physical-interface>
+        <physical-interface>
+            <name>ge-0/0/1</name>
+            <admin-status junos:format="Enabled">up</admin-status>
+            <oper-status>up</oper-status>
+            <local-index>134</local-index>
+            <snmp-index>508</snmp-index>
+            <link-level-type>Ethernet</link-level-type>
+            <mtu>1514</mtu>
+            <source-filtering>disabled</source-filtering>
+            <link-mode>Full-duplex</link-mode>
+            <speed>1000mbps</speed>
+            <bpdu-error>none</bpdu-error>
+            <l2pt-error>none</l2pt-error>
+            <loopback>disabled</loopback>
+            <if-flow-control>enabled</if-flow-control>
+            <if-auto-negotiation>enabled</if-auto-negotiation>
+            <if-remote-fault>online</if-remote-fault>
+            <if-device-flags>
+                <ifdf-present/>
+                <ifdf-running/>
+            </if-device-flags>
+            <if-config-flags>
+                <iff-snmp-traps/>
+                <internal-flags>0x4000</internal-flags>
+            </if-config-flags>
+            <if-media-flags>
+                <ifmf-none/>
+            </if-media-flags>
+            <physical-interface-cos-information>
+                <physical-interface-cos-hw-max-queues>8</physical-interface-cos-hw-max-queues>
+                <physical-interface-cos-use-max-queues>8</physical-interface-cos-use-max-queues>
+            </physical-interface-cos-information>
+            <current-physical-address>00:0c:29:5f:9b:92</current-physical-address>
+            <hardware-physical-address>00:0c:29:5f:9b:92</hardware-physical-address>
+            <interface-flapped junos:seconds="50877">2014-05-20 22:49:35 UTC (14:07:57 ago)</interface-flapped>
+            <traffic-statistics junos:style="brief">
+                <input-bps>0</input-bps>
+                <input-pps>0</input-pps>
+                <output-bps>0</output-bps>
+                <output-pps>0</output-pps>
+            </traffic-statistics>
+            <active-alarms>
+                <interface-alarms>
+                    <alarm-not-present/>
+                </interface-alarms>
+            </active-alarms>
+            <active-defects>
+                <interface-alarms>
+                    <alarm-not-present/>
+                </interface-alarms>
+            </active-defects>
+            <ethernet-mac-statistics junos:style="brief">
+                <input-bytes>16181997</input-bytes>
+                <input-packets>153047</input-packets>
+                <output-bytes>0</output-bytes>
+                <output-packets>0</output-packets>
+            </ethernet-mac-statistics>
+            <ethernet-filter-statistics junos:style="brief">
+                <input-reject-count>33777</input-reject-count>
+                <output-packet-pad-count>0</output-packet-pad-count>
+                <output-packet-error-count>0</output-packet-error-count>
+            </ethernet-filter-statistics>
+            <ethernet-autonegotiation>
+                <autonegotiation-status>complete</autonegotiation-status>
+                <link-partner-status>OK</link-partner-status>
+                <link-partner-duplexity>full-duplex</link-partner-duplexity>
+                <flow-control>None</flow-control>
+                <local-info>
+                    <local-flow-control>None</local-flow-control>
+                    <local-remote-fault>Link OK</local-remote-fault>
+                </local-info>
+            </ethernet-autonegotiation>
+            <interface-transmit-statistics>Disabled</interface-transmit-statistics>
+        </physical-interface>
+    </interface-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
