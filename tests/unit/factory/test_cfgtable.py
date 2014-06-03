@@ -60,7 +60,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.zit._data_dict['get_fields']=['system-services']
         self.zit.get(security_zone='untrust', key='host-inbound-traffic')
-        self.assertIn('get_fields', self.zit._data_dict)
+        self.assertTrue('get_fields' in self.zit._data_dict)
 
     def test_cfgtable_dot_none_RuntimeError(self):
         ret_val = '<configuration><security><zones><test-zone>' \
