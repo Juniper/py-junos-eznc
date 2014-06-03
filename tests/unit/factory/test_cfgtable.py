@@ -14,7 +14,7 @@ from mock import MagicMock, patch
 
 from jnpr.junos.factory import loadyaml
 try:
-    _YAML_ = loadyaml('lib/jnpr/junos/cfgro/srx') #removed .yml to cover __init__.py 32: path += '.yml'
+    _YAML_ = loadyaml('lib/jnpr/junos/cfgro/srx')
 except:
     # Try to load the template relative to test base
     try:
@@ -58,7 +58,7 @@ class TestFactoryCfgTable(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get_fields(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.zit._data_dict['get_fields']=['system-services']
+        self.zit._data_dict['get_fields'] = ['system-services']
         self.zit.get(security_zone='untrust', key='host-inbound-traffic')
         self.assertTrue('get_fields' in self.zit._data_dict)
 

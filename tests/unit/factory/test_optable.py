@@ -11,7 +11,7 @@ from jnpr.junos.op.phyport import PhyPortTable
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-from mock import MagicMock, patch
+from mock import patch
 
 
 @attr('unit')
@@ -43,6 +43,24 @@ class TestFactoryOpTable(unittest.TestCase):
                              'rpc-reply', fname)
         self.ppt.get()
         self.assertEqual(len(self.ppt), 2)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_optable_view_get(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get()
+        v = self.ppt['ge-0/0/0']
+        self.assertEqual(v['speed'], '1000mbps')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_optable_view_get_unknown_field(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get()
+
+        def bad(key):
+            v = self.ppt['ge-0/0/0']
+            return v[key]
+
+        self.assertRaises(ValueError, bad, 'bunk')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
