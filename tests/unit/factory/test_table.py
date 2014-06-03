@@ -50,7 +50,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_get_keys_values(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.assertListEqual(self.ppt.keys(), ['ge-0/0/0', 'ge-0/0/1'])
+        self.assertEqual(self.ppt.keys(), ['ge-0/0/0', 'ge-0/0/1'])
         self.assertEqual(len(self.ppt.values()), 2)
         self.ppt.view = None
         self.assertEqual(len(self.ppt.values()), 2)
@@ -58,8 +58,8 @@ class TestFactoryTable(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_table__getitem__(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.ppt.get('ge-0/0/0')
-        self.assertEqual(self.ppt[0].__class__.__name__, 'PhyPortView')
+        ret = self.ppt.get('ge-0/0/0')
+        self.assertEqual(ret.__class__.__name__, 'PhyPortTable')
 
 
     @patch('jnpr.junos.Device.execute')
