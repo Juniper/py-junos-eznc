@@ -75,7 +75,7 @@ class TestFactoryTable(unittest.TestCase):
         self.assertEqual(len(self.ppt.items()[1][1]), 8)
 
     def test_table_get_return_none(self):
-        self.assertIsNone(self.table.get('ge-0/0/0'))
+        self.assertEqual(self.table.get('ge-0/0/0'), None)
 
     @patch('jnpr.junos.Device.execute')
     @patch('__builtin__.file')
