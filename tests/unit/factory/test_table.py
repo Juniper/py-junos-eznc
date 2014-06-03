@@ -58,8 +58,9 @@ class TestFactoryTable(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_table__getitem__(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        ret = self.ppt.get('ge-0/0/0')
-        self.assertEqual(ret.__class__.__name__, 'PhyPortTable')
+        x= self.ppt.get('ge-0/0/0')
+        print (self.ppt[0].ITEM_NAME_XPATH)
+        self.assertEqual(self.ppt[0].ITEM_NAME_XPATH, 'name')
 
 
     @patch('jnpr.junos.Device.execute')
