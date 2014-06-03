@@ -39,10 +39,10 @@ class TestVersionInfo(unittest.TestCase):
         self.assertTrue(version_info('13.3-20131120') >= (12, 1))
 
     def test_version_info_eq(self):
-        self.assertEqual(version_info('13.3-20131120'), (13, 3))
+        self.assertTrue(version_info('13.3-20131120') == (13, 3))
 
     def test_version_info_not_eq(self):
-        self.assertNotEqual(version_info('13.3-20131120'), (15, 3))
+        self.assertTrue(version_info('13.3-20131120') != (15, 3))
 
 
 @attr('unit')

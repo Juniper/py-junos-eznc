@@ -8,12 +8,13 @@ import os
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
 
-from mock import MagicMock, patch
+from mock import patch
 from lxml import etree
 from jnpr.junos.op.phyport import PhyPortTable
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+
 
 @attr('unit')
 class TestFactoryTable(unittest.TestCase):
@@ -42,7 +43,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_repr_xml_not_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.table.xml=self.ppt.xml
+        self.table.xml = self.ppt.xml
         self.table.ITEM_XPATH = self.ppt.ITEM_XPATH
         self.assertEqual(repr(self.table), 'Table:1.1.1.1: 2 items')
 
@@ -59,12 +60,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table__getitem__(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        try:
-            self.assertEqual(self.ppt[0].ITEM_NAME_XPATH, 'name')
-        except ValueError:
-            #need to fix for python 2.6
-            pass
-
+        self.assertEqual(self.ppt[0].ITEM_NAME_XPATH, 'name')
 
     @patch('jnpr.junos.Device.execute')
     def test_table__contains__(self, mock_execute):
@@ -87,10 +83,9 @@ class TestFactoryTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.ppt.xml = etree.XML('<root><a>test</a></root>')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, append='test')
-        mock_file.assert_called_once_with('/vasr/tmssp/foo_1.1.1.1_test.xml','w')
+        mock_file.assert_called_once_with('/vasr/tmssp/foo_1.1.1.1_test.xml', 'w')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, timestamp=True)
         self.assertEqual(mock_file.call_count, 2)
-
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
