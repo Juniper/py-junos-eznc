@@ -118,7 +118,7 @@ class Table(object):
 
         if not isinstance(key_value, list):
             raise RuntimeError(
-                "What to do with key, table:'%'" %
+                "What to do with key, table:'%s'" %
                 self.__class__.__name__)
 
         # ok, so it's a list, which means we need to extract tuple values
