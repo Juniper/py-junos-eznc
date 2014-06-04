@@ -147,7 +147,7 @@ class View(object):
 
         more = type('RunstatViewMore', (object,), {})()
         if fields is True:
-            more.fields = RunstatMakerViewFields()
+            more.fields = ViewFields()
 
         # ---------------------------------------------------------------------
         # callback through context manager

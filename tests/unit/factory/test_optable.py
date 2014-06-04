@@ -6,7 +6,8 @@ import os
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
-from jnpr.junos.op.phyport import PhyPortTable
+from jnpr.junos.op.phyport import PhyPortStatsTable
+from jnpr.junos.op.ethport import EthPortTable
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -23,7 +24,7 @@ class TestFactoryOpTable(unittest.TestCase):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
-        self.ppt = PhyPortTable(self.dev)
+        self.ppt = PhyPortStatsTable(self.dev)
 
     @patch('jnpr.junos.Device.execute')
     def test_optable_get(self, mock_execute):
@@ -49,7 +50,15 @@ class TestFactoryOpTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get()
         v = self.ppt['ge-0/0/0']
-        self.assertEqual(v['speed'], '1000mbps')
+        self.assertEqual(v['rx_packets'], 1207)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_optable_view_get_astype_bool(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        et = EthPortTable(self.dev)
+        et.get()
+        v = et['ge-0/0/0']
+        self.assertEqual(v['present'], True)
 
     @patch('jnpr.junos.Device.execute')
     def test_optable_view_get_unknown_field(self, mock_execute):
