@@ -69,6 +69,11 @@ class TestPersonality(unittest.TestCase):
         personality(self.dev, self.facts)
         self.assertEqual(self.facts['personality'], 'SRX_HIGHEND')
 
+    def test_personality_olive(self):
+        self.facts['model'] = 'olive'
+        personality(self.dev, self.facts)
+        self.assertEqual(self.facts['personality'], 'OLIVE')
+
     def test_invalid_series(self):
         self.facts['model'] = 'invalid'
         personality(self.dev, self.facts)

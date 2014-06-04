@@ -1,4 +1,4 @@
-__author__ = "Rick Sherman"
+__author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest
@@ -39,6 +39,27 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_repr_xml_none(self):
         self.assertEqual(repr(self.table), 'Table:1.1.1.1 - Table empty')
 
+    def test_table_view_setter_ValueError(self):
+        try:
+            self.table.view = 'test'
+        except Exception as ex:
+            self.assertEqual(ex.__class__, ValueError)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_keys_RuntimeError(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get('ge-0/0/0')
+        self.ppt.ITEM_NAME_XPATH = 1
+        self.assertRaises(RuntimeError, self.ppt.keys)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_keys__keys_composite(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get('ge-0/0/0')
+        self.ppt.ITEM_NAME_XPATH = ['name', 'mtu']
+        self.assertEqual(self.ppt.keys(),
+                         [('ge-0/0/0', '1514'), ('ge-0/0/1', '1514')])
+
     @patch('jnpr.junos.Device.execute')
     def test_table_repr_xml_not_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -63,6 +84,18 @@ class TestFactoryTable(unittest.TestCase):
         self.assertEqual(self.ppt[0].ITEM_NAME_XPATH, 'name')
 
     @patch('jnpr.junos.Device.execute')
+    def test_table__getitem__slice(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get('ge-0/0/0')
+        self.assertEqual(self.ppt[:1][0].__class__.__name__, 'PhyPortView')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_table__getitem__tuple(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ppt.get('ge-0/0/0')
+        self.assertEqual(self.ppt[('ge-0/0/0',)], None)
+
+    @patch('jnpr.junos.Device.execute')
     def test_table__contains__(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
@@ -77,13 +110,17 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_get_return_none(self):
         self.assertEqual(self.table.get('ge-0/0/0'), None)
 
+    def test_table_get_RuntimeError(self):
+        self.assertRaises(RuntimeError, self.table._keys)
+
     @patch('jnpr.junos.Device.execute')
     @patch('__builtin__.file')
     def test_table_savexml(self, mock_file, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.xml = etree.XML('<root><a>test</a></root>')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, append='test')
-        mock_file.assert_called_once_with('/vasr/tmssp/foo_1.1.1.1_test.xml', 'w')
+        mock_file.assert_called_once_with('/vasr/tmssp/foo_1.1.1.1_test.xml',
+                                          'w')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, timestamp=True)
         self.assertEqual(mock_file.call_count, 2)
 
