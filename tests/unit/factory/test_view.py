@@ -6,8 +6,8 @@ from nose.plugins.attrib import attr
 from mock import MagicMock
 from jnpr.junos import Device
 from jnpr.junos.factory.view import View
-from jnpr.junos.op.phyport import PhyPortTable
-
+from jnpr.junos.op.phyport import PhyPortTable, PhyPortStatsTable, PhyPortStatsView
+from jnpr.junos.op.ethport import EthPortTable
 from lxml import etree
 
 
@@ -17,7 +17,7 @@ class TestFactoryView(unittest.TestCase):
     def setUp(self):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                   gather_facts=False)
-        self.ppt = PhyPortTable(self.dev)
+        self.ppt = PhyPortStatsTable(self.dev)
 
         ret_val = '<physical-interface> \
             <name>ge-0/0/0</name> \
@@ -25,7 +25,7 @@ class TestFactoryView(unittest.TestCase):
             <oper-status>up</oper-status> \
         </physical-interface>'
         xml = etree.fromstring(ret_val)
-        self.v = View(self.ppt, xml)
+        self.v = PhyPortStatsView(self.ppt, xml)
 
     def test_view_init(self):
         self.assertEqual(self.v.key, 'ge-0/0/0')
@@ -37,7 +37,7 @@ class TestFactoryView(unittest.TestCase):
         self.assertRaises(ValueError, View, self.ppt, ['test'])
 
     def test_view_repr(self):
-        self.assertEqual(str(self.v), 'View:ge-0/0/0')
+        self.assertEqual(str(self.v), 'PhyPortStatsView:ge-0/0/0')
 
     def test_view_d(self):
         self.assertEqual(self.v.D, self.dev)
@@ -54,7 +54,7 @@ class TestFactoryView(unittest.TestCase):
         self.assertEqual(self.v.name, ('ge-0/0/0', 'up'))
 
     def test_view_asview(self):
-        self.assertEqual(type(self.v.asview(PhyPortTable)), PhyPortTable)
+        self.assertEqual(type(self.v.asview(PhyPortStatsTable)), PhyPortStatsTable)
 
     def test_view_refresh_can_refresh_false(self):
         self.v._table.can_refresh = False
@@ -72,16 +72,38 @@ class TestFactoryView(unittest.TestCase):
         except Exception as ex:
             self.assertEqual(ex.__class__, ValueError)
 
-    def test_view_updater(self):
+    def test_view_updater_context(self):
         with self.v.updater(fields=False) as up:
             self.assertEqual(up.__class__.__name__, 'RunstatViewMore')
 
     def test_view_updater_fields_true(self):
         def fn():
-            with self.v.updater():
+            with self.v.updater(fields=True):
                 pass
-        self.assertRaises(NameError, fn)
+        fn()
+        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+
+    def test_view_updater_groups_true(self):
+        def fn():
+            with self.v.updater(groups=True):
+                pass
+        fn()
+        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
 
     def test_view_updater_all_false(self):
-        with self.v.updater(fields=False, all=False):
-            self.assertEqual(self.v.FIELDS, {})
+        with self.v.updater(all=False):
+            self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+
+    def test_view_updater_with_groups_all_true(self):
+        def fn():
+            with self.v.updater(all=True) as more:
+                more.groups = {}
+        fn()
+        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+
+    def test_view_updater_with_groups_all_false(self):
+        def fn():
+            with self.v.updater(all=False) as more:
+                more.groups = {}
+        fn()
+        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
