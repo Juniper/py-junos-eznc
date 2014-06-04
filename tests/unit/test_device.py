@@ -111,6 +111,15 @@ class TestDevice(unittest.TestCase):
         mock_manager.connect.side_effect = TypeError
         self.assertRaises(EzErrors.ConnectError, self.dev.open)
 
+    def test_device_probe_error(self):
+        mock_probe = MagicMock()
+        mock_probe.return_value = None
+        self.dev.probe = mock_probe
+
+        def fn():
+            self.dev.open(auto_probe=1)
+        self.assertRaises(EzErrors.ProbeError, fn)
+
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch('__builtin__.open', mock):
@@ -140,6 +149,11 @@ class TestDevice(unittest.TestCase):
         localdev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
+
+    def test_device_local(self):
+        Device.ON_JUNOS = True
+        localdev = Device()
+        self.assertEqual(localdev._hostname, 'localhost')
 
     @patch('jnpr.junos.device.os')
     @patch('__builtin__.open')
@@ -262,12 +276,12 @@ class TestDevice(unittest.TestCase):
 <bad-element>get-bgp-summary-information</bad-element>
 </error-info>
 <error-message>permission denied</error-message>
-</rpc-error>                
+</rpc-error>
             """
             xml = etree.XML(rpc_err)
 
         self.dev._conn.rpc = MagicMock(side_effect=MyException)
-        self.assertRaises(RpcError, self.dev.execute, 
+        self.assertRaises(RpcError, self.dev.execute,
             '<get-software-information/>')
 
     def test_device_execute_rpc_error(self):
@@ -405,4 +419,3 @@ class TestDevice(unittest.TestCase):
 
     def _do_nothing(self, *args, **kwargs):
         return 'Nothing'
-    
