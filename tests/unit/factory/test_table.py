@@ -1,4 +1,4 @@
-__author__ = "Rick Sherman"
+__author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest

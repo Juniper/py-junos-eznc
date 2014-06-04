@@ -219,6 +219,13 @@ class TestSW(unittest.TestCase):
         self.assertTrue('Shutdown NOW' in self.sw.reboot())
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_multi_re_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.sw._multi_VC = False
+        self.assertTrue('Shutdown NOW' in self.sw.reboot())
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
         rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
         mock_execute.side_effect = RpcError(rsp=rsp)
@@ -235,6 +242,13 @@ class TestSW(unittest.TestCase):
         rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
         mock_execute.side_effect = RpcError(rsp=rsp)
         self.assertRaises(Exception, self.sw.poweroff)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_poweroff_multi_re_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.sw._multi_VC = False
+        self.assertTrue('Shutdown NOW' in self.sw.poweroff())
 
     def _myprogress(self, dev, report):
         pass
