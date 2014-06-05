@@ -15,10 +15,6 @@ class TestFactoryLoader(unittest.TestCase):
 
     def setUp(self):
         self.fl = FactoryLoader()
-        # self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-        #           gather_facts=False)
-        # from jnpr.junos.op.routes import RouteTable
-        # routes = RouteTable(self.dev)
         self.fl.catalog = {'RouteTable':
                            {'item': 'route-table/rt',
                             'rpc': 'get-route-information',
@@ -46,3 +42,12 @@ class TestFactoryLoader(unittest.TestCase):
         mock_view.return_value = type('test', (object,), {})
         self.assertEqual(self.fl._build_view('RouteTableView'),
                          self.fl.catalog['RouteTableView'])
+
+    def test_FactoryLoader__fieldfunc_False(self):
+        fn = self.fl._fieldfunc_False('test')
+        self.assertFalse(fn('test'))
+
+    def test_FactoryLoader__add_dictfield_RuntimeError(self):
+        self.assertRaises(
+            RuntimeError, self.fl._add_dictfield, 'teting', 'age', {
+                'age/@seconds': 'test'}, {})
