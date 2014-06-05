@@ -19,7 +19,7 @@ except:
     # Try to load the template relative to test base
     try:
         _YAML_ = loadyaml(os.path.join(os.path.dirname(__file__), '../../..',
-                                                       'lib/jnpr/junos/cfgro/srx.yml'))
+                                       'lib/jnpr/junos/cfgro/srx.yml'))
     except:
         raise
 

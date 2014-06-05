@@ -2,11 +2,8 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from lxml import etree
 from nose.plugins.attrib import attr
 from jnpr.junos.factory import FactoryLoader
-from jnpr.junos.op.routes import RouteTable
-from jnpr.junos import Device
 from mock import patch
 
 
@@ -49,5 +46,10 @@ class TestFactoryLoader(unittest.TestCase):
 
     def test_FactoryLoader__add_dictfield_RuntimeError(self):
         self.assertRaises(
-            RuntimeError, self.fl._add_dictfield, 'teting', 'age', {
+            RuntimeError, self.fl._add_dictfield, 'testing', 'age', {
                 'age/@seconds': 'test'}, {})
+
+    def test_FactoryLoader__add_dictfield_ValueError(self):
+        self.assertRaises(
+            ValueError, self.fl._add_dictfield, 'testing', 'age', {
+                'age/@seconds': 'test=test'}, {})

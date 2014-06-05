@@ -41,7 +41,7 @@ class TestFactoryOpTable(unittest.TestCase):
     def test_optable_local(self):
         fname = 'local-get-interface-information.xml'
         self.ppt._path = os.path.join(os.path.dirname(__file__),
-                             'rpc-reply', fname)
+                                      'rpc-reply', fname)
         self.ppt.get()
         self.assertEqual(len(self.ppt), 2)
 

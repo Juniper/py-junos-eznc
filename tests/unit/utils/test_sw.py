@@ -16,7 +16,6 @@ from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-from jnpr.junos.exception import RpcError
 from lxml import etree
 
 from mock import patch, MagicMock, call, mock_open
@@ -58,7 +57,7 @@ class TestSW(unittest.TestCase):
         self.dev.close()
 
     def test_sw_hashfile(self):
-        with patch('__builtin__.open', mock_open(), create=True) as m:
+        with patch('__builtin__.open', mock_open(), create=True):
             import jnpr.junos.utils.sw
             with open('foo') as h:
                 h.read.side_effect = ('abc', 'a', '')
@@ -103,7 +102,7 @@ class TestSW(unittest.TestCase):
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
     def test_sw_put(self, mock_scp_put, mock_scp):
-        #mock_scp_put.side_effect = self.mock_put
+        # mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
         self.assertTrue(call('test.tgz', '/var/tmp') in mock_scp_put.mock_calls)
@@ -209,8 +208,7 @@ class TestSW(unittest.TestCase):
     def test_sw_inventory(self):
         self.sw.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertEqual(self.sw.inventory,
-                             {'current': None, 'rollback': None})
+        self.assertEqual(self.sw.inventory, {'current': None, 'rollback': None})
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot(self, mock_execute):
