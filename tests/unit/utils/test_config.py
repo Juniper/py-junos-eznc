@@ -68,7 +68,7 @@ class TestConfig(unittest.TestCase):
         class MyException(Exception):
                 xml = 'test'
         self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
-        #with self.assertRaises(AttributeError):
+        # with self.assertRaises(AttributeError):
         self.conf.commit_check()
 
     def test_config_commit_check_exception_RpcError(self):
@@ -90,7 +90,7 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff()
         self.conf.rpc.get_configuration.\
-            assert_called_with({'compare': 'rollback', 'rollback': '0', 'format':'text'})
+            assert_called_with({'compare': 'rollback', 'rollback': '0', 'format': 'text'})
 
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='')
