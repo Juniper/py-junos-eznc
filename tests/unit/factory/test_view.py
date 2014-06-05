@@ -6,8 +6,7 @@ from nose.plugins.attrib import attr
 from mock import MagicMock
 from jnpr.junos import Device
 from jnpr.junos.factory.view import View
-from jnpr.junos.op.phyport import PhyPortTable, PhyPortStatsTable, PhyPortStatsView
-from jnpr.junos.op.ethport import EthPortTable
+from jnpr.junos.op.phyport import PhyPortStatsTable, PhyPortStatsView
 from lxml import etree
 
 
@@ -16,7 +15,7 @@ class TestFactoryView(unittest.TestCase):
 
     def setUp(self):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                  gather_facts=False)
+                          gather_facts=False)
         self.ppt = PhyPortStatsTable(self.dev)
 
         ret_val = '<physical-interface> \
@@ -54,7 +53,10 @@ class TestFactoryView(unittest.TestCase):
         self.assertEqual(self.v.name, ('ge-0/0/0', 'up'))
 
     def test_view_asview(self):
-        self.assertEqual(type(self.v.asview(PhyPortStatsTable)), PhyPortStatsTable)
+        self.assertEqual(
+            type(
+                self.v.asview(PhyPortStatsTable)),
+            PhyPortStatsTable)
 
     def test_view_refresh_can_refresh_false(self):
         self.v._table.can_refresh = False
@@ -81,29 +83,106 @@ class TestFactoryView(unittest.TestCase):
             with self.v.updater(fields=True):
                 pass
         fn()
-        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+        self.assertEqual(
+            self.v.GROUPS, {
+                'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
 
     def test_view_updater_groups_true(self):
         def fn():
             with self.v.updater(groups=True):
                 pass
         fn()
-        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+        self.assertEqual(
+            self.v.GROUPS, {
+                'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
 
     def test_view_updater_all_false(self):
         with self.v.updater(all=False):
-            self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+            self.assertEqual(
+                self.v.GROUPS, {
+                    'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
 
     def test_view_updater_with_groups_all_true(self):
         def fn():
             with self.v.updater(all=True) as more:
                 more.groups = {}
         fn()
-        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+        self.assertEqual(
+            self.v.GROUPS, {
+                'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
 
     def test_view_updater_with_groups_all_false(self):
         def fn():
             with self.v.updater(all=False) as more:
                 more.groups = {}
         fn()
-        self.assertEqual(self.v.GROUPS, {'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+        self.assertEqual(
+            self.v.GROUPS, {
+                'rxerrs': 'input-error-list', 'ts': 'traffic-statistics'})
+
+    def test_view___getattr__table_item(self):
+        tbl = {'RouteTable': {'item': 'route-table/rt',
+                              'rpc': 'get-route-information',
+                              'args_key': 'destination',
+                              'key': 'rt-destination',
+                              'view': 'RouteTableView',
+                              'table': PhyPortStatsTable}}
+        self.v.FIELDS.update(tbl)
+        self.assertEqual(self.v.RouteTable.__class__.__name__,
+                         'PhyPortStatsTable')
+
+    def test_view___getattr___munch(self):
+        ret_val = '<physical-interface> \
+            <name>ge-0/0/0</name> \
+            <admin-status>up</admin-status> \
+            <admin-status>down</admin-status> \
+            <oper-status>up</oper-status> \
+        </physical-interface>'
+        xml = etree.fromstring(ret_val)
+        self.v = PhyPortStatsView(self.ppt, xml)
+        tbl = {'RouteTable': {'item': 'route-table/rt',
+                              'rpc': 'get-route-information',
+                              'args_key': 'destination',
+                              'key': 'rt-destination',
+                              'view': 'RouteTableView',
+                              'xpath': './/admin-status'}}
+        self.v.FIELDS.update(tbl)
+        self.assertEqual(self.v.RouteTable, ['up', 'down'])
+
+    def test_view___getattr___munch_tag(self):
+        ret_val = '<physical-interface> \
+            <name>ge-0/0/0</name> \
+            <admin-status><test>test_tag</test></admin-status> \
+            <oper-status>up</oper-status> \
+        </physical-interface>'
+        xml = etree.fromstring(ret_val)
+        self.v = PhyPortStatsView(self.ppt, xml)
+        tbl = {'RouteTable': {'item': 'route-table/rt',
+                              'rpc': 'get-route-information',
+                              'args_key': 'destination',
+                              'key': 'rt-destination',
+                              'view': 'RouteTableView',
+                              'xpath': './/admin-status'}}
+        self.v.FIELDS.update(tbl)
+        self.assertEqual(self.v.RouteTable, 'admin-status')
+
+    def test_view___getattr___raise_RuntimeError(self):
+        ret_val = '<physical-interface> \
+            <name>ge-0/0/0</name> \
+            <admin-status><test>test_tag</test></admin-status> \
+            <oper-status>up</oper-status> \
+        </physical-interface>'
+        xml = etree.fromstring(ret_val)
+        self.v = PhyPortStatsView(self.ppt, xml)
+        tbl = {'RouteTable': {'item': 'route-table/rt',
+                              'rpc': 'get-route-information',
+                              'args_key': 'destination',
+                              'key': 'rt-destination',
+                              'view': 'RouteTableView',
+                              'xpath': './/admin-status',
+                              'astype': 'abc'}}
+        self.v.FIELDS.update(tbl)
+
+        def fn():
+            return self.v.RouteTable
+        self.assertRaises(RuntimeError, fn)
