@@ -9,12 +9,12 @@ from jnpr.junos.facts.srx_cluster import facts_srx_cluster
 from jnpr.junos.facts.domain import facts_domain
 
 FACT_LIST = [
-    facts_chassis,
-    facts_routing_engines,
-    facts_software_version,    
-    facts_personality,
+    facts_chassis,                  # first
+    facts_routing_engines,          # second
+    facts_personality,              # third
+    facts_srx_cluster,              # four
+    facts_software_version,         # fifth
     facts_domain,
-    facts_srx_cluster,
     facts_ifd_style,
     facts_switch_style,
     facts_session
