@@ -14,6 +14,7 @@ FACT_LIST = [
     facts_personality,              # third
     facts_srx_cluster,              # four
     facts_software_version,         # fifth
+
     facts_domain,
     facts_ifd_style,
     facts_switch_style,
