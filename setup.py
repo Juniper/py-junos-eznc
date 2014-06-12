@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages
+from sys import path
+
+path.append('lib')
+from jnpr.junos import __version__
 
 # parse requirements
 req_lines = [line.strip() for line in open(
@@ -8,7 +12,7 @@ install_reqs = list(filter(None, req_lines))
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="0.3.1",
+    version=__version__,
     author="Jeremy Schulman",
     author_email="jschulman@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
