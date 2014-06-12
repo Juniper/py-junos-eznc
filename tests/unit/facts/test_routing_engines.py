@@ -3,7 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from mock import patch
+from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
@@ -38,6 +38,12 @@ class TestRoutingEngines(unittest.TestCase):
         self.mode = 'master'
         routing_engines(self.dev, self.facts)
         self.assertEqual(self.facts['RE0']['mastership_state'], 'master')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_routing_engine_exception_ret_none(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_route_engine_information = MagicMock(side_effect=ValueError)
+        self.assertEqual(routing_engines(self.dev, self.facts), None)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

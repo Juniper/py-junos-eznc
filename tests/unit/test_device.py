@@ -48,7 +48,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
 
     @patch('jnpr.junos.device.os.path')
     def test_temp_load_get_source_filter_true(self, os_path_mock):
-        #cant use @patch here as with statement will have exit
+        # cant use @patch here as with statement will have exit
         m = mock_open()
         with patch('__builtin__.file', m, create=True):
             self.template_loader.get_source(None, None)
@@ -111,6 +111,15 @@ class TestDevice(unittest.TestCase):
         mock_manager.connect.side_effect = TypeError
         self.assertRaises(EzErrors.ConnectError, self.dev.open)
 
+    def test_device_probe_error(self):
+        mock_probe = MagicMock()
+        mock_probe.return_value = None
+        self.dev.probe = mock_probe
+
+        def fn():
+            self.dev.open(auto_probe=1)
+        self.assertRaises(EzErrors.ProbeError, fn)
+
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch('__builtin__.open', mock):
@@ -140,6 +149,11 @@ class TestDevice(unittest.TestCase):
         localdev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
+
+    def test_device_local(self):
+        Device.ON_JUNOS = True
+        localdev = Device()
+        self.assertEqual(localdev._hostname, 'localhost')
 
     @patch('jnpr.junos.device.os')
     @patch('__builtin__.open')
@@ -235,7 +249,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.cli('show system uptime | display xml rpc')\
+        self.assertEqual(self.dev.cli('show system uptime | display xml rpc')
                          .tag, 'get-system-uptime-information')
 
     def test_device_cli_exception(self):
@@ -262,13 +276,13 @@ class TestDevice(unittest.TestCase):
 <bad-element>get-bgp-summary-information</bad-element>
 </error-info>
 <error-message>permission denied</error-message>
-</rpc-error>                
+</rpc-error>
             """
             xml = etree.XML(rpc_err)
 
         self.dev._conn.rpc = MagicMock(side_effect=MyException)
-        self.assertRaises(RpcError, self.dev.execute, 
-            '<get-software-information/>')
+        self.assertRaises(RpcError, self.dev.execute,
+                          '<get-software-information/>')
 
     def test_device_execute_rpc_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
@@ -322,7 +336,7 @@ class TestDevice(unittest.TestCase):
             self.dev.bind()
             mock = MagicMock()
             mock.__name__ = 'magic mock'
-            #for *args
+            # for *args
             self.dev.bind(mock)
             self.dev.bind(mock)
         self.assertRaises(ValueError, varg)
@@ -332,7 +346,7 @@ class TestDevice(unittest.TestCase):
             self.dev.bind()
             mock = MagicMock()
             mock.__name__ = 'magic mock'
-            #for **kwargs
+            # for **kwargs
             self.dev.bind(kw=mock)
             self.dev.bind(kw=mock)
         self.assertRaises(ValueError, kve)
@@ -348,8 +362,8 @@ class TestDevice(unittest.TestCase):
             except:
                 raise
         self.assertEqual(template.render({'host_name': '1',
-                               'domain_name': '2'}),
-                               'system {\n  host-name 1;\n  domain-name 2;\n}')
+                                          'domain_name': '2'}),
+                         'system {\n  host-name 1;\n  domain-name 2;\n}')
 
     def test_device_close(self):
         def close_conn():
@@ -405,4 +419,3 @@ class TestDevice(unittest.TestCase):
 
     def _do_nothing(self, *args, **kwargs):
         return 'Nothing'
-    

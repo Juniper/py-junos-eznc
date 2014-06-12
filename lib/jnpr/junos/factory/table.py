@@ -118,7 +118,7 @@ class Table(object):
 
         if not isinstance(key_value, list):
             raise RuntimeError(
-                "What to do with key, table:'%'" %
+                "What to do with key, table:'%s'" %
                 self.__class__.__name__)
 
         # ok, so it's a list, which means we need to extract tuple values
@@ -274,7 +274,7 @@ class Table(object):
 
         def get_xpath(find_value):
             namekey_xpath, item_xpath = self._keyspec()
-            xnkv = '[normalize-space({})="{}"]'
+            xnkv = '[normalize-space({0})="{1}"]'
 
             if isinstance(find_value, str):
                 # find by name, simple key

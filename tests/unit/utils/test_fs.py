@@ -69,20 +69,20 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.stat(path),
-                             {'owner': 'pqr', 'path': '/var/abc.sh',
-                              'permissions': 755,
-                              'permissions_text': '-rwxr-xr-x', 'size': 2,
-                              'ts_date': 'Mar 13 06:54',
-                              'ts_epoc': '1394693680',
-                              'type': 'file'})
+                         {'owner': 'pqr', 'path': '/var/abc.sh',
+                          'permissions': 755,
+                          'permissions_text': '-rwxr-xr-x', 'size': 2,
+                          'ts_date': 'Mar 13 06:54',
+                          'ts_epoc': '1394693680',
+                          'type': 'file'})
 
     def test_stat_calling___decode_dir(self):
         path = 'test/stat/decode_dir'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.stat(path),
-                             {'path': '/var', 'type': 'dir', 'file_count': 1,
-                              'size': 2})
+                         {'path': '/var', 'type': 'dir', 'file_count': 1,
+                          'size': 2})
 
     def test_stat_return_none(self):
         path = 'test/abc'
@@ -95,28 +95,28 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.ls(path),
-                             {'owner': 'pqr', 'path': '/var/abc.sh',
-                              'permissions': 755,
-                              'permissions_text': '-rwxr-xr-x', 'size': 2,
-                              'ts_date': 'Mar 13 06:54',
-                              'ts_epoc': '1394693680',
-                              'type': 'file'})
+                         {'owner': 'pqr', 'path': '/var/abc.sh',
+                          'permissions': 755,
+                          'permissions_text': '-rwxr-xr-x', 'size': 2,
+                          'ts_date': 'Mar 13 06:54',
+                          'ts_epoc': '1394693680',
+                          'type': 'file'})
 
     def test_ls_calling___decode_dir(self):
         path = 'test/stat/decode_dir'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.ls(path),
-                             {'files':
-                              {'abc': {'permissions_text': 'drwxr-xr-x',
-                                       'ts_date': 'Feb 17 15:30',
-                                       'ts_epoc': '1392651039',
-                                       'owner': 'root', 'path': 'abc',
-                                       'size': 2, 'type': 'dir',
-                                       'permissions': 555}},
-                                 'path': '/var', 'type': 'dir',
-                                 'file_count': 1,
-                                 'size': 2})
+                         {'files':
+                          {'abc': {'permissions_text': 'drwxr-xr-x',
+                                   'ts_date': 'Feb 17 15:30',
+                                   'ts_epoc': '1392651039',
+                                   'owner': 'root', 'path': 'abc',
+                                   'size': 2, 'type': 'dir',
+                                   'permissions': 555}},
+                          'path': '/var', 'type': 'dir',
+                          'file_count': 1,
+                          'size': 2})
 
     def test_ls_return_none(self):
         path = 'test/abc'
@@ -130,7 +130,7 @@ class TestFS(unittest.TestCase):
         path = 'test/stat/decode_file'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        op = self.fs.ls(path, followlink=False)
+        self.fs.ls(path, followlink=False)
         mock_decode_file.assert_has_calls(call().get('link'))
 
     def test_ls_brief_true(self):
@@ -138,24 +138,24 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.ls(path, brief=True),
-                             {'files': ['abc'], 'path': '/var',
-                              'type': 'dir', 'file_count': 1, 'size': 2})
+                         {'files': ['abc'], 'path': '/var',
+                          'type': 'dir', 'file_count': 1, 'size': 2})
 
     def test_ls_calling___decode_dir_type_symbolic_link(self):
         path = 'test/stat/decode_symbolic_link'
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.assertEqual(self.fs.ls(path),
-                             {'files':
-                              {'abc': {'permissions_text': 'drwxr-xr-x',
-                                       'ts_date': 'Feb 17 15:30',
-                                       'link': 'symlink test',
-                                       'ts_epoc': '1392651039',
-                                       'owner': 'root', 'path': 'abc',
-                                       'size': 2, 'type': 'link',
-                                       'permissions': 555}},
-                              'path': '/var', 'type': 'dir', 'file_count': 1,
-                              'size': 2})
+                         {'files':
+                          {'abc': {'permissions_text': 'drwxr-xr-x',
+                                   'ts_date': 'Feb 17 15:30',
+                                   'link': 'symlink test',
+                                   'ts_epoc': '1392651039',
+                                   'owner': 'root', 'path': 'abc',
+                                   'size': 2, 'type': 'link',
+                                   'permissions': 555}},
+                          'path': '/var', 'type': 'dir', 'file_count': 1,
+                          'size': 2})
 
     def test_rm_return_true(self):
         self.fs.dev.rpc.file_delete = MagicMock(return_value=True)
@@ -258,26 +258,26 @@ class TestFS(unittest.TestCase):
     def test_storage_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_usage(),
-                             {'/dev/abc':
-                              {'avail_block': 234234,
-                               'used_blocks': 2346455, 'used_pct': '1',
-                               'mount': '/', 'total_blocks': 567431,
-                               'avail': '2F', 'used': '481M',
-                               'total': '4F'}})
+                         {'/dev/abc':
+                          {'avail_block': 234234,
+                           'used_blocks': 2346455, 'used_pct': '1',
+                           'mount': '/', 'total_blocks': 567431,
+                           'avail': '2F', 'used': '481M',
+                           'total': '4F'}})
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_cleanup(),
-                             {'/var/abc.txt':
-                              {'ts_date': 'Apr 25 10:38', 'size': 11}})
+                         {'/var/abc.txt':
+                          {'ts_date': 'Apr 25 10:38', 'size': 11}})
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup_check(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_cleanup_check(),
-                             {'/var/abc.txt':
-                              {'ts_date': 'Apr 25 10:38', 'size': 11}})
+                         {'/var/abc.txt':
+                          {'ts_date': 'Apr 25 10:38', 'size': 11}})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
