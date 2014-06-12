@@ -221,6 +221,18 @@ class Config(Util):
                 kvargs['format'] = _lformat_byext(path)
                 _lset_format(kvargs, rpc_xattrs)
 
+        def try_load(rpc_contents, rpc_xattrs):
+            try:
+                got = self.rpc.load_config(rpc_contents, **rpc_xattrs)            
+            except Exception as err:
+                rerrs = err.rsp[0].findall('rpc-error')
+                if len(rerrs) > 0:
+                    if any([e.find('[error-severity="error"]') for e in rerrs]):
+                        raise err
+                return err.rsp[0]
+
+            return got
+
         # ---------------------------------------------------------------------
         # end-of: private helpers
         # ---------------------------------------------------------------------
@@ -238,7 +250,7 @@ class Config(Util):
             if isinstance(rpc_contents, str) and not 'format' in kvargs:
                 raise RuntimeError(
                     "You must define the format of the contents")
-            return self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            return try_load(rpc_contents, rpc_xattrs)
 
             #~! UNREACHABLE !~#
 
@@ -254,7 +266,7 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            return try_load(rpc_contents, rpc_xattrs)
 
             #~! UNREACHABLE !~#
 
@@ -269,7 +281,8 @@ class Config(Util):
             template = self.dev.Template(path)
             rpc_contents = template.render(kvargs.get('template_vars', {}))
             _lset_fromfile(path)
-            return self.rpc.load_config(rpc_contents, **rpc_xattrs)
+
+            return try_load(rpc_contents, rpc_xattrs)
 
             #~! UNREACHABLE !~#
 
@@ -283,7 +296,8 @@ class Config(Util):
             path = template.filename
             rpc_contents = template.render(kvargs.get('template_vars', {}))
             _lset_fromfile(path)
-            return self.rpc.load_config(rpc_contents, **rpc_xattrs)
+
+            return try_load(rpc_contents, rpc_xattrs)
 
             #~! UNREACHABLE !~#
 

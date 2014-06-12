@@ -5,6 +5,8 @@ from jnpr.junos.exception import ConnectNotMasterError
 def facts_chassis(junos, facts):
     """
     The following facts are assigned:
+      facts['2RE'] : designates if the device can support two RE, not that it has them
+      facts['RE_hw_mi'] : designates if the device is multi-instance-routing-engine
       facts['model'] : product model
       facts['serialnumber'] : serial number
 
@@ -39,7 +41,8 @@ def facts_chassis(junos, facts):
         facts['2RE'] = False
         x_ch = rsp.find('chassis')
 
-    facts['model'] = x_ch.find('description').text
+    facts['model'] = x_ch.findtext('description')
+    
     try:
         facts['serialnumber'] = x_ch.find('serial-number').text
     except:
