@@ -93,7 +93,7 @@ class CfgTable(Table):
             dot = get_cmd.find('.//' + key_name.replace('_', '-'))
             if dot is None:
                 raise RuntimeError(
-                    "Unable to find parent XML for key: '%'" %
+                    "Unable to find parent XML for key: '%s'" %
                     key_name)
             for _at, _add in enumerate(add_keylist_xml):
                 dot.insert(_at, _add)
