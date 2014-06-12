@@ -14,5 +14,8 @@ install:
 
 script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
+after_success:
+  coveralls
+
 notifications:
   email: false

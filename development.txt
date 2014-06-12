@@ -5,3 +5,4 @@ mock         # http://www.voidspace.org.uk/python/mock/
 nose         # http://nose.readthedocs.org/en/latest/
 pep8	     # https://github.com/jcrocholl/pep8
 pyflakes	 # https://launchpad.net/pyflakes
+coveralls	 # https://coveralls.io/
