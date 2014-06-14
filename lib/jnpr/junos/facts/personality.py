@@ -16,7 +16,7 @@ def facts_personality(junos, facts):
         persona = 'SWITCH'
     elif examine.startswith("MX"):
         persona = 'MX'
-    elif examine.startswith("vMX"):
+    elif re.match('^VMX', examine, re.I):
         facts['virtual'] = True
         persona = 'MX'
     elif examine.startswith("VJX"):
