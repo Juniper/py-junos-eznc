@@ -162,6 +162,10 @@ class Config(Util):
           determines if the contents completely replace the existing
           configuration.  options are [True/False], default: False
 
+        kvargs['replace']
+          set this to :True: if your configuration change uses the
+          replace marker in the 'text' or XML formats (NA for set)
+
         kvargs['template_path']
           path to a jinja2 template file.  used in conjection with the
           kvargs['template_vars'] option, this will perform a templating
@@ -187,6 +191,8 @@ class Config(Util):
         overwrite = kvargs.get('overwrite', False)
         if True == overwrite:
             rpc_xattrs['action'] = 'override'
+        elif kvargs.get('replace',False) is True:
+            rpc_xattrs['action'] = 'replace'
 
         # ---------------------------------------------------------------------
         # private helpers ...
