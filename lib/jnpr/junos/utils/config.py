@@ -162,6 +162,10 @@ class Config(Util):
           determines if the contents completely replace the existing
           configuration.  options are [True/False], default: False
 
+        kvargs['merge']
+          if set to :True: will set the load-config action to merge.
+          the default load-config action is 'replace'
+
         kvargs['template_path']
           path to a jinja2 template file.  used in conjection with the
           kvargs['template_vars'] option, this will perform a templating
@@ -178,7 +182,10 @@ class Config(Util):
           used in conjection with the other template options.  this option
           contains a dictionary of variables to render into the template
         """
-        rpc_xattrs = {'format': 'xml'}      # junos attributes, default to XML
+        rpc_xattrs = {}
+        rpc_xattrs['format'] = 'xml'        # default to XML format
+        rpc_xattrs['action'] = 'replace'    # replace is default action
+
         rpc_contents = None
 
         # support the ability to completely replace the Junos configuration
@@ -187,6 +194,8 @@ class Config(Util):
         overwrite = kvargs.get('overwrite', False)
         if True == overwrite:
             rpc_xattrs['action'] = 'override'
+        elif kvargs.get('merge') is True:
+            del rpc_xattrs['action']
 
         # ---------------------------------------------------------------------
         # private helpers ...
