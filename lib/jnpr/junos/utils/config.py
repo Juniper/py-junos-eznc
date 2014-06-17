@@ -11,7 +11,6 @@ from jnpr.junos.utils.util import Util
 
 
 class Config(Util):
-
     """
     Configuration Utilities:
 
@@ -22,8 +21,8 @@ class Config(Util):
       load - load changes into the candidate config
       lock - take an exclusive lock on the candidate config
       unlock - release the exclusive lock
+      rescue - controls "rescue configuration"
       rollback - perform the load rollback command
-
     """
 
     # ------------------------------------------------------------------------
@@ -368,3 +367,77 @@ class Config(Util):
         ))
 
         return True
+
+    # -------------------------------------------------------------------------
+    # rescue configuration
+    # -------------------------------------------------------------------------
+
+    def rescue(self, action, format='text' ):
+        """
+        Performs rescue configuration actions:
+        :action:
+          * 'get' - retrieves/returns the rescue configuration via :format:
+          * 'save' - saves current configuration as rescue
+          * 'delete' - removes the rescue configuration
+          * 'reload' - loads the resuce config as candidate (no-commit)
+
+        Exceptions:
+          * ValueError - if :action: is not one of the above
+        """
+
+        def _rescue_save():
+            """
+            Saves the current configuration as the rescue configuration
+            """
+            self.rpc.request_save_rescue_configuration()
+            return True
+
+        def _rescue_delete():
+            """
+            Deletes the existing resuce configuration.  
+            """
+            # note that this will result in an "OK" regardless if
+            # a rescue config exists or not. 
+            self.rpc.request_delete_rescue_configuration()
+            return True
+
+        def _rescue_get():
+            """
+            Retrieves the rescue configuration, returning it in
+            either :format: 'text' or 'xml'.
+
+            Returns either the 'text'/'xml' if the rescue config
+            exists, or :None: otherwise
+            """
+            try:
+                got = self.rpc.get_rescue_information(format=format)
+                return got.findtext('configuration-information/configuration-output') \
+                    if 'text' == format else got
+            except:
+                return None
+
+        def _rescue_reload():
+            """
+            Loads the rescue configuration as the active candidate.  
+            This action does *not* commit the configuration; use the
+            :commit(): method for that purpose.
+
+            Returns the XML response if the rescue configuration 
+            exists, or :False: otherwise
+            """
+            try:
+                return self.rpc.load_configuration({'rescue':'rescue'})
+            except:
+                return False
+
+        def _unsupported_action():
+            raise ValueError("unsupported action: {0}".format(action))
+
+        result = {
+            'get' : _rescue_get,
+            'save' : _rescue_save,
+            'delete' : _rescue_delete,
+            'reload' : _rescue_reload
+        }.get( action, _unsupported_action )()
+
+        return result
