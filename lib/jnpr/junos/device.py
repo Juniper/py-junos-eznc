@@ -57,13 +57,13 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class Device(object):
-    ON_JUNOS = platform.system().upper() == 'JUNOS'    
+    ON_JUNOS = platform.system().upper() == 'JUNOS'
     auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
-    
+
     # ------------------------------------------------------------------------
     # property: hostname
     # ------------------------------------------------------------------------
@@ -101,6 +101,13 @@ class Device(object):
     @password.setter
     def password(self, value):
         self._password = value
+
+    @property
+    def ssh_key(self):
+        """
+          The ssh key to access the Junos device
+        """
+        return self._ssh_key
 
     # ------------------------------------------------------------------------
     # property: logfile
@@ -195,6 +202,7 @@ class Device(object):
         self._hostname = found.get('hostname', self._hostname)
         self._port = found.get('port', self._port)
         self._auth_user = found.get('user')
+        self._ssh_key = found.get('ssh_key')
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -234,12 +242,12 @@ class Device(object):
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
             # running on a Junos device locally
-            # ---------------------------------            
+            # ---------------------------------
             self._auth_user = None
             self._auth_password = None
             self._hostname = 'localhost'
         else:
-            # --------------------------            
+            # --------------------------
             # making a remote connection
             # --------------------------
             if hostname is None:
@@ -252,7 +260,8 @@ class Device(object):
             # but if user is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-        
+            self._ssh_key = kvargs.get('ssh_key')
+
         # -----------------------------
         # initialize instance variables
         # ------------------------------
@@ -281,7 +290,7 @@ class Device(object):
             for only this open process
 
         kvargs['auto_probe']:
-            if non-zero then this enables auto_probe and defines the amount 
+            if non-zero then this enables auto_probe and defines the amount
             of time/seconds for the probe timeout
         """
 
@@ -294,25 +303,34 @@ class Device(object):
             ts_start = datetime.datetime.now()
 
             # open connection using ncclient transport
-            self._conn = netconf_ssh.connect(
-                host=self._hostname,
-                port=self._port,
-                username=self._auth_user,
-                password=self._auth_password,
-                hostkey_verify=False,
-                device_params={'name': 'junos'})
+            if self._ssh_key:
+                self._conn = netconf_ssh.connect(
+                    host=self._hostname,
+                    port=self._port,
+                    username=self._auth_user,
+                    key_filename=self._ssh_key,
+                    hostkey_verify=False,
+                    device_params={'name': 'junos'})
+            else:
+                self._conn = netconf_ssh.connect(
+                    host=self._hostname,
+                    port=self._port,
+                    username=self._auth_user,
+                    password=self._auth_password,
+                    hostkey_verify=False,
+                    device_params={'name': 'junos'})
 
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
 
         except NcErrors.SSHError as err:
-            # this is a bit of a hack for now, since we want to 
+            # this is a bit of a hack for now, since we want to
             # know if the connection was refused or we simply could
             # not open a connection due to reachability.  so using
             # a timestamp to differentiate the two conditions for now
-            # if the diff is < 3 sec, then assume the host is 
-            # reachable, but NETCONF connection is refushed. 
+            # if the diff is < 3 sec, then assume the host is
+            # reachable, but NETCONF connection is refushed.
 
             ts_err = datetime.datetime.now()
             diff_ts = ts_err - ts_start
@@ -340,7 +358,7 @@ class Device(object):
             # anything else, we will re-raise as a
             # generic ConnectError
             cnx_err = EzErrors.ConnectError(self)
-            cnx_err._orig = err 
+            cnx_err._orig = err
             raise cnx_err
 
         self.connected = True
