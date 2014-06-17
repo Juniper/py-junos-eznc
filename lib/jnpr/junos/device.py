@@ -225,7 +225,7 @@ class Device(object):
             if you need to provide a private key rather than
             loading the key into the ssh-key-ring/environment.  if your
             ssh-key requires a password, then you must provide it via 
-            kvargs['passwwd'].
+            kvargs['passwd'].
         """
 
         # ----------------------------------------
@@ -301,9 +301,10 @@ class Device(object):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to disable the ssh-agent iff we are given a password
-            # and we are not given an ssh key file. in this condition
-            # it means that the password is the 'plain-text' password
+            # we want to disable the ssh-agent if-and-only-if we are 
+            # given a password and we are not given an ssh key file. 
+            # in this condition it means that the password is 
+            # the 'plain-text' password
 
             allow_agent = not bool((self._auth_password is not None) and 
                 (self._ssh_private_key_file is None ))
