@@ -1,8 +1,4 @@
-[![PyPI version](https://badge.fury.io/py/junos-eznc.png)](http://badge.fury.io/py/junos-eznc)
-
-Unit-Tests (WIP)
-
-[![Build Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
+[![PyPi Version](https://pypip.in/version/junos-eznc/badge.png)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://pypip.in/download/junos-eznc/badge.png)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://coveralls.io/repos/Juniper/py-junos-eznc/badge.png)](https://coveralls.io/r/Juniper/py-junos-eznc) [![Build Status](http://162.243.252.245/job/Junos_PyEZ/badge/icon)](http://162.243.252.245/job/Junos_PyEZ/) 
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
@@ -115,5 +111,5 @@ Apache 2.0
 # CONTRIBUTORS
 
   - Jeremy Schulman (@nwkautomaniac), Core developer
-  - Rick Sherman (@shermdog)
+  - Rick Sherman (@shermdog01)
   - Nitin Kumar (@vnitinv)
