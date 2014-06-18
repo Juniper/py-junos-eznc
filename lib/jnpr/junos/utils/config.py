@@ -9,6 +9,10 @@ from jnpr.junos.exception import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
 
+"""
+Configuration Utilities
+"""
+
 class Config(Util):
     """
     Overivew of Configuration Utilities:
@@ -30,12 +34,18 @@ class Config(Util):
 
     def commit(self, **kvargs):
         """
-        commit a configuration.  returns either :True: or
-        raises an RPCError exception
+        Commit a configuration. 
 
-        kvargs
-          confirm = [True | <timeout-minutes>]
-          comment = <comment log string>
+        :param str comment: If provide logs this comment with the commit.
+        :param int confirm: If provided activates confirm safeguard with 
+                            provided value as timeout (minutes).
+
+        :returns:
+            * ``True`` when successful
+
+        :raises CommitError: When errors detected in candidate configuraiton.
+                             You can use the Exception variable (XML) 
+                             to identify the specific problems
         """
         rpc_args = {}
 
@@ -148,49 +158,62 @@ class Config(Util):
 
     def load(self, *vargs, **kvargs):
         """
-        loads configuration into the device
+        Loads changes into the candidate configuration.  Changes can be 
+        in the form of strings (text,set,xml), XML objects, and files.
+        Files can be either static snippets of configuration or Jinja2
+        templates.  When using Jinja2 Templates, this method will render
+        variables into the templates and then load the resulting change;
+        i.e. "template building".
 
-        vargs (optional)
-          is the content to load.  if the contents is a string, then you
-          must specify kvargs['format'].
+        :param object vargs[0]:
+            The content to load.  If the contents is a string, then you
+            must specify the **format** parameter.  If the content is
+            an XML object, then this method assumes you've structured it
+            correctly; and if not an Exception will be raised.
 
-        kvargs['path']
-            path to file of configuration.  the path extension will be used
-            to determine the format of the contents.
+        :param str path:
+            Path to file of configuration on the local server.  
+            The path extension will be used to determine the format of 
+            the contents:
 
-                | ['conf','text','txt'] is curly-text-style
-                | ['set'] is set-style
-                | ['xml'] is XML
+            * "conf","text","txt" is curly-text-style
+            * "set" - ascii-text, set-style
+            * "xml" - ascii-text, XML
 
-            the format can specific set by using kvarg['format']
+            .. note:: The format can specifically set using **format**.
 
-        kvargs['format']
-          determines the format of the contents.  options are
-          ['xml','set','text'] for XML/etree, set-style, curly-brace-style
+        :param str format:
+          Determines the format of the contents. Refer to options
+          from the **path** description.
 
-        kvargs['overwrite']
-          determines if the contents completely replace the existing
-          configuration.  options are [True/False], default: False
+        :param bool overwrite:
+          Determines if the contents completely replace the existing
+          configuration.  Default is ``False``.
 
-        kvargs['merge']
-          if set to :True: will set the load-config action to merge.
+          .. note:: This option cannot be used if **format** is "set".
+
+        :param bool merge:
+          If set to ``True`` will set the load-config action to merge.
           the default load-config action is 'replace'
 
-        kvargs['template_path']
-          path to a jinja2 template file.  used in conjection with the
-          kvargs['template_vars'] option, this will perform a templating
-          render and then load the result.  The template extension will
-          be used to determine the format-style of the contents, or you
-          can override using kvargs['format']
+        :param str template_path:
+          Similar to the **path** parameter, but this indicates that 
+          the file contents are ``Jinja2`` format and will require
+          template-rendering.
 
-        kvargs['template']
-          jinja2 Template.  same description as kvargs['template_path'],
+          .. note:: This parameter is used in conjection with **template_vars**.
+                     The template filename extension will be used to determine 
+                     the format-style of the contents, or you can override 
+                     using **format**.
+
+        :param jinja2.Template template:
+          A Jinja2 Template object.  Same description as *template_path*,
           except this option you provide the actual Template, rather than
-          a path to the template file
+          a path to the template file.
 
-        kvargs['template_vars']
-          used in conjection with the other template options.  this option
-          contains a dictionary of variables to render into the template
+        :param dict template_vars:
+          Used in conjection with the other template options.  This parameter
+          contains a dictionary of variables to render into the template.
         """
         rpc_xattrs = {}
         rpc_xattrs['format'] = 'xml'        # default to XML format
