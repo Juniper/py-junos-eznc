@@ -17,15 +17,15 @@ class Config(Util):
     """
     Overivew of Configuration Utilities:
 
-    * commit - commit changes
-    * commit_check - perform the commit check operation
-    * diff - return the diff string between running and candidate config
-    * load - load changes into the candidate config
-    * lock - take an exclusive lock on the candidate config
-    * pdiff - prints the diff string (debug/helper)
-    * rescue - controls "rescue configuration"
-    * rollback - perform the load rollback command
-    * unlock - release the exclusive lock
+    * :meth:`commit`: commit changes
+    * :meth:`commit_check`: perform the commit check operation
+    * :meth:`diff`: return the diff string between running and candidate config
+    * :meth:`load`: load changes into the candidate config
+    * :meth:`lock`: take an exclusive lock on the candidate config
+    * :meth:`pdiff`: prints the diff string (debug/helper)
+    * :meth:`rescue`: controls "rescue configuration"
+    * :meth:`rollback`: perform the load rollback command
+    * :meth:`unlock`: release the exclusive lock
     """
 
     # ------------------------------------------------------------------------

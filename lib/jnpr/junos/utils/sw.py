@@ -11,8 +11,11 @@ from lxml.builder import E
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
 
-__all__ = ['SW']
+"""
+Software Installation Utilities
+"""
 
+__all__ = ['SW']
 
 def _hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
@@ -21,27 +24,28 @@ def _hashfile(afile, hasher, blocksize=65536):
         buf = afile.read(blocksize)
     return hasher.hexdigest()
 
-
 class SW(Util):
 
     """
     Software Utility class, used to perform a software upgrade and
-    associated functions.
+    associated functions.  These methods have been tested on
+    *simple deployments*.  Refer to **install** for restricted
+    use-cases for software upgrades.
 
-    Primary methods:
-      install - perform the entire software installation process
-      reboot - reboots the system for the new image to take effect
-      poweroff - shutdown the system
+    **Primary methods:**
+      * :meth:`install`: perform the entire software installation process
+      * :meth:`reboot`: reboots the system for the new image to take effect
+      * :meth:`poweroff`: shutdown the system
 
-    Helpers called from install, but you can use these individually if needed:
-      put - SCP put package file onto Junos device
-      pkgadd - performs the 'request' operation to install the package
-      validate - performs the 'request' to validate the package
+    **Helpers:** (Useful as standalone as well)
+      * :meth:`put`: SCP put package file onto Junos device
+      * :meth:`pkgadd`: performs the 'request' operation to install the package
+      * :meth:`validate`: performs the 'request' to validate the package
 
-    Other utils:
-      rollback - same as 'request softare rollback'
-      inventory - (property) provides file info for current and rollback
-      images on the device
+    **Miscellaneous:**
+      * rollback: same as 'request softare rollback'
+      * inventory: (property) provides file info for current and rollback
+        images on the device
     """
 
     def __init__(self, dev):
@@ -99,14 +103,14 @@ class SW(Util):
         """
         SCP 'put' the package file from the local server to the remote device.
 
-        :package:
-          file path to the package file on the local file system
+        :param str package:
+          File path to the package file on the local file system
 
-        :remote_path:
-          the directory on the device where the package will be copied to
+        :param str remote_path:
+          The directory on the device where the package will be copied to.
 
-        :progress:
-          callback function to indicate progress.  You can use :SW.progress:
+        :param func progress:
+          Callback function to indicate progress.  You can use :meth:`SW.progress`
           for basic reporting.  See that class method for details.
         """
         def _progress(report):
@@ -146,21 +150,22 @@ class SW(Util):
 
     def pkgadd(self, remote_package, **kvargs):
         """
-        Issue the 'request system software add' command on the package.  No
-        validate is auto-set.  If you want to validate the image, do that
-        using the specific :validate(): method.  Also, if you want to
-        reboot the device, suggest using the :reboot(): method rather
-        than kvargs['reboot']=True.
+        Issue the 'request system software add' command on the package.  
+        The "no-validate" options is set by default.  If you want to validate 
+        the image, do that using the specific :meth:`validate` method.  Also, 
+        if you want to reboot the device, suggest using the :meth:`reboot` method 
+        rather ``reboot=True``.
 
-        :remote_package:
-          the file-path to the install package
+        :param str remote_package:
+          The file-path to the install package on the remote (Junos) device.
 
-        :kvargs:
-          any additional parameters to the 'request' command can
-          be passed within kvargs, following the RPC syntax
+        :param dict kvargs:
+          Any additional parameters to the 'request' command can
+          be passed within **kvargs**, following the RPC syntax
           methodology (dash-2-underscore,etc.)
 
         .. todo:: Add way to notify user why installation failed.
+        .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
         args = dict(no_validate=True, package_name=remote_package)
@@ -174,6 +179,7 @@ class SW(Util):
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
+
         #return True if rc == 0 else got.findtext('output').strip()
         return True if rc == 0 else False
 
@@ -182,8 +188,13 @@ class SW(Util):
     # -------------------------------------------------------------------------
 
     def validate(self, remote_package):
-        """ Issues the 'request' operation to validate the package against the
-            config
+        """ 
+        Issues the 'request' operation to validate the package against the
+        config.
+
+        :returns:
+            * ``True`` if validation passes
+            * error (str) otherwise
         """
         rsp = self.rpc.request_package_validate(
             package_name=remote_package).getparent()
@@ -191,7 +202,19 @@ class SW(Util):
         return True if 0 == errcode else rsp.findtext('output').strip()
 
     def remote_checksum(self, remote_package):
-        """ computes the MD5 checksum on the remote device """
+        """ 
+        Computes the MD5 checksum on the remote device.
+
+        :param str remote_package:
+            The file-path on the remote Junos device
+
+        :returns: 
+            The MD5 checksum string
+
+        :raises RpcError: when the **remote_package** is not found.
+
+        .. todo:: should trap the error and return ``None`` instead.
+        """
         rsp = self.rpc.get_checksum_information(path=remote_package)
         return rsp.findtext('.//checksum').strip()
 
@@ -205,7 +228,23 @@ class SW(Util):
         this means to clean the filesystem to make space, perform the
         secure-copy, and then verify the MD5 checksum.
 
-        For :kvargs: values, please refer to the :install(): method.
+        :param str package: 
+            file-path to package on local filesystem
+        :param str remote_path: 
+            file-path to directory on remote device
+        :param func progress: 
+            call-back function for progress updates
+        :param bool cleanfs: 
+            When ``True`` (default) this method will perform the 
+            "storage cleanup" on the device.
+        :param str checksum:
+            This is the checksum string as computed on the local system.  
+            This value will be used to compare the checksum on the 
+            remote Junos device.
+
+        :returns:
+            * ``True`` when the copy was successful
+            * ``False`` otherwise
         """
         remote_path = kvargs.get('remote_path', '/var/tmp')
         progress = kvargs.get('progress')
@@ -251,9 +290,8 @@ class SW(Util):
                 validate=False, checksum=None, cleanfs=True, no_copy=False,
                 timeout=1800):
         """
-        Performs the complete installation of the :package: that includes the
+        Performs the complete installation of the **package** that includes the
         following steps:
-        When no_copy is False (default-case)
 
         1. computes the local MD5 checksum if not provided in :checksum:
         2. performs a storage cleanup if :cleanfs: is True
@@ -262,43 +300,56 @@ class SW(Util):
         5. validates the package if :validate: is True
         6. installs the package
 
-        You can get a progress report on this process by providing a :progress:
-        callback;
-        see description below.
+        .. warning:: This process has been validated on "simple" deployments.
 
-        You will need to invoke the :reboot(): method explicitly to reboot
-        the device.
+                      Tested:
 
-        :package:
-          is the install package tarball on the local filesystem.
+                      * Single RE devices (EX, QFX, MX, SRX).
+                      * MX dual-RE
+                      * EX virtual-chassis when all same HW model 
+                      * QFX virtual-chassis when all same HW model 
 
-        :remote_path:
-          is the directory on the Junos device where the package file will be
-          SCP'd to.
+                      Known Restrictions:
 
-        :validate:
-          determines whether or not to perform a config validation against the
-          new image
+                      * SRX cluster 
+                      * MX virtual-chassis
 
-        :checksum:
+        You can get a progress report on this process by providing a **progress**
+        callback.
+
+        .. note:: You will need to invoke the :meth:`reboot` method explicitly to reboot
+                  the device.
+
+        :param str package:
+          The file-path to the install package tarball on the local filesystem
+
+        :param str remote_path:
+          The directory on the Junos device where the package file will be
+          SCP'd to; the default is ``/var/tmp``.
+
+        :param bool validate:
+          When ``True`` this method will perform a config validation against 
+          the new image
+
+        :param str checksum:
           MD5 hexdigest of the package file. If this is not provided, then this
           method will perform the calculation. If you are planning on using the
           same image for multiple updates, you should consider using the
-          :local_md5(): method to pre calculate this value and then provide to
+          :meth:`local_md5` method to pre calculate this value and then provide to
           this method.
 
-        :cleanfs:
-          Determines whether or not to perform a 'storeage cleanup' before
-          SCP'ing the file to the device.
+        :param bool cleanfs:
+          When ``True`` will perform a 'storeage cleanup' before SCP'ing the 
+          file to the device.  Default is ``True``.
 
-        :progress:
+        :param func progress:
           If provided, this is a callback function with a function prototype
-          given the Device instance and the report string, e.g.
+          given the Device instance and the report string::
 
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
 
-        :timeout:
+        :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.  This
           argument was added since most of the time the "package add" RPC
           takes a significant amount of time.  The default RPC timeout is 
@@ -387,6 +438,15 @@ class SW(Util):
 
         If the device is equipped with dual-RE, then both RE will be
         rebooted.  This code also hanldes EX/QFX VC.
+
+        :param int in_min: time (minutes) before rebooting the device.
+
+        :returns:
+            * reboot message (string) if command successful
+
+        :raises RpcError: when command is not successful.
+
+        .. todo:: need to better handle the exception event.
         """
         cmd = E('request-reboot', E('in', str(in_min)))
 
@@ -410,6 +470,15 @@ class SW(Util):
 
         If the device is equipped with dual-RE, then both RE will be
         rebooted.  This code also hanldes EX/QFX VC.
+
+        :param int in_min: time (minutes) before rebooting the device.
+
+        :returns:
+            * reboot message (string) if command successful
+
+        :raises RpcError: when command is not successful.
+
+        .. todo:: need to better handle the exception event.        
         """
         cmd = E('request-power-off', E('in', str(in_min)))
 
@@ -429,7 +498,10 @@ class SW(Util):
     def rollback(self):
         """
         issues the 'request' command to do the rollback and returns the string
-        output of the results
+        output of the results.
+
+        :returns:
+            Rollback results (str)
         """
         rsp = self.rpc.request_package_rollback()
         return rsp.text.strip()
@@ -444,6 +516,9 @@ class SW(Util):
         Returns dictionary of file listing information for current and rollback
         Junos install packages. This information comes from the /packages
         directory.
+
+        .. warning:: Experimental method; may not work on all platforms.  If 
+                     you find this not working, please report issue.
         """
         from jnpr.junos.utils.fs import FS
         fs = FS(self.dev)
