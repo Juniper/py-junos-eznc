@@ -57,6 +57,29 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class Device(object):
+    """
+    Junos Device class.
+
+    :attr:`ON_JUNOS`: 
+        **READ-ONLY** -
+        Auto-set to ``True`` when this code is running on a Junos device,
+        vs. running on a local-server remotely connecting to a device.
+
+    :attr:`auto_probe`:
+        When non-zero the call to :meth:`open` will probe for NETCONF
+        reachability before proceeding with the NETCONF session establishment.
+        If you want to enable this behavior by default, you could do the 
+        following in your code::
+
+            from jnpr.junos import Device
+
+            # set all device open to auto-probe with timeout of 10 sec 
+            Device.auto_probe = 10
+
+            dev = Device( ... )
+            dev.open()   # this will probe before attempting NETCONF connect
+
+    """
     ON_JUNOS = platform.system().upper() == 'JUNOS'    
     auto_probe = 0          # default is no auto-probe
 
@@ -71,7 +94,7 @@ class Device(object):
     @property
     def hostname(self):
         """
-        The hostname/ip-addr of the Junos device
+        :returns: the host-name of the Junos device.
         """
         return self._hostname if (
             self._hostname != 'localhost') else self.facts.get('hostname')
@@ -83,7 +106,7 @@ class Device(object):
     @property
     def user(self):
         """
-        The login user accessing the Junos device
+        :returns: the login user (str) accessing the Junos device
         """
         return self._auth_user
 
@@ -94,12 +117,16 @@ class Device(object):
     @property
     def password(self):
         """
-          The login password to access the Junos deviec
+        :returns: ``None`` - do not provide the password
         """
         return None  # read-only
 
     @password.setter
     def password(self, value):
+        """
+        Change the authentication password value.  This is handy in case
+        the calling program needs to attempt different passwords.
+        """
         self._password = value
 
     # ------------------------------------------------------------------------
@@ -109,16 +136,23 @@ class Device(object):
     @property
     def logfile(self):
         """
-          simply returns the log file object
+        :returns: exsiting logfile ``file`` object.
         """
         return self._logfile
 
     @logfile.setter
     def logfile(self, value):
         """
-          assigns an opened file object to the device for logging
-          If there is an open logfile, and 'value' is None/False
-          then close the existing file
+        Assigns an opened file object to the device for logging
+        If there is an open logfile, and 'value' is ``None`` or ``False``
+        then close the existing file.
+
+        :param file value: An open ``file`` object.
+
+        :returns: the new logfile ``file`` object
+
+        :raises ValueError:
+            When **value** is not a ``file`` object
         """
         # got an existing file that we need to close
         if (not value) and (None != self._logfile):
@@ -138,12 +172,19 @@ class Device(object):
 
     @property
     def timeout(self):
-        """ the netconf timeout value """
+        """
+        :returns: the current RPC timeout value (int) in seconds. 
+        """
         return self._conn.timeout
 
     @timeout.setter
     def timeout(self, value):
-        """ set the netconf timeout value """
+        """ 
+        Used to change the RPC timeout value (default=30 sec).
+
+        :param int value:
+            New timeout value in seconds
+        """
         self._conn.timeout = value
 
     # ------------------------------------------------------------------------
@@ -152,10 +193,14 @@ class Device(object):
 
     @property
     def facts(self):
+        """
+        :returns: Device fact dictionary
+        """
         return self._facts
 
     @facts.setter
     def facts(self, value):
+        """ read-only property """
         raise RuntimeError("facts is read-only!")
 
     # ------------------------------------------------------------------------
@@ -165,8 +210,9 @@ class Device(object):
     @property
     def manages(self):
         """
-        returns a list of Resource Managers/Utilities attached to this
-        isinstance using the :bind(): method
+        :returns: 
+            ``list`` of Resource Managers/Utilities attached to this
+            instance using the :meth:`bind` method.
         """
         return self._manages
 
@@ -198,34 +244,38 @@ class Device(object):
 
     def __init__(self, *vargs, **kvargs):
         """
-        vargs[0] -- ALTERNATIVE for kvargs['host']
+        Device object constructor.
 
-        kvargs['host'] -- REQUIRED for off-box
-          device hostname or ipaddress
+        :param str vargs[0]: host-name or ipaddress.  This is an
+                             alternative for **host**
 
-        kvargs['user'] -- OPTIONAL
-          login user-name, uses $USER if not provided
+        :param str host: 
+            **REQUIRED** host-name or ipaddress of target device
 
-        kvargs['password'] -- OPTIONAL
-        kvargs['passwd'] -- OPTIONAL
-          login password.  if not provided, assumed ssh-keys are enforced
+        :param str user: 
+            *OPTIONAL* login user-name, uses $USER if not provided
 
-        kvargs['port'] -- OPTIONAL
-          device login port (defaults to 830)
+        :param str passwd: 
+            *OPTIONAL* if not provided, assumed ssh-keys are enforced
 
-        kvargs['gather_facts'] -- optional
-          if :False: then the facts are not gathered on call to :open():
+        :param int port:
+            *OPTIONAL* NETCONF port (defaults to 830)
 
-        kvargs['auto_probe'] -- OPTIONAL
-            if non-zero then this enables auto_probe at time of :open():
-            and defines the amount of time/seconds for the probe timeout
+        :param bool gather_facts:
+            *OPTIONAL* default is ``True``.  If ``False`` then the 
+            facts are not gathered on call to :meth:`open`
 
-        kvargs['ssh_private_key_file'] -- OPTIONAL
-            the path to the SSH private key file.  this can be used
-            if you need to provide a private key rather than
+        :param bool auto_probe: 
+            *OPTIONAL*  if non-zero then this enables auto_probe at time of 
+            :meth:`open` and defines the amount of time(sec) for the 
+            probe timeout
+
+        :param str ssh_private_key_file:
+            *OPTIONAL* The path to the SSH private key file.  
+            This can be used if you need to provide a private key rather than
             loading the key into the ssh-key-ring/environment.  if your
             ssh-key requires a password, then you must provide it via 
-            kvargs['passwd'].
+            **passwd**
         """
 
         # ----------------------------------------
@@ -281,16 +331,37 @@ class Device(object):
 
     def open(self, *vargs, **kvargs):
         """
-        opens a connection to the device using existing login/auth
+        Opens a connection to the device using existing login/auth
         information.
 
-        kvargs['gather_facts']:
-            If set to True/False will override the device instance value
-            for only this open process
+        :param bool gather_facts:
+            If set to ``True``/``False`` will override the device 
+            instance value for only this open process
 
-        kvargs['auto_probe']:
-            if non-zero then this enables auto_probe and defines the amount 
+        :param bool auto_probe:
+            If non-zero then this enables auto_probe and defines the amount 
             of time/seconds for the probe timeout
+
+        :returns Device: Device instance (*self*).
+
+        :raises ProbeError: 
+            When **auto_probe** is ``True`` and the probe activity 
+            exceeds the timeout
+
+        :raises ConnectAuthError: 
+            When provided authentication credentials fail to login
+
+        :raises ConnectRefusedError:
+            When the device does not have NETCONF enabled
+
+        :raises ConnectTimeoutError:
+            When the the :meth:`Device.timeout` value is exceeded
+            during the attempt to connect to the remote device
+
+        :raises ConnectError:
+            When an error, other than the above, occurs.  The
+            originating ``Exception`` is assigned as ``err._orig``
+            and re-raised to the caller.
         """
 
         auto_probe = kvargs.get('auto_probe', self._auto_probe)
@@ -372,7 +443,7 @@ class Device(object):
 
     def close(self):
         """
-        closes the connection to the device
+        Closes the connection to the device.
         """
         self._conn.close_session()
         self.connected = False
@@ -381,16 +452,33 @@ class Device(object):
         """
         Executes an XML RPC and returns results as either XML or native python
 
-        rpc_cmd
+        :param rpc_cmd:
           can either be an XML Element or xml-as-string.  In either case
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
 
-        kvargs['to_py']
-          is a caller provided function that takes the response and
+        :param func to_py':
+          Is a caller provided function that takes the response and
           will convert the results to native python types.  all kvargs
-          will be passed to this function as well in the form:
-          :to_py:( self, rpc_rsp, \**kvargs )
+          will be passed to this function as well in the form::
+
+            to_py( self, rpc_rsp, **kvargs )
+
+        :raises ValueError: 
+            When the **rpc_cmd** is of unknown origin 
+
+        :raises PermissionError:
+            When the requested RPC command is not allowed due to
+            user-auth class privledge controls on Junos
+
+        :raises RpcError:
+            When an ``rpc-error`` element is contained in the RPC-reply
+
+        :returns: 
+            RPC-reply as XML object.  If **to_py** is provided, then
+            that function is called, and return of that function is 
+            provided back to the caller; presuably to convert the XML to 
+            native python data-types (e.g. ``dict``).
         """
 
         if isinstance(rpc_cmd, str):
@@ -448,19 +536,29 @@ class Device(object):
         """
         Executes the CLI command and returns the CLI text output by default.
 
-        command
+        :param str command:
           The CLI command to execute, e.g. "show version"
 
-        format
+        :param str format:
           The return format, by default is text.  You can optionally select
-          'xml' to return the XML structure.
+          "xml" to return the XML structure.
 
-        Notes:
-          You can also use this method to obtain the XML RPC command for a
-          given CLI command by using the pipe filter "| display xml rpc". When
-          you do this, the return value is the XML RPC command. For example if
-          you provide as the command "show version | display xml rpc", you will
-          get back the XML Element <get-software-information>
+        .. note::
+            You can also use this method to obtain the XML RPC command for a
+            given CLI command by using the pipe filter ``| display xml rpc``. When
+            you do this, the return value is the XML RPC command. For example if
+            you provide as the command ``show version | display xml rpc``, you will
+            get back the XML Element ``<get-software-information>``.
+
+        .. warning::
+            You should **NOT** use this method to for general automation purposes
+            that put you in the of "screen-scraping the CLI".  The purpose of the
+            PyEZ framework is to migrate away from that tooling pattern.
+
+        .. warning::
+            You cannot use "pipe" filters with **command** such as ``| match``
+            or ``| count``, etc.  The only value use of the "pipe" is for the
+            ``| display xml rpc`` as noted above.
         """
         try:
             rsp = self.rpc.cli(command, format)
@@ -479,7 +577,14 @@ class Device(object):
     # ------------------------------------------------------------------------
 
     def Template(self, filename, parent=None, gvars=None):
+        """
+        Used to return a Jinja2 :class:`Template`. 
+        
+        :param str filename:
+            file-path to Jinja2 template file on local device
 
+        :returns: Jinja2 :class:`Template` give **filename**.
+        """
         # templates are XML files, and the assumption here is that they will
         # have .xml extensions.  if the caller doesn't include any extension
         # be kind and add '.xml' for them
@@ -495,15 +600,28 @@ class Device(object):
 
     def bind(self, *vargs, **kvargs):
         """
-        Used to attach things to this Device instance
+        Used to attach things to this Device instance and make them a 
+        property of the :class:Device instance.  The most common use
+        for bind is attaching Utiilty instances to a :class:Device.
+        For example::
 
-        vargs
-          a list of functions that will get bound as instance methods to
-          this Device instance
+            from jnpr.junos.utils.config import Config 
 
-        kvargs
+            dev.bind( cu=Config )
+            dev.cu.lock()
+            # ... load some changes
+            dev.cu.commit()
+            dev.cu.unlock()
+
+        :param list vargs:
+          A list of functions that will get bound as instance methods to
+          this Device instance.
+
+          .. warning:: Experimental.
+
+        :param new_property:
           name/class pairs that will create resource-managers bound as
-          instance attributes to this Device instance
+          instance attributes to this Device instance.  See code example above
         """
         if len(vargs):
             for fn in vargs:
@@ -543,7 +661,7 @@ class Device(object):
 
     def facts_refresh(self):
         """
-        reload the facts from the Junos device into :facts: property
+        Reload the facts from the Junos device into :attr:`facts` property.
         """
         for gather in FACT_LIST:
             gather(self, self._facts)
@@ -559,14 +677,16 @@ class Device(object):
         This method is meant to be called *prior* to :open():
         This method will not work with ssh-jumphost environments.
 
-        :timeout:
-          the probe will report True/False if the device report connectivity
-          within this timeout (seconds)
+        :param int timeout:
+          The probe will report ``True``/``False`` if the device report 
+          connectivity within this timeout (seconds)
 
-        :intvtimeout:
-          timeout interval on the socket connection. Generally you should not
+        :param int intvtimeout:
+          Timeout interval on the socket connection. Generally you should not
           change this value, but you can if you want to twiddle the frequency
           of the socket attempts on the connection
+
+        :returns: ``True`` if probe is successful, ``False`` otherwise
         """
         start = datetime.datetime.now()
         end = start + datetime.timedelta(seconds=timeout)
