@@ -25,7 +25,6 @@ def _hashfile(afile, hasher, blocksize=65536):
     return hasher.hexdigest()
 
 class SW(Util):
-
     """
     Software Utility class, used to perform a software upgrade and
     associated functions.  These methods have been tested on
@@ -63,20 +62,26 @@ class SW(Util):
     @classmethod
     def local_sha256(cls, package):
         """
-        computes the SHA-256 value on the package file.
+        Computes the SHA-256 value on the package file.
 
-        :package:
-          complete path to the package (\*.tgz) file on the local server
+        :param str package:
+          File-path to the package (\*.tgz) file on the local server
+
+        :returns: SHA-256 checksum (str)
+        :raises IOError: when **package** file does not exist
         """
         return _hashfile(open(package, 'rb'), hashlib.sha256())
 
     @classmethod
     def local_md5(cls, package):
         """
-        computes the MD5 checksum value on the local package file.
+        Computes the MD5 checksum value on the local package file.
 
-        :package:
-          complete path to the package (\*.tgz) file on the local server
+        :param str package:
+          File-path to the package (\*.tgz) file on the local server
+
+        :returns: MD5 checksum (str)
+        :raises IOError: when **package** file does not exist
         """
         return _hashfile(open(package, 'rb'), hashlib.md5())
 
@@ -85,8 +90,11 @@ class SW(Util):
         """
         computes the SHA1 checksum value on the local package file.
 
-        :package:
-          complete path to the package (\*.tgz) file on the local server
+        :param str package:
+          File-path to the package (\*.tgz) file on the local server
+
+        :returns: SHA1 checksum (str)
+        :raises IOError: when **package** file does not exist
         """
         return _hashfile(open(package, 'rb'), hashlib.sha1())
 
