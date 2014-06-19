@@ -5,30 +5,31 @@ from jnpr.junos.utils.start_shell import StartShell
 
 
 class FS(Util):
-
     """
     Filesystem (FS) utilities:
 
-      cat - show the contents of a file
-      checksum - calculate file checksum (md5,sha256,sha1)
-      copy - local file copy (not scp)
-      cwd - change working directory
-      ls - return file/dir listing
-      mkdir - create a directory
-      pwd - get working directory
-      rename - local file rename
-      rm - local file delete
-      rmdir - remove a directory
-      stat - return file/dir information
-      storage_usage - return storage usage
-      storage_cleanup - perform storage storage_cleanup
-      storage_cleanup_check - returns a list of files to remove at cleanup
-      symlink - create a symlink
-      tgz - tar+gzip a directory
+    * :meth:`cat`: show the contents of a file
+    * :meth:`checksum`: calculate file checksum (md5,sha256,sha1)
+    * :meth:`cp`: local file copy (not scp)
+    * :meth:`cwd`: change working directory
+    * :meth:`ls`: return file/dir listing
+    * :meth:`mkdir`: create a directory
+    * :meth:`pwd`: get working directory
+    * :meth:`mv`: local file rename
+    * :meth:`rm`: local file delete
+    * :meth:`rmdir`: remove a directory
+    * :meth:`stat`: return file/dir information
+    * :meth:`storage_usage`: return storage usage
+    * :meth:`storage_cleanup`: perform storage storage_cleanup
+    * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
+    * :meth:`symlink`: create a symlink
+    * :meth:`tgz`: tar+gzip a directory
 
-    NOTES:
-      The following methods require 'start shell' priveldges:
-      [mkdir, rmdir, symlink]
+    .. note: The following methods require 'start shell' priveldges:
+              
+              * mkdir
+              * rmdir
+              * symlink
     """
 
     # -------------------------------------------------------------------------
@@ -37,7 +38,11 @@ class FS(Util):
 
     def cat(self, path):
         """
-        returns the contents of the file :path:
+        Returns the contents of the file **path**.
+
+        :param str path: File-path
+
+        :returns: contents of the file (str) or ``None`` if file does not exist
         """
         try:
             rsp = self._dev.rpc.file_show(filename=path)
@@ -51,7 +56,9 @@ class FS(Util):
 
     def cwd(self, path):
         """
-        change working directory to path
+        Change working directory to **path**.
+
+        :param str path: path to working directory
         """
         self._dev.rpc.set_cli_working_directory(directory=path)
 
@@ -61,7 +68,7 @@ class FS(Util):
 
     def pwd(self):
         """
-        returns the current working directory
+        :returns: The current working directory path (str)
         """
         rsp = self._dev.rpc(E.command("show cli directory"))
         return rsp.findtext('./working-directory')
@@ -72,10 +79,18 @@ class FS(Util):
 
     def checksum(self, path, calc='md5'):
         """
-        performs the checksum command on the given file path using the
-        required calculation method ['md5', 'sha256', 'sha1'] and returns
-        the string value.  if the :path: is not found on the device, then
-        None is returned.
+        Performs the checksum command on the given file path using the
+        required calculation method and returns the string value.  
+        If the **path** is not found on the device, then ``None`` is returned.
+
+        :param str path: file-path on local device
+        :param str calc: checksum calculation method:
+
+                         * "md5"
+                         * "sha256"
+                         * "sha1"
+
+        :returns: checksum value (str) or ``None`` if file not found
         """
         cmd_map = {
             'md5': self._dev.rpc.get_checksum_information,
@@ -133,10 +148,13 @@ class FS(Util):
 
     def stat(self, path):
         """
-        Returns a dictionary of status information on the path, or None
+        Returns a dictionary of status information on the path, or ``None``
         if the path does not exist.
 
-        @@@ MORE NEEDED @@@
+        :param str path: file-path on local device
+
+        :returns: status information on the file
+        :rtype: dict
         """
         rsp = self._dev.rpc.file_list(detail=True, path=path)
 
@@ -161,9 +179,21 @@ class FS(Util):
     def ls(self, path='.', brief=False, followlink=True):
         """
         File listing, returns a dict of file information.  If the
-        path is a symlink, then by default (:followlink):) will
+        path is a symlink, then by default **followlink** will
         recursively call this method to obtain the symlink specific
         information.
+
+        :param str path: 
+            file-path on local device. defaults to current
+            working directory
+        :param bool brief: 
+            when ``True`` brief amount of data
+        :param bool followlink:
+            when ``True`` (default) this method will recursively
+            follow the directory symlinks to gather data
+
+        :returns: dict collection of file information or ``None``
+                  if **path** is not found
         """
         rsp = self._dev.rpc.file_list(detail=True, path=path)
 
@@ -206,6 +236,11 @@ class FS(Util):
     # -------------------------------------------------------------------------
 
     def storage_usage(self):
+        """
+        Returns the storage usage, similar to the unix "df" command.
+
+        :returns: dict of storage usage
+        """
         rsp = self._dev.rpc.get_system_storage()
 
         _name = lambda fs: fs.findtext('filesystem-name').strip()
@@ -247,8 +282,10 @@ class FS(Util):
     def storage_cleanup_check(self):
         """
         Perform the 'request system storage cleanup dry-run' command
-        to return a :dict: of files/info that would be removed if
+        to return a ``dict`` of files/info that would be removed if
         the cleanup command was executed.
+
+        :returns: dict of files that would be removed (dry-run)
         """
         rsp = self._dev.rpc.request_system_storage_cleanup(dry_run=True)
         files = rsp.xpath('file-list/file')
@@ -257,8 +294,10 @@ class FS(Util):
     def storage_cleanup(self):
         """
         Perform the 'request system storage cleanup' command to remove
-        files from the filesystem.  Return a :dict: of file name/info
+        files from the filesystem.  Return a ``dict`` of file name/info
         on the files that were removed.
+
+        :returns: dict on files that were removed
         """
         rsp = self._dev.rpc.request_system_storage_cleanup()
         files = rsp.xpath('file-list/file')
@@ -271,7 +310,9 @@ class FS(Util):
     def rm(self, path):
         """
         Performs a local file delete action, per Junos CLI command
-        "file delete". If the file does not exist, then this returns False.
+        "file delete". 
+
+        :returns: ``True`` when successful, ``False`` otherwise.
         """
         # the return value from this RPC will return either True if the delete
         # was successful, or an XML structure otherwise.  So we can do a simple
@@ -288,11 +329,17 @@ class FS(Util):
 
     def cp(self, from_path, to_path):
         """
-        Perform a local file copy where :from_path: and :to_path: can be any
+        Perform a local file copy where **from_path** and **to_path** can be any
         valid Junos path argument.  Refer to the Junos "file copy" command
         documentation for details.
 
-        Returns True if OK, False if file does not exist.
+        :param str from_path: source file-path
+        :param str to_path: destination file-path
+
+        .. notes: Valid Junos file-path can include URL, such as ``http://``.
+                  this is handy for copying files for webservers.
+
+        :returns: ``True`` if OK, ``False`` if file does not exist.
         """
         # this RPC returns True if it is OK.  If the file does not exist
         # this RPC will generate an RpcError exception, so just return False
@@ -309,6 +356,8 @@ class FS(Util):
     def mv(self, from_path, to_path):
         """
         Perform a local file rename function, same as "file rename" Junos CLI.
+
+        :returns: ``True`` if OK, ``False`` if file does not exist.
         """
         rsp = self._dev.rpc.file_rename(source=from_path, destination=to_path)
         if rsp is True:
@@ -318,8 +367,13 @@ class FS(Util):
 
     def tgz(self, from_path, tgz_path):
         """
-        create a file called :tgz_path: that is the tar-gzip of the given
-        directory specified :from_path:
+        Create a file called **tgz_path** that is the tar-gzip of the given
+        directory specified **from_path**.
+
+        :param str from_path: file-path to directory of files
+        :param str tgz_path: file-path name of tgz file to create
+
+        :returns: ``True`` if OK, error-msg (str) otherwise
         """
         rsp = self._dev.rpc.file_archive(compress=True,
                                          source=from_path,
@@ -345,30 +399,35 @@ class FS(Util):
 
     def rmdir(self, path):
         """
-        *REQUIRES SHELL PRIVILEGES*
+        Executes the 'rmdir' command on **path**. 
 
-        executes the 'rmdir' command on path
-        returns True if OK, or error string
+        .. warning:: REQUIRES SHELL PRIVILEGES
+
+        :param str path: file-path to directory
+
+        :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("rmdir %s" % path)
         return True if results[0] is True else ''.join(results[1][2:-1])
 
     def mkdir(self, path):
         """
-        *REQUIRES SHELL PRIVILEGES*
+        Executes the 'mkdir -p' command on **path**.
 
-        executes the 'mkdir -p' command on path
-        returns True if OK, or error string
+        .. warning:: REQUIRES SHELL PRIVILEGES
+
+        :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("mkdir -p %s" % path)
         return True if results[0] is True else ''.join(results[1][2:-1])
 
     def symlink(self, from_path, to_path):
         """
-        *REQUIRES SHELL PRIVILEGES*
+        Executes the 'ln -sf **from_path** **to_path**' command.
 
-        executes the 'ln -sf <from_path> <to_path>' command
-        returns True if OK, or error string
+        .. warning:: REQUIRES SHELL PRIVILEGES
+
+        :returns: ``True`` if OK, or error-message (str) otherwise
         """
         results = self._ssh_exec("ln -sf %s %s" % (from_path, to_path))
         return True if results[0] is True else ''.join(results[1][2:-1])
