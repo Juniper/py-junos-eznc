@@ -1,6 +1,11 @@
-class Util(object):
+"""
+Junos PyEZ Utility Base Class 
+"""
 
-    """ Base class for all utility classes """
+class Util(object):
+    """ 
+    Base class for all utility classes 
+    """
 
     def __init__(self, dev):
         self._dev = dev
@@ -15,11 +20,14 @@ class Util(object):
 
     @property
     def dev(self):
-        """ return the Device device object """
+        """ 
+        :returns: the Device object 
+        """
         return self._dev
 
     @dev.setter
     def dev(self, value):
+        """ read-only property """
         raise RuntimeError("read-only: dev")
 
     # -------------------------------------------------------------------------
@@ -28,9 +36,12 @@ class Util(object):
 
     @property
     def rpc(self):
-        """ return the Device RPC meta object """
+        """ 
+        :returns: Device RPC meta object 
+        """
         return self._dev.rpc
 
     @rpc.setter
     def rpc(self, value):
+        """ read-only property """
         raise RuntimeError("read-only: rpc")
