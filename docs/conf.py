@@ -128,6 +128,10 @@ html_theme_options = {
     'navbar_site_name': "Module",
     'navbar_pagenav_name': "Classes",
     'source_link_position': "footer",
+    'navbar_links': [
+        ("Wiki", "https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ", True),
+        ("Forum", "http://groups.google.com/group/junos-python-ez", True),
+        ],
     }
 
 # Add any paths that contain custom themes here, relative to this directory.
