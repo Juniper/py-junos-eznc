@@ -26,7 +26,7 @@ class FS(Util):
     * :meth:`tgz`: tar+gzip a directory
 
     .. note: The following methods require 'start shell' priveldges:
-              
+
               * mkdir
               * rmdir
               * symlink
@@ -80,7 +80,7 @@ class FS(Util):
     def checksum(self, path, calc='md5'):
         """
         Performs the checksum command on the given file path using the
-        required calculation method and returns the string value.  
+        required calculation method and returns the string value.
         If the **path** is not found on the device, then ``None`` is returned.
 
         :param str path: file-path on local device
@@ -183,10 +183,10 @@ class FS(Util):
         recursively call this method to obtain the symlink specific
         information.
 
-        :param str path: 
+        :param str path:
             file-path on local device. defaults to current
             working directory
-        :param bool brief: 
+        :param bool brief:
             when ``True`` brief amount of data
         :param bool followlink:
             when ``True`` (default) this method will recursively
@@ -310,7 +310,7 @@ class FS(Util):
     def rm(self, path):
         """
         Performs a local file delete action, per Junos CLI command
-        "file delete". 
+        "file delete".
 
         :returns: ``True`` when successful, ``False`` otherwise.
         """
@@ -399,7 +399,7 @@ class FS(Util):
 
     def rmdir(self, path):
         """
-        Executes the 'rmdir' command on **path**. 
+        Executes the 'rmdir' command on **path**.
 
         .. warning:: REQUIRES SHELL PRIVILEGES
 
