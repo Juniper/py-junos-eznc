@@ -7,6 +7,7 @@ from scp import SCPClient
 Secure Copy Utility
 """
 
+
 class SCP(object):
     """
     The SCP utility is used to conjunction with :class:`jnpr.junos.utils.sw.SW`
@@ -25,7 +26,7 @@ class SCP(object):
         Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` related objects.
 
         :param Device junos: the Device object
-        :param kvargs scpargs: any additional args to be passed to paramiko SCP 
+        :param kvargs scpargs: any additional args to be passed to paramiko SCP
         """
         self._junos = junos
         self._scpargs = scpargs
@@ -37,7 +38,7 @@ class SCP(object):
         .. note:: This method uses the same username/password authentication
                    credentials as used by :class:`jnpr.junos.device.Device`.
 
-        .. warning:: The :class:`jnpr.junos.device.Device` ``ssh_private_key_file`` 
+        .. warning:: The :class:`jnpr.junos.device.Device` ``ssh_private_key_file``
                      option is currently **not** supported.
 
         .. todo:: add support for ``ssh_private_key_file``.

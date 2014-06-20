@@ -13,6 +13,7 @@ from jnpr.junos.utils.util import Util
 Configuration Utilities
 """
 
+
 class Config(Util):
     """
     Overivew of Configuration Utilities:
@@ -34,17 +35,17 @@ class Config(Util):
 
     def commit(self, **kvargs):
         """
-        Commit a configuration. 
+        Commit a configuration.
 
         :param str comment: If provide logs this comment with the commit.
-        :param int confirm: If provided activates confirm safeguard with 
+        :param int confirm: If provided activates confirm safeguard with
                             provided value as timeout (minutes).
 
         :returns:
             * ``True`` when successful
 
         :raises CommitError: When errors detected in candidate configuraiton.
-                             You can use the Exception variable (XML) 
+                             You can use the Exception variable (XML)
                              to identify the specific problems
         """
         rpc_args = {}
@@ -126,7 +127,7 @@ class Config(Util):
 
         :param int rollback: rollback id [0..49]
 
-        :returns: 
+        :returns:
             * ``None`` if there is no difference
             * ascii-text (str) if there is a difference
         """
@@ -143,7 +144,7 @@ class Config(Util):
 
     def pdiff(self, rb_id=0):
         """
-        Helper method that calls ``print`` on the diff (patch-fomrat) between the 
+        Helper method that calls ``print`` on the diff (patch-fomrat) between the
         current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
@@ -158,7 +159,7 @@ class Config(Util):
 
     def load(self, *vargs, **kvargs):
         """
-        Loads changes into the candidate configuration.  Changes can be 
+        Loads changes into the candidate configuration.  Changes can be
         in the form of strings (text,set,xml), XML objects, and files.
         Files can be either static snippets of configuration or Jinja2
         templates.  When using Jinja2 Templates, this method will render
@@ -172,8 +173,8 @@ class Config(Util):
             correctly; and if not an Exception will be raised.
 
         :param str path:
-            Path to file of configuration on the local server.  
-            The path extension will be used to determine the format of 
+            Path to file of configuration on the local server.
+            The path extension will be used to determine the format of
             the contents:
 
             * "conf","text","txt" is curly-text-style
@@ -197,13 +198,13 @@ class Config(Util):
           the default load-config action is 'replace'
 
         :param str template_path:
-          Similar to the **path** parameter, but this indicates that 
+          Similar to the **path** parameter, but this indicates that
           the file contents are ``Jinja2`` format and will require
           template-rendering.
 
           .. note:: This parameter is used in conjection with **template_vars**.
-                     The template filename extension will be used to determine 
-                     the format-style of the contents, or you can override 
+                     The template filename extension will be used to determine
+                     the format-style of the contents, or you can override
                      using **format**.
 
         :param jinja2.Template template:
@@ -265,7 +266,7 @@ class Config(Util):
 
         def try_load(rpc_contents, rpc_xattrs):
             try:
-                got = self.rpc.load_config(rpc_contents, **rpc_xattrs)            
+                got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
             except Exception as err:
                 rerrs = err.rsp[0].findall('rpc-error')
                 if len(rerrs) > 0:
@@ -289,12 +290,12 @@ class Config(Util):
         if len(vargs):
             # caller is providing the content directly.
             rpc_contents = vargs[0]
-            if isinstance(rpc_contents, str) and not 'format' in kvargs:
+            if isinstance(rpc_contents, str) and 'format' not in kvargs:
                 raise RuntimeError(
                     "You must define the format of the contents")
             return try_load(rpc_contents, rpc_xattrs)
 
-            #~! UNREACHABLE !~#
+            # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
         # if path is provided, use the static-config file
@@ -310,7 +311,7 @@ class Config(Util):
 
             return try_load(rpc_contents, rpc_xattrs)
 
-            #~! UNREACHABLE !~#
+            # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
         # if template_path is provided, then jinja2 load the template, and
@@ -326,7 +327,7 @@ class Config(Util):
 
             return try_load(rpc_contents, rpc_xattrs)
 
-            #~! UNREACHABLE !~#
+            # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
         # if template is provided, then this is a pre-loaded jinja2 Template
@@ -341,7 +342,7 @@ class Config(Util):
 
             return try_load(rpc_contents, rpc_xattrs)
 
-            #~! UNREACHABLE !~#
+            # ~! UNREACHABLE !~#
 
         raise RuntimeError("Unhandled load request")
 
@@ -351,7 +352,7 @@ class Config(Util):
 
     def lock(self):
         """
-        Attempts an exclusive lock on the candidate configuration.  This 
+        Attempts an exclusive lock on the candidate configuration.  This
         is a non-blocking call.
 
         :returns:
@@ -376,12 +377,12 @@ class Config(Util):
 
     def unlock(self):
         """
-        Unlocks the candidate configuration. 
+        Unlocks the candidate configuration.
 
         :returns:
             ``True`` always when successful
 
-        :raises UnlockError: If you attempt to unlock a configuration 
+        :raises UnlockError: If you attempt to unlock a configuration
                              when you do not own the lock
         """
         try:
@@ -390,7 +391,7 @@ class Config(Util):
             if isinstance(err, RpcError):
                 raise UnlockError(rsp=err.rsp)
             else:
-            # :err: is from ncclient
+                # :err: is from ncclient
                 raise UnlockError(rsp=JXML.remove_namespaces(err.xml))
 
         return True
@@ -425,7 +426,7 @@ class Config(Util):
     # rescue configuration
     # -------------------------------------------------------------------------
 
-    def rescue(self, action, format='text' ):
+    def rescue(self, action, format='text'):
         """
         Perform action on the "rescue configuration".
 
@@ -434,7 +435,7 @@ class Config(Util):
             * "get" - retrieves/returns the rescue configuration via **format**
             * "save" - saves current configuration as rescue
             * "delete" - removes the rescue configuration
-            * "reload" - loads the resuce config as candidate (no-commit)        
+            * "reload" - loads the resuce config as candidate (no-commit)
 
         :param str format: identifies the return format when **action** is "get":
 
@@ -457,7 +458,7 @@ class Config(Util):
               exists, and ``False`` otherwise.
 
             .. note:: The rescue configuration is only loaded as the candidate,
-                      and not committed.  You must commit to make the rescue 
+                      and not committed.  You must commit to make the rescue
                       configuration active.
 
         :raises ValueError:
@@ -473,10 +474,10 @@ class Config(Util):
 
         def _rescue_delete():
             """
-            Deletes the existing resuce configuration.  
+            Deletes the existing resuce configuration.
             """
             # note that this will result in an "OK" regardless if
-            # a rescue config exists or not. 
+            # a rescue config exists or not.
             self.rpc.request_delete_rescue_configuration()
             return True
 
@@ -497,15 +498,15 @@ class Config(Util):
 
         def _rescue_reload():
             """
-            Loads the rescue configuration as the active candidate.  
+            Loads the rescue configuration as the active candidate.
             This action does *not* commit the configuration; use the
             :commit(): method for that purpose.
 
-            Returns the XML response if the rescue configuration 
+            Returns the XML response if the rescue configuration
             exists, or :False: otherwise
             """
             try:
-                return self.rpc.load_configuration({'rescue':'rescue'})
+                return self.rpc.load_configuration({'rescue': 'rescue'})
             except:
                 return False
 
@@ -513,10 +514,10 @@ class Config(Util):
             raise ValueError("unsupported action: {0}".format(action))
 
         result = {
-            'get' : _rescue_get,
-            'save' : _rescue_save,
-            'delete' : _rescue_delete,
-            'reload' : _rescue_reload
-        }.get( action, _unsupported_action )()
+            'get': _rescue_get,
+            'save': _rescue_save,
+            'delete': _rescue_delete,
+            'reload': _rescue_reload
+        }.get(action, _unsupported_action)()
 
         return result

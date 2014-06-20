@@ -93,9 +93,10 @@ class TestConfig(unittest.TestCase):
             assert_called_with({'compare': 'rollback', 'rollback': '0', 'format': 'text'})
 
     def test_config_pdiff(self):
-        self.conf.diff = MagicMock(return_value='')
+        self.conf.diff = MagicMock(return_value='Stuff')
         self.conf.pdiff()
-        self.conf.diff.assert_any_call()
+        print self.conf.diff.call_args
+        self.conf.diff.assert_called_once_with(0)
 
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
@@ -162,8 +163,8 @@ class TestConfig(unittest.TestCase):
 
     def test_config_diff_exception(self):
         self.conf.rpc.get_configuration = MagicMock()
-        self.assertRaises(ValueError, self.conf.diff, rollback=51)
-        self.assertRaises(ValueError, self.conf.diff, rollback=-1)
+        self.assertRaises(ValueError, self.conf.diff, 51)
+        self.assertRaises(ValueError, self.conf.diff, -1)
 
     def test_config_lock(self):
         self.conf.rpc.lock_configuration = MagicMock()
@@ -190,7 +191,7 @@ class TestConfig(unittest.TestCase):
     def test_config_unlock_LockError(self, mock_jxml):
         ex = RpcError(rsp='ok')
         self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
-        self.assertRaises(LockError, self.conf.unlock)
+        self.assertRaises(UnlockError, self.conf.unlock)
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_unlock_exception(self, mock_jxml):

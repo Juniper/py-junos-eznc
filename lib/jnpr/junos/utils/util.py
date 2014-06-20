@@ -1,10 +1,11 @@
 """
-Junos PyEZ Utility Base Class 
+Junos PyEZ Utility Base Class
 """
 
+
 class Util(object):
-    """ 
-    Base class for all utility classes 
+    """
+    Base class for all utility classes
     """
 
     def __init__(self, dev):
@@ -20,8 +21,8 @@ class Util(object):
 
     @property
     def dev(self):
-        """ 
-        :returns: the Device object 
+        """
+        :returns: the Device object
         """
         return self._dev
 
@@ -36,8 +37,8 @@ class Util(object):
 
     @property
     def rpc(self):
-        """ 
-        :returns: Device RPC meta object 
+        """
+        :returns: Device RPC meta object
         """
         return self._dev.rpc
 

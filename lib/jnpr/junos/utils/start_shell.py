@@ -62,7 +62,7 @@ class StartShell(object):
     def open(self):
         """
         Open an ssh-client connection and issue the 'start shell' command to
-        drop into the Junos shell (csh).  This process opens a 
+        drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
         junos = self._nc

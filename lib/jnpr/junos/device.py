@@ -1,14 +1,12 @@
 # stdlib
 import os
 import types
-from inspect import isclass
 import platform
 
 # stdlib, in support of the the 'probe' method
 import socket
 import datetime
 import time
-import sys
 
 # 3rd-party packages
 from lxml import etree
@@ -60,7 +58,7 @@ class Device(object):
     """
     Junos Device class.
 
-    :attr:`ON_JUNOS`: 
+    :attr:`ON_JUNOS`:
         **READ-ONLY** -
         Auto-set to ``True`` when this code is running on a Junos device,
         vs. running on a local-server remotely connecting to a device.
@@ -68,25 +66,25 @@ class Device(object):
     :attr:`auto_probe`:
         When non-zero the call to :meth:`open` will probe for NETCONF
         reachability before proceeding with the NETCONF session establishment.
-        If you want to enable this behavior by default, you could do the 
+        If you want to enable this behavior by default, you could do the
         following in your code::
 
             from jnpr.junos import Device
 
-            # set all device open to auto-probe with timeout of 10 sec 
+            # set all device open to auto-probe with timeout of 10 sec
             Device.auto_probe = 10
 
             dev = Device( ... )
             dev.open()   # this will probe before attempting NETCONF connect
 
     """
-    ON_JUNOS = platform.system().upper() == 'JUNOS'    
+    ON_JUNOS = platform.system().upper() == 'JUNOS'
     auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
-    
+
     # ------------------------------------------------------------------------
     # property: hostname
     # ------------------------------------------------------------------------
@@ -173,13 +171,13 @@ class Device(object):
     @property
     def timeout(self):
         """
-        :returns: the current RPC timeout value (int) in seconds. 
+        :returns: the current RPC timeout value (int) in seconds.
         """
         return self._conn.timeout
 
     @timeout.setter
     def timeout(self, value):
-        """ 
+        """
         Used to change the RPC timeout value (default=30 sec).
 
         :param int value:
@@ -210,7 +208,7 @@ class Device(object):
     @property
     def manages(self):
         """
-        :returns: 
+        :returns:
             ``list`` of Resource Managers/Utilities attached to this
             instance using the :meth:`bind` method.
         """
@@ -249,32 +247,32 @@ class Device(object):
         :param str vargs[0]: host-name or ipaddress.  This is an
                              alternative for **host**
 
-        :param str host: 
+        :param str host:
             **REQUIRED** host-name or ipaddress of target device
 
-        :param str user: 
+        :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided
 
-        :param str passwd: 
+        :param str passwd:
             *OPTIONAL* if not provided, assumed ssh-keys are enforced
 
         :param int port:
             *OPTIONAL* NETCONF port (defaults to 830)
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the 
+            *OPTIONAL* default is ``True``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
 
-        :param bool auto_probe: 
-            *OPTIONAL*  if non-zero then this enables auto_probe at time of 
-            :meth:`open` and defines the amount of time(sec) for the 
+        :param bool auto_probe:
+            *OPTIONAL*  if non-zero then this enables auto_probe at time of
+            :meth:`open` and defines the amount of time(sec) for the
             probe timeout
 
         :param str ssh_private_key_file:
-            *OPTIONAL* The path to the SSH private key file.  
+            *OPTIONAL* The path to the SSH private key file.
             This can be used if you need to provide a private key rather than
             loading the key into the ssh-key-ring/environment.  if your
-            ssh-key requires a password, then you must provide it via 
+            ssh-key requires a password, then you must provide it via
             **passwd**
         """
 
@@ -291,12 +289,12 @@ class Device(object):
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
             # running on a Junos device locally
-            # ---------------------------------            
+            # ---------------------------------
             self._auth_user = None
             self._auth_password = None
             self._hostname = 'localhost'
         else:
-            # --------------------------            
+            # --------------------------
             # making a remote connection
             # --------------------------
             if hostname is None:
@@ -310,7 +308,7 @@ class Device(object):
             self._auth_user = kvargs.get('user') or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
             self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
-        
+
         # -----------------------------
         # initialize instance variables
         # ------------------------------
@@ -335,20 +333,20 @@ class Device(object):
         information.
 
         :param bool gather_facts:
-            If set to ``True``/``False`` will override the device 
+            If set to ``True``/``False`` will override the device
             instance value for only this open process
 
         :param bool auto_probe:
-            If non-zero then this enables auto_probe and defines the amount 
+            If non-zero then this enables auto_probe and defines the amount
             of time/seconds for the probe timeout
 
         :returns Device: Device instance (*self*).
 
-        :raises ProbeError: 
-            When **auto_probe** is ``True`` and the probe activity 
+        :raises ProbeError:
+            When **auto_probe** is ``True`` and the probe activity
             exceeds the timeout
 
-        :raises ConnectAuthError: 
+        :raises ConnectAuthError:
             When provided authentication credentials fail to login
 
         :raises ConnectRefusedError:
@@ -372,13 +370,13 @@ class Device(object):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to disable the ssh-agent if-and-only-if we are 
-            # given a password and we are not given an ssh key file. 
-            # in this condition it means that the password is 
+            # we want to disable the ssh-agent if-and-only-if we are
+            # given a password and we are not given an ssh key file.
+            # in this condition it means that the password is
             # the 'plain-text' password
 
-            allow_agent = not bool((self._auth_password is not None) and 
-                (self._ssh_private_key_file is None ))
+            allow_agent = not bool((self._auth_password is not None) and
+                (self._ssh_private_key_file is None))
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
@@ -397,12 +395,12 @@ class Device(object):
             raise EzErrors.ConnectAuthError(self)
 
         except NcErrors.SSHError as err:
-            # this is a bit of a hack for now, since we want to 
+            # this is a bit of a hack for now, since we want to
             # know if the connection was refused or we simply could
             # not open a connection due to reachability.  so using
             # a timestamp to differentiate the two conditions for now
-            # if the diff is < 3 sec, then assume the host is 
-            # reachable, but NETCONF connection is refushed. 
+            # if the diff is < 3 sec, then assume the host is
+            # reachable, but NETCONF connection is refushed.
 
             ts_err = datetime.datetime.now()
             diff_ts = ts_err - ts_start
@@ -430,7 +428,7 @@ class Device(object):
             # anything else, we will re-raise as a
             # generic ConnectError
             cnx_err = EzErrors.ConnectError(self)
-            cnx_err._orig = err 
+            cnx_err._orig = err
             raise cnx_err
 
         self.connected = True
@@ -464,8 +462,8 @@ class Device(object):
 
             to_py( self, rpc_rsp, **kvargs )
 
-        :raises ValueError: 
-            When the **rpc_cmd** is of unknown origin 
+        :raises ValueError:
+            When the **rpc_cmd** is of unknown origin
 
         :raises PermissionError:
             When the requested RPC command is not allowed due to
@@ -474,10 +472,10 @@ class Device(object):
         :raises RpcError:
             When an ``rpc-error`` element is contained in the RPC-reply
 
-        :returns: 
+        :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
-            that function is called, and return of that function is 
-            provided back to the caller; presuably to convert the XML to 
+            that function is called, and return of that function is
+            provided back to the caller; presuably to convert the XML to
             native python data-types (e.g. ``dict``).
         """
 
@@ -578,8 +576,8 @@ class Device(object):
 
     def Template(self, filename, parent=None, gvars=None):
         """
-        Used to return a Jinja2 :class:`Template`. 
-        
+        Used to return a Jinja2 :class:`Template`.
+
         :param str filename:
             file-path to Jinja2 template file on local device
 
@@ -600,12 +598,12 @@ class Device(object):
 
     def bind(self, *vargs, **kvargs):
         """
-        Used to attach things to this Device instance and make them a 
+        Used to attach things to this Device instance and make them a
         property of the :class:Device instance.  The most common use
         for bind is attaching Utiilty instances to a :class:Device.
         For example::
 
-            from jnpr.junos.utils.config import Config 
+            from jnpr.junos.utils.config import Config
 
             dev.bind( cu=Config )
             dev.cu.lock()
@@ -678,7 +676,7 @@ class Device(object):
         This method will not work with ssh-jumphost environments.
 
         :param int timeout:
-          The probe will report ``True``/``False`` if the device report 
+          The probe will report ``True``/``False`` if the device report
           connectivity within this timeout (seconds)
 
         :param int intvtimeout:

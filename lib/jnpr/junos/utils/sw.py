@@ -17,12 +17,14 @@ Software Installation Utilities
 
 __all__ = ['SW']
 
+
 def _hashfile(afile, hasher, blocksize=65536):
     buf = afile.read(blocksize)
     while len(buf) > 0:
         hasher.update(buf)
         buf = afile.read(blocksize)
     return hasher.hexdigest()
+
 
 class SW(Util):
     """
@@ -122,7 +124,7 @@ class SW(Util):
           for basic reporting.  See that class method for details.
         """
         def _progress(report):
-        # report progress only if a progress callback was provided
+            # report progress only if a progress callback was provided
             if progress is not None:
                 progress(self._dev, report)
 
@@ -143,13 +145,14 @@ class SW(Util):
 
         # check for the logger barncale for 'paramiko.transport'
         plog = logging.getLogger('paramiko.transport')
-        if not plog.handlers: 
+        if not plog.handlers:
             class NullHandler(logging.Handler):
-                def emit(self, record): pass
+                def emit(self, record):
+                    pass
             plog.addHandler(NullHandler())
 
         # execute the secure-copy with the Python SCP module
-        with SCP(self._dev, progress=_scp_progress) as scp:            
+        with SCP(self._dev, progress=_scp_progress) as scp:
             scp.put(package, remote_path)
 
     # -------------------------------------------------------------------------
@@ -158,10 +161,10 @@ class SW(Util):
 
     def pkgadd(self, remote_package, **kvargs):
         """
-        Issue the 'request system software add' command on the package.  
-        The "no-validate" options is set by default.  If you want to validate 
-        the image, do that using the specific :meth:`validate` method.  Also, 
-        if you want to reboot the device, suggest using the :meth:`reboot` method 
+        Issue the 'request system software add' command on the package.
+        The "no-validate" options is set by default.  If you want to validate
+        the image, do that using the specific :meth:`validate` method.  Also,
+        if you want to reboot the device, suggest using the :meth:`reboot` method
         rather ``reboot=True``.
 
         :param str remote_package:
@@ -188,7 +191,7 @@ class SW(Util):
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
 
-        #return True if rc == 0 else got.findtext('output').strip()
+        # return True if rc == 0 else got.findtext('output').strip()
         return True if rc == 0 else False
 
     # -------------------------------------------------------------------------
@@ -196,7 +199,7 @@ class SW(Util):
     # -------------------------------------------------------------------------
 
     def validate(self, remote_package):
-        """ 
+        """
         Issues the 'request' operation to validate the package against the
         config.
 
@@ -210,13 +213,13 @@ class SW(Util):
         return True if 0 == errcode else rsp.findtext('output').strip()
 
     def remote_checksum(self, remote_package):
-        """ 
+        """
         Computes the MD5 checksum on the remote device.
 
         :param str remote_package:
             The file-path on the remote Junos device
 
-        :returns: 
+        :returns:
             The MD5 checksum string
 
         :raises RpcError: when the **remote_package** is not found.
@@ -236,18 +239,18 @@ class SW(Util):
         this means to clean the filesystem to make space, perform the
         secure-copy, and then verify the MD5 checksum.
 
-        :param str package: 
+        :param str package:
             file-path to package on local filesystem
-        :param str remote_path: 
+        :param str remote_path:
             file-path to directory on remote device
-        :param func progress: 
+        :param func progress:
             call-back function for progress updates
-        :param bool cleanfs: 
-            When ``True`` (default) this method will perform the 
+        :param bool cleanfs:
+            When ``True`` (default) this method will perform the
             "storage cleanup" on the device.
         :param str checksum:
-            This is the checksum string as computed on the local system.  
-            This value will be used to compare the checksum on the 
+            This is the checksum string as computed on the local system.
+            This value will be used to compare the checksum on the
             remote Junos device.
 
         :returns:
@@ -314,12 +317,12 @@ class SW(Util):
 
                       * Single RE devices (EX, QFX, MX, SRX).
                       * MX dual-RE
-                      * EX virtual-chassis when all same HW model 
-                      * QFX virtual-chassis when all same HW model 
+                      * EX virtual-chassis when all same HW model
+                      * QFX virtual-chassis when all same HW model
 
                       Known Restrictions:
 
-                      * SRX cluster 
+                      * SRX cluster
                       * MX virtual-chassis
 
         You can get a progress report on this process by providing a **progress**
@@ -336,7 +339,7 @@ class SW(Util):
           SCP'd to; the default is ``/var/tmp``.
 
         :param bool validate:
-          When ``True`` this method will perform a config validation against 
+          When ``True`` this method will perform a config validation against
           the new image
 
         :param str checksum:
@@ -347,7 +350,7 @@ class SW(Util):
           this method.
 
         :param bool cleanfs:
-          When ``True`` will perform a 'storeage cleanup' before SCP'ing the 
+          When ``True`` will perform a 'storeage cleanup' before SCP'ing the
           file to the device.  Default is ``True``.
 
         :param func progress:
@@ -360,7 +363,7 @@ class SW(Util):
         :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.  This
           argument was added since most of the time the "package add" RPC
-          takes a significant amount of time.  The default RPC timeout is 
+          takes a significant amount of time.  The default RPC timeout is
           generally around 30 seconds.  So this :timeout: value will be
           used in the context of the SW installation process.  Defaults to
           30 minutes (30*60=1800)
@@ -369,7 +372,6 @@ class SW(Util):
             if progress is not None:
                 progress(self._dev, report)
 
-        rpc = self.rpc
         dev = self.dev
 
         # ---------------------------------------------------------------------
@@ -486,7 +488,7 @@ class SW(Util):
 
         :raises RpcError: when command is not successful.
 
-        .. todo:: need to better handle the exception event.        
+        .. todo:: need to better handle the exception event.
         """
         cmd = E('request-power-off', E('in', str(in_min)))
 
@@ -525,7 +527,7 @@ class SW(Util):
         Junos install packages. This information comes from the /packages
         directory.
 
-        .. warning:: Experimental method; may not work on all platforms.  If 
+        .. warning:: Experimental method; may not work on all platforms.  If
                      you find this not working, please report issue.
         """
         from jnpr.junos.utils.fs import FS
