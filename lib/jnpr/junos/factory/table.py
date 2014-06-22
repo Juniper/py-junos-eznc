@@ -10,20 +10,7 @@ from lxml import etree
 _TSFMT = "%Y%m%d%H%M%S"
 
 import json
-from jnpr.junos.factory.view import View
-
-class TableJSONEncoder( json.JSONEncoder ):
-    """
-    Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
-    """
-    def default(self, obj):
-        if isinstance(obj, View):
-            obj = dict(obj.items())
-        elif isinstance(obj,Table):
-            obj = { item.name: item for item in obj }
-        else:
-            obj = super(TableJSONEncoder, self).default(obj)
-        return obj
+from jnpr.junos.factory.to_json import TableJSONEncoder
 
 class Table(object):
     ITEM_XPATH = None
