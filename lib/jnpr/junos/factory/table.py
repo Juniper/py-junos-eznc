@@ -9,6 +9,21 @@ from lxml import etree
 
 _TSFMT = "%Y%m%d%H%M%S"
 
+import json
+from jnpr.junos.factory.view import View
+
+class TableJSONEncoder( json.JSONEncoder ):
+    """
+    Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
+    """
+    def default(self, obj):
+        if isinstance(obj, View):
+            obj = dict(obj.items())
+        elif isinstance(obj,Table):
+            obj = { item.name: item for item in obj }
+        else:
+            obj = super(TableJSONEncoder, self).default(obj)
+        return obj
 
 class Table(object):
     ITEM_XPATH = None
@@ -213,6 +228,12 @@ class Table(object):
 
         path = fname + fext
         return etree.ElementTree(self.xml).write(file(path, 'w'))
+
+    def to_json(self):
+        """
+        :returns: JSON encoded string of entire Table contents
+        """
+        return json.dumps(self, cls=TableJSONEncoder )
 
     # -------------------------------------------------------------------------
     # OVERLOADS
