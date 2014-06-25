@@ -16,7 +16,8 @@ VlanView:
  
 
 _VlanPortTable:
-    item: vlan-detail/vlan-member-list/vlan-member
+    item: vlan-member
+    key: vlan-member-interface
     view: _VlanPortView
 
 _VlanPortView:
