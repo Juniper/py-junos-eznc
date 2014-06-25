@@ -1,6 +1,6 @@
 ---
 VlanTable:
-  rpc: vlan-information
+  rpc: get-vlan-information
   item: vlan
   view: VlanView
 
