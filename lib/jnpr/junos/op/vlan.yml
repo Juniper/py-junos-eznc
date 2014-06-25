@@ -12,14 +12,5 @@ VlanView:
     status: vlan-status
     owner: vlan-owner
     tag: vlan-tag
-    members: _VlanPortTable
+    members: .//vlan-member-interface
  
-
-_VlanPortTable:
-    item: vlan-detail/vlan-member-list/vlan-member
-    view: _VlanPortView
-
-_VlanPortView:
-    fields:
-        interface: vlan-member-interface
-
