@@ -126,6 +126,7 @@ html_theme_options = {
     'bootswatch_theme': "spacelab",
     'navbar_sidebarrel': False,
     'navbar_site_name': "Module",
+    'navbar_pagenav_name': "Classes",
     'source_link_position': "footer",
     'navbar_links': [
         ("Wiki", "https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ", True),
