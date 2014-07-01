@@ -6,7 +6,7 @@ The Junos PyEZ project is an open-source Apache 2.0 library for the Python progr
 
 The Junos PyEZ library can be used on any number of server environments supporting Python 2.6 and 2.7.  
 
-At the time of this writing, Junos PyEZ is not distributed on Junos OS platforms.
+At the time of this writing, Junos PyEZ is not distributed on devices running Junos OS.
 
 For feature documentation and community support, refer to the following URLs:
   * Project Page hosted on the Juniper Networks TechWiki:
@@ -24,7 +24,7 @@ The "pip" installation process also installs any related dependent Python module
 For the complete set of installation instructions for various platforms, see the Junos PyEZ project documentation at https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ/Installation.
 
 # Recommended Junos Release
-Junos PyEZ can be used with any Junos OS platform, because they all support the NETCONF and Junos XML APIs.   To take full advantage of the Junos PyEZ features, we recommend using Junos OS Release 11.4 or later release - see "Known Limitations and Restrictions" section for details.  For more information about Junos OS releases, refer to the Juniper Networks technical documentation site at https://www.juniper.net/techpubs/en_US/release-independent/junos/information-products/pathway-pages/junos/product/index.html .
+Junos PyEZ can be used with any device running Junos OS, because they all support the NETCONF and Junos XML APIs.   To take full advantage of the Junos PyEZ features, we recommend using Junos OS Release 11.4 or later release - see "Known Limitations and Restrictions" section for details.  For more information about Junos OS releases, refer to the Juniper Networks technical documentation site at https://www.juniper.net/techpubs/en_US/release-independent/junos/information-products/pathway-pages/junos/product/index.html .
 
 # Supported Python Releases
 The Junos PyEZ library has been tested with Python versions 2.6 and 2.7.  
@@ -33,7 +33,7 @@ At the time of this writing PyEZ is not supported in Python 3.x environments.  T
 # Known Limitations and Restrictions
 ## General
   * Junos PyEZ maintains a "timeout" mechanism for each executed command and response pair.  The default timeout is 30 seconds.  You can override the default by using the Device.timeout property.  If a timeout does occur, a timeout exception is raised.  
-  * Some Junos OS platforms might disconnect the NETCONF session due to inactivity.  This behavior has been observed on SRX Series Services Gateways.  In such cases, an exception is raised upon execution of the next command.  The Junos PyEZ library does not reconnect to the device in these inactivity scenarios.  However, you can call Device.open() to reconnect.
+  * Some devices running Junos OS might disconnect the NETCONF session due to inactivity.  This behavior has been observed on SRX Series Services Gateways.  In such cases, an exception is raised upon execution of the next command.  The Junos PyEZ library does not reconnect to the device in these inactivity scenarios.  However, you can call Device.open() to reconnect.
   * Command execution is synchronous and blocking.  The underlying NETCONF transport library is the ncclient module.  If your application requires asynchronous or nonblocking execution logic, you should investigate other libraries to wrap around the PyEZ framework such as Twisted or Python Threads.
   * The `Device.cli()` method is intended to be used with interactive python, and as a means to facilitate the interactive experience as needed.  Please do not use this for "screen-scraping" the CLI output for automation purposes.
 
