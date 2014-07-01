@@ -24,7 +24,7 @@ The "pip" installation process also installs any related dependent Python module
 For the complete set of installation instructions for various platforms, see the Junos PyEZ project documentation at https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ/Installation.
 
 # Recommended Junos Release
-Junos PyEZ can be used with any Junos OS platform, because they all support the NETCONF and Junos XML APIs.   To take full advantage of the Junos PyEZ features, we recommend using Junos OS Release 11.4 or later release � see "Known Limitations and Restrictions" section for details.  For more information about Junos OS releases, refer to the Juniper Networks technical documentation site at https://www.juniper.net/techpubs/en_US/release-independent/junos/information-products/pathway-pages/junos/product/index.html .
+Junos PyEZ can be used with any Junos OS platform, because they all support the NETCONF and Junos XML APIs.   To take full advantage of the Junos PyEZ features, we recommend using Junos OS Release 11.4 or later release - see "Known Limitations and Restrictions" section for details.  For more information about Junos OS releases, refer to the Juniper Networks technical documentation site at https://www.juniper.net/techpubs/en_US/release-independent/junos/information-products/pathway-pages/junos/product/index.html .
 
 # Supported Python Releases
 The Junos PyEZ library has been tested with Python versions 2.6 and 2.7.  
