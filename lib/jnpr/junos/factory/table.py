@@ -9,6 +9,8 @@ from lxml import etree
 
 _TSFMT = "%Y%m%d%H%M%S"
 
+import json
+from jnpr.junos.factory.to_json import TableJSONEncoder
 
 class Table(object):
     ITEM_XPATH = None
@@ -213,6 +215,12 @@ class Table(object):
 
         path = fname + fext
         return etree.ElementTree(self.xml).write(file(path, 'w'))
+
+    def to_json(self):
+        """
+        :returns: JSON encoded string of entire Table contents
+        """
+        return json.dumps(self, cls=TableJSONEncoder )
 
     # -------------------------------------------------------------------------
     # OVERLOADS

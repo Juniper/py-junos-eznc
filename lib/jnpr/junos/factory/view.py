@@ -2,9 +2,10 @@ import warnings
 from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
+import json
 
 from jnpr.junos.factory.viewfields import ViewFields
-
+from jnpr.junos.factory.to_json import TableViewJSONEncoder
 
 class View(object):
 
@@ -181,6 +182,12 @@ class View(object):
         new_xml = tbl_xml.xpath(self._table.ITEM_XPATH)[0]
         self._init_xml(new_xml)
         return self
+
+    def to_json(self):
+        """
+        :returns: JSON encoded string of entire View contents
+        """
+        return json.dumps(self, cls=TableViewJSONEncoder )        
 
     # -------------------------------------------------------------------------
     # OVERLOADS
