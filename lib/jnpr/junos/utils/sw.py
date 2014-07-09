@@ -442,7 +442,7 @@ class SW(Util):
     # rebbot - system reboot
     # -------------------------------------------------------------------------
 
-    def reboot(self, in_min=0):
+    def reboot(self, in_min=0, at=''):
         """
         Perform a system reboot, with optional delay (in minutes).
 
@@ -458,7 +458,11 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        cmd = E('request-reboot', E('in', str(in_min)))
+        
+        if(in_min > 0):
+            cmd = E('request-reboot', E('in', str(in_min)))
+        else:
+            cmd = E('request-reboot', E('at', str(at)))
 
         if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
