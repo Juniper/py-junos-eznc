@@ -442,9 +442,10 @@ class SW(Util):
     # rebbot - system reboot
     # -------------------------------------------------------------------------
 
-    def reboot(self, in_min=0, at=''):
+    def reboot(self, in_min=0, at=None):
         """
-        Perform a system reboot, with optional delay (in minutes).
+        Perform a system reboot, with optional delay (in minutes) or at 
+        a specified date and time.
 
         If the device is equipped with dual-RE, then both RE will be
         rebooted.  This code also hanldes EX/QFX VC.
@@ -458,8 +459,9 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        
-        if(in_min > 0):
+        if(in_min == 0 and at == None):
+            cmd = E('request-reboot', E('in', str(in_min)))
+        elif(in_min > 0):
             cmd = E('request-reboot', E('in', str(in_min)))
         else:
             cmd = E('request-reboot', E('at', str(at)))
