@@ -1,0 +1,35 @@
+---
+EthernetSwitchingTable:
+    rpc: get-ethernet-switching-table-information
+    item: ethernet-switching-table
+    view: EthernetSwitchingView
+
+EthernetSwitchingView:
+    fields:
+        count: mac-table-count
+        learned: mac-table-learned
+        persistent: mac-table-persistent
+        entries: _MacTableEntriesTable
+
+_MacTableEntriesTable:
+    item: mac-table-entry
+    key: mac-vlan
+    view: _MacTableEntriesView
+
+_MacTableEntriesView:
+    fields:
+        vlan: mac-vlan
+        mac_address: mac-address
+        type: mac-type
+        age: mac-age
+        interface: mac-interface
+        interface-list: _MacTableInterfacesTable
+
+_MacTableInterfacesTable:
+    item: mac-interfaces-list
+    key: mac-interfaces
+    view: _MacTableInterfacesView
+
+_MacTableInterfacesView:
+    fields:
+        interfaces: mac-interfaces
