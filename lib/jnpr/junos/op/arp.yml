@@ -1,8 +1,6 @@
 ---
 ArpTable:
   rpc: get-arp-table-information
-  args:
-    vpn: default
   item: arp-table-entry
   key: mac-address
   view: ArpView
