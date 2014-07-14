@@ -452,6 +452,9 @@ class SW(Util):
 
         :param int in_min: time (minutes) before rebooting the device.
 
+        :param string at: date and time the reboot should take place. The 
+        string must match the junos cli reboot at syntax
+
         :returns:
             * reboot message (string) if command successful
 
@@ -459,9 +462,7 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if(in_min == 0 and at == None):
-            cmd = E('request-reboot', E('in', str(in_min)))
-        elif(in_min > 0):
+        if in_min >= 0 and at == None:
             cmd = E('request-reboot', E('in', str(in_min)))
         else:
             cmd = E('request-reboot', E('at', str(at)))
