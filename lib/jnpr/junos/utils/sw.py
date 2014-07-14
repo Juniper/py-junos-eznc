@@ -453,7 +453,7 @@ class SW(Util):
         :param int in_min: time (minutes) before rebooting the device.
 
         :param string at: date and time the reboot should take place. The 
-        string must match the junos cli reboot at syntax
+        string must match the junos cli "reboot at" syntax
 
         :returns:
             * reboot message (string) if command successful
