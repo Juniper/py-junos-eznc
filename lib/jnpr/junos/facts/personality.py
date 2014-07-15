@@ -12,16 +12,21 @@ def facts_personality(junos, facts):
                 examine = facts[fact]['model']
                 break
 
+    examine = examine.upper()
+
     if re.match("^(EX)|(QFX)", examine):
         persona = 'SWITCH'
     elif examine.startswith("MX"):
         persona = 'MX'
-    elif re.match('^VMX', examine, re.I):
+    elif examine.startswith('VMX'):
         facts['virtual'] = True
         persona = 'MX'
     elif examine.startswith("VJX"):
         facts['virtual'] = True
         persona = 'SRX_BRANCH'
+    elif 'VRR' == examine:
+        persona = "MX"
+        facts['virtual'] = True
     elif examine.startswith("M"):
         persona = "M"
     elif examine.startswith("T"):
@@ -35,7 +40,7 @@ def facts_personality(junos, facts):
     elif re.search("firefly", examine, re.IGNORECASE):
         facts['virtual'] = True
         persona = 'SRX_BRANCH'
-    elif 'olive' == examine:
+    elif 'OLIVE' == examine:
         facts['virtual'] = True
         persona = 'OLIVE'
     else:
