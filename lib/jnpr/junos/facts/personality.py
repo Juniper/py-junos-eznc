@@ -18,7 +18,7 @@ def facts_personality(junos, facts):
         persona = 'SWITCH'
     elif examine.startswith("MX"):
         persona = 'MX'
-    elif 'VMX' == examine:
+    elif examine.startswith('VMX'):
         facts['virtual'] = True
         persona = 'MX'
     elif examine.startswith("VJX"):
@@ -40,7 +40,7 @@ def facts_personality(junos, facts):
     elif re.search("firefly", examine, re.IGNORECASE):
         facts['virtual'] = True
         persona = 'SRX_BRANCH'
-    elif 'olive' == examine:
+    elif 'OLIVE' == examine:
         facts['virtual'] = True
         persona = 'OLIVE'
     else:
