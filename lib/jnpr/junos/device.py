@@ -239,6 +239,7 @@ class Device(object):
         self._hostname = found.get('hostname', self._hostname)
         self._port = found.get('port', self._port)
         self._auth_user = found.get('user')
+        self._ssh_private_key_file = found.get('identityfile')
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -307,7 +308,8 @@ class Device(object):
             # but if user is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            if not hasattr(self, '_ssh_private_key_file'):
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
 
         # -----------------------------
         # initialize instance variables
@@ -370,14 +372,6 @@ class Device(object):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to disable the ssh-agent if-and-only-if we are
-            # given a password and we are not given an ssh key file.
-            # in this condition it means that the password is
-            # the 'plain-text' password
-
-            allow_agent = not bool((self._auth_password is not None) and
-                (self._ssh_private_key_file is None))
-
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -386,8 +380,6 @@ class Device(object):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
-                look_for_keys=False,
-                allow_agent=allow_agent,
                 device_params={'name': 'junos'})
 
         except NcErrors.AuthenticationError as err:
