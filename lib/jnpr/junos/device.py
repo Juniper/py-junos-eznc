@@ -372,6 +372,14 @@ class Device(object):
         try:
             ts_start = datetime.datetime.now()
 
+            # we want to enable the ssh-agent if-and-only-if we are
+            # not given a password or an ssh key file.
+            # in this condition it means we want to query the agent
+            # for available ssh keys
+
+            allow_agent = bool((self._auth_password is None) and
+                               (self._ssh_private_key_file is None))
+
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -380,6 +388,7 @@ class Device(object):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
+                allow_agent=allow_agent,
                 device_params={'name': 'junos'})
 
         except NcErrors.AuthenticationError as err:
