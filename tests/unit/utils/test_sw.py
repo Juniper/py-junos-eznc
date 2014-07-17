@@ -217,6 +217,11 @@ class TestSW(unittest.TestCase):
         self.assertTrue('Shutdown NOW' in self.sw.reboot())
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_at(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertTrue('Shutdown at' in self.sw.reboot(at='201407091815'))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_multi_re_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = True
@@ -279,4 +284,7 @@ class TestSW(unittest.TestCase):
             return Manager(session, device_handler)
 
         elif args:
-            return self._read_file(args[0].tag + '.xml')
+            if args[0].find('at') is not None:
+                return self._read_file('request-reboot-at.xml')
+            else:
+                return self._read_file(args[0].tag + '.xml')
