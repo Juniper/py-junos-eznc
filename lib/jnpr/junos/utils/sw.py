@@ -444,7 +444,7 @@ class SW(Util):
 
     def reboot(self, in_min=0, at=None):
         """
-        Perform a system reboot, with optional delay (in minutes) or at 
+        Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
 
         If the device is equipped with dual-RE, then both RE will be
@@ -452,7 +452,7 @@ class SW(Util):
 
         :param int in_min: time (minutes) before rebooting the device.
 
-        :param str at: date and time the reboot should take place. The 
+        :param str at: date and time the reboot should take place. The
             string must match the junos cli reboot syntax
 
         :returns:
@@ -462,7 +462,7 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if in_min >= 0 and at == None:
+        if in_min >= 0 and at is None:
             cmd = E('request-reboot', E('in', str(in_min)))
         else:
             cmd = E('request-reboot', E('at', str(at)))
