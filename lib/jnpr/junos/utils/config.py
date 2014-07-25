@@ -144,7 +144,7 @@ class Config(Util):
 
     def pdiff(self, rb_id=0):
         """
-        Helper method that calls ``print`` on the diff (patch-fomrat) between the
+        Helper method that calls ``print`` on the diff (patch-format) between the
         current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
