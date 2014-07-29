@@ -68,7 +68,10 @@ class _RpcMetaExec(object):
             rpc.append(E('configuration-text', contents))
         else:
             # otherwise, it's just XML Element
-            etree.SubElement(rpc, 'configuration').append(contents)
+            if contents.tag != 'configuration':
+                etree.SubElement(rpc, 'configuration').append(contents)
+            else:
+                rpc.append(contents)
 
         return self._junos.execute(rpc)
 
