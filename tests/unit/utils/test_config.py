@@ -114,7 +114,13 @@ class TestConfig(unittest.TestCase):
     def test_config_load_len_with_format_xml(self):
         self.conf.rpc.load_config = \
             MagicMock(return_value='rpc_contents')
-        self.assertEqual(self.conf.load('test.xml', format='xml'),
+        xmldata = """<snmp>
+          <community>
+            <name>iBGP</name>
+          </community>
+        </snmp>"""
+
+        self.assertEqual(self.conf.load(xmldata, format='xml'),
                          'rpc_contents')
 
     @patch('__builtin__.open')
