@@ -105,10 +105,16 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(RuntimeError, self.conf.load,
                           'test.xml')
 
-    def test_config_load_len_with_format(self):
+    def test_config_load_len_with_format_set(self):
         self.conf.rpc.load_config = \
             MagicMock(return_value='rpc_contents')
         self.assertEqual(self.conf.load('test.xml', format='set'),
+                         'rpc_contents')
+
+    def test_config_load_len_with_format_xml(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        self.assertEqual(self.conf.load('test.xml', format='xml'),
                          'rpc_contents')
 
     @patch('__builtin__.open')

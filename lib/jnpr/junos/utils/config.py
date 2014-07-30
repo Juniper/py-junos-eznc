@@ -293,6 +293,9 @@ class Config(Util):
             if isinstance(rpc_contents, str) and 'format' not in kvargs:
                 raise RuntimeError(
                     "You must define the format of the contents")
+            elif isinstance(rpc_contents, str) and kvargs['format'] == 'xml':
+                # covert the XML string into XML structure
+                rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
 
             # ~! UNREACHABLE !~#
