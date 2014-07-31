@@ -29,6 +29,14 @@ class Test_RpcMetaExec(unittest.TestCase):
                          'load-configuration')
 
     @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_load_config_with_configuration_tag(self, mock_execute_fn):
+        root = etree.XML(
+            '<configuration><root><a>test</a></root></configuration>')
+        self.rpc.load_config(root)
+        self.assertEqual(mock_execute_fn.call_args[0][0].tag,
+                         'load-configuration')
+
+    @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_load_config_option_action(self, mock_execute_fn):
         set_commands = """
             set system host-name test_rpc
