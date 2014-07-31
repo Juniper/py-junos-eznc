@@ -2,9 +2,12 @@
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
-## NOTICE
+## DOCUMENTATION
 
-As of release 0.5.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.1 or later.  
+API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
+
+_Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+
 
 ## ABOUT
 
@@ -38,6 +41,10 @@ _Junos PyEZ_ is designed to provide the same capabilties as a user would have on
 * Retrieve configuration information as Tables/Views
 * Make configuration changes in unstructured and structured ways
 * Provide common utilities for tasks such as secure copy of files and software updates
+
+## NOTICE
+
+As of release 0.5.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.1 or later.  
 
 ## INSTALLATION
 
@@ -100,9 +107,6 @@ Example output for an SRX-210 device:
  'version': '12.1X44-D10.4',
  'version_info': junos.versino_info(major=(12, 1), type=X, minor=(44, 'D', 10), build=4)}
 ````
-## DOCUMENTATION
-
-Please refer to the _Junos PyEZ_ project page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
 
 ## LICENSE
 
