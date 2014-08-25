@@ -584,12 +584,6 @@ class Device(object):
 
         :returns: Jinja2 :class:`Template` give **filename**.
         """
-        # templates are XML files, and the assumption here is that they will
-        # have .xml extensions.  if the caller doesn't include any extension
-        # be kind and add '.xml' for them
-
-        if os.path.splitext(filename)[1] == '':
-            filename = filename + '.xml'
 
         return self._j2ldr.get_template(filename, parent, gvars)
 
