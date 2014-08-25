@@ -354,11 +354,11 @@ class TestDevice(unittest.TestCase):
     def test_device_template(self):
         # Try to load the template relative to module base
         try:
-            template = self.dev.Template('tests/unit/templates/config-example')
+            template = self.dev.Template('tests/unit/templates/config-example.xml')
         except:
             # Try to load the template relative to test base
             try:
-                template = self.dev.Template('templates/config-example')
+                template = self.dev.Template('templates/config-example.xml')
             except:
                 raise
         self.assertEqual(template.render({'host_name': '1',

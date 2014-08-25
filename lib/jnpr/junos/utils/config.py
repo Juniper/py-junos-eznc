@@ -327,6 +327,9 @@ class Config(Util):
             template = self.dev.Template(path)
             rpc_contents = template.render(kvargs.get('template_vars', {}))
             _lset_fromfile(path)
+            if rpc_xattrs['format'] == 'xml':
+                # covert the XML string into XML structure
+                rpc_contents = etree.XML(rpc_contents)
 
             return try_load(rpc_contents, rpc_xattrs)
 
@@ -342,6 +345,9 @@ class Config(Util):
             path = template.filename
             rpc_contents = template.render(kvargs.get('template_vars', {}))
             _lset_fromfile(path)
+            if rpc_xattrs['format'] == 'xml':
+                # covert the XML string into XML structure
+                rpc_contents = etree.XML(rpc_contents)
 
             return try_load(rpc_contents, rpc_xattrs)
 

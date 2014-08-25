@@ -158,16 +158,18 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
-    def test_config_load_template_path(self):
+    @patch('jnpr.junos.utils.config.etree.XML')
+    def test_config_load_template_path(self, mock_etree):
         self.conf.rpc.load_config = MagicMock()
         self.conf.dev.Template = MagicMock()
         self.conf.load(template_path='test.xml')
-        self.conf.dev.Template.assert_called_with('test.xml')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'xml')
 
     def test_config_load_template(self):
         class Temp:
             filename = 'abc.xml'
-            render = MagicMock()
+            render = MagicMock(return_value='<test/>')
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(template=Temp)
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
