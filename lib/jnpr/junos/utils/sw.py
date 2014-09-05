@@ -336,7 +336,7 @@ class SW(Util):
 
         :param str remote_path:
           The directory on the Junos device where the package file will be
-          SCP'd to; the default is ``/var/tmp``.
+          SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
 
         :param bool validate:
           When ``True`` this method will perform a config validation against
@@ -359,6 +359,9 @@ class SW(Util):
 
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
+
+        :param bool no_copy:
+          When ``True`` the software package will not be SCP'd to the device.  Default is ``False``.
 
         :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.  This
