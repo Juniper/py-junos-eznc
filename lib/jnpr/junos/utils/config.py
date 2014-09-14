@@ -1,5 +1,6 @@
 # utils/config.py
 import os
+import re
 
 # 3rd-party modules
 from lxml import etree
@@ -264,6 +265,16 @@ class Config(Util):
                 kvargs['format'] = _lformat_byext(path)
                 _lset_format(kvargs, rpc_xattrs)
 
+        def _lset_from_rexp(rpc):
+            """ setup the kvargs/rpc_xattrs using string regular expression """
+            if re.search(r'^<.*>$', rpc, re.MULTILINE):
+                kvargs['format'] = 'xml'
+            elif re.search(r'^\s+set\s', rpc):
+                kvargs['format'] = 'set'
+            elif re.search(r'.*}$', rpc):
+                kvargs['format'] = 'text'
+            _lset_format(kvargs, rpc_xattrs)
+
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
@@ -290,12 +301,15 @@ class Config(Util):
         if len(vargs):
             # caller is providing the content directly.
             rpc_contents = vargs[0]
-            if isinstance(rpc_contents, str) and 'format' not in kvargs:
-                raise RuntimeError(
-                    "You must define the format of the contents")
-            elif isinstance(rpc_contents, str) and kvargs['format'] == 'xml':
+            if isinstance(rpc_contents, str):
+                if 'format' not in kvargs:
+                    _lset_from_rexp(rpc_contents)
+                    if 'format' not in kvargs:
+                        raise RuntimeError(
+                            "You must define the format of the contents")
+                if kvargs['format'] == 'xml':
                 # covert the XML string into XML structure
-                rpc_contents = etree.XML(rpc_contents)
+                    rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
 
             # ~! UNREACHABLE !~#
