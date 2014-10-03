@@ -56,9 +56,9 @@ class TestFactoryTable(unittest.TestCase):
     def test_keys__keys_composite(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.ppt.ITEM_NAME_XPATH = ['name', 'mtu']
+        self.ppt.ITEM_NAME_XPATH = ['name', 'missing', 'mtu']
         self.assertEqual(self.ppt.keys(),
-                         [('ge-0/0/0', '1514'), ('ge-0/0/1', '1514')])
+                         [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
 
     @patch('jnpr.junos.Device.execute')
     def test_table_repr_xml_not_none(self, mock_execute):

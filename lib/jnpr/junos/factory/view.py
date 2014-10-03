@@ -7,6 +7,7 @@ import json
 from jnpr.junos.factory.viewfields import ViewFields
 from jnpr.junos.factory.to_json import TableViewJSONEncoder
 
+
 class View(object):
 
     """
@@ -82,10 +83,14 @@ class View(object):
             return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
         else:
             # composite key
-# return tuple([self.xml.findtext(i).strip() for i in
-# self.ITEM_NAME_XPATH])
-            return tuple([self.xml.xpath(i)[0].text.strip()
-                         for i in self.ITEM_NAME_XPATH])
+            # keys with missing XPATH nodes are set to None
+            keys = []
+            for i in self.ITEM_NAME_XPATH:
+                try:
+                    keys.append(self.xml.xpath(i)[0].text.strip())
+                except:
+                    keys.append(None)
+            return tuple(keys)
 
     # ALIAS key <=> name
     key = name
@@ -187,7 +192,7 @@ class View(object):
         """
         :returns: JSON encoded string of entire View contents
         """
-        return json.dumps(self, cls=TableViewJSONEncoder )        
+        return json.dumps(self, cls=TableViewJSONEncoder)
 
     # -------------------------------------------------------------------------
     # OVERLOADS
