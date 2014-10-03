@@ -199,6 +199,14 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.install('file', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_install_kwargs_force_host(self, mock_execute):
+        self.sw.install('file', no_copy=True,
+                                        force_host=True)
+        rpc = """<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>"""
+        self.assertEqual(etree.tostring(mock_execute.call_args[0][0]),
+                         rpc)
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
         # we need proper xml for this test case, update request-package-roll
         # back.xml

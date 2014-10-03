@@ -299,7 +299,7 @@ class SW(Util):
 
     def install(self, package, remote_path='/var/tmp', progress=None,
                 validate=False, checksum=None, cleanfs=True, no_copy=False,
-                timeout=1800):
+                timeout=1800, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -370,6 +370,10 @@ class SW(Util):
           generally around 30 seconds.  So this :timeout: value will be
           used in the context of the SW installation process.  Defaults to
           30 minutes (30*60=1800)
+
+        :param bool force_host:
+          (Optional) Force the addition of host software package or bundle
+          (ignore warnings) on the QFX5100 device.
         """
         def _progress(report):
             if progress is not None:
@@ -409,7 +413,7 @@ class SW(Util):
         if self._multi_RE is False:
             # simple case of device with only one RE
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(remote_package)
+            add_ok = self.pkgadd(remote_package, **kwargs)
             dev.timeout = restore_timeout
             return add_ok
         else:
@@ -425,7 +429,7 @@ class SW(Util):
                     _progress(
                         "installing software on VC member: {0} ... please be"
                         " patient ...".format(vc_id))
-                    ok &= self.pkgadd(remote_package, member=vc_id)
+                    ok &= self.pkgadd(remote_package, member=vc_id, **kwargs)
                 dev.timeout = restore_timeout
                 return ok
             else:
@@ -434,10 +438,10 @@ class SW(Util):
                 ok = True
                 _progress(
                     "installing software on RE0 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re0=True)
+                ok &= self.pkgadd(remote_package, re0=True, **kwargs)
                 _progress(
                     "installing software on RE1 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re1=True)
+                ok &= self.pkgadd(remote_package, re1=True, **kwargs)
                 dev.timeout = restore_timeout
                 return ok
 
