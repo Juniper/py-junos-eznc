@@ -44,7 +44,7 @@ class Config(Util):
         :returns:
             * ``True`` when successful
 
-        :raises CommitError: When errors detected in candidate configuraiton.
+        :raises CommitError: When errors detected in candidate configuration.
                              You can use the Exception variable (XML)
                              to identify the specific problems
         """
@@ -122,7 +122,7 @@ class Config(Util):
 
     def diff(self, rb_id=0):
         """
-        retrieve a diff (patch-format) report of the candidate config against
+        Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
         :param int rollback: rollback id [0..49]
@@ -202,7 +202,7 @@ class Config(Util):
           the file contents are ``Jinja2`` format and will require
           template-rendering.
 
-          .. note:: This parameter is used in conjection with **template_vars**.
+          .. note:: This parameter is used in conjunction with **template_vars**.
                      The template filename extension will be used to determine
                      the format-style of the contents, or you can override
                      using **format**.
@@ -213,7 +213,7 @@ class Config(Util):
           a path to the template file.
 
         :param dict template_vars:
-          Used in conjection with the other template options.  This parameter
+          Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
         """
         rpc_xattrs = {}
@@ -444,7 +444,7 @@ class Config(Util):
             * "get" - retrieves/returns the rescue configuration via **format**
             * "save" - saves current configuration as rescue
             * "delete" - removes the rescue configuration
-            * "reload" - loads the resuce config as candidate (no-commit)
+            * "reload" - loads the rescue config as candidate (no-commit)
 
         :param str format: identifies the return format when **action** is "get":
 

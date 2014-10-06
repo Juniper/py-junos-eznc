@@ -468,7 +468,7 @@ class Device(object):
 
         :raises PermissionError:
             When the requested RPC command is not allowed due to
-            user-auth class privledge controls on Junos
+            user-auth class privilege controls on Junos
 
         :raises RpcError:
             When an ``rpc-error`` element is contained in the RPC-reply
@@ -476,7 +476,7 @@ class Device(object):
         :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
             that function is called, and return of that function is
-            provided back to the caller; presuably to convert the XML to
+            provided back to the caller; presumably to convert the XML to
             native python data-types (e.g. ``dict``).
         """
 
@@ -550,9 +550,11 @@ class Device(object):
             get back the XML Element ``<get-software-information>``.
 
         .. warning::
-            You should **NOT** use this method to for general automation purposes
-            that put you in the of "screen-scraping the CLI".  The purpose of the
-            PyEZ framework is to migrate away from that tooling pattern.
+            This function is provided for **DEBUG** purposes only!
+            **DO NOT** use this method for general automation purposes as
+            that puts you in the realm of "screen-scraping the CLI".  The purpose of
+            the PyEZ framework is to migrate away from that tooling pattern.
+            Interaction with the device should be done via the RPC function.
 
         .. warning::
             You cannot use "pipe" filters with **command** such as ``| match``
@@ -595,7 +597,7 @@ class Device(object):
         """
         Used to attach things to this Device instance and make them a
         property of the :class:Device instance.  The most common use
-        for bind is attaching Utiilty instances to a :class:Device.
+        for bind is attaching Utility instances to a :class:Device.
         For example::
 
             from jnpr.junos.utils.config import Config

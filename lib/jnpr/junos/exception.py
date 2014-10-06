@@ -138,7 +138,7 @@ class ConnectUnknownHostError(ConnectError):
 class ConnectRefusedError(ConnectError):
     """
     Generated if the specified host denies the NETCONF; could
-    be that the serivces is not enabled, or the host has
+    be that the services is not enabled, or the host has
     too many connections already.
     """
     pass

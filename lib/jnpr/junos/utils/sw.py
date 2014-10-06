@@ -44,7 +44,7 @@ class SW(Util):
       * :meth:`validate`: performs the 'request' to validate the package
 
     **Miscellaneous:**
-      * rollback: same as 'request softare rollback'
+      * rollback: same as 'request software rollback'
       * inventory: (property) provides file info for current and rollback
         images on the device
     """
@@ -90,7 +90,7 @@ class SW(Util):
     @classmethod
     def local_sha1(cls, package):
         """
-        computes the SHA1 checksum value on the local package file.
+        Computes the SHA1 checksum value on the local package file.
 
         :param str package:
           File-path to the package (\*.tgz) file on the local server
@@ -455,7 +455,7 @@ class SW(Util):
         a specified date and time.
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also hanldes EX/QFX VC.
+        rebooted.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before rebooting the device.
 
@@ -493,7 +493,7 @@ class SW(Util):
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also hanldes EX/QFX VC.
+        rebooted.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before rebooting the device.
 
@@ -521,7 +521,7 @@ class SW(Util):
 
     def rollback(self):
         """
-        issues the 'request' command to do the rollback and returns the string
+        Issues the 'request' command to do the rollback and returns the string
         output of the results.
 
         :returns:

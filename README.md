@@ -4,6 +4,8 @@ The repo is under active development.  If you take a clone, you are getting the 
 
 ## DOCUMENTATION
 
+Official Documentation with examples, [here](http://www.juniper.net/techpubs/en_US/release-independent/junos-pyez/information-products/pathway-pages/index.html)
+
 API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
 
 _Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
@@ -17,7 +19,7 @@ This library was built for two types of users:
 
 ### For "Non-Programmers" - Python as a Power Shell
 
-This means that "non-programmers", for example the _Network Engineer_, can use the native Python shell on their management server (laptop, tablet, phone, etc.) as their point-of-control for remotely managing Junos devices. The Python shell is an interactive environment that provides the necessary means to perform common automation tasks, such as conditional testing, for-loops, macros, and templates.  These building blocks are similar enough to other "shell" enviornments, like Bash, to enable the non-programmer to use the Python shell as a power-tool, rather than a programming language.  From the Python shell a user can manage Junos devices using native hash tables, arrays, etc. rather than device-specific Junos XML or resorting to 'screen scraping' the actual Junos CLI.
+This means that "non-programmers", for example the _Network Engineer_, can use the native Python shell on their management server (laptop, tablet, phone, etc.) as their point-of-control for remotely managing Junos devices. The Python shell is an interactive environment that provides the necessary means to perform common automation tasks, such as conditional testing, for-loops, macros, and templates.  These building blocks are similar enough to other "shell" environments, like Bash, to enable the non-programmer to use the Python shell as a power-tool, rather than a programming language.  From the Python shell a user can manage Junos devices using native hash tables, arrays, etc. rather than device-specific Junos XML or resorting to 'screen scraping' the actual Junos CLI.
 
 ### For "Programmers" - Open and Extensible
 
@@ -33,9 +35,9 @@ Issues and bugs can be opened in the repository.
 
 ## FEATURES
 
-_Junos PyEZ_ is designed to provide the same capabilties as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabiltieis include, but are not limited to:
+_Junos PyEZ_ is designed to provide the same capabilities as a user would have on the Junos CLI, but in an environment built for automation tasks.  These capabilities include, but are not limited to:
 
-* Remote connectivty and management of Junos devices via NETCONF
+* Remote connectivity and management of Junos devices via NETCONF
 * Provide "facts" about the device such as software-version, serial-number, etc.
 * Retrieve "operational" or "run-state" information as Tables/Views
 * Retrieve configuration information as Tables/Views
@@ -57,7 +59,7 @@ Installing from Git is also supported (OS must have git installed).
 	To install the latest MASTER code
 	pip install git+https://github.com/Juniper/py-junos-eznc.git
 	-or-
-	To install a specific version, brach, tag, etc.
+	To install a specific version, branch, tag, etc.
 	pip install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
 	
 ## UPGRADE
@@ -75,7 +77,7 @@ Prior to release 0.0.5, _Junos PyEZ_ used a fork of ncclient
 
 ## HELLO, WORLD
 
-The following is a quick "hello, world" example to ensure that the softare was installed correctly.  This code will simply connect to a device and display the known facts of the device, like serial-number, model, etc.
+The following is a quick "hello, world" example to ensure that the software was installed correctly.  This code will simply connect to a device and display the known facts of the device, like serial-number, model, etc.
 
 ````python
 from pprint import pprint
