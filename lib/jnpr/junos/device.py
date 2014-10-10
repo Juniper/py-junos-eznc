@@ -226,20 +226,24 @@ class Device(object):
     # -----------------------------------------------------------------------
 
     def _sshconf_lkup(self):
-        home = os.getenv('HOME')
-        if not home:
-            return
-        sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
+        if self._ssh_config:
+            sshconf_path = self._ssh_config
+        else:
+            home = os.getenv('HOME')
+            if not home:
+                return None
+            sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
         if not os.path.exists(sshconf_path):
-            return
-
-        sshconf = paramiko.SSHConfig()
-        sshconf.parse(open(sshconf_path, 'r'))
-        found = sshconf.lookup(self._hostname)
-        self._hostname = found.get('hostname', self._hostname)
-        self._port = found.get('port', self._port)
-        self._auth_user = found.get('user')
-        self._ssh_private_key_file = found.get('identityfile')
+            return None
+        else:
+            sshconf = paramiko.SSHConfig()
+            sshconf.parse(open(sshconf_path, 'r'))
+            found = sshconf.lookup(self._hostname)
+            self._hostname = found.get('hostname', self._hostname)
+            self._port = found.get('port', self._port)
+            self._auth_user = found.get('user')
+            self._ssh_private_key_file = found.get('identityfile')
+            return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -275,6 +279,11 @@ class Device(object):
             loading the key into the ssh-key-ring/environment.  if your
             ssh-key requires a password, then you must provide it via
             **passwd**
+
+        :param str ssh_config:
+            *OPTIONAL* The path to the SSH configuration file.
+            This can be used to load SSH information from a configuration file.
+            By default ~/.ssh/config is queried.
         """
 
         # ----------------------------------------
@@ -304,7 +313,8 @@ class Device(object):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             # user can get updated by ssh_config
-            self._sshconf_lkup()
+            self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_path = self._sshconf_lkup()
             # but if user is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
@@ -389,6 +399,7 @@ class Device(object):
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
+                ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos'})
 
         except NcErrors.AuthenticationError as err:
