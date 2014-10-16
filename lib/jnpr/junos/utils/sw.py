@@ -182,11 +182,7 @@ class SW(Util):
         args = dict(no_validate=True, package_name=remote_package)
         args.update(kvargs)
 
-        dev_to = self.dev.timeout     # store device/rpc timeout
-        # hardset to 1 hr for long running process
-        self.dev.timeout = 60 * 60
         rsp = self.rpc.request_package_add(**args)
-        self.dev.timeout = dev_to     # restore original timeout
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
@@ -198,7 +194,7 @@ class SW(Util):
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package):
+    def validate(self, remote_package, **kwargs):
         """
         Issues the 'request' operation to validate the package against the
         config.
@@ -208,7 +204,7 @@ class SW(Util):
             * error (str) otherwise
         """
         rsp = self.rpc.request_package_validate(
-            package_name=remote_package).getparent()
+            package_name=remote_package, **kwargs).getparent()
         errcode = int(rsp.findtext('package-result'))
         return True if 0 == errcode else rsp.findtext('output').strip()
 
@@ -379,8 +375,6 @@ class SW(Util):
             if progress is not None:
                 progress(self._dev, report)
 
-        dev = self.dev
-
         # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
@@ -398,23 +392,18 @@ class SW(Util):
 
         remote_package = remote_path + '/' + path.basename(package)
 
-        restore_timeout = dev.timeout      # for restoration later
-        dev.timeout = timeout              # set for long timeout
-
         if validate is True:
             _progress(
                 "validating software against current config,"
                 " please be patient ...")
-            v_ok = self.validate(remote_package)
+            v_ok = self.validate(remote_package, dev_timeout=timeout)
             if v_ok is not True:
-                dev.timeout = restore_timeout
                 return v_ok  # will be the string of output
 
         if self._multi_RE is False:
             # simple case of device with only one RE
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(remote_package, **kwargs)
-            dev.timeout = restore_timeout
+            add_ok = self.pkgadd(remote_package, dev_timeout=timeout, **kwargs)
             return add_ok
         else:
             # we need to update multiple devices
@@ -429,8 +418,7 @@ class SW(Util):
                     _progress(
                         "installing software on VC member: {0} ... please be"
                         " patient ...".format(vc_id))
-                    ok &= self.pkgadd(remote_package, member=vc_id, **kwargs)
-                dev.timeout = restore_timeout
+                    ok &= self.pkgadd(remote_package, member=vc_id, dev_timeout=timeout, **kwargs)
                 return ok
             else:
                 # then this is a device with two RE that supports the "re0"
@@ -438,11 +426,10 @@ class SW(Util):
                 ok = True
                 _progress(
                     "installing software on RE0 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re0=True, **kwargs)
+                ok &= self.pkgadd(remote_package, re0=True, dev_timeout=timeout, **kwargs)
                 _progress(
                     "installing software on RE1 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re1=True, **kwargs)
-                dev.timeout = restore_timeout
+                ok &= self.pkgadd(remote_package, re1=True, dev_timeout=timeout, **kwargs)
                 return ok
 
     # -------------------------------------------------------------------------

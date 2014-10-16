@@ -22,6 +22,7 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
+from jnpr.junos.decorators import timeoutDecorator
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -459,6 +460,7 @@ class Device(object):
         self._conn.close_session()
         self.connected = False
 
+    @timeoutDecorator
     def execute(self, rpc_cmd, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
