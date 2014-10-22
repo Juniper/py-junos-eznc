@@ -79,6 +79,10 @@ class Config(Util):
                 return True
             else:
                 raise CommitError(cmd=err.cmd, rsp=err.rsp)
+        except ConnectTimeoutError as err:
+           # err is a TimeoutExpiredError from ncclient,
+           # which has no such attribute as xml.
+           raise
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
