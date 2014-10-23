@@ -35,6 +35,11 @@ class version_info(object):
                 self.build = after_type[0]  # non-numeric
 
         self.as_tuple = self.major + tuple([self.minor, self.build])
+        self.v_dict = {'major': self.major, 'type': self.type, 'minor': self.minor, 'build': self.build}
+
+    def __iter__(self):
+        for x in self.v_dict:
+            yield x
 
     def __repr__(self):
         retstr = "junos.version_info(major={major}, type={type}," \
@@ -107,7 +112,7 @@ def facts_software_version(junos, facts):
     # extract the version information out of the RPC response
     # ------------------------------------------------------------------------
 
-    f_master = facts.get('master','RE0')
+    f_master = facts.get('master', 'RE0')
 
     if x_swver.tag == 'multi-routing-engine-results':
         # we need to find/identify each of the routing-engine (CPU) versions.
@@ -117,12 +122,10 @@ def facts_software_version(junos, facts):
 
         if isinstance(f_master, list):
             xpath = './multi-routing-engine-item[re-name="{0}"' \
-                    ']/software-information/host-name'.format(
-            f_master[0].lower())
+                    ']/software-information/host-name'.format(f_master[0].lower())
         else:
             xpath = './multi-routing-engine-item[re-name="{0}"' \
-                    ']/software-information/host-name'.format(
-            f_master.lower())
+                    ']/software-information/host-name'.format(f_master.lower())
 
         facts['hostname'] = x_swver.findtext(xpath)
         if facts['hostname'] is None:
@@ -177,3 +180,8 @@ def facts_software_version(junos, facts):
     # ------------------------------------------------------------------------
 
     facts['version_info'] = version_info(facts['version'])
+
+
+def version_yaml_representer(dumper, version):
+    #return dumper.represent_scalar(u'!version', u'%s' % version.v_dict)
+    return dumper.represent_mapping(u'tag:yaml.org,2002:map', version.v_dict)

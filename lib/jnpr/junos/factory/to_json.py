@@ -1,6 +1,7 @@
 import json
 
-class TableJSONEncoder( json.JSONEncoder ):
+
+class TableJSONEncoder(json.JSONEncoder):
     """
     Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
     """
@@ -10,15 +11,15 @@ class TableJSONEncoder( json.JSONEncoder ):
 
         if isinstance(obj, View):
             obj = dict(obj.items())
-        elif isinstance(obj,Table):
-#            obj = { item.name: item for item in obj }
-            obj = dict((item.name,item) for item in obj)
+        elif isinstance(obj, Table):
+            obj = dict((item.name, item) for item in obj)
 
         else:
             obj = super(TableJSONEncoder, self).default(obj)
         return obj
 
-class TableViewJSONEncoder( json.JSONEncoder ):
+
+class TableViewJSONEncoder(json.JSONEncoder):
     """
     Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
     """
@@ -27,10 +28,26 @@ class TableViewJSONEncoder( json.JSONEncoder ):
         from jnpr.junos.factory.table import Table
 
         if isinstance(obj, View):
-            obj = { obj.name: dict(obj.items()) }
-        elif isinstance(obj,Table):
-#            obj = { item.name: dict(item.items()) for item in obj }
-            obj = dict((item.name,dict(item.items())) for item in obj)
+            obj = {obj.name: dict(obj.items())}
+        elif isinstance(obj, Table):
+            obj = dict((item.name, dict(item.items())) for item in obj)
         else:
             obj = super(TableViewJSONEncoder, self).default(obj)
+        return obj
+
+
+class PyEzJSONEncoder(json.JSONEncoder):
+    """
+    Used to encode facts and rpc instances into JSON.`.
+    """
+    def default(self, obj):
+        from jnpr.junos.facts.swver import version_info
+        if isinstance(obj, version_info):
+            obj = obj.v_dict
+        elif isinstance(obj, lxml.etree._Element):
+            def recursive_dict(element):
+                return element.tag, dict(map(recursive_dict, element)) or element.text
+            _, obj = recursive_dict(obj)
+        else:
+            obj = super(PyEzJSONEncoder, self).default(obj)
         return obj
