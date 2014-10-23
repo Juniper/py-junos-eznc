@@ -1,5 +1,5 @@
 import json
-
+from lxml import etree
 
 class TableJSONEncoder(json.JSONEncoder):
     """
@@ -44,7 +44,7 @@ class PyEzJSONEncoder(json.JSONEncoder):
         from jnpr.junos.facts.swver import version_info
         if isinstance(obj, version_info):
             obj = obj.v_dict
-        elif isinstance(obj, lxml.etree._Element):
+        elif isinstance(obj, etree._Element):
             def recursive_dict(element):
                 return element.tag, dict(map(recursive_dict, element)) or element.text
             _, obj = recursive_dict(obj)
