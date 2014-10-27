@@ -1,6 +1,7 @@
 import json
 from lxml import etree
 
+
 class TableJSONEncoder(json.JSONEncoder):
     """
     Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.

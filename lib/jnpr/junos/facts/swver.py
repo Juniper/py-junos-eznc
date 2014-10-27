@@ -38,8 +38,8 @@ class version_info(object):
         self.v_dict = {'major': self.major, 'type': self.type, 'minor': self.minor, 'build': self.build}
 
     def __iter__(self):
-        for x in self.v_dict:
-            yield x
+        for key in self.v_dict:
+            yield key, self.v_dict[key]
 
     def __repr__(self):
         retstr = "junos.version_info(major={major}, type={type}," \
@@ -183,5 +183,4 @@ def facts_software_version(junos, facts):
 
 
 def version_yaml_representer(dumper, version):
-    #return dumper.represent_scalar(u'!version', u'%s' % version.v_dict)
     return dumper.represent_mapping(u'tag:yaml.org,2002:map', version.v_dict)
