@@ -1,7 +1,7 @@
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
-import unittest
+import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
@@ -265,6 +265,21 @@ class TestDevice(unittest.TestCase):
         self.dev.rpc.cli = MagicMock(side_effect=AttributeError)
         val = self.dev.cli('show version')
         self.assertEqual(val, 'invalid command: show version')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_display_xml_rpc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.dev.display_xml_rpc('show system uptime ').tag, 'get-system-uptime-information')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_display_xml_rpc_text(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertIn('<get-system-uptime-information>', self.dev.display_xml_rpc('show system uptime ', format='text'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_display_xml_exception(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.dev.display_xml_rpc('show foo'), 'invalid command: show foo| display xml rpc')
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)

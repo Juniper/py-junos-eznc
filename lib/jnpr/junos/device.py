@@ -2,6 +2,7 @@
 import os
 import types
 import platform
+import warnings
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -542,7 +543,7 @@ class Device(object):
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
 
-    def cli(self, command, format='text'):
+    def cli(self, command, format='text', warning=True):
         """
         Executes the CLI command and returns the CLI text output by default.
 
@@ -572,6 +573,11 @@ class Device(object):
             or ``| count``, etc.  The only value use of the "pipe" is for the
             ``| display xml rpc`` as noted above.
         """
+        if 'display xml rpc' not in command and warning is True:
+            warnings.simplefilter("always")
+            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
+            warnings.resetwarnings()
+
         try:
             rsp = self.rpc.cli(command, format)
             if rsp.tag == 'output':
@@ -581,6 +587,26 @@ class Device(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
+        except:
+            return "invalid command: " + command
+
+    def display_xml_rpc(self, command, format='xml'):
+        """
+        Executes the CLI command and returns the CLI text output by default.
+
+        :param str command:
+          The CLI command to retrieve XML RPC for, e.g. "show version"
+
+        :param str format:
+          The return format, by default is XML.  You can optionally select
+          "text" to return the XML structure as a string.
+        """
+        try:
+            command = command + '| display xml rpc'
+            rsp = self.rpc.cli(command)
+            if format == 'text':
+                return etree.tostring(rsp[0])
+            return rsp[0]
         except:
             return "invalid command: " + command
 
