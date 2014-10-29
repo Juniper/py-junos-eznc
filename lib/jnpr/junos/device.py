@@ -590,7 +590,7 @@ class Device(object):
         except:
             return "invalid command: " + command
 
-    def xml_rpc(self, command, format='xml'):
+    def display_xml_rpc(self, command, format='xml'):
         """
         Executes the CLI command and returns the CLI text output by default.
 

@@ -267,19 +267,19 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(val, 'invalid command: show version')
 
     @patch('jnpr.junos.Device.execute')
-    def test_device_xml_rpc(self, mock_execute):
+    def test_device_display_xml_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.xml_rpc('show system uptime ').tag, 'get-system-uptime-information')
+        self.assertEqual(self.dev.display_xml_rpc('show system uptime ').tag, 'get-system-uptime-information')
 
     @patch('jnpr.junos.Device.execute')
-    def test_device_xml_rpc_text(self, mock_execute):
+    def test_device_display_xml_rpc_text(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('<get-system-uptime-information>', self.dev.xml_rpc('show system uptime ', format='text'))
+        self.assertIn('<get-system-uptime-information>', self.dev.display_xml_rpc('show system uptime ', format='text'))
 
     @patch('jnpr.junos.Device.execute')
-    def test_device_xml_exception(self, mock_execute):
+    def test_device_display_xml_exception(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.xml_rpc('show foo'), 'invalid command: show foo| display xml rpc')
+        self.assertEqual(self.dev.display_xml_rpc('show foo'), 'invalid command: show foo| display xml rpc')
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
