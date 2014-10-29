@@ -16,22 +16,17 @@ class timeoutDecorator(object):
             except:
                 dev = args[0]
             restore_timeout = dev._conn.timeout
-            print restore_timeout
             dev._conn.timeout = kwargs['dev_timeout']
-            print dev._conn.timeout
             kwargs.pop('dev_timeout', None)
             try:
                 result = self.function(*args, **kwargs)
                 dev._conn.timeout = restore_timeout
-                print dev._conn.timeout
                 return result
             except Exception:
                 dev._conn.timeout = restore_timeout
-                print dev._conn.timeout
                 raise
         else:
             try:
-                print 'default timeout'
                 return self.function(*args, **kwargs)
             except Exception:
                 raise
