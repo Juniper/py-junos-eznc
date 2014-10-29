@@ -1,7 +1,7 @@
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
-import unittest
+import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import patch
 import os
@@ -43,6 +43,17 @@ class TestVersionInfo(unittest.TestCase):
 
     def test_version_info_not_eq(self):
         self.assertTrue(version_info('13.3-20131120') != (15, 3))
+
+    def test_version_to_json(self):
+        import json
+        self.assertEqual(json.dumps(version_info('11.4R7.5')), '{"major": [11, 4], "type": "R", "build": 5, "minor": "7"}')
+
+    def test_version_to_yaml(self):
+        import yaml
+        self.assertEqual(yaml.dump(version_info('11.4R7.5')), "build: 5\nmajor: !!python/tuple [11, 4]\nminor: '7'\ntype: R\n")
+
+    def test_version_iter(self):
+        self.assertItemsEqual(version_info('11.4R7.5'), [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
 
 
 @attr('unit')
