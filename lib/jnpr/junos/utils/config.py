@@ -40,6 +40,9 @@ class Config(Util):
         :param str comment: If provide logs this comment with the commit.
         :param int confirm: If provided activates confirm safeguard with
                             provided value as timeout (minutes).
+        :param int timeout: If provided the command will wait for completion
+                            using the provided value as timeout (seconds).
+                            By default the device timeout is used.
 
         :returns:
             * ``True`` when successful
@@ -47,6 +50,11 @@ class Config(Util):
         :raises CommitError: When errors detected in candidate configuration.
                              You can use the Exception variable (XML)
                              to identify the specific problems
+
+        .. warning::
+            If the function does not receive a reply prior to the timeout
+            a RpcTimeoutError will be raised.  It is possible the commit
+            was successful.  Manual verification may be required.
         """
         rpc_args = {}
 
@@ -68,21 +76,25 @@ class Config(Util):
             if 'True' != confirm_val:
                 rpc_args['confirm-timeout'] = confirm_val
 
+        # if a timeout is provided, then include that in the RPC
+
+        timeout = kvargs.get('timeout')
+        if timeout:
+            rpc_args['dev_timeout'] = timeout
+
         # dbl-splat the rpc_args since we want to pass key/value to metaexec
         # if there is a commit/check error, this will raise an execption
 
         try:
             self.rpc.commit_configuration(**rpc_args)
+        except RpcTimeoutError:
+            raise
         except RpcError as err:        # jnpr.junos exception
             if err.rsp.find('ok') is not None:
                 # this means there are warnings, but no errors
                 return True
             else:
                 raise CommitError(cmd=err.cmd, rsp=err.rsp)
-        except ConnectTimeoutError as err:
-           # err is a TimeoutExpiredError from ncclient,
-           # which has no such attribute as xml.
-           raise
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error

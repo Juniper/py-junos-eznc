@@ -510,10 +510,10 @@ class Device(object):
 
         try:
             rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
-        except NcOpErrors.TimeoutExpiredError as err:
+        except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
-            raise EzErrors.ConnectTimeoutError(self)
+            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
