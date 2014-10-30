@@ -13,6 +13,7 @@ import time
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+import ncclient.operations.errors as NcOpErrors
 import paramiko
 import jinja2
 
@@ -509,6 +510,10 @@ class Device(object):
 
         try:
             rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
+        except NcOpErrors.TimeoutExpiredError as err:
+            # err is a TimeoutExpiredError from ncclient,
+            # which has no such attribute as xml.
+            raise EzErrors.ConnectTimeoutError(self)
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
