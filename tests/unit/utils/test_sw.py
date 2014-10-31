@@ -170,8 +170,7 @@ class TestSW(unittest.TestCase):
         package = 'install.tgz'
         self.sw.put = MagicMock()
         SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
-        self.assertTrue(self.sw.install(package, progress=self._myprogress,
-                                        cleanfs=True))
+        self.assertTrue(self.sw.install(package, progress=self._myprogress, cleanfs=True))
 
     @patch('jnpr.junos.utils.sw.SW.safe_copy')
     def test_sw_safe_install_copy_fail(self, mock_copy):
@@ -200,8 +199,7 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
-        self.sw.install('file', no_copy=True,
-                                        force_host=True)
+        self.sw.install('file', no_copy=True, force_host=True)
         rpc = """<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>"""
         self.assertEqual(etree.tostring(mock_execute.call_args[0][0]),
                          rpc)
@@ -283,6 +281,9 @@ class TestSW(unittest.TestCase):
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
+            # Little hack for mocked execute
+            if kwargs == {'dev_timeout': 1800}:
+                return self._read_file(args[0].tag + '.xml')
             if 'path' in kwargs:
                 if kwargs['path'] == '/packages':
                     return self._read_file('file-list_dir.xml')

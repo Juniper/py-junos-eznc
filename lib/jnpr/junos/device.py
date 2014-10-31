@@ -13,6 +13,7 @@ import time
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+import ncclient.operations.errors as NcOpErrors
 import paramiko
 import jinja2
 
@@ -22,6 +23,7 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
+from jnpr.junos.decorators import timeoutDecorator
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -459,6 +461,7 @@ class Device(object):
         self._conn.close_session()
         self.connected = False
 
+    @timeoutDecorator
     def execute(self, rpc_cmd, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
@@ -507,6 +510,10 @@ class Device(object):
 
         try:
             rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
+        except NcOpErrors.TimeoutExpiredError:
+            # err is a TimeoutExpiredError from ncclient,
+            # which has no such attribute as xml.
+            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)

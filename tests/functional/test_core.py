@@ -2,8 +2,9 @@
 
 @author: rsherman
 '''
-import unittest
+import unittest2 as unittest
 from nose.plugins.attrib import attr
+from jnpr.junos.exception import RpcTimeoutError
 
 
 @attr('functional')
@@ -37,11 +38,9 @@ class TestCore(unittest.TestCase):
         self.assertTrue('srx210' in self.dev.cli('show version'))
 
     def test_device_rpc(self):
-        sw = self.dev.rpc.get_software_information()
-        hostname = sw.findtext('.//host-name')
-        self.assertEqual(hostname, 'pabst')
+        res = self.dev.rpc.traceroute(noresolve=True, host='8.8.8.8', wait='1')
+        self.assertEqual(res.tag, 'traceroute-results')
 
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'TestCore.testName']
-    unittest.main()
+    def test_device_rpc_timeout(self):
+        with self.assertRaises(RpcTimeoutError):
+            self.dev.rpc.traceroute(noresolve=True, host='8.8.8.8', dev_timeout=1)
