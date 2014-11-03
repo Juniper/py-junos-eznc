@@ -13,8 +13,7 @@ class TableJSONEncoder(json.JSONEncoder):
         if isinstance(obj, View):
             obj = dict(obj.items())
         elif isinstance(obj, Table):
-            obj = dict((item.name, item) for item in obj)
-
+            obj = dict((str(item.name), item) for item in obj)
         else:
             obj = super(TableJSONEncoder, self).default(obj)
         return obj
@@ -29,9 +28,9 @@ class TableViewJSONEncoder(json.JSONEncoder):
         from jnpr.junos.factory.table import Table
 
         if isinstance(obj, View):
-            obj = {obj.name: dict(obj.items())}
+            obj = {str(obj.name): dict(obj.items())}
         elif isinstance(obj, Table):
-            obj = dict((item.name, dict(item.items())) for item in obj)
+            obj = dict((str(item.name), dict(item.items())) for item in obj)
         else:
             obj = super(TableViewJSONEncoder, self).default(obj)
         return obj
