@@ -1,15 +1,10 @@
 # stdlib
-import functools
+from functools import wraps
 
 
-class timeoutDecorator(object):
-    def __init__(self, function):
-        self.function = function
-        self.__doc__ = function.__doc__
-        self.__name__ = function.__name__
-        self.__module__ = function.__module__
-
-    def __call__(self, *args, **kwargs):
+def timeoutDecorator(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
         if 'dev_timeout' in kwargs:
             try:
                 dev = args[0].dev
@@ -19,7 +14,7 @@ class timeoutDecorator(object):
             dev.timeout = kwargs['dev_timeout']
             kwargs.pop('dev_timeout', None)
             try:
-                result = self.function(*args, **kwargs)
+                result = function(*args, **kwargs)
                 dev.timeout = restore_timeout
                 return result
             except Exception:
@@ -27,9 +22,8 @@ class timeoutDecorator(object):
                 raise
         else:
             try:
-                return self.function(*args, **kwargs)
+                return function(*args, **kwargs)
             except Exception:
                 raise
 
-    def __get__(self, obj_self, objtype):
-        return functools.partial(self.__call__, obj_self)
+    return wrapper
