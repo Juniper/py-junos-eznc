@@ -12,6 +12,7 @@ _TSFMT = "%Y%m%d%H%M%S"
 import json
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
+
 class Table(object):
     ITEM_XPATH = None
     ITEM_NAME_XPATH = 'name'
@@ -85,11 +86,19 @@ class Table(object):
         if self.xml is None:
             raise RuntimeError("Table is empty, use get()")
 
+    def _tkey(self, this, key_list):
+        """ keys with missing XPATH nodes are set to None """
+        keys = []
+        for k in key_list:
+            try:
+                keys.append(this.xpath(k)[0].text)
+            except:
+                keys.append(None)
+        return tuple(keys)
+
     def _keys_composite(self, xpath, key_list):
         """ composite keys return a tuple of key-items """
-#    _tkey = lambda this: tuple([this.findtext(k) for k in key_list ])
-        _tkey = lambda this: tuple([this.xpath(k)[0].text for k in key_list])
-        return [_tkey(item) for item in self.xml.xpath(xpath)]
+        return [self._tkey(item, key_list) for item in self.xml.xpath(xpath)]
 
     def _keys_simple(self, xpath):
         return [x.text.strip() for x in self.xml.xpath(xpath)]
@@ -220,7 +229,7 @@ class Table(object):
         """
         :returns: JSON encoded string of entire Table contents
         """
-        return json.dumps(self, cls=TableJSONEncoder )
+        return json.dumps(self, cls=TableJSONEncoder)
 
     # -------------------------------------------------------------------------
     # OVERLOADS
@@ -291,8 +300,12 @@ class Table(object):
             if isinstance(find_value, tuple):
                 # composite key (value1, value2, ...) will create an
                 # iterative xpath of the fmt statement for each key/value pair
-                xpf = ''.join([xnkv.format(k.replace('_', '-'), v)
-                              for k, v in zip(namekey_xpath, find_value)])
+                # skip over missing keys
+                kv = []
+                for k, v in zip(namekey_xpath, find_value):
+                    if v is not None:
+                        kv.append(xnkv.format(k.replace('_', '-'), v))
+                xpf = ''.join(kv)
                 return item_xpath + xpf
 
         # ---[END: get_xpath ] ------------------------------------------------

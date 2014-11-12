@@ -44,7 +44,7 @@ class SW(Util):
       * :meth:`validate`: performs the 'request' to validate the package
 
     **Miscellaneous:**
-      * rollback: same as 'request softare rollback'
+      * rollback: same as 'request software rollback'
       * inventory: (property) provides file info for current and rollback
         images on the device
     """
@@ -90,7 +90,7 @@ class SW(Util):
     @classmethod
     def local_sha1(cls, package):
         """
-        computes the SHA1 checksum value on the local package file.
+        Computes the SHA1 checksum value on the local package file.
 
         :param str package:
           File-path to the package (\*.tgz) file on the local server
@@ -182,11 +182,7 @@ class SW(Util):
         args = dict(no_validate=True, package_name=remote_package)
         args.update(kvargs)
 
-        dev_to = self.dev.timeout     # store device/rpc timeout
-        # hardset to 1 hr for long running process
-        self.dev.timeout = 60 * 60
         rsp = self.rpc.request_package_add(**args)
-        self.dev.timeout = dev_to     # restore original timeout
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
@@ -198,7 +194,7 @@ class SW(Util):
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package):
+    def validate(self, remote_package, **kwargs):
         """
         Issues the 'request' operation to validate the package against the
         config.
@@ -208,7 +204,7 @@ class SW(Util):
             * error (str) otherwise
         """
         rsp = self.rpc.request_package_validate(
-            package_name=remote_package).getparent()
+            package_name=remote_package, **kwargs).getparent()
         errcode = int(rsp.findtext('package-result'))
         return True if 0 == errcode else rsp.findtext('output').strip()
 
@@ -299,7 +295,7 @@ class SW(Util):
 
     def install(self, package, remote_path='/var/tmp', progress=None,
                 validate=False, checksum=None, cleanfs=True, no_copy=False,
-                timeout=1800):
+                timeout=1800, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -336,7 +332,7 @@ class SW(Util):
 
         :param str remote_path:
           The directory on the Junos device where the package file will be
-          SCP'd to; the default is ``/var/tmp``.
+          SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
 
         :param bool validate:
           When ``True`` this method will perform a config validation against
@@ -360,6 +356,9 @@ class SW(Util):
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
 
+        :param bool no_copy:
+          When ``True`` the software package will not be SCP'd to the device.  Default is ``False``.
+
         :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.  This
           argument was added since most of the time the "package add" RPC
@@ -367,12 +366,14 @@ class SW(Util):
           generally around 30 seconds.  So this :timeout: value will be
           used in the context of the SW installation process.  Defaults to
           30 minutes (30*60=1800)
+
+        :param bool force_host:
+          (Optional) Force the addition of host software package or bundle
+          (ignore warnings) on the QFX5100 device.
         """
         def _progress(report):
             if progress is not None:
                 progress(self._dev, report)
-
-        dev = self.dev
 
         # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
@@ -391,23 +392,18 @@ class SW(Util):
 
         remote_package = remote_path + '/' + path.basename(package)
 
-        restore_timeout = dev.timeout      # for restoration later
-        dev.timeout = timeout              # set for long timeout
-
         if validate is True:
             _progress(
                 "validating software against current config,"
                 " please be patient ...")
-            v_ok = self.validate(remote_package)
+            v_ok = self.validate(remote_package, dev_timeout=timeout)
             if v_ok is not True:
-                dev.timeout = restore_timeout
                 return v_ok  # will be the string of output
 
         if self._multi_RE is False:
             # simple case of device with only one RE
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(remote_package)
-            dev.timeout = restore_timeout
+            add_ok = self.pkgadd(remote_package, dev_timeout=timeout, **kwargs)
             return add_ok
         else:
             # we need to update multiple devices
@@ -422,8 +418,7 @@ class SW(Util):
                     _progress(
                         "installing software on VC member: {0} ... please be"
                         " patient ...".format(vc_id))
-                    ok &= self.pkgadd(remote_package, member=vc_id)
-                dev.timeout = restore_timeout
+                    ok &= self.pkgadd(remote_package, member=vc_id, dev_timeout=timeout, **kwargs)
                 return ok
             else:
                 # then this is a device with two RE that supports the "re0"
@@ -431,11 +426,10 @@ class SW(Util):
                 ok = True
                 _progress(
                     "installing software on RE0 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re0=True)
+                ok &= self.pkgadd(remote_package, re0=True, dev_timeout=timeout, **kwargs)
                 _progress(
                     "installing software on RE1 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re1=True)
-                dev.timeout = restore_timeout
+                ok &= self.pkgadd(remote_package, re1=True, dev_timeout=timeout, **kwargs)
                 return ok
 
     # -------------------------------------------------------------------------
@@ -448,7 +442,7 @@ class SW(Util):
         a specified date and time.
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also hanldes EX/QFX VC.
+        rebooted.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before rebooting the device.
 
@@ -486,7 +480,7 @@ class SW(Util):
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also hanldes EX/QFX VC.
+        rebooted.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before rebooting the device.
 
@@ -514,7 +508,7 @@ class SW(Util):
 
     def rollback(self):
         """
-        issues the 'request' command to do the rollback and returns the string
+        Issues the 'request' command to do the rollback and returns the string
         output of the results.
 
         :returns:

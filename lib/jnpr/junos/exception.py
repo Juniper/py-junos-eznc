@@ -6,21 +6,25 @@ class RpcError(Exception):
     """
     Parent class for all junos-pyez RPC Exceptions
     """
-    def __init__(self, cmd=None, rsp=None, errs=None):
+    def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
           :errs: is a list of <rpc-error> elements
+          :dev: is the device rpc was executed on
+          :timeout: is the timeout value of the device
         """
         self.cmd = cmd
         self.rsp = rsp
         self.errs = errs
+        self.dev = dev
+        self.timeout = timeout
 
     def __repr__(self):
         """
           pprints the response XML attribute
         """
-        if None != self.rsp:
+        if self.rsp is not None:
             return etree.tostring(self.rsp, pretty_print=True)
 
 
@@ -65,11 +69,26 @@ class PermissionError(RpcError):
         RpcError.__init__(self, cmd=cmd, rsp=rsp)
         self.message = rsp.findtext('.//bad-element')
 
-#### ================================================================
-#### ================================================================
-####                    Connection Exceptions
-#### ================================================================
-#### ================================================================
+
+class RpcTimeoutError(RpcError):
+    """
+    Generated in response to a RPC execution timeout.
+    """
+    def __init__(self, dev, cmd, timeout):
+        RpcError.__init__(self, dev=dev, cmd=cmd, timeout=timeout)
+
+    def __repr__(self):
+        return "{0}({1},{2},{3})".format(self.__class__.__name__,
+                                         self.dev.hostname, self.cmd, self.timeout)
+
+    __str__ = __repr__
+
+
+# ================================================================
+# ================================================================
+#                    Connection Exceptions
+# ================================================================
+# ================================================================
 
 
 class ConnectError(Exception):
@@ -138,7 +157,7 @@ class ConnectUnknownHostError(ConnectError):
 class ConnectRefusedError(ConnectError):
     """
     Generated if the specified host denies the NETCONF; could
-    be that the serivces is not enabled, or the host has
+    be that the services is not enabled, or the host has
     too many connections already.
     """
     pass

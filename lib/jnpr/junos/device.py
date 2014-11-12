@@ -2,6 +2,7 @@
 import os
 import types
 import platform
+import warnings
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -12,6 +13,7 @@ import time
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+import ncclient.operations.errors as NcOpErrors
 import paramiko
 import jinja2
 
@@ -21,6 +23,7 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
+from jnpr.junos.decorators import timeoutDecorator
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -226,20 +229,24 @@ class Device(object):
     # -----------------------------------------------------------------------
 
     def _sshconf_lkup(self):
-        home = os.getenv('HOME')
-        if not home:
-            return
-        sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
+        if self._ssh_config:
+            sshconf_path = self._ssh_config
+        else:
+            home = os.getenv('HOME')
+            if not home:
+                return None
+            sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
         if not os.path.exists(sshconf_path):
-            return
-
-        sshconf = paramiko.SSHConfig()
-        sshconf.parse(open(sshconf_path, 'r'))
-        found = sshconf.lookup(self._hostname)
-        self._hostname = found.get('hostname', self._hostname)
-        self._port = found.get('port', self._port)
-        self._auth_user = found.get('user')
-        self._ssh_private_key_file = found.get('identityfile')
+            return None
+        else:
+            sshconf = paramiko.SSHConfig()
+            sshconf.parse(open(sshconf_path, 'r'))
+            found = sshconf.lookup(self._hostname)
+            self._hostname = found.get('hostname', self._hostname)
+            self._port = found.get('port', self._port)
+            self._auth_user = found.get('user')
+            self._ssh_private_key_file = found.get('identityfile')
+            return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -275,6 +282,11 @@ class Device(object):
             loading the key into the ssh-key-ring/environment.  if your
             ssh-key requires a password, then you must provide it via
             **passwd**
+
+        :param str ssh_config:
+            *OPTIONAL* The path to the SSH configuration file.
+            This can be used to load SSH information from a configuration file.
+            By default ~/.ssh/config is queried.
         """
 
         # ----------------------------------------
@@ -304,7 +316,8 @@ class Device(object):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             # user can get updated by ssh_config
-            self._sshconf_lkup()
+            self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_path = self._sshconf_lkup()
             # but if user is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
@@ -389,6 +402,7 @@ class Device(object):
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
+                ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos'})
 
         except NcErrors.AuthenticationError as err:
@@ -447,6 +461,7 @@ class Device(object):
         self._conn.close_session()
         self.connected = False
 
+    @timeoutDecorator
     def execute(self, rpc_cmd, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
@@ -468,7 +483,7 @@ class Device(object):
 
         :raises PermissionError:
             When the requested RPC command is not allowed due to
-            user-auth class privledge controls on Junos
+            user-auth class privilege controls on Junos
 
         :raises RpcError:
             When an ``rpc-error`` element is contained in the RPC-reply
@@ -476,7 +491,7 @@ class Device(object):
         :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
             that function is called, and return of that function is
-            provided back to the caller; presuably to convert the XML to
+            provided back to the caller; presumably to convert the XML to
             native python data-types (e.g. ``dict``).
         """
 
@@ -495,6 +510,10 @@ class Device(object):
 
         try:
             rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
+        except NcOpErrors.TimeoutExpiredError:
+            # err is a TimeoutExpiredError from ncclient,
+            # which has no such attribute as xml.
+            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except Exception as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
@@ -531,7 +550,7 @@ class Device(object):
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
 
-    def cli(self, command, format='text'):
+    def cli(self, command, format='text', warning=True):
         """
         Executes the CLI command and returns the CLI text output by default.
 
@@ -550,15 +569,22 @@ class Device(object):
             get back the XML Element ``<get-software-information>``.
 
         .. warning::
-            You should **NOT** use this method to for general automation purposes
-            that put you in the of "screen-scraping the CLI".  The purpose of the
-            PyEZ framework is to migrate away from that tooling pattern.
+            This function is provided for **DEBUG** purposes only!
+            **DO NOT** use this method for general automation purposes as
+            that puts you in the realm of "screen-scraping the CLI".  The purpose of
+            the PyEZ framework is to migrate away from that tooling pattern.
+            Interaction with the device should be done via the RPC function.
 
         .. warning::
             You cannot use "pipe" filters with **command** such as ``| match``
             or ``| count``, etc.  The only value use of the "pipe" is for the
             ``| display xml rpc`` as noted above.
         """
+        if 'display xml rpc' not in command and warning is True:
+            warnings.simplefilter("always")
+            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
+            warnings.resetwarnings()
+
         try:
             rsp = self.rpc.cli(command, format)
             if rsp.tag == 'output':
@@ -568,6 +594,26 @@ class Device(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
+        except:
+            return "invalid command: " + command
+
+    def display_xml_rpc(self, command, format='xml'):
+        """
+        Executes the CLI command and returns the CLI text output by default.
+
+        :param str command:
+          The CLI command to retrieve XML RPC for, e.g. "show version"
+
+        :param str format:
+          The return format, by default is XML.  You can optionally select
+          "text" to return the XML structure as a string.
+        """
+        try:
+            command = command + '| display xml rpc'
+            rsp = self.rpc.cli(command)
+            if format == 'text':
+                return etree.tostring(rsp[0])
+            return rsp[0]
         except:
             return "invalid command: " + command
 
@@ -595,7 +641,7 @@ class Device(object):
         """
         Used to attach things to this Device instance and make them a
         property of the :class:Device instance.  The most common use
-        for bind is attaching Utiilty instances to a :class:Device.
+        for bind is attaching Utility instances to a :class:Device.
         For example::
 
             from jnpr.junos.utils.config import Config

@@ -49,8 +49,8 @@ class TestFactoryView(unittest.TestCase):
         self.assertEqual(self.v.name, '1.1.1.1')
 
     def test_view_name_xpath_composite(self):
-        self.v.ITEM_NAME_XPATH = ['name', 'admin-status']
-        self.assertEqual(self.v.name, ('ge-0/0/0', 'up'))
+        self.v.ITEM_NAME_XPATH = ['name', 'missing', 'admin-status']
+        self.assertEqual(self.v.name, ('ge-0/0/0', None, 'up'))
 
     def test_view_asview(self):
         self.assertEqual(
