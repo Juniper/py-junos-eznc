@@ -242,6 +242,8 @@ class View(object):
             # added support to use the element tag if the text is empty
             def _munch(x):
                 as_str = x if isinstance(x, str) else x.text
+                if isinstance(as_str, unicode):
+                    as_str = as_str.encode('ascii','replace')
                 if as_str is not None:
                     as_str = as_str.strip()
                 if not as_str:
