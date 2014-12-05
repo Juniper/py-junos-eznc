@@ -6,6 +6,7 @@ refer to the .yml files in this jnpr.junos.op directory.
 """
 # stdlib
 from copy import deepcopy
+import re
 
 # locally
 from jnpr.junos.factory.factory_cls import *
@@ -62,10 +63,18 @@ class FactoryLoader(object):
     # -----------------------------------------------------------------------
 
     def _fieldfunc_True(self, value_rhs):
-        return lambda x: x == value_rhs
+        def true_test(x):
+            if value_rhs.startswith('regex('):
+                return True if bool(re.search(value_rhs.strip('regex()'), x)) else False
+            return x == value_rhs
+        return true_test
 
     def _fieldfunc_False(self, value_rhs):
-        return lambda x: x != value_rhs
+        def false_test(x):
+            if value_rhs.startswith('regex('):
+                return False if bool(re.search(value_rhs.strip('regex()'), x)) else True
+            return x != value_rhs
+        return false_test
 
     def _add_dictfield(self, fields, f_name, f_dict, kvargs):
         """ add a field based on its associated dictionary """

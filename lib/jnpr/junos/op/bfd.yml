@@ -32,7 +32,7 @@ BfdSessionView:
     remote_discriminator: remote-discriminator
     echo_mode_desired: echo-mode-desired
     echo_mode_state: echo-mode-state
-    no_absorb: no-absorb
+    no_absorb: { no-absorb: True=regex(no-absorb) }
     no_refresh: { no-refresh: True=no-refresh }
     bfd_client: _BfdSessionClientTable
 

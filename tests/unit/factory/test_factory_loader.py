@@ -40,9 +40,41 @@ class TestFactoryLoader(unittest.TestCase):
         self.assertEqual(self.fl._build_view('RouteTableView'),
                          self.fl.catalog['RouteTableView'])
 
+    def test_FactoryLoader__fieldfunc_True(self):
+        fn = self.fl._fieldfunc_True('test')
+        self.assertTrue(fn('test'))
+
+    def test_FactoryLoader__fieldfunc_True_fail(self):
+        # Assert that false is returned if value not found
+        fn = self.fl._fieldfunc_True('test')
+        self.assertFalse(fn('nope'))
+
+    def test_FactoryLoader__fieldfunc_True_regex(self):
+        fn = self.fl._fieldfunc_True('regex(this|test)')
+        self.assertTrue(fn('test'))
+
+    def test_FactoryLoader__fieldfunc_True_regex_fail(self):
+        # Assert that false is returned if value not found
+        fn = self.fl._fieldfunc_True('regex(this|test)')
+        self.assertFalse(fn('nope'))
+
     def test_FactoryLoader__fieldfunc_False(self):
         fn = self.fl._fieldfunc_False('test')
         self.assertFalse(fn('test'))
+
+    def test_FactoryLoader__fieldfunc_False_fail(self):
+        # Assert that true is returned if value not found
+        fn = self.fl._fieldfunc_False('test')
+        self.assertTrue(fn('nope'))
+
+    def test_FactoryLoader__fieldfunc_False_regex(self):
+        fn = self.fl._fieldfunc_False('regex(this|test)')
+        self.assertFalse(fn('test'))
+
+    def test_FactoryLoader__fieldfunc_False_regex_fail(self):
+        # Assert that true is returned if value not found
+        fn = self.fl._fieldfunc_False('regex(this|test)')
+        self.assertTrue(fn('nope'))
 
     def test_FactoryLoader__add_dictfield_RuntimeError(self):
         self.assertRaises(
