@@ -61,6 +61,15 @@ class TestFactoryOpTable(unittest.TestCase):
         self.assertEqual(v['present'], True)
 
     @patch('jnpr.junos.Device.execute')
+    def test_optable_view_get_astype_bool_regex(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.op.bfd import BfdSessionTable
+        bfd = BfdSessionTable(self.dev)
+        bfd.get()
+        v = bfd['10.92.20.4']
+        self.assertEqual(v['no_absorb'], True)
+
+    @patch('jnpr.junos.Device.execute')
     def test_optable_view_get_unknown_field(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get()

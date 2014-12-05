@@ -1,0 +1,50 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/13.3R1/junos">
+    <bfd-session-information xmlns="http://xml.juniper.net/junos/13.3R1/junos-bfd" junos:style="extensive">
+        <bfd-session>
+            <session-neighbor>10.92.20.4</session-neighbor>
+            <session-state>Down</session-state>
+            <session-interface></session-interface>
+            <session-detection-time>0.000</session-detection-time>
+            <session-transmission-interval>3.000</session-transmission-interval>
+            <session-adaptive-multiplier>3</session-adaptive-multiplier>
+            <bfd-client>
+                <client-name>Static</client-name>
+                <client-transmission-interval>0.300</client-transmission-interval>
+                <client-reception-interval>0.300</client-reception-interval>
+            </bfd-client>
+            <local-diagnostic>None</local-diagnostic>
+            <remote-diagnostic>None</remote-diagnostic>
+            <session-version>1</session-version>
+            <remote-state>AdminDown</remote-state>
+            <session-type>Multi hop BFD</session-type>
+            <minimum-asynchronous-interval>0.300</minimum-asynchronous-interval>
+            <minimum-slow-interval>3.000</minimum-slow-interval>
+            <adaptive-asynchronous-transmission-interval>3.000</adaptive-asynchronous-transmission-interval>
+            <adaptive-reception-interval>3.000</adaptive-reception-interval>
+            <minimum-transmission-interval>3.000</minimum-transmission-interval>
+            <minimum-reception-interval>0.300</minimum-reception-interval>
+            <detection-multiplier>3</detection-multiplier>
+            <neighbor-minimum-transmission-interval>0.000</neighbor-minimum-transmission-interval>
+            <neighbor-minimum-reception-interval>0.000</neighbor-minimum-reception-interval>
+            <neighbor-session-multiplier>0</neighbor-session-multiplier>
+            <local-discriminator>16</local-discriminator>
+            <remote-discriminator>0</remote-discriminator>
+            <echo-mode-desired>disabled</echo-mode-desired>
+            <echo-mode-state>inactive</echo-mode-state>
+            <no-absorb>, no-absorb</no-absorb>
+            <no-refresh>no-refresh</no-refresh>
+            <multihop>Multi-hop</multihop>
+            <multihop-time-to-live>1</multihop-time-to-live>
+            <multihop-routing-table-index>0</multihop-routing-table-index>
+            <multihop-local-address>10.60.0.1</multihop-local-address>
+            <no-refresh> Session ID: 0x1</no-refresh>
+        </bfd-session>
+        <sessions>1</sessions>
+        <clients>1</clients>
+        <cumulative-transmission-rate>0.3</cumulative-transmission-rate>
+        <cumulative-reception-rate>0.0</cumulative-reception-rate>
+    </bfd-session-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
