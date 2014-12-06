@@ -10,6 +10,7 @@ from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError
 
 from mock import MagicMock, patch
+from lxml import etree
 
 
 @attr('unit')
@@ -157,6 +158,21 @@ class TestConfig(unittest.TestCase):
         self.conf.load(path='test.set')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
+
+    @patch('__builtin__.open')
+    def test_config_load_try_load_exception(self, mock_open):
+        ex = RpcError(
+            rsp = [etree.fromstring((
+                """<load-configuration-results>
+                <rpc-error>
+                <error-severity>error</error-severity>
+                <error-message>syntax error</error-message>
+                </rpc-error>
+                </load-configuration-results>"""))])
+        self.conf.rpc.load_config = MagicMock(side_effect=ex)
+        with self.assertRaises(RpcError):
+            self.conf.load(path='config.conf')
+
 
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_template_path(self, mock_etree):
