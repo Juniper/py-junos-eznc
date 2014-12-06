@@ -246,7 +246,7 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_get_exception(self, mock_exec):
         self.dev.rpc.get_rescue_information = MagicMock(side_effect=Exception)
-        self.assertIsNone(self.conf.rescue('get'))
+        self.assertTrue(self.conf.rescue('get')==None)
 
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_get(self, mock_exec):
