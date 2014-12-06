@@ -170,8 +170,7 @@ class TestConfig(unittest.TestCase):
                 </rpc-error>
                 </load-configuration-results>"""))])
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
-        with self.assertRaises(RpcError):
-            self.conf.load(path='config.conf')
+        self.assertRaises(RpcError, self.conf.load, path='config.conf')
 
 
     @patch('jnpr.junos.utils.config.etree.XML')
@@ -273,5 +272,4 @@ class TestConfig(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_unsupported_action(self, mock_exec):
-        with self.assertRaises(ValueError):
-            self.conf.rescue('abc')
+        self.assertRaises(ValueError, self.conf.rescue, 'abc')
