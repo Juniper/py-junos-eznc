@@ -10,6 +10,7 @@ from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError
 
 from mock import MagicMock, patch
+from lxml import etree
 
 
 @attr('unit')
@@ -158,6 +159,20 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
+    @patch('__builtin__.open')
+    def test_config_load_try_load_exception(self, mock_open):
+        ex = RpcError(
+            rsp = [etree.fromstring((
+                """<load-configuration-results>
+                <rpc-error>
+                <error-severity>error</error-severity>
+                <error-message>syntax error</error-message>
+                </rpc-error>
+                </load-configuration-results>"""))])
+        self.conf.rpc.load_config = MagicMock(side_effect=ex)
+        self.assertRaises(RpcError, self.conf.load, path='config.conf')
+
+
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_template_path(self, mock_etree):
         self.conf.rpc.load_config = MagicMock()
@@ -222,3 +237,39 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.load_configuration = MagicMock()
         self.assertRaises(ValueError, self.conf.rollback, 51)
         self.assertRaises(ValueError, self.conf.rollback, -1)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_save(self, mock_exec):
+        self.dev.request_save_rescue_configuration = MagicMock()
+        self.assertTrue(self.conf.rescue('save'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_get_exception(self, mock_exec):
+        self.dev.rpc.get_rescue_information = MagicMock(side_effect=Exception)
+        self.assertTrue(self.conf.rescue('get')==None)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_get(self, mock_exec):
+        self.dev.rpc.get_rescue_information = MagicMock()
+        self.dev.rpc.get_rescue_information.return_value = 1
+        self.assertEqual(self.conf.rescue('get', format='xml'), 1)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_delete(self, mock_exec):
+        self.dev.rpc.request_delete_rescue_configuration = MagicMock()
+        self.assertTrue(self.conf.rescue('delete'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_reload(self, mock_exec):
+        self.dev.rpc.load_configuration = MagicMock()
+        self.dev.rpc.load_configuration.return_value = True
+        self.assertTrue(self.conf.rescue('reload'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_reload_exception(self, mock_exec):
+        self.dev.rpc.load_configuration = MagicMock(side_effect=Exception)
+        self.assertFalse(self.conf.rescue('reload'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_rescue_action_unsupported_action(self, mock_exec):
+        self.assertRaises(ValueError, self.conf.rescue, 'abc')
