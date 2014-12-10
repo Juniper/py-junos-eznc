@@ -61,6 +61,14 @@ class TestFactoryTable(unittest.TestCase):
                          [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
 
     @patch('jnpr.junos.Device.execute')
+    def test_keys__keys_pipe(self, mock_execute):
+        from jnpr.junos.op.lldp import LLDPNeighborTable
+        mock_execute.side_effect = self._mock_manager
+        self.lldp = LLDPNeighborTable(self.dev)
+        self.lldp.get()
+        self.assertEqual(self.lldp.keys(), ['et-0/0/48', 'et-0/0/49', 'xe-0/0/13'])
+
+    @patch('jnpr.junos.Device.execute')
     def test_table_repr_xml_not_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
