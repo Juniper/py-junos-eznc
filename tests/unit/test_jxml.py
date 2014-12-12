@@ -28,7 +28,7 @@ class Test_JXML(unittest.TestCase):
         import xml.etree.ElementTree as ET
         root = ET.fromstring(xmldata)
         test = remove_namespaces(root)
-        for elem in test.getiterator():
+        for elem in test.iter():
             i = elem.tag.find('}')
             if i > 0:
                 i = i + 1

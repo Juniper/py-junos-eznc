@@ -297,7 +297,7 @@ class Config(Util):
             except Exception as err:
                 rerrs = err.rsp[0].findall('rpc-error')
                 if len(rerrs) > 0:
-                    if any([e.find('[error-severity="error"]') for e in rerrs]):
+                    if len([e.find('[error-severity="error"]') for e in rerrs]):
                         raise err
                 return err.rsp[0]
 
