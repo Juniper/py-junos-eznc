@@ -273,3 +273,62 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_unsupported_action(self, mock_exec):
         self.assertRaises(ValueError, self.conf.rescue, 'abc')
+
+    def test_config_load_lset_from_rexp_xml(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """<snmp><name>iBGP</name></snmp>"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'xml')
+
+    def test_config_load_lset_from_rexp_set(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """set system domain-name englab.nitin.net"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_set_set(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """set system domain-name englab.nitin.net"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_set_delete(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """delete snmp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_conf(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """
+            snmp {
+                location USA;
+                community iBGP {
+                authorization read-only;
+            }
+            }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_conf_replace_tag(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """replace:
+            snmp {
+                location USA;
+                community iBGP {
+                authorization read-only;
+            }
+            }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_error(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """nitin>"""
+        self.assertRaises(RuntimeError, self.conf.load, conf)
