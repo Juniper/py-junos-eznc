@@ -35,6 +35,15 @@ class CommitError(RpcError):
     def __init__(self, cmd=None, rsp=None, errs=None):
         RpcError.__init__(self, cmd, rsp, errs)
         self.rpc_error = jxml.rpc_error(rsp)
+        if self.errs is None:
+            self.errs = self.rpc_error
+
+    def __repr__(self):
+        return "{0}({1},{2},{3})".format(self.__class__.__name__,
+                                         self.rpc_error['edit_path'], self.rpc_error['bad_element'],
+                                         self.rpc_error['message'])
+
+    __str__ = __repr__
 
 
 class LockError(RpcError):
