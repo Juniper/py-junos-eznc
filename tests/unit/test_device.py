@@ -10,6 +10,7 @@ from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 import ncclient.transport.errors as NcErrors
+from ncclient.operations import RPCError
 
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
@@ -291,21 +292,29 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.execute('<get-system-core-dumps/>',
                                           to_py=self._do_nothing), 'Nothing')
 
-    def test_device_execute_exception(self):
-        class MyException(Exception):
-            rpc_err = """
-<rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
-<error-severity>error</error-severity>
-<error-info>
-<bad-element>get-bgp-summary-information</bad-element>
-</error-info>
-<error-message>permission denied</error-message>
-</rpc-error>
-            """
-            xml = etree.XML(rpc_err)
+# This test is for the commented out rpc-error code
+#     def test_device_execute_exception(self):
+#         class MyException(Exception):
+#             rpc_err = """
+# <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+# <error-severity>error</error-severity>
+# <error-info>
+# <bad-element>get-bgp-summary-information</bad-element>
+# </error-info>
+# <error-message>permission denied</error-message>
+# </rpc-error>
+#             """
+#             xml = etree.XML(rpc_err)
+#
+#         self.dev._conn.rpc = MagicMock(side_effect=MyException)
+#         self.assertRaises(RpcError, self.dev.execute,
+#                           '<get-software-information/>')
 
+    def test_device_execute_unknown_exception(self):
+        class MyException(Exception):
+            pass
         self.dev._conn.rpc = MagicMock(side_effect=MyException)
-        self.assertRaises(RpcError, self.dev.execute,
+        self.assertRaises(MyException, self.dev.execute,
                           '<get-software-information/>')
 
     def test_device_execute_rpc_error(self):
@@ -404,8 +413,10 @@ class TestDevice(unittest.TestCase):
                              'rpc-reply', fname)
         foo = open(fpath).read()
 
-        if (fname == 'get-rpc-error.xml' or
-                fname == 'get-index-error.xml' or
+        if fname == 'get-rpc-error.xml':
+            # Raise ncclient exception for error
+            raise RPCError(etree.XML(foo))
+        elif (fname == 'get-index-error.xml' or
                 fname == 'get-system-core-dumps.xml'):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())

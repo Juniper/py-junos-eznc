@@ -1,8 +1,18 @@
 <rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
-	<rpc-error>
-		<error-severity>error-severity</error-severity>
-		<error-path>error-path</error-path>
-		<error-message>error-message</error-message>
-		<error-info>...</error-info>
-	</rpc-error>
+    <commit-results>
+        <xnm:error xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+            <source-daemon>dcd</source-daemon>
+            <edit-path>[edit interfaces ge-0/0/1]</edit-path>
+            <statement>unit 2</statement>
+            <message>Only unit 0 is valid for this encapsulation</message>
+        </xnm:error>
+        <xnm:error xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+            <message>
+                configuration check-out failed
+            </message>
+        </xnm:error>
+    </commit-results>
+    <cli>
+        <banner>[edit]</banner>
+    </cli>
 </rpc-reply>
