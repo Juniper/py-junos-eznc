@@ -14,6 +14,7 @@ from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
 import ncclient.operations.errors as NcOpErrors
+from ncclient.operations import RPCError
 import paramiko
 import jinja2
 
@@ -514,18 +515,23 @@ class Device(object):
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
             raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
-        except Exception as err:
+        except RPCError as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
             e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
             raise e(cmd=rpc_cmd_e, rsp=rsp)
+        # Something unexpected happened - raise it up
+        except Exception as err:
+            warnings.warn("An unknown exception occured - please report.", RuntimeWarning)
+            raise
 
+        # This section is here for the possible use of something other than ncclient
         # for RPCs that have embedded rpc-errors, need to check for those now
 
-        rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
-        if len(rpc_errs):
-            raise EzErrors.RpcError(rpc_cmd_e, rpc_rsp_e, rpc_errs)
+        #rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
+        #if len(rpc_errs):
+        #    raise EzErrors.RpcError(rpc_cmd_e, rpc_rsp_e, rpc_errs)
 
         # skip the <rpc-reply> element and pass the caller first child element
         # generally speaking this is what they really want. If they want to
