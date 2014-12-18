@@ -125,6 +125,9 @@ class Table(object):
         key_value, xpath = self._keyspec()
 
         if isinstance(key_value, str):
+            # Check if pipe is in the key_value, if so append xpath to each value
+            if ' | ' in key_value:
+                return self._keys_simple(' | '.join([xpath + '/' + x for x in key_value.split(' | ')]))
             return self._keys_simple(xpath + '/' + key_value)
 
         if not isinstance(key_value, list):

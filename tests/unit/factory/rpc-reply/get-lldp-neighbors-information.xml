@@ -1,0 +1,32 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/13.2X51/junos">
+    <lldp-neighbors-information junos:style="brief">
+		<lldp-neighbor-information>
+			<lldp-local-port-id>et-0/0/48</lldp-local-port-id>
+			<lldp-local-parent-interface-name>-</lldp-local-parent-interface-name>
+			<lldp-remote-chassis-id-subtype>Mac address</lldp-remote-chassis-id-subtype>
+			<lldp-remote-chassis-id>10:0e:7e:ad:ae:00</lldp-remote-chassis-id>
+			<lldp-remote-port-description>et-0/0/2</lldp-remote-port-description>
+			<lldp-remote-system-name>spine-01</lldp-remote-system-name>
+		</lldp-neighbor-information>
+		<lldp-neighbor-information>
+			<lldp-local-port-id>et-0/0/49</lldp-local-port-id>
+			<lldp-local-parent-interface-name>-</lldp-local-parent-interface-name>
+			<lldp-remote-chassis-id-subtype>Mac address</lldp-remote-chassis-id-subtype>
+			<lldp-remote-chassis-id>10:0e:7e:ad:De:c0</lldp-remote-chassis-id>
+			<lldp-remote-port-description>et-0/0/2</lldp-remote-port-description>
+			<lldp-remote-system-name>spine-02</lldp-remote-system-name>
+		</lldp-neighbor-information>
+		<lldp-neighbor-information>
+			<lldp-local-port-id>xe-0/0/13</lldp-local-port-id>
+			<lldp-local-parent-interface-name>-</lldp-local-parent-interface-name>
+			<lldp-remote-chassis-id-subtype>Mac address</lldp-remote-chassis-id-subtype>
+			<lldp-remote-chassis-id>10:0e:7e:b1:D3:80</lldp-remote-chassis-id>
+			<lldp-remote-port-description>xe-0/0/13</lldp-remote-port-description>
+			<lldp-remote-system-name>leaf-02</lldp-remote-system-name>
+		</lldp-neighbor-information>
+	</lldp-neighbors-information>
+    <cli>
+        <banner>{master:0}</banner>
+    </cli>
+</rpc-reply>
+	

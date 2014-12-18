@@ -50,7 +50,7 @@ class Config(Util):
             * ``True`` when successful
 
         :raises CommitError: When errors detected in candidate configuration.
-                             You can use the Exception variable (XML)
+                             You can use the Exception errs variable
                              to identify the specific problems
 
         .. warning::
@@ -113,11 +113,13 @@ class Config(Util):
         """
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
-        are not reported (at this time).
+        are reported and available in the Exception errs.
 
         :returns: ``True`` if commit-check is successful (no errors)
-        :raises RpcError: when commit-check fails and resulting
-                          exception contains XML data.
+        :raises CommitError: When errors detected in candidate configuration.
+                             You can use the Exception errs variable
+                             to identify the specific problems
+        :raises RpcError: When underlying ncclient has an error
         """
         try:
             self.rpc.commit_configuration(check=True)
