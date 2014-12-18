@@ -16,6 +16,7 @@ Configuration Utilities
 
 
 class Config(Util):
+
     """
     Overivew of Configuration Utilities:
 
@@ -274,7 +275,6 @@ class Config(Util):
                 kvargs['format'] = 'text'
             rpc_xattrs['format'] = kvargs['format']
 
-
         def _lset_fromfile(path):
             """ setup the kvargs/rpc_xattrs based on path """
             if 'format' not in kvargs:
@@ -320,7 +320,7 @@ class Config(Util):
             if isinstance(rpc_contents, str):
                 if 'format' not in kvargs:
                     _lset_from_rexp(rpc_contents)
-                    if kvargs.has_key('format'):
+                    if 'format' in kvargs:
                         _lset_format(kvargs, rpc_xattrs)
                     else:
                         raise RuntimeError(
