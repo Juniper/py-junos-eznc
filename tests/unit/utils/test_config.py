@@ -7,7 +7,7 @@ from nose.plugins.attrib import attr
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
-    UnlockError, CommitError
+    UnlockError, CommitError, RpcTimeoutError
 
 from mock import MagicMock, patch
 from lxml import etree
@@ -15,6 +15,7 @@ from lxml import etree
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
+
     def setUp(self):
         self.dev = Device(host='1.1.1.1')
         self.conf = Config(self.dev)
@@ -67,7 +68,7 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.utils.config.JXML.rpc_error')
     def test_commit_check_exception(self, mock_jxml):
         class MyException(Exception):
-                xml = 'test'
+            xml = 'test'
         self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
         # with self.assertRaises(AttributeError):
         self.conf.commit_check()
@@ -91,12 +92,12 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff()
         self.conf.rpc.get_configuration.\
-            assert_called_with({'compare': 'rollback', 'rollback': '0', 'format': 'text'})
+            assert_called_with(
+                {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
 
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='Stuff')
         self.conf.pdiff()
-        print self.conf.diff.call_args
         self.conf.diff.assert_called_once_with(0)
 
     def test_config_load(self):
@@ -162,7 +163,7 @@ class TestConfig(unittest.TestCase):
     @patch('__builtin__.open')
     def test_config_load_try_load_exception(self, mock_open):
         ex = RpcError(
-            rsp = [etree.fromstring((
+            rsp=[etree.fromstring((
                 """<load-configuration-results>
                 <rpc-error>
                 <error-severity>error</error-severity>
@@ -171,7 +172,6 @@ class TestConfig(unittest.TestCase):
                 </load-configuration-results>"""))])
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(RpcError, self.conf.load, path='config.conf')
-
 
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_template_path(self, mock_etree):
@@ -208,7 +208,7 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_lock_exception(self, mock_jxml):
         class MyException(Exception):
-                xml = 'test'
+            xml = 'test'
         self.conf.rpc.lock_configuration = MagicMock(side_effect=MyException)
         self.assertRaises(LockError, self.conf.lock)
 
@@ -225,7 +225,7 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_unlock_exception(self, mock_jxml):
         class MyException(Exception):
-                xml = 'test'
+            xml = 'test'
         self.conf.rpc.unlock_configuration = MagicMock(side_effect=MyException)
         self.assertRaises(UnlockError, self.conf.unlock)
 
@@ -246,7 +246,7 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_get_exception(self, mock_exec):
         self.dev.rpc.get_rescue_information = MagicMock(side_effect=Exception)
-        self.assertTrue(self.conf.rescue('get')==None)
+        self.assertTrue(self.conf.rescue('get') is None)
 
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_get(self, mock_exec):
@@ -273,3 +273,74 @@ class TestConfig(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_rescue_action_unsupported_action(self, mock_exec):
         self.assertRaises(ValueError, self.conf.rescue, 'abc')
+
+    def test_config_load_lset_from_rexp_xml(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """<snmp><name>iBGP</name></snmp>"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'xml')
+
+    def test_config_load_lset_from_rexp_set(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """set system domain-name englab.nitin.net"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_delete(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """delete snmp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_conf(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """
+            snmp {
+                location USA;
+                community iBGP {
+                authorization read-only;
+            }
+            }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_lset_from_rexp_conf_replace_tag(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """replace:
+            snmp {
+                location USA;
+                community iBGP {
+                authorization read-only;
+            }
+            }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'replace')
+
+    def test_config_load_lset_from_rexp_error(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """nitin>"""
+        self.assertRaises(RuntimeError, self.conf.load, conf)
+
+    def test_load_merge_true(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """
+            snmp {
+                location USA;
+                community iBGP {
+                authorization read-only;
+            }
+            }"""
+        self.conf.load(conf, merge=True)
+        self.assertFalse('action' in self.conf.rpc.load_config.call_args[1])
+
+    def test_commit_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.commit)
