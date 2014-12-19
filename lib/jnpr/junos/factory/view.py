@@ -79,6 +79,9 @@ class View(object):
         if self.ITEM_NAME_XPATH is None:
             return self._table.D.hostname
         if isinstance(self.ITEM_NAME_XPATH, str):
+            # xpath union key
+            if ' | ' in self.ITEM_NAME_XPATH:
+                return self._xml.xpath(self.ITEM_NAME_XPATH)[0].text.strip()
             # simple key
             return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
         else:
