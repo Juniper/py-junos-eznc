@@ -231,7 +231,7 @@ class Device(object):
 
     def _sshconf_lkup(self):
         if self._ssh_config:
-            sshconf_path = self._ssh_config
+            sshconf_path = os.path.expanduser(self._ssh_config)
         else:
             home = os.getenv('HOME')
             if not home:
