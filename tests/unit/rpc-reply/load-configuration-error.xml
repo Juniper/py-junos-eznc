@@ -1,0 +1,18 @@
+﻿<rpc-reply message-id="urn:uuid:15ceca00-904e-11e4-94ad-5c514f91ab3f">
+	<load-configuration-results>
+		<rpc-error>
+			<error-severity>error</error-severity>
+			<error-info>
+				<bad-element>system1</bad-element>
+			</error-info>
+			<error-message>syntax error</error-message>
+		</rpc-error>
+		<rpc-error>
+			<error-severity>error</error-severity>
+			<error-info>
+				<bad-element>}</bad-element>
+			</error-info>
+			<error-message>error recovery ignores input until this point</error-message>
+		</rpc-error>
+	</load-configuration-results>
+</rpc-reply>
