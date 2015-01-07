@@ -292,11 +292,11 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.execute('<get-system-core-dumps/>',
                                           to_py=self._do_nothing), 'Nothing')
 
-# This test is for the (perviously) commented out rpc-error code
-    def test_device_execute_exception(self):
-        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.assertRaises(RpcError, self.dev.execute,
-                          '<load-configuration-error/>')
+# This test is for the commented out rpc-error code
+#     def test_device_execute_exception(self):
+#         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+#         self.assertRaises(RpcError, self.dev.execute,
+#                           '<load-configuration-error/>')
 
     def test_device_execute_unknown_exception(self):
         class MyException(Exception):

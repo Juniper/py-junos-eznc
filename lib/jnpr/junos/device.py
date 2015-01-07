@@ -527,12 +527,11 @@ class Device(object):
             raise
 
         # This section is here for the possible use of something other than ncclient
-        # or until nest rpc-error bug is resolved in ncclient
         # for RPCs that have embedded rpc-errors, need to check for those now
 
-        rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
-        if len(rpc_errs):
-            raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
+        # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
+        # if len(rpc_errs):
+        #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
 
         # skip the <rpc-reply> element and pass the caller first child element
         # generally speaking this is what they really want. If they want to
