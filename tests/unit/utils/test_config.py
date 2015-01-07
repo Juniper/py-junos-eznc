@@ -163,13 +163,13 @@ class TestConfig(unittest.TestCase):
     @patch('__builtin__.open')
     def test_config_load_try_load_exception(self, mock_open):
         ex = RpcError(
-            rsp=[etree.fromstring((
+            rsp=etree.fromstring((
                 """<load-configuration-results>
                 <rpc-error>
                 <error-severity>error</error-severity>
                 <error-message>syntax error</error-message>
                 </rpc-error>
-                </load-configuration-results>"""))])
+                </load-configuration-results>""")))
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(RpcError, self.conf.load, path='config.conf')
 

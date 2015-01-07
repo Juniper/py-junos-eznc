@@ -4,6 +4,7 @@ import re
 
 # 3rd-party modules
 from lxml import etree
+from ncclient.operations import RPCError
 
 # package modules
 from jnpr.junos.exception import *
@@ -235,6 +236,13 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
+
+        :returns:
+            RPC-reply as XML object.
+
+        :raises: ConfigLoadError: When errors detected while loading candidate configuration.
+                             You can use the Exception errs variable
+                             to identify the specific problems
         """
         rpc_xattrs = {}
         rpc_xattrs['format'] = 'xml'        # default to XML format
@@ -296,12 +304,11 @@ class Config(Util):
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcError as err:
+                raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
+            # Something unexpected happened - raise it up
             except Exception as err:
-                rerrs = err.rsp[0].findall('rpc-error')
-                if len(rerrs) > 0:
-                    if len([e.find('[error-severity="error"]') for e in rerrs]):
-                        raise err
-                return err.rsp[0]
+                raise
 
             return got
 
