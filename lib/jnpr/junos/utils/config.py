@@ -16,7 +16,6 @@ Configuration Utilities
 
 
 class Config(Util):
-
     """
     Overivew of Configuration Utilities:
 
@@ -50,7 +49,7 @@ class Config(Util):
             * ``True`` when successful
 
         :raises CommitError: When errors detected in candidate configuration.
-                             You can use the Exception errs variable
+                             You can use the Exception variable (XML)
                              to identify the specific problems
 
         .. warning::
@@ -113,13 +112,11 @@ class Config(Util):
         """
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
-        are reported and available in the Exception errs.
+        are not reported (at this time).
 
         :returns: ``True`` if commit-check is successful (no errors)
-        :raises CommitError: When errors detected in candidate configuration.
-                             You can use the Exception errs variable
-                             to identify the specific problems
-        :raises RpcError: When underlying ncclient has an error
+        :raises RpcError: when commit-check fails and resulting
+                          exception contains XML data.
         """
         try:
             self.rpc.commit_configuration(check=True)
@@ -286,12 +283,13 @@ class Config(Util):
 
         def _lset_from_rexp(rpc):
             """ setup the kvargs/rpc_xattrs using string regular expression """
-            if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
+            if re.search(r'^<.*>$', rpc, re.MULTILINE):
                 kvargs['format'] = 'xml'
-            elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
+            elif re.search(r'^\s+set\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*\w+\s+{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
+            elif re.search(r'.*}$', rpc):
                 kvargs['format'] = 'text'
+            _lset_format(kvargs, rpc_xattrs)
 
         def try_load(rpc_contents, rpc_xattrs):
             try:
@@ -299,7 +297,7 @@ class Config(Util):
             except Exception as err:
                 rerrs = err.rsp[0].findall('rpc-error')
                 if len(rerrs) > 0:
-                    if len([e.find('[error-severity="error"]') for e in rerrs]):
+                    if any([e.find('[error-severity="error"]') for e in rerrs]):
                         raise err
                 return err.rsp[0]
 
@@ -322,17 +320,14 @@ class Config(Util):
             if isinstance(rpc_contents, str):
                 if 'format' not in kvargs:
                     _lset_from_rexp(rpc_contents)
-                    if 'format' in kvargs:
-                        _lset_format(kvargs, rpc_xattrs)
-                    else:
+                    if 'format' not in kvargs:
                         raise RuntimeError(
-                            "Not able to resolve the config format "
-                            "You must define the format of the contents explicitly "
-                            "to the function. Ex: format='set'")
+                            "You must define the format of the contents")
                 if kvargs['format'] == 'xml':
                 # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
+
             # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
