@@ -188,10 +188,12 @@ class Config(Util):
         i.e. "template building".
 
         :param object vargs[0]:
-            The content to load.  If the contents is a string, then you
-            must specify the **format** parameter.  If the content is
-            an XML object, then this method assumes you've structured it
-            correctly; and if not an Exception will be raised.
+            The content to load.  If the contents is a string, the framework
+            will attempt to automatically determine the format.  If it is
+            unable to determine the format then you must specify the
+            **format** parameter.  If the content is an XML object, then
+            this method assumes you've structured it correctly;
+            and if not an Exception will be raised.
 
         :param str path:
             Path to file of configuration on the local server.
