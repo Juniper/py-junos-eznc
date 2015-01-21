@@ -33,8 +33,8 @@ def facts_chassis(junos, facts):
         facts['serialnumber'] = x_ch.find('serial-number').text
     except:
         # if the toplevel chassis does not have a serial-number, then
-        # check the Backplane chassis-module
+        # check the Backplane/Midplane chassis-module
         facts['serialnumber'] = x_ch.xpath(
-            'chassis-module[name="Backplane"]/serial-number')[0].text
+            '//chassis-module[name="Backplane" or name="Midplane"]/serial-number')[0].text
 
 

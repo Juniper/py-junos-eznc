@@ -1,4 +1,5 @@
 import re as RE
+import pdb
 
 def facts_routing_engines(junos, facts):
 
@@ -8,7 +9,10 @@ def facts_routing_engines(junos, facts):
         'model',
         'up-time',
         'last-reboot-reason']
-    re_info = junos.rpc.get_route_engine_information()
+    try:
+        re_info = junos.rpc.get_route_engine_information()
+    except:
+        re_info = junos.rpc.get_route_engine_information(infrastructure="FM-0")
 
     master = []
     re_list = re_info.xpath('.//route-engine')
@@ -38,7 +42,7 @@ def facts_routing_engines(junos, facts):
                 re_fd[factoid.replace('-', '_')] = x_f.text
 
         if 'mastership_state' in re_fd:
-            if facts[re_name]['mastership_state'] == 'master':
+            if facts[re_name]['mastership_state'].find('master') > 0:
                 master.append(re_name)
 
     # --[ end for-each 're' ]-------------------------------------------------
