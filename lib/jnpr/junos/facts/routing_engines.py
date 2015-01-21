@@ -1,5 +1,4 @@
 import re as RE
-import pdb
 
 def facts_routing_engines(junos, facts):
 
