@@ -245,7 +245,7 @@ class Device(object):
             found = sshconf.lookup(self._hostname)
             self._hostname = found.get('hostname', self._hostname)
             self._port = found.get('port', self._port)
-            self._auth_user = found.get('user')
+            self._conf_auth_user = found.get('user')
             self._ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
@@ -316,11 +316,12 @@ class Device(object):
             self._hostname = hostname
             # user will default to $USER
             self._auth_user = os.getenv('USER')
+            self._conf_auth_user = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_path = self._sshconf_lkup()
             # but if user is explit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._auth_user
+            self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
             if not hasattr(self, '_ssh_private_key_file'):
                 self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
