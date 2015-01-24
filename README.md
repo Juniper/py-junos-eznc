@@ -46,11 +46,11 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 
 ## NOTICE
 
-As of release 0.5.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.1 or later.  
+As of release 1.1.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.3 or later.  
 
 ## INSTALLATION
 
-Installation requires Python 2.7 and associate `pip` tool
+Installation requires Python 2.6 or 2.7 and associated `pip` tool
 
     pip install junos-eznc
 	
@@ -68,12 +68,6 @@ Upgrading has the same requirements as installation and has the same format with
 
 	pip install -U junos-eznc
 
-## INSTALLATION PRIOR TO 0.0.5
-
-Prior to release 0.0.5, _Junos PyEZ_ used a fork of ncclient
-
-    pip install git+https://github.com/Juniper/ncclient.git
-    pip install junos-eznc
 
 ## HELLO, WORLD
 

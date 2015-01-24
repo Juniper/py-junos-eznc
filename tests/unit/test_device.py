@@ -294,21 +294,9 @@ class TestDevice(unittest.TestCase):
 
 # This test is for the commented out rpc-error code
 #     def test_device_execute_exception(self):
-#         class MyException(Exception):
-#             rpc_err = """
-# <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
-# <error-severity>error</error-severity>
-# <error-info>
-# <bad-element>get-bgp-summary-information</bad-element>
-# </error-info>
-# <error-message>permission denied</error-message>
-# </rpc-error>
-#             """
-#             xml = etree.XML(rpc_err)
-#
-#         self.dev._conn.rpc = MagicMock(side_effect=MyException)
+#         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
 #         self.assertRaises(RpcError, self.dev.execute,
-#                           '<get-software-information/>')
+#                           '<load-configuration-error/>')
 
     def test_device_execute_unknown_exception(self):
         class MyException(Exception):
@@ -417,7 +405,8 @@ class TestDevice(unittest.TestCase):
             # Raise ncclient exception for error
             raise RPCError(etree.XML(foo))
         elif (fname == 'get-index-error.xml' or
-                fname == 'get-system-core-dumps.xml'):
+                fname == 'get-system-core-dumps.xml' or
+                fname == 'load-configuration-error.xml'):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
         elif (fname == 'show-configuration.xml' or

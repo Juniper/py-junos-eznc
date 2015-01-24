@@ -4,6 +4,7 @@ import re
 
 # 3rd-party modules
 from lxml import etree
+from ncclient.operations import RPCError
 
 # package modules
 from jnpr.junos.exception import *
@@ -16,6 +17,7 @@ Configuration Utilities
 
 
 class Config(Util):
+
     """
     Overivew of Configuration Utilities:
 
@@ -49,7 +51,7 @@ class Config(Util):
             * ``True`` when successful
 
         :raises CommitError: When errors detected in candidate configuration.
-                             You can use the Exception variable (XML)
+                             You can use the Exception errs variable
                              to identify the specific problems
 
         .. warning::
@@ -112,11 +114,13 @@ class Config(Util):
         """
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
-        are not reported (at this time).
+        are reported and available in the Exception errs.
 
         :returns: ``True`` if commit-check is successful (no errors)
-        :raises RpcError: when commit-check fails and resulting
-                          exception contains XML data.
+        :raises CommitError: When errors detected in candidate configuration.
+                             You can use the Exception errs variable
+                             to identify the specific problems
+        :raises RpcError: When underlying ncclient has an error
         """
         try:
             self.rpc.commit_configuration(check=True)
@@ -184,10 +188,12 @@ class Config(Util):
         i.e. "template building".
 
         :param object vargs[0]:
-            The content to load.  If the contents is a string, then you
-            must specify the **format** parameter.  If the content is
-            an XML object, then this method assumes you've structured it
-            correctly; and if not an Exception will be raised.
+            The content to load.  If the contents is a string, the framework
+            will attempt to automatically determine the format.  If it is
+            unable to determine the format then you must specify the
+            **format** parameter.  If the content is an XML object, then
+            this method assumes you've structured it correctly;
+            and if not an Exception will be raised.
 
         :param str path:
             Path to file of configuration on the local server.
@@ -232,6 +238,13 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
+
+        :returns:
+            RPC-reply as XML object.
+
+        :raises: ConfigLoadError: When errors detected while loading candidate configuration.
+                             You can use the Exception errs variable
+                             to identify the specific problems
         """
         rpc_xattrs = {}
         rpc_xattrs['format'] = 'xml'        # default to XML format
@@ -283,23 +296,21 @@ class Config(Util):
 
         def _lset_from_rexp(rpc):
             """ setup the kvargs/rpc_xattrs using string regular expression """
-            if re.search(r'^<.*>$', rpc, re.MULTILINE):
+            if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
                 kvargs['format'] = 'xml'
-            elif re.search(r'^\s+set\s', rpc):
+            elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'.*}$', rpc):
+            elif re.search(r'^[a-z:]*\s*\w+\s+{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'text'
-            _lset_format(kvargs, rpc_xattrs)
 
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcError as err:
+                raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
+            # Something unexpected happened - raise it up
             except Exception as err:
-                rerrs = err.rsp[0].findall('rpc-error')
-                if len(rerrs) > 0:
-                    if any([e.find('[error-severity="error"]') for e in rerrs]):
-                        raise err
-                return err.rsp[0]
+                raise
 
             return got
 
@@ -320,14 +331,17 @@ class Config(Util):
             if isinstance(rpc_contents, str):
                 if 'format' not in kvargs:
                     _lset_from_rexp(rpc_contents)
-                    if 'format' not in kvargs:
+                    if 'format' in kvargs:
+                        _lset_format(kvargs, rpc_xattrs)
+                    else:
                         raise RuntimeError(
-                            "You must define the format of the contents")
+                            "Not able to resolve the config format "
+                            "You must define the format of the contents explicitly "
+                            "to the function. Ex: format='set'")
                 if kvargs['format'] == 'xml':
                 # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
-
             # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
