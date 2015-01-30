@@ -307,6 +307,8 @@ class Device(object):
             self._auth_user = None
             self._auth_password = None
             self._hostname = 'localhost'
+            self._ssh_private_key_file = None
+            self._ssh_config = None
         else:
             # --------------------------
             # making a remote connection
