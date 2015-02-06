@@ -1,5 +1,6 @@
 from lxml.builder import E
 from jnpr.junos.factory.table import Table
+from jnpr.junos import jxml
 
 
 class CfgTable(Table):
@@ -37,7 +38,7 @@ class CfgTable(Table):
     # PRIVATE METHODS
     # -----------------------------------------------------------------------
 
-    def _buildxml(self, namesonly=True):
+    def _buildxml(self, namesonly=False):
         """
         Return an lxml Element starting with <configuration> and comprised
         of the elements specified in the xpath expression.
@@ -122,21 +123,23 @@ class CfgTable(Table):
 
     def get(self, *vargs, **kvargs):
         """
-        Retrieve configuration data for this table.  By default only the
-        keys of the table is loaded.  This behavior can be overriden by
-        either requesting a sepcifc table item, or by calling with
-        kvargs['values']=True
+        Retrieve configuration data for this table.  By default all child
+        keys of the table are loaded.  This behavior can be overridden by
+        with kvargs['nameonly']=True
 
-        :vargs:
-          [0] identifies a unique item in the table,
+        :param str vargs[0]: identifies a unique item in the table,
           same as calling with :kvargs['key']: value
 
-        RESERVED :kvargs:
-          'values' - True/False*, when set to True will cause all data item
-          values to be retrieved, not just the name-keys.
+        :param str namesonly:
+          *OPTIONAL* True/False*, when set to True will cause only the
+          the name-keys to be retrieved.
 
-          'key' - used to retrieve the contents of the table record, and not
-          just the list of keys (default) [when namesonly=True]
+        :param str key:
+          *OPTIONAL* identifies a unique item in the table
+
+        :param dict options:
+          *OPTIONAL* options to pass to get-configuration.  By default
+          {'inherit': 'inherit', 'groups': 'groups'} is sent.
         """
         if self.keys_required is True and not len(kvargs):
             raise ValueError(
@@ -147,19 +150,12 @@ class CfgTable(Table):
 
         # determine if we need to get only the names of keys, or all of the
         # hierarchical data from the config.  The caller can explicitly set
-        # :namesonly: in the call, or request a specific items.  A specific
-        # item can be identified either by vargs[0] or kvargs['key'].
-        #
-        # a caller might want to *botH* specify a named item, and
-        # namesonly=True simply to test for the existence of an item in the
-        # config, yo!
-        # this 'feature' doesn't work yet, but looking into it.
+        # :namesonly: in the call.
 
-        b_values = kvargs.get('values')
-        namesonly = (
-            not (
-                len(vargs) or (
-                    'key' in kvargs))) if b_values is None else not(b_values)
+        if 'namesonly' in kvargs:
+            namesonly = kvargs.get('namesonly')
+        else:
+            namesonly = False
 
         get_cmd = self._buildxml(namesonly=namesonly)
 
@@ -185,16 +181,18 @@ class CfgTable(Table):
             # caller not requesting a specific table item
             pass
 
-        self._get_cmd = get_cmd   # for debug purposes
+        # Check for options in get
+        if 'options' in kvargs:
+            options = kvargs.get('options') or {}
+        else:
+            options = jxml.INHERIT_GROUPS
+
+        # for debug purposes
+        self._get_cmd = get_cmd
+        self._get_opt = options
 
         # retrieve the XML configuration
-        self.xml = self.RPC.get_config(get_cmd)
+        self.xml = self.RPC.get_config(get_cmd, options=options)
 
         # return self for call-chaining, yo!
         return self
-
-
-
-    # -----------------------------------------------------------------------
-    # OVERLOADS
-    # -----------------------------------------------------------------------
