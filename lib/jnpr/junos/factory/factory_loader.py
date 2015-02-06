@@ -85,6 +85,11 @@ class FactoryLoader(object):
         # will be enhaced, yo!
 
         xpath, opt = f_dict.items()[0]       # get first/only key,value
+
+        if opt == 'group':
+            fields.group(f_name, xpath)
+            return
+
         if 'flag' == opt:
             opt = 'bool'       # flag is alias for bool
 
