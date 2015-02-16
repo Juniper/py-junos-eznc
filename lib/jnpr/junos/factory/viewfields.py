@@ -58,6 +58,14 @@ class ViewFields(object):
         """
         return self.astype(name, xpath, bool, **kvargs)
 
+    def group(self, name, xpath=None, **kvargs):
+        """
+        field is an apply group, results in value of group attr if the xpath
+        element has the associated group attribute.
+        """
+        xpath = './{0}/@group'.format(xpath)
+        return self.astype(name, xpath, str, **kvargs)
+
     def table(self, name, table):
         """ field is a RunstatTable """
         self._fields.update({

@@ -220,7 +220,10 @@ class View(object):
         # otherwise, not a sub-table, and handle the field
         astype = item.get('astype', str)
         if 'group' in item:
-            found = self._groups[item['group']].xpath(item['xpath'])
+            if item['group'] in self._groups:
+                found = self._groups[item['group']].xpath(item['xpath'])
+            else:
+                return
         else:
             found = self._xml.xpath(item['xpath'])
 

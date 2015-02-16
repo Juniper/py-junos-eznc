@@ -4,6 +4,7 @@ __credits__ = "Jeremy Schulman"
 import unittest
 import os
 from nose.plugins.attrib import attr
+import yaml
 
 from jnpr.junos import Device
 
@@ -13,6 +14,8 @@ from lxml import etree
 from mock import MagicMock, patch
 
 from jnpr.junos.factory import loadyaml
+from jnpr.junos.factory.factory_loader import FactoryLoader
+
 try:
     _YAML_ = loadyaml('lib/jnpr/junos/cfgro/srx')
 except:
@@ -25,6 +28,27 @@ except:
 
 globals().update(_YAML_)
 
+yaml_data = \
+    """---
+    UserTable:
+      get: system/login/user
+      required_keys:
+        user: name
+      view: userView
+
+    userView:
+      groups:
+        auth: authentication
+      fields:
+        uid: uid
+        class: class
+        uidgroup: { uid: group }
+        fullgroup: { full-name: group }
+      fields_auth:
+        pass: encrypted-password
+      """
+globals().update(FactoryLoader().load(yaml.load(yaml_data)))
+
 
 @attr('unit')
 class TestFactoryCfgTable(unittest.TestCase):
@@ -36,12 +60,31 @@ class TestFactoryCfgTable(unittest.TestCase):
                           gather_facts=False)
         self.dev.open()
         self.zit = ZoneIfsTable(self.dev)
+        self.ut = UserTable(self.dev)
 
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.zit.get(security_zone='untrust')
         self.assertEqual(len(self.zit), 1)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_get_group(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.ut.get(user='test')
+        self.assertEqual(self.ut[0]['uidgroup'], 'global')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_get_namesonly(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.zit.get(security_zone='untrust', namesonly=True)
+        self.assertEqual(self.zit._get_cmd.xpath('//@recurse')[0], 'false')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_get_options(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.zit.get(security_zone='untrust', options={'inherit': 'defaults', 'groups': 'groups'})
+        self.assertEqual(self.zit._get_opt, {'inherit': 'defaults', 'groups': 'groups'})
 
     def test_optable_get_key_required_error(self):
         self.assertRaises(ValueError, self.zit.get)
@@ -89,4 +132,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             return Manager(session, device_handler)
 
         if args:
-            return self._read_file(args[0].tag + '.xml')
+            if args[0].xpath('//configuration/system/login/user'):
+                return self._read_file('get-configuration-user.xml')
+            else:
+                return self._read_file(args[0].tag + '.xml')
