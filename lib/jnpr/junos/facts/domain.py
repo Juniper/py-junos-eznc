@@ -1,5 +1,6 @@
 from jnpr.junos.utils.fs import FS
 
+
 def facts_domain(junos, facts):
     """
     The following facts are required:
@@ -10,7 +11,9 @@ def facts_domain(junos, facts):
         facts['fqdn']
     """
     fs = FS(junos)
-    words = fs.cat('/etc/resolv.conf').split()
+    # changes done to fix issue #332
+    file_content = fs.cat('/etc/resolv.conf') or fs.cat('/var/etc/resolv.conf')
+    words = file_content.split() if file_content is not None else ''
     if 'domain' not in words:
         facts['domain'] = None
         facts['fqdn'] = facts['hostname']

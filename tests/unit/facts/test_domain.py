@@ -40,3 +40,10 @@ class TestDomain(unittest.TestCase):
         facts_domain(self.dev, self.facts)
         self.assertEqual(self.facts['domain'], None)
         self.assertEqual(self.facts['fqdn'], 'test')
+
+    @patch('jnpr.junos.facts.domain.FS.cat')
+    def test_resolv_conf_file_absent_under_etc(self, mock_fs_cat):
+        mock_fs_cat.return_value = None
+        self.facts['hostname'] = 'test'
+        facts_domain(self.dev, self.facts)
+        mock_fs_cat.assert_called_with('/var/etc/resolv.conf')
