@@ -31,3 +31,15 @@ class TestScp(unittest.TestCase):
     def test_scp_context(self, mock_connect):
         with SCP(self.dev) as scp:
             scp.get('addrbook.conf')
+
+    @patch('jnpr.junos.device.os')
+    @patch('__builtin__.open')
+    @patch('paramiko.config.SSHConfig.lookup')
+    @patch('paramiko.SSHClient')
+    @patch('paramiko.proxy.ProxyCommand')
+    def test_scp_proxycommand(self, os_mock, open_mock, mock_paramiko, mock_connect, mock_proxy):
+        os_mock.path.exists.return_value = True
+        self.dev._sshconf_path = '/home/rsherman/.ssh/config'
+        with SCP(self.dev) as scp:
+            scp.get('addrbook.conf')
+        mock_proxy.assert_called_any()

@@ -56,7 +56,7 @@ class SCP(object):
         # through a jumphost.
 
         config = {}
-        ssh_config = getattr(junos,'_sshconf_path')
+        ssh_config = getattr(junos, '_sshconf_path')
         if ssh_config:
             config = paramiko.SSHConfig()
             config.parse(open(ssh_config))
@@ -64,7 +64,6 @@ class SCP(object):
         sock = None
         if config.get("proxycommand"):
             sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
-
 
         self._ssh.connect(hostname=junos._hostname,
                           port=(
