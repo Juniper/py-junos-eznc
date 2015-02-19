@@ -55,6 +55,17 @@ class SCP(object):
         # use junos._hostname since this will be correct if we are going
         # through a jumphost.
 
+        config = {}
+        ssh_config = getattr(junos,'_sshconf_path')
+        if ssh_config:
+            config = paramiko.SSHConfig()
+            config.parse(open(ssh_config))
+            config = config.lookup(junos._hostname)
+        sock = None
+        if config.get("proxycommand"):
+            sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
+
+
         self._ssh.connect(hostname=junos._hostname,
                           port=(
                               22, int(
@@ -62,6 +73,7 @@ class SCP(object):
                               junos._hostname == 'localhost'],
                           username=junos._auth_user,
                           password=junos._auth_password,
+                          sock=sock
                           )
         return SCPClient(self._ssh.get_transport(), **scpargs)
 
