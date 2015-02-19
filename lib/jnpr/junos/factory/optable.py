@@ -47,6 +47,9 @@ class OpTable(Table):
             self.xml = etree.parse(self._path).getroot()
             return self
 
+        if self.xml is not None:
+            return self
+
         argkey = vargs[0] if len(vargs) else None
 
         rpc_args = {}                     # create empty <dict>

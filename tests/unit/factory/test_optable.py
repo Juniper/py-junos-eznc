@@ -38,12 +38,20 @@ class TestFactoryOpTable(unittest.TestCase):
         self.ppt.get('ge-0/0/0')
         self.assertEqual(self.ppt.GET_KEY, 'interface_name')
 
-    def test_optable_local(self):
+    def test_optable_path(self):
         fname = 'local-get-interface-information.xml'
-        self.ppt._path = os.path.join(os.path.dirname(__file__),
-                                      'rpc-reply', fname)
-        self.ppt.get()
-        self.assertEqual(len(self.ppt), 2)
+        path = os.path.join(os.path.dirname(__file__),
+                            'rpc-reply', fname)
+        lppt = PhyPortStatsTable(path=path)
+        lppt.get()
+        self.assertEqual(len(lppt), 2)
+
+    def test_optable_xml(self):
+        fname = 'get-interface-information.xml'
+        xml = self._read_file(fname)
+        lppt = PhyPortStatsTable(xml=xml)
+        lppt.get()
+        self.assertEqual(len(lppt), 2)
 
     @patch('jnpr.junos.Device.execute')
     def test_optable_view_get(self, mock_execute):
