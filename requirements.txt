@@ -1,6 +1,6 @@
 lxml>=3.2.4
 ncclient>=0.4.3
-paramiko
+paramiko>=1.15.2
 scp>=0.7.0
 jinja2>=2.7.1
 PyYAML>=3.10
