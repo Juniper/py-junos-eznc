@@ -203,7 +203,7 @@ class FS(Util):
         if rsp.find('output') is not None:
             return None
 
-        xdir = rsp.find('directory')
+        xdir = rsp.find('.//directory')
 
         # check to see if the directory element has a :name:
         # attribute, and if it does not, then this is a file, and
