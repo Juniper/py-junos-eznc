@@ -25,7 +25,14 @@ class RpcError(Exception):
           pprints the response XML attribute
         """
         if self.rsp is not None:
-            return etree.tostring(self.rsp, pretty_print=True)
+            self.rpc_error = jxml.rpc_error(self.rsp)
+            if self.errs is None:
+                self.errs = self.rpc_error
+            return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
+                .format(self.__class__.__name__, self.rpc_error['severity'],
+                        self.rpc_error['bad_element'], self.rpc_error['message'])
+
+    __str__ = __repr__
 
 
 class CommitError(RpcError):
@@ -39,9 +46,9 @@ class CommitError(RpcError):
             self.errs = self.rpc_error
 
     def __repr__(self):
-        return "{0}({1},{2},{3})".format(self.__class__.__name__,
-                                         self.rpc_error['edit_path'], self.rpc_error['bad_element'],
-                                         self.rpc_error['message'])
+        return "{0}(edit_path: {1}, bad_element: {2}, message: {3})"\
+            .format(self.__class__.__name__, self.rpc_error['edit_path'],
+                    self.rpc_error['bad_element'], self.rpc_error['message'])
 
     __str__ = __repr__
 
@@ -57,9 +64,9 @@ class ConfigLoadError(RpcError):
             self.errs = self.rpc_error
 
     def __repr__(self):
-        return "{0}({1},{2},{3})".format(self.__class__.__name__,
-                                         self.rpc_error['severity'], self.rpc_error['bad_element'],
-                                         self.rpc_error['message'])
+        return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
+            .format(self.__class__.__name__, self.rpc_error['severity'],
+                    self.rpc_error['bad_element'], self.rpc_error['message'])
 
     __str__ = __repr__
 
@@ -105,8 +112,8 @@ class RpcTimeoutError(RpcError):
         RpcError.__init__(self, dev=dev, cmd=cmd, timeout=timeout)
 
     def __repr__(self):
-        return "{0}({1},{2},{3})".format(self.__class__.__name__,
-                                         self.dev.hostname, self.cmd, self.timeout)
+        return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
+            .format(self.__class__.__name__, self.dev.hostname, self.cmd, self.timeout)
 
     __str__ = __repr__
 
