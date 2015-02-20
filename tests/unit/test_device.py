@@ -309,6 +309,10 @@ class TestDevice(unittest.TestCase):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertRaises(RpcError, self.dev.rpc.get_rpc_error)
 
+    def test_device_execute_permission_error(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.assertRaises(EzErrors.PermissionError, self.dev.rpc.get_permission_denied)
+
     def test_device_execute_index_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertTrue(self.dev.rpc.get_index_error())
@@ -402,6 +406,9 @@ class TestDevice(unittest.TestCase):
         foo = open(fpath).read()
 
         if fname == 'get-rpc-error.xml':
+            # Raise ncclient exception for error
+            raise RPCError(etree.XML(foo))
+        elif fname == 'get-permission-denied.xml':
             # Raise ncclient exception for error
             raise RPCError(etree.XML(foo))
         elif (fname == 'get-index-error.xml' or

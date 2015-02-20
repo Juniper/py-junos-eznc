@@ -7,7 +7,7 @@ from nose.plugins.attrib import attr
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
-    UnlockError, CommitError, RpcTimeoutError
+    UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
 
 from mock import MagicMock, patch
 from lxml import etree
@@ -162,7 +162,7 @@ class TestConfig(unittest.TestCase):
 
     @patch('__builtin__.open')
     def test_config_load_try_load_exception(self, mock_open):
-        ex = RpcError(
+        ex = ConfigLoadError(
             rsp=etree.fromstring((
                 """<load-configuration-results>
                 <rpc-error>
@@ -171,7 +171,7 @@ class TestConfig(unittest.TestCase):
                 </rpc-error>
                 </load-configuration-results>""")))
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
-        self.assertRaises(RpcError, self.conf.load, path='config.conf')
+        self.assertRaises(ConfigLoadError, self.conf.load, path='config.conf')
 
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_template_path(self, mock_etree):
