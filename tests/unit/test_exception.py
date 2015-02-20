@@ -3,7 +3,8 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from jnpr.junos.exception import RpcError, CommitError, ConnectError
+from jnpr.junos.exception import RpcError, CommitError, \
+    ConnectError, ConfigLoadError, RpcTimeoutError
 from jnpr.junos import Device
 from lxml import etree
 
@@ -22,15 +23,36 @@ commit_xml = '''
         </rpc-error>
     '''
 
+rpc_xml = '''
+    <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X47/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <error-severity>error</error-severity>
+    <error-info>
+    <bad-element>bgp</bad-element>
+    </error-info>
+    <error-message>syntax error</error-message>
+    </rpc-error>
+    '''
+
+conf_xml = '''
+    <rpc-error>
+        <error-severity>error</error-severity>
+        <error-info>
+            <bad-element>system1</bad-element>
+        </error-info>
+        <error-message>syntax error</error-message>
+    </rpc-error>
+'''
+
 
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
 
     def test_rpcerror_repr(self):
-        rsp = etree.XML('<root><a>test</a></root>')
+        rsp = etree.XML(rpc_xml)
         obj = RpcError(rsp=rsp)
+        err = 'RpcError(severity: error, bad_element: bgp, message: syntax error)'
         self.assertEquals(str, type(obj.__repr__()))
-        self.assertEqual(obj.__repr__(), '<root>\n  <a>test</a>\n</root>\n')
+        self.assertEqual(obj.__repr__(), err)
 
     def test_rpcerror_jxml_check(self):
         # this test is intended to hit jxml code
@@ -50,5 +72,18 @@ class Test_RpcError(unittest.TestCase):
     def test_CommitError_repr(self):
         rsp = etree.XML(commit_xml)
         obj = CommitError(rsp=rsp)
-        self.assertEqual(obj.__repr__(),
-                         'CommitError([edit interfaces ge-0/0/1],unit 2,Only unit 0 is valid for this encapsulation)')
+        err = ("CommitError(edit_path: [edit interfaces ge-0/0/1], "
+               "bad_element: unit 2, message: Only unit 0 is valid for this encapsulation)")
+        self.assertEqual(obj.__repr__(), err)
+
+    def test_ConfigLoadError_repr(self):
+        rsp = etree.XML(conf_xml)
+        obj = ConfigLoadError(rsp=rsp)
+        err = 'ConfigLoadError(severity: error, bad_element: system1, message: syntax error)'
+        self.assertEqual(obj.__repr__(), err)
+
+    def test_RpcTimeoutError_repr(self):
+        dev = Device('test')
+        obj = RpcTimeoutError(dev=dev, cmd='test', timeout=50)
+        err = 'RpcTimeoutError(host: test, cmd: test, timeout: 50)'
+        self.assertEqual(obj.__repr__(), err)
