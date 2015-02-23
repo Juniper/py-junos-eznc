@@ -1,4 +1,3 @@
-from lxml import etree
 from jnpr.junos import jxml
 
 
@@ -129,6 +128,9 @@ class ConnectError(Exception):
     """
     Parent class for all connection related exceptions
     """
+    def __init__(self, dev, msg=None):
+        self.dev = dev
+        self._orig = msg
 
     @property
     def user(self):
@@ -145,15 +147,18 @@ class ConnectError(Exception):
         """ login SSH port """
         return self.dev._port
 
-    def __init__(self, dev):
-        self.dev = dev
-        # @@@ need to attach attributes for each access
-        # @@@ to user-name, host, jump-host, etc.
+    @property
+    def msg(self):
+        """ login SSH port """
+        return self._orig
 
     def __repr__(self):
-        return "{0}({1})".format(
-            self.__class__.__name__,
-            self.dev.hostname)
+        if self._orig:
+            return "{0}(host: {1}, msg: {2})".format(self.__class__.__name__,
+                                                     self.dev.hostname, self._orig)
+        else:
+            return "{0}({1})".format(self.__class__.__name__,
+                                     self.dev.hostname)
 
     __str__ = __repr__
 
