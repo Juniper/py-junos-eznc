@@ -61,13 +61,18 @@ class Test_RpcError(unittest.TestCase):
         self.assertEqual(obj.rpc_error['bad_element'], 'unit 2')
 
     def test_ConnectError(self):
-        self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+        self.dev = Device(host='1.1.1.1', user='rick')
         obj = ConnectError(self.dev)
         self.assertEqual(obj.user, 'rick')
         self.assertEqual(obj.host, '1.1.1.1')
         self.assertEqual(obj.port, 830)
         self.assertEqual(repr(obj), 'ConnectError(1.1.1.1)')
+
+    def test_ConnectError_msg(self):
+        self.dev = Device(host='1.1.1.1', user='rick')
+        obj = ConnectError(self.dev, msg='underlying exception info')
+        self.assertEqual(obj.msg, 'underlying exception info')
+        self.assertEqual(repr(obj), 'ConnectError(host: 1.1.1.1, msg: underlying exception info)')
 
     def test_CommitError_repr(self):
         rsp = etree.XML(commit_xml)
