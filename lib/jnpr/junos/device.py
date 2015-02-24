@@ -429,7 +429,7 @@ class Device(object):
             # at this point, we assume that the connection
             # has timeed out due to ip-reachability issues
 
-            if err.message.find('not open') > 0:
+            if str(err).find('not open') > 0:
                 raise EzErrors.ConnectTimeoutError(self)
             else:
                 # otherwise raise a generic connection
@@ -499,6 +499,9 @@ class Device(object):
             native python data-types (e.g. ``dict``).
         """
 
+        if self.connected is not True:
+            raise EzErrors.ConnectClosedError(self)
+
         if isinstance(rpc_cmd, str):
             rpc_cmd_e = etree.XML(rpc_cmd)
         elif isinstance(rpc_cmd, etree._Element):
@@ -518,6 +521,8 @@ class Device(object):
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
             raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
+        except NcErrors.TransportError:
+            raise EzErrors.ConnectClosedError(self)
         except RPCError as err:
             # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
