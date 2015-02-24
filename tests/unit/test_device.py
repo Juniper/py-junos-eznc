@@ -10,7 +10,7 @@ from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 import ncclient.transport.errors as NcErrors
-from ncclient.operations import RPCError
+from ncclient.operations import RPCError, TimeoutExpiredError
 
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
@@ -82,8 +82,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.device.netconf_ssh')
     @patch('jnpr.junos.device.datetime')
     def test_device_ConnectTimeoutError(self, mock_datetime, mock_manager):
-        NcErrors.SSHError.message = 'cannot open'
-        mock_manager.connect.side_effect = NcErrors.SSHError
+        mock_manager.connect.side_effect = NcErrors.SSHError("Could not open socket to 1.1.1.1:830")
         from datetime import timedelta, datetime
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
@@ -319,6 +318,19 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute_ValueError(self):
         self.assertRaises(ValueError, self.dev.execute, None)
+
+    def test_device_execute_unopened(self):
+        self.dev.connected = False
+        self.assertRaises(EzErrors.ConnectClosedError, self.dev.execute, None)
+
+    def test_device_execute_timeout(self):
+        self.dev._conn.rpc = MagicMock(side_effect=TimeoutExpiredError)
+        self.assertRaises(EzErrors.RpcTimeoutError, self.dev.rpc.get_rpc_timeout)
+
+    def test_device_execute_closed(self):
+        self.dev._conn.rpc = MagicMock(side_effect=NcErrors.TransportError)
+        self.assertRaises(EzErrors.ConnectClosedError, self.dev.rpc.get_rpc_close)
+        self.assertFalse(self.dev.connected)
 
     def test_device_rpcmeta(self):
         self.assertEqual(self.dev.rpc.get_software_information.func_doc,

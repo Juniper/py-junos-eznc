@@ -209,3 +209,12 @@ class ConnectNotMasterError(ConnectError):
     device, or a virtual-chassis member (linecard), for example
     """
     pass
+
+
+class ConnectClosedError(ConnectError):
+    """
+    Generated if connection unexpectedly closed
+    """
+    def __init__(self, dev):
+        ConnectError.__init__(self, dev=dev)
+        dev.connected = False
