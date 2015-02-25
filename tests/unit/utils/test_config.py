@@ -103,9 +103,9 @@ class TestConfig(unittest.TestCase):
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
 
-    def test_config_load_vargs_len(self):
-        self.assertRaises(RuntimeError, self.conf.load,
-                          'test.xml')
+    def test_config_load_path_err(self):
+        self.assertRaises(IOError, self.conf.load,
+                          path='test.xml')
 
     def test_config_load_len_with_format_set(self):
         self.conf.rpc.load_config = \
@@ -123,6 +123,44 @@ class TestConfig(unittest.TestCase):
         </snmp>"""
 
         self.assertEqual(self.conf.load(xmldata, format='xml'),
+                         'rpc_contents')
+
+    def test_config_load_len_without_format_text(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        data = """routing-options {
+        static {
+            route 10.205.0.0/16 {
+                next-hop 10.0.200.1;
+                community [ 47000:660 ];
+            }
+        }
+        }"""
+
+        self.assertEqual(self.conf.load(data),
+                         'rpc_contents')
+
+    def test_config_load_len_without_format_set(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        set_commands="""
+        set system host-name choc-mx240-b
+        set system domain-name englab.juniper.net
+        """
+
+        self.assertEqual(self.conf.load(set_commands),
+                         'rpc_contents')
+
+    def test_config_load_len_without_format(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        xmldata = """<snmp>
+          <community>
+            <name>iBGP</name>
+          </community>
+        </snmp>"""
+
+        self.assertEqual(self.conf.load(xmldata),
                          'rpc_contents')
 
     @patch('__builtin__.open')

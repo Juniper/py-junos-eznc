@@ -1,0 +1,81 @@
+<rpc-reply xmlns:junos="abc">
+    <multi-routing-engine-results>
+
+    <multi-routing-engine-item>
+
+    <re-name>re0</re-name>
+
+    <software-information>
+    <host-name>R1_re0</host-name>
+    <product-model>mx240</product-model>
+    <product-name>mx240</product-name>
+    <junos-version>15.1I20141208_1545</junos-version>
+    <package-information>
+    <name>vmguest</name>
+    <comment>JUNOS Packet Forwarding Engine Trio Simulation Package [20141208.154550_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>os-kernel</name>
+    <comment>JUNOS OS Kernel 32-bit (WITNESS) [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    <package-information>
+    <name>os-runtime</name>
+    <comment>JUNOS OS runtime [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    <package-information>
+    <name>py-base</name>
+    <comment>JUNOS py base [20141208.154550_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>os-zoneinfo</name>
+    <comment>JUNOS OS time zone information [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    <package-information>
+    <name>os-crypto</name>
+    <comment>JUNOS OS crypto [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    <package-information>
+    <name>netstack</name>
+    <comment>JUNOS network stack and utilities [20141208.141758_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>junos-libs</name>
+    <comment>JUNOS libs [20141208.154550_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>junos-runtime</name>
+    <comment>JUNOS runtime [20141208.154550_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>junos-platform</name>
+    <comment>JUNOS platform support [20141208.141758_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    </software-information>
+    </multi-routing-engine-item>
+
+    <multi-routing-engine-item>
+
+    <re-name>re1</re-name>
+
+    <software-information>
+    <host-name>R1_re01</host-name>
+    <product-model>mx240</product-model>
+    <product-name>mx240</product-name>
+    <junos-version>15.1I20141208_1545_xyz</junos-version>
+    <package-information>
+    <name>vmguest</name>
+    <comment>JUNOS Packet Forwarding Engine Trio Simulation Package [20141208.154550_xyz_ib_15_1_psd]</comment>
+    </package-information>
+    <package-information>
+    <name>os-kernel</name>
+    <comment>JUNOS OS Kernel 32-bit (WITNESS) [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    <package-information>
+    <name>os-runtime</name>
+    <comment>JUNOS OS runtime [20141027.113735_fbsd-builder_10]</comment>
+    </package-information>
+    </software-information>
+    </multi-routing-engine-item>
+
+    </multi-routing-engine-results>
+</rpc-reply>

@@ -35,7 +35,11 @@ class version_info(object):
                 self.build = after_type[0]  # non-numeric
 
         self.as_tuple = self.major + tuple([self.minor, self.build])
-        self.v_dict = {'major': self.major, 'type': self.type, 'minor': self.minor, 'build': self.build}
+        self.v_dict = {
+            'major': self.major,
+            'type': self.type,
+            'minor': self.minor,
+            'build': self.build}
 
     def __iter__(self):
         for key in self.v_dict:
@@ -122,7 +126,8 @@ def facts_software_version(junos, facts):
 
         if isinstance(f_master, list):
             xpath = './multi-routing-engine-item[re-name="{0}"' \
-                    ']/software-information/host-name'.format(f_master[0].lower())
+                    ']/software-information/host-name'.format(
+                        f_master[0].lower())
         else:
             xpath = './multi-routing-engine-item[re-name="{0}"' \
                     ']/software-information/host-name'.format(f_master.lower())
@@ -143,15 +148,19 @@ def facts_software_version(junos, facts):
             # "FPC<n>" or "ndoe<n>", and normalize to "RE<n>".
             re_name = re.sub(r'(\w+)(\d+)', 'RE\\2', re_name)
 
-            pkginfo = re_sw.xpath(
-                'package-information[normalize-space(name)="junos"]/comment'
-            )[0].text
+            try:
+                pkginfo = re_sw.xpath(
+                    'package-information[normalize-space(name)="junos"]/comment'
+                )[0].text
+            except IndexError:
+                # occam and some build is not having tag <name>junos</name>
+                pkginfo = re_sw.findtext('junos-version')
 
             try:
                 versions.append(
                     (re_name.upper(),
                      re.findall(
-                         r'\[(.*)\]',
+                         r'\[?(.*)\]?',
                          pkginfo)[0]))
             except:
                 versions.append((re_name.upper(), "0.0I0.0"))
