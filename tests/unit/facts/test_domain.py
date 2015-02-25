@@ -3,7 +3,8 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from mock import patch
+from mock import patch, MagicMock
+from lxml import etree
 
 from jnpr.junos.facts.domain import facts_domain
 from jnpr.junos import Device
@@ -49,3 +50,13 @@ class TestDomain(unittest.TestCase):
         self.facts['hostname'] = 'test'
         facts_domain(self.dev, self.facts)
         mock_fs_cat.assert_called_with('/var/etc/resolv.conf')
+
+    def test_domain_in_configuration(self):
+        xmldata = etree.XML("""<configuration><system>
+                <domain-name>testing.net</domain-name>
+                </system></configuration>""")
+        self.dev.rpc.get_config = MagicMock(side_effect=xmldata)
+        self.facts['hostname'] = 'test'
+        facts_domain(self.dev, self.facts)
+        self.assertEqual(self.facts['domain'], 'testing.net')
+        self.assertEqual(self.facts['fqdn'], 'test.testing.net')

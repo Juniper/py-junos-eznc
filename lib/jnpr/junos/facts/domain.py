@@ -12,8 +12,8 @@ def facts_domain(junos, facts):
         facts['fqdn']
     """
     # changes done to fix issue #332
-    get_domain = E('configuration', E('system', E('domain-name')))
-    domain = junos.rpc.get_config(get_domain)
+    domain_filter_xml = E('configuration', E('system', E('domain-name')))
+    domain = junos.rpc.get_config(domain_filter_xml)
     domain_name = domain.xpath('.//domain-name')
     if len(domain_name) > 0:
         facts['domain'] = domain_name[0].text
