@@ -3,7 +3,8 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from mock import patch
+from mock import patch, MagicMock
+from lxml import etree
 
 from jnpr.junos.facts.domain import facts_domain
 from jnpr.junos import Device
@@ -12,9 +13,11 @@ from jnpr.junos import Device
 @attr('unit')
 class TestDomain(unittest.TestCase):
 
-    def setUp(self):
+    @patch('ncclient.manager.connect')
+    def setUp(self, mock_connect):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
+        self.dev.open()
         self.facts = {}
 
     @patch('jnpr.junos.facts.domain.FS.cat')
@@ -40,3 +43,21 @@ class TestDomain(unittest.TestCase):
         facts_domain(self.dev, self.facts)
         self.assertEqual(self.facts['domain'], None)
         self.assertEqual(self.facts['fqdn'], 'test')
+
+    @patch('jnpr.junos.facts.domain.FS.cat')
+    def test_resolv_conf_file_absent_under_etc(self, mock_fs_cat):
+        mock_fs_cat.side_effect = [None, 'domain juniper.net']
+        self.facts['hostname'] = 'test'
+        facts_domain(self.dev, self.facts)
+        self.assertEqual(self.facts['domain'], 'juniper.net')
+        self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
+
+    def test_domain_in_configuration(self):
+        xmldata = etree.XML("""<configuration><system>
+                <domain-name>testing.net</domain-name>
+                </system></configuration>""")
+        self.dev.rpc.get_config = MagicMock(side_effect=xmldata)
+        self.facts['hostname'] = 'test'
+        facts_domain(self.dev, self.facts)
+        self.assertEqual(self.facts['domain'], 'testing.net')
+        self.assertEqual(self.facts['fqdn'], 'test.testing.net')
