@@ -10,7 +10,7 @@ from cStringIO import StringIO
 from contextlib import contextmanager
 
 from jnpr.junos import Device
-from jnpr.junos.exception import RpcError
+from jnpr.junos.exception import RpcError, SwRollbackError
 from jnpr.junos.utils.sw import SW
 from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
@@ -206,10 +206,28 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
-        # we need proper xml for this test case, update request-package-roll
-        # back.xml
+        rsp = '<rpc-reply><output>junos-vsrx-12.1X46-D30.2-domestic will become active at next reboot</output></rpc-reply>'
+        mock_execute.side_effect = etree.XML(rsp)
+        msg = 'junos-vsrx-12.1X46-D30.2-domestic will become active at next reboot'
+        self.assertEqual(self.sw.rollback(), msg)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_rollback_multi(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.sw.rollback(), '')
+        msg = '{\'fpc1\': "Junos version \'D10.2\' will become active at next reboot", \'fpc0\': \'JUNOS version "D10.2" will become active at next reboot\'}'
+        self.assertEqual(self.sw.rollback(), msg)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_rollback_multi_exception(self, mock_execute):
+        fname = 'request-package-rollback-multi-error.xml'
+        mock_execute.side_effect = self._read_file(fname)
+        self.assertRaises(SwRollbackError, self.sw.rollback)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_rollback_exception(self, mock_execute):
+        rsp = '<rpc-reply><output>WARNING: Cannot rollback, /packages/junos.old is not valid</output></rpc-reply>'
+        mock_execute.side_effect = etree.XML(rsp)
+        self.assertRaises(SwRollbackError, self.sw.rollback)
 
     def test_sw_inventory(self):
         self.sw.dev.rpc.file_list = \

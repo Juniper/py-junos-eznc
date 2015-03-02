@@ -5,19 +5,21 @@ class RpcError(Exception):
     """
     Parent class for all junos-pyez RPC Exceptions
     """
-    def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None):
+    def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
           :errs: is a list of <rpc-error> elements
           :dev: is the device rpc was executed on
           :timeout: is the timeout value of the device
+          :re: is the RE or member exception occured on
         """
         self.cmd = cmd
         self.rsp = rsp
         self.errs = errs
         self.dev = dev
         self.timeout = timeout
+        self.re = re
 
     def __repr__(self):
         """
@@ -113,6 +115,24 @@ class RpcTimeoutError(RpcError):
     def __repr__(self):
         return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
             .format(self.__class__.__name__, self.dev.hostname, self.cmd, self.timeout)
+
+    __str__ = __repr__
+
+
+class SwRollbackError(RpcError):
+    """
+    Generated in response to a SW rollback error.
+    """
+    def __init__(self, re=None, rsp=None):
+        RpcError.__init__(self, re=re, rsp=rsp)
+
+    def __repr__(self):
+        if self.re:
+            return "{0}(re: {1}, output: {2})"\
+                .format(self.__class__.__name__, self.re, self.rsp)
+        else:
+            return "{0}(output: {1})".format(self.__class__.__name__,
+                                             self.rsp)
 
     __str__ = __repr__
 
