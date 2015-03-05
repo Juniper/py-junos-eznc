@@ -10,6 +10,7 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
+from jnpr.junos.exception import SwRollbackError
 
 """
 Software Installation Utilities
@@ -515,7 +516,24 @@ class SW(Util):
             Rollback results (str)
         """
         rsp = self.rpc.request_package_rollback()
-        return rsp.text.strip()
+        fail_list = ['Cannot rollback', 'rollback aborted']
+        multi = rsp.xpath('//multi-routing-engine-item')
+        if multi:
+            rsp = {}
+            for x in multi:
+                re = x.findtext('re-name')
+                output = x.findtext('output')
+                if any(x in output for x in fail_list):
+                    raise SwRollbackError(re=re, rsp=output)
+                else:
+                    rsp[re] = output
+            return str(rsp)
+        else:
+            output = rsp.xpath('//output')[0].text
+            if any(x in output for x in fail_list):
+                raise SwRollbackError(rsp=output)
+            else:
+                return output
 
     # -------------------------------------------------------------------------
     # inventory - file info on current and rollback packages

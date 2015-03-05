@@ -4,7 +4,7 @@ __credits__ = "Jeremy Schulman"
 import unittest
 from nose.plugins.attrib import attr
 from jnpr.junos.exception import RpcError, CommitError, \
-    ConnectError, ConfigLoadError, RpcTimeoutError
+    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError
 from jnpr.junos import Device
 from lxml import etree
 
@@ -91,4 +91,14 @@ class Test_RpcError(unittest.TestCase):
         dev = Device('test')
         obj = RpcTimeoutError(dev=dev, cmd='test', timeout=50)
         err = 'RpcTimeoutError(host: test, cmd: test, timeout: 50)'
+        self.assertEqual(obj.__repr__(), err)
+
+    def test_SwRollbackError_repr(self):
+        obj = SwRollbackError(rsp="Single RE exception")
+        err = 'SwRollbackError(output: Single RE exception)'
+        self.assertEqual(obj.__repr__(), err)
+
+    def test_SwRollbackError_repr_multi(self):
+        obj = SwRollbackError(re='test1', rsp="Multi RE exception")
+        err = 'SwRollbackError(re: test1, output: Multi RE exception)'
         self.assertEqual(obj.__repr__(), err)
