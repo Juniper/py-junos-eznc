@@ -4,7 +4,8 @@ import unittest2 as unittest
 from nose.plugins.attrib import attr
 
 from jnpr.junos.device import Device
-from jnpr.junos.decorators import timeoutDecorator
+from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.jxml import normalize_xslt
 
 from mock import patch, PropertyMock, call
 
@@ -44,6 +45,88 @@ class Test_Decorators(unittest.TestCase):
             calls = [call(), call(10), call(30)]
             # verify timeout was set/reset
             mock_timeout.assert_has_calls(calls)
+
+    # Test default of true and passing true keyword
+    def test_normalize_true_true(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            self.dev._normalize = True
+            function = lambda x: x
+            decorator = normalizeDecorator(function)
+            decorator(self.dev, normalize=True)
+            self.assertFalse(mock_transform.called)
+
+    # Test default of true and passing true keyword and a func exception
+    def test_normalize_true_true_except(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            self.dev._normalize = True
+
+            def function(*args, **kwargs):
+                raise Exception()
+            decorator = normalizeDecorator(function)
+            with self.assertRaises(Exception):
+                decorator(self.dev, normalize=True)
+            self.assertFalse(mock_transform.called)
+
+    # Test default of True and passing false keyword
+    def test_normalize_true_false(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            mock_transform.return_value = 'o.g.'
+            self.dev._normalize = True
+            function = lambda x: x
+            decorator = normalizeDecorator(function)
+            decorator(self.dev, normalize=False)
+            calls = [call(), call(self.dev._nc_transform), call('o.g.')]
+            mock_transform.assert_has_calls(calls)
+
+    # Test default of True and passing false keyword and a func exception
+    def test_normalize_true_false_except(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            mock_transform.return_value = 'o.g.'
+            self.dev._normalize = True
+
+            def function(*args, **kwargs):
+                raise Exception()
+            decorator = normalizeDecorator(function)
+            with self.assertRaises(Exception):
+                decorator(self.dev, normalize=False)
+            calls = [call(), call(self.dev._nc_transform), call('o.g.')]
+            mock_transform.assert_has_calls(calls)
+
+    # Test default of false and passing true keyword
+    def test_normalize_false_true(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            mock_transform.return_value = 'o.g.'
+            self.dev._normalize = False
+            function = lambda x: x
+            decorator = normalizeDecorator(function)
+            decorator(self.dev, normalize=True)
+            calls = [call(), call(normalize_xslt), call('o.g.')]
+            #print mock_transform.call_args_list
+            mock_transform.assert_has_calls(calls)
+
+    # Test default of false and passing true keyword and a func exception
+    def test_normalize_false_true_except(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            mock_transform.return_value = 'o.g.'
+            self.dev._normalize = False
+
+            def function(*args, **kwargs):
+                raise Exception()
+            decorator = normalizeDecorator(function)
+            with self.assertRaises(Exception):
+                decorator(self.dev, normalize=True)
+            calls = [call(), call(normalize_xslt), call('o.g.')]
+            #print mock_transform.call_args_list
+            mock_transform.assert_has_calls(calls)
+
+    # Test default of false and passing false keyword
+    def test_normalize_false_false(self):
+        with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
+            self.dev._normalize = False
+            function = lambda x: x
+            decorator = normalizeDecorator(function)
+            decorator(self.dev, normalize=False)
+            self.assertFalse(mock_transform.called)
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:

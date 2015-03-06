@@ -274,7 +274,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc_text(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('<get-system-uptime-information>', self.dev.display_xml_rpc('show system uptime ', format='text'))
+        self.assertIn('<get-system-uptime-information/>', self.dev.display_xml_rpc('show system uptime ', format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
