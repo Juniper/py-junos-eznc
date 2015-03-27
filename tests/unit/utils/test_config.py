@@ -23,11 +23,13 @@ class TestConfig(unittest.TestCase):
     def test_config_constructor(self):
         self.assertTrue(isinstance(self.conf._dev, Device))
 
-    def test_config_confirm(self):
+    def test_config_confirm_true(self):
         self.conf.rpc.commit_configuration = MagicMock()
-        self.assertTrue(self.conf.commit(confirm=True))
+        self.conf.commit(confirm=True)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(confirmed=True)
 
-    def test_config_commit_confirm_timeout(self):
+    def test_config_commit_confirm(self):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.commit(confirm=10)
         self.conf.rpc.commit_configuration\
@@ -37,6 +39,45 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.commit(comment='Test')
         self.conf.rpc.commit_configuration.assert_called_with(log='Test')
+
+    def test_config_commit_sync(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(sync=True)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(synchronize=True)
+
+    def test_config_commit_force_sync(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(force_sync=True)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(**{'synchronize': True, 'force-synchronize': True})
+
+    def test_config_commit_timeout(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(timeout=60)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(dev_timeout=60)
+
+    def test_config_commit_full(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.commit(full=True)
+        self.conf.rpc.commit_configuration\
+            .assert_called_with(full=True)
+
+    def test_config_commit_detail(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.rpc.commit_configuration.return_value = '<mockdetail/>'
+        self.assertEqual('<mockdetail/>', self.conf.commit(detail=True))
+        self.conf.rpc.commit_configuration\
+            .assert_called_with({'detail': 'detail'})
+
+    def test_config_commit_combination(self):
+        self.conf.rpc.commit_configuration = MagicMock()
+        self.conf.rpc.commit_configuration.return_value = '<moredetail/>'
+        self.assertEqual('<moredetail/>', self.conf.commit(detail=True, force_sync=True, full=True))
+        self.conf.rpc.commit_configuration\
+            .assert_called_with({'detail': 'detail'},
+                                **{'synchronize': True, 'full': True, 'force-synchronize': True})
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_commit_exception(self, mock_jxml):
@@ -161,7 +202,7 @@ class TestConfig(unittest.TestCase):
                          'set')
 
     @patch('__builtin__.open')
-    def test_config_load_try_load_exception(self, mock_open):
+    def test_config_load_try_load_rpcerror(self, mock_open):
         ex = ConfigLoadError(
             rsp=etree.fromstring((
                 """<load-configuration-results>
@@ -172,6 +213,13 @@ class TestConfig(unittest.TestCase):
                 </load-configuration-results>""")))
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(ConfigLoadError, self.conf.load, path='config.conf')
+
+    @patch('__builtin__.open')
+    def test_config_try_load_exception(self, mock_open):
+        class OtherException(Exception):
+            pass
+        self.conf.rpc.load_config = MagicMock(side_effect=OtherException())
+        self.assertRaises(OtherException, self.conf.load, path='config.conf')
 
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_template_path(self, mock_etree):

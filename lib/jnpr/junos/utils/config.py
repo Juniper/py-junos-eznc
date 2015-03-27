@@ -40,15 +40,27 @@ class Config(Util):
         """
         Commit a configuration.
 
-        :param str comment: If provide logs this comment with the commit.
+        :param str comment: If provided logs this comment with the commit.
         :param int confirm: If provided activates confirm safeguard with
                             provided value as timeout (minutes).
         :param int timeout: If provided the command will wait for completion
                             using the provided value as timeout (seconds).
                             By default the device timeout is used.
+        :param bool sync: On dual control plane systems, requests that
+                            the candidate configuration on one control plane be
+                            copied to the other control plane, checked for
+                            correct syntax, and committed on both Routing Engines.
+        :param bool force_sync: On dual control plane systems, forces the candidate
+                            configuration on one control plane to be copied to the
+                            other control plane.
+        :param bool full: When true requires all the daemons to check and evaluate
+                            the new configuration.
+        :param bool detail: When true return commit detail as XML
+
 
         :returns:
             * ``True`` when successful
+            * Commit detail XML (when detail is True)
 
         :raises CommitError: When errors detected in candidate configuration.
                              You can use the Exception errs variable
@@ -85,11 +97,27 @@ class Config(Util):
         if timeout:
             rpc_args['dev_timeout'] = timeout
 
+        # Check for force_sync and sync
+        if kvargs.get('force_sync'):
+            rpc_args['synchronize'] = True
+            rpc_args['force-synchronize'] = True
+        elif kvargs.get('sync'):
+            rpc_args['synchronize'] = True
+
+        # Check for full
+        if kvargs.get('full'):
+            rpc_args['full'] = True
+
+        rpc_varg = []
+        detail = kvargs.get('detail')
+        if detail:
+            rpc_varg = [{'detail': 'detail'}]
+
         # dbl-splat the rpc_args since we want to pass key/value to metaexec
         # if there is a commit/check error, this will raise an execption
 
         try:
-            self.rpc.commit_configuration(**rpc_args)
+            rsp = self.rpc.commit_configuration(*rpc_varg, **rpc_args)
         except RpcTimeoutError:
             raise
         except RpcError as err:        # jnpr.junos exception
@@ -104,7 +132,10 @@ class Config(Util):
             JXML.remove_namespaces(err.xml)
             raise CommitError(rsp=err.xml)
 
-        return True
+        if detail:
+            return rsp
+        else:
+            return True
 
     # -------------------------------------------------------------------------
     # commit check
