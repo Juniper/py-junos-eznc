@@ -403,6 +403,8 @@ class SW(Util):
 
             elif isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
                 for pkg in pkg_set:
+                    # To disable cleanfs after 1st iteration
+                    cleanfs = cleanfs and pkg_set.index(pkg)==0
                     copy_ok = self.safe_copy(pkg, remote_path=remote_path,
                                              progress=progress,
                                              cleanfs=cleanfs,
@@ -416,7 +418,7 @@ class SW(Util):
         # ---------------------------------------------------------------------
         if package is not None:
             remote_package = remote_path + '/' + path.basename(package)
-            if validate is True:  # in case of Mixed VC its of no use
+            if validate is True:  # in case of Mixed VC it cant be used
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
@@ -472,6 +474,7 @@ class SW(Util):
                     return ok
 
         elif isinstance(pkg_set, (list, tuple)) and self._mixed_VC:
+            pkg_set = [remote_path + '/' + path.basename(pkg) for pkg in pkg_set]
             _progress("installing software ... please be patient ...")
             add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
             return add_ok
