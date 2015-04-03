@@ -338,6 +338,10 @@ class SW(Util):
         :param str package:
           The file-path to the install package tarball on the local filesystem
 
+        :param list pkg_set:
+          The file-paths as list/tuple of the install package tarballs on the local
+          filesystem which will be installed on mixed VC setup.
+
         :param str remote_path:
           The directory on the Junos device where the package file will be
           SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
@@ -510,6 +514,8 @@ class SW(Util):
 
         if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
+        elif self._mixed_VC is True:
+            cmd.append(E('all-members'))
         try:
             rsp = self.rpc(cmd)
             got = rsp.getparent().findtext('.//request-reboot-status').strip()
