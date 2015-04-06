@@ -86,7 +86,7 @@ class TestSW(unittest.TestCase):
     @patch('__builtin__.open')
     def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
-        self.assertEqual(SW.local_md5(package),
+        self.assertEqual(self.sw.local_md5(package),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
     @patch('__builtin__.open')
@@ -105,7 +105,10 @@ class TestSW(unittest.TestCase):
         # mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
-        self.assertTrue(call('test.tgz', '/var/tmp') in mock_scp_put.mock_calls)
+        self.assertTrue(
+            call(
+                'test.tgz',
+                '/var/tmp') in mock_scp_put.mock_calls)
 
     @patch('jnpr.junos.utils.scp.SCP.__exit__')
     @patch('jnpr.junos.utils.scp.SCP.__init__')
@@ -127,6 +130,16 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_pkgadd_pkg_set(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        pkg_set = ['abc.tgz', 'pqr.tgz']
+        self.sw._mixed_VC = True
+        self.sw.pkgadd(pkg_set)
+        self.assertEqual([i.text for i in
+                          mock_execute.call_args[0][0].findall('set')],
+                         pkg_set)
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_validate(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'package.tgz'
@@ -137,10 +150,10 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock()
-
-        self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress, cleanfs=True,
-                                          checksum='96a35ab371e1ca10408c3caecdbd8a67'))
+        with patch('jnpr.junos.utils.sw.SW.local_md5'):
+            self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
+                                              cleanfs=True,
+                                              checksum='96a35ab371e1ca10408c3caecdbd8a67'))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy_return_false(self, mock_execute):
@@ -148,29 +161,32 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock()
-
-        self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
-                                           cleanfs=True))
-        SW.local_md5.assert_called_with(package)
+        with patch('jnpr.junos.utils.sw.SW.local_md5'):
+            self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
+                                               cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy_checksum_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
-
-        self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
-                                          cleanfs=True))
+        with patch('jnpr.junos.utils.sw.SW.local_md5',
+                   MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')):
+            self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
+                                              cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'install.tgz'
         self.sw.put = MagicMock()
-        SW.local_md5 = MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')
-        self.assertTrue(self.sw.install(package, progress=self._myprogress, cleanfs=True))
+        with patch('jnpr.junos.utils.sw.SW.local_md5',
+                   MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')):
+            self.assertTrue(
+                self.sw.install(
+                    package,
+                    progress=self._myprogress,
+                    cleanfs=True))
 
     @patch('jnpr.junos.utils.sw.SW.safe_copy')
     def test_sw_safe_install_copy_fail(self, mock_copy):
@@ -196,6 +212,67 @@ class TestSW(unittest.TestCase):
         self.sw._multi_VC = True
         self.sw._RE_list = ('version_RE0', 'version_RE1')
         self.assertTrue(self.sw.install('file', no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_mixed_vc(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._mixed_VC = True
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        self.assertTrue(self.sw.install(pkg_set=['abc.tgz', 'pqr.tgz'],
+                                        no_copy=True))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_mixed_vc_with_copy(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._mixed_VC = True
+        self.sw.put = MagicMock()
+        self.sw.remote_checksum = MagicMock(
+            return_value='d41d8cd98f00b204e9800998ecf8427e')
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        with patch('jnpr.junos.utils.sw.SW.local_md5',
+                   MagicMock(return_value='d41d8cd98f00b204e9800998ecf8427e')):
+            self.assertTrue(
+                self.sw.install(
+                    pkg_set=[
+                        'install.tgz',
+                        'install.tgz'],
+                    cleanfs=False))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_mixed_vc_safe_copy_false(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._mixed_VC = True
+        self.sw.safe_copy = MagicMock(return_value=False)
+        self.sw.remote_checksum = MagicMock(
+            return_value='d41d8cd98f00b204e9800998ecf8427e')
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        with patch('jnpr.junos.utils.sw.SW.local_md5',
+                   MagicMock(return_value='d41d8cd98f00b204e9800998ecf8427e')):
+            self.assertFalse(
+                self.sw.install(
+                    pkg_set=[
+                        'install.tgz',
+                        'install.tgz'],
+                    cleanfs=False))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_mixed_vc_ValueError(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.sw._mixed_VC = True
+        self.sw.remote_checksum = MagicMock(
+            return_value='d41d8cd98f00b204e9800998ecf8427e')
+        self.sw._RE_list = ('version_RE0', 'version_RE1')
+        with patch('jnpr.junos.utils.sw.SW.local_md5',
+                   MagicMock(return_value='d41d8cd98f00b204e9800998ecf8427e')):
+            self.assertRaises(
+                ValueError,
+                self.sw.install,
+                pkg_set='install.tgz',
+                cleanfs=False)
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_mixed_vc_TypeError(self, mock_pkgadd):
+        self.assertRaises(TypeError, self.sw.install, cleanfs=False)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
@@ -232,7 +309,9 @@ class TestSW(unittest.TestCase):
     def test_sw_inventory(self):
         self.sw.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
-        self.assertEqual(self.sw.inventory, {'current': None, 'rollback': None})
+        self.assertEqual(
+            self.sw.inventory, {
+                'current': None, 'rollback': None})
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot(self, mock_execute):
@@ -251,6 +330,16 @@ class TestSW(unittest.TestCase):
         self.sw._multi_RE = True
         self.sw._multi_VC = False
         self.assertTrue('Shutdown NOW' in self.sw.reboot())
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_mixed_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.sw._multi_VC = True
+        self.sw._mixed_VC = True
+        self.sw.reboot()
+        self.assertTrue('all-members' in
+                        etree.tostring(mock_execute.call_args[0][0]))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
@@ -294,7 +383,9 @@ class TestSW(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
-        rpc_reply = NCElement(foo, self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
+        rpc_reply = NCElement(
+            foo,
+            self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):

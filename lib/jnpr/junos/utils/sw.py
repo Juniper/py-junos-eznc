@@ -154,6 +154,7 @@ class SW(Util):
 
                 def emit(self, record):
                     pass
+
             plog.addHandler(NullHandler())
 
         # execute the secure-copy with the Python SCP module
@@ -408,7 +409,7 @@ class SW(Util):
             elif isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
                 for pkg in pkg_set:
                     # To disable cleanfs after 1st iteration
-                    cleanfs = cleanfs and pkg_set.index(pkg)==0
+                    cleanfs = cleanfs and pkg_set.index(pkg) == 0
                     copy_ok = self.safe_copy(pkg, remote_path=remote_path,
                                              progress=progress,
                                              cleanfs=cleanfs,
@@ -416,7 +417,8 @@ class SW(Util):
                     if copy_ok is False:
                         return False
             else:
-                ValueError('proper value either package or pkg_set is missing')
+                raise ValueError(
+                    'proper value either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
         # ---------------------------------------------------------------------
@@ -478,7 +480,10 @@ class SW(Util):
                     return ok
 
         elif isinstance(pkg_set, (list, tuple)) and self._mixed_VC:
-            pkg_set = [remote_path + '/' + path.basename(pkg) for pkg in pkg_set]
+            pkg_set = [
+                remote_path +
+                '/' +
+                path.basename(pkg) for pkg in pkg_set]
             _progress("installing software ... please be patient ...")
             add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
             return add_ok
