@@ -1,0 +1,28 @@
+---
+
+### ------------------------------------------------------
+### show l2circuit connections
+### ------------------------------------------------------
+
+L2CircuitConnectionTable:
+  rpc: get-l2circuit-connection-information
+  item: l2circuit-neighbor/connection
+  key:
+    - remote-pe
+    - connection-id
+  view: L2CircuitConnectionView
+
+L2CircuitConnectionView:
+  fields_entry:
+    connection_id: connection-id
+    connection_type: connection-type
+    connection_status: connection-status
+    remote_pe: remote-pe
+    control_word: control-word
+    inboud_label: inbound-label
+    outbound_label: outbound-label
+    pw_status_tlv: pw-status-tlv
+    local_interface: local-interface/interface-name
+    interface_status: local-interface/interface-status
+    interface_encapsulation: local-interface/interface-encapsulation
+    interface_description: local-interface/interface-description
