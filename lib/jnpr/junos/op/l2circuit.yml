@@ -5,15 +5,15 @@
 ### ------------------------------------------------------
 
 L2CircuitConnectionTable:
-  rpc: get-l2circuit-connection-information
+  rpc: get-l2ckt-connection-information
   item: l2circuit-neighbor/connection
   key:
-    - remote-pe
+    - ancestor::l2circuit-neighbor/neighbor-address
     - connection-id
   view: L2CircuitConnectionView
 
 L2CircuitConnectionView:
-  fields_entry:
+  fields:
     connection_id: connection-id
     connection_type: connection-type
     connection_status: connection-status
