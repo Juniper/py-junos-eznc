@@ -10,7 +10,7 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
-from jnpr.junos.exception import SwRollbackError
+from jnpr.junos.exception import SwRollbackError, RpcTimeoutError
 
 """
 Software Installation Utilities
@@ -53,14 +53,23 @@ class SW(Util):
 
     def __init__(self, dev):
         Util.__init__(self, dev)
+        self._dev = dev
         self._RE_list = [
             x for x in dev.facts.keys() if x.startswith('version_RE')]
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True)
-        self._mixed_VC = self._multi_VC and\
-            dev.facts['RE0']['model'] != dev.facts['RE1']['model']
+        self._mixed_VC = self._multi_VC and self._check_mixed_VC()
 
+    def _check_mixed_VC(self):
+        try:
+            op = self._dev.rpc.get_virtual_chassis_information()
+            master = op.xpath(
+                './/member-list/member[member-role="Master*"]')[0]
+            return master.findtext('member-mixed-mode') == 'Y' \
+                and master.findtext('member-route-mode') == 'VC'
+        except:
+            return False
     # -----------------------------------------------------------------------
     # CLASS METHODS
     # -----------------------------------------------------------------------
@@ -525,6 +534,8 @@ class SW(Util):
             rsp = self.rpc(cmd)
             got = rsp.getparent().findtext('.//request-reboot-status').strip()
             return got
+        except RpcTimeoutError as err:
+            raise err
         except Exception as err:
             if err.rsp.findtext('.//error-severity') != 'warning':
                 raise err
