@@ -3,11 +3,12 @@ __credits__ = "Jeremy Schulman"
 
 import unittest2 as unittest
 from nose.plugins.attrib import attr
-from mock import patch
+from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
 from jnpr.junos.facts.swver import facts_software_version as software_version, version_info
+from jnpr.junos.facts.swver import _get_swver
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
@@ -57,7 +58,7 @@ class TestVersionInfo(unittest.TestCase):
 
 
 @attr('unit')
-class TestSrxCluster(unittest.TestCase):
+class TestSwver(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
@@ -66,6 +67,13 @@ class TestSrxCluster(unittest.TestCase):
                           gather_facts=False)
         self.dev.open()
         self.facts = {}
+        self.facts['vc_capable'] = False
+
+    def test_get_swver_vc(self):
+        self.dev.rpc.cli = MagicMock()
+        self.facts['vc_capable'] = True
+        _get_swver(self.dev, self.facts)
+        self.dev.rpc.cli.assert_called_with('show version all-members', format='xml')
 
     @patch('jnpr.junos.Device.execute')
     def test_swver(self, mock_execute):

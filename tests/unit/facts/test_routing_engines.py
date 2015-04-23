@@ -24,6 +24,17 @@ class TestRoutingEngines(unittest.TestCase):
         self.dev.open()
         self.facts = {}
         self.mode = ''
+        self.vc = False
+
+    @patch('jnpr.junos.Device.execute')
+    def test_multi_re_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.mode = 'multi'
+        self.vc = True
+        routing_engines(self.dev, self.facts)
+        self.assertTrue(self.facts['vc_capable'])
+        self.assertTrue(self.facts['2RE'])
+        self.assertEqual(self.facts['RE0-RE1']['mastership_state'], 'backup')
 
     @patch('jnpr.junos.Device.execute')
     def test_multi_instance(self, mock_execute):
@@ -65,4 +76,6 @@ class TestRoutingEngines(unittest.TestCase):
             return Manager(session, device_handler)
 
         if args:
+            if self.vc is True and args[0].tag == 'get-virtual-chassis-information':
+                return self._read_file('get-virtual-chassis-information.xml')
             return self._read_file(args[0].tag + '_' + self.mode + '.xml')
