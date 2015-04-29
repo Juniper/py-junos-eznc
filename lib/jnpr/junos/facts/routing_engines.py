@@ -4,8 +4,13 @@ import re as RE
 def _get_vc_status(dev, facts):
     try:
         rsp = dev.rpc.get_virtual_chassis_information()
-        facts['vc_capable'] = True
-        return rsp
+        # MX issue where command returns, but without content
+        if rsp is not True:
+            facts['vc_capable'] = True
+            return rsp
+        else:
+            facts['vc_capable'] = False
+            return None
     except:
         facts['vc_capable'] = False
         return None
