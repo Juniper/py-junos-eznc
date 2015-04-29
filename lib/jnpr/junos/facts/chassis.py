@@ -1,6 +1,5 @@
-from lxml.builder import E
-from jnpr.junos import jxml as JXML
 from jnpr.junos.exception import ConnectNotMasterError
+
 
 def facts_chassis(junos, facts):
     """
@@ -18,14 +17,15 @@ def facts_chassis(junos, facts):
     """
     try:
         rsp = junos.rpc.get_chassis_inventory()
-        if rsp.tag == 'error': raise RuntimeError()
+        if rsp.tag == 'error':
+            raise RuntimeError()
     except:
         # this means that the RPC caused a trap.  this should generally
         # never happen, but we'll trap it cleanly for now
         facts['2RE'] = False
         facts['model'] = ''
-        facts['serialnumber'] = ''      
-        return  
+        facts['serialnumber'] = ''
+        return
 
     if rsp.tag == 'output':
         # this means that there was an error; due to the
@@ -42,7 +42,7 @@ def facts_chassis(junos, facts):
         x_ch = rsp.find('chassis')
 
     facts['model'] = x_ch.findtext('description')
-    
+
     try:
         facts['serialnumber'] = x_ch.find('serial-number').text
     except:
