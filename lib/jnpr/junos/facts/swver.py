@@ -78,15 +78,13 @@ class version_info(object):
 
 
 def _get_swver(dev, facts):
-    try:
-        return dev.rpc.cli(
-            "show version invoke-on all-routing-engines", format='xml')
-    except:
+    # See if we're VC Capable
+    if facts['vc_capable'] is True:
+        return dev.rpc.cli("show version all-members", format='xml')
+    else:
         try:
-            facts['vc_capable'] = True
-            return dev.rpc.cli("show version all-members", format='xml')
+            return dev.rpc.cli("show version invoke-on all-routing-engines", format='xml')
         except:
-            facts['vc_capable'] = False
             return dev.rpc.get_software_information()
 
 
@@ -116,8 +114,8 @@ def facts_software_version(junos, facts):
 
     if x_swver.tag == 'multi-routing-engine-results':
         # we need to find/identify each of the routing-engine (CPU) versions.
-
-        facts['2RE'] = True
+        if len(x_swver.xpath('./multi-routing-engine-item')) > 1:
+            facts['2RE'] = True
         versions = []
 
         if isinstance(f_master, list):

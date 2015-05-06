@@ -1,5 +1,21 @@
 import re as RE
 
+
+def _get_vc_status(dev, facts):
+    try:
+        rsp = dev.rpc.get_virtual_chassis_information()
+        # MX issue where command returns, but without content
+        if rsp is not True:
+            facts['vc_capable'] = True
+            return rsp
+        else:
+            facts['vc_capable'] = False
+            return None
+    except:
+        facts['vc_capable'] = False
+        return None
+
+
 def facts_routing_engines(junos, facts):
 
     re_facts = [
@@ -9,6 +25,17 @@ def facts_routing_engines(junos, facts):
         'up-time',
         'last-reboot-reason']
 
+    master = []
+
+    vc_info = _get_vc_status(junos, facts)
+
+    if vc_info is not None:
+        vc_list = vc_info.xpath(".//member-role[starts-with(.,'Master') or starts-with(.,'Backup')]")
+        if len(vc_list) > 1:
+            facts['2RE'] = True
+        for member_id in vc_info.xpath(".//member-role[starts-with(.,'Master')]/preceding-sibling::member-id"):
+            master.append("RE{0}".format(member_id.text))
+
     try:
         re_info = junos.rpc.get_route_engine_information()
     except:
@@ -16,8 +43,8 @@ def facts_routing_engines(junos, facts):
         # happen, but we will trap it cleanly for now
         return
 
-    master = []
     re_list = re_info.xpath('.//route-engine')
+
     if len(re_list) > 1:
         facts['2RE'] = True
 
@@ -34,7 +61,10 @@ def facts_routing_engines(junos, facts):
         else:
             # multi-instance routing platform
             m = RE.search('(\d)', x_re_name[0].text)
-            re_name = "RE" + m.group(0)   # => RE0 | RE1
+            if vc_info is not None:
+                re_name = "RE{0}-RE{1}".format(m.group(0), re.find('slot').text)  # => RE0-RE0 | RE0-RE1
+            else:
+                re_name = "RE" + m.group(0)   # => RE0 | RE1
 
         re_fd = {}
         facts[re_name] = re_fd
@@ -43,7 +73,7 @@ def facts_routing_engines(junos, facts):
             if x_f is not None:
                 re_fd[factoid.replace('-', '_')] = x_f.text
 
-        if 'mastership_state' in re_fd:
+        if vc_info is None and 'mastership_state' in re_fd:
             if facts[re_name]['mastership_state'] == 'master':
                 master.append(re_name)
 
