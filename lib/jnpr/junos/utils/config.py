@@ -203,7 +203,7 @@ class Config(Util):
 
         :returns: ``None``
         """
-        print self.diff(rb_id)
+        print (self.diff(rb_id))
 
     # -------------------------------------------------------------------------
     # helper on loading configs
