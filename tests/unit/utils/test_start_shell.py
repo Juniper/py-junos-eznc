@@ -21,7 +21,7 @@ class TestStartShell(unittest.TestCase):
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
     def test_startshell_open(self, mock_connect, mock_wait):
         self.shell.open()
-        mock_connect.assert_called_with('% ')
+        mock_connect.assert_called_with('(%|>)')
 
     @patch('paramiko.SSHClient')
     def test_startshell_close(self, mock_connect):
@@ -40,7 +40,22 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_wait_for(self, mock_select):
         mock_select.return_value = ['> ', 2, 3]
         self.shell._chan = MagicMock()
-        self.assertTrue(call.endswith('> ') in self.shell.wait_for('> ')[0].mock_calls)
+        self.shell._chan.recv.return_value = '> '
+        self.assertTrue(self.shell.wait_for('> ')[0].endswith('> '))
+
+    @patch('jnpr.junos.utils.start_shell.select')
+    def test_startshell_wait_for_regex(self, mock_select):
+        mock_select.return_value = ['> ', 2, 3]
+        self.shell._chan = MagicMock()
+        #output from command: cli -c "show version"
+        self.shell._chan.recv.return_value = \
+        """
+        ------------
+        JUNOS Services Deep Packet Inspection package [15.1
+        ---(more)---
+        """
+        self.assertTrue(self.shell.wait_for('---\(more\s?\d*%?\)---\n\s*|%')[0]
+                        in self.shell._chan.recv.return_value)
 
     @patch('jnpr.junos.utils.start_shell.StartShell.open')
     @patch('jnpr.junos.utils.start_shell.StartShell.close')

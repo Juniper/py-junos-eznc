@@ -1,5 +1,6 @@
 import paramiko
 from select import select
+import re
 
 _JUNOS_PROMPT = '> '
 _SHELL_PROMPT = '% '
@@ -8,6 +9,7 @@ _RECVSZ = 1024
 
 
 class StartShell(object):
+
     """
     Junos shell execution utility.  This utility is written to
     support the "context manager" design pattern.  For example::
@@ -19,6 +21,7 @@ class StartShell(object):
             return (ok, got)
 
     """
+
     def __init__(self, nc):
         """
         Utility Constructor
@@ -31,7 +34,7 @@ class StartShell(object):
         """
         Wait for the result of the command, expecting **this** prompt.
 
-        :param str this: expected string.
+        :param str this: expected string/pattern.
 
         :returns: resulting string of data
         :rtype: str
@@ -45,7 +48,7 @@ class StartShell(object):
             if rd:
                 data = chan.recv(_RECVSZ)
                 got.append(data)
-                if data.endswith(this):
+                if re.search(r'{0}\s?$'.format(this), data):
                     break
         return got
 
@@ -80,9 +83,10 @@ class StartShell(object):
         self._client = client
         self._chan = chan
 
-        self.wait_for(_JUNOS_PROMPT)
-        self.send('start shell')
-        self.wait_for(_SHELL_PROMPT)
+        got = self.wait_for('(%|>)')
+        if not got[-1].endswith(_SHELL_PROMPT):
+            self.send('start shell')
+            self.wait_for(_SHELL_PROMPT)
 
     def close(self):
         """ Close the SSH client channel """
