@@ -6,7 +6,10 @@ from nose.plugins.attrib import attr
 
 import os
 import sys
-from cStringIO import StringIO
+if sys.version < '3':
+    from cStringIO import StringIO
+else:
+    from io import StringIO
 from contextlib import contextmanager
 
 from jnpr.junos import Device

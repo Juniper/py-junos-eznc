@@ -226,7 +226,7 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.utils.fs.StartShell')
     def test_rmdir(self, mock_StartShell):
         path = 'test/rmdir'
-        print self.fs.rmdir(path)
+        print(self.fs.rmdir(path))
         calls = [
             call().__enter__(),
             call().__enter__().run('rmdir test/rmdir'),
@@ -236,7 +236,7 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.utils.fs.StartShell')
     def test_mkdir(self, mock_StartShell):
         path = 'test/mkdir'
-        print self.fs.mkdir(path)
+        print(self.fs.mkdir(path))
         calls = [
             call().__enter__(),
             call().__enter__().run('mkdir -p test/mkdir'),
@@ -247,7 +247,7 @@ class TestFS(unittest.TestCase):
     def test_symlink(self, mock_StartShell):
         src = 'test/tgz.txt'
         dst = 'test/xyz'
-        print self.fs.symlink(src, dst)
+        print(self.fs.symlink(src, dst))
         calls = [
             call().__enter__(),
             call().__enter__().run('ln -sf test/tgz.txt test/xyz'),

@@ -4,6 +4,7 @@ __credits__ = "Jeremy Schulman"
 import unittest
 from nose.plugins.attrib import attr
 import os
+import six 
 
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
@@ -57,8 +58,8 @@ class TestFactoryTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
         self.ppt.ITEM_NAME_XPATH = ['name', 'missing', 'mtu']
-        self.assertEqual(self.ppt.keys(),
-                         [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
+        self.assertEqual(list(six.iterkeys(self.ppt.keys)),
+                  [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
 
     @patch('jnpr.junos.Device.execute')
     def test_keys__keys_pipe(self, mock_execute):
@@ -66,7 +67,7 @@ class TestFactoryTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.lldp = LLDPNeighborTable(self.dev)
         self.lldp.get()
-        self.assertEqual(self.lldp.keys(), ['et-0/0/48', 'et-0/0/49', 'xe-0/0/13'])
+        self.assertEqual(list(six.iterkeys(self.lldp)), ['et-0/0/48', 'et-0/0/49', 'xe-0/0/13'])
 
     @patch('jnpr.junos.Device.execute')
     def test_table_repr_xml_not_none(self, mock_execute):
@@ -80,10 +81,10 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_get_keys_values(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.assertEqual(self.ppt.keys(), ['ge-0/0/0', 'ge-0/0/1'])
-        self.assertEqual(len(self.ppt.values()), 2)
+        self.assertEqual(list(six.iterkeys(self.ppt)), ['ge-0/0/0', 'ge-0/0/1'])
+        self.assertEqual(len(list(six.itervalues(self.ppt))), 2)
         self.ppt.view = None
-        self.assertEqual(len(self.ppt.values()), 2)
+        self.assertEqual(len(list(six.itervalues(self.ppt))), 2)
 
     @patch('jnpr.junos.Device.execute')
     def test_table__getitem__(self, mock_execute):
@@ -113,7 +114,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_items(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.assertEqual(len(self.ppt.items()[1][1]), 8)
+        self.assertEqual(len(list(six.iteritems(self.ppt[1][1]))), 8)
 
     def test_table_get_return_none(self):
         self.assertEqual(self.table.get('ge-0/0/0'), None)

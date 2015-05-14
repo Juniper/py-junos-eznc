@@ -45,7 +45,7 @@ class TestRoutingEngines(unittest.TestCase):
         self.vc = True
         self.vct = True
         routing_engines(self.dev, self.facts)
-        print self.facts
+        print(self.facts)
         self.assertFalse(self.facts['vc_capable'])
         self.assertTrue(self.facts['2RE'])
         self.assertEqual(self.facts['RE1']['mastership_state'], 'backup')

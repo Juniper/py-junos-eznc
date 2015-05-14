@@ -6,6 +6,7 @@ from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
 from lxml import etree
+import sys
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -333,7 +334,11 @@ class TestDevice(unittest.TestCase):
         self.assertFalse(self.dev.connected)
 
     def test_device_rpcmeta(self):
-        self.assertEqual(self.dev.rpc.get_software_information.func_doc,
+        if sys.version < '3':
+            self.assertEqual(self.dev.rpc.get_software_information.func_doc,
+                         'get-software-information')
+        else:
+            self.assertEqual(self.dev.rpc.get_software_information.__doc__,
                          'get-software-information')
 
     def test_device_probe_timeout_zero(self):
