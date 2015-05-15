@@ -6,10 +6,14 @@ from nose.plugins.attrib import attr
 
 import os
 import sys
-if sys.version < '3':
-    from cStringIO import StringIO
+
+from six import StringIO
+
+if sys.version<'3':
+    builtin_string = '__builtin__'
 else:
-    from io import StringIO
+    builtin_string = 'builtins'
+
 from contextlib import contextmanager
 
 from jnpr.junos import Device
@@ -60,7 +64,7 @@ class TestSW(unittest.TestCase):
         self.dev.close()
 
     def test_sw_hashfile(self):
-        with patch('__builtin__.open', mock_open(), create=True):
+        with patch(builtin_string + '.open', mock_open(), create=True):
             import jnpr.junos.utils.sw
             with open('foo') as h:
                 h.read.side_effect = ('abc', 'a', '')
@@ -79,20 +83,20 @@ class TestSW(unittest.TestCase):
         self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_VC)
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_sha256(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha256(package),
                          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934'
                          'ca495991b7852b855')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_md5(package),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_sha1(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha1(package),

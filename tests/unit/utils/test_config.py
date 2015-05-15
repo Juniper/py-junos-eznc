@@ -2,6 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
+import sys
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
@@ -12,6 +13,10 @@ from jnpr.junos.exception import RpcError, LockError,\
 from mock import MagicMock, patch
 from lxml import etree
 
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
@@ -166,7 +171,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.load(xmldata, format='xml'),
                          'rpc_contents')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
             MagicMock(return_value='rpc_contents')
@@ -178,7 +183,7 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(ValueError, self.conf.load,
                           'test.xml', format='set', overwrite=True)
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_path_xml(self, mock_etree, mock_open):
         self.conf.dev.Template = MagicMock()
@@ -187,21 +192,21 @@ class TestConfig(unittest.TestCase):
             MagicMock(return_value=mock_etree.return_value)
         self.assertEqual(self.conf.load(path='test.xml'), 'rpc_contents')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_path_text(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path='test.conf')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'text')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_path_set(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path='test.set')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_try_load_rpcerror(self, mock_open):
         ex = ConfigLoadError(
             rsp=etree.fromstring((
@@ -214,7 +219,7 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(ConfigLoadError, self.conf.load, path='config.conf')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_try_load_exception(self, mock_open):
         class OtherException(Exception):
             pass

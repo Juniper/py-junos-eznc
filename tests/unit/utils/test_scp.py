@@ -8,7 +8,11 @@ from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
 
 from mock import patch
-
+import sys
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 @attr('unit')
 class TestScp(unittest.TestCase):
@@ -33,7 +37,7 @@ class TestScp(unittest.TestCase):
             scp.get('addrbook.conf')
 
     @patch('jnpr.junos.device.os')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     @patch('paramiko.config.SSHConfig.lookup')
     @patch('paramiko.SSHClient')
     @patch('paramiko.proxy.ProxyCommand')
