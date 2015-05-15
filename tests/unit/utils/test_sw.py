@@ -208,7 +208,7 @@ class TestSW(unittest.TestCase):
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = """<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>"""
-        self.assertEqual(etree.tostring(mock_execute.call_args[0][0]),
+        self.assertEqual(str(etree.tostring(mock_execute.call_args[0][0])),
                          rpc)
 
     @patch('jnpr.junos.Device.execute')
@@ -221,7 +221,8 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        msg = '{\'fpc1\': "Junos version \'D10.2\' will become active at next reboot", \'fpc0\': \'JUNOS version "D10.2" will become active at next reboot\'}'
+        msg = '{\'fpc1\': "Junos version \'D10.2\' will become active at next reboot", ' \
+              '\'fpc0\': \'JUNOS version "D10.2" will become active at next reboot\'}'
         self.assertEqual(self.sw.rollback(), msg)
 
     @patch('jnpr.junos.Device.execute')

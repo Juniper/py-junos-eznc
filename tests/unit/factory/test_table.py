@@ -4,7 +4,6 @@ __credits__ = "Jeremy Schulman"
 import unittest
 from nose.plugins.attrib import attr
 import os
-import six 
 
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
@@ -15,7 +14,12 @@ from jnpr.junos.op.phyport import PhyPortTable
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+import sys
 
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 @attr('unit')
 class TestFactoryTable(unittest.TestCase):
@@ -114,6 +118,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_items(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
+        print (self.ppt.items())
         self.assertEqual(len(self.ppt.items()[1][1]), 8)
 
     def test_table_get_return_none(self):
@@ -123,7 +128,7 @@ class TestFactoryTable(unittest.TestCase):
         self.assertRaises(RuntimeError, self.table._keys)
 
     @patch('jnpr.junos.Device.execute')
-    @patch('__builtin__.file')
+    @patch(builtin_string + '.open')
     def test_table_savexml(self, mock_file, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.xml = etree.XML('<root><a>test</a></root>')

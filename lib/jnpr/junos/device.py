@@ -53,6 +53,8 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         with open(path) as f:
             # You are trying to decode an object that is already decoded. You have a str,
             # there is no need to decode from UTF-8 anymore.
+            # open already decodes to Unicode in Python 3 if you open in text mode.
+            # If you want to open it as bytes, so that you can then decode, you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 

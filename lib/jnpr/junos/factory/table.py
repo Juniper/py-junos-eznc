@@ -160,7 +160,7 @@ class Table(object):
             return [this for this in self]
         else:
             # view object for each item
-            return [this.items() for this in self]
+            return [list(this.items()) for this in self]
 
     # ------------------------------------------------------------------------
     # items
@@ -168,7 +168,7 @@ class Table(object):
 
     def items(self):
         """ returns list of tuple(name,values) for each table entry """
-        return zip(self.keys(), self.values())
+        return list(zip(self.keys(), self.values()))
 
     # ------------------------------------------------------------------------
     # get - loads the data from source
@@ -226,7 +226,7 @@ class Table(object):
             fname += "_%s" % append
 
         path = fname + fext
-        return etree.ElementTree(self.xml).write(file(path, 'w'))
+        return etree.ElementTree(self.xml).write(open(path, 'w'))
 
     def to_json(self):
         """
