@@ -45,7 +45,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
 
     @patch(builtin_string + '.filter')
     def test_temp_load_get_source_filter_false(self, filter_mock):
-        filter_mock.return_value = False
+        filter_mock.return_value = []
         try:
             self.template_loader.get_source(None, None)
         except Exception as ex:
@@ -56,7 +56,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
     def test_temp_load_get_source_filter_true(self, os_path_mock):
         # cant use @patch here as with statement will have exit
         m = mock_open()
-        with patch(builtin_string + '.file', m, create=True):
+        with patch(builtin_string + '.open', m, create=True):
             self.template_loader.get_source(None, None)
 
 
@@ -279,7 +279,8 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc_text(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('<get-system-uptime-information>', self.dev.display_xml_rpc('show system uptime ', format='text'))
+        self.assertIn('<get-system-uptime-information>',
+                      str(self.dev.display_xml_rpc('show system uptime ', format='text')))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):

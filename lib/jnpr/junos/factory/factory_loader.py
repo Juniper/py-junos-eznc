@@ -84,7 +84,7 @@ class FactoryLoader(object):
         # however, as this framework expands in capability, this
         # will be enhaced, yo!
 
-        xpath, opt = f_dict.items()[0]       # get first/only key,value
+        xpath, opt = list(f_dict.items())[0]       # get first/only key,value
 
         if opt == 'group':
             fields.group(f_name, xpath)

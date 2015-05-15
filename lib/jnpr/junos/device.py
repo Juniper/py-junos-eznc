@@ -41,18 +41,19 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         self.paths = ['.', os.path.join(_MODULEPATH, 'templates')]
 
     def get_source(self, environment, template):
-
         def _in_path(dir):
             return os.path.exists(os.path.join(dir, template))
 
-        path = filter(_in_path, self.paths)
+        path = list(filter(_in_path, self.paths))
         if not path:
             raise jinja2.TemplateNotFound(template)
 
         path = os.path.join(path[0], template)
         mtime = os.path.getmtime(path)
-        with file(path) as f:
-            source = f.read().decode('utf-8')
+        with open(path) as f:
+            # You are trying to decode an object that is already decoded. You have a str,
+            # there is no need to decode from UTF-8 anymore.
+            source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
 _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
