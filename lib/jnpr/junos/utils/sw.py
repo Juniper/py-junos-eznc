@@ -104,7 +104,7 @@ class SW(Util):
     @classmethod
     def progress(cls, dev, report):
         """ simple progress report function """
-        print dev.hostname + ": " + report
+        print (dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
     # put - SCP put the image onto the device
