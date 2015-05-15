@@ -8,6 +8,7 @@ import warnings
 import socket
 import datetime
 import time
+import sys
 
 # 3rd-party packages
 from lxml import etree
@@ -688,11 +689,10 @@ class Device(object):
                         fn.__name__)
             for fn in vargs:
                 # bind as instance method, majik.
-                self.__dict__[
-                    fn.__name__] = types.MethodType(
-                    fn,
-                    self,
-                    self.__class__)
+                if sys.version<'3':
+                    self.__dict__[fn.__name__] = types.MethodType(fn, self, self.__class__)
+                else:
+                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
             return
 
         # first verify that the names do not conflict with
