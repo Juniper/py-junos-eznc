@@ -207,9 +207,15 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
-        rpc = """<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>"""
-        self.assertEqual(str(etree.tostring(mock_execute.call_args[0][0])),
-                         rpc)
+        rpc = [
+        '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+        '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
+        '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
+        '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+        '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+        '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
+        print ('nitsss', etree.tostring(mock_execute.call_args[0][0]).decode('utf-8)'))
+        self.assertTrue((etree.tostring(mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -221,9 +227,9 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        msg = '{\'fpc1\': "Junos version \'D10.2\' will become active at next reboot", ' \
-              '\'fpc0\': \'JUNOS version "D10.2" will become active at next reboot\'}'
-        self.assertEqual(self.sw.rollback(), msg)
+        msg = {'fpc1': "Junos version 'D10.2' will become active at next reboot",
+               'fpc0': 'JUNOS version "D10.2" will become active at next reboot'}
+        self.assertEqual(eval(self.sw.rollback()), msg)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi_exception(self, mock_execute):
