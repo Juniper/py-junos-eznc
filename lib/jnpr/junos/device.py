@@ -166,8 +166,13 @@ class Device(object):
             self._logfile = False
             return rc
 
-        if not isinstance(value, file):
-            raise ValueError("value must be a file object")
+        if sys.version < '3':
+            if not isinstance(value, file):
+                raise ValueError("value must be a file object")
+        else:
+            import io
+            if not isinstance(value, io.TextIOWrapper):
+                raise ValueError("value must be a file object")
 
         self._logfile = value
         return self._logfile

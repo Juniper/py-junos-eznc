@@ -128,7 +128,11 @@ class TestDevice(unittest.TestCase):
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch(builtin_string + '.open', mock):
-            with patch(builtin_string + '.file', MagicMock):
+            if sys.version >'3':
+                builtin_file = 'io.TextIOWrapper'
+            else:
+                builtin_file = builtin_string + '.file'
+            with patch(builtin_file, MagicMock):
                 handle = open('filename', 'r')
                 self.dev.logfile = handle
                 self.assertEqual(self.dev.logfile, handle)

@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from lxml import etree
 import json
+import sys
 
 from jnpr.junos.factory.viewfields import ViewFields
 from jnpr.junos.factory.to_json import TableViewJSONEncoder
@@ -247,9 +248,12 @@ class View(object):
             # -- 2031-dec-06, JLS
             # added support to use the element tag if the text is empty
             def _munch(x):
-                as_str = x if isinstance(x, str) else x.text
-                if isinstance(as_str, str):
-                    as_str = as_str.encode('ascii','replace')
+                if sys.version<'3':
+                    as_str = x if isinstance(x, str) else x.text
+                    if isinstance(as_str, str):
+                        as_str = as_str.encode('ascii','replace')
+                else:
+                    as_str = x if isinstance(x, str) else x.text
                 if as_str is not None:
                     as_str = as_str.strip()
                 if not as_str:
