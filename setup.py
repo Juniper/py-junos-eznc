@@ -22,9 +22,6 @@ setup(
         'jnpr.junos.cfgro': ['*.yml']
     },
     install_requires=install_reqs,
-    dependency_links = [
-        'git+https://github.com/vnitinv/ncclient.git@3x#egg=ncclient',
-    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
