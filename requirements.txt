@@ -6,4 +6,3 @@ jinja2>=2.7.1
 PyYAML>=3.10
 netaddr
 six
--e git+https://github.com/vnitinv/ncclient.git@3x#egg=ncclient
