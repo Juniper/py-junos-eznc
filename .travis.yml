@@ -4,6 +4,7 @@ cache: apt
 python:
   - "2.6"
   - "2.7"
+  - "3.4"
 
 before_install:
   - sudo apt-get install -qq python-dev libxml2-dev libxslt-dev
