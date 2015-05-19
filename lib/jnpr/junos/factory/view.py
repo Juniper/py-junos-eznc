@@ -250,7 +250,7 @@ class View(object):
             def _munch(x):
                 if sys.version<'3':
                     as_str = x if isinstance(x, str) else x.text
-                    if isinstance(as_str, str):
+                    if isinstance(as_str, unicode):
                         as_str = as_str.encode('ascii','replace')
                 else:
                     as_str = x if isinstance(x, str) else x.text
