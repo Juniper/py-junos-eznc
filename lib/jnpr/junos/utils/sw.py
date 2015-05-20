@@ -10,7 +10,7 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
-from jnpr.junos.exception import SwRollbackError
+from jnpr.junos.exception import SwRollbackError, RpcTimeoutError
 
 """
 Software Installation Utilities
@@ -28,6 +28,7 @@ def _hashfile(afile, hasher, blocksize=65536):
 
 
 class SW(Util):
+
     """
     Software Utility class, used to perform a software upgrade and
     associated functions.  These methods have been tested on
@@ -52,12 +53,23 @@ class SW(Util):
 
     def __init__(self, dev):
         Util.__init__(self, dev)
+        self._dev = dev
         self._RE_list = [
             x for x in dev.facts.keys() if x.startswith('version_RE')]
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True)
+        self._mixed_VC = self._multi_VC and self._check_mixed_VC()
 
+    def _check_mixed_VC(self):
+        try:
+            op = self._dev.rpc.get_virtual_chassis_information()
+            master = op.xpath(
+                './/member-list/member[member-role="Master*"]')[0]
+            return master.findtext('member-mixed-mode') == 'Y' \
+                and master.findtext('member-route-mode') == 'VC'
+        except:
+            return False
     # -----------------------------------------------------------------------
     # CLASS METHODS
     # -----------------------------------------------------------------------
@@ -148,8 +160,10 @@ class SW(Util):
         plog = logging.getLogger('paramiko.transport')
         if not plog.handlers:
             class NullHandler(logging.Handler):
+
                 def emit(self, record):
                     pass
+
             plog.addHandler(NullHandler())
 
         # execute the secure-copy with the Python SCP module
@@ -180,7 +194,10 @@ class SW(Util):
         .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
-        args = dict(no_validate=True, package_name=remote_package)
+        if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
+            args = dict(no_validate=True, set=remote_package)
+        else:
+            args = dict(no_validate=True, package_name=remote_package)
         args.update(kvargs)
 
         rsp = self.rpc.request_package_add(**args)
@@ -294,7 +311,7 @@ class SW(Util):
     # install - complete installation process, but not reboot
     # -------------------------------------------------------------------------
 
-    def install(self, package, remote_path='/var/tmp', progress=None,
+    def install(self, package=None, pkg_set=None, remote_path='/var/tmp', progress=None,
                 validate=False, checksum=None, cleanfs=True, no_copy=False,
                 timeout=1800, **kwargs):
         """
@@ -331,6 +348,10 @@ class SW(Util):
         :param str package:
           The file-path to the install package tarball on the local filesystem
 
+        :param list pkg_set:
+          The file-paths as list/tuple of the install package tarballs on the local
+          filesystem which will be installed on mixed VC setup.
+
         :param str remote_path:
           The directory on the Junos device where the package file will be
           SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
@@ -358,7 +379,8 @@ class SW(Util):
               print "host: %s, report: %s" % (dev.hostname, report)
 
         :param bool no_copy:
-          When ``True`` the software package will not be SCP'd to the device.  Default is ``False``.
+          When ``True`` the software package will not be SCP'd to the device.
+          Default is ``False``.
 
         :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.  This
@@ -380,61 +402,103 @@ class SW(Util):
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
 
-        if no_copy is False:
-            copy_ok = self.safe_copy(package, remote_path=remote_path,
-                                     progress=progress, cleanfs=cleanfs,
-                                     checksum=checksum)
-            if copy_ok is False:
-                return False
+        if package is None and pkg_set is None:
+            raise TypeError(
+                'install() takes atleast 1 argument package or pkg_set')
 
+        if no_copy is False:
+            copy_ok = True
+            if isinstance(package, str):
+                copy_ok = self.safe_copy(package, remote_path=remote_path,
+                                         progress=progress, cleanfs=cleanfs,
+                                         checksum=checksum)
+                if copy_ok is False:
+                    return False
+
+            elif isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
+                for pkg in pkg_set:
+                    # To disable cleanfs after 1st iteration
+                    cleanfs = cleanfs and pkg_set.index(pkg) == 0
+                    copy_ok = self.safe_copy(pkg, remote_path=remote_path,
+                                             progress=progress,
+                                             cleanfs=cleanfs,
+                                             checksum=checksum)
+                    if copy_ok is False:
+                        return False
+            else:
+                raise ValueError(
+                    'proper value either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
         # ---------------------------------------------------------------------
+        if package is not None:
+            remote_package = remote_path + '/' + path.basename(package)
+            if validate is True:  # in case of Mixed VC it cant be used
+                _progress(
+                    "validating software against current config,"
+                    " please be patient ...")
+                v_ok = self.validate(remote_package, dev_timeout=timeout)
+                if v_ok is not True:
+                    return v_ok  # will be the string of output
 
-        remote_package = remote_path + '/' + path.basename(package)
-
-        if validate is True:
-            _progress(
-                "validating software against current config,"
-                " please be patient ...")
-            v_ok = self.validate(remote_package, dev_timeout=timeout)
-            if v_ok is not True:
-                return v_ok  # will be the string of output
-
-        if self._multi_RE is False:
-            # simple case of device with only one RE
-            _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(remote_package, dev_timeout=timeout, **kwargs)
-            return add_ok
-        else:
-            # we need to update multiple devices
-            if self._multi_VC is True:
-                ok = True
-                # extract the VC number out of the 'version_RE<n>' string
-                vc_members = [
-                    re.search(
-                        '(\d+)',
-                        x).group(1) for x in self._RE_list]
-                for vc_id in vc_members:
-                    _progress(
-                        "installing software on VC member: {0} ... please be"
-                        " patient ...".format(vc_id))
-                    ok &= self.pkgadd(remote_package, member=vc_id, dev_timeout=timeout, **kwargs)
-                return ok
+            if self._multi_RE is False:
+                # simple case of device with only one RE
+                _progress("installing software ... please be patient ...")
+                add_ok = self.pkgadd(
+                    remote_package,
+                    dev_timeout=timeout,
+                    **kwargs)
+                return add_ok
             else:
-                # then this is a device with two RE that supports the "re0"
-                # and "re1" options to the command (M, MX tested only)
-                ok = True
-                _progress(
-                    "installing software on RE0 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re0=True, dev_timeout=timeout, **kwargs)
-                _progress(
-                    "installing software on RE1 ... please be patient ...")
-                ok &= self.pkgadd(remote_package, re1=True, dev_timeout=timeout, **kwargs)
-                return ok
+                # we need to update multiple devices
+                if self._multi_VC is True:
+                    ok = True
+                    # extract the VC number out of the 'version_RE<n>' string
+                    vc_members = [
+                        re.search(
+                            '(\d+)',
+                            x).group(1) for x in self._RE_list]
+                    for vc_id in vc_members:
+                        _progress(
+                            "installing software on VC member: {0} ... please be"
+                            " patient ...".format(vc_id))
+                        ok &= self.pkgadd(
+                            remote_package,
+                            member=vc_id,
+                            dev_timeout=timeout,
+                            **kwargs)
+                    return ok
+                else:
+                    # then this is a device with two RE that supports the "re0"
+                    # and "re1" options to the command (M, MX tested only)
+                    ok = True
+                    _progress(
+                        "installing software on RE0 ... please be patient ...")
+                    ok &= self.pkgadd(
+                        remote_package,
+                        re0=True,
+                        dev_timeout=timeout,
+                        **kwargs)
+                    _progress(
+                        "installing software on RE1 ... please be patient ...")
+                    ok &= self.pkgadd(
+                        remote_package,
+                        re1=True,
+                        dev_timeout=timeout,
+                        **kwargs)
+                    return ok
+
+        elif isinstance(pkg_set, (list, tuple)) and self._mixed_VC:
+            pkg_set = [
+                remote_path +
+                '/' +
+                path.basename(pkg) for pkg in pkg_set]
+            _progress("installing software ... please be patient ...")
+            add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
+            return add_ok
 
     # -------------------------------------------------------------------------
-    # rebbot - system reboot
+    # reboot - system reboot
     # -------------------------------------------------------------------------
 
     def reboot(self, in_min=0, at=None):
@@ -464,10 +528,14 @@ class SW(Util):
 
         if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
+        elif self._mixed_VC is True:
+            cmd.append(E('all-members'))
         try:
             rsp = self.rpc(cmd)
             got = rsp.getparent().findtext('.//request-reboot-status').strip()
             return got
+        except RpcTimeoutError as err:
+            raise err
         except Exception as err:
             if err.rsp.findtext('.//error-severity') != 'warning':
                 raise err
