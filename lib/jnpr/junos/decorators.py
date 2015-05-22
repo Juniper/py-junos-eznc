@@ -13,8 +13,7 @@ def timeoutDecorator(function):
             except:
                 dev = args[0]
             restore_timeout = dev.timeout
-            dev.timeout = kwargs['dev_timeout']
-            kwargs.pop('dev_timeout', None)
+            dev.timeout = kwargs.pop('dev_timeout', None)
             try:
                 result = function(*args, **kwargs)
                 dev.timeout = restore_timeout
@@ -35,8 +34,7 @@ def normalizeDecorator(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         if 'normalize' in kwargs:
-            normalize = kwargs['normalize']
-            kwargs.pop('normalize', None)
+            normalize = kwargs.pop('normalize', None)
             try:
                 dev = args[0].dev
             except:
@@ -56,7 +54,7 @@ def normalizeDecorator(function):
                         raise
                 else:
                     try:
-                        dev.transform = normalize_xslt
+                        dev.transform = dev._norm_transform
                         result = function(*args, **kwargs)
                         dev.transform = restore_transform
                         return result

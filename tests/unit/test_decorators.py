@@ -5,7 +5,6 @@ from nose.plugins.attrib import attr
 
 from jnpr.junos.device import Device
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
-from jnpr.junos.jxml import normalize_xslt
 
 from mock import patch, PropertyMock, call
 
@@ -26,7 +25,9 @@ class Test_Decorators(unittest.TestCase):
     def test_timeout(self):
         with patch('jnpr.junos.Device.timeout', new_callable=PropertyMock) as mock_timeout:
             mock_timeout.return_value = 30
-            function = lambda x: x
+
+            def function(x):
+                return x
             decorator = timeoutDecorator(function)
             decorator(self.dev, dev_timeout=10)
             calls = [call(), call(10), call(30)]
@@ -50,7 +51,9 @@ class Test_Decorators(unittest.TestCase):
     def test_normalize_true_true(self):
         with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
             self.dev._normalize = True
-            function = lambda x: x
+
+            def function(x):
+                return x
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=True)
             self.assertFalse(mock_transform.called)
@@ -72,7 +75,9 @@ class Test_Decorators(unittest.TestCase):
         with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
             mock_transform.return_value = 'o.g.'
             self.dev._normalize = True
-            function = lambda x: x
+
+            def function(x):
+                return x
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=False)
             calls = [call(), call(self.dev._nc_transform), call('o.g.')]
@@ -97,10 +102,12 @@ class Test_Decorators(unittest.TestCase):
         with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
             mock_transform.return_value = 'o.g.'
             self.dev._normalize = False
-            function = lambda x: x
+
+            def function(x):
+                return x
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=True)
-            calls = [call(), call(normalize_xslt), call('o.g.')]
+            calls = [call(), call(self.dev._norm_transform), call('o.g.')]
             #print mock_transform.call_args_list
             mock_transform.assert_has_calls(calls)
 
@@ -115,7 +122,7 @@ class Test_Decorators(unittest.TestCase):
             decorator = normalizeDecorator(function)
             with self.assertRaises(Exception):
                 decorator(self.dev, normalize=True)
-            calls = [call(), call(normalize_xslt), call('o.g.')]
+            calls = [call(), call(self.dev._norm_transform), call('o.g.')]
             #print mock_transform.call_args_list
             mock_transform.assert_has_calls(calls)
 
@@ -123,7 +130,9 @@ class Test_Decorators(unittest.TestCase):
     def test_normalize_false_false(self):
         with patch('jnpr.junos.Device.transform', new_callable=PropertyMock) as mock_transform:
             self.dev._normalize = False
-            function = lambda x: x
+
+            def function(x):
+                return x
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=False)
             self.assertFalse(mock_transform.called)

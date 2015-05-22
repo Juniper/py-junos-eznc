@@ -311,8 +311,8 @@ class Device(object):
             By default ~/.ssh/config is queried.
 
         :param bool normalize:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
-            XML returned by :meth:`open` does not have whitespace normalized
+            *OPTIONAL* default is ``False``.  If ``True`` then the
+            XML returned by :meth:`execute` will have whitespace normalized
         """
 
         # ----------------------------------------
@@ -323,7 +323,7 @@ class Device(object):
 
         self._port = kvargs.get('port', 830)
         self._gather_facts = kvargs.get('gather_facts', True)
-        self._normalize = kvargs.get('normalize', True)
+        self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
@@ -384,6 +384,10 @@ class Device(object):
         :param bool auto_probe:
             If non-zero then this enables auto_probe and defines the amount
             of time/seconds for the probe timeout
+
+        :param bool normalize:
+            If set to ``True``/``False`` will override the device
+            instance value for only this open process
 
         :returns Device: Device instance (*self*).
 
@@ -479,10 +483,11 @@ class Device(object):
         self.connected = True
 
         self._nc_transform = self.transform
+        self._norm_transform = lambda: JXML.normalize_xslt
 
         normalize = kvargs.get('normalize', self._normalize)
         if normalize is True:
-            self.transform = lambda: JXML.normalize_xslt
+            self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
         if gather_facts is True:

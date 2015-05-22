@@ -234,6 +234,14 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.manages, [],
                          'By default manages will be empty list')
 
+    @patch('ncclient.manager.connect')
+    @patch('jnpr.junos.Device.execute')
+    def test_device_open_normalize(self, mock_connect, mock_execute):
+        mock_connect.side_effect = self._mock_manager
+        self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+        self.dev2.open(gather_facts=False, normalize=True)
+        self.assertEqual(self.dev2.transform, self.dev2._norm_transform)
+
     def test_device_set_facts_exception(self):
         try:
             self.dev.facts = 'test'
@@ -274,7 +282,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc_text(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('<get-system-uptime-information/>', self.dev.display_xml_rpc('show system uptime ', format='text'))
+        self.assertIn('<get-system-uptime-information>', self.dev.display_xml_rpc('show system uptime ', format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
