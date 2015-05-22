@@ -108,7 +108,7 @@ class _RpcMetaExec(object):
             # kvargs are the command parameter/values
             if kvargs:
                 for arg_name, arg_value in kvargs.items():
-                    if arg_name != 'dev_timeout':
+                    if arg_name not in ['dev_timeout', 'normalize']:
                         arg_name = re.sub('_', '-', arg_name)
                         if isinstance(arg_value, (tuple, list)):
                             for a in arg_value:
@@ -126,15 +126,21 @@ class _RpcMetaExec(object):
                     if v is not True:
                         rpc.attrib[k] = v
 
+            # gather any decorator keywords
+            timeout = kvargs.get('dev_timeout')
+            normalize = kvargs.get('normalize')
+
+            dec_args = {}
+
+            if timeout is not None:
+                dec_args['dev_timeout'] = timeout
+            if normalize is not None:
+                dec_args['normalize'] = normalize
+
             # now invoke the command against the
             # associated :junos: device and return
             # the results per :junos:execute()
-            timeout = kvargs.get('dev_timeout')
-
-            if timeout:
-                return self._junos.execute(rpc, dev_timeout=timeout)
-            else:
-                return self._junos.execute(rpc)
+            return self._junos.execute(rpc, **dec_args)
 
         # metabind help() and the function name to the :rpc_cmd_name:
         # provided by the caller ... that's about all we can do, yo!
