@@ -80,6 +80,8 @@ class TestToJson(unittest.TestCase):
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
+            if 'normalize' in kwargs and args:
+                return self._read_file(args[0].tag + '.xml')
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
