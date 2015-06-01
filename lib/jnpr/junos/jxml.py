@@ -1,4 +1,6 @@
-# jxml.py
+from ncclient import manager
+from ncclient.xml_ import NCElement
+from lxml import etree
 
 """
   These are Junos XML 'helper' definitions use for generic XML processing
@@ -40,6 +42,47 @@ NAMES_ONLY = {'recurse': "false"}
 INHERIT = {'inherit': 'inherit'}
 INHERIT_GROUPS = {'inherit': 'inherit', 'groups': 'groups'}
 INHERIT_DEFAULTS = {'inherit': 'defaults', 'groups': 'groups'}
+
+# XSLT for on-box commit script
+conf_xslt = '''\
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+    <xsl:output method="xml" indent="yes"/>
+    <xsl:strip-space elements="*"/>
+
+    <xsl:param name="subSelectionXPath" />
+
+    <xsl:template match="/">
+        <xsl:apply-templates
+            select="$subSelectionXPath/ancestor::*[position()=last()]"/>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:choose>
+
+            <xsl:when test="$subSelectionXPath/ancestor::*
+                [generate-id() = generate-id(current())]">
+                <xsl:copy>
+                    <xsl:copy-of select="@*"/>
+
+                    <xsl:choose>
+                        <xsl:when test="generate-id(.)=
+                            generate-id($subSelectionXPath/ancestor::*[1])">
+                            <xsl:copy-of select="$subSelectionXPath"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:apply-templates select="*"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+
+                </xsl:copy>
+            </xsl:when>
+            <xsl:otherwise/>
+        </xsl:choose>
+    </xsl:template>
+  </xsl:stylesheet>'''
+
+conf_xslt_root = etree.XML(conf_xslt)
+conf_transform = etree.XSLT(conf_xslt_root)
 
 
 normalize_xslt = '''\
@@ -100,3 +143,13 @@ def rpc_error(rpc_xml):
     this_err['message'] = find_strip('error-message')
 
     return this_err
+
+
+def cscript_conf(reply):
+    try:
+        device_params = {'name': 'junos'}
+        device_handler = manager.make_device_handler(device_params)
+        transform_reply = device_handler.transform_reply()
+        return NCElement(etree.tostring(reply), transform_reply)._NCElement__doc
+    except:
+        return None
