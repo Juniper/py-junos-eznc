@@ -52,7 +52,7 @@ class OpTable(Table):
 
         argkey = vargs[0] if len(vargs) else None
 
-        rpc_args = {}                     # create empty <dict>
+        rpc_args = {'normalize': True}    # create default <dict>
         rpc_args.update(self.GET_ARGS)    # copy default args
         rpc_args.update(kvargs)           # copy caller provided args
 
