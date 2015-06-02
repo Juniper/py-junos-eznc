@@ -59,17 +59,8 @@ class SW(Util):
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True)
-        self._mixed_VC = self._multi_VC and self._check_mixed_VC()
+        self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
 
-    def _check_mixed_VC(self):
-        try:
-            op = self._dev.rpc.get_virtual_chassis_information()
-            master = op.xpath(
-                './/member-list/member[member-role="Master*"]')[0]
-            return master.findtext('member-mixed-mode') == 'Y' \
-                and master.findtext('member-route-mode') == 'VC'
-        except:
-            return False
     # -----------------------------------------------------------------------
     # CLASS METHODS
     # -----------------------------------------------------------------------
@@ -325,7 +316,7 @@ class SW(Util):
         5. validates the package if :validate: is True
         6. installs the package
 
-        .. warning:: This process has been validated on "simple" deployments.
+        .. warning:: This process has been validated on the following deployments.
 
                       Tested:
 
@@ -333,6 +324,7 @@ class SW(Util):
                       * MX dual-RE
                       * EX virtual-chassis when all same HW model
                       * QFX virtual-chassis when all same HW model
+                      * QFX/EX mixed virtual-chassis
 
                       Known Restrictions:
 

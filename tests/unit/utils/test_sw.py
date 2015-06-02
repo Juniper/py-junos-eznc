@@ -270,27 +270,6 @@ class TestSW(unittest.TestCase):
                 pkg_set='install.tgz',
                 cleanfs=False)
 
-    @patch('jnpr.junos.Device.execute')
-    def test_sw_check_mixed_VC_false(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.assertFalse(self.sw._check_mixed_VC())
-
-    @patch('jnpr.junos.Device.execute')
-    def test_sw_check_mixed_VC_true(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.sw._multi_VC = True
-        rsp = """<rpc-reply><virtual-chassis-information>
-        <member-list>
-            <member>
-                <member-mixed-mode>Y</member-mixed-mode>
-                <member-route-mode>VC</member-route-mode>
-                <member-role>Master*</member-role>
-            </member>
-        </member-list></virtual-chassis-information></rpc-reply>
-        """
-        mock_execute.side_effect = etree.XML(rsp)
-        self.assertTrue(self.sw._check_mixed_VC())
-
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_mixed_vc_TypeError(self, mock_pkgadd):
         self.assertRaises(TypeError, self.sw.install, cleanfs=False)
