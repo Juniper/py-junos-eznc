@@ -30,6 +30,9 @@ def facts_routing_engines(junos, facts):
     vc_info = _get_vc_status(junos, facts)
 
     if vc_info is not None:
+        facts['vc_mode'] = vc_info.findtext('.//virtual-chassis-mode')
+        if len(vc_info.xpath(".//virtual-chassis-id-information[@style='fabric']")) > 0:
+            facts['vc_fabric'] = True
         vc_list = vc_info.xpath(".//member-role[starts-with(.,'Master') or starts-with(.,'Backup')]")
         if len(vc_list) > 1:
             facts['2RE'] = True
