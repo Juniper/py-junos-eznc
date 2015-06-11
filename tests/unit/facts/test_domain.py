@@ -8,6 +8,7 @@ from lxml import etree
 
 from jnpr.junos.facts.domain import facts_domain
 from jnpr.junos import Device
+from jnpr.junos.exception import RpcError
 
 
 @attr('unit')
@@ -61,3 +62,16 @@ class TestDomain(unittest.TestCase):
         facts_domain(self.dev, self.facts)
         self.assertEqual(self.facts['domain'], 'testing.net')
         self.assertEqual(self.facts['fqdn'], 'test.testing.net')
+
+    @patch('jnpr.junos.facts.domain.FS.cat')
+    def test_domain_rpc_error(self, mock_fs_cat):
+        self.dev.rpc.get_config = MagicMock(side_effect=RpcError)
+        mock_fs_cat.return_value =\
+            """# domain juniper.net
+        search englab.juniper.net spglab.juniper.net juniper.net jnpr.net
+        nameserver 10.11.12.13
+        """
+        self.facts['hostname'] = 'test'
+        facts_domain(self.dev, self.facts)
+        self.assertEqual(self.facts['domain'], 'juniper.net')
+        self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
