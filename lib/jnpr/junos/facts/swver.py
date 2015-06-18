@@ -169,10 +169,10 @@ def facts_software_version(junos, facts):
         facts['hostname'] = x_swver.findtext('host-name')
 
         # First try the <junos-version> tag present in >= 15.1
-        swinfo = re_swver.findtext('.//junos-version', default=None)
+        swinfo = x_swver.findtext('.//junos-version', default=None)
         if not swinfo:
 	    # For < 15.1, get version from the "junos" package.
-            pkginfo = re_swver.xpath(
+            pkginfo = x_swver.xpath(
                 './/package-information[normalize-space(name)="junos"]/comment'
             )[0].text
             try:
