@@ -141,18 +141,18 @@ def facts_software_version(junos, facts):
             # "FPC<n>" or "ndoe<n>", and normalize to "RE<n>".
             re_name = re.sub(r'(\w+)(\d+)', 'RE\\2', re_name)
 
-            pkginfo = re_sw.xpath(
-                'package-information[normalize-space(name)="junos"]/comment'
-            )[0].text
-
-            try:
-                versions.append(
-                    (re_name.upper(),
-                     re.findall(
-                         r'\[(.*)\]',
-                         pkginfo)[0]))
-            except:
-                versions.append((re_name.upper(), "0.0I0.0"))
+            # First try the <junos-version> tag present in >= 15.1
+            swinfo = re_sw.findtext('junos-version', default=None)
+            if not swinfo:
+	        # For < 15.1, get version from the "junos" package.
+                pkginfo = re_sw.xpath(
+                    'package-information[normalize-space(name)="junos"]/comment'
+                )[0].text
+                try:
+                    swinfo = re.findall(r'\[(.*)\]',pkginfo)[0]
+                except:
+                    swinfo = "0.0I0.0"
+            versions.append((re_name.upper(),swinfo))
 
         # now add the versions to the facts <dict>
         for re_ver in versions:
@@ -168,10 +168,18 @@ def facts_software_version(junos, facts):
         # single-RE
         facts['hostname'] = x_swver.findtext('host-name')
 
-        pkginfo = x_swver.xpath(
-            './/package-information[normalize-space(name)="junos"]/comment'
-        )[0].text
-        facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
+        # First try the <junos-version> tag present in >= 15.1
+        swinfo = re_swver.findtext('.//junos-version', default=None)
+        if not swinfo:
+	    # For < 15.1, get version from the "junos" package.
+            pkginfo = re_swver.xpath(
+                './/package-information[normalize-space(name)="junos"]/comment'
+            )[0].text
+            try:
+                swinfo = re.findall(r'\[(.*)\]',pkginfo)[0]
+            except:
+                swinfo = "0.0I0.0"
+        facts['version'] = swinfo
 
     # ------------------------------------------------------------------------
     # create a 'version_info' object based on the master version
