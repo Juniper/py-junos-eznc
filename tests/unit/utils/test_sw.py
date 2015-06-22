@@ -1,7 +1,7 @@
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
-import unittest
+import unittest2 as unittest
 from nose.plugins.attrib import attr
 
 import os
@@ -144,6 +144,31 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'package.tgz'
         self.assertTrue(self.sw.validate(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_not_found(self, mock_execute):
+        xml = '''<rpc-error>
+        <error-severity>error</error-severity>
+        <error-message>
+        md5: /var/tmp/123: No such file or directory
+        </error-message>
+        </rpc-error>'''
+        mock_execute.side_effect = RpcError(rsp=etree.fromstring(xml))
+        package = 'test.tgz'
+        self.assertEqual(self.sw.remote_checksum(package), None)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_not_rpc_error(self, mock_execute):
+        xml = '''<rpc-error>
+        <error-severity>error</error-severity>
+        <error-message>
+        something else!
+        </error-message>
+        </rpc-error>'''
+        mock_execute.side_effect = RpcError(rsp=etree.fromstring(xml))
+        package = 'test.tgz'
+        with self.assertRaises(RpcError):
+            self.sw.remote_checksum(package)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy(self, mock_execute):
@@ -395,7 +420,7 @@ class TestSW(unittest.TestCase):
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             # Little hack for mocked execute
-            if kwargs == {'dev_timeout': 1800}:
+            if 'dev_timeout' in kwargs:
                 return self._read_file(args[0].tag + '.xml')
             if 'path' in kwargs:
                 if kwargs['path'] == '/packages':
