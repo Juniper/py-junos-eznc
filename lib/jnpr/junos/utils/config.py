@@ -129,8 +129,10 @@ class Config(Util):
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
-            JXML.remove_namespaces(err.xml)
-            raise CommitError(rsp=err.xml)
+            if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
+                raise CommitError(rsp=err.xml)
+            else:
+                raise
 
         if detail:
             return rsp
