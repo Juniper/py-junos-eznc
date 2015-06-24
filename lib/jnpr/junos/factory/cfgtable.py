@@ -159,7 +159,7 @@ class CfgTable(Table):
           *OPTIONAL* options to pass to get-configuration.  By default
           {'inherit': 'inherit', 'groups': 'groups'} is sent.
         """
-        if self.xml is not None:
+        if self._lxml is not None:
             return self
 
         if self._path is not None:
