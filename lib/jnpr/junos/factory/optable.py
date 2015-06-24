@@ -47,7 +47,7 @@ class OpTable(Table):
             self.xml = etree.parse(self._path).getroot()
             return self
 
-        if self.xml is not None:
+        if self._lxml is not None:
             return self
 
         argkey = vargs[0] if len(vargs) else None

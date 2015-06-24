@@ -68,6 +68,21 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.zit = ZoneIfsTable(self.dev)
         self.ut = UserTable(self.dev)
 
+    def test_cfgtable_path(self):
+        fname = 'user.xml'
+        path = os.path.join(os.path.dirname(__file__),
+                            'rpc-reply', fname)
+        ut = UserTable(path=path)
+        ut.get()
+        self.assertEqual(ut[0].uid, '2000')
+
+    def test_cfgtable_xml(self):
+        fname = 'user.xml'
+        xml = self._read_file(fname)
+        ut = UserTable(xml=xml)
+        ut.get()
+        self.assertEqual(ut[0].uid, '2000')
+
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -131,6 +146,9 @@ class TestFactoryCfgTable(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
+
+        if fname == 'user.xml':
+            return etree.fromstring(foo)
 
         rpc_reply = NCElement(foo, self.dev._conn.
                               _device_handler.transform_reply())\

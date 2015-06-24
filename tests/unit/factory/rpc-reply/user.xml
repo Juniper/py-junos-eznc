@@ -1,0 +1,14 @@
+﻿<configuration changed-seconds="1435177642" changed-localtime="2015-06-24 13:27:22 PDT">
+    <system group="global">
+        <login group="global">
+            <user group="global">
+                <name group="global">test</name>
+                <uid group="global">2000</uid>
+                <class group="global">super-user</class>
+                <authentication group="global">
+                    <encrypted-password group="global">$$$$$$</encrypted-password>
+                </authentication>
+            </user>
+        </login>
+    </system>
+</configuration>

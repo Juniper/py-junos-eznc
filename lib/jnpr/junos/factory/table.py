@@ -29,6 +29,7 @@ class Table(object):
         self.view = self.VIEW
         self._key_list = []
         self._path = path
+        self._lxml = xml
 
     # -------------------------------------------------------------------------
     # PROPERTIES
