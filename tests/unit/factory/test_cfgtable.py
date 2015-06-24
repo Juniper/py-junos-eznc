@@ -46,6 +46,12 @@ yaml_data = \
         fullgroup: { full-name: group }
       fields_auth:
         pass: encrypted-password
+
+    GroupTable:
+        get: groups
+        item:
+        args_key: name
+        options: {}
       """
 globals().update(FactoryLoader().load(yaml.load(yaml_data)))
 
@@ -85,6 +91,13 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.zit.get(security_zone='untrust', options={'inherit': 'defaults', 'groups': 'groups'})
         self.assertEqual(self.zit._get_opt, {'inherit': 'defaults', 'groups': 'groups'})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_table_options(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        gt = GroupTable(self.dev)
+        gt.get()
+        self.assertEqual(gt._get_opt, {})
 
     def test_optable_get_key_required_error(self):
         self.assertRaises(ValueError, self.zit.get)

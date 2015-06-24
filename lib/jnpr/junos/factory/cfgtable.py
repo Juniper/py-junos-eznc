@@ -20,6 +20,7 @@ class CfgTable(Table):
         self.ITEM_NAME_XPATH = self._data_dict.get('key', 'name')
         self.ITEM_XPATH = self._data_dict['get']
         self.view = self._data_dict.get('view')
+        self._options = self._data_dict.get('options')
 
     # -----------------------------------------------------------------------
     # PROPERTIES
@@ -210,7 +211,10 @@ class CfgTable(Table):
         if 'options' in kvargs:
             options = kvargs.get('options') or {}
         else:
-            options = jxml.INHERIT_GROUPS
+            if self._options is not None:
+                options = self._options
+            else:
+                options = jxml.INHERIT_GROUPS
 
         # for debug purposes
         self._get_cmd = get_cmd
