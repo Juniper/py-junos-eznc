@@ -15,7 +15,9 @@ def facts_domain(junos, facts):
 
     try:
         domain_filter_xml = E('configuration', E('system', E('domain-name')))
-        domain = junos.rpc.get_config(domain_filter_xml)
+	inherit_option = {'inherit':'inherit'}
+        domain = junos.rpc.get_config(filter_xml=domain_filter_xml,
+		                      options=inherit_option)
         domain_name = domain.xpath('.//domain-name')
         if len(domain_name) > 0:
             facts['domain'] = domain_name[0].text
