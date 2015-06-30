@@ -144,15 +144,15 @@ def facts_software_version(junos, facts):
             # First try the <junos-version> tag present in >= 15.1
             swinfo = re_sw.findtext('junos-version', default=None)
             if not swinfo:
-	        # For < 15.1, get version from the "junos" package.
+                # For < 15.1, get version from the "junos" package.
                 pkginfo = re_sw.xpath(
                     'package-information[normalize-space(name)="junos"]/comment'
                 )[0].text
                 try:
-                    swinfo = re.findall(r'\[(.*)\]',pkginfo)[0]
+                    swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
                 except:
                     swinfo = "0.0I0.0"
-            versions.append((re_name.upper(),swinfo))
+            versions.append((re_name.upper(), swinfo))
 
         # now add the versions to the facts <dict>
         for re_ver in versions:
@@ -171,12 +171,12 @@ def facts_software_version(junos, facts):
         # First try the <junos-version> tag present in >= 15.1
         swinfo = x_swver.findtext('.//junos-version', default=None)
         if not swinfo:
-	    # For < 15.1, get version from the "junos" package.
+            # For < 15.1, get version from the "junos" package.
             pkginfo = x_swver.xpath(
                 './/package-information[normalize-space(name)="junos"]/comment'
             )[0].text
             try:
-                swinfo = re.findall(r'\[(.*)\]',pkginfo)[0]
+                swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
             except:
                 swinfo = "0.0I0.0"
         facts['version'] = swinfo
