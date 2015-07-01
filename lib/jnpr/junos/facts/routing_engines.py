@@ -8,6 +8,8 @@ def facts_routing_engines(junos, facts):
         'model',
         'up-time',
         'last-reboot-reason']
+    """QFabric requires an 'infrastructure' argument. Try getting RE info. If an exception is raised it's probably a QFabric so try again with the argument.
+    """
     try:
         re_info = junos.rpc.get_route_engine_information()
     except:
