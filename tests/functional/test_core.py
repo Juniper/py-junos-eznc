@@ -44,3 +44,11 @@ class TestCore(unittest.TestCase):
     def test_device_rpc_timeout(self):
         with self.assertRaises(RpcTimeoutError):
             self.dev.rpc.traceroute(noresolve=True, host='8.8.8.8', dev_timeout=1)
+
+    def test_device_rpc_normalize_true(self):
+        rsp = self.dev.rpc.get_interface_information(interface_name='ge-0/0/0', normalize=True)
+        self.assertEqual(rsp.xpath('physical-interface/name')[0].text, 'ge-0/0/0')
+
+    def test_device_rpc_normalize_false(self):
+        rsp = self.dev.rpc.get_interface_information(interface_name='ge-0/0/0', normalize=False)
+        self.assertEqual(rsp.xpath('physical-interface/name')[0].text, '\nge-0/0/0\n')

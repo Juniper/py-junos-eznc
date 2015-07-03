@@ -46,6 +46,12 @@ yaml_data = \
         fullgroup: { full-name: group }
       fields_auth:
         pass: encrypted-password
+
+    GroupTable:
+        get: groups
+        item:
+        args_key: name
+        options: {}
       """
 globals().update(FactoryLoader().load(yaml.load(yaml_data)))
 
@@ -61,6 +67,21 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.dev.open()
         self.zit = ZoneIfsTable(self.dev)
         self.ut = UserTable(self.dev)
+
+    def test_cfgtable_path(self):
+        fname = 'user.xml'
+        path = os.path.join(os.path.dirname(__file__),
+                            'rpc-reply', fname)
+        ut = UserTable(path=path)
+        ut.get()
+        self.assertEqual(ut[0].uid, '2000')
+
+    def test_cfgtable_xml(self):
+        fname = 'user.xml'
+        xml = self._read_file(fname)
+        ut = UserTable(xml=xml)
+        ut.get()
+        self.assertEqual(ut[0].uid, '2000')
 
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
@@ -85,6 +106,13 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.zit.get(security_zone='untrust', options={'inherit': 'defaults', 'groups': 'groups'})
         self.assertEqual(self.zit._get_opt, {'inherit': 'defaults', 'groups': 'groups'})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_table_options(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        gt = GroupTable(self.dev)
+        gt.get()
+        self.assertEqual(gt._get_opt, {})
 
     def test_optable_get_key_required_error(self):
         self.assertRaises(ValueError, self.zit.get)
@@ -118,6 +146,9 @@ class TestFactoryCfgTable(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
+
+        if fname == 'user.xml':
+            return etree.fromstring(foo)
 
         rpc_reply = NCElement(foo, self.dev._conn.
                               _device_handler.transform_reply())\

@@ -1,3 +1,7 @@
+from copy import deepcopy
+import re
+
+from lxml import etree
 from lxml.builder import E
 from jnpr.junos.factory.table import Table
 from jnpr.junos import jxml
@@ -9,13 +13,14 @@ class CfgTable(Table):
     # CONSTRUCTOR
     # -----------------------------------------------------------------------
 
-    def __init__(self, dev):
-        Table.__init__(self, dev)       # call parent constructor
+    def __init__(self, dev=None, xml=None, path=None):
+        Table.__init__(self, dev, xml, path)       # call parent constructor
 
         self._data_dict = self.DEFINE  # crutch
         self.ITEM_NAME_XPATH = self._data_dict.get('key', 'name')
         self.ITEM_XPATH = self._data_dict['get']
         self.view = self._data_dict.get('view')
+        self._options = self._data_dict.get('options')
 
     # -----------------------------------------------------------------------
     # PROPERTIES
@@ -58,6 +63,7 @@ class CfgTable(Table):
         to retrieve the specifc data
         """
         xpath = self._data_dict['get']
+        self._get_xpath = '//configuration/' + xpath
         top = E('configuration')
         dot = top
         for name in xpath.split('/'):
@@ -73,6 +79,13 @@ class CfgTable(Table):
         simple = lambda: [E(key_xpath.replace('_', '-'), key_value)]
         composite = lambda: [E(xp.replace('_', '-'), xv)
                              for xp, xv in zip(key_xpath, key_value)]
+        return simple() if isinstance(key_xpath, str) else composite()
+
+    def _grindxpath(self, key_xpath, key_value):
+        """ returns xpath elements for key values """
+        simple = lambda: "[{0}='{1}']".format(key_xpath.replace('_', '-'), key_value)
+        composite = lambda: "[{0}]".format(' and '.join(["{0}='{1}'".format(xp.replace('_', '-'), xv)
+                                                         for xp, xv in zip(key_xpath, key_value)]))
         return simple() if isinstance(key_xpath, str) else composite()
 
     def _encode_requiredkeys(self, get_cmd, kvargs):
@@ -91,13 +104,18 @@ class CfgTable(Table):
 
             # now link this item into the XML command, where key_name
             # designates the XML parent element
-            dot = get_cmd.find('.//' + key_name.replace('_', '-'))
+            key_name = key_name.replace('_', '-')
+            dot = get_cmd.find('.//' + key_name)
             if dot is None:
                 raise RuntimeError(
                     "Unable to find parent XML for key: '%s'" %
                     key_name)
             for _at, _add in enumerate(add_keylist_xml):
                 dot.insert(_at, _add)
+
+            # Add required key values to _get_xpath
+            xid = re.search(r"\b{0}\b".format(key_name), self._get_xpath).start() + len(key_name)
+            self._get_xpath = self._get_xpath[:xid] + self._grindxpath(key_xpath, key_value) + self._get_xpath[xid:]
 
     def _encode_namekey(self, get_cmd, dot, namekey_value):
         """
@@ -141,6 +159,14 @@ class CfgTable(Table):
           *OPTIONAL* options to pass to get-configuration.  By default
           {'inherit': 'inherit', 'groups': 'groups'} is sent.
         """
+        if self._lxml is not None:
+            return self
+
+        if self._path is not None:
+            # for loading from local file-path
+            self.xml = etree.parse(self._path).getroot()
+            return self
+
         if self.keys_required is True and not len(kvargs):
             raise ValueError(
                 "This table has required-keys\n",
@@ -185,14 +211,34 @@ class CfgTable(Table):
         if 'options' in kvargs:
             options = kvargs.get('options') or {}
         else:
-            options = jxml.INHERIT_GROUPS
+            if self._options is not None:
+                options = self._options
+            else:
+                options = jxml.INHERIT_GROUPS
 
         # for debug purposes
         self._get_cmd = get_cmd
         self._get_opt = options
 
         # retrieve the XML configuration
-        self.xml = self.RPC.get_config(get_cmd, options=options)
+        # Check to see if running on box
+        if self._dev.ON_JUNOS:
+            try:
+                from junos import Junos_Configuration
+
+                # If part of commit script use the context
+                if Junos_Configuration is not None:
+                    # Convert the onbox XML to ncclient reply
+                    config = jxml.conf_transform(deepcopy(jxml.cscript_conf(Junos_Configuration)),
+                                                 subSelectionXPath=self._get_xpath)
+                    self.xml = config.getroot()
+                else:
+                    self.xml = self.RPC.get_config(get_cmd, options=options)
+            # If onbox import missing fallback to RPC - possibly raise exception in future
+            except ImportError:
+                self.xml = self.RPC.get_config(get_cmd, options=options)
+        else:
+            self.xml = self.RPC.get_config(get_cmd, options=options)
 
         # return self for call-chaining, yo!
         return self

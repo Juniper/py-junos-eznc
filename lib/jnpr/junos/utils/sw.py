@@ -10,7 +10,7 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
-from jnpr.junos.exception import SwRollbackError, RpcTimeoutError
+from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
 
 """
 Software Installation Utilities
@@ -59,17 +59,8 @@ class SW(Util):
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True)
-        self._mixed_VC = self._multi_VC and self._check_mixed_VC()
+        self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
 
-    def _check_mixed_VC(self):
-        try:
-            op = self._dev.rpc.get_virtual_chassis_information()
-            master = op.xpath(
-                './/member-list/member[member-role="Master*"]')[0]
-            return master.findtext('member-mixed-mode') == 'Y' \
-                and master.findtext('member-route-mode') == 'VC'
-        except:
-            return False
     # -----------------------------------------------------------------------
     # CLASS METHODS
     # -----------------------------------------------------------------------
@@ -226,22 +217,33 @@ class SW(Util):
         errcode = int(rsp.findtext('package-result'))
         return True if 0 == errcode else rsp.findtext('output').strip()
 
-    def remote_checksum(self, remote_package):
+    def remote_checksum(self, remote_package, timeout=300):
         """
         Computes the MD5 checksum on the remote device.
 
         :param str remote_package:
             The file-path on the remote Junos device
 
+        :param int timeout:
+          The amount of time (seconds) before declaring an RPC timeout.
+          The default RPC timeout is generally around 30 seconds.  So this
+          :timeout: value will be used in the context of the checksum process.
+          Defaults to 5 minutes (5*60=300)
+
         :returns:
-            The MD5 checksum string
+            * The MD5 checksum string
+            * ``False`` when the **remote_package** is not found.
 
-        :raises RpcError: when the **remote_package** is not found.
-
-        .. todo:: should trap the error and return ``None`` instead.
+        :raises RpcError: RPC errors other than **remote_package** not found.
         """
-        rsp = self.rpc.get_checksum_information(path=remote_package)
-        return rsp.findtext('.//checksum').strip()
+        try:
+            rsp = self.rpc.get_checksum_information(path=remote_package, dev_timeout=timeout)
+            return rsp.findtext('.//checksum').strip()
+        except RpcError as e:
+            if hasattr(e, 'errs') and ('No such file or directory' in e.errs['message']):
+                return None
+            else:
+                raise
 
     # -------------------------------------------------------------------------
     # safe_copy - copies the package and performs checksum
@@ -325,7 +327,7 @@ class SW(Util):
         5. validates the package if :validate: is True
         6. installs the package
 
-        .. warning:: This process has been validated on "simple" deployments.
+        .. warning:: This process has been validated on the following deployments.
 
                       Tested:
 
@@ -333,6 +335,7 @@ class SW(Util):
                       * MX dual-RE
                       * EX virtual-chassis when all same HW model
                       * QFX virtual-chassis when all same HW model
+                      * QFX/EX mixed virtual-chassis
 
                       Known Restrictions:
 

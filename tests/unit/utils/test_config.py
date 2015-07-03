@@ -80,12 +80,19 @@ class TestConfig(unittest.TestCase):
                                 **{'synchronize': True, 'full': True, 'force-synchronize': True})
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
-    def test_config_commit_exception(self, mock_jxml):
+    def test_config_commit_xml_exception(self, mock_jxml):
         class MyException(Exception):
-            xml = 'test'
+            xml = etree.fromstring('<test/>')
         self.conf.rpc.commit_configuration = \
             MagicMock(side_effect=MyException)
-        self.assertRaises(AttributeError, self.conf.commit)
+        self.assertRaises(CommitError, self.conf.commit)
+
+    def test_config_commit_exception(self):
+        class MyException(Exception):
+            pass
+        self.conf.rpc.commit_configuration = \
+            MagicMock(side_effect=MyException)
+        self.assertRaises(MyException, self.conf.commit)
 
     def test_config_commit_exception_RpcError(self):
         ex = RpcError(rsp='ok')

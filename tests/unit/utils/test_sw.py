@@ -1,7 +1,7 @@
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
-import unittest
+import unittest2 as unittest
 from nose.plugins.attrib import attr
 
 import os
@@ -146,6 +146,31 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.validate(package))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_not_found(self, mock_execute):
+        xml = '''<rpc-error>
+        <error-severity>error</error-severity>
+        <error-message>
+        md5: /var/tmp/123: No such file or directory
+        </error-message>
+        </rpc-error>'''
+        mock_execute.side_effect = RpcError(rsp=etree.fromstring(xml))
+        package = 'test.tgz'
+        self.assertEqual(self.sw.remote_checksum(package), None)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_not_rpc_error(self, mock_execute):
+        xml = '''<rpc-error>
+        <error-severity>error</error-severity>
+        <error-message>
+        something else!
+        </error-message>
+        </rpc-error>'''
+        mock_execute.side_effect = RpcError(rsp=etree.fromstring(xml))
+        package = 'test.tgz'
+        with self.assertRaises(RpcError):
+            self.sw.remote_checksum(package)
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
@@ -269,27 +294,6 @@ class TestSW(unittest.TestCase):
                 self.sw.install,
                 pkg_set='install.tgz',
                 cleanfs=False)
-
-    @patch('jnpr.junos.Device.execute')
-    def test_sw_check_mixed_VC_false(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.assertFalse(self.sw._check_mixed_VC())
-
-    @patch('jnpr.junos.Device.execute')
-    def test_sw_check_mixed_VC_true(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.sw._multi_VC = True
-        rsp = """<rpc-reply><virtual-chassis-information>
-        <member-list>
-            <member>
-                <member-mixed-mode>Y</member-mixed-mode>
-                <member-route-mode>VC</member-route-mode>
-                <member-role>Master*</member-role>
-            </member>
-        </member-list></virtual-chassis-information></rpc-reply>
-        """
-        mock_execute.side_effect = etree.XML(rsp)
-        self.assertTrue(self.sw._check_mixed_VC())
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_mixed_vc_TypeError(self, mock_pkgadd):
@@ -416,7 +420,7 @@ class TestSW(unittest.TestCase):
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             # Little hack for mocked execute
-            if kwargs == {'dev_timeout': 1800}:
+            if 'dev_timeout' in kwargs:
                 return self._read_file(args[0].tag + '.xml')
             if 'path' in kwargs:
                 if kwargs['path'] == '/packages':

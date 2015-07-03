@@ -1,4 +1,5 @@
 from jnpr.junos import jxml
+from lxml.etree import _Element
 
 
 class RpcError(Exception):
@@ -20,15 +21,18 @@ class RpcError(Exception):
         self.dev = dev
         self.timeout = timeout
         self.re = re
+        self.rpc_error = None
+
+        if isinstance(self.rsp, _Element):
+            self.rpc_error = jxml.rpc_error(self.rsp)
+            if self.errs is None:
+                self.errs = self.rpc_error
 
     def __repr__(self):
         """
           pprints the response XML attribute
         """
-        if self.rsp is not None:
-            self.rpc_error = jxml.rpc_error(self.rsp)
-            if self.errs is None:
-                self.errs = self.rpc_error
+        if self.rpc_error is not None:
             return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
                 .format(self.__class__.__name__, self.rpc_error['severity'],
                         self.rpc_error['bad_element'], self.rpc_error['message'])
@@ -40,11 +44,8 @@ class CommitError(RpcError):
     """
     Generated in response to a commit-check or a commit action.
     """
-    def __init__(self, cmd=None, rsp=None, errs=None):
+    def __init__(self, rsp, cmd=None, errs=None):
         RpcError.__init__(self, cmd, rsp, errs)
-        self.rpc_error = jxml.rpc_error(rsp)
-        if self.errs is None:
-            self.errs = self.rpc_error
 
     def __repr__(self):
         return "{0}(edit_path: {1}, bad_element: {2}, message: {3})"\
@@ -58,11 +59,8 @@ class ConfigLoadError(RpcError):
     """
     Generated in response to a failure when loading a configuration.
     """
-    def __init__(self, cmd=None, rsp=None, errs=None):
+    def __init__(self, rsp, cmd=None, errs=None):
         RpcError.__init__(self, cmd, rsp, errs)
-        self.rpc_error = jxml.rpc_error(rsp)
-        if self.errs is None:
-            self.errs = self.rpc_error
 
     def __repr__(self):
         return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
@@ -79,7 +77,6 @@ class LockError(RpcError):
     """
     def __init__(self, rsp):
         RpcError.__init__(self, rsp=rsp)
-        self.rpc_error = jxml.rpc_error(rsp)
 
 
 class UnlockError(RpcError):
@@ -89,7 +86,6 @@ class UnlockError(RpcError):
     """
     def __init__(self, rsp):
         RpcError.__init__(self, rsp=rsp)
-        self.rpc_error = jxml.rpc_error(rsp)
 
 
 class PermissionError(RpcError):
@@ -100,7 +96,7 @@ class PermissionError(RpcError):
     PermissionError.message gives you the specific RPC that cause
     the exceptions
     """
-    def __init__(self, cmd=None, rsp=None):
+    def __init__(self, rsp, cmd=None):
         RpcError.__init__(self, cmd=cmd, rsp=rsp)
         self.message = rsp.findtext('.//bad-element')
 
@@ -123,7 +119,7 @@ class SwRollbackError(RpcError):
     """
     Generated in response to a SW rollback error.
     """
-    def __init__(self, re=None, rsp=None):
+    def __init__(self, rsp, re=None):
         RpcError.__init__(self, re=re, rsp=rsp)
 
     def __repr__(self):

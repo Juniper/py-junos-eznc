@@ -24,7 +24,7 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import timeoutDecorator
+from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -218,6 +218,27 @@ class Device(object):
         """
         return self._manages
 
+    # ------------------------------------------------------------------------
+    # property: transform
+    # ------------------------------------------------------------------------
+
+    @property
+    def transform(self):
+        """
+        :returns: the current RPC XML Transformation.
+        """
+        return self._conn._device_handler.transform_reply
+
+    @transform.setter
+    def transform(self, func):
+        """
+        Used to change the RPC XML Transformation.
+
+        :param lambda value:
+            New transform lambda
+        """
+        self._conn._device_handler.transform_reply = func
+
     # -----------------------------------------------------------------------
     # OVERLOADS
     # -----------------------------------------------------------------------
@@ -288,6 +309,10 @@ class Device(object):
             *OPTIONAL* The path to the SSH configuration file.
             This can be used to load SSH information from a configuration file.
             By default ~/.ssh/config is queried.
+
+        :param bool normalize:
+            *OPTIONAL* default is ``False``.  If ``True`` then the
+            XML returned by :meth:`execute` will have whitespace normalized
         """
 
         # ----------------------------------------
@@ -298,6 +323,7 @@ class Device(object):
 
         self._port = kvargs.get('port', 830)
         self._gather_facts = kvargs.get('gather_facts', True)
+        self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
@@ -358,6 +384,10 @@ class Device(object):
         :param bool auto_probe:
             If non-zero then this enables auto_probe and defines the amount
             of time/seconds for the probe timeout
+
+        :param bool normalize:
+            If set to ``True``/``False`` will override the device
+            instance value for only this open process
 
         :returns Device: Device instance (*self*).
 
@@ -452,6 +482,13 @@ class Device(object):
 
         self.connected = True
 
+        self._nc_transform = self.transform
+        self._norm_transform = lambda: JXML.normalize_xslt
+
+        normalize = kvargs.get('normalize', self._normalize)
+        if normalize is True:
+            self.transform = self._norm_transform
+
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
         if gather_facts is True:
             self.facts_refresh()
@@ -465,6 +502,7 @@ class Device(object):
         self._conn.close_session()
         self.connected = False
 
+    @normalizeDecorator
     @timeoutDecorator
     def execute(self, rpc_cmd, **kvargs):
         """

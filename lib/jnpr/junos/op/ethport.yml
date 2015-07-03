@@ -15,6 +15,7 @@ EthPortView:
   fields:
     oper: oper-status
     admin: admin-status
+    description: description
     mtu: { mtu : int }
     link_mode: link-mode
     macaddr: current-physical-address
