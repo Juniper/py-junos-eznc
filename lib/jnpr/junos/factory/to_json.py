@@ -46,6 +46,9 @@ class PyEzJSONEncoder(json.JSONEncoder):
             obj = obj.v_dict
         elif isinstance(obj, etree._Element):
             def recursive_dict(element):
+                # JSON does not support comments - pass over them
+                if isinstance(element, etree._Comment):
+                    element = element.getnext()
                 return element.tag, dict(map(recursive_dict, element)) or element.text
             _, obj = recursive_dict(obj)
         else:
