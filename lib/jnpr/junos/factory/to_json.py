@@ -1,5 +1,7 @@
+from jnpr.junos.jxml import strip_comments_transform
 import json
 from lxml import etree
+from copy import deepcopy
 
 
 class TableJSONEncoder(json.JSONEncoder):
@@ -46,10 +48,9 @@ class PyEzJSONEncoder(json.JSONEncoder):
             obj = obj.v_dict
         elif isinstance(obj, etree._Element):
             def recursive_dict(element):
-                # JSON does not support comments - pass over them
-                if isinstance(element, etree._Comment):
-                    element = element.getnext()
                 return element.tag, dict(map(recursive_dict, element)) or element.text
+            # JSON does not support comments - strip them
+            obj = strip_comments_transform(deepcopy(obj)).getroot()
             _, obj = recursive_dict(obj)
         else:
             obj = super(PyEzJSONEncoder, self).default(obj)
