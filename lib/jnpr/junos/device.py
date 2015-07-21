@@ -576,7 +576,7 @@ class Device(object):
         # From 14.2 onward, junos supports JSON, so now code can be written as
         # dev.rpc.get_route_engine_information({'format': 'json'})
 
-        if rpc_cmd_e.attrib.get('format') == 'json':
+        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
             return json.loads(rpc_rsp_e.text)
 
         # This section is here for the possible use of something other than ncclient
