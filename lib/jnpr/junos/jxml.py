@@ -113,6 +113,25 @@ normalize_xslt = '''\
         </xsl:stylesheet>'''
 
 
+# XSLT to strip comments
+strip_comments_xslt = '''\
+<xsl:stylesheet version="1.0"
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+  <xsl:strip-space elements="*"/>
+
+  <xsl:template match="node()|@*" name="identity">
+        <xsl:copy>
+            <xsl:apply-templates select="node()|@*"/>
+        </xsl:copy>
+   </xsl:template>
+   <xsl:template match="comment()"/>
+</xsl:stylesheet>'''
+
+strip_xslt_root = etree.XML(strip_comments_xslt)
+strip_comments_transform = etree.XSLT(strip_xslt_root)
+
+
 def remove_namespaces(xml):
     for elem in xml.getiterator():
         i = elem.tag.find('}')
