@@ -33,14 +33,16 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.coverage',
-    'sphinx.ext.todo',    
+    'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
 ]
+
 
 def skip(app, what, name, obj, skip, options):
     if name == "__init__":
         return False
     return skip
+
 
 def setup(app):
     app.connect("autodoc-skip-member", skip)
@@ -129,10 +131,12 @@ html_theme_options = {
     'navbar_pagenav_name': "Classes",
     'source_link_position': "footer",
     'navbar_links': [
-        ("Wiki", "https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ", True),
+        ("Wiki",
+         "https://techwiki.juniper.net/Automation_Scripting/Junos_PyEZ",
+         True),
         ("Forum", "http://groups.google.com/group/junos-python-ez", True),
-        ],
-    }
+    ],
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
@@ -173,10 +177,10 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-   '**': [
-       'globaltoc.html',
-       'localtoc.html',
-       ]
+    '**': [
+        'globaltoc.html',
+        'localtoc.html',
+    ]
 }
 
 # Additional templates that should be rendered to pages, maps page names to
@@ -216,22 +220,22 @@ htmlhelp_basename = 'JunosPyEZdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'JunosPyEZ.tex', u'Junos PyEZ Documentation',
-   u'Juniper Networks, Inc.', 'manual'),
+    ('index', 'JunosPyEZ.tex', u'Junos PyEZ Documentation',
+     u'Juniper Networks, Inc.', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -274,9 +278,10 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'JunosPyEZ', u'Junos PyEZ Documentation',
-   u'Juniper Networks, Inc.', 'JunosPyEZ', 'One line description of project.',
-   'Miscellaneous'),
+    ('index', 'JunosPyEZ', u'Junos PyEZ Documentation',
+     u'Juniper Networks, Inc.', 'JunosPyEZ',
+     'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -303,10 +308,10 @@ epub_copyright = u'2014, Juniper Networks, Inc.'
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Junos PyEZ'
 
-# The HTML theme for the epub output. Since the default themes are not optimized
-# for small screen space, using the same theme for HTML and epub output is
-# usually not wise. This defaults to 'epub', a theme designed to save visual
-# space.
+# The HTML theme for the epub output. Since the default themes are not
+# optimized for small screen space, using the same theme for HTML and epub
+# output is usually not wise. This defaults to 'epub', a theme designed to
+# save visual space.
 #epub_theme = 'epub'
 
 # The language of the text. It defaults to the language option
