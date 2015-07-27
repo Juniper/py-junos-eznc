@@ -2,7 +2,6 @@
 import hashlib
 import re
 from os import path
-import logging
 
 # 3rd-party modules
 from lxml.builder import E
@@ -146,16 +145,6 @@ class SW(Util):
                 _progress(
                     "%s: %s / %s (%s%%)" %
                     (_path, _xfrd, _total, str(pct)))
-
-        # check for the logger barncale for 'paramiko.transport'
-        plog = logging.getLogger('paramiko.transport')
-        if not plog.handlers:
-            class NullHandler(logging.Handler):
-
-                def emit(self, record):
-                    pass
-
-            plog.addHandler(NullHandler())
 
         # execute the secure-copy with the Python SCP module
         with SCP(self._dev, progress=_scp_progress) as scp:
