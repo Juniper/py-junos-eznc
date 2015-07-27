@@ -129,7 +129,7 @@ class Device(object):
         Change the authentication password value.  This is handy in case
         the calling program needs to attempt different passwords.
         """
-        self._password = value
+        self._auth_password = value
 
     # ------------------------------------------------------------------------
     # property: logfile
