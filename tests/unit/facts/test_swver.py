@@ -11,6 +11,7 @@ from jnpr.junos.facts.swver import facts_software_version as software_version, v
 from jnpr.junos.facts.swver import _get_swver
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+from jnpr.junos.exception import RpcError
 
 
 @attr('unit')
@@ -47,14 +48,20 @@ class TestVersionInfo(unittest.TestCase):
 
     def test_version_to_json(self):
         import json
-        self.assertEqual(json.dumps(version_info('11.4R7.5')), '{"major": [11, 4], "type": "R", "build": 5, "minor": "7"}')
+        self.assertEqual(
+            json.dumps(version_info('11.4R7.5')),
+            '{"major": [11, 4], "type": "R", "build": 5, "minor": "7"}')
 
     def test_version_to_yaml(self):
         import yaml
-        self.assertEqual(yaml.dump(version_info('11.4R7.5')), "build: 5\nmajor: !!python/tuple [11, 4]\nminor: '7'\ntype: R\n")
+        self.assertEqual(
+            yaml.dump(version_info('11.4R7.5')),
+            "build: 5\nmajor: !!python/tuple [11, 4]\nminor: '7'\ntype: R\n")
 
     def test_version_iter(self):
-        self.assertItemsEqual(version_info('11.4R7.5'), [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
+        self.assertItemsEqual(
+            version_info('11.4R7.5'),
+            [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
 
 
 @attr('unit')
@@ -74,6 +81,17 @@ class TestSwver(unittest.TestCase):
         self.facts['vc_capable'] = True
         _get_swver(self.dev, self.facts)
         self.dev.rpc.cli.assert_called_with('show version all-members', format='xml')
+
+    def test_get_swver_vc_capable_standalone(self):
+        def raise_ex(*args):
+            if args[0] == 'show version all-members':
+                raise RpcError()
+        self.dev.rpc.cli = MagicMock(
+            side_effect=lambda *args, **kwargs: raise_ex(*args))
+        self.facts['vc_capable'] = True
+        _get_swver(self.dev, self.facts)
+        self.dev.rpc.cli.assert_called_with('show version invoke-on all-routing-engines',
+                                            format='xml')
 
     @patch('jnpr.junos.Device.execute')
     def test_swver(self, mock_execute):
