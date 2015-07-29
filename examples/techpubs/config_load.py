@@ -1,69 +1,62 @@
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import *
+from jnpr.junos.exception import ConnectError, LockError, UnlockError, ConfigLoadError, CommitError
 
 host = 'dc1a.example.com'
 conf_file = 'configs/junos-config-add-op-script.conf'
 
-def main():
-    dev = Device(host=host)
 
+def main():
     # open a connection with the device and start a NETCONF session
     try:
+        dev = Device(host=host)
         dev.open()
-    except Exception as err:
-        print "Cannot connect to device:", err
+    except ConnectError as err:
+        print "Cannot connect to device: {0}".format(err)
         return
 
-    dev.bind( cu=Config )
+    dev.bind(cu=Config)
 
     # Lock the configuration, load configuration changes, and commit
     print "Locking the configuration"
     try:
         dev.cu.lock()
-    except LockError:
-        print "Error: Unable to lock configuration"
+    except LockError as err:
+        print "Unable to lock configuration: {0}".format(err)
         dev.close()
         return
 
     print "Loading configuration changes"
     try:
         dev.cu.load(path=conf_file, merge=True)
-    except ValueError as err:
-        print err.message
-
-    except Exception as err:
-        if err.rsp.find('.//ok') is None:
-            rpc_msg = err.rsp.findtext('.//error-message')
-            print "Unable to load configuration changes: ", rpc_msg
-
+    except (ConfigLoadError, Exception) as err:
+        print "Unable to load configuration changes: {0}".format(err)
         print "Unlocking the configuration"
         try:
                 dev.cu.unlock()
         except UnlockError:
-                print "Error: Unable to unlock configuration"
+            print "Unable to unlock configuration: {0}".format(err)
         dev.close()
         return
 
     print "Committing the configuration"
     try:
-        dev.cu.commit()
-    except CommitError:
-        print "Error: Unable to commit configuration"
+        dev.cu.commit(comment='Loaded by example.')
+    except CommitError as err:
+        print "Unable to commit configuration: {0}".format(err)
         print "Unlocking the configuration"
         try:
             dev.cu.unlock()
-        except UnlockError:
-            print "Error: Unable to unlock configuration"
+        except UnlockError as err:
+            print "Unable to unlock configuration: {0}".format(err)
         dev.close()
         return
 
     print "Unlocking the configuration"
     try:
-         dev.cu.unlock()
-    except UnlockError:
-         print "Error: Unable to unlock configuration"
-
+        dev.cu.unlock()
+    except UnlockError as err:
+        print "Unable to unlock configuration: {0}".format(err)
 
     # End the NETCONF session and close the connection
     dev.close()

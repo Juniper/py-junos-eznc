@@ -1,0 +1,38 @@
+2015-07-29 12:05:50,138:dc1a.example.com: Information logged in install.log
+2015-07-29 12:05:51,914:dc1a.example.com: Starting the software upgrade process: jinstall-13.3R1.8-domestic-signed.tgz
+2015-07-29 12:05:51,914:dc1a.example.com: computing local checksum on: jinstall-13.3R1.8-domestic-signed.tgz
+2015-07-29 12:05:52,621:dc1a.example.com: cleaning filesystem ...
+2015-07-29 12:06:03,091:paramiko.transport: starting thread (client mode): 0x3625ba8L
+2015-07-29 12:06:03,119:paramiko.transport: Connected (version 2.0, client OpenSSH_6.6)
+2015-07-29 12:06:03,190:paramiko.transport: kex algos:[u'curve25519-sha256@libssh.org', u'ecdh-sha2-nistp256', u'ecdh-sha2-nistp384', u'ecdh-sha2-nistp521', u'diffie-hellman-group-exchange-sha256', u'diffie-hellman-group-exchange-sha1', u'diffie-hellman-group14-sha1', u'diffie-hellman-group1-sha1'] server key:[u'ssh-rsa', u'ssh-dss', u'ssh-ed25519'] client encrypt:[u'aes128-ctr', u'aes192-ctr', u'aes256-ctr', u'arcfour256', u'arcfour128', u'chacha20-poly1305@openssh.com', u'aes128-cbc', u'3des-cbc', u'blowfish-cbc', u'cast128-cbc', u'aes192-cbc', u'aes256-cbc', u'arcfour', u'rijndael-cbc@lysator.liu.se'] server encrypt:[u'aes128-ctr', u'aes192-ctr', u'aes256-ctr', u'arcfour256', u'arcfour128', u'chacha20-poly1305@openssh.com', u'aes128-cbc', u'3des-cbc', u'blowfish-cbc', u'cast128-cbc', u'aes192-cbc', u'aes256-cbc', u'arcfour', u'rijndael-cbc@lysator.liu.se'] client mac:[u'hmac-md5-etm@openssh.com', u'hmac-sha1-etm@openssh.com', u'umac-64-etm@openssh.com', u'umac-128-etm@openssh.com', u'hmac-sha2-256-etm@openssh.com', u'hmac-sha2-512-etm@openssh.com', u'hmac-ripemd160-etm@openssh.com', u'hmac-sha1-96-etm@openssh.com', u'hmac-md5-96-etm@openssh.com', u'hmac-md5', u'hmac-sha1', u'umac-64@openssh.com', u'umac-128@openssh.com', u'hmac-sha2-256', u'hmac-sha2-512', u'hmac-ripemd160', u'hmac-ripemd160@openssh.com', u'hmac-sha1-96', u'hmac-md5-96'] server mac:[u'hmac-md5-etm@openssh.com', u'hmac-sha1-etm@openssh.com', u'umac-64-etm@openssh.com', u'umac-128-etm@openssh.com', u'hmac-sha2-256-etm@openssh.com', u'hmac-sha2-512-etm@openssh.com', u'hmac-ripemd160-etm@openssh.com', u'hmac-sha1-96-etm@openssh.com', u'hmac-md5-96-etm@openssh.com', u'hmac-md5', u'hmac-sha1', u'umac-64@openssh.com', u'umac-128@openssh.com', u'hmac-sha2-256', u'hmac-sha2-512', u'hmac-ripemd160', u'hmac-ripemd160@openssh.com', u'hmac-sha1-96', u'hmac-md5-96'] client compress:[u'none', u'zlib@openssh.com'] server compress:[u'none', u'zlib@openssh.com'] client lang:[u''] server lang:[u''] kex follows?False
+2015-07-29 12:06:03,190:paramiko.transport: Ciphers agreed: local=aes128-ctr, remote=aes128-ctr
+2015-07-29 12:06:03,190:paramiko.transport: using kex diffie-hellman-group14-sha1; server key type ssh-rsa; cipher: local aes128-ctr, remote aes128-ctr; mac: local hmac-sha1, remote hmac-sha1; compression: local none, remote none
+2015-07-29 12:06:03,352:paramiko.transport: Switch to new keys ...
+2015-07-29 12:06:03,354:paramiko.transport: Adding ssh-rsa host key for 192.168.74.35: 90abe75bbdda54ba5c6393f97f046e71
+2015-07-29 12:06:03,464:paramiko.transport: userauth is OK
+2015-07-29 12:06:03,484:paramiko.transport: Authentication (password) successful!
+2015-07-29 12:06:03,490:paramiko.transport: [chan 0] Max packet in: 32768 bytes
+2015-07-29 12:06:03,500:paramiko.transport: [chan 0] Max packet out: 32768 bytes
+2015-07-29 12:06:03,500:paramiko.transport: Secsh channel 0 opened.
+2015-07-29 12:06:03,519:paramiko.transport: [chan 0] Sesch channel 0 request ok
+2015-07-29 12:06:07,283:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 22315008 / 223076571 (10%)
+2015-07-29 12:06:11,134:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 44630016 / 223076571 (20%)
+2015-07-29 12:06:14,848:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 66928640 / 223076571 (30%)
+2015-07-29 12:06:18,470:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 89243648 / 223076571 (40%)
+2015-07-29 12:06:22,154:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 111542272 / 223076571 (50%)
+2015-07-29 12:06:25,989:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 133857280 / 223076571 (60%)
+2015-07-29 12:06:29,671:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 156155904 / 223076571 (70%)
+2015-07-29 12:06:33,492:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 178470912 / 223076571 (80%)
+2015-07-29 12:06:37,239:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 200769536 / 223076571 (90%)
+2015-07-29 12:06:40,882:dc1a.example.com: jinstall-13.3R1.8-domestic-signed.tgz: 223076571 / 223076571 (100%)
+2015-07-29 12:06:40,915:paramiko.transport: [chan 0] EOF sent (0)
+2015-07-29 12:06:40,923:paramiko.transport: EOF in transport thread
+2015-07-29 12:06:40,924:dc1a.example.com: computing remote checksum on: /var/tmp/jinstall-13.3R1.8-domestic-signed.tgz
+2015-07-29 12:06:42,492:dc1a.example.com: checksum check passed.
+2015-07-29 12:06:42,492:dc1a.example.com: validating software against current config, please be patient ...
+2015-07-29 12:07:22,394:dc1a.example.com: installing software ... please be patient ...
+2015-07-29 12:07:35,927:dc1a.example.com: Software installation complete. Rebooting
+2015-07-29 12:07:36,094:dc1a.example.com: Upgrade pending reboot cycle, please be patient.
+2015-07-29 12:07:36,094:dc1a.example.com: Shutdown NOW!
+[pid 3361]
+

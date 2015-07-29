@@ -1,4 +1,5 @@
 from jnpr.junos import Device
+from jnpr.junos.exception import ConnectError
 from jnpr.junos.utils.config import Config
 
 host = 'dc1a.example.com'
@@ -11,8 +12,8 @@ def main():
     # open a connection with the device and start a NETCONF session
     try:
         dev.open()
-    except Exception as err:
-        print "Cannot connect to device:", err
+    except ConnectError as err:
+        print "Cannot connect to device: {0}".format(err)
         return
 
     # Create an instance of Config
@@ -28,8 +29,6 @@ def main():
         else:
             print "Rescue configuration found:"
             print rescue
-    except ValueError as err:
-        print err.message
     except Exception as err:
         print err
 
