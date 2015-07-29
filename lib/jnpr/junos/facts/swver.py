@@ -80,12 +80,15 @@ class version_info(object):
 def _get_swver(dev, facts):
     # See if we're VC Capable
     if facts['vc_capable'] is True:
-        return dev.rpc.cli("show version all-members", format='xml')
-    else:
         try:
-            return dev.rpc.cli("show version invoke-on all-routing-engines", format='xml')
+            return dev.rpc.cli("show version all-members", format='xml')
         except:
-            return dev.rpc.get_software_information()
+            pass
+    try:
+        return dev.rpc.cli("show version invoke-on all-routing-engines",
+                           format='xml')
+    except:
+        return dev.rpc.get_software_information()
 
 
 def facts_software_version(junos, facts):
