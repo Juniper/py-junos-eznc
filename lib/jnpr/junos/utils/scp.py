@@ -17,8 +17,8 @@ class SCP(object):
 
         from jnpr.junos.utils.scp import SCP
 
-        with SCP( dev, progress=_scp_progress ) as scp:
-            scp.put( package, remote_path )
+        with SCP(dev, progress=True) as scp:
+            scp.put(package, remote_path)
 
     """
     def __init__(self, junos, **scpargs):
@@ -30,6 +30,27 @@ class SCP(object):
         """
         self._junos = junos
         self._scpargs = scpargs
+        if 'progress' not in self._scpargs or self._scpargs['progress'] is True:
+            self._scpargs['progress'] = self._scp_progress
+
+    def _progress(self, report):
+        """ simple progress report function """
+        print self._junos.hostname + ": " + report
+
+    def _scp_progress(self, _path, _total, _xfrd):
+        # init static variable
+        if 'by10pct' not in locals():
+            by10pct = 0
+
+        # calculate current percentage xferd
+        pct = int(float(_xfrd) / float(_total) * 100)
+
+        # if 10% more has been copied, then print a message
+        if 0 == (pct % 10) and pct != by10pct:
+            by10pct = pct
+            self._progress(
+                "%s: %s / %s (%s%%)" %
+                (_path, _xfrd, _total, str(pct)))
 
     def open(self, **scpargs):
         """

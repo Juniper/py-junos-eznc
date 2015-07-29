@@ -112,7 +112,7 @@ class SW(Util):
     # put - SCP put the image onto the device
     # -------------------------------------------------------------------------
 
-    def put(self, package, remote_path='/var/tmp', progress=None):
+    def put(self, package, remote_path='/var/tmp', progress=True):
         """
         SCP 'put' the package file from the local server to the remote device.
 
@@ -123,31 +123,11 @@ class SW(Util):
           The directory on the device where the package will be copied to.
 
         :param func progress:
-          Callback function to indicate progress.  You can use :meth:`SW.progress`
-          for basic reporting.  See that class method for details.
+          Callback function to indicate progress.  If set to True uses :meth:`scp._scp_progress`
+          for basic reporting by default.  See that class method for details.
         """
-        def _progress(report):
-            # report progress only if a progress callback was provided
-            if progress is not None:
-                progress(self._dev, report)
-
-        def _scp_progress(_path, _total, _xfrd):
-            # init static variable
-            if not hasattr(_scp_progress, 'by10pct'):
-                _scp_progress.by10pct = 0
-
-            # calculate current percentage xferd
-            pct = int(float(_xfrd) / float(_total) * 100)
-
-            # if 10% more has been copied, then print a message
-            if 0 == (pct % 10) and pct != _scp_progress.by10pct:
-                _scp_progress.by10pct = pct
-                _progress(
-                    "%s: %s / %s (%s%%)" %
-                    (_path, _xfrd, _total, str(pct)))
-
         # execute the secure-copy with the Python SCP module
-        with SCP(self._dev, progress=_scp_progress) as scp:
+        with SCP(self._dev, progress=progress) as scp:
             scp.put(package, remote_path)
 
     # -------------------------------------------------------------------------

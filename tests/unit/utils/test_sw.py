@@ -116,8 +116,8 @@ class TestSW(unittest.TestCase):
     def test_sw_put_progress(self, mock_enter, mock_scp, mock_exit):
         package = 'test.tgz'
         mock_scp.side_effect = self._fake_scp
-        self.sw.put(package, progress=self._myprogress)
-        self.assertEqual(mock_scp.call_args_list[0][1]['progress'].by10pct, 50)
+        with self.capture(self.sw.put, package, progress=self._my_scp_progress) as output:
+            self.assertEqual('test.tgz 100 50\n', output)
 
     def _fake_scp(self, *args, **kwargs):
         progress = kwargs['progress']
@@ -397,6 +397,9 @@ class TestSW(unittest.TestCase):
 
     def _myprogress(self, dev, report):
         pass
+
+    def _my_scp_progress(self, _path, _total, _xfrd):
+        print _path, _total, _xfrd
 
     @contextmanager
     def capture(self, command, *args, **kwargs):
