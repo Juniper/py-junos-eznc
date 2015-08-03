@@ -345,6 +345,7 @@ class Device(object):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             self._conf_auth_user = None
+            self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_path = self._sshconf_lkup()
