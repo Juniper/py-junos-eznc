@@ -3,7 +3,7 @@
 
 <multi-routing-engine-item>
 
-<re-name>sfc0-re0</re-name>
+<re-name>abc-re0</re-name>
 
 <software-information>
 <host-name>pyez</host-name>
@@ -17,134 +17,6 @@
 <name>junos</name>
 <comment>JUNOS Base OS boot [14.2R4]</comment>
 </package-information>
-<package-information>
-<name>jbase</name>
-<comment>JUNOS Base OS Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jplatform</name>
-<comment>JUNOS platform Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jweb</name>
-<comment>JUNOS Web Management [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime</name>
-<comment>JUNOS Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jdocs</name>
-<comment>JUNOS Online Documentation [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-aacl</name>
-<comment>JUNOS Services AACL Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-alg</name>
-<comment>JUNOS Services Application Level Gateways [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-appid</name>
-<comment>JUNOS AppId Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-bgf</name>
-<comment>JUNOS Border Gateway Function package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-cpcd</name>
-<comment>JUNOS Services Captive Portal and Content Delivery Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-hcm</name>
-<comment>JUNOS Services HTTP Content Management package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-idp</name>
-<comment>JUNOS IDP Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-llpdf</name>
-<comment>JUNOS Services LL-PDF Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-jflow</name>
-<comment>JUNOS Services Jflow Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mobile</name>
-<comment>JUNOS Services MobileNext Software package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mss</name>
-<comment>JUNOS Services Mobile Subscriber Service Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-nat</name>
-<comment>JUNOS Services NAT [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ptsp</name>
-<comment>JUNOS Services PTSP Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-rpm</name>
-<comment>JUNOS Services RPM [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-sfw</name>
-<comment>JUNOS Services Stateful Firewall [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-voice</name>
-<comment>JUNOS Voice Services Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jmacsec</name>
-<comment>JUNOS Macsec Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ssl</name>
-<comment>JUNOS Services SSL [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-crypto-base</name>
-<comment>JUNOS Services Crypto [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ipsec</name>
-<comment>JUNOS Services IPSec [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>py-base-i386</name>
-<comment>JUNOS py-base-i386 [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jkernel</name>
-<comment>JUNOS 64-bit Kernel Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jcrypto64</name>
-<comment>JUNOS Crypto Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime64</name>
-<comment>JUNOS 64-bit Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe-common</name>
-<comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe</name>
-<comment>JUNOS Packet Forwarding Engine Support (T-Series) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jroute</name>
-<comment>JUNOS Routing Software Suite [14.2R4]</comment>
-</package-information>
 </software-information>
 </multi-routing-engine-item>
 
@@ -153,8 +25,8 @@
 <re-name>lcc0-re0</re-name>
 
 <software-information>
-<host-name>pyez-lcc0-re0</host-name>
-<product-model>t1600</product-model>
+<host-name>pyez-ddd0-re0</host-name>
+<product-model>t100</product-model>
 <product-name>t1600</product-name>
 <package-information>
 <name>junos-version</name>
@@ -163,134 +35,6 @@
 <package-information>
 <name>junos</name>
 <comment>JUNOS Base OS boot [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jbase</name>
-<comment>JUNOS Base OS Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jplatform</name>
-<comment>JUNOS platform Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jweb</name>
-<comment>JUNOS Web Management [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime</name>
-<comment>JUNOS Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jdocs</name>
-<comment>JUNOS Online Documentation [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-aacl</name>
-<comment>JUNOS Services AACL Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-alg</name>
-<comment>JUNOS Services Application Level Gateways [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-appid</name>
-<comment>JUNOS AppId Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-bgf</name>
-<comment>JUNOS Border Gateway Function package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-cpcd</name>
-<comment>JUNOS Services Captive Portal and Content Delivery Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-hcm</name>
-<comment>JUNOS Services HTTP Content Management package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-idp</name>
-<comment>JUNOS IDP Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-jflow</name>
-<comment>JUNOS Services Jflow Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-llpdf</name>
-<comment>JUNOS Services LL-PDF Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mobile</name>
-<comment>JUNOS Services MobileNext Software package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mss</name>
-<comment>JUNOS Services Mobile Subscriber Service Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-nat</name>
-<comment>JUNOS Services NAT [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ptsp</name>
-<comment>JUNOS Services PTSP Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-rpm</name>
-<comment>JUNOS Services RPM [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-sfw</name>
-<comment>JUNOS Services Stateful Firewall [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-voice</name>
-<comment>JUNOS Voice Services Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jmacsec</name>
-<comment>JUNOS Macsec Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-crypto-base</name>
-<comment>JUNOS Services Crypto [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ssl</name>
-<comment>JUNOS Services SSL [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ipsec</name>
-<comment>JUNOS Services IPSec [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>py-base-i386</name>
-<comment>JUNOS py-base-i386 [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jkernel</name>
-<comment>JUNOS 64-bit Kernel Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jcrypto64</name>
-<comment>JUNOS Crypto Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime64</name>
-<comment>JUNOS 64-bit Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe-common</name>
-<comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe</name>
-<comment>JUNOS Packet Forwarding Engine Support (T-Series) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jroute</name>
-<comment>JUNOS Routing Software Suite [14.2R4]</comment>
 </package-information>
 </software-information>
 </multi-routing-engine-item>
@@ -299,8 +43,8 @@
 <re-name>lcc2-re0</re-name>
 
 <software-information>
-<host-name>pyez-lcc2-re0</host-name>
-<product-model>t1600</product-model>
+<host-name>pyez-ldd2-re0</host-name>
+<product-model>t100</product-model>
 <product-name>t1600</product-name>
 <package-information>
 <name>junos-version</name>
@@ -309,134 +53,6 @@
 <package-information>
 <name>junos</name>
 <comment>JUNOS Base OS boot [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jbase</name>
-<comment>JUNOS Base OS Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jplatform</name>
-<comment>JUNOS platform Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jweb</name>
-<comment>JUNOS Web Management [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime</name>
-<comment>JUNOS Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jdocs</name>
-<comment>JUNOS Online Documentation [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-aacl</name>
-<comment>JUNOS Services AACL Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-appid</name>
-<comment>JUNOS AppId Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-alg</name>
-<comment>JUNOS Services Application Level Gateways [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-bgf</name>
-<comment>JUNOS Border Gateway Function package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-hcm</name>
-<comment>JUNOS Services HTTP Content Management package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-cpcd</name>
-<comment>JUNOS Services Captive Portal and Content Delivery Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-idp</name>
-<comment>JUNOS IDP Services [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-llpdf</name>
-<comment>JUNOS Services LL-PDF Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-jflow</name>
-<comment>JUNOS Services Jflow Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mss</name>
-<comment>JUNOS Services Mobile Subscriber Service Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-mobile</name>
-<comment>JUNOS Services MobileNext Software package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-nat</name>
-<comment>JUNOS Services NAT [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ptsp</name>
-<comment>JUNOS Services PTSP Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-rpm</name>
-<comment>JUNOS Services RPM [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-sfw</name>
-<comment>JUNOS Services Stateful Firewall [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-voice</name>
-<comment>JUNOS Voice Services Container package [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jmacsec</name>
-<comment>JUNOS Macsec Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ssl</name>
-<comment>JUNOS Services SSL [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-crypto-base</name>
-<comment>JUNOS Services Crypto [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jservices-ipsec</name>
-<comment>JUNOS Services IPSec [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>py-base-i386</name>
-<comment>JUNOS py-base-i386 [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jkernel</name>
-<comment>JUNOS 64-bit Kernel Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jcrypto64</name>
-<comment>JUNOS Crypto Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jruntime64</name>
-<comment>JUNOS 64-bit Runtime Software Suite [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe-common</name>
-<comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jpfe</name>
-<comment>JUNOS Packet Forwarding Engine Support (T-Series) [14.2R4]</comment>
-</package-information>
-<package-information>
-<name>jroute</name>
-<comment>JUNOS Routing Software Suite [14.2R4]</comment>
 </package-information>
 </software-information>
 </multi-routing-engine-item>
