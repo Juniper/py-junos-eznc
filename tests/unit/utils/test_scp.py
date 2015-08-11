@@ -1,10 +1,6 @@
 __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
-import sys
-from cStringIO import StringIO
-from contextlib import contextmanager
-
 import unittest
 from nose.plugins.attrib import attr
 
@@ -47,15 +43,3 @@ class TestScp(unittest.TestCase):
         with SCP(self.dev) as scp:
             scp.get('addrbook.conf')
         mock_proxy.assert_called_any()
-
-    def test_scp_progress(self):
-        scp = SCP(self.dev)
-        print scp._scp_progress('test', 100, 50)
-
-    @contextmanager
-    def capture(self, command, *args, **kwargs):
-        out, sys.stdout = sys.stdout, StringIO()
-        command(*args, **kwargs)
-        sys.stdout.seek(0)
-        yield sys.stdout.read()
-        sys.stdout = out
