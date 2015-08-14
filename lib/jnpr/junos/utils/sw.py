@@ -112,7 +112,7 @@ class SW(Util):
     # put - SCP put the image onto the device
     # -------------------------------------------------------------------------
 
-    def put(self, package, remote_path='/var/tmp', progress=True):
+    def put(self, package, remote_path='/var/tmp', progress=None):
         """
         SCP 'put' the package file from the local server to the remote device.
 
@@ -123,8 +123,9 @@ class SW(Util):
           The directory on the device where the package will be copied to.
 
         :param func progress:
-          Callback function to indicate progress.  If set to True uses :meth:`scp._scp_progress`
-          for basic reporting by default.  See that class method for details.
+          Callback function to indicate progress.  If set to ``True``
+          uses :meth:`scp._scp_progress` for basic reporting by default.
+          See that class method for details.
         """
         # execute the secure-copy with the Python SCP module
         with SCP(self._dev, progress=progress) as scp:
@@ -229,7 +230,8 @@ class SW(Util):
         :param str remote_path:
             file-path to directory on remote device
         :param func progress:
-            call-back function for progress updates
+            call-back function for progress updates. If set to ``True`` uses
+          :meth:`sw.progress` for basic reporting by default.
         :param bool cleanfs:
             When ``True`` (default) this method will perform the
             "storage cleanup" on the device.
@@ -248,7 +250,9 @@ class SW(Util):
         cleanfs = kvargs.get('cleanfs', True)
 
         def _progress(report):
-            if progress is not None:
+            if progress is True:
+                self.progress(self._dev, report)
+            elif callable(progress):
                 progress(self._dev, report)
 
         if checksum is None:
@@ -305,6 +309,7 @@ class SW(Util):
                       * EX virtual-chassis when all same HW model
                       * QFX virtual-chassis when all same HW model
                       * QFX/EX mixed virtual-chassis
+                      * Mixed mode VC
 
                       Known Restrictions:
 
@@ -350,6 +355,9 @@ class SW(Util):
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
 
+          If set to ``True``, it uses :meth:`sw.progress`
+          for basic reporting by default.
+
         :param bool no_copy:
           When ``True`` the software package will not be SCP'd to the device.
           Default is ``False``.
@@ -367,7 +375,9 @@ class SW(Util):
           (ignore warnings) on the QFX5100 device.
         """
         def _progress(report):
-            if progress is not None:
+            if progress is True:
+                self.progress(self._dev, report)
+            elif callable(progress):
                 progress(self._dev, report)
 
         # ---------------------------------------------------------------------

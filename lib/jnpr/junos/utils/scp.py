@@ -30,24 +30,35 @@ class SCP(object):
         """
         self._junos = junos
         self._scpargs = scpargs
-        if 'progress' not in self._scpargs or self._scpargs['progress'] is True:
+        self._by10pct = 0
+        self._user_progress = self._scpargs.get('progress')
+        if self._user_progress is True:
             self._scpargs['progress'] = self._scp_progress
+        elif callable(self._user_progress):
+            # User case also define progress with 3 params, the way scp module
+            # expects. Function will take path, total size, transferred.
+            # https://github.com/jbardin/scp.py/blob/master/scp.py#L97
+            if self._user_progress.func_code.co_argcount == 3:
+                self._scpargs['progress'] = self._user_progress
+            else:
+                # this will override the function _progress defined for this
+                # class to use progress provided by user.
+                self._progress = lambda report: \
+                    self._user_progress(self._junos, report)
+                self._scpargs['progress'] = self._scp_progress
 
     def _progress(self, report):
         """ simple progress report function """
         print self._junos.hostname + ": " + report
 
     def _scp_progress(self, _path, _total, _xfrd):
-        # init static variable
-        if 'by10pct' not in locals():
-            by10pct = 0
 
         # calculate current percentage xferd
         pct = int(float(_xfrd) / float(_total) * 100)
 
         # if 10% more has been copied, then print a message
-        if 0 == (pct % 10) and pct != by10pct:
-            by10pct = pct
+        if 0 == (pct % 10) and pct != self._by10pct:
+            self._by10pct = pct
             self._progress(
                 "%s: %s / %s (%s%%)" %
                 (_path, _xfrd, _total, str(pct)))
