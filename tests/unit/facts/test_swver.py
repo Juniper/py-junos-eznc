@@ -115,6 +115,15 @@ class TestSwver(unittest.TestCase):
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '15.3R6.6')
 
+
+    @patch('jnpr.junos.Device.execute')
+    def test_swver_txp_master_list(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.facts['master'] = ['RE0', 'RE0', 'RE1', 'RE2', 'RE3']
+        self.facts['version_RE0-RE0'] = '14.2R4'
+        software_version(self.dev, self.facts)
+        self.assertEqual(self.facts['version'], '14.2R4')
+
 # --> JLS, there should always be a facts['master'] assigned.
     # @patch('jnpr.junos.Device.execute')
     # def test_swver_master_none(self, mock_execute):
@@ -152,4 +161,6 @@ class TestSwver(unittest.TestCase):
             return Manager(session, device_handler)
 
         if args:
+            if 'version_RE0-RE0' in self.facts:
+                return self._read_file(args[0].tag + '_RE0-RE0.xml')
             return self._read_file(args[0].tag + '.xml')

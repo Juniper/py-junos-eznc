@@ -1,0 +1,64 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2/junos">
+<multi-routing-engine-results>
+
+<multi-routing-engine-item>
+
+<re-name>abc-re0</re-name>
+
+<software-information>
+<host-name>pyez</host-name>
+<product-model>txp</product-model>
+<product-name>txp</product-name>
+<package-information>
+<name>junos-version</name>
+<comment>Junos: 14.2R4</comment>
+</package-information>
+<package-information>
+<name>junos</name>
+<comment>JUNOS Base OS boot [14.2R4]</comment>
+</package-information>
+</software-information>
+</multi-routing-engine-item>
+
+<multi-routing-engine-item>
+
+<re-name>lcc0-re0</re-name>
+
+<software-information>
+<host-name>pyez-ddd0-re0</host-name>
+<product-model>t100</product-model>
+<product-name>t1600</product-name>
+<package-information>
+<name>junos-version</name>
+<comment>Junos: 14.2R4</comment>
+</package-information>
+<package-information>
+<name>junos</name>
+<comment>JUNOS Base OS boot [14.2R4]</comment>
+</package-information>
+</software-information>
+</multi-routing-engine-item>
+<multi-routing-engine-item>
+
+<re-name>lcc2-re0</re-name>
+
+<software-information>
+<host-name>pyez-ldd2-re0</host-name>
+<product-model>t100</product-model>
+<product-name>t1600</product-name>
+<package-information>
+<name>junos-version</name>
+<comment>Junos: 14.2R4</comment>
+</package-information>
+<package-information>
+<name>junos</name>
+<comment>JUNOS Base OS boot [14.2R4]</comment>
+</package-information>
+</software-information>
+</multi-routing-engine-item>
+
+</multi-routing-engine-results>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
