@@ -1,5 +1,9 @@
-__author__ = "Rick Sherman"
-__credits__ = "Jeremy Schulman, Nitin Kumar"
+__author__ = "Rick Sherman, Nitin Kumar"
+__credits__ = "Jeremy Schulman"
+
+import sys
+from cStringIO import StringIO
+from contextlib import contextmanager
 
 import unittest
 from nose.plugins.attrib import attr
@@ -37,9 +41,47 @@ class TestScp(unittest.TestCase):
     @patch('paramiko.config.SSHConfig.lookup')
     @patch('paramiko.SSHClient')
     @patch('paramiko.proxy.ProxyCommand')
-    def test_scp_proxycommand(self, os_mock, open_mock, mock_paramiko, mock_connect, mock_proxy):
+    def test_scp_proxycommand(self, os_mock, open_mock, mock_paramiko,
+                              mock_connect, mock_proxy):
         os_mock.path.exists.return_value = True
         self.dev._sshconf_path = '/home/rsherman/.ssh/config'
         with SCP(self.dev) as scp:
             scp.get('addrbook.conf')
         mock_proxy.assert_called_any()
+
+    def test_scp_progress(self):
+        scp = SCP(self.dev)
+        print scp._scp_progress('test', 100, 50)
+
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    @patch('scp.SCPClient.__init__')
+    def test_scp_user_def_progress(self, mock_scpclient, mock_put, mock_ssh):
+        mock_scpclient.return_value = None
+
+        def fn(file, total, tfd):
+            pass
+        package = 'test.tgz'
+        with SCP(self.dev, progress=fn) as scp:
+            scp.put(package)
+        self.assertEqual(
+            mock_scpclient.mock_calls[0][2]['progress'].func_name, 'fn')
+
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    @patch('scp.SCPClient.__init__')
+    def test_scp_progress_true(self, mock_scpclient, mock_put, mock_sshclient):
+        mock_scpclient.return_value = None
+        package = 'test.tgz'
+        with SCP(self.dev, progress=True) as scp:
+            scp.put(package)
+        self.assertEqual(mock_scpclient.mock_calls[0][2]['progress'].func_name,
+                         '_scp_progress')
+
+    @contextmanager
+    def capture(self, command, *args, **kwargs):
+        out, sys.stdout = sys.stdout, StringIO()
+        command(*args, **kwargs)
+        sys.stdout.seek(0)
+        yield sys.stdout.read()
+        sys.stdout = out

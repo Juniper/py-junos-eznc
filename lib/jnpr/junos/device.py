@@ -130,7 +130,7 @@ class Device(object):
         Change the authentication password value.  This is handy in case
         the calling program needs to attempt different passwords.
         """
-        self._password = value
+        self._auth_password = value
 
     # ------------------------------------------------------------------------
     # property: logfile
@@ -268,7 +268,7 @@ class Device(object):
             self._hostname = found.get('hostname', self._hostname)
             self._port = found.get('port', self._port)
             self._conf_auth_user = found.get('user')
-            self._ssh_private_key_file = found.get('identityfile')
+            self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
@@ -346,14 +346,14 @@ class Device(object):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             self._conf_auth_user = None
+            self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_path = self._sshconf_lkup()
-            # but if user is explit from call, then use it.
+            # but if user or private key is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
+            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') or self._conf_ssh_private_key_file
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-            if not hasattr(self, '_ssh_private_key_file'):
-                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
 
         # -----------------------------
         # initialize instance variables

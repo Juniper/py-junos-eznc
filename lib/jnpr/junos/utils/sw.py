@@ -2,7 +2,6 @@
 import hashlib
 import re
 from os import path
-import logging
 
 # 3rd-party modules
 from lxml.builder import E
@@ -124,41 +123,12 @@ class SW(Util):
           The directory on the device where the package will be copied to.
 
         :param func progress:
-          Callback function to indicate progress.  You can use :meth:`SW.progress`
-          for basic reporting.  See that class method for details.
+          Callback function to indicate progress.  If set to ``True``
+          uses :meth:`scp._scp_progress` for basic reporting by default.
+          See that class method for details.
         """
-        def _progress(report):
-            # report progress only if a progress callback was provided
-            if progress is not None:
-                progress(self._dev, report)
-
-        def _scp_progress(_path, _total, _xfrd):
-            # init static variable
-            if not hasattr(_scp_progress, 'by10pct'):
-                _scp_progress.by10pct = 0
-
-            # calculate current percentage xferd
-            pct = int(float(_xfrd) / float(_total) * 100)
-
-            # if 10% more has been copied, then print a message
-            if 0 == (pct % 10) and pct != _scp_progress.by10pct:
-                _scp_progress.by10pct = pct
-                _progress(
-                    "%s: %s / %s (%s%%)" %
-                    (_path, _xfrd, _total, str(pct)))
-
-        # check for the logger barncale for 'paramiko.transport'
-        plog = logging.getLogger('paramiko.transport')
-        if not plog.handlers:
-            class NullHandler(logging.Handler):
-
-                def emit(self, record):
-                    pass
-
-            plog.addHandler(NullHandler())
-
         # execute the secure-copy with the Python SCP module
-        with SCP(self._dev, progress=_scp_progress) as scp:
+        with SCP(self._dev, progress=progress) as scp:
             scp.put(package, remote_path)
 
     # -------------------------------------------------------------------------
@@ -260,7 +230,8 @@ class SW(Util):
         :param str remote_path:
             file-path to directory on remote device
         :param func progress:
-            call-back function for progress updates
+            call-back function for progress updates. If set to ``True`` uses
+          :meth:`sw.progress` for basic reporting by default.
         :param bool cleanfs:
             When ``True`` (default) this method will perform the
             "storage cleanup" on the device.
@@ -279,7 +250,9 @@ class SW(Util):
         cleanfs = kvargs.get('cleanfs', True)
 
         def _progress(report):
-            if progress is not None:
+            if progress is True:
+                self.progress(self._dev, report)
+            elif callable(progress):
                 progress(self._dev, report)
 
         if checksum is None:
@@ -336,6 +309,7 @@ class SW(Util):
                       * EX virtual-chassis when all same HW model
                       * QFX virtual-chassis when all same HW model
                       * QFX/EX mixed virtual-chassis
+                      * Mixed mode VC
 
                       Known Restrictions:
 
@@ -381,6 +355,9 @@ class SW(Util):
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
 
+          If set to ``True``, it uses :meth:`sw.progress`
+          for basic reporting by default.
+
         :param bool no_copy:
           When ``True`` the software package will not be SCP'd to the device.
           Default is ``False``.
@@ -398,7 +375,9 @@ class SW(Util):
           (ignore warnings) on the QFX5100 device.
         """
         def _progress(report):
-            if progress is not None:
+            if progress is True:
+                self.progress(self._dev, report)
+            elif callable(progress):
                 progress(self._dev, report)
 
         # ---------------------------------------------------------------------

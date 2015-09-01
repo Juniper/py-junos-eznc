@@ -221,7 +221,7 @@ class TestDevice(unittest.TestCase):
 
     def test_device_set_password(self):
         self.dev.password = 'secret'
-        self.assertEqual(self.dev._password, 'secret')
+        self.assertEqual(self.dev._auth_password, 'secret')
 
     def test_device_get_timeout(self):
         self.assertEqual(self.dev.timeout, 30)
