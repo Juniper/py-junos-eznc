@@ -7,10 +7,11 @@ from nose.plugins.attrib import attr
 
 from jnpr.junos.device import Device
 from jnpr.junos.rpcmeta import _RpcMetaExec
+from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-from mock import patch, MagicMock
+from mock import patch, MagicMock, call
 from lxml import etree
 
 
@@ -87,12 +88,29 @@ class Test_RpcMetaExec(unittest.TestCase):
         self.assertEqual(mock_execute_fn.call_args[0][0].tag,
                          'get-configuration')
 
-    def test_rpcmeta_exec_rpc_format_json(self):
+    def test_rpcmeta_exec_rpc_format_json_14_2(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.dev._facts['version_info'] = version_info('14.2X46-D15.3')
         op = self.rpc.get_system_users_information(dict(format='json'))
         self.assertEqual(op['system-users-information'][0]
                          ['uptime-information'][0]['date-time'][0]['data'],
                          u'4:43AM')
+
+    def test_rpcmeta_exec_rpc_format_json_gt_14_2(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.dev._facts['version_info'] = version_info('15.1X46-D15.3')
+        op = self.rpc.get_system_users_information(dict(format='json'))
+        self.assertEqual(op['system-users-information'][0]
+                         ['uptime-information'][0]['date-time'][0]['data'],
+                         u'4:43AM')
+
+    @patch('jnpr.junos.device.warnings')
+    def test_rpcmeta_exec_rpc_format_json_lt_14_2(self, mock_warn):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.dev._facts['version_info'] = version_info('13.1X46-D15.3')
+        self.rpc.get_system_users_information(dict(format='json'))
+        mock_warn.assert_has_calls(call.warn(
+            'Native JSON support is only from 14.2 onwards', RuntimeWarning))
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:

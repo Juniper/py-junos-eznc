@@ -577,7 +577,15 @@ class Device(object):
         # dev.rpc.get_route_engine_information({'format': 'json'})
 
         if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
-            return json.loads(rpc_rsp_e.text)
+            if self._facts == {}:
+                self.facts_refresh()
+            ver_info = self._facts['version_info']
+            if ver_info.major[0] >= 15 or \
+                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+                return json.loads(rpc_rsp_e.text)
+            else:
+                warnings.warn("Native JSON support is only from 14.2 onwards",
+                              RuntimeWarning)
 
         # This section is here for the possible use of something other than ncclient
         # for RPCs that have embedded rpc-errors, need to check for those now
