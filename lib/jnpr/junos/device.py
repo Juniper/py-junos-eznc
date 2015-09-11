@@ -809,5 +809,6 @@ class Device(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.connected and not isinstance(exc_val, EzErrors.ConnectError):
+        if self._conn.connected and \
+                not isinstance(exc_val, EzErrors.ConnectError):
             self.close()

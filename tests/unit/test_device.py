@@ -426,6 +426,8 @@ class TestDevice(unittest.TestCase):
             with Device(host='3.3.3.3', user='gic',
                         password='password123', gather_facts=False) as dev:
                 self.assertTrue(dev.connected)
+                dev._conn = MagicMock(name='_conn')
+                dev._conn.connected = True
 
                 def close_conn():
                     dev.connected = False
