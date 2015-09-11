@@ -61,6 +61,7 @@ class TestDevice(unittest.TestCase):
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
+
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
@@ -417,6 +418,23 @@ class TestDevice(unittest.TestCase):
         self.dev.close.side_effect = close_conn
         self.dev.close()
         self.assertEqual(self.dev.connected, False)
+
+    @patch('ncclient.manager.connect')
+    def test_device_context_manager(self, mock_connect):
+        mock_connect.side_effect = self._mock_manager
+        try:
+            with Device(host='3.3.3.3', user='gic',
+                        password='password123', gather_facts=False) as dev:
+                self.assertTrue(dev.connected)
+
+                def close_conn():
+                    dev.connected = False
+                dev.close = MagicMock(name='close')
+                dev.close.side_effect = close_conn
+                raise RpcError
+        except Exception as e:
+            self.assertIsInstance(e, RpcError)
+        self.assertFalse(dev.connected)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
