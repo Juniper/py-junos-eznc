@@ -1,0 +1,25 @@
+---
+CCCTable:
+  rpc: get-ccc-information
+  args: 
+    status: True
+    interface-switch: True
+  item: ccc-connection
+  key: ccc-connection-name
+  view: CCCView
+
+CCCView:
+  fields:
+    status: ccc-connection-status
+    ports: _CCCPorts
+
+_CCCPorts:
+  item: ccc-connection-circuit
+  key:
+    - ccc-circuit-name
+  view: _CCCPortsView
+ 
+_CCCPortsView:
+  fields:
+    type: ccc-circuit-type
+    status: ccc-circuit-status
