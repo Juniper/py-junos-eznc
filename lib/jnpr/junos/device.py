@@ -563,7 +563,15 @@ class Device(object):
             raise EzErrors.ConnectClosedError(self)
         except RPCError as err:
             # err is an NCError from ncclient
-            rsp = JXML.remove_namespaces(err.xml)
+            if isinstance(err.xml, list):
+                for error in err.xml:
+                    if error.severity == 'error':
+                        rsp = JXML.remove_namespaces(error.xml)
+                        break
+                else:
+                    e = EzErrors.RpcError
+            else:
+                rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
             e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
             raise e(cmd=rpc_cmd_e, rsp=rsp)
