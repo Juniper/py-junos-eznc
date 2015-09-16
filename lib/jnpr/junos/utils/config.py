@@ -125,7 +125,7 @@ class Config(Util):
                 # this means there are warnings, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
