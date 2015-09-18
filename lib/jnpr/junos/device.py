@@ -565,7 +565,7 @@ class Device(object):
             # err is an NCError from ncclient
             errs = None
             if isinstance(err.xml, list):
-                errs=[error._raw for error in err.xml]
+                errs = [JXML.remove_namespaces(error._raw) for error in err.xml]
                 for error in err.xml:
                     if error.severity == 'error':
                         rsp = JXML.remove_namespaces(error.xml)

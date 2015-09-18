@@ -96,8 +96,8 @@ class PermissionError(RpcError):
     PermissionError.message gives you the specific RPC that cause
     the exceptions
     """
-    def __init__(self, rsp, cmd=None):
-        RpcError.__init__(self, cmd=cmd, rsp=rsp)
+    def __init__(self, rsp, cmd=None, errs=None):
+        RpcError.__init__(self, cmd=cmd, rsp=rsp, errs=errs)
         self.message = rsp.findtext('.//bad-element')
 
 
