@@ -57,7 +57,8 @@ class SW(Util):
             x for x in dev.facts.keys() if x.startswith('version_RE')]
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
-            self._multi_RE is True and dev.facts.get('vc_capable') is True)
+            self._multi_RE is True and dev.facts.get('vc_capable') is True and
+            dev.facts.get('vc_mode') is not 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
 
     # -----------------------------------------------------------------------
