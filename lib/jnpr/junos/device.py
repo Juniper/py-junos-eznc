@@ -799,3 +799,16 @@ class Device(object):
             probe_ok = False
 
         return probe_ok
+
+    # -----------------------------------------------------------------------
+    # Context Manager
+    # -----------------------------------------------------------------------
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._conn.connected and \
+                not isinstance(exc_val, EzErrors.ConnectError):
+            self.close()
