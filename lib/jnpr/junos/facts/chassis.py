@@ -43,10 +43,20 @@ def facts_chassis(junos, facts):
 
     facts['model'] = x_ch.findtext('description')
 
-    try:
-        facts['serialnumber'] = x_ch.find('serial-number').text
-    except:
+    facts['serialnumber'] = x_ch.get('serial-number', '')
+    if facts['serialnumber'] == '':
         # if the toplevel chassis does not have a serial-number, then
         # check the Backplane chassis-module
-        facts['serialnumber'] = x_ch.xpath(
-            'chassis-module[name="Backplane"]/serial-number')[0].text
+        try:
+            facts['serialnumber'] = x_ch.xpath(
+              'chassis-module[name="Backplane"]/serial-number')[0].text
+        except:
+            # if Backplane module is not present (or has no serial number)
+            # check the Midplane (as the Backplane is called on MX)
+            try:
+                facts['serialnumber'] = x_ch.xpath(
+                  'chassis-module[name="Midplane"]/serial-number')[0].text
+            except:
+                # this still fails on the vMX platform and we let it pass
+                # with the default '' value assigned above
+                pass 
