@@ -1,0 +1,120 @@
+<rpc-reply message-id="urn:uuid:986c395e-2f84-11e5-ac45-b8e85604f858">
+    {
+    "system-users-information" : [
+    {
+    "attributes" : {"xmlns" : "http://xml.juniper.net/junos/15.1I0/junos"},
+    "uptime-information" : [
+    {
+    "date-time" : [
+    {
+    "data" : "4:43AM",
+    "attributes" : {"junos:seconds" : "1437468224"}
+    }
+    ],
+    "up-time" : [
+    {
+    "data" : "48 days, 22:58",
+    "attributes" : {"junos:seconds" : "4229925"}
+    }
+    ],
+    "active-user-count" : [
+    {
+    "data" : "2",
+    "attributes" : {"junos:format" : "2 users"}
+    }
+    ],
+    "load-average-1" : [
+    {
+    "data" : "0.00"
+    }
+    ],
+    "load-average-5" : [
+    {
+    "data" : "0.02"
+    }
+    ],
+    "load-average-15" : [
+    {
+    "data" : "0.00"
+    }
+    ],
+    "user-table" : [
+    {
+    "user-entry" : [
+    {
+    "user" : [
+    {
+    "data" : "regress"
+    }
+    ],
+    "tty" : [
+    {
+    "data" : "p0"
+    }
+    ],
+    "from" : [
+    {
+    "data" : "172.29.227.10"
+    }
+    ],
+    "login-time" : [
+    {
+    "data" : "4:28AM",
+    "attributes" : {"junos:seconds" : "1437467296"}
+    }
+    ],
+    "idle-time" : [
+    {
+    "data" : "-",
+    "attributes" : {"junos:seconds" : "24"}
+    }
+    ],
+    "command" : [
+    {
+    "data" : "cli"
+    }
+    ]
+    },
+    {
+    "user" : [
+    {
+    "data" : "regress"
+    }
+    ],
+    "tty" : [
+    {
+    "data" : "p2"
+    }
+    ],
+    "from" : [
+    {
+    "data" : "bng-junos-d051.juniper.net"
+    }
+    ],
+    "login-time" : [
+    {
+    "data" : "03Jun15",
+    "attributes" : {"junos:seconds" : "1433314876"}
+    }
+    ],
+    "idle-time" : [
+    {
+    "data" : "47days",
+    "attributes" : {"junos:seconds" : "4143714"}
+    }
+    ],
+    "command" : [
+    {
+    "data" : "gdb /b/"
+    }
+    ]
+    }
+    ]
+    }
+    ]
+    }
+    ]
+    }
+    ]
+    }
+</rpc-reply>

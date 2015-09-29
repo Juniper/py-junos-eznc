@@ -8,6 +8,7 @@ import warnings
 import socket
 import datetime
 import time
+import json
 
 # 3rd-party packages
 from lxml import etree
@@ -571,6 +572,20 @@ class Device(object):
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.", RuntimeWarning)
             raise
+
+        # From 14.2 onward, junos supports JSON, so now code can be written as
+        # dev.rpc.get_route_engine_information({'format': 'json'})
+
+        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+            if self._facts == {}:
+                self.facts_refresh()
+            ver_info = self._facts['version_info']
+            if ver_info.major[0] >= 15 or \
+                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+                return json.loads(rpc_rsp_e.text)
+            else:
+                warnings.warn("Native JSON support is only from 14.2 onwards",
+                              RuntimeWarning)
 
         # This section is here for the possible use of something other than ncclient
         # for RPCs that have embedded rpc-errors, need to check for those now
