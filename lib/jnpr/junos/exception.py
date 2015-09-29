@@ -10,7 +10,7 @@ class RpcError(Exception):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
-          :errs: is a list of <rpc-error> elements
+          :errs: is a list of dictionaries of extracted <rpc-error> elements.
           :dev: is the device rpc was executed on
           :timeout: is the timeout value of the device
           :re: is the RE or member exception occured on
@@ -26,7 +26,7 @@ class RpcError(Exception):
         if isinstance(self.rsp, _Element):
             self.rpc_error = jxml.rpc_error(self.rsp)
             if self.errs is None:
-                self.errs = self.rpc_error
+                self.errs = [self.rpc_error]
 
     def __repr__(self):
         """
