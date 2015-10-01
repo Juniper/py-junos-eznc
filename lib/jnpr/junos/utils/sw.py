@@ -58,7 +58,7 @@ class SW(Util):
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
-            dev.facts.get('vc_mode') is not 'Disabled')
+            dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
 
     # -----------------------------------------------------------------------
