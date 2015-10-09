@@ -399,3 +399,8 @@ class TestConfig(unittest.TestCase):
         ex = RpcTimeoutError(self.dev, None, 10)
         self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertRaises(RpcTimeoutError, self.conf.commit)
+
+    def test_commit_check_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.commit_check)

@@ -121,7 +121,7 @@ class Config(Util):
         except RpcTimeoutError:
             raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there are warnings, but no errors
                 return True
             else:
@@ -157,8 +157,10 @@ class Config(Util):
         """
         try:
             self.rpc.commit_configuration(check=True)
+        except RpcTimeoutError:
+            raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there is a warning, but no errors
                 return True
             else:
