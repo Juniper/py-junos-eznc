@@ -5,7 +5,7 @@ class version_info(object):
 
     def __init__(self, verstr):
         """verstr - version string"""
-        m1 = re.match('(.*?)([RBIXS-])(.*)', verstr)
+        m1 = re.match('(.*?)([RBIXSF-])(.*)', verstr)
         self.type = m1.group(2)
 
         self.major = tuple(map(int, m1.group(1).split('.')))  # creates tuyple
