@@ -341,6 +341,8 @@ class Config(Util):
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcTimeoutError as err:
+                raise err
             except RpcError as err:
                 raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
             # Something unexpected happened - raise it up

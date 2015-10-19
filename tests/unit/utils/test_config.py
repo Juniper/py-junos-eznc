@@ -222,6 +222,12 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(ConfigLoadError, self.conf.load, path='config.conf')
 
     @patch('__builtin__.open')
+    def test_config_load_try_load_rpctimeouterror(self, mock_open):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.load_config = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.load, path='config.conf')
+
+    @patch('__builtin__.open')
     def test_config_try_load_exception(self, mock_open):
         class OtherException(Exception):
             pass
