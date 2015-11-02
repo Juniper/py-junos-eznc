@@ -247,6 +247,27 @@ class TestSW(unittest.TestCase):
                                         no_copy=True))
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.dev._facts = {
+            'domain': None, 'RE1': {
+                'status': 'OK', 'model': 'RE-EX8208',
+                'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
+            'version_RE1': '12.3R7.7', 'version_RE0': '12.3', '2RE': True,
+            'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
+            'RE0': {'status': 'OK', 'model': 'RE-EX8208',
+                    'mastership_state': 'master'}, 'switch_style': 'VLAN',
+            'version': '12.3R5-S3.1', 'master': 'RE0', 'hostname': 'XXXXXX',
+            'HOME': '/var/home/sn', 'vc_mode': 'Disabled', 'model': 'EX8208',
+            'vc_capable': True, 'personality': 'SWITCH'}
+        sw = self.get_sw()
+        sw.install(package='abc.tgz', no_copy=True)
+        self.assertFalse(sw._multi_VC)
+        calls = [call('/var/tmp/abc.tgz', dev_timeout=1800, re0=True),
+                 call('/var/tmp/abc.tgz', dev_timeout=1800, re1=True)]
+        mock_pkgadd.assert_has_calls(calls)
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_mixed_vc_with_copy(self, mock_pkgadd):
         mock_pkgadd.return_value = True
         self.sw._mixed_VC = True

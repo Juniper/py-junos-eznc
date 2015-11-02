@@ -63,6 +63,11 @@ class TestVersionInfo(unittest.TestCase):
             version_info('11.4R7.5'),
             [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
 
+    def test_version_feature_velocity(self):
+        self.assertItemsEqual(
+            version_info('15.4F7.5'),
+            [('build', 5), ('major', (15, 4)), ('minor', '7'), ('type', 'F')])
+
 
 @attr('unit')
 class TestSwver(unittest.TestCase):

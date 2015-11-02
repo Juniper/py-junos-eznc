@@ -121,7 +121,7 @@ class Config(Util):
         except RpcTimeoutError:
             raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there are warnings, but no errors
                 return True
             else:
@@ -157,8 +157,10 @@ class Config(Util):
         """
         try:
             self.rpc.commit_configuration(check=True)
+        except RpcTimeoutError:
+            raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there is a warning, but no errors
                 return True
             else:
@@ -339,6 +341,8 @@ class Config(Util):
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcTimeoutError as err:
+                raise err
             except RpcError as err:
                 raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
             # Something unexpected happened - raise it up
