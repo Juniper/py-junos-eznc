@@ -27,6 +27,8 @@ class RpcError(Exception):
             self.rpc_error = jxml.rpc_error(self.rsp)
             if self.errs is None:
                 self.errs = [self.rpc_error]
+        if isinstance(self.errs, list):
+            self.message = '\n'.join([er['message'] for er in self.errs])
 
     def __repr__(self):
         """
