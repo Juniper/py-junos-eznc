@@ -563,19 +563,10 @@ class Device(object):
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
         except RPCError as err:
-            # err is an NCError from ncclient
-            errs = None
-            if len(err.errors)>1:
-                errs = [JXML.rpc_error(error.xml) for error in err.errors]
-                for error in err.errors:
-                    if error.severity == 'error':
-                        rsp = JXML.remove_namespaces(error.xml)
-                        break
-            else:
-                rsp = JXML.remove_namespaces(err.xml)
-                # see if this is a permission error
+            rsp = JXML.remove_namespaces(err.xml)
+            # see if this is a permission error
             e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=errs)
+            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.", RuntimeWarning)

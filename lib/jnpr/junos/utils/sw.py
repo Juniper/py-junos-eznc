@@ -211,7 +211,9 @@ class SW(Util):
             rsp = self.rpc.get_checksum_information(path=remote_package, dev_timeout=timeout)
             return rsp.findtext('.//checksum').strip()
         except RpcError as e:
-            if hasattr(e, 'errs') and ('No such file or directory' in e.errs['message']):
+            # e.errs is list of dictionaries
+            if hasattr(e, 'errs') and \
+                    filter(lambda x: 'No such file or directory' in x['message'], e.errs):
                 return None
             else:
                 raise
