@@ -27,6 +27,7 @@ class RpcError(Exception):
         self.re = re
         self.rpc_error = None
 
+        # To handle errors coming from ncclient, Here errs is list of RPCError
         if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
             self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
             for error in errs.errors:
