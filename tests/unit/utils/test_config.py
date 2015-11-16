@@ -9,6 +9,7 @@ from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
 
+import ncclient
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from ncclient.operations import RPCError, RPCReply
@@ -432,14 +433,19 @@ class TestConfig(unittest.TestCase):
             self.dev.rpc.commit_configuration()
         except Exception as ex:
             self.assertTrue(isinstance(ex, RpcError))
-            self.assertEqual(ex.message,
-                             "error: interface-range 'axp' is not defined\n"
-                             "error: interface-ranges expansion failed")
-            self.assertEqual(ex.errs, [{'source': None, 'message':
-                "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
-                'error', 'edit_path': None}, {'source': None, 'message':
-                'interface-ranges expansion failed', 'bad_element': None,
-                                              'severity': 'error', 'edit_path': None}])
+            if ncclient.__version__>(0,4,5):
+                self.assertEqual(ex.message,
+                                 "error: interface-range 'axp' is not defined\n"
+                                 "error: interface-ranges expansion failed")
+                self.assertEqual(ex.errs, [{'source': None, 'message':
+                    "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
+                    'error', 'edit_path': None}, {'source': None, 'message':
+                    'interface-ranges expansion failed', 'bad_element': None,
+                                                  'severity': 'error', 'edit_path': None}])
+            else:
+                self.assertEqual(ex.message,
+                                 "interface-range 'axp' is not defined")
+
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -453,7 +459,10 @@ class TestConfig(unittest.TestCase):
             raw = etree.XML(foo)
             obj = RPCReply(raw)
             obj.parse()
-            raise RPCError(etree.XML(foo), errs=obj._errors)
+            if ncclient.__version__>(0,4,5):
+                raise RPCError(etree.XML(foo), errs=obj._errors)
+            else:
+                raise RPCError(etree.XML(foo))
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
