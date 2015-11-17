@@ -9,16 +9,32 @@ from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
 
+import ncclient
+from ncclient.manager import Manager, make_device_handler
+from ncclient.transport import SSHSession
+from ncclient.operations import RPCError, RPCReply
+
 from mock import MagicMock, patch
 from lxml import etree
+import os
 
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
 
-    def setUp(self):
-        self.dev = Device(host='1.1.1.1')
+    @patch('ncclient.manager.connect')
+    def setUp(self, mock_connect):
+        mock_connect.side_effect = self._mock_manager
+
+        self.dev = Device(host='1.1.1.1', user='test', password='test123',
+                          gather_facts=False)
+        self.dev.open()
         self.conf = Config(self.dev)
+
+    @patch('ncclient.operations.session.CloseSession.request')
+    def tearDown(self, mock_session):
+        self.dev.close()
+
 
     def test_config_constructor(self):
         self.assertTrue(isinstance(self.conf._dev, Device))
@@ -410,3 +426,50 @@ class TestConfig(unittest.TestCase):
         ex = RpcTimeoutError(self.dev, None, 10)
         self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertRaises(RpcTimeoutError, self.conf.commit_check)
+
+    def test_commit_configuration_multi_rpc_error(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        try:
+            self.dev.rpc.commit_configuration()
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, RpcError))
+            if ncclient.__version__>(0,4,5):
+                self.assertEqual(ex.message,
+                                 "error: interface-range 'axp' is not defined\n"
+                                 "error: interface-ranges expansion failed")
+                self.assertEqual(ex.errs, [{'source': None, 'message':
+                    "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
+                    'error', 'edit_path': None}, {'source': None, 'message':
+                    'interface-ranges expansion failed', 'bad_element': None,
+                                                  'severity': 'error', 'edit_path': None}])
+            else:
+                self.assertEqual(ex.message,
+                                 "interface-range 'axp' is not defined")
+
+
+    def _read_file(self, fname):
+        from ncclient.xml_ import NCElement
+
+        fpath = os.path.join(os.path.dirname(__file__),
+                             'rpc-reply', fname)
+        foo = open(fpath).read()
+
+        # specific to multi rpc error
+        if fname == 'commit-configuration.xml':
+            raw = etree.XML(foo)
+            obj = RPCReply(raw)
+            obj.parse()
+            if ncclient.__version__>(0,4,5):
+                raise RPCError(etree.XML(foo), errs=obj._errors)
+            else:
+                raise RPCError(etree.XML(foo))
+
+    def _mock_manager(self, *args, **kwargs):
+        if kwargs:
+            device_params = kwargs['device_params']
+            device_handler = make_device_handler(device_params)
+            session = SSHSession(device_handler)
+            return Manager(session, device_handler)
+
+        elif args:
+            return self._read_file(args[0].tag + '.xml')
