@@ -164,7 +164,7 @@ class Config(Util):
                 # this means there is a warning, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
