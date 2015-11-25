@@ -611,3 +611,54 @@ class Config(Util):
         }.get(action, _unsupported_action)()
 
         return result
+
+    def __init__(self, dev, **kwrgs):
+        self.kwrgs = kwrgs
+        Util.__init__(self, dev=dev)
+
+
+    def __enter__(self):
+
+        def _open_configuration_private():
+            try:
+                self.rpc.open_configuration(private=True)
+            except RpcError as err:
+                if err.rpc_error['severity']=='warning':
+                    return True
+                else:
+                    return False
+            return True
+
+        def _open_configuration_dynamic():
+            self.rpc.open_configuration(dynamic=True)
+            return True
+
+        def _open_configuration_batch():
+            try:
+                self.rpc.open_configuration(batch=True)
+                return True
+            except:
+                return False
+
+        def _open_configuration_ephemeral():
+            try:
+                self.rpc.open_configuration(ephemeral=True)
+                return True
+            except:
+                return False
+
+        def _unsupported_option():
+            raise ValueError("unsupported action: {0}".format(self.kwrgs.keys()[0]))
+
+        result = {
+            'private': _open_configuration_private,
+            'dynamic': _open_configuration_dynamic,
+            'batch': _open_configuration_batch,
+            'ephemeral': _open_configuration_ephemeral
+        }.get(self.kwrgs.keys()[0], _unsupported_option)()
+        print 'result',result
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.rpc.close_configuration()
+        print 'closed configuration'
