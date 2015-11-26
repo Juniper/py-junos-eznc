@@ -614,7 +614,7 @@ class Config(Util):
 
     def __init__(self, dev, mode=None):
         """
-        :param str mode: Can be used when using Config as context manager
+        :param str mode: Can be used (only) for creating Config object using context manager
 
             * "private" - Work in private database
             * "dynamic" - Work in dynamic database
@@ -625,9 +625,10 @@ class Config(Util):
         self.mode = mode
         Util.__init__(self, dev=dev)
 
-
     def __enter__(self):
 
+        # defining separate functions for each mode so that can be
+        # changed/edited as per the need of corresponding rpc call.
         def _open_configuration_private():
             try:
                 self.rpc.open_configuration(private=True)
@@ -650,11 +651,8 @@ class Config(Util):
             return self.lock()
 
         def _open_configuration_ephemeral():
-            try:
-                self.rpc.open_configuration(ephemeral=True)
-                return True
-            except:
-                return False
+            self.rpc.open_configuration(ephemeral=True)
+            return True
 
         def _unsupported_option():
             if self.mode is not None:
