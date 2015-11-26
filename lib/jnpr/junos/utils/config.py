@@ -520,7 +520,7 @@ class Config(Util):
         """
         Perform action on the "rescue configuration".
 
-        :param str action: identifes the action as follows:
+        :param str action: identifies the action as follows:
 
             * "get" - retrieves/returns the rescue configuration via **format**
             * "save" - saves current configuration as rescue
@@ -612,8 +612,17 @@ class Config(Util):
 
         return result
 
-    def __init__(self, dev, **kwrgs):
-        self.kwrgs = kwrgs
+    def __init__(self, dev, mode=None):
+        """
+        :param str mode: Can be used when using Config as context manager
+
+            * "private" - Work in private database
+            * "dynamic" - Work in dynamic database
+            * "batch" - Work in batch database
+            * "ephemeral" - Work in default ephemeral instance
+            * "exclusive" - Work with Locking the candidate configuration
+        """
+        self.mode = mode
         Util.__init__(self, dev=dev)
 
 
@@ -622,12 +631,9 @@ class Config(Util):
         def _open_configuration_private():
             try:
                 self.rpc.open_configuration(private=True)
+                return True
             except RpcError as err:
-                if err.rpc_error['severity']=='warning':
-                    return True
-                else:
-                    return False
-            return True
+                return err.rpc_error['severity'] == 'warning'
 
         def _open_configuration_dynamic():
             self.rpc.open_configuration(dynamic=True)
@@ -637,8 +643,11 @@ class Config(Util):
             try:
                 self.rpc.open_configuration(batch=True)
                 return True
-            except:
-                return False
+            except RpcError as err:
+                return err.rpc_error['severity'] == 'warning'
+
+        def _open_configuration_exclusive():
+            return self.lock()
 
         def _open_configuration_ephemeral():
             try:
@@ -648,17 +657,26 @@ class Config(Util):
                 return False
 
         def _unsupported_option():
-            raise ValueError("unsupported action: {0}".format(self.kwrgs.keys()[0]))
+            if self.mode is not None:
+                raise ValueError("unsupported action: {0}".format(self.mode))
 
-        result = {
+        {
             'private': _open_configuration_private,
             'dynamic': _open_configuration_dynamic,
             'batch': _open_configuration_batch,
+            'exclusive': _open_configuration_exclusive,
             'ephemeral': _open_configuration_ephemeral
-        }.get(self.kwrgs.keys()[0], _unsupported_option)()
-        print 'result',result
+        }.get(self.mode, _unsupported_option)()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.rpc.close_configuration()
-        print 'closed configuration'
+        if self.mode == 'exclusive':
+            self.unlock()
+        elif self.mode == 'ephemeral':
+            self.rpc.clear_ephemeral_database_state()
+        elif self.mode is not None:
+            try:
+                self.rpc.close_configuration()
+            except RpcError as err:
+                if err.message == 'Configuration database is not open':
+                    pass
