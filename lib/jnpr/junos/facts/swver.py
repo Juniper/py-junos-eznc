@@ -5,7 +5,7 @@ class version_info(object):
 
     def __init__(self, verstr):
         """verstr - version string"""
-        m1 = re.match('(.*?)([RBIXS-])(.*)', verstr)
+        m1 = re.match('(.*?)([RBIXSF-])(.*)', verstr)
         self.type = m1.group(2)
 
         self.major = tuple(map(int, m1.group(1).split('.')))  # creates tuyple
@@ -14,7 +14,7 @@ class version_info(object):
 
         if 'X' == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
-            xm = re.match("(\d+)-(\w)(.*)", self.minor)
+            xm = re.match("(\d+)-(\w)(\d+)", self.minor)
             self.minor = tuple(
                 [int(xm.group(1)), xm.group(2), int(xm.group(3))])
             if len(after_type) < 2:

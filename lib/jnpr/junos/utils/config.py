@@ -125,7 +125,7 @@ class Config(Util):
                 # this means there are warnings, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
@@ -164,7 +164,7 @@ class Config(Util):
                 # this means there is a warning, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
@@ -341,6 +341,8 @@ class Config(Util):
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcTimeoutError as err:
+                raise err
             except RpcError as err:
                 raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
             # Something unexpected happened - raise it up
