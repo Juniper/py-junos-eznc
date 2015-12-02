@@ -508,9 +508,11 @@ class TestConfig(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_config_mode_undefined(self, mock_exec):
-        with self.assertRaises(ValueError):
+        try:
             with Config(self.dev, mode='unknown') as conf:
                 conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, ValueError))
 
     @patch('jnpr.junos.Device.execute')
     def test_config_mode_batch_open_configuration_ex(self, mock_exec):
