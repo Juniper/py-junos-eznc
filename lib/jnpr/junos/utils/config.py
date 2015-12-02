@@ -181,7 +181,7 @@ class Config(Util):
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
-        :param int rollback: rollback id [0..49]
+        :param int rb_id: rollback id [0..49]
 
         :returns:
             * ``None`` if there is no difference
@@ -614,13 +614,21 @@ class Config(Util):
 
     def __init__(self, dev, mode=None):
         """
-        :param str mode: Can be used (only) for creating Config object using context manager
+        :param str mode: Can be used *only* when creating Config object using context manager
 
             * "private" - Work in private database
             * "dynamic" - Work in dynamic database
             * "batch" - Work in batch database
             * "ephemeral" - Work in default ephemeral instance
             * "exclusive" - Work with Locking the candidate configuration
+
+            Example::
+
+                # mode can be private/dynamic/exclusive/batch/ephemeral
+                with Config(dev, mode='exclusive') as cu:
+                    cu.load('set system services netconf traceoptions file xyz', format='set')
+                    print cu.diff()
+                    cu.commit()
         """
         self.mode = mode
         Util.__init__(self, dev=dev)
