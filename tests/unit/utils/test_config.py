@@ -35,7 +35,6 @@ class TestConfig(unittest.TestCase):
     def tearDown(self, mock_session):
         self.dev.close()
 
-
     def test_config_constructor(self):
         self.assertTrue(isinstance(self.conf._dev, Device))
 
@@ -90,7 +89,12 @@ class TestConfig(unittest.TestCase):
     def test_config_commit_combination(self):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.rpc.commit_configuration.return_value = '<moredetail/>'
-        self.assertEqual('<moredetail/>', self.conf.commit(detail=True, force_sync=True, full=True))
+        self.assertEqual(
+            '<moredetail/>',
+            self.conf.commit(
+                detail=True,
+                force_sync=True,
+                full=True))
         self.conf.rpc.commit_configuration\
             .assert_called_with({'detail': 'detail'},
                                 **{'synchronize': True, 'full': True, 'force-synchronize': True})
@@ -402,7 +406,7 @@ class TestConfig(unittest.TestCase):
 
     def test_config_load_lset_from_rexp_error(self):
         self.conf.rpc.load_config = MagicMock()
-        conf = """nitin>"""
+        conf = """test>"""
         self.assertRaises(RuntimeError, self.conf.load, conf)
 
     def test_load_merge_true(self):
@@ -433,19 +437,114 @@ class TestConfig(unittest.TestCase):
             self.dev.rpc.commit_configuration()
         except Exception as ex:
             self.assertTrue(isinstance(ex, RpcError))
-            if ncclient.__version__>(0,4,5):
+            if ncclient.__version__ > (0, 4, 5):
                 self.assertEqual(ex.message,
                                  "error: interface-range 'axp' is not defined\n"
                                  "error: interface-ranges expansion failed")
                 self.assertEqual(ex.errs, [{'source': None, 'message':
-                    "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
-                    'error', 'edit_path': None}, {'source': None, 'message':
-                    'interface-ranges expansion failed', 'bad_element': None,
-                                                  'severity': 'error', 'edit_path': None}])
+                                            "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
+                                            'error', 'edit_path': None}, {'source': None, 'message':
+                                                                          'interface-ranges expansion failed', 'bad_element': None,
+                                                                          'severity': 'error', 'edit_path': None}])
             else:
                 self.assertEqual(ex.message,
                                  "interface-range 'axp' is not defined")
 
+    @patch('jnpr.junos.utils.config.Config.lock')
+    @patch('jnpr.junos.utils.config.Config.unlock')
+    def test_config_mode_exclusive(self, mock_unlock, mock_lock):
+        with Config(self.dev, mode='exclusive') as conf:
+            conf.rpc.load_config = MagicMock()
+            conf.load('conf', format='set')
+        self.assertTrue(mock_lock.called and mock_unlock.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_batch(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='batch') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(batch=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_private(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='private') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(private=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_dynamic(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='dynamic') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(dynamic=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_ephemeral(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        self.dev.rpc.clear_ephemeral_database_state = MagicMock()
+        with Config(self.dev, mode='ephemeral') as conf:
+            conf.load('conf', format='set')
+        self.assertTrue(self.dev.rpc.open_configuration.called)
+        self.assertTrue(self.dev.rpc.clear_ephemeral_database_state.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_None(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        self.dev.rpc.clear_ephemeral_database_state = MagicMock()
+        with Config(self.dev) as conf:
+            conf.load('conf', format='set')
+        self.assertFalse(self.dev.rpc.open_configuration.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_close_configuration_ex(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        ex = RpcError(rsp='ok')
+        ex.message = 'Configuration database is not open'
+        self.dev.rpc.close_configuration = MagicMock(side_effect=ex)
+        with Config(self.dev, mode='batch') as conf:
+            conf.load('conf', format='set')
+        self.assertTrue(self.dev.rpc.close_configuration.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_undefined(self, mock_exec):
+        try:
+            with Config(self.dev, mode='unknown') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, ValueError))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_batch_open_configuration_ex(self, mock_exec):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>syntax error</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        obj = RpcError(rsp=rsp)
+        self.dev.rpc.open_configuration = MagicMock(side_effect=obj)
+        with Config(self.dev, mode='batch') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(batch=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_private_open_configuration_ex(self, mock_exec):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>syntax error</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        obj = RpcError(rsp=rsp)
+        self.dev.rpc.open_configuration = MagicMock(side_effect=obj)
+        with Config(self.dev, mode='private') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(private=True)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -459,7 +558,7 @@ class TestConfig(unittest.TestCase):
             raw = etree.XML(foo)
             obj = RPCReply(raw)
             obj.parse()
-            if ncclient.__version__>(0,4,5):
+            if ncclient.__version__ > (0, 4, 5):
                 raise RPCError(etree.XML(foo), errs=obj._errors)
             else:
                 raise RPCError(etree.XML(foo))

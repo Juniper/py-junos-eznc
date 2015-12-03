@@ -181,7 +181,7 @@ class Config(Util):
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
-        :param int rollback: rollback id [0..49]
+        :param int rb_id: rollback id [0..49]
 
         :returns:
             * ``None`` if there is no difference
@@ -520,7 +520,7 @@ class Config(Util):
         """
         Perform action on the "rescue configuration".
 
-        :param str action: identifes the action as follows:
+        :param str action: identifies the action as follows:
 
             * "get" - retrieves/returns the rescue configuration via **format**
             * "save" - saves current configuration as rescue
@@ -611,3 +611,78 @@ class Config(Util):
         }.get(action, _unsupported_action)()
 
         return result
+
+    def __init__(self, dev, mode=None):
+        """
+        :param str mode: Can be used *only* when creating Config object using context manager
+
+            * "private" - Work in private database
+            * "dynamic" - Work in dynamic database
+            * "batch" - Work in batch database
+            * "ephemeral" - Work in default ephemeral instance
+            * "exclusive" - Work with Locking the candidate configuration
+
+            Example::
+
+                # mode can be private/dynamic/exclusive/batch/ephemeral
+                with Config(dev, mode='exclusive') as cu:
+                    cu.load('set system services netconf traceoptions file xyz', format='set')
+                    print cu.diff()
+                    cu.commit()
+        """
+        self.mode = mode
+        Util.__init__(self, dev=dev)
+
+    def __enter__(self):
+
+        # defining separate functions for each mode so that can be
+        # changed/edited as per the need of corresponding rpc call.
+        def _open_configuration_private():
+            try:
+                self.rpc.open_configuration(private=True)
+                return True
+            except RpcError as err:
+                return err.rpc_error['severity'] == 'warning'
+
+        def _open_configuration_dynamic():
+            self.rpc.open_configuration(dynamic=True)
+            return True
+
+        def _open_configuration_batch():
+            try:
+                self.rpc.open_configuration(batch=True)
+                return True
+            except RpcError as err:
+                return err.rpc_error['severity'] == 'warning'
+
+        def _open_configuration_exclusive():
+            return self.lock()
+
+        def _open_configuration_ephemeral():
+            self.rpc.open_configuration(ephemeral=True)
+            return True
+
+        def _unsupported_option():
+            if self.mode is not None:
+                raise ValueError("unsupported action: {0}".format(self.mode))
+
+        {
+            'private': _open_configuration_private,
+            'dynamic': _open_configuration_dynamic,
+            'batch': _open_configuration_batch,
+            'exclusive': _open_configuration_exclusive,
+            'ephemeral': _open_configuration_ephemeral
+        }.get(self.mode, _unsupported_option)()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.mode == 'exclusive':
+            self.unlock()
+        elif self.mode == 'ephemeral':
+            self.rpc.clear_ephemeral_database_state()
+        elif self.mode is not None:
+            try:
+                self.rpc.close_configuration()
+            except RpcError as err:
+                if err.message == 'Configuration database is not open':
+                    pass

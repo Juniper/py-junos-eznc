@@ -46,7 +46,7 @@ class RpcError(Exception):
         if isinstance(self.rsp, _Element):
             self.rpc_error = jxml.rpc_error(self.rsp)
             self.message = self.message or self.rpc_error['message']
-            if self.errs is None:
+            if self.errs is None or not isinstance(self.errs, list):
                 self.errs = [self.rpc_error]
 
     def __repr__(self):
