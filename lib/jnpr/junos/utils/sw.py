@@ -393,7 +393,7 @@ class SW(Util):
 
         if no_copy is False:
             copy_ok = True
-            if isinstance(package, str):
+            if isinstance(package, (str, unicode)):
                 copy_ok = self.safe_copy(package, remote_path=remote_path,
                                          progress=progress, cleanfs=cleanfs,
                                          checksum=checksum)
