@@ -564,7 +564,12 @@ class Device(object):
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
         except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
+            # This can sometimes be multiple RPCerrors packaged in one
+            # so it needs to be unpacked before returning
+            if isinstance(err.xml, list):
+                rsp = JXML.remove_namespaces(err.xml[0].xml)
+            else:
+                rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
             e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
             raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
