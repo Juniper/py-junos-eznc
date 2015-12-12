@@ -15,12 +15,20 @@ class version_info(object):
         if 'X' == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
             xm = re.match("(\d+)-(\w)(\d+)", self.minor)
-            self.minor = tuple(
-                [int(xm.group(1)), xm.group(2), int(xm.group(3))])
-            if len(after_type) < 2:
-                self.build = None
+            if xm is not None:
+                self.minor = tuple(
+                    [int(xm.group(1)), xm.group(2), int(xm.group(3))])
+                if len(after_type) < 2:
+                    self.build = None
+                else:
+                    self.build = int(after_type[1])
+            # it's not hyphen form "45-D10", perhaps "11.4X12.1", just extract 12
             else:
-                self.build = int(after_type[1])
+                if len(after_type) < 2:
+                    self.build = None
+                else:
+                    self.build = int(after_type[1])
+
         elif ('I' == self.type) or ('-' == self.type):
             self.type = 'I'
             try:
