@@ -22,7 +22,7 @@ class version_info(object):
                     self.build = None
                 else:
                     self.build = int(after_type[1])
-            # it's not hyphen form "45-D10", perhaps "11.4X12.1", just extract 12
+            # X type not hyphen format, perhaps "11.4X12.1", just extract build rev or set None
             else:
                 if len(after_type) < 2:
                     self.build = None
