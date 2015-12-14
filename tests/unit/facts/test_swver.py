@@ -20,11 +20,6 @@ class TestVersionInfo(unittest.TestCase):
     def test_version_info_after_type_len_else(self):
         self.assertEqual(version_info('12.1X46-D10').build, None)
 
-    def test_version_info_X_type_non_hyphenated(self):
-        self.assertItemsEqual(
-            version_info('11.4X12.2'),
-            [('build', 2), ('major', (11, 4)), ('minor', '12'), ('type', 'X')])
-
     def test_version_info_constructor_else_exception(self):
         self.assertEqual(version_info('11.4R7').build, '7')
 
