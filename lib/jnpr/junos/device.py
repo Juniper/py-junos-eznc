@@ -3,6 +3,7 @@ import os
 import types
 import platform
 import warnings
+import traceback
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -764,12 +765,25 @@ class Device(object):
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self):
+    def facts_refresh(self, exception_on_failure=False):
         """
         Reload the facts from the Junos device into :attr:`facts` property.
+
+        :param bool exception_on_failure: To raise exception or warning when
+                             facts gathering errors out.
+
         """
         for gather in FACT_LIST:
-            gather(self, self._facts)
+            try:
+                gather(self, self._facts)
+            except:
+                if exception_on_failure:
+                    raise
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"', RuntimeWarning)
+                return
+
+
 
     # ------------------------------------------------------------------------
     # probe
