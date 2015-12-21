@@ -1,6 +1,7 @@
 # utils/config.py
 import os
 import re
+import warnings
 
 # 3rd-party modules
 from lxml import etree
@@ -619,12 +620,11 @@ class Config(Util):
             * "private" - Work in private database
             * "dynamic" - Work in dynamic database
             * "batch" - Work in batch database
-            * "ephemeral" - Work in default ephemeral instance
             * "exclusive" - Work with Locking the candidate configuration
 
             Example::
 
-                # mode can be private/dynamic/exclusive/batch/ephemeral
+                    # mode can be private/dynamic/exclusive/batch
                 with Config(dev, mode='exclusive') as cu:
                     cu.load('set system services netconf traceoptions file xyz', format='set')
                     print cu.diff()
@@ -639,10 +639,12 @@ class Config(Util):
         # changed/edited as per the need of corresponding rpc call.
         def _open_configuration_private():
             try:
-                self.rpc.open_configuration(private=True)
-                return True
+                rsp = self.rpc.open_configuration(private=True)
             except RpcError as err:
-                return err.rpc_error['severity'] == 'warning'
+                if err.rpc_error['severity'] == 'warning':
+                    return True
+                else:
+                    raise err
 
         def _open_configuration_dynamic():
             self.rpc.open_configuration(dynamic=True)
@@ -651,16 +653,15 @@ class Config(Util):
         def _open_configuration_batch():
             try:
                 self.rpc.open_configuration(batch=True)
-                return True
             except RpcError as err:
-                return err.rpc_error['severity'] == 'warning'
+                if err.rpc_error['severity'] == 'warning':
+                    warnings.warn(err.message, RuntimeWarning)
+                    return True
+                else:
+                    raise err
 
         def _open_configuration_exclusive():
             return self.lock()
-
-        def _open_configuration_ephemeral():
-            self.rpc.open_configuration(ephemeral=True)
-            return True
 
         def _unsupported_option():
             if self.mode is not None:
@@ -670,19 +671,12 @@ class Config(Util):
             'private': _open_configuration_private,
             'dynamic': _open_configuration_dynamic,
             'batch': _open_configuration_batch,
-            'exclusive': _open_configuration_exclusive,
-            'ephemeral': _open_configuration_ephemeral
+            'exclusive': _open_configuration_exclusive
         }.get(self.mode, _unsupported_option)()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.mode == 'exclusive':
             self.unlock()
-        elif self.mode == 'ephemeral':
-            self.rpc.clear_ephemeral_database_state()
         elif self.mode is not None:
-            try:
-                self.rpc.close_configuration()
-            except RpcError as err:
-                if err.message == 'Configuration database is not open':
-                    pass
+            self.rpc.close_configuration()

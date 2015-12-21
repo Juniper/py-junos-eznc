@@ -8,7 +8,7 @@ install_reqs = list(filter(None, req_lines))
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="1.3.0",
+    version="1.3.1",
     author="Jeremy Schulman",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
