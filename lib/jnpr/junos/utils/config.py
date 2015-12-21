@@ -639,9 +639,11 @@ class Config(Util):
         # changed/edited as per the need of corresponding rpc call.
         def _open_configuration_private():
             try:
-                rsp = self.rpc.open_configuration(private=True)
+                self.rpc.open_configuration(private=True)
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
+                    if err.message != 'uncommitted changes will be discarded on exit':
+                        warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
                     raise err
@@ -655,7 +657,8 @@ class Config(Util):
                 self.rpc.open_configuration(batch=True)
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
-                    warnings.warn(err.message, RuntimeWarning)
+                    if err.message != 'uncommitted changes will be discarded on exit':
+                        warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
                     raise err
