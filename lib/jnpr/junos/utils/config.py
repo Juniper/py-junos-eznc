@@ -624,7 +624,7 @@ class Config(Util):
 
             Example::
 
-                    # mode can be private/dynamic/exclusive/batch
+                # mode can be private/dynamic/exclusive/batch
                 with Config(dev, mode='exclusive') as cu:
                     cu.load('set system services netconf traceoptions file xyz', format='set')
                     print cu.diff()
