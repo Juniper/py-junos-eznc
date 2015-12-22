@@ -480,30 +480,16 @@ class TestConfig(unittest.TestCase):
         self.dev.rpc.open_configuration.assert_called_with(dynamic=True)
 
     @patch('jnpr.junos.Device.execute')
-    def test_config_mode_ephemeral(self, mock_exec):
-        self.dev.rpc.open_configuration = MagicMock()
-        self.dev.rpc.clear_ephemeral_database_state = MagicMock()
-        with Config(self.dev, mode='ephemeral') as conf:
-            conf.load('conf', format='set')
-        self.assertTrue(self.dev.rpc.open_configuration.called)
-        self.assertTrue(self.dev.rpc.clear_ephemeral_database_state.called)
-
-    @patch('jnpr.junos.Device.execute')
-    def test_config_mode_None(self, mock_exec):
-        self.dev.rpc.open_configuration = MagicMock()
-        self.dev.rpc.clear_ephemeral_database_state = MagicMock()
-        with Config(self.dev) as conf:
-            conf.load('conf', format='set')
-        self.assertFalse(self.dev.rpc.open_configuration.called)
-
-    @patch('jnpr.junos.Device.execute')
     def test_config_mode_close_configuration_ex(self, mock_exec):
         self.dev.rpc.open_configuration = MagicMock()
         ex = RpcError(rsp='ok')
         ex.message = 'Configuration database is not open'
         self.dev.rpc.close_configuration = MagicMock(side_effect=ex)
-        with Config(self.dev, mode='batch') as conf:
-            conf.load('conf', format='set')
+        try:
+            with Config(self.dev, mode='batch') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, RpcError))
         self.assertTrue(self.dev.rpc.close_configuration.called)
 
     @patch('jnpr.junos.Device.execute')
