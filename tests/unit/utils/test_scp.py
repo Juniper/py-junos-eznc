@@ -55,7 +55,7 @@ class TestScp(unittest.TestCase):
 
     def test_scp_progress(self):
         scp = SCP(self.dev)
-        print scp._scp_progress('test', 100, 50)
+        print (scp._scp_progress('test', 100, 50))
 
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')

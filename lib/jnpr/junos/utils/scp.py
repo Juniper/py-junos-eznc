@@ -49,7 +49,7 @@ class SCP(object):
 
     def _progress(self, report):
         """ simple progress report function """
-        print self._junos.hostname + ": " + report
+        print (self._junos.hostname + ": " + report)
 
     def _scp_progress(self, _path, _total, _xfrd):
 
