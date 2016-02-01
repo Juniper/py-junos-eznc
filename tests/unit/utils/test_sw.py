@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
@@ -8,7 +10,6 @@ import os
 import sys
 
 from six import StringIO
-from __future__ import print_function
 
 if sys.version<'3':
     builtin_string = '__builtin__'
