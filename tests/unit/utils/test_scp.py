@@ -2,7 +2,7 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import sys
-from cStringIO import StringIO
+from six import StringIO
 from contextlib import contextmanager
 
 import unittest
