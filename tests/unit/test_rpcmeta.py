@@ -129,7 +129,8 @@ class Test_RpcMetaExec(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        with open(fpath) as fp:
+            foo = fp.read()
         if fname == 'get-system-users-information.xml':
             return NCElement(foo,
                              self.dev._conn._device_handler.transform_reply())

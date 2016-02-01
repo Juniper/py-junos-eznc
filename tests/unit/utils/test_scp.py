@@ -79,7 +79,7 @@ class TestScp(unittest.TestCase):
         package = 'test.tgz'
         with SCP(self.dev, progress=True) as scp:
             scp.put(package)
-        self.assertEqual(mock_scpclient.mock_calls[0][2]['progress'].func_name,
+        self.assertEqual(mock_scpclient.mock_calls[0][2]['progress'].__name__,
                          '_scp_progress')
 
     @contextmanager
