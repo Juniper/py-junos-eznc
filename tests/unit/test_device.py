@@ -482,25 +482,26 @@ class TestDevice(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        with open(fpath) as fp:
+            foo = fp.read()
 
-        if fname == 'get-rpc-error.xml':
-            # Raise ncclient exception for error
-            raise RPCError(etree.XML(foo))
-        elif fname == 'get-permission-denied.xml':
-            # Raise ncclient exception for error
-            raise RPCError(etree.XML(foo))
-        elif (fname == 'get-index-error.xml' or
-                fname == 'get-system-core-dumps.xml' or
-                fname == 'load-configuration-error.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            if fname == 'get-rpc-error.xml':
+                # Raise ncclient exception for error
+                raise RPCError(etree.XML(foo))
+            elif fname == 'get-permission-denied.xml':
+                # Raise ncclient exception for error
+                raise RPCError(etree.XML(foo))
+            elif (fname == 'get-index-error.xml' or
+                    fname == 'get-system-core-dumps.xml' or
+                    fname == 'load-configuration-error.xml'):
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
-        elif (fname == 'show-configuration.xml' or
-              fname == 'show-system-alarms.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            elif (fname == 'show-configuration.xml' or
+                  fname == 'show-system-alarms.xml'):
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
-        else:
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            else:
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
