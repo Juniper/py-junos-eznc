@@ -394,8 +394,7 @@ class SW(Util):
 
         if no_copy is False:
             copy_ok = True
-            if (sys.version<'3' and isinstance(package, (str, unicode))) or 
-                            isinstance(package, str):
+            if (sys.version<'3' and isinstance(package, (str, unicode))) or isinstance(package, str):
                 copy_ok = self.safe_copy(package, remote_path=remote_path,
                                          progress=progress, cleanfs=cleanfs,
                                          checksum=checksum)
