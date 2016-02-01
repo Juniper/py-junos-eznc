@@ -273,12 +273,13 @@ class Device(object):
             return None
         else:
             sshconf = paramiko.SSHConfig()
-            sshconf.parse(open(sshconf_path, 'r'))
-            found = sshconf.lookup(self._hostname)
-            self._hostname = found.get('hostname', self._hostname)
-            self._port = found.get('port', self._port)
-            self._conf_auth_user = found.get('user')
-            self._conf_ssh_private_key_file = found.get('identityfile')
+            with open(sshconf_path, 'r') as fp:
+                sshconf.parse(fp)
+                found = sshconf.lookup(self._hostname)
+                self._hostname = found.get('hostname', self._hostname)
+                self._port = found.get('port', self._port)
+                self._conf_auth_user = found.get('user')
+                self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
