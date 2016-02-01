@@ -26,6 +26,7 @@ class TestRoutingEngines(unittest.TestCase):
         self.mode = ''
         self.vc = False
         self.vct = False
+        self.vcf = False
 
     @patch('jnpr.junos.Device.execute')
     def test_multi_re_vc(self, mock_execute):
@@ -48,6 +49,16 @@ class TestRoutingEngines(unittest.TestCase):
         self.assertFalse(self.facts['vc_capable'])
         self.assertTrue(self.facts['2RE'])
         self.assertEqual(self.facts['RE1']['mastership_state'], 'backup')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_mixed_mode_vcf(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.mode = 'multi'
+        self.vc = True
+        self.vcf = True
+        routing_engines(self.dev, self.facts)
+        self.assertTrue(self.facts['vc_fabric'])
+        self.assertEqual(self.facts['vc_mode'], 'Mixed')
 
     @patch('jnpr.junos.Device.execute')
     def test_multi_instance(self, mock_execute):
@@ -92,6 +103,8 @@ class TestRoutingEngines(unittest.TestCase):
             if self.vc is True and args[0].tag == 'get-virtual-chassis-information':
                 if self.vct is True:
                     return True
+                elif self.vcf is True:
+                    return self._read_file('get-virtual-chassis-information_mmvcf.xml')
                 else:
                     return self._read_file('get-virtual-chassis-information.xml')
             return self._read_file(args[0].tag + '_' + self.mode + '.xml')

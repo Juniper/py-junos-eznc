@@ -39,6 +39,7 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
 
 @attr('unit')
 class Test_MyTemplateLoader(unittest.TestCase):
+
     def setUp(self):
         from jnpr.junos.device import _MyTemplateLoader
         self.template_loader = _MyTemplateLoader()
@@ -66,6 +67,7 @@ class TestDevice(unittest.TestCase):
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
+
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
@@ -87,7 +89,8 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.device.netconf_ssh')
     @patch('jnpr.junos.device.datetime')
     def test_device_ConnectTimeoutError(self, mock_datetime, mock_manager):
-        mock_manager.connect.side_effect = NcErrors.SSHError("Could not open socket to 1.1.1.1:830")
+        mock_manager.connect.side_effect = NcErrors.SSHError(
+            "Could not open socket to 1.1.1.1:830")
         from datetime import timedelta, datetime
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
@@ -203,7 +206,10 @@ class TestDevice(unittest.TestCase):
             """
             mock_connect.side_effect = self._mock_manager
             mock_execute.side_effect = self._mock_manager
-            self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+            self.dev2 = Device(
+                host='2.2.2.2',
+                user='rick',
+                password='password123')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
 
@@ -219,6 +225,15 @@ class TestDevice(unittest.TestCase):
             self.dev.facts_refresh()
             assert self.dev.facts['version'] == facts['version']
 
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_facts_error(self, mock_warnings, mock_execute):
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.dev.facts_refresh()
+            self.assertTrue(mock_warnings.warn.called)
+
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
@@ -230,7 +245,7 @@ class TestDevice(unittest.TestCase):
 
     def test_device_set_password(self):
         self.dev.password = 'secret'
-        self.assertEqual(self.dev._password, 'secret')
+        self.assertEqual(self.dev._auth_password, 'secret')
 
     def test_device_get_timeout(self):
         self.assertEqual(self.dev.timeout, 30)
@@ -286,18 +301,25 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.display_xml_rpc('show system uptime ').tag, 'get-system-uptime-information')
+        self.assertEqual(
+            self.dev.display_xml_rpc('show system uptime ').tag,
+            'get-system-uptime-information')
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc_text(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertIn('<get-system-uptime-information>',
-                      str(self.dev.display_xml_rpc('show system uptime ', format='text')))
+        self.assertIn(
+            '<get-system-uptime-information>',
+            self.dev.display_xml_rpc(
+                'show system uptime ',
+                format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.display_xml_rpc('show foo'), 'invalid command: show foo| display xml rpc')
+        self.assertEqual(
+            self.dev.display_xml_rpc('show foo'),
+            'invalid command: show foo| display xml rpc')
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
@@ -329,7 +351,9 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute_permission_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.assertRaises(EzErrors.PermissionError, self.dev.rpc.get_permission_denied)
+        self.assertRaises(
+            EzErrors.PermissionError,
+            self.dev.rpc.get_permission_denied)
 
     def test_device_execute_index_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
@@ -344,11 +368,15 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute_timeout(self):
         self.dev._conn.rpc = MagicMock(side_effect=TimeoutExpiredError)
-        self.assertRaises(EzErrors.RpcTimeoutError, self.dev.rpc.get_rpc_timeout)
+        self.assertRaises(
+            EzErrors.RpcTimeoutError,
+            self.dev.rpc.get_rpc_timeout)
 
     def test_device_execute_closed(self):
         self.dev._conn.rpc = MagicMock(side_effect=NcErrors.TransportError)
-        self.assertRaises(EzErrors.ConnectClosedError, self.dev.rpc.get_rpc_close)
+        self.assertRaises(
+            EzErrors.ConnectClosedError,
+            self.dev.rpc.get_rpc_close)
         self.assertFalse(self.dev.connected)
 
     def test_device_rpcmeta(self):
@@ -410,7 +438,8 @@ class TestDevice(unittest.TestCase):
     def test_device_template(self):
         # Try to load the template relative to module base
         try:
-            template = self.dev.Template('tests/unit/templates/config-example.xml')
+            template = self.dev.Template(
+                'tests/unit/templates/config-example.xml')
         except:
             # Try to load the template relative to test base
             try:
@@ -428,6 +457,25 @@ class TestDevice(unittest.TestCase):
         self.dev.close.side_effect = close_conn
         self.dev.close()
         self.assertEqual(self.dev.connected, False)
+
+    @patch('ncclient.manager.connect')
+    def test_device_context_manager(self, mock_connect):
+        mock_connect.side_effect = self._mock_manager
+        try:
+            with Device(host='3.3.3.3', user='gic',
+                        password='password123', gather_facts=False) as dev:
+                self.assertTrue(dev.connected)
+                dev._conn = MagicMock(name='_conn')
+                dev._conn.connected = True
+
+                def close_conn():
+                    dev.connected = False
+                dev.close = MagicMock(name='close')
+                dev.close.side_effect = close_conn
+                raise RpcError
+        except Exception as e:
+            self.assertIsInstance(e, RpcError)
+        self.assertFalse(dev.connected)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

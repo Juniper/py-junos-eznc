@@ -1,6 +1,7 @@
 # utils/config.py
 import os
 import re
+import warnings
 
 # 3rd-party modules
 from lxml import etree
@@ -121,16 +122,18 @@ class Config(Util):
         except RpcTimeoutError:
             raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there are warnings, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
-            JXML.remove_namespaces(err.xml)
-            raise CommitError(rsp=err.xml)
+            if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
+                raise CommitError(rsp=err.xml)
+            else:
+                raise
 
         if detail:
             return rsp
@@ -155,12 +158,14 @@ class Config(Util):
         """
         try:
             self.rpc.commit_configuration(check=True)
+        except RpcTimeoutError:
+            raise
         except RpcError as err:        # jnpr.junos exception
-            if err.rsp.find('ok') is not None:
+            if err.rsp is not None and err.rsp.find('ok') is not None:
                 # this means there is a warning, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.rsp)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
@@ -177,7 +182,7 @@ class Config(Util):
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
-        :param int rollback: rollback id [0..49]
+        :param int rb_id: rollback id [0..49]
 
         :returns:
             * ``None`` if there is no difference
@@ -337,6 +342,8 @@ class Config(Util):
         def try_load(rpc_contents, rpc_xattrs):
             try:
                 got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+            except RpcTimeoutError as err:
+                raise err
             except RpcError as err:
                 raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
             # Something unexpected happened - raise it up
@@ -514,7 +521,7 @@ class Config(Util):
         """
         Perform action on the "rescue configuration".
 
-        :param str action: identifes the action as follows:
+        :param str action: identifies the action as follows:
 
             * "get" - retrieves/returns the rescue configuration via **format**
             * "save" - saves current configuration as rescue
@@ -605,3 +612,74 @@ class Config(Util):
         }.get(action, _unsupported_action)()
 
         return result
+
+    def __init__(self, dev, mode=None):
+        """
+        :param str mode: Can be used *only* when creating Config object using context manager
+
+            * "private" - Work in private database
+            * "dynamic" - Work in dynamic database
+            * "batch" - Work in batch database
+            * "exclusive" - Work with Locking the candidate configuration
+
+            Example::
+
+                # mode can be private/dynamic/exclusive/batch
+                with Config(dev, mode='exclusive') as cu:
+                    cu.load('set system services netconf traceoptions file xyz', format='set')
+                    print cu.diff()
+                    cu.commit()
+        """
+        self.mode = mode
+        Util.__init__(self, dev=dev)
+
+    def __enter__(self):
+
+        # defining separate functions for each mode so that can be
+        # changed/edited as per the need of corresponding rpc call.
+        def _open_configuration_private():
+            try:
+                self.rpc.open_configuration(private=True)
+            except RpcError as err:
+                if err.rpc_error['severity'] == 'warning':
+                    if err.message != 'uncommitted changes will be discarded on exit':
+                        warnings.warn(err.message, RuntimeWarning)
+                    return True
+                else:
+                    raise err
+
+        def _open_configuration_dynamic():
+            self.rpc.open_configuration(dynamic=True)
+            return True
+
+        def _open_configuration_batch():
+            try:
+                self.rpc.open_configuration(batch=True)
+            except RpcError as err:
+                if err.rpc_error['severity'] == 'warning':
+                    if err.message != 'uncommitted changes will be discarded on exit':
+                        warnings.warn(err.message, RuntimeWarning)
+                    return True
+                else:
+                    raise err
+
+        def _open_configuration_exclusive():
+            return self.lock()
+
+        def _unsupported_option():
+            if self.mode is not None:
+                raise ValueError("unsupported action: {0}".format(self.mode))
+
+        {
+            'private': _open_configuration_private,
+            'dynamic': _open_configuration_dynamic,
+            'batch': _open_configuration_batch,
+            'exclusive': _open_configuration_exclusive
+        }.get(self.mode, _unsupported_option)()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.mode == 'exclusive':
+            self.unlock()
+        elif self.mode is not None:
+            self.rpc.close_configuration()

@@ -1,98 +1,124 @@
 from jnpr.junos import jxml
+from jnpr.junos import jxml as JXML
+from lxml.etree import _Element
+from ncclient.operations.rpc import RPCError
 
 
 class RpcError(Exception):
+
     """
     Parent class for all junos-pyez RPC Exceptions
     """
-    def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
+
+    def __init__(
+            self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
-          :errs: is a list of <rpc-error> elements
+          :errs: is a list of dictionaries of extracted <rpc-error> elements.
           :dev: is the device rpc was executed on
           :timeout: is the timeout value of the device
           :re: is the RE or member exception occured on
         """
         self.cmd = cmd
         self.rsp = rsp
-        self.errs = errs
         self.dev = dev
         self.timeout = timeout
         self.re = re
+        self.rpc_error = None
+
+        # To handle errors coming from ncclient, Here errs is list of RPCError
+        if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
+            self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
+            for error in errs.errors:
+                if error.severity == 'error':
+                    self.rsp = JXML.remove_namespaces(error.xml)
+                    break
+            self.message = errs.message
+        else:
+            self.errs = errs
+            self.message = "\n".join(["%s: %s" %(err['severity'].strip(),
+                                                 err['message'].strip())
+                                      for err in errs if err['message'] is not None
+                                      and err['severity'] is not None]) \
+                if isinstance(errs, list) else ''
+
+        if isinstance(self.rsp, _Element):
+            self.rpc_error = jxml.rpc_error(self.rsp)
+            self.message = self.message or self.rpc_error['message']
+            if self.errs is None or not isinstance(self.errs, list):
+                self.errs = [self.rpc_error]
 
     def __repr__(self):
         """
           pprints the response XML attribute
         """
-        if self.rsp is not None:
-            self.rpc_error = jxml.rpc_error(self.rsp)
-            if self.errs is None:
-                self.errs = self.rpc_error
+        if self.rpc_error is not None:
             return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
                 .format(self.__class__.__name__, self.rpc_error['severity'],
-                        self.rpc_error['bad_element'], self.rpc_error['message'])
+                        self.rpc_error['bad_element'], self.message)
 
     __str__ = __repr__
 
 
 class CommitError(RpcError):
+
     """
     Generated in response to a commit-check or a commit action.
     """
-    def __init__(self, cmd=None, rsp=None, errs=None):
+
+    def __init__(self, rsp, cmd=None, errs=None):
         RpcError.__init__(self, cmd, rsp, errs)
-        self.rpc_error = jxml.rpc_error(rsp)
-        if self.errs is None:
-            self.errs = self.rpc_error
 
     def __repr__(self):
         return "{0}(edit_path: {1}, bad_element: {2}, message: {3})"\
             .format(self.__class__.__name__, self.rpc_error['edit_path'],
-                    self.rpc_error['bad_element'], self.rpc_error['message'])
+                    self.rpc_error['bad_element'], self.message)
 
     __str__ = __repr__
 
 
 class ConfigLoadError(RpcError):
+
     """
     Generated in response to a failure when loading a configuration.
     """
-    def __init__(self, cmd=None, rsp=None, errs=None):
+
+    def __init__(self, rsp, cmd=None, errs=None):
         RpcError.__init__(self, cmd, rsp, errs)
-        self.rpc_error = jxml.rpc_error(rsp)
-        if self.errs is None:
-            self.errs = self.rpc_error
 
     def __repr__(self):
         return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
             .format(self.__class__.__name__, self.rpc_error['severity'],
-                    self.rpc_error['bad_element'], self.rpc_error['message'])
+                    self.rpc_error['bad_element'], self.message)
 
     __str__ = __repr__
 
 
 class LockError(RpcError):
+
     """
     Generated in response to attempting to take an exclusive
     lock on the configuration database.
     """
+
     def __init__(self, rsp):
         RpcError.__init__(self, rsp=rsp)
-        self.rpc_error = jxml.rpc_error(rsp)
 
 
 class UnlockError(RpcError):
+
     """
     Generated in response to attempting to unlock the
     configuration database.
     """
+
     def __init__(self, rsp):
         RpcError.__init__(self, rsp=rsp)
-        self.rpc_error = jxml.rpc_error(rsp)
 
 
 class PermissionError(RpcError):
+
     """
     Generated in response to invoking an RPC for which the
     auth user does not have user-class permissions.
@@ -100,15 +126,18 @@ class PermissionError(RpcError):
     PermissionError.message gives you the specific RPC that cause
     the exceptions
     """
-    def __init__(self, cmd=None, rsp=None):
-        RpcError.__init__(self, cmd=cmd, rsp=rsp)
+
+    def __init__(self, rsp, cmd=None, errs=None):
+        RpcError.__init__(self, cmd=cmd, rsp=rsp, errs=errs)
         self.message = rsp.findtext('.//bad-element')
 
 
 class RpcTimeoutError(RpcError):
+
     """
     Generated in response to a RPC execution timeout.
     """
+
     def __init__(self, dev, cmd, timeout):
         RpcError.__init__(self, dev=dev, cmd=cmd, timeout=timeout)
 
@@ -120,10 +149,12 @@ class RpcTimeoutError(RpcError):
 
 
 class SwRollbackError(RpcError):
+
     """
     Generated in response to a SW rollback error.
     """
-    def __init__(self, re=None, rsp=None):
+
+    def __init__(self, rsp, re=None):
         RpcError.__init__(self, re=re, rsp=rsp)
 
     def __repr__(self):
@@ -145,9 +176,11 @@ class SwRollbackError(RpcError):
 
 
 class ConnectError(Exception):
+
     """
     Parent class for all connection related exceptions
     """
+
     def __init__(self, dev, msg=None):
         self.dev = dev
         self._orig = msg
@@ -184,6 +217,7 @@ class ConnectError(Exception):
 
 
 class ProbeError(ConnectError):
+
     """
     Generated if auto_probe is enabled and the probe action fails
     """
@@ -191,6 +225,7 @@ class ProbeError(ConnectError):
 
 
 class ConnectAuthError(ConnectError):
+
     """
     Generated if the user-name, password is invalid
     """
@@ -198,6 +233,7 @@ class ConnectAuthError(ConnectError):
 
 
 class ConnectTimeoutError(ConnectError):
+
     """
     Generated if the NETCONF session fails to connect, could
     be due to the fact the device is not ip reachable; bad
@@ -207,6 +243,7 @@ class ConnectTimeoutError(ConnectError):
 
 
 class ConnectUnknownHostError(ConnectError):
+
     """
     Generated if the specific hostname does not DNS resolve
     """
@@ -214,6 +251,7 @@ class ConnectUnknownHostError(ConnectError):
 
 
 class ConnectRefusedError(ConnectError):
+
     """
     Generated if the specified host denies the NETCONF; could
     be that the services is not enabled, or the host has
@@ -223,6 +261,7 @@ class ConnectRefusedError(ConnectError):
 
 
 class ConnectNotMasterError(ConnectError):
+
     """
     Generated if the connection is made to a non-master
     routing-engine.  This could be a backup RE on an MX
@@ -232,9 +271,11 @@ class ConnectNotMasterError(ConnectError):
 
 
 class ConnectClosedError(ConnectError):
+
     """
     Generated if connection unexpectedly closed
     """
+
     def __init__(self, dev):
         ConnectError.__init__(self, dev=dev)
         dev.connected = False

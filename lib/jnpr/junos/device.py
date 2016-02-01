@@ -3,12 +3,14 @@ import os
 import types
 import platform
 import warnings
+import traceback
 
 # stdlib, in support of the the 'probe' method
 import socket
 import datetime
 import time
 import sys
+import json
 
 # 3rd-party packages
 from lxml import etree
@@ -133,7 +135,7 @@ class Device(object):
         Change the authentication password value.  This is handy in case
         the calling program needs to attempt different passwords.
         """
-        self._password = value
+        self._auth_password = value
 
     # ------------------------------------------------------------------------
     # property: logfile
@@ -276,7 +278,7 @@ class Device(object):
             self._hostname = found.get('hostname', self._hostname)
             self._port = found.get('port', self._port)
             self._conf_auth_user = found.get('user')
-            self._ssh_private_key_file = found.get('identityfile')
+            self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
@@ -354,14 +356,14 @@ class Device(object):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             self._conf_auth_user = None
+            self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_path = self._sshconf_lkup()
-            # but if user is explit from call, then use it.
+            # but if user or private key is explit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
+            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') or self._conf_ssh_private_key_file
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-            if not hasattr(self, '_ssh_private_key_file'):
-                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
 
         # -----------------------------
         # initialize instance variables
@@ -571,15 +573,28 @@ class Device(object):
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
         except RPCError as err:
-            # err is an NCError from ncclient
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
             e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp)
+            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.", RuntimeWarning)
             raise
+
+        # From 14.2 onward, junos supports JSON, so now code can be written as
+        # dev.rpc.get_route_engine_information({'format': 'json'})
+
+        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+            if self._facts == {}:
+                self.facts_refresh()
+            ver_info = self._facts['version_info']
+            if ver_info.major[0] >= 15 or \
+                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+                return json.loads(rpc_rsp_e.text)
+            else:
+                warnings.warn("Native JSON support is only from 14.2 onwards",
+                              RuntimeWarning)
 
         # This section is here for the possible use of something other than ncclient
         # for RPCs that have embedded rpc-errors, need to check for those now
@@ -758,12 +773,25 @@ class Device(object):
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self):
+    def facts_refresh(self, exception_on_failure=False):
         """
         Reload the facts from the Junos device into :attr:`facts` property.
+
+        :param bool exception_on_failure: To raise exception or warning when
+                             facts gathering errors out.
+
         """
         for gather in FACT_LIST:
-            gather(self, self._facts)
+            try:
+                gather(self, self._facts)
+            except:
+                if exception_on_failure:
+                    raise
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"', RuntimeWarning)
+                return
+
+
 
     # ------------------------------------------------------------------------
     # probe
@@ -807,3 +835,16 @@ class Device(object):
             probe_ok = False
 
         return probe_ok
+
+    # -----------------------------------------------------------------------
+    # Context Manager
+    # -----------------------------------------------------------------------
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._conn.connected and \
+                not isinstance(exc_val, EzErrors.ConnectError):
+            self.close()

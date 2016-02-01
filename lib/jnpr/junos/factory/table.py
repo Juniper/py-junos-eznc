@@ -29,6 +29,7 @@ class Table(object):
         self.view = self.VIEW
         self._key_list = []
         self._path = path
+        self._lxml = xml
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -294,7 +295,7 @@ class Table(object):
 
         def get_xpath(find_value):
             namekey_xpath, item_xpath = self._keyspec()
-            xnkv = '[normalize-space({0})="{1}"]'
+            xnkv = '[{0}="{1}"]'
 
             if isinstance(find_value, str):
                 # find by name, simple key

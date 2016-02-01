@@ -8,6 +8,7 @@ from . import exception
 
 import json
 import yaml
+import logging
 
 __version__ = version.VERSION
 __date__ = version.DATE
@@ -25,3 +26,14 @@ yaml.dumper.Dumper.ignore_aliases = lambda self, data: True
 # Add YAML representer for version_info
 yaml.Dumper.add_multi_representer(version_info, version_yaml_representer)
 yaml.SafeDumper.add_multi_representer(version_info, version_yaml_representer)
+
+
+# Suppress Paramiko logger warnings
+plog = logging.getLogger('paramiko')
+if not plog.handlers:
+    class NullHandler(logging.Handler):
+
+        def emit(self, record):
+            pass
+
+    plog.addHandler(NullHandler())

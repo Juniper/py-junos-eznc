@@ -1,0 +1,22 @@
+OspfNeighborTable:
+  rpc: get-ospf-neighbor-information
+  args:
+    extensive: True
+  item: ospf-neighbor
+  key:
+    - interface-name
+    - neighbor-id
+  view: OspfNeighborView
+
+OspfNeighborView:
+  fields:
+    neighbor_address: neighbor-address
+    interface_name: interface-name
+    ospf_neighbor_state: ospf-neighbor-state
+    neighbor_id: neighbor-id
+    activity_timer: activity-timer
+    ospf_area: ospf-area
+    dr_address: dr-address
+    bdr_address: bdr-address
+    neighbor_up_time: neighbor-up-time
+    neighbor_adjacency_time: neighbor-adjacency-time

@@ -5,7 +5,7 @@ class version_info(object):
 
     def __init__(self, verstr):
         """verstr - version string"""
-        m1 = re.match('(.*?)([RBIXS-])(.*)', verstr)
+        m1 = re.match('(.*?)([RBIXSF-])(.*)', verstr)
         self.type = m1.group(2)
 
         self.major = tuple(map(int, m1.group(1).split('.')))  # creates tuyple
@@ -14,13 +14,21 @@ class version_info(object):
 
         if 'X' == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
-            xm = re.match("(\d+)-(\w)(.*)", self.minor)
-            self.minor = tuple(
-                [int(xm.group(1)), xm.group(2), int(xm.group(3))])
-            if len(after_type) < 2:
-                self.build = None
+            xm = re.match("(\d+)-(\w)(\d+)", self.minor)
+            if xm is not None:
+                self.minor = tuple(
+                    [int(xm.group(1)), xm.group(2), int(xm.group(3))])
+                if len(after_type) < 2:
+                    self.build = None
+                else:
+                    self.build = int(after_type[1])
+            # X type not hyphen format, perhaps "11.4X12.1", just extract build rev or set None
             else:
-                self.build = int(after_type[1])
+                if len(after_type) < 2:
+                    self.build = None
+                else:
+                    self.build = int(after_type[1])
+
         elif ('I' == self.type) or ('-' == self.type):
             self.type = 'I'
             try:
@@ -35,7 +43,8 @@ class version_info(object):
                 self.build = after_type[0]  # non-numeric
 
         self.as_tuple = self.major + tuple([self.minor, self.build])
-        self.v_dict = {'major': self.major, 'type': self.type, 'minor': self.minor, 'build': self.build}
+        self.v_dict = {'major': self.major, 'type': self.type,
+                       'minor': self.minor, 'build': self.build}
 
     def __iter__(self):
         for key in self.v_dict:
@@ -80,12 +89,15 @@ class version_info(object):
 def _get_swver(dev, facts):
     # See if we're VC Capable
     if facts['vc_capable'] is True:
-        return dev.rpc.cli("show version all-members", format='xml')
-    else:
         try:
-            return dev.rpc.cli("show version invoke-on all-routing-engines", format='xml')
+            return dev.rpc.cli("show version all-members", format='xml')
         except:
-            return dev.rpc.get_software_information()
+            pass
+    try:
+        return dev.rpc.cli("show version invoke-on all-routing-engines",
+                           format='xml')
+    except:
+        return dev.rpc.get_software_information()
 
 
 def facts_software_version(junos, facts):
@@ -141,18 +153,18 @@ def facts_software_version(junos, facts):
             # "FPC<n>" or "ndoe<n>", and normalize to "RE<n>".
             re_name = re.sub(r'(\w+)(\d+)', 'RE\\2', re_name)
 
-            pkginfo = re_sw.xpath(
-                'package-information[normalize-space(name)="junos"]/comment'
-            )[0].text
-
-            try:
-                versions.append(
-                    (re_name.upper(),
-                     re.findall(
-                         r'\[(.*)\]',
-                         pkginfo)[0]))
-            except:
-                versions.append((re_name.upper(), "0.0I0.0"))
+            # First try the <junos-version> tag present in >= 15.1
+            swinfo = re_sw.findtext('junos-version', default=None)
+            if not swinfo:
+                # For < 15.1, get version from the "junos" package.
+                pkginfo = re_sw.xpath(
+                    'package-information[normalize-space(name)="junos"]/comment'
+                )[0].text
+                try:
+                    swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
+                except:
+                    swinfo = "0.0I0.0"
+            versions.append((re_name.upper(), swinfo))
 
         # now add the versions to the facts <dict>
         for re_ver in versions:
@@ -160,7 +172,10 @@ def facts_software_version(junos, facts):
 
         if f_master is not None:
             master = f_master[0] if isinstance(f_master, list) else f_master
-            facts['version'] = facts['version_' + master]
+            if 'version_' + master in facts:
+                facts['version'] = facts['version_' + master]
+            else:
+                facts['version'] = versions[0][1]
         else:
             facts['version'] = versions[0][1]
 
@@ -168,10 +183,18 @@ def facts_software_version(junos, facts):
         # single-RE
         facts['hostname'] = x_swver.findtext('host-name')
 
-        pkginfo = x_swver.xpath(
-            './/package-information[normalize-space(name)="junos"]/comment'
-        )[0].text
-        facts['version'] = re.findall(r'\[(.*)\]', pkginfo)[0]
+        # First try the <junos-version> tag present in >= 15.1
+        swinfo = x_swver.findtext('.//junos-version', default=None)
+        if not swinfo:
+            # For < 15.1, get version from the "junos" package.
+            pkginfo = x_swver.xpath(
+                './/package-information[normalize-space(name)="junos"]/comment'
+            )[0].text
+            try:
+                swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
+            except:
+                swinfo = "0.0I0.0"
+        facts['version'] = swinfo
 
     # ------------------------------------------------------------------------
     # create a 'version_info' object based on the master version

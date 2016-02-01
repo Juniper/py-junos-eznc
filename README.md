@@ -1,4 +1,4 @@
-[![PyPi Version](https://pypip.in/version/junos-eznc/badge.png)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://pypip.in/download/junos-eznc/badge.png)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://coveralls.io/repos/Juniper/py-junos-eznc/badge.png)](https://coveralls.io/r/Juniper/py-junos-eznc)
+[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://img.shields.io/pypi/dm/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc)
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
