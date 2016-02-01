@@ -434,7 +434,10 @@ class TestSW(unittest.TestCase):
         pass
 
     def _my_scp_progress(self, _path, _total, _xfrd):
-        print (_path, _total, _xfrd)
+        if sys.version<'3':
+            print _path, _total, _xfrd
+        else:
+            print (_path, _total, _xfrd)
 
     @contextmanager
     def capture(self, command, *args, **kwargs):
