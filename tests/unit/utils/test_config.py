@@ -253,7 +253,6 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(RpcTimeoutError, self.conf.load, path='config.conf')
 
     @patch(builtin_string + '.open')
-    def test_config_load_try_load_rpctimeouterror(self, mock_open):
     def test_config_try_load_exception(self, mock_open):
         class OtherException(Exception):
             pass
