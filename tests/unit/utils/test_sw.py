@@ -399,7 +399,7 @@ class TestSW(unittest.TestCase):
         self.sw._mixed_VC = True
         self.sw.reboot()
         self.assertTrue('all-members' in
-                        etree.tostring(mock_execute.call_args[0][0]))
+                        (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
