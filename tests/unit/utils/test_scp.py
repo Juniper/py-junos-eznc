@@ -69,7 +69,7 @@ class TestScp(unittest.TestCase):
         with SCP(self.dev, progress=fn) as scp:
             scp.put(package)
         self.assertEqual(
-            mock_scpclient.mock_calls[0][2]['progress'].__name__, 'fn')
+            mock_scpclient.mock_calls[0][2]['progress'].func_name, 'fn')
 
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
