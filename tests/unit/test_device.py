@@ -312,7 +312,7 @@ class TestDevice(unittest.TestCase):
             '<get-system-uptime-information>',
             self.dev.display_xml_rpc(
                 'show system uptime ',
-                format='text'))
+                format='text').decode('utf-8'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):

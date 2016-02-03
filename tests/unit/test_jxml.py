@@ -34,8 +34,7 @@ class Test_JXML(unittest.TestCase):
         parser = ET.XMLParser()
         root   = ET.parse(StringIO(xmldata), parser)
         test = remove_namespaces(root)
-
-        for elem in test.getiterator():
+        for elem in test.iter():
             i = elem.tag.find('}')
             if i > 0:
                 i = i + 1
