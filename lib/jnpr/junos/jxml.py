@@ -133,7 +133,7 @@ strip_comments_transform = etree.XSLT(strip_xslt_root)
 
 
 def remove_namespaces(xml):
-    for elem in xml.iter():
+    for elem in xml.getiterator():
         if elem.tag is etree.Comment:
             continue
         i = elem.tag.find('}')
