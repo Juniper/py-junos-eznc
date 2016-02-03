@@ -54,6 +54,6 @@ class Test_JXML(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         with open(fpath) as fp:
-            foo = etree.fromstring(fp.read())
+            foo = fp.read()
         return foo
 
