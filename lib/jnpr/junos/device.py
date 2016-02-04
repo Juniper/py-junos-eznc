@@ -10,6 +10,7 @@ import socket
 import datetime
 import time
 import json
+import re
 
 # 3rd-party packages
 from lxml import etree
@@ -27,6 +28,7 @@ from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.utils.start_shell import StartShell
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -291,6 +293,12 @@ class Device(object):
         :param int port:
             *OPTIONAL* NETCONF port (defaults to 830)
 
+        :param str routing_engine:
+            *OPTIONAL* If not provided default behavior will be raise exception
+            if the connected RE is not master.
+            This can be used to connected to require RE.
+            Values to this argument can be master/backup/re0/re1/any
+
         :param bool gather_facts:
             *OPTIONAL* default is ``True``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
@@ -327,6 +335,7 @@ class Device(object):
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
+        self._RE = kvargs.get('routing_engine', None)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -412,6 +421,80 @@ class Device(object):
             originating ``Exception`` is assigned as ``err._orig``
             and re-raised to the caller.
         """
+        #
+        #  PRIVATE Functions
+        #
+
+        def _get_connected_slot():
+            """return connected slot. In case of error return None"""
+            with StartShell(self) as sh:
+                got = sh.run("sysctl hw.re.slotid")
+                if not sh.last_ok:
+                    return None
+                #get slot id from the result
+                got = '\n'.join(got)
+                mat = re.search('hw.re.slotid:\s*(\d+)', got, re.IGNORECASE)
+                if not mat:
+                    return None
+                re_connected = "RE" + mat.group(1)
+                return re_connected
+            raise Exception("Could not determine routing engine slot id")
+
+        def _connect_to_other_re():
+
+            # Determine other re
+            other_re = None
+            if self._connected_re.upper() == 'RE0':
+                other_re = 're1'
+            else:
+                other_re = 're0'
+
+            # get the name of other re
+            command = etree.XML('<configuration><groups><name>%s</name></groups></configuration>' % other_re)
+            res = self.rpc.get_config(filter_xml=command)
+            self._hostname = res.xpath('//groups/system/host-name')[0].text
+
+            # open connection using ncclient transport
+            self._conn = netconf_ssh.connect(
+                host=self._hostname,
+                port=self._port,
+                username=self._auth_user,
+                password=self._auth_password,
+                hostkey_verify=False,
+                key_filename=self._ssh_private_key_file,
+                allow_agent=allow_agent,
+                ssh_config=self._sshconf_lkup(),
+                device_params={'name': 'junos'})
+
+        def _connect_to_re():
+            """Connected to proper routing engine based on routing_engine(self._RE)"""
+
+            from jnpr.junos.facts.routing_engines import facts_routing_engines
+            facts_routing_engines(self, self._facts)
+
+            # Check if connected to proper RE
+            # Check for cases where routing_engine provided is master/backup
+            if re.search('^(master|backup)$', self._RE):
+                if self.facts[self._connected_re]['mastership_state'] != self._RE:
+                    _connect_to_other_re()
+                    self._connected_re = _get_connected_slot()
+
+            # Check for cases where routing_engine provided is re0/re1
+            elif re.search('^(re0|re1)$', self._RE, re.I):
+                if self._connected_re.upper() != self._RE.upper():
+                    _connect_to_other_re()
+                    self._connected_re = _get_connected_slot()
+
+            # Check for cases where routing_engine provided is any
+            elif self._RE.lower() == 'any':
+                self._connected_re = _get_connected_slot()
+            else:
+                raise Exception("Invalid input for 'routing_engine' argument.\
+                 Valid values are master/backup/re0/re1")
+
+        #
+        #  End of PRIVATE Functions
+        #
 
         auto_probe = kvargs.get('auto_probe', self._auto_probe)
         if auto_probe is not 0:
@@ -440,6 +523,14 @@ class Device(object):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos'})
+
+            # If routing_engine(_RE) is defined then check if you are connected to correct RE .
+            # else get name of other re and connect to it.
+            self.connected = True
+
+            self._connected_re = _get_connected_slot()
+            if self._RE:
+                _connect_to_re()
 
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
