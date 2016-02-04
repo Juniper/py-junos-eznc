@@ -431,7 +431,7 @@ class Device(object):
                 got = sh.run("sysctl hw.re.slotid")
                 if not sh.last_ok:
                     return None
-                #get slot id from the result
+                # get slot id from the result
                 got = '\n'.join(got)
                 mat = re.search('hw.re.slotid:\s*(\d+)', got, re.IGNORECASE)
                 if not mat:
@@ -450,7 +450,8 @@ class Device(object):
                 other_re = 're0'
 
             # get the name of other re
-            command = etree.XML('<configuration><groups><name>%s</name></groups></configuration>' % other_re)
+            command = etree.XML('<configuration><groups><name>%s</name>'
+                                '</groups></configuration>' % other_re)
             res = self.rpc.get_config(filter_xml=command)
             self._hostname = res.xpath('//groups/system/host-name')[0].text
 
@@ -467,7 +468,10 @@ class Device(object):
                 device_params={'name': 'junos'})
 
         def _connect_to_re():
-            """Connected to proper routing engine based on routing_engine(self._RE)"""
+            """
+            Connected to proper routing engine based on
+            routing_engine(self._RE)
+            """
 
             from jnpr.junos.facts.routing_engines import facts_routing_engines
             facts_routing_engines(self, self._facts)
@@ -524,11 +528,14 @@ class Device(object):
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos'})
 
-            # If routing_engine(_RE) is defined then check if you are connected to correct RE .
-            # else get name of other re and connect to it.
+            # If routing_engine(_RE) is defined then check if you are
+            # connected to correct RE, else get name of other re and
+            # connect to it.
             self.connected = True
 
-            self._connected_re = _get_connected_slot()
+            gather_facts = kvargs.get('gather_facts', self._gather_facts)
+            if gather_facts is True:
+                self._connected_re = _get_connected_slot()
             if self._RE:
                 _connect_to_re()
 

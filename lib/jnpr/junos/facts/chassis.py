@@ -46,7 +46,7 @@ def facts_chassis(junos, facts):
         facts['2RE'] = False
         x_ch = rsp.find('chassis')
 
-    if x_ch is None: # This is when backup RE is being connected
+    if x_ch is None:  # This is when backup RE is being connected
         try:
             rsp = junos.rpc.get_software_information()
             if rsp.tag == 'error':
