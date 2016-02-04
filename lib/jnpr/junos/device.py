@@ -534,7 +534,7 @@ class Device(object):
             self.connected = True
 
             gather_facts = kvargs.get('gather_facts', self._gather_facts)
-            if gather_facts is True:
+            if gather_facts is True and self._RE is not None:
                 self._connected_re = _get_connected_slot()
             if self._RE:
                 _connect_to_re()

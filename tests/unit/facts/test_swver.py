@@ -112,6 +112,7 @@ class TestSwver(unittest.TestCase):
     def test_swver(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['master'] = 'RE0'
+        self.dev._reRole = 'master'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '12.3R6.6')
 
@@ -119,6 +120,7 @@ class TestSwver(unittest.TestCase):
     def test_swver_f_master_list(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.facts['master'] = ['RE0', 'RE1']
+        self.dev._reRole = 'master'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '12.3R6.6')
 
@@ -127,6 +129,7 @@ class TestSwver(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.facts['master'] = 'RE5'
         self.facts['version_RE5'] = '15.3R6.6'
+        self.dev._reRole = 'master'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '15.3R6.6')
 
@@ -136,6 +139,7 @@ class TestSwver(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.facts['master'] = ['RE0', 'RE0', 'RE1', 'RE2', 'RE3']
         self.facts['version_RE0-RE0'] = '14.2R4'
+        self.dev._reRole = 'master'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '14.2R4')
 
@@ -153,6 +157,7 @@ class TestSwver(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         mock_re_findall.side_effect = IndexError
         self.facts['master'] = 'RE0'
+        self.dev._reRole = 'master'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '0.0I0.0')
 
