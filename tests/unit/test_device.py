@@ -16,6 +16,7 @@ from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.utils.start_shell import StartShell
 
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
@@ -28,7 +29,8 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
                  'last_reboot_reason': 'Router rebooted after a '
                  'normal shutdown.',
                  'model': 'FIREFLY-PERIMETER RE',
-                 'up_time': '6 hours, 29 minutes, 30 seconds'},
+                 'up_time': '6 hours, 29 minutes, 30 seconds',
+                 'mastersip_state': 'master'},
          'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
@@ -203,6 +205,66 @@ class TestDevice(unittest.TestCase):
                 password='password123')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
+
+    @patch('ncclient.manager.connect')
+    @patch('jnpr.junos.Device.execute')
+    def test_device_open_other_re(self, mock_connect, mock_execute):
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            mock_shell = StartShell
+            mock_shell.__enter__ = MagicMock(name="__enter__")
+            mock_shell.__enter__.return_value = MagicMock(name="enterReturn")
+            mock_shell._chan = MagicMock(name="_chan")
+            mock_shell._client = MagicMock(name="_client")
+            mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 0']
+            self.dev2 = Device(
+                host='2.2.2.2',
+                user='rick',
+                password='password123',
+                routing_engine='backup')
+            xmldata = etree.XML('<rpc-reply><route-engine-information>'
+                                '<route-engine><slot>0</slot>'
+                                '<mastership-state>master</mastership-state>'
+                                '</route-engine>'
+                                '<route-engine><slot>1</slot>'
+                                '<mastership-state>backup</mastership-state>'
+                                '</route-engine></route-engine-information></rpc-reply>')
+            self.dev2.rpc.get_route_engine_information = MagicMock(side_effect=xmldata)
+            xmldata = etree.XML('<rpc-reply><configuration>'
+                                '<groups><name>re1</name><system>'
+                                '<host-name>irtb4-a1</host-name>'
+                                '</system></groups>'
+                                '</configuration></rpc-reply>')
+            self.dev2.rpc.get_config = MagicMock(side_effect=xmldata)
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
+
+            self.dev2 = Device(
+                host='2.2.2.2',
+                user='rick',
+                password='password123',
+                routing_engine='invalid')
+            mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 1']
+            self.assertRaises(Exception, self.dev2.open)
+
+
+            self.dev2 = Device(
+                host='2.2.2.2',
+                user='rick',
+                password='password123',
+                routing_engine='any')
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
+
+            mock_shell.__enter__.return_value.last_ok = None
+            self.assertRaises(Exception, self.dev2.open)
+
 
     @patch('jnpr.junos.Device.execute')
     def test_device_facts(self, mock_execute):

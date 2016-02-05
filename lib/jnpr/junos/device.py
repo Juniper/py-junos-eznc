@@ -430,7 +430,7 @@ class Device(object):
             with StartShell(self) as sh:
                 got = sh.run("sysctl hw.re.slotid")
                 if not sh.last_ok:
-                    return None
+                    raise Exception("Could not determine routing engine slot id")
                 # get slot id from the result
                 got = '\n'.join(got)
                 mat = re.search('hw.re.slotid:\s*(\d+)', got, re.IGNORECASE)
@@ -537,6 +537,7 @@ class Device(object):
             if gather_facts is True and self._RE is not None:
                 self._connected_re = _get_connected_slot()
             if self._RE:
+                self._connected_re = _get_connected_slot()
                 _connect_to_re()
 
         except NcErrors.AuthenticationError as err:
