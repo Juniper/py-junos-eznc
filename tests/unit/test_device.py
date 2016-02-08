@@ -67,12 +67,6 @@ class TestDevice(unittest.TestCase):
 
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
-        mock_shell = StartShell
-        mock_shell.__enter__ = MagicMock(name="__enter__")
-        mock_shell.__enter__.return_value = MagicMock(name="enterReturn")
-        mock_shell._chan = MagicMock(name="_chan")
-        mock_shell._client = MagicMock(name="_client")
-        mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 1']
         self.dev.open()
 
     @patch('ncclient.operations.session.CloseSession.request')
@@ -223,12 +217,6 @@ class TestDevice(unittest.TestCase):
             """
             mock_connect.side_effect = self._mock_manager
             mock_execute.side_effect = self._mock_manager
-            mock_shell = StartShell
-            mock_shell.__enter__ = MagicMock(name="__enter__")
-            mock_shell.__enter__.return_value = MagicMock(name="enterReturn")
-            mock_shell._chan = MagicMock(name="_chan")
-            mock_shell._client = MagicMock(name="_client")
-            mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 0']
             self.dev2 = Device(
                 host='2.2.2.2',
                 user='rick',
@@ -241,7 +229,11 @@ class TestDevice(unittest.TestCase):
                                 '<route-engine><slot>1</slot>'
                                 '<mastership-state>backup</mastership-state>'
                                 '</route-engine></route-engine-information></rpc-reply>')
-            self.dev2.rpc.get_route_engine_information = MagicMock(side_effect=xmldata)
+            self.dev2.rpc.get_route_engine_information = MagicMock(side_effect=[xmldata, xmldata, xmldata, xmldata])
+            xmldata = etree.XML('<rpc-reply><chassis-inventory>'
+                            '</chassis-inventory></rpc-reply>')
+            xmldata1 = etree.XML('<output></output>')
+            self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=[xmldata, xmldata1])
             xmldata = etree.XML('<rpc-reply><configuration>'
                                 '<groups><name>re1</name><system>'
                                 '<host-name>irtb4-a1</host-name>'
@@ -256,9 +248,7 @@ class TestDevice(unittest.TestCase):
                 user='rick',
                 password='password123',
                 routing_engine='invalid')
-            mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 1']
             self.assertRaises(Exception, self.dev2.open)
-
 
             self.dev2 = Device(
                 host='2.2.2.2',
@@ -267,9 +257,6 @@ class TestDevice(unittest.TestCase):
                 routing_engine='any')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
-
-            mock_shell.__enter__.return_value.last_ok = None
-            self.assertRaises(Exception, self.dev2.open)
 
 
     @patch('jnpr.junos.Device.execute')

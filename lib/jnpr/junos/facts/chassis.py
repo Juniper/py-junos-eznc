@@ -53,7 +53,8 @@ def facts_chassis(junos, facts):
                 raise RuntimeError('Could not get model information')
         except:
             return
-        facts['model'] = rsp.xpath('//software-information/product-model')[0].text
+        facts['model'] = \
+            rsp.xpath('//software-information/product-model')[0].text
         return
 
     facts['model'] = x_ch.findtext('description')

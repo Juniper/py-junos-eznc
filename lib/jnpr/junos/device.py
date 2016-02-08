@@ -427,18 +427,32 @@ class Device(object):
 
         def _get_connected_slot():
             """return connected slot. In case of error return None"""
-            with StartShell(self) as sh:
-                got = sh.run("sysctl hw.re.slotid")
-                if not sh.last_ok:
-                    raise Exception("Could not determine routing engine slot id")
-                # get slot id from the result
-                got = '\n'.join(got)
-                mat = re.search('hw.re.slotid:\s*(\d+)', got, re.IGNORECASE)
-                if not mat:
-                    return None
-                re_connected = "RE" + mat.group(1)
-                return re_connected
-            raise Exception("Could not determine routing engine slot id")
+
+            rsp = self.rpc.get_chassis_inventory()
+            if rsp.tag == 'error':
+                raise RuntimeError('Could not determine RE slot id')
+            if rsp.tag == 'output':
+                # this means that there was an error; due to the
+                # fact that this connection is not on the master
+                # @@@ need to validate on VC-member
+                self._reRole = "backup"
+            else:
+                self._reRole = "master"
+
+            rsp = self.rpc.get_route_engine_information()
+            if rsp.tag == 'error':
+                raise RuntimeError('Could not determine RE slot id')
+            re_list = rsp.xpath('.//route-engine')
+            if len(re_list) == 1:
+                return "RE0"
+            for re in re_list:
+                m_state = re.find('mastership-state')
+                if self._reRole.lower() == m_state.text.lower():
+                    x_slot = re.find('slot')
+                    if x_slot is None:
+                        raise RuntimeError("Could not find RE slot id")
+                    return "RE" + str(x_slot.text)
+            raise RuntimeError("Could not find RE slot id")
 
         def _connect_to_other_re():
 
@@ -479,7 +493,8 @@ class Device(object):
             # Check if connected to proper RE
             # Check for cases where routing_engine provided is master/backup
             if re.search('^(master|backup)$', self._RE):
-                if self.facts[self._connected_re]['mastership_state'] != self._RE:
+                if self.facts[self._connected_re]['mastership_state'] != \
+                        self._RE:
                     _connect_to_other_re()
                     self._connected_re = _get_connected_slot()
 
@@ -534,10 +549,9 @@ class Device(object):
             self.connected = True
 
             gather_facts = kvargs.get('gather_facts', self._gather_facts)
-            #if gather_facts is True and self._RE is not None:
-            #    self._connected_re = _get_connected_slot()
-            self._connected_re = _get_connected_slot()
+
             if self._RE:
+                self._connected_re = _get_connected_slot()
                 _connect_to_re()
 
         except NcErrors.AuthenticationError as err:
@@ -881,8 +895,6 @@ class Device(object):
                 warnings.warn('Facts gathering is incomplete. '
                               'To know the reason call "dev.facts_refresh(exception_on_failure=True)"', RuntimeWarning)
                 return
-
-
 
     # ------------------------------------------------------------------------
     # probe
