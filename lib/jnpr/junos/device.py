@@ -294,9 +294,10 @@ class Device(object):
             *OPTIONAL* NETCONF port (defaults to 830)
 
         :param str routing_engine:
-            *OPTIONAL* If not provided, tries to connect to IP/host provided
-            and raises an exception if the host is not master RE
-            This can be used to connected to require RE.
+            *OPTIONAL* If not provided, defaults to None and tries to connect
+            to IP/host provided and raises an exception if the host is not
+            master RE
+            This can be used to connect to required RE.
             Values to this argument can be master/backup/re0/re1/any
 
         :param bool gather_facts:
@@ -547,8 +548,6 @@ class Device(object):
             # connected to correct RE, else get name of other re and
             # connect to it.
             self.connected = True
-
-            gather_facts = kvargs.get('gather_facts', self._gather_facts)
 
             if self._RE:
                 self._connected_re = _get_connected_slot()
