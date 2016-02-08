@@ -50,7 +50,7 @@ def facts_chassis(junos, facts):
         try:
             rsp = junos.rpc.get_software_information()
             if rsp.tag == 'error':
-                raise RuntimeError()
+                raise RuntimeError('Could not get model information')
         except:
             return
         facts['model'] = rsp.xpath('//software-information/product-model')[0].text

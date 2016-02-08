@@ -67,6 +67,12 @@ class TestDevice(unittest.TestCase):
 
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
+        mock_shell = StartShell
+        mock_shell.__enter__ = MagicMock(name="__enter__")
+        mock_shell.__enter__.return_value = MagicMock(name="enterReturn")
+        mock_shell._chan = MagicMock(name="_chan")
+        mock_shell._client = MagicMock(name="_client")
+        mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 1']
         self.dev.open()
 
     @patch('ncclient.operations.session.CloseSession.request')

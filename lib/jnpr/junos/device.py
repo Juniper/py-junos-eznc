@@ -294,8 +294,8 @@ class Device(object):
             *OPTIONAL* NETCONF port (defaults to 830)
 
         :param str routing_engine:
-            *OPTIONAL* If not provided default behavior will be raise exception
-            if the connected RE is not master.
+            *OPTIONAL* If not provided, tries to connect to IP/host provided
+            and raises an exception if the host is not master RE
             This can be used to connected to require RE.
             Values to this argument can be master/backup/re0/re1/any
 
@@ -534,10 +534,10 @@ class Device(object):
             self.connected = True
 
             gather_facts = kvargs.get('gather_facts', self._gather_facts)
-            if gather_facts is True and self._RE is not None:
-                self._connected_re = _get_connected_slot()
+            #if gather_facts is True and self._RE is not None:
+            #    self._connected_re = _get_connected_slot()
+            self._connected_re = _get_connected_slot()
             if self._RE:
-                self._connected_re = _get_connected_slot()
                 _connect_to_re()
 
         except NcErrors.AuthenticationError as err:

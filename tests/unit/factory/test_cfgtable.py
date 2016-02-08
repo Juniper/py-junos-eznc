@@ -15,6 +15,7 @@ from mock import MagicMock, patch
 
 from jnpr.junos.factory import loadyaml
 from jnpr.junos.factory.factory_loader import FactoryLoader
+from jnpr.junos.utils.start_shell import StartShell
 
 try:
     _YAML_ = loadyaml('lib/jnpr/junos/cfgro/srx')
@@ -64,6 +65,12 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
+        mock_shell = StartShell
+        mock_shell.__enter__ = MagicMock(name="__enter__")
+        mock_shell.__enter__.return_value = MagicMock(name="enterReturn")
+        mock_shell._chan = MagicMock(name="_chan")
+        mock_shell._client = MagicMock(name="_client")
+        mock_shell.__enter__.return_value.run.return_value = ['hw.re.slotid: 1']
         self.dev.open()
         self.zit = ZoneIfsTable(self.dev)
         self.ut = UserTable(self.dev)
