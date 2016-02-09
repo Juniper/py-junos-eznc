@@ -23,7 +23,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.login')
     def test_ftp_open(self, mock_Ftpconnect, mock_ftplogin):
         dev_ftp = Ftp(self.dev)
-        self.assertIsInstance(dev_ftp.open(), FTP)
+        assert isinstance(dev_ftp.open(), FTP)
 
     @patch('ncclient.manager.connect')
     @patch('ftplib.FTP.connect')
@@ -48,7 +48,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.close')
     def test_ftp_context(self, mock_ftpconnect, mock_ftplogin, mock_ftpclose):
         with Ftp(self.dev) as dev_ftp:
-            self.assertIsInstance(dev_ftp, FTP)
+            assert isinstance(dev_ftp, FTP)
 
     @patch('ftplib.FTP.connect')
     @patch('ftplib.FTP.login')
