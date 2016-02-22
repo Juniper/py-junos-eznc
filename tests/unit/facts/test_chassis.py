@@ -14,7 +14,6 @@ from jnpr.junos.exception import ConnectNotMasterError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
-
 @attr('unit')
 class TestChassis(unittest.TestCase):
 
@@ -43,6 +42,49 @@ class TestChassis(unittest.TestCase):
         chassis(self.dev, self.facts)
         self.assertFalse(self.facts['2RE'])
         self.assertEqual(self.facts['model'], self.facts['serialnumber'])
+
+    def test_backup_chassis(self):
+        xmldata = etree.XML('<rpc-reply><output>test</output></rpc-reply>')
+        self.dev._RE = "backup"
+        self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
+        xmldata = etree.XML('<rpc-reply><error>test</error></rpc-reply>')
+        self.dev.rpc.get_software_information = MagicMock(side_effect=xmldata)
+        chassis(self.dev, self.facts)
+        self.assertEqual(self.dev._reRole, 'backup')
+
+    @patch('ncclient.manager.connect')
+    @patch('jnpr.junos.Device.execute')
+    def test_device_chassis2(self, mock_connect, mock_execute):
+        mock_connect.side_effect = self._mock_manager
+        mock_execute.side_effect = self._mock_manager
+        self.dev2 = Device(
+            host='2.2.2.2',
+            user='rick',
+            password='password123',
+            routing_engine='master',
+            gather_facts=False)
+        xmldata = etree.XML('<rpc-reply><route-engine-information>'
+                            '<route-engine><slot>0</slot>'
+                            '<mastership-state>master</mastership-state>'
+                            '</route-engine>'
+                            '<route-engine><slot>1</slot>'
+                            '<mastership-state>backup</mastership-state>'
+                            '</route-engine></route-engine-information></rpc-reply>')
+        self.dev2.rpc.get_route_engine_information = MagicMock(side_effect=[xmldata, xmldata])
+        xmldata = etree.XML('<rpc-reply><chassis-inventory>'
+                            '</chassis-inventory></rpc-reply>')
+        self.dev2.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
+        xmldata = etree.XML('<rpc-reply><configuration>'
+                            '<groups><name>re1</name><system>'
+                            '<host-name>irtb4-a1</host-name>'
+                            '</system></groups>'
+                            '</configuration></rpc-reply>')
+        self.dev2.rpc.get_config = MagicMock(side_effect=xmldata)
+        self.dev2.open()
+        xmldata = etree.XML('<rpc-reply><output>test</output></rpc-reply>')
+        self.dev2.rpc.get_software_information = MagicMock(side_effect=xmldata)
+        chassis(self.dev2, self.facts)
+        self.assertEqual(self.dev2._reRole, 'master')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

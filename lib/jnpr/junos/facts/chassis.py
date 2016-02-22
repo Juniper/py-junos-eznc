@@ -15,6 +15,7 @@ def facts_chassis(junos, facts):
         (2) hostname, domain, and fqdn are retrieved from configuration data;
             inherited configs are checked.
     """
+
     try:
         rsp = junos.rpc.get_chassis_inventory()
         if rsp.tag == 'error':
@@ -31,7 +32,11 @@ def facts_chassis(junos, facts):
         # this means that there was an error; due to the
         # fact that this connection is not on the master
         # @@@ need to validate on VC-member
-        raise ConnectNotMasterError(junos)
+        if not junos._RE:
+            raise ConnectNotMasterError(junos)
+        junos._reRole = "backup"
+    else:
+        junos._reRole = "master"
 
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
@@ -40,6 +45,17 @@ def facts_chassis(junos, facts):
     else:
         facts['2RE'] = False
         x_ch = rsp.find('chassis')
+
+    if x_ch is None:  # This is when backup RE is being connected
+        try:
+            rsp = junos.rpc.get_software_information()
+            if rsp.tag == 'error':
+                raise RuntimeError('Could not get model information')
+        except:
+            return
+        facts['model'] = \
+            rsp.xpath('//software-information/product-model')[0].text
+        return
 
     facts['model'] = x_ch.findtext('description')
 
