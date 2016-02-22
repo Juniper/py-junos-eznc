@@ -111,7 +111,11 @@ Apache 2.0
 # CONTRIBUTORS
 
 Juniper Networks is actively contributing to and maintaining this repo. Please contact jnpr-community-netdev@juniper.net for any queries.
+
 *Contributors:*
-Nitin Kumar (@vnitinv), Edward Arcuri (@sdndude), Ganesh Nalawade (@ganeshnalawade)
+
+[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+
 *Former Contributors:*
-Jeremy Schulman (@jeremyschulman), Rick Sherman (@shermdog)
+
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog)
