@@ -1,0 +1,226 @@
+from time import sleep
+
+from jnpr.junos.netconify.tty_netconf import tty_netconf
+
+__all__ = ['Terminal']
+
+# =========================================================================
+# Terminal class
+# =========================================================================
+
+
+class Terminal(object):
+
+    """
+    Terminal is used to bootstrap Junos New Out of the Box (NOOB) device
+    over the CONSOLE port.  The general use-case is to setup the minimal
+    configuration so that the device is IP reachable using SSH
+    and NETCONF for remote management.
+
+    Serial is needed for Junos devices that do not support
+    the DHCP 'auto-installation' or 'ZTP' feature; i.e. you *MUST*
+    to the NOOB configuration via the CONSOLE.
+
+    Serial is also useful for situations even when the Junos
+    device supports auto-DHCP, but is not an option due to the
+    specific situation
+    """
+    TIMEOUT = 0.2           # serial readline timeout, seconds
+    EXPECT_TIMEOUT = 10     # total read timeout, seconds
+    LOGIN_RETRY = 5         # total number of passes thru login state-machine
+
+    _ST_INIT = 0
+    _ST_LOGIN = 1
+    _ST_PASSWD = 2
+    _ST_DONE = 3
+    _ST_BAD_PASSWD = 4
+    _ST_TTY_NOLOGIN = 5
+
+    _re_pat_login = '(?P<login>ogin:\s*$)'
+
+    _RE_PAT = [
+        _re_pat_login,
+        '(?P<passwd>assword:\s*$)',
+        '(?P<badpasswd>ogin incorrect)',
+        '(?P<shell>%|#\s*$)',
+        '(?P<cli>[^\\-"]>\s*$)'
+    ]
+
+    # -----------------------------------------------------------------------
+    # CONSTRUCTOR
+    # -----------------------------------------------------------------------
+
+    def __init__(self, **kvargs):
+        """
+        :kvargs['user']:
+          defaults to 'root'
+
+        :kvargs['passwd']:
+          defaults to empty; NOOB Junos devics there is
+          no root password initially
+
+        :kvargs['attempts']:
+          the total number of login attempts thru the login
+          state-machine
+        """
+        # logic args
+        self.user = kvargs.get('user', 'root')
+        self.passwd = kvargs.get('passwd', '')
+        self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
+
+        # misc setup
+        self.nc = tty_netconf(self)
+        self.state = self._ST_INIT
+        self.notifier = None
+        self._badpasswd = 0
+
+    @property
+    def tty_name(self):
+        return self._tty_name
+
+    def notify(self, event, message):
+        if not self.notifier:
+            return
+        self.notifier(self, event, message)
+
+    # -----------------------------------------------------------------------
+    # Login/logout
+    # -----------------------------------------------------------------------
+
+    def login(self, notify=None):
+        """
+        open the TTY connection and login.  once the login is successful,
+        start the NETCONF XML API process
+        """
+        self.notifier = notify
+        self.notify('login', 'connecting to TTY:{0} ...'.format(self.tty_name))
+        self._tty_open()
+
+        self.notify('login', 'logging in ...')
+
+        self.state = self._ST_INIT
+        self._login_state_machine()
+
+        # now start NETCONF XML
+        self.notify('login', 'starting NETCONF')
+        self.nc.open(at_shell=self.at_shell)
+        return True
+
+    def logout(self):
+        """
+        cleanly logout of the TTY
+        """
+        self.notify('logout', 'logging out ...')
+        self.nc.close()
+        self._logout_state_machine()
+        return True
+
+    # -----------------------------------------------------------------------
+    # TTY logout state-machine
+    # -----------------------------------------------------------------------
+
+    def _logout_state_machine(self, attempt=0):
+        if 10 == attempt:
+            raise RuntimeError('logout_sm_failure')
+
+        prompt, found = self.read_prompt()
+
+        def _ev_login():
+            # back at login prompt, so we are cleanly done!
+            self._tty_close()
+
+        def _ev_shell():
+            self.write('exit')
+
+        def _ev_cli():
+            self.write('exit')
+
+        _ev_tbl = {
+            'login': _ev_login,
+            'shell': _ev_shell,
+            'cli': _ev_cli
+        }
+
+        _ev_tbl[found]()
+
+        if found == 'login':
+            return True
+        else:
+            sleep(1)
+            self._logout_state_machine(attempt=attempt + 1)
+
+    # -----------------------------------------------------------------------
+    # TTY login state-machine
+    # -----------------------------------------------------------------------
+
+    def _login_state_machine(self, attempt=0):
+        if self.login_attempts == attempt:
+            raise RuntimeError('login_sm_failure')
+
+        prompt, found = self.read_prompt()
+
+#    print "CUR-STATE:{0}".format(self.state)
+#    print "IN:{0}:`{1}`".format(found,prompt)
+
+        def _ev_login():
+            self.state = self._ST_LOGIN
+            self.write(self.user)
+
+        def _ev_passwd():
+            self.state = self._ST_PASSWD
+            self.write(self.passwd)
+
+        def _ev_bad_passwd():
+            self.state = self._ST_BAD_PASSWD
+            self.write('\n')
+            self._badpasswd += 1
+            if self._badpasswd == 2:
+                raise RuntimeError("bad_passwd")
+            # return through and try again ... could have been
+            # prior failed attempt
+
+        def _ev_tty_nologin():
+            if self._ST_INIT == self.state:
+                # assume we're in a hung state, i.e. we don't see
+                # a login prompt for whatever reason
+                self.state = self._ST_TTY_NOLOGIN
+                self.write('<close-session/>')  # @@@ this is a hack
+
+        def _ev_shell():
+            if self.state == self._ST_INIT:
+                # this means that the shell was left
+                # open.  probably not a good thing,
+                # so issue a notify, but move on.
+                self.notify('login_warn', 'shell login was open!')
+
+            self.at_shell = True
+            self.state = self._ST_DONE
+            # if we are here, then we are done
+
+        def _ev_cli():
+            if self.state == self._ST_INIT:
+                # this means that the shell was left open.  probably not a good thing,
+                # so issue a notify, hit <ENTER> and try again just to be
+                # sure...
+                self.notify('login_warn', 'waiting on TTY.')
+                sleep(5)
+#        return
+
+            self.at_shell = False
+            self.state = self._ST_DONE
+
+        _ev_tbl = {
+            'login': _ev_login,
+            'passwd': _ev_passwd,
+            'badpasswd': _ev_bad_passwd,
+            'shell': _ev_shell,
+            'cli': _ev_cli
+        }
+
+        _ev_tbl.get(found, _ev_tty_nologin)()
+
+        if self.state == self._ST_DONE:
+            return True
+        else:
+            # if we are here, then loop the event again
+            self._login_state_machine(attempt + 1)
