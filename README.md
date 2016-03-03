@@ -110,6 +110,12 @@ Apache 2.0
   
 # CONTRIBUTORS
 
-  - Jeremy Schulman (@nwkautomaniac), Core developer
-  - Rick Sherman (@shermdog01)
-  - Nitin Kumar (@vnitinv)
+Juniper Networks is actively contributing to and maintaining this repo. Please contact jnpr-community-netdev@juniper.net for any queries.
+
+*Contributors:*
+
+[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+
+*Former Contributors:*
+
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog)
