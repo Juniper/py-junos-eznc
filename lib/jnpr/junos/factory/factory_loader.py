@@ -84,7 +84,7 @@ class FactoryLoader(object):
         # however, as this framework expands in capability, this
         # will be enhaced, yo!
 
-        xpath, opt = f_dict.items()[0]       # get first/only key,value
+        xpath, opt = list(f_dict.items())[0]       # get first/only key,value
 
         if opt == 'group':
             fields.group(f_name, xpath)
@@ -268,9 +268,9 @@ class FactoryLoader(object):
         self._catalog_dict = catalog_dict
         self._sortitems()
 
-        map(self._build_optable, self._item_optables)
-        map(self._build_cfgtable, self._item_cfgtables)
-        map(self._build_table, self._item_tables)
-        map(self._build_view, self._item_views)
+        list(map(self._build_optable, self._item_optables))
+        list(map(self._build_cfgtable, self._item_cfgtables))
+        list(map(self._build_table, self._item_tables))
+        list(map(self._build_view, self._item_views))
 
         return self.catalog

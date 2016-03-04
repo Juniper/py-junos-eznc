@@ -6,6 +6,7 @@ from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open
 import os
 from lxml import etree
+import sys
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -17,6 +18,10 @@ from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
 
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
@@ -39,9 +44,9 @@ class Test_MyTemplateLoader(unittest.TestCase):
         from jnpr.junos.device import _MyTemplateLoader
         self.template_loader = _MyTemplateLoader()
 
-    @patch('__builtin__.filter')
+    @patch(builtin_string + '.filter')
     def test_temp_load_get_source_filter_false(self, filter_mock):
-        filter_mock.return_value = False
+        filter_mock.return_value = []
         try:
             self.template_loader.get_source(None, None)
         except Exception as ex:
@@ -52,7 +57,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
     def test_temp_load_get_source_filter_true(self, os_path_mock):
         # cant use @patch here as with statement will have exit
         m = mock_open()
-        with patch('__builtin__.file', m, create=True):
+        with patch(builtin_string + '.open', m, create=True):
             self.template_loader.get_source(None, None)
 
 
@@ -125,8 +130,12 @@ class TestDevice(unittest.TestCase):
 
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
-        with patch('__builtin__.open', mock):
-            with patch('__builtin__.file', MagicMock):
+        with patch(builtin_string + '.open', mock):
+            if sys.version >'3':
+                builtin_file = 'io.TextIOWrapper'
+            else:
+                builtin_file = builtin_string + '.file'
+            with patch(builtin_file, MagicMock):
                 handle = open('filename', 'r')
                 self.dev.logfile = handle
                 self.assertEqual(self.dev.logfile, handle)
@@ -159,7 +168,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(localdev._hostname, 'localhost')
 
     @patch('jnpr.junos.device.os')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     @patch('paramiko.config.SSHConfig.lookup')
     def test_device__sshconf_lkup(self, os_mock, open_mock, mock_paramiko):
         os_mock.path.exists.return_value = True
@@ -167,7 +176,7 @@ class TestDevice(unittest.TestCase):
         mock_paramiko.assert_called_any()
 
     @patch('jnpr.junos.device.os')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     @patch('paramiko.config.SSHConfig.lookup')
     def test_device__sshconf_lkup_def(self, os_mock, open_mock, mock_paramiko):
         os_mock.path.exists.return_value = True
@@ -303,7 +312,7 @@ class TestDevice(unittest.TestCase):
             '<get-system-uptime-information>',
             self.dev.display_xml_rpc(
                 'show system uptime ',
-                format='text'))
+                format='text').decode('utf-8'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
@@ -314,6 +323,7 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        print (self.dev.execute('<get-system-core-dumps/>').tag)
         self.assertEqual(self.dev.execute('<get-system-core-dumps/>').tag,
                          'directory-list')
 
@@ -370,7 +380,7 @@ class TestDevice(unittest.TestCase):
         self.assertFalse(self.dev.connected)
 
     def test_device_rpcmeta(self):
-        self.assertEqual(self.dev.rpc.get_software_information.func_doc,
+        self.assertEqual(self.dev.rpc.get_software_information.__doc__,
                          'get-software-information')
 
     def test_device_probe_timeout_zero(self):
@@ -472,25 +482,26 @@ class TestDevice(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        with open(fpath) as fp:
+            foo = fp.read()
 
-        if fname == 'get-rpc-error.xml':
-            # Raise ncclient exception for error
-            raise RPCError(etree.XML(foo))
-        elif fname == 'get-permission-denied.xml':
-            # Raise ncclient exception for error
-            raise RPCError(etree.XML(foo))
-        elif (fname == 'get-index-error.xml' or
-                fname == 'get-system-core-dumps.xml' or
-                fname == 'load-configuration-error.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            if fname == 'get-rpc-error.xml':
+                # Raise ncclient exception for error
+                raise RPCError(etree.XML(foo))
+            elif fname == 'get-permission-denied.xml':
+                # Raise ncclient exception for error
+                raise RPCError(etree.XML(foo))
+            elif (fname == 'get-index-error.xml' or
+                    fname == 'get-system-core-dumps.xml' or
+                    fname == 'load-configuration-error.xml'):
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
-        elif (fname == 'show-configuration.xml' or
-              fname == 'show-system-alarms.xml'):
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            elif (fname == 'show-configuration.xml' or
+                  fname == 'show-system-alarms.xml'):
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
-        else:
-            rpc_reply = NCElement(foo, self.dev._conn._device_handler
+            else:
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc[0]
         return rpc_reply
 

@@ -9,6 +9,7 @@ import traceback
 import socket
 import datetime
 import time
+import sys
 import json
 
 # 3rd-party packages
@@ -43,18 +44,21 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         self.paths = ['.', os.path.join(_MODULEPATH, 'templates')]
 
     def get_source(self, environment, template):
-
         def _in_path(dir):
             return os.path.exists(os.path.join(dir, template))
 
-        path = filter(_in_path, self.paths)
+        path = list(filter(_in_path, self.paths))
         if not path:
             raise jinja2.TemplateNotFound(template)
 
         path = os.path.join(path[0], template)
         mtime = os.path.getmtime(path)
-        with file(path) as f:
-            source = f.read().decode('utf-8')
+        with open(path) as f:
+            # You are trying to decode an object that is already decoded. You have a str,
+            # there is no need to decode from UTF-8 anymore.
+            # open already decodes to Unicode in Python 3 if you open in text mode.
+            # If you want to open it as bytes, so that you can then decode, you need to open with mode 'rb'.
+            source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
 _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
@@ -164,8 +168,13 @@ class Device(object):
             self._logfile = False
             return rc
 
-        if not isinstance(value, file):
-            raise ValueError("value must be a file object")
+        if sys.version < '3':
+            if not isinstance(value, file):
+                raise ValueError("value must be a file object")
+        else:
+            import io
+            if not isinstance(value, io.TextIOWrapper):
+                raise ValueError("value must be a file object")
 
         self._logfile = value
         return self._logfile
@@ -264,12 +273,13 @@ class Device(object):
             return None
         else:
             sshconf = paramiko.SSHConfig()
-            sshconf.parse(open(sshconf_path, 'r'))
-            found = sshconf.lookup(self._hostname)
-            self._hostname = found.get('hostname', self._hostname)
-            self._port = found.get('port', self._port)
-            self._conf_auth_user = found.get('user')
-            self._conf_ssh_private_key_file = found.get('identityfile')
+            with open(sshconf_path, 'r') as fp:
+                sshconf.parse(fp)
+                found = sshconf.lookup(self._hostname)
+                self._hostname = found.get('hostname', self._hostname)
+                self._port = found.get('port', self._port)
+                self._conf_auth_user = found.get('user')
+                self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
     def __init__(self, *vargs, **kvargs):
@@ -738,11 +748,10 @@ class Device(object):
                         fn.__name__)
             for fn in vargs:
                 # bind as instance method, majik.
-                self.__dict__[
-                    fn.__name__] = types.MethodType(
-                    fn,
-                    self,
-                    self.__class__)
+                if sys.version<'3':
+                    self.__dict__[fn.__name__] = types.MethodType(fn, self, self.__class__)
+                else:
+                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
             return
 
         # first verify that the names do not conflict with

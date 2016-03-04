@@ -41,12 +41,14 @@ class TestToJson(unittest.TestCase):
         rst = RouteSummaryTable(self.dev)
         rst.get()
         resp = rst.to_json()
-        j = '{"ISP-1.inet.0": {"proto": {"Local": {"count": 1, "active": 1}, ' \
-            '"Direct": {"count": 3, "active": 3}}, "dests": 4, "holddown": 0, "active": 4, "hidden": 0, "total": 4}, ' \
-            '"ISP-2.inet.0": {"proto": {"Local": {"count": 1, "active": 1}, "Direct": {"count": 3, "active": 3}}, ' \
-            '"dests": 4, "holddown": 0, "active": 4, "hidden": 0, "total": 4}, "inet.0": {"proto": {"Static": {"count": 1, "active": 1}, ' \
-            '"Local": {"count": 4, "active": 4}, "Direct": {"count": 4, "active": 3}}, "dests": 8, "holddown": 0, "active": 8, "hidden": 0, "total": 9}}'
-        self.assertEqual(resp, j)
+        j = {'ISP-1.inet.0': {'proto': {'Local': {'count': 1, 'active': 1}, 'Direct': {'count': 3, 'active': 3}},
+                              'dests': 4, 'holddown': 0, 'active': 4, 'hidden': 0, 'total': 4},
+             'ISP-2.inet.0': {'proto': {'Local': {'count': 1, 'active': 1}, 'Direct': {'count': 3, 'active': 3}},
+                              'dests': 4, 'holddown': 0, 'active': 4, 'hidden': 0, 'total': 4},
+             'inet.0': {'proto': {'Local': {'count': 4, 'active': 4}, 'Static': {'count': 1, 'active': 1},
+                                  'Direct': {'count': 4, 'active': 3}}, 'dests': 8, 'holddown': 0, 'active': 8,
+                        'hidden': 0, 'total': 9}}
+        self.assertEqual(eval(resp), j)
 
     @patch('jnpr.junos.Device.execute')
     def test_view_json(self, mock_execute):
@@ -54,17 +56,17 @@ class TestToJson(unittest.TestCase):
         rst = RouteSummaryTable(self.dev)
         rst.get()
         resp = rst["ISP-1.inet.0"].to_json()
-        j = '{"ISP-1.inet.0": {"proto": {"Local": {"count": 1, "active": 1}, "Direct": {"count": 3, "active": 3}}, ' \
-            '"dests": 4, "holddown": 0, "active": 4, "hidden": 0, "total": 4}}'
-        self.assertEqual(resp, j)
+        j = {"ISP-1.inet.0": {"proto": {"Local": {"count": 1, "active": 1}, "Direct": {"count": 3, "active": 3}},
+                              "dests": 4, "holddown": 0, "active": 4, "hidden": 0, "total": 4}}
+        self.assertEqual(eval(resp), j)
 
     @patch('jnpr.junos.Device.execute')
     def test_json_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         resp = self.dev.rpc.get_software_information()
-        j = '{"package-information": {"comment": "JUNOS Software Release [12.1X46-D15.3]", "name": "junos"}, ' \
-            '"host-name": "firefly", "product-model": "firefly-perimeter", "product-name": "firefly-perimeter"}'
-        self.assertEqual(json.dumps(resp), j)
+        j = {'package-information': {'comment': 'JUNOS Software Release [12.1X46-D15.3]', 'name': 'junos'},
+             'host-name': 'firefly', 'product-model': 'firefly-perimeter', 'product-name': 'firefly-perimeter'}
+        self.assertEqual(eval(json.dumps(resp)), j)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

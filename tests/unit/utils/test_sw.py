@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
@@ -6,7 +8,14 @@ from nose.plugins.attrib import attr
 
 import os
 import sys
-from cStringIO import StringIO
+
+from six import StringIO
+
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
+
 from contextlib import contextmanager
 
 from jnpr.junos import Device
@@ -57,7 +66,7 @@ class TestSW(unittest.TestCase):
         self.dev.close()
 
     def test_sw_hashfile(self):
-        with patch('__builtin__.open', mock_open(), create=True):
+        with patch(builtin_string + '.open', mock_open(), create=True):
             import jnpr.junos.utils.sw
             with open('foo') as h:
                 h.read.side_effect = ('abc', 'a', '')
@@ -76,20 +85,20 @@ class TestSW(unittest.TestCase):
         self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_VC)
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_sha256(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha256(package),
                          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934'
                          'ca495991b7852b855')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(self.sw.local_md5(package),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_sw_local_sha1(self, mock_built_open):
         package = 'test.tgz'
         self.assertEqual(SW.local_sha1(package),
@@ -323,9 +332,15 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
-        rpc = """<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>"""
-        self.assertEqual(etree.tostring(mock_execute.call_args[0][0]),
-                         rpc)
+        rpc = [
+        '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+        '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
+        '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
+        '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+        '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+        '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
+        print ('nitsss', etree.tostring(mock_execute.call_args[0][0]).decode('utf-8)'))
+        self.assertTrue((etree.tostring(mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -337,8 +352,9 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        msg = '{\'fpc1\': "Junos version \'D10.2\' will become active at next reboot", \'fpc0\': \'JUNOS version "D10.2" will become active at next reboot\'}'
-        self.assertEqual(self.sw.rollback(), msg)
+        msg = {'fpc1': "Junos version 'D10.2' will become active at next reboot",
+               'fpc0': 'JUNOS version "D10.2" will become active at next reboot'}
+        self.assertEqual(eval(self.sw.rollback()), msg)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi_exception(self, mock_execute):
@@ -383,7 +399,7 @@ class TestSW(unittest.TestCase):
         self.sw._mixed_VC = True
         self.sw.reboot()
         self.assertTrue('all-members' in
-                        etree.tostring(mock_execute.call_args[0][0]))
+                        (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
@@ -420,7 +436,7 @@ class TestSW(unittest.TestCase):
         pass
 
     def _my_scp_progress(self, _path, _total, _xfrd):
-        print _path, _total, _xfrd
+        print (_path, _total, _xfrd)
 
     @contextmanager
     def capture(self, command, *args, **kwargs):

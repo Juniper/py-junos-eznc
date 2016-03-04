@@ -2,6 +2,7 @@
 import hashlib
 import re
 from os import path
+import sys
 
 # 3rd-party modules
 from lxml.builder import E
@@ -107,7 +108,7 @@ class SW(Util):
     @classmethod
     def progress(cls, dev, report):
         """ simple progress report function """
-        print dev.hostname + ": " + report
+        print (dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
     # put - SCP put the image onto the device
@@ -211,9 +212,10 @@ class SW(Util):
             rsp = self.rpc.get_checksum_information(path=remote_package, dev_timeout=timeout)
             return rsp.findtext('.//checksum').strip()
         except RpcError as e:
+
             # e.errs is list of dictionaries
             if hasattr(e, 'errs') and \
-                    filter(lambda x: 'No such file or directory' in x['message'], e.errs):
+                    list(filter(lambda x: 'No such file or directory' in x['message'], e.errs)):
                 return None
             else:
                 raise
@@ -393,7 +395,7 @@ class SW(Util):
 
         if no_copy is False:
             copy_ok = True
-            if isinstance(package, (str, unicode)):
+            if (sys.version<'3' and isinstance(package, (str, unicode))) or isinstance(package, str):
                 copy_ok = self.safe_copy(package, remote_path=remote_path,
                                          progress=progress, cleanfs=cleanfs,
                                          checksum=checksum)
