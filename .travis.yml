@@ -14,6 +14,7 @@ addons:
     - libxslt1-dev
 
 install:
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then pip install git+https://github.com/ncclient/ncclient.git; fi
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
 
