@@ -81,8 +81,8 @@ class _RpcMetaExec(object):
 
     def cli(self, command, format='text'):
         rpc = E('command', command)
-        if 'text' == format:
-            rpc.attrib['format'] = 'text'
+        if format.lower() in ['text', 'json']:
+            rpc.attrib['format'] = format
         return self._junos.execute(rpc)
 
     # -----------------------------------------------------------------------
