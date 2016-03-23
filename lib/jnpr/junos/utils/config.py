@@ -5,7 +5,6 @@ import warnings
 
 # 3rd-party modules
 from lxml import etree
-from ncclient.operations import RPCError
 
 # package modules
 from jnpr.junos.exception import *
@@ -336,7 +335,7 @@ class Config(Util):
                 kvargs['format'] = 'xml'
             elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*\w+\s+{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
+            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'text'
 
         def try_load(rpc_contents, rpc_xattrs):
