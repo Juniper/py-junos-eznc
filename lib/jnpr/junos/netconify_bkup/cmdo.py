@@ -42,40 +42,169 @@ class netconifyCmdo(object):
         self._skip_logout = False
         self.on_notify = kvargs.get('notify', None)
 
+
         #
         # public attributes
         #
         self.facts = None
         self.results = dict(changed=False, failed=False, errmsg=None)
-        self.host = kvargs.get('host')
 
+
+
+        self.host = kvargs.get('host')
         self.junos_conf_file = kvargs.get('junos_conf_file')
-        self.junos_merge_conf = kvargs.get('junos_merge_conf', False)
+        self.junos_merge_conf = kvargs.get('junos_merge_conf', 'overwrite')
         self.qfx_mode = kvargs.get('qfx_mode')
         self.request_zeroize = kvargs.get('request_zeroize', False)
-        self.zeroize_value = kvargs.get('zeroize_value')
-        self.request_shutdown = kvargs.get('request_shutdown', False ) ## options are poweroff and reboot
-        self.shutdown_mode = kvargs.get('shutdown_mode', 'reboot' )
+        self.request_shutdown = kvargs.get('request_shutdown', False)
         self.gather_facts = kvargs.get('gather_facts', False)
         self.request_srx_cluster = kvargs.get('request_srx_cluster')
         self.request_srx_cluster_dis = kvargs.get('request_srx_cluster_dis')
-        self.savedir = kvargs.get('savedir', os.getcwd())
+        self.savedir = kvargs.get('savedir')
         self.no_save = kvargs.get('no_save', False)
         self.port = kvargs.get('port','/dev/ttyUSB0')
         self.baud = kvargs.get('baud', '9600')
         self.mode = kvargs.get('mode', 'telnet')
         self.timeout = kvargs.get('timeout', '0.5')
         self.user = kvargs.get ('user', 'root')
-        self.passwd = kvargs.get('password', '')
+        self.passwd = kvargs.get('password')
         self.attempts = kvargs.get('attempts', 10)
 
 
 
-    # ------------------------------------------------------------------------
-    # get version
-    # -------------------------------------------------------------------------
-    def get_version(self):
-        return C.version
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def _init_argsparser(self):
+        p = argparse.ArgumentParser(add_help=True)
+        self._argsparser = p
+
+        # ---------------------------------------------------------------------
+        # input identifiers
+        # ---------------------------------------------------------------------
+
+        p.add_argument('name',
+                       nargs='?',
+                       help='name of Junos device')
+
+        p.add_argument('--version', action='version', version=C.version)
+
+        # ---------------------------------------------------------------------
+        # Device level options
+        # ---------------------------------------------------------------------
+
+        g = p.add_argument_group('DEVICE options')
+
+        g.add_argument('-f', '--file',
+                       dest='junos_conf_file',
+                       help="Junos configuration file")
+
+        g.add_argument("--merge",
+                       dest='junos_merge_conf',
+                       help='load-merge conf file, default is overwrite',
+                       action='store_true')
+
+        g.add_argument('--qfx-node',
+                       dest='qfx_mode',
+                       action='store_const', const=QFX_MODE_NODE,
+                       help='Set QFX device into "node" mode')
+
+        g.add_argument('--qfx-switch',
+                       dest='qfx_mode',
+                       action='store_const', const=QFX_MODE_SWITCH,
+                       help='Set QFX device into "switch" mode')
+
+        g.add_argument('--zeroize',
+                       dest='request_zeroize',
+                       action='store_true',
+                       help='ZEROIZE the device')
+
+        g.add_argument('--shutdown',
+                       dest='request_shutdown',
+                       choices=['poweroff', 'reboot'],
+                       help='SHUTDOWN or REBOOT the device')
+
+        g.add_argument('--facts',
+                       action='store_true',
+                       dest='gather_facts',
+                       help='Gather facts and save them into SAVEDIR')
+
+        g.add_argument('--srx_cluster',
+                       dest='request_srx_cluster',
+                       help='cluster_id,node ... Invoke cluster on SRX device and reboot')
+
+        g.add_argument('--srx_cluster_disable',
+                       dest='request_srx_cluster_dis',
+                       action='store_true',
+                       help='Disable cluster mode on SRX device and reboot')
+
+        # ---------------------------------------------------------------------
+        # directories
+        # ---------------------------------------------------------------------
+
+        g = p.add_argument_group('DIRECTORY options')
+
+        g.add_argument('-S', '--savedir',
+                       nargs='?', default='.',
+                       help="Files are saved into this directory, $CWD by default")
+
+        g.add_argument('--no-save',
+                       action='store_true',
+                       help="Do not save facts and inventory files")
+
+        # ---------------------------------------------------------------------
+        # console port
+        # ---------------------------------------------------------------------
+
+        g = p.add_argument_group('CONSOLE options')
+
+        g.add_argument('-p', '--port',
+                       default='/dev/ttyUSB0',
+                       help="serial port device")
+
+        g.add_argument('-b', '--baud',
+                       default='9600',
+                       help="serial port baud rate")
+
+        g.add_argument('-t', '--telnet',
+                       help='terminal server, <host>,<port>')
+
+        g.add_argument('--timeout',
+                       default='0.5',
+                       help='TTY connection timeout (s)')
+
+        # ---------------------------------------------------------------------
+        # login configuration
+        # ---------------------------------------------------------------------
+
+        g = p.add_argument_group("LOGIN options")
+
+        g.add_argument('-u', '--user',
+                       default='root',
+                       help='login user name, defaults to "root"')
+
+        g.add_argument('-P', '--passwd',
+                       default='',
+                       help='login user password, *empty* for NOOB')
+
+        g.add_argument('-k',
+                       action='store_true', default=False,
+                       dest='passwd_prompt',
+                       help='prompt for user password')
+
+        g.add_argument('-a', '--attempts',
+                       default=10,
+                       help='login attempts before giving up')
 
     # -------------------------------------------------------------------------
     # run command, can be involved from SHELL or programmatically
@@ -87,7 +216,6 @@ class netconifyCmdo(object):
         # validate command options before going through the LOGIN process
         # ---------------------------------------------------------------
 
-        print "\n ****** inside cmdo: run "
         fname = self.junos_conf_file
         if fname is not None:
             if os.path.isfile(fname) is False:
@@ -110,11 +238,7 @@ class netconifyCmdo(object):
         # by the command args
         # -----------------------------------------------------
 
-        self._do_actions()
-
-        """
         try:
-            print "\n ****** do_actions ******"
             self._do_actions()
         except Exception as err:
             try:
@@ -123,8 +247,6 @@ class netconifyCmdo(object):
                 self._hook_exception('ERROR', "{0}\n".format(str(logout_err)))
             traceback.print_exc()
             self._hook_exception('action', err)
-
-        """
 
         # ----------------------------------------------------
         # logout, unless we don't need to (due to reboot,etc.)
@@ -137,7 +259,6 @@ class netconifyCmdo(object):
                 self._hook_exception('logout', err)
         else:
             try:
-                print "\n ****** inside _tty_close **** \n"
                 self._tty._tty_close()
             except Exception as err:
                 self._hook_exception('close', err)
@@ -156,7 +277,6 @@ class netconifyCmdo(object):
         self._notify("TTY:{0}".format(event), message)
 
     def _notify(self, event, message):
-        print "\n ****** inside cmdo: _notify **** \n "
         if self.on_notify is not None:
             self.on_notify(self, event, message)
         elif self.on_notify is not False:
@@ -167,7 +287,7 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
 
     def _tty_login(self):
-        print "\n ****** inside cmdo: tty_login \n"
+
         tty_args = {}
         tty_args['user'] = self.user
         tty_args['passwd'] = self.passwd
@@ -189,7 +309,6 @@ class netconifyCmdo(object):
         self._tty.login(notify=notify)
 
     def _tty_logout(self):
-        print "\n ****** inside cmdo: tty_logout \n "
         self._tty.logout()
 
     # -------------------------------------------------------------------------
@@ -197,7 +316,6 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
     def _do_actions(self):
 
-        print "\n ****** inside cmdo: do_actions ****"
         if self.request_srx_cluster is not None:
             self._srx_cluster()
             return
@@ -207,27 +325,21 @@ class netconifyCmdo(object):
             return
 
         if self.request_shutdown:
-            print "\n ***** inside self.request_shutdown *************"
             self._shutdown()
             return
 
         if self.request_zeroize:
             print "\n zeroizing device ******"
-            val =self.zeroize_value
-            if val is None:
-                self._zeroize()
-            else:
-                self._zeroize(val)
+            self._zeroize()
             return
 
         if self.gather_facts is True:
             print "\n ****** gather_facts ******"
-            if self._gather_facts():
-                self._save_facts_json()
-                self._save_inventory_xml()
+            self._gather_facts()
+            self._save_facts_json()
+            self._save_inventory_xml()
 
         if self.junos_conf_file is not None:
-            print "\n ****** inside do_action: junos_conf_file *********\n "
             self._push_config()
 
         if self.qfx_mode is not None:
@@ -235,7 +347,6 @@ class netconifyCmdo(object):
 
     def _srx_cluster(self):
         """ Enable cluster mode on SRX device"""
-        print "\n ****** inside cmdo: _srx_cluster "
         srx_args = {}
         cluster_id, node = re.split('[:,]', self.request_srx_cluster)
         srx_args['cluster_id'] = cluster_id
@@ -249,27 +360,22 @@ class netconifyCmdo(object):
 
     def _srx_cluster_disable(self):
         """ Disable cluster mode on SRX device"""
-        print "\n ****** inside cmdo: _srx_cluster_disable \n  "
         self._notify('srx_cluster', 'disable cluster mode on srx device, rebooting')
         self._tty.nc.disablecluster()
         self._skip_logout = True
         self.results['changed'] = True
 
-    def _zeroize(self, value= None):
+    def _zeroize(self):
         """ perform device ZEROIZE actions """
-        print "\n ****** inside cmdo: zeroize \n "
         self._notify('zeroize', 'ZEROIZE device, rebooting')
-        res= self._tty.nc.zeroize(value)
-        print "\n **** result of zeroizing the device "
+        self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True
 
     def _shutdown(self):
         """ shutdown or reboot """
-        print "\n ****** inside cmdo: _shutdown \n "
         self._skip_logout = True
-        mode = self.shutdown_mode
-        print "\n mode is=====", mode
+        mode = self.request_shutdown
         self._notify('shutdown', 'shutdown {0}'.format(mode))
         nc = self._tty.nc
         shutdown = nc.poweroff if 'poweroff' == mode else nc.reboot
@@ -278,7 +384,6 @@ class netconifyCmdo(object):
         self.results['changed'] = True
 
     def _save_facts_json(self):
-        print "\n ****** inside cmdo: save_facts_json \n"
         if self.no_save is True:
             return
         fname = self._save_name + '-facts.json'
@@ -292,7 +397,6 @@ class netconifyCmdo(object):
             f.write(json.dumps(self.facts))
 
     def _save_inventory_xml(self):
-        print "\n ****** inside cmdo: save_inventory_xml \n"
         if self.no_save is True:
             return
         if not hasattr(self._tty.nc.facts, 'inventory'):
@@ -312,33 +416,25 @@ class netconifyCmdo(object):
             f.write(as_xml)
 
     def _gather_facts(self):
-        print "\n ****** inside cmdo: _gather_facts ******\n"
         self._notify('facts', 'retrieving device facts...')
-        if self._tty.nc.facts.gather():
-            self.facts = self._tty.nc.facts.items
-            self.results['facts'] = self.facts
-            self._save_name = self._name or self.facts[
-                'hostname'] or '_'.join(self.console)
-            return True
-        else:
-            return False
-            print "\n ********* Error Occurred in gathering facts *********"
+        self._tty.nc.facts.gather()
+        self.facts = self._tty.nc.facts.items
+        self.results['facts'] = self.facts
+        self._save_name = self._name or self.facts[
+            'hostname'] or '_'.join(self.console)
 
     def _push_config(self):
         """ push the configuration or rollback changes on error """
-        print "\n ****** inside cmdo: _push_config *******\n"
+
         self._notify('conf', 'loading into device ...')
         content = open(self.junos_conf_file, 'r').read()
         load_args = dict(content=content)
         print "\n ****** inside push_config ****** \n"
         if self.junos_merge_conf is True:
-            print "\n merging the config *************\n "
             load_args['action'] = 'replace'  # merge/replace; yeah, I know ...
         rc = self._tty.nc.load(**load_args)
-        #print "\n ***** rc is: ", rc
 
         if rc is not True:
-            print "\n ***** inside rc is not true for loading ******"
             self.results['failed'] = True
             self.results['errmsg'] = 'failure to load configuration, aborting.'
             self._notify('conf_ld_err', self.results['errmsg'])
@@ -348,7 +444,6 @@ class netconifyCmdo(object):
         self._notify('conf', 'commit ... please be patient')
         rc = self._tty.nc.commit()
         if rc is not True:
-            print "\n ***** rc is not true for committing ********"
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'faiure to commit configuration, aborting.'

@@ -76,11 +76,9 @@ class Terminal(object):
 
     @property
     def tty_name(self):
-        print "\n ****** tty: tty_name *****"
         return self._tty_name
 
     def notify(self, event, message):
-        print "\n ****** tty: notify *****"
         if not self.notifier:
             return
         self.notifier(self, event, message)
@@ -90,7 +88,6 @@ class Terminal(object):
     # -----------------------------------------------------------------------
 
     def login(self, notify=None):
-        print "\n ****** tty: login "
         """
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
@@ -113,8 +110,6 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        print "\n ****** tty: logout"
-        print "\n ******** inside tty logout ******"
         self.notify('logout', 'logging out ...')
         self.nc.close()
         self._logout_state_machine()
@@ -125,14 +120,10 @@ class Terminal(object):
     # -----------------------------------------------------------------------
 
     def _logout_state_machine(self, attempt=0):
-        print "\n ****** tty: _logout_state_machine "
         if 10 == attempt:
             raise RuntimeError('logout_sm_failure')
 
         prompt, found = self.read_prompt()
-
-        #print "\n ********* prompt:", prompt, found
-        #print "\n ***** found ****:", found
 
         def _ev_login():
             # back at login prompt, so we are cleanly done!
@@ -150,10 +141,7 @@ class Terminal(object):
             'cli': _ev_cli
         }
 
-        if found is not None:
-            _ev_tbl[found]()
-        else:
-            return True
+        _ev_tbl[found]()
 
         if found == 'login':
             return True
@@ -166,7 +154,6 @@ class Terminal(object):
     # -----------------------------------------------------------------------
 
     def _login_state_machine(self, attempt=0):
-        #print "\n ****** tty: _login_state_machine "
         if self.login_attempts == attempt:
             raise RuntimeError('login_sm_failure')
 
