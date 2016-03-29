@@ -7,6 +7,7 @@ from mock import MagicMock, patch, mock_open
 import os
 from lxml import etree
 import sys
+import json
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -278,6 +279,12 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.cli('show cli directory').tag, 'cli')
 
     @patch('jnpr.junos.Device.execute')
+    def test_device_cli_format_json(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli('show version invoke-on all-routing-engines',
+                            warning=False, format='json')
+
+    @patch('jnpr.junos.Device.execute')
     def test_device_cli_conf_info(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertTrue('ge-0/0/0' in self.dev.cli('show configuration'))
@@ -500,6 +507,8 @@ class TestDevice(unittest.TestCase):
                   fname == 'show-system-alarms.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
+            elif fname == 'show-version-all-re.json':
+                rpc_reply = json.loads(foo)
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc[0]
@@ -516,6 +525,8 @@ class TestDevice(unittest.TestCase):
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':
                     return self._read_file('show-cli-directory.xml')
+                if args[0].text == 'show version invoke-on all-routing-engines':
+                    return self._read_file('show-version-all-re.json')
                 elif args[0].text == 'show configuration':
                     return self._read_file('show-configuration.xml')
                 elif args[0].text == 'show system alarms':
