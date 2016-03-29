@@ -336,7 +336,7 @@ class Config(Util):
                 kvargs['format'] = 'xml'
             elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*\w+\s+{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
+            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'text'
 
         def try_load(rpc_contents, rpc_xattrs):

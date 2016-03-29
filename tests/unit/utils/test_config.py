@@ -198,6 +198,28 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.load(xmldata, format='xml'),
                          'rpc_contents')
 
+    def test_config_load_len_with_format_text(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        textdata = """policy-options {
+    prefix-list TEST1-NETS {
+        100.0.0.0/24;
+    }
+    policy-statement TEST1-NETS {
+        term TEST1 {
+            from {
+                prefix-list TEST1-NETS;
+            }
+            then accept;
+        }
+        term REJECT {
+            then reject;
+        }
+    }
+}"""
+
+        self.assertEqual(self.conf.load(textdata), 'rpc_contents')
+
     @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
