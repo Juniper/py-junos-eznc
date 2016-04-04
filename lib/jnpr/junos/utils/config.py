@@ -640,6 +640,8 @@ class Config(Util):
         def _open_configuration_private():
             try:
                 self.rpc.open_configuration(private=True)
+            except (RpcTimeoutError, ConnectClosedError) as err:
+                raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
                     if err.message != 'uncommitted changes will be discarded on exit':
@@ -649,12 +651,17 @@ class Config(Util):
                     raise err
 
         def _open_configuration_dynamic():
-            self.rpc.open_configuration(dynamic=True)
+            try:
+                self.rpc.open_configuration(dynamic=True)
+            except RpcError as err:
+                raise err
             return True
 
         def _open_configuration_batch():
             try:
                 self.rpc.open_configuration(batch=True)
+            except (RpcTimeoutError, ConnectClosedError) as err:
+                raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
                     if err.message != 'uncommitted changes will be discarded on exit':
