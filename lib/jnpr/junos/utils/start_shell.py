@@ -17,8 +17,7 @@ class StartShell(object):
         def _ssh_exec(self, command):
             with StartShell(self._dev) as sh:
                 got = sh.run(command)
-                ok = sh.last_ok
-            return (ok, got)
+            return got
 
     """
 
@@ -110,14 +109,14 @@ class StartShell(object):
         """
         # run the command and capture the output
         self.send(command)
-        got = self.wait_for(this)
+        got = ''.join(self.wait_for(this))
 
         # use $? to get the exit code of the command
         self.send('echo $?')
         rc = ''.join(self.wait_for(this))
         self.last_ok = True if rc.find('0') > 0 else False
 
-        return got
+        return (self.last_ok,got)
 
     # -------------------------------------------------------------------------
     # CONTEXT MANAGER
