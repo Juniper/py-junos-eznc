@@ -89,7 +89,7 @@ class Device(object):
             dev.open()   # this will probe before attempting NETCONF connect
 
     """
-    ON_JUNOS = platform.system().upper() == 'JUNOS'
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or platform.release().startswith('JNPR')
     auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
@@ -450,7 +450,7 @@ class Device(object):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos'})
+                device_params={'name': 'junos', 'local': False})
 
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
