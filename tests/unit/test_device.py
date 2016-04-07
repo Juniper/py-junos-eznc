@@ -281,8 +281,12 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_format_json(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli('show version invoke-on all-routing-engines',
+        data = self.dev.cli('show interface terse',
                             warning=False, format='json')
+        self.assertEqual(type(data), dict)
+        self.assertEqual(data['interface-information'][0]
+                         ['physical-interface'][0]['oper-status'][0]['data'],
+                         'up')
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_conf_info(self, mock_execute):
@@ -507,7 +511,7 @@ class TestDevice(unittest.TestCase):
                   fname == 'show-system-alarms.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
-            elif fname == 'show-version-all-re.json':
+            elif fname == 'show-interface-terse.json':
                 rpc_reply = json.loads(foo)
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
@@ -525,8 +529,8 @@ class TestDevice(unittest.TestCase):
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':
                     return self._read_file('show-cli-directory.xml')
-                if args[0].text == 'show version invoke-on all-routing-engines':
-                    return self._read_file('show-version-all-re.json')
+                if args[0].text == 'show interface terse':
+                    return self._read_file('show-interface-terse.json')
                 elif args[0].text == 'show configuration':
                     return self._read_file('show-configuration.xml')
                 elif args[0].text == 'show system alarms':
