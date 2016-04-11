@@ -1,4 +1,6 @@
 from time import sleep
+from datetime import datetime, timedelta
+from jnpr.junos.netconify import cmdo
 
 from jnpr.junos.netconify.tty_netconf import tty_netconf
 
@@ -27,18 +29,20 @@ class Terminal(object):
     """
     TIMEOUT = 0.2           # serial readline timeout, seconds
     EXPECT_TIMEOUT = 10     # total read timeout, seconds
-    LOGIN_RETRY = 5         # total number of passes thru login state-machine
+    LOGIN_RETRY = 20         # total number of passes thru login state-machine
 
     _ST_INIT = 0
-    _ST_LOGIN = 1
-    _ST_PASSWD = 2
-    _ST_DONE = 3
-    _ST_BAD_PASSWD = 4
-    _ST_TTY_NOLOGIN = 5
+    _ST_LOADER = 1
+    _ST_LOGIN = 2
+    _ST_PASSWD = 3
+    _ST_DONE = 4
+    _ST_BAD_PASSWD = 5
+    _ST_TTY_NOLOGIN = 6
 
     _re_pat_login = '(?P<login>ogin:\s*$)'
 
     _RE_PAT = [
+        '(?P<loader>oader>\s*$)',
         _re_pat_login,
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
@@ -66,6 +70,8 @@ class Terminal(object):
         # logic args
         self.user = kvargs.get('user', 'root')
         self.passwd = kvargs.get('passwd', '')
+        self.c_user = kvargs.get('s_user', self.user)
+        self.c_passwd = kvargs.get('s_passwd', self.passwd)
         self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
 
         # misc setup
@@ -73,14 +79,13 @@ class Terminal(object):
         self.state = self._ST_INIT
         self.notifier = None
         self._badpasswd = 0
+        self._loader = 0
 
     @property
     def tty_name(self):
-        print "\n ****** tty: tty_name *****"
         return self._tty_name
 
     def notify(self, event, message):
-        print "\n ****** tty: notify *****"
         if not self.notifier:
             return
         self.notifier(self, event, message)
@@ -90,22 +95,21 @@ class Terminal(object):
     # -----------------------------------------------------------------------
 
     def login(self, notify=None):
-        print "\n ****** tty: login "
         """
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
         self.notifier = notify
-        self.notify('login', 'connecting to TTY:{0} ...'.format(self.tty_name))
+        self.notify('TTY', 'connecting to TTY:{0} ...'.format(self.tty_name))
         self._tty_open()
 
-        self.notify('login', 'logging in ...')
+        self.notify('TTY', 'logging in ...')
 
         self.state = self._ST_INIT
         self._login_state_machine()
 
         # now start NETCONF XML
-        self.notify('login', 'starting NETCONF')
+        self.notify('TTY', ' OK ... starting NETCONF')
         self.nc.open(at_shell=self.at_shell)
         return True
 
@@ -113,26 +117,20 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        print "\n ****** tty: logout"
-        print "\n ******** inside tty logout ******"
         self.notify('logout', 'logging out ...')
         self.nc.close()
         self._logout_state_machine()
         return True
 
-    # -----------------------------------------------------------------------
-    # TTY logout state-machine
-    # -----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        # TTY logout state-machine
+        # ---------------------------------------------------------------------
 
     def _logout_state_machine(self, attempt=0):
-        print "\n ****** tty: _logout_state_machine "
         if 10 == attempt:
             raise RuntimeError('logout_sm_failure')
 
         prompt, found = self.read_prompt()
-
-        #print "\n ********* prompt:", prompt, found
-        #print "\n ***** found ****:", found
 
         def _ev_login():
             # back at login prompt, so we are cleanly done!
@@ -150,10 +148,7 @@ class Terminal(object):
             'cli': _ev_cli
         }
 
-        if found is not None:
-            _ev_tbl[found]()
-        else:
-            return True
+        _ev_tbl[found]()
 
         if found == 'login':
             return True
@@ -164,16 +159,27 @@ class Terminal(object):
     # -----------------------------------------------------------------------
     # TTY login state-machine
     # -----------------------------------------------------------------------
-
     def _login_state_machine(self, attempt=0):
-        #print "\n ****** tty: _login_state_machine "
         if self.login_attempts == attempt:
             raise RuntimeError('login_sm_failure')
 
         prompt, found = self.read_prompt()
 
-#    print "CUR-STATE:{0}".format(self.state)
-#    print "IN:{0}:`{1}`".format(found,prompt)
+        if cmdo.verbose == 1:
+            self.notify('\nDEBUG:current state', "{0}".format(self.state))
+            self.notify('DEBUG:login', "IN:{0}:`{1}`".format(found, prompt))
+            self.notify('DEBUG:password', "{0}".format(self.passwd))
+            self.notify('DEBUG:attempt', "{0}".format(attempt))
+
+        def _ev_loader():
+            self.state = self._ST_LOADER
+            self.write('boot')
+            self.write('\n')
+            sleep(300)
+            self._login_state_machine(attempt=0)
+            self._loader += 1
+            if self._loader == 2:
+                raise RuntimeError("propably corrupted image, stuck in loader")
 
         def _ev_login():
             self.state = self._ST_LOGIN
@@ -187,7 +193,9 @@ class Terminal(object):
             self.state = self._ST_BAD_PASSWD
             self.write('\n')
             self._badpasswd += 1
-            if self._badpasswd == 2:
+            # if self._badpasswd == 3:
+            #     self.passwd = 'pass123'
+            if self._badpasswd == 5:
                 raise RuntimeError("bad_passwd")
             # return through and try again ... could have been
             # prior failed attempt
@@ -198,6 +206,10 @@ class Terminal(object):
                 # a login prompt for whatever reason
                 self.state = self._ST_TTY_NOLOGIN
                 self.write('<close-session/>')  # @@@ this is a hack
+                # if console connection have a banner or warning
+                # comment-out line above and uncoment lines bellow ... better hack
+                # sleep(5)
+                # self.write('\n')
 
         def _ev_shell():
             if self.state == self._ST_INIT:
@@ -217,12 +229,13 @@ class Terminal(object):
                 # sure...
                 self.notify('login_warn', 'waiting on TTY.')
                 sleep(5)
-#        return
+                #  return
 
             self.at_shell = False
             self.state = self._ST_DONE
 
         _ev_tbl = {
+            'loader': _ev_loader,
             'login': _ev_login,
             'passwd': _ev_passwd,
             'badpasswd': _ev_bad_passwd,

@@ -16,40 +16,34 @@ class Fact(object):
     def version(self):
         rsp = self.rpc('get-software-information')
         self.swinfo = rsp  # keep this since we may want it later
-        err = rsp.xpath("//error-in-receive")
-        if len(err):
-            print "Error occurred, complete error message:",etree.tostring(rsp)
-            return False
+        # extract the version
+        # First try the <junos-version> tag present in >= 15.1
+
+        swinfo= rsp.findtext('junos-version', default=None)
+        if not swinfo:
+            # For < 15.1, get version from the "junos" package.
+            pkginfo = rsp.xpath(
+                './/package-information[normalize-space(name)="junos"]/comment'
+            )[0].text
+            try:
+                swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
+            except:
+                swinfo = "0.0I0.0"
+        self.facts['version'] = swinfo
+
+        # extract the host-name
+        self.facts['hostname'] = rsp.xpath('.//host-name')[0].text
+
+        # extract the product model/models
+        product_model = rsp.xpath('//product-model')
+        num_models = len(product_model)
+        if num_models == 0:
+            self.facts['model'] = None
+        elif num_models == 1:
+            self.facts['model'] = product_model[0].text.upper()
         else:
-            print "\n ******* self.swinfo ", self.swinfo
-            # extract the version
-            # First try the <junos-version> tag present in >= 15.1
-            swinfo = rsp.xpath('.//junos-version')[0].text
-            if not swinfo:
-                # For < 15.1, get version from the "junos" package.
-                pkginfo = rsp.xpath(
-                    './/package-information[normalize-space(name)="junos"]/comment'
-                )[0].text
-                try:
-                    swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
-                except:
-                    swinfo = "0.0I0.0"
-            self.facts['version'] = swinfo
-
-            # extract the host-name
-            self.facts['hostname'] = rsp.xpath('.//host-name')[0].text
-
-            # extract the product model/models
-            product_model = rsp.xpath('//product-model')
-            num_models = len(product_model)
-            if num_models == 0:
-                self.facts['model'] = None
-            elif num_models == 1:
-                self.facts['model'] = product_model[0].text.upper()
-            else:
-                fpc = lambda m: m.xpath('../../re-name')[0].text
-                self.facts['models'] = dict((fpc(m), m.text.upper()) for m in product_model)
-            return True
+            fpc = lambda m: m.xpath('../../re-name')[0].text
+            self.facts['models'] = dict((fpc(m), m.text.upper()) for m in product_model)
 
     def chassis(self):
         try:
@@ -93,9 +87,5 @@ class Fact(object):
         return facts[ifname]
 
     def gather(self):
-        val = self.version()
-        if val:
-            self.chassis()
-            return True
-        else:
-            return False
+        self.version()
+        self.chassis()

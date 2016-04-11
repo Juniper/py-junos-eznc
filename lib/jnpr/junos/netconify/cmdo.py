@@ -3,16 +3,19 @@ This file defines the 'netconifyCmdo' class.
 Used by the 'netconify' shell utility.
 """
 import os
+import sys
 import json
 import re
 import argparse
+import logging
+import traceback
+from ConfigParser import SafeConfigParser
 from getpass import getpass
 from lxml import etree
 import traceback
 
+#from jnpr.junos import netconify
 from jnpr.junos.netconify import constants as C
-from jnpr.junos.netconify.tty_telnet import Telnet
-from jnpr.junos.netconify.tty_serial import Serial
 
 # only export the netconifyCmdo class definition
 __all__ = ['netconifyCmdo']
@@ -20,10 +23,14 @@ __all__ = ['netconifyCmdo']
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
 QFX_MODE_SWITCH = 'SWITCH'
+verbose = 0
 
 
 class netconifyCmdo(object):
 
+    # -------------------------------------------------------------------------
+    # CONSTRUCTOR
+    # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
     # CONSTRUCTOR
     # -------------------------------------------------------------------------
@@ -69,7 +76,8 @@ class netconifyCmdo(object):
         self.passwd = kvargs.get('password', '')
         self.attempts = kvargs.get('attempts', 10)
 
-
+#        g.add_argument('-s', '--ssh',
+#                       help='ssh server, <host>,<port>,<user>,<password>')
 
     # ------------------------------------------------------------------------
     # get version
@@ -81,14 +89,29 @@ class netconifyCmdo(object):
     # run command, can be involved from SHELL or programmatically
     # -------------------------------------------------------------------------
 
-    def run(self):
+    def run(self, args=None):
+
+        # ---------------------------------------------------------------
+        # validate device hostname or IP address
+        # ---------------------------------------------------------------
+
+        # if self._name is None:
+        #     self.results['failed'] = True
+        #     self.results['errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
+        #     return self.results
+
+        global verbose
+        debug = args.verbose
+        if debug == 1:  # DEBUG LOGIN LEVEL
+            verbose = 1
+        elif debug == 2:  # DEBUG RPC REPLY
+            verbose = 2
 
         # ---------------------------------------------------------------
         # validate command options before going through the LOGIN process
         # ---------------------------------------------------------------
 
-        print "\n ****** inside cmdo: run "
-        fname = self.junos_conf_file
+        fname = args.junos_conf_file
         if fname is not None:
             if os.path.isfile(fname) is False:
                 self.results['failed'] = True
@@ -110,11 +133,7 @@ class netconifyCmdo(object):
         # by the command args
         # -----------------------------------------------------
 
-        self._do_actions()
-
-        """
         try:
-            print "\n ****** do_actions ******"
             self._do_actions()
         except Exception as err:
             try:
@@ -123,8 +142,6 @@ class netconifyCmdo(object):
                 self._hook_exception('ERROR', "{0}\n".format(str(logout_err)))
             traceback.print_exc()
             self._hook_exception('action', err)
-
-        """
 
         # ----------------------------------------------------
         # logout, unless we don't need to (due to reboot,etc.)
@@ -137,7 +154,6 @@ class netconifyCmdo(object):
                 self._hook_exception('logout', err)
         else:
             try:
-                print "\n ****** inside _tty_close **** \n"
                 self._tty._tty_close()
             except Exception as err:
                 self._hook_exception('close', err)
@@ -149,14 +165,13 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
 
     def _hook_exception(self, event, err):
-        self._notify("ERROR", "{0}\n".format(str(err)))
+        self._notify("ERROR", "{0}:{1}\n".format(event, str(err)))
         raise
 
     def _tty_notifier(self, tty, event, message):
-        self._notify("TTY:{0}".format(event), message)
+        self._notify("{0}".format(event), message)
 
     def _notify(self, event, message):
-        print "\n ****** inside cmdo: _notify **** \n "
         if self.on_notify is not None:
             self.on_notify(self, event, message)
         elif self.on_notify is not False:
@@ -167,7 +182,7 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
 
     def _tty_login(self):
-        print "\n ****** inside cmdo: tty_login \n"
+
         tty_args = {}
         tty_args['user'] = self.user
         tty_args['passwd'] = self.passwd
@@ -178,18 +193,25 @@ class netconifyCmdo(object):
             tty_args['host'] = self.host
             tty_args['port'] = self.port
             self.console = ('telnet', self.host, self.port)
-            self._tty = Telnet(**tty_args)
+            self._tty = jnpr.junos.netconify.Telnet(**tty_args)
+        elif self.mode == 'ssh':
+            host, port, s_user, s_passwd = re.split('[,:]', self._args.ssh)
+            tty_args['host'] = self.host
+            tty_args['port'] = self.port
+            tty_args['s_user'] = self.user
+            tty_args['s_passwd'] = self.passwd
+            self.console = ('ssh', self.host, self.port, self.user, self.passwd)
+            self._tty = jnpr.junos.netconify.SecureShell(**tty_args)
         else:
             tty_args['port'] = self.port
             tty_args['baud'] = self.baud
             self.console = ('serial', self.port)
-            self._tty = Serial(**tty_args)
+            self._tty = jnpr.junos.netconify.Serial(**tty_args)
 
         notify = self.on_notify or self._tty_notifier
         self._tty.login(notify=notify)
 
     def _tty_logout(self):
-        print "\n ****** inside cmdo: tty_logout \n "
         self._tty.logout()
 
     # -------------------------------------------------------------------------
@@ -197,7 +219,6 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
     def _do_actions(self):
 
-        print "\n ****** inside cmdo: do_actions ****"
         if self.request_srx_cluster is not None:
             self._srx_cluster()
             return
@@ -207,35 +228,25 @@ class netconifyCmdo(object):
             return
 
         if self.request_shutdown:
-            print "\n ***** inside self.request_shutdown *************"
             self._shutdown()
             return
 
         if self.request_zeroize:
-            print "\n zeroizing device ******"
-            val =self.zeroize_value
-            if val is None:
-                self._zeroize()
-            else:
-                self._zeroize(val)
+            self._zeroize()
             return
 
         if self.gather_facts is True:
-            print "\n ****** gather_facts ******"
-            if self._gather_facts():
-                self._save_facts_json()
-                self._save_inventory_xml()
+            self._gather_facts()
+            self._save_facts_json()
+            self._save_inventory_xml()
 
         if self.junos_conf_file is not None:
-            print "\n ****** inside do_action: junos_conf_file *********\n "
             self._push_config()
-
         if self.qfx_mode is not None:
             self._qfx_mode()
 
     def _srx_cluster(self):
         """ Enable cluster mode on SRX device"""
-        print "\n ****** inside cmdo: _srx_cluster "
         srx_args = {}
         cluster_id, node = re.split('[:,]', self.request_srx_cluster)
         srx_args['cluster_id'] = cluster_id
@@ -249,27 +260,24 @@ class netconifyCmdo(object):
 
     def _srx_cluster_disable(self):
         """ Disable cluster mode on SRX device"""
-        print "\n ****** inside cmdo: _srx_cluster_disable \n  "
-        self._notify('srx_cluster', 'disable cluster mode on srx device, rebooting')
+        self._notify(
+            'srx_cluster',
+            'disable cluster mode on srx device, rebooting')
         self._tty.nc.disablecluster()
         self._skip_logout = True
         self.results['changed'] = True
 
-    def _zeroize(self, value= None):
+    def _zeroize(self):
         """ perform device ZEROIZE actions """
-        print "\n ****** inside cmdo: zeroize \n "
         self._notify('zeroize', 'ZEROIZE device, rebooting')
-        res= self._tty.nc.zeroize(value)
-        print "\n **** result of zeroizing the device "
+        self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True
 
     def _shutdown(self):
         """ shutdown or reboot """
-        print "\n ****** inside cmdo: _shutdown \n "
         self._skip_logout = True
-        mode = self.shutdown_mode
-        print "\n mode is=====", mode
+        mode = self.request_shutdown
         self._notify('shutdown', 'shutdown {0}'.format(mode))
         nc = self._tty.nc
         shutdown = nc.poweroff if 'poweroff' == mode else nc.reboot
@@ -278,33 +286,27 @@ class netconifyCmdo(object):
         self.results['changed'] = True
 
     def _save_facts_json(self):
-        print "\n ****** inside cmdo: save_facts_json \n"
         if self.no_save is True:
+            self._notify('facts', '{0}'.format(self.facts))
             return
         fname = self._save_name + '-facts.json'
-        if self.savedir is None:
-            fpath = os.getcwd()
-        else:
-            fpath = self.savedir
-        path = os.path.join(fpath, fname)
+        path = os.path.join(self.savedir, fname)
         self._notify('facts', 'saving: {0}'.format(path))
-        with open(path, 'w+') as f:
-            f.write(json.dumps(self.facts))
+        try:
+            with open(path, 'w+') as f:
+                f.write(json.dumps(self.facts))
+        except:
+            raise RuntimeError(
+                "Netconify Error: can not write file, check directory persmissions")
 
     def _save_inventory_xml(self):
-        print "\n ****** inside cmdo: save_inventory_xml \n"
         if self.no_save is True:
             return
         if not hasattr(self._tty.nc.facts, 'inventory'):
             return
 
         fname = self._save_name + '-inventory.xml'
-        if self.savedir is None:
-            fpath = os.getcwd()
-        else:
-            fpath = self.savedir
-
-        path = os.path.join(fpath, fname)
+        path = os.path.join(self.savedir, fname)
         self._notify('inventory', 'saving: {0}'.format(path))
         as_xml = etree.tostring(
             self._tty.nc.facts.inventory, pretty_print=True)
@@ -312,33 +314,24 @@ class netconifyCmdo(object):
             f.write(as_xml)
 
     def _gather_facts(self):
-        print "\n ****** inside cmdo: _gather_facts ******\n"
         self._notify('facts', 'retrieving device facts...')
-        if self._tty.nc.facts.gather():
-            self.facts = self._tty.nc.facts.items
-            self.results['facts'] = self.facts
-            self._save_name = self._name or self.facts[
-                'hostname'] or '_'.join(self.console)
-            return True
-        else:
-            return False
-            print "\n ********* Error Occurred in gathering facts *********"
+        self._tty.nc.facts.gather()
+        self.facts = self._tty.nc.facts.items
+        self.results['facts'] = self.facts
+        self._save_name = self._name or self.facts[
+            'hostname'] or '_'.join(self.console)
 
     def _push_config(self):
         """ push the configuration or rollback changes on error """
-        print "\n ****** inside cmdo: _push_config *******\n"
+
         self._notify('conf', 'loading into device ...')
         content = open(self.junos_conf_file, 'r').read()
         load_args = dict(content=content)
-        print "\n ****** inside push_config ****** \n"
         if self.junos_merge_conf is True:
-            print "\n merging the config *************\n "
             load_args['action'] = 'replace'  # merge/replace; yeah, I know ...
         rc = self._tty.nc.load(**load_args)
-        #print "\n ***** rc is: ", rc
 
         if rc is not True:
-            print "\n ***** inside rc is not true for loading ******"
             self.results['failed'] = True
             self.results['errmsg'] = 'failure to load configuration, aborting.'
             self._notify('conf_ld_err', self.results['errmsg'])
@@ -348,7 +341,6 @@ class netconifyCmdo(object):
         self._notify('conf', 'commit ... please be patient')
         rc = self._tty.nc.commit()
         if rc is not True:
-            print "\n ***** rc is not true for committing ********"
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'faiure to commit configuration, aborting.'
@@ -465,6 +457,7 @@ class netconifyCmdo(object):
         """ sets the device mode """
         rpc = self._tty.nc.rpc
         mode = self._QFX_XML_MODES[self.qfx_mode]
-        cmd = '<request-chassis-device-mode><{0}/></request-chassis-device-mode>'.format(mode)
+        cmd = '<request-chassis-device-mode><{0}/></request-chassis-device-mode>'.format(
+            mode)
         got = rpc(cmd)
         return True

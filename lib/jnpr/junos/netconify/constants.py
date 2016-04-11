@@ -1,3 +1,3 @@
-version = "1.0.2"
-date = "2016-Feb-08"
+version = "1.0.3"
+date = "2016-March-17"
 author = "Jeremy Schulman, @nwkautomaniac"

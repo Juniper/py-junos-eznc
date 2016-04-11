@@ -13,7 +13,6 @@ class Telnet(Terminal):
     RETRY_BACKOFF = 2             # seconds to wait between retries
 
     def __init__(self, host, port, **kvargs):
-        print "\n ******* tty_telnet: init ******\n"
         """
         :host:
           The hostname or ip-addr of the ternminal server
@@ -41,7 +40,6 @@ class Telnet(Terminal):
     # -------------------------------------------------------------------------
 
     def _tty_open(self):
-        print "\n ******* tty_telnet: _tty_open **********"
         retry = self.RETRY_OPEN
         while retry > 0:
             try:
@@ -57,7 +55,6 @@ class Telnet(Terminal):
         self.write('\n')
 
     def _tty_close(self):
-        print "\n ******* tty_telnet: _tty_close ******\n"
         self._tn.close()
 
     # -------------------------------------------------------------------------
@@ -65,24 +62,19 @@ class Telnet(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        print "\n ******* tty_telnet: write ******\n"
         """ write content + <ENTER> """
         self._tn.write(content + '\n')
 
     def rawwrite(self, content):
-        #print "\n ******* tty_telnet: rawwrite *****, content is: \n ", content
         """ write content as-is """
         self._tn.write(content)
 
     def read(self):
-        print "\n ******* tty_telnet: read ******* \n "
         """ read a single line """
         return self._tn.read_until('\n', self.EXPECT_TIMEOUT)
 
     def read_prompt(self):
-        print "\n *********** tty_telnet: read_prompt ****** \n"
         got = self._tn.expect(Terminal._RE_PAT, self.EXPECT_TIMEOUT)
-        #print "\n got *****:", got
         sre = got[1]
 
         if 'in use' in got[2]:
