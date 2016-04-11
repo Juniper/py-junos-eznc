@@ -304,7 +304,7 @@ class TestDevice(unittest.TestCase):
 
     def test_device_cli_exception(self):
         self.dev.rpc.cli = MagicMock(side_effect=AttributeError)
-        val = self.dev.cli('show version', warning=False)
+        val = self.dev.cli('show version')
         self.assertEqual(val, 'invalid command: show version')
 
     @patch('jnpr.junos.Device.execute')
