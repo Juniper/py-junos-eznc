@@ -275,27 +275,36 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_cli(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.cli('show cli directory').tag, 'cli')
+        self.assertEqual(self.dev.cli('show cli directory',
+                                      warning=False).tag, 'cli')
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_conf_info(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertTrue('ge-0/0/0' in self.dev.cli('show configuration'))
+        self.assertTrue('ge-0/0/0' in self.dev.cli('show configuration',
+                                                   warning=False))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_output(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertTrue('Alarm' in self.dev.cli('show system alarms'))
+        self.assertTrue('Alarm' in self.dev.cli('show system alarms',
+                                                warning=False))
+
+    def test_device_cli_blank_output(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.assertEqual('', self.dev.cli('show configuration interfaces',
+                                          warning=False))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.cli('show system uptime | display xml rpc')
+        self.assertEqual(self.dev.cli('show system uptime | display xml rpc',
+                                      warning=False)
                          .tag, 'get-system-uptime-information')
 
     def test_device_cli_exception(self):
         self.dev.rpc.cli = MagicMock(side_effect=AttributeError)
-        val = self.dev.cli('show version')
+        val = self.dev.cli('show version', warning=False)
         self.assertEqual(val, 'invalid command: show version')
 
     @patch('jnpr.junos.Device.execute')
@@ -323,7 +332,6 @@ class TestDevice(unittest.TestCase):
 
     def test_device_execute(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        print (self.dev.execute('<get-system-core-dumps/>').tag)
         self.assertEqual(self.dev.execute('<get-system-core-dumps/>').tag,
                          'directory-list')
 
@@ -493,7 +501,8 @@ class TestDevice(unittest.TestCase):
                 raise RPCError(etree.XML(foo))
             elif (fname == 'get-index-error.xml' or
                     fname == 'get-system-core-dumps.xml' or
-                    fname == 'load-configuration-error.xml'):
+                    fname == 'load-configuration-error.xml' or
+                          fname=='show-configuration-interfaces.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
             elif (fname == 'show-configuration.xml' or
@@ -522,6 +531,8 @@ class TestDevice(unittest.TestCase):
                     return self._read_file('show-system-alarms.xml')
                 elif args[0].text == 'show system uptime | display xml rpc':
                     return self._read_file('show-system-uptime-rpc.xml')
+                elif args[0].text == 'show configuration interfaces':
+                    return self._read_file('show-configuration-interfaces.xml')
                 else:
                     raise RpcError
 
