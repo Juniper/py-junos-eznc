@@ -14,7 +14,6 @@ from getpass import getpass
 from lxml import etree
 import traceback
 
-#from jnpr.junos import netconify
 from jnpr.junos.netconify import constants as C
 
 # only export the netconifyCmdo class definition
@@ -75,6 +74,7 @@ class netconifyCmdo(object):
         self.user = kvargs.get ('user', 'root')
         self.passwd = kvargs.get('password', '')
         self.attempts = kvargs.get('attempts', 10)
+        self.verbose = kvargs.get('verbose', 0)
 
 #        g.add_argument('-s', '--ssh',
 #                       help='ssh server, <host>,<port>,<user>,<password>')
@@ -101,7 +101,7 @@ class netconifyCmdo(object):
         #     return self.results
 
         global verbose
-        debug = args.verbose
+        debug = self.verbose
         if debug == 1:  # DEBUG LOGIN LEVEL
             verbose = 1
         elif debug == 2:  # DEBUG RPC REPLY
@@ -111,7 +111,7 @@ class netconifyCmdo(object):
         # validate command options before going through the LOGIN process
         # ---------------------------------------------------------------
 
-        fname = args.junos_conf_file
+        fname = self.junos_conf_file
         if fname is not None:
             if os.path.isfile(fname) is False:
                 self.results['failed'] = True
@@ -182,7 +182,9 @@ class netconifyCmdo(object):
     # -------------------------------------------------------------------------
 
     def _tty_login(self):
-
+        ### hack for now
+        ### problem in importing at top, because of circular import issue
+        from jnpr.junos import netconify 
         tty_args = {}
         tty_args['user'] = self.user
         tty_args['passwd'] = self.passwd
@@ -193,7 +195,7 @@ class netconifyCmdo(object):
             tty_args['host'] = self.host
             tty_args['port'] = self.port
             self.console = ('telnet', self.host, self.port)
-            self._tty = jnpr.junos.netconify.Telnet(**tty_args)
+            self._tty = netconify.Telnet(**tty_args)
         elif self.mode == 'ssh':
             host, port, s_user, s_passwd = re.split('[,:]', self._args.ssh)
             tty_args['host'] = self.host
@@ -201,12 +203,12 @@ class netconifyCmdo(object):
             tty_args['s_user'] = self.user
             tty_args['s_passwd'] = self.passwd
             self.console = ('ssh', self.host, self.port, self.user, self.passwd)
-            self._tty = jnpr.junos.netconify.SecureShell(**tty_args)
+            self._tty = netconify.SecureShell(**tty_args)
         else:
             tty_args['port'] = self.port
             tty_args['baud'] = self.baud
             self.console = ('serial', self.port)
-            self._tty = jnpr.junos.netconify.Serial(**tty_args)
+            self._tty = netconify.Serial(**tty_args)
 
         notify = self.on_notify or self._tty_notifier
         self._tty.login(notify=notify)
