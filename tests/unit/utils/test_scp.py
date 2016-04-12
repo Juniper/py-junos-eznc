@@ -74,6 +74,21 @@ class TestScp(unittest.TestCase):
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
     @patch('scp.SCPClient.__init__')
+    def test_scp_user_def_progress_args_2(self, mock_scpclient, mock_put,
+                                          mock_ssh):
+        mock_scpclient.return_value = None
+
+        def myprogress(dev, report):
+            print "host: %s, report: %s" % (dev.hostname, report)
+        package = 'test.tgz'
+        with SCP(self.dev, progress=myprogress) as scp:
+            scp.put(package)
+        self.assertEqual(
+            mock_scpclient.mock_calls[0][2]['progress'].__name__, '_scp_progress')
+
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    @patch('scp.SCPClient.__init__')
     def test_scp_progress_true(self, mock_scpclient, mock_put, mock_sshclient):
         mock_scpclient.return_value = None
         package = 'test.tgz'

@@ -25,7 +25,7 @@ else:
     builtin_string = 'builtins'
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
-         'version_info': version_info('12.1X46-D15.3'),
+         'version_info': version_info('15.1X46-D15.3'),
          '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
@@ -279,6 +279,17 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.cli('show cli directory',
                                       warning=False).tag, 'cli')
 
+    @patch('jnpr.junos.device.json.loads')
+    def test_device_rpc_json_ex(self, mock_json_loads):
+        self.dev._facts = facts
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        mock_json_loads.side_effect = [ValueError('Extra data '),
+                    self._mock_manager(
+                    etree.fromstring('<get-route-information format="json"/>')
+                    )]
+        self.dev.rpc.get_route_information({'format': 'json'})
+        self.assertEqual(mock_json_loads.call_count, 2)
+
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_format_json(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -522,6 +533,9 @@ class TestDevice(unittest.TestCase):
                                   .transform_reply())._NCElement__doc
             elif fname == 'show-interface-terse.json':
                 rpc_reply = json.loads(foo)
+            elif fname == 'get-route-information.json':
+                rpc_reply = NCElement(foo, self.dev._conn._device_handler
+                                  .transform_reply())
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc[0]
@@ -552,6 +566,8 @@ class TestDevice(unittest.TestCase):
                     raise RpcError
 
             else:
+                if args[0].attrib.get('format')=='json':
+                    return self._read_file(args[0].tag + '.json')
                 return self._read_file(args[0].tag + '.xml')
 
     def _do_nothing(self, *args, **kwargs):
