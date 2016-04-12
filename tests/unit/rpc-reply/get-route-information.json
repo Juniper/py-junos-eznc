@@ -1,0 +1,102 @@
+<rpc-reply>
+{
+    "route-information" : [
+    {
+        "attributes" : {"xmlns" : "http://xml.juniper.net/junos/16.1I0/junos-routing"}, 
+        "route-table" : [
+        {
+            "comment" : "keepalive", 
+            "table-name" : [
+            {
+                "data" : "inet.0"
+            }
+            ], 
+            "destination-count" : [
+            {
+                "data" : "10"
+            }
+            ], 
+            "total-route-count" : [
+            {
+                "data" : "10"
+            }
+            ], 
+            "active-route-count" : [
+            {
+                "data" : "9"
+            }
+            ], 
+            "holddown-route-count" : [
+            {
+                "data" : "0"
+            }
+            ], 
+            "hidden-route-count" : [
+            {
+                "data" : "1"
+            }
+            ], 
+            "rt" : [
+            {
+                "attributes" : {"junos:style" : "brief"}, 
+                "rt-destination" : [    
+                {                       
+                    "data" : "0.0.0.0/0"
+                }                       
+                ],                      
+                "rt-entry" : [          
+                {                       
+                    "active-tag" : [    
+                    {                   
+                        "data" : "*"    
+                    }                   
+                    ],                  
+                    "current-active" : [
+                    {                   
+                        "data" : [null] 
+                    }                   
+                    ],                  
+                    "last-active" : [   
+                    {                   
+                        "data" : [null] 
+                    }                   
+                    ],                  
+                    "protocol-name" : [ 
+                    {                   
+                        "data" : "Static"
+                    }                   
+                    ],                  
+                    "preference" : [    
+                    {                   
+                        "data" : "5"    
+                    }                   
+                    ],                  
+                    "age" : [           
+                    {                   
+                        "data" : "19:56:37", 
+                        "attributes" : {"junos:seconds" : "71797"}
+                    }                   
+                    ],                  
+                    "nh" : [
+                    {
+                        "selected-next-hop" : [
+                        {
+                            "data" : [null]
+                        }
+                        ], 
+                        "to" : [
+                        {
+                            "data" : "10.209.63.254"
+                        }
+                        ], 
+                        "via" : [
+                        {
+                            "data" : "em0.0"
+                        }
+                        ]
+                    }
+                    ]
+                }
+                ]
+}}}}
+</rpc-reply>
