@@ -79,7 +79,7 @@ class TestScp(unittest.TestCase):
         mock_scpclient.return_value = None
 
         def myprogress(dev, report):
-            print "host: %s, report: %s" % (dev.hostname, report)
+            print ("host: %s, report: %s" % (dev.hostname, report))
         package = 'test.tgz'
         with SCP(self.dev, progress=myprogress) as scp:
             scp.put(package)
