@@ -11,6 +11,7 @@ import datetime
 import time
 import sys
 import json
+import re
 
 # 3rd-party packages
 from lxml import etree
@@ -592,7 +593,12 @@ class Device(object):
             ver_info = self._facts['version_info']
             if ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
-                return json.loads(rpc_rsp_e.text)
+                try:
+                    return json.loads(rpc_rsp_e.text)
+                except ValueError as ex:
+                    # when data is {}{.*} types
+                    if ex.message.startswith('Extra data'):
+                        return json.loads(re.sub('\s?{\s?}\s?','',rpc_rsp_e.text))
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
@@ -664,6 +670,8 @@ class Device(object):
 
         try:
             rsp = self.rpc.cli(command, format)
+            if isinstance(rsp, dict) and format.lower() == 'json':
+                return rsp
             # rsp returned True means <rpc-reply> is empty, hence return
             # empty str as would be the case on cli
             if rsp is True:
