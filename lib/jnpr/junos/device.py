@@ -672,6 +672,10 @@ class Device(object):
             rsp = self.rpc.cli(command, format)
             if isinstance(rsp, dict) and format.lower() == 'json':
                 return rsp
+            # rsp returned True means <rpc-reply> is empty, hence return
+            # empty str as would be the case on cli
+            if rsp is True:
+                return ''
             if rsp.tag == 'output':
                 return rsp.text
             if rsp.tag == 'configuration-information':
