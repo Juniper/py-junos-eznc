@@ -283,7 +283,9 @@ class TestDevice(unittest.TestCase):
     def test_device_rpc_json_ex(self, mock_json_loads):
         self.dev._facts = facts
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        mock_json_loads.side_effect = [ValueError('Extra data '),
+        ex = ValueError('Extra data ')
+        ex.message = 'Extra data '  # for py3 as we dont have message thr
+        mock_json_loads.side_effect = [ex,
                     self._mock_manager(
                     etree.fromstring('<get-route-information format="json"/>')
                     )]
