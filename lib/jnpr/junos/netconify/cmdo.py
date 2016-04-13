@@ -329,19 +329,21 @@ class netconifyCmdo(object):
         self._notify('conf', 'loading into device ...')
         content = open(self.junos_conf_file, 'r').read()
         load_args = dict(content=content)
+        print "\n ****** load_args: ", load_args
         if self.junos_merge_conf is True:
             load_args['action'] = 'replace'  # merge/replace; yeah, I know ...
         rc = self._tty.nc.load(**load_args)
-
+        print "\n !!!!!!rc is:", rc
         if rc is not True:
             self.results['failed'] = True
             self.results['errmsg'] = 'failure to load configuration, aborting.'
             self._notify('conf_ld_err', self.results['errmsg'])
             self._tty.nc.rollback()
             return
-
+        
         self._notify('conf', 'commit ... please be patient')
         rc = self._tty.nc.commit()
+        print "\n ***** rc:",rc
         if rc is not True:
             self.results['failed'] = True
             self.results[
@@ -349,7 +351,6 @@ class netconifyCmdo(object):
             self._notify('conf_save_err', self.results['errmsg'])
             self._tty.nc.rollback()
             return
-
         self._notify('conf', 'commit completed.')
         self.results['changed'] = True
         return
