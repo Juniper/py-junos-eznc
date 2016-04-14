@@ -5,4 +5,5 @@ scp>=0.7.0
 jinja2>=2.7.1
 PyYAML>=3.10
 netaddr
+six
 pyserial

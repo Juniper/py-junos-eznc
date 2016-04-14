@@ -58,9 +58,8 @@ class TestVersionInfo(unittest.TestCase):
 
     def test_version_to_json(self):
         import json
-        self.assertEqual(
-            json.dumps(version_info('11.4R7.5')),
-            '{"major": [11, 4], "type": "R", "build": 5, "minor": "7"}')
+        self.assertEqual(eval(json.dumps(version_info('11.4R7.5'))), 
+                    {"major": [11, 4], "type": "R", "build": 5, "minor": "7"})
 
     def test_version_to_yaml(self):
         import yaml

@@ -171,6 +171,6 @@ def cscript_conf(reply):
         device_params = {'name': 'junos'}
         device_handler = manager.make_device_handler(device_params)
         transform_reply = device_handler.transform_reply()
-        return NCElement(etree.tostring(reply), transform_reply)._NCElement__doc
+        return NCElement(reply, transform_reply)._NCElement__doc
     except:
         return None

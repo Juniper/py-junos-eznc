@@ -394,8 +394,7 @@ class FS(Util):
     def _ssh_exec(self, command):
         with StartShell(self._dev) as sh:
             got = sh.run(command)
-            ok = sh.last_ok
-        return (ok, got)
+        return got
 
     def rmdir(self, path):
         """

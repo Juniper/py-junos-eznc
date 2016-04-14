@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import inspect
 
 import paramiko
 from scp import SCPClient
@@ -38,7 +39,8 @@ class SCP(object):
             # User case also define progress with 3 params, the way scp module
             # expects. Function will take path, total size, transferred.
             # https://github.com/jbardin/scp.py/blob/master/scp.py#L97
-            if self._user_progress.func_code.co_argcount == 3:
+            spec = inspect.getargspec(self._user_progress)
+            if len(spec.args) == 3:
                 self._scpargs['progress'] = self._user_progress
             else:
                 # this will override the function _progress defined for this
@@ -49,7 +51,7 @@ class SCP(object):
 
     def _progress(self, report):
         """ simple progress report function """
-        print self._junos.hostname + ": " + report
+        print (self._junos.hostname + ": " + report)
 
     def _scp_progress(self, _path, _total, _xfrd):
 
