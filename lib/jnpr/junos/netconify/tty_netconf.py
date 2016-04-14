@@ -76,6 +76,8 @@ class tty_netconf(object):
                 E('configuration-text', content)
                 )
         rsp = self.rpc(etree.tostring(cmd))
+        print "\n rsp is:", rsp
+        print "\n ****** rsp.findtext('.//ok'):", rsp.findtext('.//ok')
         return rsp if rsp.findtext('.//ok') is None else True
 
     def commit_check(self):
@@ -183,10 +185,27 @@ class tty_netconf(object):
             cmd = '<{0}/>'.format(cmd)
         self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
         rsp = self._receive()
+        print "\n ****** rpc reply:", rsp
         try:
             return rsp[0]  # return first child after the <rpc-reply>
         except:
             return etree.XML('<error-in-receive/>')
+
+    ######### Added to remove hexadecimal and other unwanted values, to strip reply ######
+    ## rpc reply: ['\x07\x07<rpc-reply >', '<load-configuration-results>', '\x07\x07\x07<ok/>'.....]
+    ### it will be converted to ['<rpc-reply >', '<load-configuration-results>', '<ok/>',.......]
+    ######
+    def xml_strip(self, val):
+        """
+        Function to strip unwanted values
+        :param val:
+        :return: values containing stripped values
+        """
+        obj = re.search(r'<.*?>',val)
+        if obj:
+            return obj.group()
+
+
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL I/O for reading back XML response
@@ -208,9 +227,13 @@ class tty_netconf(object):
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
+        rxbuf = map(self.xml_strip, rxbuf)
+
+        print "\n ***** rxbuf:",rxbuf
 
         try:
             as_xml = etree.XML(''.join(rxbuf))
+            print "\n ***** as_xml:", as_xml
             return as_xml
         except:
             if '</xnm:error>' in rxbuf:
