@@ -99,7 +99,6 @@ class Terminal(object):
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
-        print "\n *********** inside login function ***************\n"
         self.notifier = notify
         self.notify('TTY', 'connecting to TTY:{0} ...'.format(self.tty_name))
         self._tty_open()
@@ -118,7 +117,6 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        print "\n ***** inside logout function ***************\n"
         self.notify('logout', 'logging out ...')
         self.nc.close()
         self._logout_state_machine()
@@ -133,8 +131,6 @@ class Terminal(object):
             raise RuntimeError('logout_sm_failure')
 
         prompt, found = self.read_prompt()
-        print "\n *******prompt:", prompt
-        print "\n *******found:", found
 
         def _ev_login():
             # back at login prompt, so we are cleanly done!
