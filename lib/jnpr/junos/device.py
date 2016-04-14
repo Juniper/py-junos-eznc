@@ -615,8 +615,17 @@ class Device(object):
         # uplevel they can always call the getparent() method on it.
 
         try:
+            # print etree.tostring(rpc_rsp_e)
             ret_rpc_rsp = rpc_rsp_e[0]
+            # print etree.tostring(ret_rpc_rsp)
         except IndexError:
+            # For cases where reply are like
+            # <rpc-reply>
+            #    protocol: operation-failed
+            #    error: device asdf not found
+            # </rpc-reply>
+            if rpc_rsp_e.text.strip() is not '':
+                return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
 
@@ -674,16 +683,24 @@ class Device(object):
                 return rsp
             # rsp returned True means <rpc-reply> is empty, hence return
             # empty str as would be the case on cli
+            # ex:
+            # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
+            # </rpc-reply>
             if rsp is True:
                 return ''
-            if rsp.tag == 'output':
+            if rsp.tag in ['output', 'rpc-reply']:
                 return rsp.text
             if rsp.tag == 'configuration-information':
                 return rsp.findtext('configuration-output')
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
-        except:
+        except EzErrors.RpcError as ex:
+            if ex.message is not '':
+                return "%s: %s" % (ex.message, command)
+            else:
+                return "invalid command: " + command
+        except Exception as ex:
             return "invalid command: " + command
 
     def display_xml_rpc(self, command, format='xml'):

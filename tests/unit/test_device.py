@@ -319,6 +319,14 @@ class TestDevice(unittest.TestCase):
         self.assertEqual('', self.dev.cli('show configuration interfaces',
                                           warning=False))
 
+    #@patch('jnpr.junos.Device.execute')
+    def test_device_cli_rpc_reply_with_message(self):#, mock_execute):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.assertEqual(
+            '\nprotocol: operation-failed\nerror: device asdf not found\n',
+                         self.dev.cli('show interfaces terse asdf',
+                                          warning=False))
+
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -526,7 +534,8 @@ class TestDevice(unittest.TestCase):
             elif (fname == 'get-index-error.xml' or
                     fname == 'get-system-core-dumps.xml' or
                     fname == 'load-configuration-error.xml' or
-                          fname=='show-configuration-interfaces.xml'):
+                    fname == 'show-configuration-interfaces.xml' or
+                  fname == 'show-interfaces-terse-asdf.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
             elif (fname == 'show-configuration.xml' or
@@ -564,6 +573,8 @@ class TestDevice(unittest.TestCase):
                     return self._read_file('show-system-uptime-rpc.xml')
                 elif args[0].text == 'show configuration interfaces':
                     return self._read_file('show-configuration-interfaces.xml')
+                elif args[0].text == 'show interfaces terse asdf':
+                    return self._read_file('show-interfaces-terse-asdf.xml')
                 else:
                     raise RpcError
 

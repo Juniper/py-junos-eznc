@@ -1,0 +1,4 @@
+<rpc-reply message-id="urn:uuid:cc8caa21-0236-11e6-ac05-b8e85604f858">
+protocol: operation-failed
+error: device asdf not found
+</rpc-reply>
