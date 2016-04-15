@@ -615,9 +615,7 @@ class Device(object):
         # uplevel they can always call the getparent() method on it.
 
         try:
-            # print etree.tostring(rpc_rsp_e)
             ret_rpc_rsp = rpc_rsp_e[0]
-            # print etree.tostring(ret_rpc_rsp)
         except IndexError:
             # For cases where reply are like
             # <rpc-reply>
