@@ -34,6 +34,12 @@ class RpcError(Exception):
                 if error.severity == 'error':
                     self.rsp = JXML.remove_namespaces(error.xml)
                     break
+            else:
+                # if there is no error, looking for first warning.
+                for error in errs.errors:
+                    if error.severity == 'warning':
+                        self.rsp = JXML.remove_namespaces(error.xml)
+                        break
             self.message = errs.message
         else:
             self.errs = errs
