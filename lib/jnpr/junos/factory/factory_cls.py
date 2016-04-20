@@ -9,11 +9,15 @@ from jnpr.junos.factory.table import Table
 from jnpr.junos.factory.view import View
 from jnpr.junos.factory.viewfields import ViewFields
 
+from jnpr.junos.utils.config import Config
 
 def FactoryCfgTable(table_name=None, data_dict={}):
     if table_name is None:
         table_name = "CfgTable"
-    new_cls = type(table_name, (CfgTable,), {})
+    if 'set' in data_dict.keys():
+        new_cls = type(table_name, (CfgTable, Config), {})
+    else:
+        new_cls = type(table_name, (CfgTable,), {})
     new_cls.DEFINE = deepcopy(data_dict)
     new_cls.__module__ = __name__.replace('factory_cls', 'CfgTable')
     return new_cls

@@ -5,22 +5,59 @@ from lxml import etree
 from lxml.builder import E
 from jnpr.junos.factory.table import Table
 from jnpr.junos import jxml
+from jnpr.junos.utils.config import Config
 
 
 class CfgTable(Table):
 
+    __isfrozen = False
+
     # -----------------------------------------------------------------------
     # CONSTRUCTOR
     # -----------------------------------------------------------------------
-
-    def __init__(self, dev=None, xml=None, path=None):
+    def __init__(self, dev=None, xml=None, path=None, mode=None):
         Table.__init__(self, dev, xml, path)       # call parent constructor
 
+        self._init_get()
         self._data_dict = self.DEFINE  # crutch
         self.ITEM_NAME_XPATH = self._data_dict.get('key', 'name')
-        self.ITEM_XPATH = self._data_dict['get']
         self.view = self._data_dict.get('view')
         self._options = self._data_dict.get('options')
+        self.mode = mode
+        if 'set' in self._data_dict:
+            Config.__init__(self, dev, mode)    # call parent constructor
+
+            self._init_set()
+            if self._view:
+                self.fields = self._view.FIELDS.copy()
+            else:
+                raise ValueError(
+                        "%s set table view is not defined.\n"
+                        % (self.__class__.__name__)
+                )
+            if 'key-field' in self._data_dict:
+                key_name = self._data_dict.get('key-field', None)
+                if isinstance(key_name, list):
+                    self.key_field = key_name
+                elif isinstance(key_name, str):
+                    self.key_field = [key_name]
+                else:
+                    raise TypeError(
+                            "Key-field %s is of invalid type %s.\n"
+                            % (key_name, type(key_name))
+                    )
+            else:
+                raise ValueError(
+                        "Table should have key-field attribute defined\n"
+                )
+            self._type = 'set'
+            self._init_field()
+        else:
+            self._type = 'get'
+        self.ITEM_XPATH = self._data_dict[self._type]
+
+        # no new attributes.
+        self._freeze()
 
     # -----------------------------------------------------------------------
     # PROPERTIES
@@ -42,6 +79,20 @@ class CfgTable(Table):
     # -----------------------------------------------------------------------
     # PRIVATE METHODS
     # -----------------------------------------------------------------------
+    def _init_get(self):
+        self._get_xpath = None
+
+        # for debug purposes
+        self._get_cmd = None
+        self._get_opt = None
+
+    def _init_set(self):
+        self._insert_node = None
+        self._config_xml_req = None
+
+        # for debug purposes
+        self._load_rsp = None
+        self._commit_rsp = None
 
     def _buildxml(self, namesonly=False):
         """
@@ -62,7 +113,7 @@ class CfgTable(Table):
         This return value can then be passed to dev.rpc.get_config()
         to retrieve the specifc data
         """
-        xpath = self._data_dict['get']
+        xpath = self._data_dict[self._type]
         self._get_xpath = '//configuration/' + xpath
         top = E('configuration')
         dot = top
@@ -74,6 +125,123 @@ class CfgTable(Table):
             dot.attrib['recurse'] = 'false'
         return top
 
+    def _build_config_xml(self, top):
+        """
+        used to encode the field values into the configuration XML
+        for set table,each of the field=<value> pairs are defined by user:
+        """
+        for field_name, opt in self.fields.items():
+            dot = top
+            # create an XML element with the key/value
+            field_value = getattr(self, field_name, None)
+            # If field value is not set ignore it
+            if field_value is None:
+                continue
+
+            if isinstance(field_value, (list, tuple, set)):
+                [self._validate_value(field_name, v, opt) for v in field_value]
+            else:
+                self._validate_value(field_name, field_value, opt)
+
+            field_dict = self.fields[field_name]
+
+            if 'group' in field_dict:
+                group_xpath = self._view.GROUPS[field_dict['group']]
+                dot = self._encode_xpath(top, group_xpath.split('/'))
+
+            lxpath = field_dict['xpath'].split('/')
+            if len(lxpath) > 1:
+                dot = self._encode_xpath(top, lxpath[0:len(lxpath)-1])
+
+            add_field = self._grindfield(lxpath[-1], field_value)
+            for _add in add_field:
+                if field_name in self.key_field:
+                    dot.insert(0, _add)
+                else:
+                    dot.append(_add)
+
+    def _validate_value(self, field_name, value, opt):
+        """
+        Validate value set for field against the constraints and
+        data type check define in yml table/view defination.
+
+        :param field_name: Name of field as mentioned in yaml table/view
+        :param value: Value set by user for field_name.
+        :param opt: Dictionary of data type and constraint check.
+        :return:
+        """
+        def _get_field_type(ftype):
+            ft = {
+                'str': str,
+                'int': int,
+                'float': float,
+                'bool': bool,
+            }.get(ftype, None)
+
+            if ft is None:
+                raise TypeError("Unsupported type %s\n" % (ftype))
+            return ft
+
+        def _validate_enum_value(field_name, value, enum_value):
+            if isinstance(enum_value, list):
+                if value not in enum_value:
+                    raise ValueError('Invalid value %s assigned '
+                                     'to field %s' % (value, field_name))
+            elif isinstance(enum_value, str):
+                if not value == enum_value:
+                    raise ValueError('Invalid value %s assigned '
+                                     'to field %s' % (value, field_name))
+            else:
+                raise TypeError('Value of enum should '
+                                'be either a string or list of strings.\n')
+
+        def _validate_type(field_name, value, opt):
+            if isinstance(opt['type'], dict):
+                if 'enum' in opt['type']:
+                    _validate_enum_value(field_name,
+                                         value, opt['type']['enum'])
+                else:
+                    # More user defined type check can be added in future.
+                    # raise execption for now.
+                    raise TypeError("Unsupported type %s\n" % (opt['type']))
+
+            elif isinstance(opt['type'], str):
+                field_type = _get_field_type(opt['type'])
+                if not isinstance(value, field_type):
+                    raise TypeError(
+                            'Invalid value %s asigned to field %s,'
+                            ' value should be of type %s\n'
+                            % (value, field_name, field_type)
+                    )
+            else:
+                raise TypeError(
+                      'Invalid value %s, should be either of'
+                      ' type string or dictionary.\n' % (opt['type'])
+                )
+
+        def _validate_min_max_value(field_name, value, opt):
+            if isinstance(value, (int, float)):
+                if value < opt['minValue'] or value >= opt['maxValue']:
+                    raise ValueError(
+                            'Invalid value %s assigned '
+                            'to field %s.\n' % (value, field_name)
+                    )
+            elif isinstance(value, str):
+                if len(value) < opt['minValue'] or \
+                                len(value) >= opt['maxValue']:
+                    raise ValueError(
+                            'Invalid value %s assigned '
+                            'to field %s.\n' % (value, field_name)
+                    )
+
+        if isinstance(value, (list, tuple, dict, set)):
+            raise ValueError("%s value is invalid %s\n" % (field_name,  value))
+        else:
+            if 'type' in opt:
+                _validate_type(field_name, value, opt)
+            if ('minValue' or 'maxValue') in opt:
+                _validate_min_max_value(field_name, value, opt)
+
     def _grindkey(self, key_xpath, key_value):
         """ returns list of XML elements for key values """
         simple = lambda: [E(key_xpath.replace('_', '-'), key_value)]
@@ -83,10 +251,24 @@ class CfgTable(Table):
 
     def _grindxpath(self, key_xpath, key_value):
         """ returns xpath elements for key values """
-        simple = lambda: "[{0}='{1}']".format(key_xpath.replace('_', '-'), key_value)
-        composite = lambda: "[{0}]".format(' and '.join(["{0}='{1}'".format(xp.replace('_', '-'), xv)
-                                                         for xp, xv in zip(key_xpath, key_value)]))
+        simple = lambda: "[{0}='{1}']".format(
+                        key_xpath.replace('_', '-'),
+                        key_value
+        )
+        composite = lambda: "[{0}]".format(' and '.join(
+                            ["{0}='{1}'".format(xp.replace('_', '-'), xv)
+                                for xp, xv in zip(key_xpath, key_value)]))
         return simple() if isinstance(key_xpath, str) else composite()
+
+    def _grindfield(self, xpath, value):
+        """ returns list of xml elements for field name-value pairs """
+        lst = []
+        if isinstance(value, (list, tuple, set)):
+            for v in value:
+                lst.append(E(xpath.replace('_', '-'), str(v)))
+        else:
+            lst.append(E(xpath.replace('_', '-'), str(value)))
+        return lst
 
     def _encode_requiredkeys(self, get_cmd, kvargs):
         """
@@ -98,7 +280,7 @@ class CfgTable(Table):
             # create an XML element with the key/value
             key_value = kvargs.get(key_name)
             if key_value is None:
-                raise ValueError("Missing required-key: '%s'" % key_name)
+                raise ValueError("Missing required-key: '%s'" % (key_name))
             key_xpath = rqkeys[key_name]
             add_keylist_xml = self._grindkey(key_xpath, key_value)
 
@@ -109,13 +291,17 @@ class CfgTable(Table):
             if dot is None:
                 raise RuntimeError(
                     "Unable to find parent XML for key: '%s'" %
-                    key_name)
+                    (key_name))
             for _at, _add in enumerate(add_keylist_xml):
                 dot.insert(_at, _add)
 
             # Add required key values to _get_xpath
-            xid = re.search(r"\b{0}\b".format(key_name), self._get_xpath).start() + len(key_name)
-            self._get_xpath = self._get_xpath[:xid] + self._grindxpath(key_xpath, key_value) + self._get_xpath[xid:]
+            xid = re.search(r"\b{0}\b".format(key_name),
+                            self._get_xpath).start() + len(key_name)
+
+            self._get_xpath = self._get_xpath[:xid] + \
+                self._grindxpath(key_xpath, key_value) + \
+                self._get_xpath[xid:]
 
     def _encode_namekey(self, get_cmd, dot, namekey_value):
         """
@@ -131,13 +317,92 @@ class CfgTable(Table):
         for field_xpath in self._data_dict['get_fields']:
             dot.append(E(field_xpath))
 
+    def _encode_xpath(self, top, lst):
+        """
+        Create xml element hierarchy for given field. Return container
+        node to which field and its value will appended as child elements.
+        """
+        dot = top
+        for index in range(1, len(lst) + 1):
+            xp = '/'.join(lst[0:index])
+            if not len(top.xpath(xp)):
+                dot.append(E(lst[index - 1]))
+            dot = dot[-1]
+        return dot
+
     def _keyspec(self):
         """ returns tuple (keyname-xpath, item-xpath) """
-        return (self._data_dict.get('key', 'name'), self._data_dict['get'])
+        return (self._data_dict.get('key', 'name'),
+                self._data_dict[self._type])
 
-    # -------------------------------------------------------------------------
+    def _init_field(self):
+        """
+        Initialize fields of set table to it's default value
+        (if mentioned in yml Table/View) else set to None.
+        """
+        for fname, opt in self.fields.items():
+            self.__dict__[fname] = opt['default'] \
+                if 'default' in opt else None
+
+    def _mandatory_check(self):
+        """ Mandatory checks for set table/view  """
+        for key in self.key_field:
+            value = getattr(self, key)
+            if value is None:
+                raise ValueError("%s key-field value is not set.\n" % (key))
+
+    def _freeze(self):
+        """
+        Freeze class object so that user cannot add new attributes (fields).
+        """
+        self.__isfrozen = True
+
+    def _unfreeze(self):
+        """
+        Unfreeze class object, should be called from within class only.
+        """
+        self.__isfrozen = False
+
+    def reset(self):
+        """
+        Initialize fields of set table to it's default value
+        (if mentioned in yml Table/View) else set to None.
+        """
+        return self._init_field()
+
+    def get_table_xml(self):
+        """
+        It returns configuration xml that is generated from table
+        data field=value pairs. To get a valid xml this should be
+        called after either one of 'append' api is used.
+        """
+        return self._config_xml_req
+
+    def append(self):
+        """
+        Append field name-value pair to partially generated configuration xml.
+        Appropriate value should be assigned to field before calling append.
+        After calling append field values already appended cannot be changed.
+        """
+
+        # mandatory check for 'set' table fields
+        self._mandatory_check()
+
+        set_cmd = self._buildxml()
+        top = set_cmd.find(self._data_dict[self._type])
+        self._build_config_xml(top)
+        if self._config_xml_req is None:
+            self._config_xml_req = set_cmd
+            self._insert_node = top.getparent()
+        else:
+            self._insert_node.extend(top.getparent())
+
+        # Reset field values
+        self.reset()
+
+    # ----------------------------------------------------------------------
     # get - retrieve Table data
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 
     def get(self, *vargs, **kvargs):
         """
@@ -197,7 +462,7 @@ class CfgTable(Table):
             # be an actual name of a thing, and not an index number.
             # ... at least for now ...
             named_item = kvargs.get('key') or vargs[0]
-            dot = get_cmd.find(self._data_dict['get'])
+            dot = get_cmd.find(self._data_dict[self._type])
             self._encode_namekey(get_cmd, dot, named_item)
 
             if 'get_fields' in self._data_dict:
@@ -229,16 +494,150 @@ class CfgTable(Table):
                 # If part of commit script use the context
                 if Junos_Configuration is not None:
                     # Convert the onbox XML to ncclient reply
-                    config = jxml.conf_transform(deepcopy(jxml.cscript_conf(Junos_Configuration)),
-                                                 subSelectionXPath=self._get_xpath)
+                    config = jxml.conf_transform(
+                            deepcopy(jxml.cscript_conf(Junos_Configuration)),
+                            subSelectionXPath=self._get_xpath
+                    )
                     self.xml = config.getroot()
                 else:
                     self.xml = self.RPC.get_config(get_cmd, options=options)
-            # If onbox import missing fallback to RPC - possibly raise exception in future
+            # If onbox import missing fallback to RPC - possibly raise
+            # exception in future
             except ImportError:
                 self.xml = self.RPC.get_config(get_cmd, options=options)
         else:
             self.xml = self.RPC.get_config(get_cmd, options=options)
 
         # return self for call-chaining, yo!
+        return self
+
+    # -----------------------------------------------------------------------
+    # set - configure Table data in running configuration.
+    # -----------------------------------------------------------------------
+
+    def set(self, **kvargs):
+        """
+        Set configuration data in running configuration db.
+        Convert field-name, value pair assigned by user to proper structured
+        configuration xml object and will issue lock, load, commit, unlock
+        operations in sequence.
+
+        :param bool overwrite:
+          Determines if the contents completely replace the existing
+          configuration.  Default is ``False``.
+
+        :param bool merge:
+          If set to ``True`` will set the load-config action to merge.
+          the default load-config action is 'replace'
+
+        :param str comment: If provided logs this comment with the commit.
+
+        :param int confirm: If provided activates confirm safeguard with
+                            provided value as timeout (minutes).
+
+        :param int timeout: If provided the command will wait for completion
+                            using the provided value as timeout (seconds).
+                            By default the device timeout is used.
+
+        :param bool sync: On dual control plane systems, requests that
+                            the candidate configuration on one control plane
+                            be copied to the other control plane, checked for
+                            correct syntax, and committed on both Routing
+                            Engines.
+
+        :param bool force_sync: On dual control plane systems, forces the
+                            candidate configuration on one control plane
+                            to be copied to the other control plane.
+
+        :param bool full: When true requires all the daemons to check and
+                          evaluate the new configuration.
+
+        :param bool detail: When true return commit detail as XML
+
+        :returns:
+            Class object.
+
+        :raises: ConfigLoadError: When errors detected while loading
+                            configuration. You can use the Exception errs
+                            variable to identify the specific problems
+
+                CommitError: When errors detected in candidate configuration.
+                             You can use the Exception errs variable
+                             to identify the specific problems
+
+        .. warning::
+            If the function does not receive a reply prior to the timeout
+            a RpcTimeoutError will be raised.  It is possible the commit
+            was successful.  Manual verification may be required.
+        """
+
+        self.lock()
+
+        try:
+            # Invoke config class load() api, with xml object.
+            self._load_rsp = super(CfgTable, self).load(self._config_xml_req,
+                                                        **kvargs)
+            self._commit_rsp = self.commit(**kvargs)
+        finally:
+            self.unlock()
+
+        return self
+
+    # -----------------------------------------------------------------------
+    # OVERLOADS
+    # -----------------------------------------------------------------------
+
+    def __setitem__(self, t_field, value):
+        """
+        implements []= to set Field value
+        """
+        if t_field in self.fields:
+            # pass 'up' to standard setattr method
+            object.__setattr__(self, t_field, value)
+        else:
+            raise ValueError("Unknown field: %s" % (t_field))
+
+    def __setattr__(self, attribute, value):
+        if self.__isfrozen and not hasattr(self, attribute):
+            raise ValueError("Unknown field: %s" % (attribute))
+        else:
+            # pass 'up' to standard setattr method
+            object.__setattr__(self, attribute, value)
+
+    def __enter__(self):
+        return super(CfgTable, self).__enter__()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return super(CfgTable, self).__exit__(exc_type, exc_val, exc_tb)
+
+    # -----------------------------------------------------------------------
+    # load - configure Table data in candidate configuration.
+    # -----------------------------------------------------------------------
+
+    def load(self, **kvargs):
+        """
+        Convert field-name, value pair assigned by user to proper structured
+        configuration xml object and will configure data in candidate
+        configuration.
+
+        :param bool overwrite:
+          Determines if the contents completely replace the existing
+          configuration.  Default is ``False``.
+
+        :param bool merge:
+          If set to ``True`` will set the load-config action to merge.
+          the default load-config action is 'replace'
+
+        :returns:
+            Class object.
+
+        :raises: ConfigLoadError: When errors detected while loading
+                            configuration. You can use the Exception errs
+                            variable to identify the specific problems
+
+        """
+
+        # pass up to config class load() api, with xml object as vargs[0].
+        self._load_rsp = super(CfgTable, self).load(self._config_xml_req,
+                                                    **kvargs)
         return self

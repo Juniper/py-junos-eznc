@@ -1,0 +1,16 @@
+---
+  SyslogTable:
+    set: system/syslog/file
+    key-field:
+      - name
+      - contents_name
+    view: SyslogView
+  SyslogView:
+    groups:
+      contents: contents
+    fields:
+      name : { 'name' : { 'default' : 'messages' } }
+    fields_contents:
+      info           : info
+      contents_name  : name
+      error          : error
