@@ -95,6 +95,10 @@ class FactoryLoader(object):
 
         # first check to see if the option is a built-in Python
         # type, most commonly would be 'int' for numbers, like counters
+        if isinstance(opt, dict):
+            kvargs.update(opt)
+            fields.str(f_name, xpath, **kvargs)
+            return
 
         astype = __builtins__.get(opt) or globals().get(opt)
         if astype is not None:
@@ -254,6 +258,8 @@ class FactoryLoader(object):
             if 'rpc' in v:
                 self._item_optables.append(k)
             elif 'get' in v:
+                self._item_cfgtables.append(k)
+            elif 'set' in v:
                 self._item_cfgtables.append(k)
             elif 'view' in v:
                 self._item_tables.append(k)
