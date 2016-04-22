@@ -110,6 +110,13 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.assertEqual(ut[0].uid, '2000')
 
     @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_junos(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.ON_JUNOS = True
+        self.ut.get(user='test')
+        self.assertEqual(self.ut[0]['uidgroup'], 'global')
+
+    @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.zit.get(security_zone='untrust')
@@ -476,6 +483,22 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.assertRaises(ValueError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_append_not_call_error(self, mock_execute):
+        self.bgp.rpc.lock_configuration = MagicMock()
+        self.bgp['bgp_name'] = 'external_3'
+        self.assertRaises(RuntimeError, self.bgp.set)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_load_append_not_call_error(self, mock_execute):
+        self.bgp['bgp_name'] = 'external_3'
+        self.assertRaises(RuntimeError, self.bgp.load)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_unfreeze(self, mock_execute):
+        self.bgp._unfreeze()
+        self.assertEqual(self.bgp._CfgTable__isfrozen, False)
+
+    @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.utils.config.Config.lock')
     @patch('jnpr.junos.utils.config.Config.unlock')
     def test_cfgtable_with_block(self, mock_execute, mock_unlock, mock_lock):
@@ -485,7 +508,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             bgp.append()
             bgp.load()
         self.assertTrue(mock_lock.called and mock_unlock.called)
-        
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
