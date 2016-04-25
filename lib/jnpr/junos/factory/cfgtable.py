@@ -88,7 +88,12 @@ class CfgTable(Table):
 
     def _init_set(self):
         self._insert_node = None
+
+        # lxml object of configuration xml
         self._config_xml_req = None
+
+        # To check if field value is set.
+        self._is_field_set = False
 
         # for debug purposes
         self._load_rsp = None
@@ -363,26 +368,40 @@ class CfgTable(Table):
         """
         self.__isfrozen = False
 
+    # ----------------------------------------------------------------------
+    # reset - Assign 'set' Table field values to default or None
+    # ----------------------------------------------------------------------
     def reset(self):
         """
         Initialize fields of set table to it's default value
-        (if mentioned in yml Table/View) else set to None.
+        (if mentioned in Table/View) else set to None.
         """
         return self._init_field()
 
+    # ----------------------------------------------------------------------
+    # get_table_xml - retrieve lxml configuration object for set table
+    # ----------------------------------------------------------------------
     def get_table_xml(self):
         """
-        It returns configuration xml that is generated from table
-        data field=value pairs. To get a valid xml this should be
-        called after either one of 'append' api is used.
+        It returns lxml object of configuration xml that is generated
+        from table data (field=value) pairs. To get a valid xml this
+        method should be used after append() is called.
         """
         return self._config_xml_req
 
+    # ----------------------------------------------------------------------
+    # append - append Table data to lxml configuration object
+    # ----------------------------------------------------------------------
     def append(self):
         """
-        Append field name-value pair to partially generated configuration xml.
-        Appropriate value should be assigned to field before calling append.
-        After calling append field values already appended cannot be changed.
+        It creates lxml nodes with field name as xml tag and its value
+        given by user as text of xml node. The generated xml nodes are
+        appended to configuration xml at appropriate hierarchy.
+
+        .. warning::
+            xml node that are appended cannot be changed later hence
+            care should be taken to assign correct value to table fields
+            before calling append.
         """
 
         # mandatory check for 'set' table fields
@@ -397,8 +416,8 @@ class CfgTable(Table):
         else:
             self._insert_node.extend(top.getparent())
 
-        # Reset field values
-        self.reset()
+        self.reset()                 # Reset field values
+        self._is_field_set = False
 
     # ----------------------------------------------------------------------
     # get - retrieve Table data
@@ -517,10 +536,16 @@ class CfgTable(Table):
 
     def set(self, **kvargs):
         """
-        Set configuration data in running configuration db.
-        Convert field-name, value pair assigned by user to proper structured
-        configuration xml object and will issue lock, load, commit, unlock
-        operations in sequence.
+        Load configuration data in running db.
+        It performs following operation in sequence.
+
+        * lock(): Locks candidate configuration db.
+        * load(): Load structured configuration xml in candidate db.
+        * commit(): Commit configuration to runnning db.
+        * unlock(): Unlock candidate db.
+
+        This method should be used after append() is called to
+        get the desired results.
 
         :param bool overwrite:
           Determines if the contents completely replace the existing
@@ -554,22 +579,32 @@ class CfgTable(Table):
 
         :param bool detail: When true return commit detail as XML
 
-        :returns:
-            Class object.
+        :returns: Class object:
 
-        :raises: ConfigLoadError: When errors detected while loading
-                            configuration. You can use the Exception errs
-                            variable to identify the specific problems
+        :raises: ConfigLoadError:
+                    When errors detected while loading
+                    configuration. You can use the Exception errs
+                    variable to identify the specific problems
 
-                CommitError: When errors detected in candidate configuration.
-                             You can use the Exception errs variable
-                             to identify the specific problems
+                CommitError:
+                    When errors detected in candidate configuration.
+                    You can use the Exception errs variable
+                    to identify the specific problems
+
+                RuntimeError:
+                    If field value is set and append() is not
+                    invoked before calling this method, it will
+                    raise an exception with appropriate error
+                    message.
 
         .. warning::
             If the function does not receive a reply prior to the timeout
             a RpcTimeoutError will be raised.  It is possible the commit
             was successful.  Manual verification may be required.
         """
+        if self._is_field_set:
+            raise RuntimeError("Field value is changed, append() "
+                               "must be called before set()")
 
         self.lock()
 
@@ -593,7 +628,7 @@ class CfgTable(Table):
         """
         if t_field in self.fields:
             # pass 'up' to standard setattr method
-            object.__setattr__(self, t_field, value)
+            self.__setattr__(t_field, value)
         else:
             raise ValueError("Unknown field: %s" % (t_field))
 
@@ -603,6 +638,8 @@ class CfgTable(Table):
         else:
             # pass 'up' to standard setattr method
             object.__setattr__(self, attribute, value)
+            if hasattr(self, 'fields') and attribute in self.fields:
+                object.__setattr__(self, '_is_field_set', True)
 
     def __enter__(self):
         return super(CfgTable, self).__enter__()
@@ -616,9 +653,10 @@ class CfgTable(Table):
 
     def load(self, **kvargs):
         """
-        Convert field-name, value pair assigned by user to proper structured
-        configuration xml object and will configure data in candidate
-        configuration.
+        Load configuration xml having table data (field=value)
+        in candidate db.
+        This method should be used after append() is called to
+        get the desired results.
 
         :param bool overwrite:
           Determines if the contents completely replace the existing
@@ -628,14 +666,21 @@ class CfgTable(Table):
           If set to ``True`` will set the load-config action to merge.
           the default load-config action is 'replace'
 
-        :returns:
-            Class object.
+        :returns: Class object.
 
-        :raises: ConfigLoadError: When errors detected while loading
-                            configuration. You can use the Exception errs
-                            variable to identify the specific problems
-
+        :raises: ConfigLoadError:
+                    When errors detected while loading
+                    configuration. You can use the Exception errs
+                    variable to identify the specific problems
+                 RuntimeError:
+                    If field value is set and append() is not
+                    invoked before calling this method, it will
+                    raise an exception with appropriate error
+                    message.
         """
+        if self._is_field_set:
+            raise RuntimeError("Field value is changed, append() "
+                               "must be called before load()")
 
         # pass up to config class load() api, with xml object as vargs[0].
         self._load_rsp = super(CfgTable, self).load(self._config_xml_req,
