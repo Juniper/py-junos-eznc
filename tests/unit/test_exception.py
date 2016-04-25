@@ -43,6 +43,25 @@ conf_xml = '''
     </rpc-error>
 '''
 
+multi_warning_xml = '''
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+<load-configuration-results>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+statement not found
+</error-message>
+</rpc-error>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+statement not found
+</error-message>
+</rpc-error>
+<ok/>
+</load-configuration-results>
+</rpc-reply>
+'''
 
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
@@ -102,3 +121,18 @@ class Test_RpcError(unittest.TestCase):
         obj = SwRollbackError(re='test1', rsp="Multi RE exception")
         err = 'SwRollbackError(re: test1, output: Multi RE exception)'
         self.assertEqual(obj.__repr__(), err)
+
+    def test_repr_multi_warning(self):
+        rsp = etree.XML(multi_warning_xml)
+        from ncclient.operations import RPCError
+        warn_msg = '''
+        <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <error-severity>warning</error-severity>
+        <error-message>
+        statement not found
+        </error-message>
+        </rpc-error>'''
+        errs = RPCError(etree.XML(warn_msg))
+        errs.errors = [errs, errs]
+        obj = RpcError(rsp=rsp, errs=errs)
+        self.assertEqual(obj.rpc_error['severity'], 'warning')
