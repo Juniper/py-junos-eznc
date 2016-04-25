@@ -26,7 +26,6 @@ class RpcError(Exception):
         self.timeout = timeout
         self.re = re
         self.rpc_error = None
-
         # To handle errors coming from ncclient, Here errs is list of RPCError
         if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
             self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
@@ -35,11 +34,11 @@ class RpcError(Exception):
                     self.rsp = JXML.remove_namespaces(error.xml)
                     break
             else:
-                # if there is no error, looking for first warning.
-                for error in errs.errors:
-                    if error.severity == 'warning':
-                        self.rsp = JXML.remove_namespaces(error.xml)
-                        break
+                if errs.severity == 'warning':
+                    for error in errs.errors:
+                        if error.severity == 'warning':
+                            self.rsp = JXML.remove_namespaces(error.xml)
+                            break
             self.message = errs.message
         else:
             self.errs = errs
