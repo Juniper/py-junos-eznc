@@ -1,9 +1,8 @@
 import paramiko
 from select import select
 import re
-
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '% '
+_SHELL_PROMPT = '%'
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -84,7 +83,7 @@ class StartShell(object):
         self._chan = chan
 
         got = self.wait_for('(%|>)')
-        if not got[-1].endswith(_SHELL_PROMPT):
+        if not got[-1].rstrip().endswith(_SHELL_PROMPT):
             self.send('start shell')
             self.wait_for(_SHELL_PROMPT)
 
