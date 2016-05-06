@@ -234,3 +234,18 @@ class ConnectClosedError(ConnectError):
     def __init__(self, dev):
         ConnectError.__init__(self, dev=dev)
         dev.connected = False
+
+class TimedOutWaitingForCharacter(ConnectError):
+    '''
+    Generated if timeout occurred while waiting for an
+    expected character in a shell session.
+    '''
+    def __init__(self, dev, character):
+        self.character = character
+        msg = "Timed out waiting for '%s'" % character
+        ConnectError.__init__(self, dev=dev, msg=msg)
+    def character(self):
+        '''
+        :return: character that was sought
+        '''
+        return self.character
