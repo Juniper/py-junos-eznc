@@ -1,4 +1,4 @@
-[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://img.shields.io/pypi/dm/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc)
+[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://img.shields.io/pypi/dm/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc) [![Coverage Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
@@ -110,6 +110,12 @@ Apache 2.0
   
 # CONTRIBUTORS
 
-  - Jeremy Schulman (@nwkautomaniac), Core developer
-  - Rick Sherman (@shermdog01)
-  - Nitin Kumar (@vnitinv)
+Juniper Networks is actively contributing to and maintaining this repo. Please contact jnpr-community-netdev@juniper.net for any queries.
+
+*Contributors:*
+
+[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+
+*Former Contributors:*
+
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog)

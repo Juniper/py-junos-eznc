@@ -8,6 +8,7 @@ jnpr.junos
    jnpr.junos.factory
    jnpr.junos.facts
    jnpr.junos.op
+   jnpr.junos.resources
    jnpr.junos.utils
 
 

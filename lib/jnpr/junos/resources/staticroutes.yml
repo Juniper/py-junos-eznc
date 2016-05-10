@@ -1,0 +1,14 @@
+---
+### ------------------------------------------------------
+### Table-view to configure Static routes.
+### ------------------------------------------------------
+StaticRouteTable:
+  set: routing-options/static/route
+  key-field:
+    - route_name
+  view: StaticRouteView
+
+StaticRouteView:
+  fields:
+    route_name: name
+    hop: next-hop

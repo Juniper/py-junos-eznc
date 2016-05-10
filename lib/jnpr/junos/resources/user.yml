@@ -1,0 +1,18 @@
+---
+### ------------------------------------------------------
+### Table-view to configure login user.
+### ------------------------------------------------------
+UserTable:
+  set: system/login/user
+  key-field: user
+  view: userView
+
+userView:
+  groups:
+    auth: authentication
+  fields:
+    user: name
+    uid: { uid : { 'type' : 'int', 'minValue' : 100, 'maxValue' : 64000 } }
+    class_name: { class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+  fields_auth:
+    password: encrypted-password

@@ -134,6 +134,8 @@ strip_comments_transform = etree.XSLT(strip_xslt_root)
 
 def remove_namespaces(xml):
     for elem in xml.getiterator():
+        if elem.tag is etree.Comment:
+            continue
         i = elem.tag.find('}')
         if i > 0:
             elem.tag = elem.tag[i + 1:]
@@ -169,6 +171,6 @@ def cscript_conf(reply):
         device_params = {'name': 'junos'}
         device_handler = manager.make_device_handler(device_params)
         transform_reply = device_handler.transform_reply()
-        return NCElement(etree.tostring(reply), transform_reply)._NCElement__doc
+        return NCElement(reply, transform_reply)._NCElement__doc
     except:
         return None

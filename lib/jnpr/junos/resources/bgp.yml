@@ -1,0 +1,19 @@
+---
+### ------------------------------------------------------
+### Table-view to configure BGP.
+### ------------------------------------------------------
+BgpTable:
+  set: protocols/bgp/group
+  key-field:
+    - bgp_name
+  view: BgpView
+BgpView:
+  groups:
+    neigh : neighbor
+  fields:
+    bgp_name   : { 'name' : { 'type' : 'str', 'minValue' : 1, 'maxValue' : 255} }
+    bgp_type   : {'type' : {'type': { 'enum': ['external', 'internal'] } } }
+    local_addr : local-address
+    peer       : { 'peer-as' : { 'type' : 'int' } }
+  fields_neigh:
+    neigh_addr : name

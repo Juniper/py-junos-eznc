@@ -2,6 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
+import sys
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
@@ -9,16 +10,35 @@ from jnpr.junos.utils.config import Config
 from jnpr.junos.exception import RpcError, LockError,\
     UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
 
+import ncclient
+from ncclient.manager import Manager, make_device_handler
+from ncclient.transport import SSHSession
+from ncclient.operations import RPCError, RPCReply
+
 from mock import MagicMock, patch
 from lxml import etree
+import os
 
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
 
-    def setUp(self):
-        self.dev = Device(host='1.1.1.1')
+    @patch('ncclient.manager.connect')
+    def setUp(self, mock_connect):
+        mock_connect.side_effect = self._mock_manager
+
+        self.dev = Device(host='1.1.1.1', user='test', password='test123',
+                          gather_facts=False)
+        self.dev.open()
         self.conf = Config(self.dev)
+
+    @patch('ncclient.operations.session.CloseSession.request')
+    def tearDown(self, mock_session):
+        self.dev.close()
 
     def test_config_constructor(self):
         self.assertTrue(isinstance(self.conf._dev, Device))
@@ -74,7 +94,12 @@ class TestConfig(unittest.TestCase):
     def test_config_commit_combination(self):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.rpc.commit_configuration.return_value = '<moredetail/>'
-        self.assertEqual('<moredetail/>', self.conf.commit(detail=True, force_sync=True, full=True))
+        self.assertEqual(
+            '<moredetail/>',
+            self.conf.commit(
+                detail=True,
+                force_sync=True,
+                full=True))
         self.conf.rpc.commit_configuration\
             .assert_called_with({'detail': 'detail'},
                                 **{'synchronize': True, 'full': True, 'force-synchronize': True})
@@ -173,7 +198,29 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.load(xmldata, format='xml'),
                          'rpc_contents')
 
-    @patch('__builtin__.open')
+    def test_config_load_len_with_format_text(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value='rpc_contents')
+        textdata = """policy-options {
+    prefix-list TEST1-NETS {
+        100.0.0.0/24;
+    }
+    policy-statement TEST1-NETS {
+        term TEST1 {
+            from {
+                prefix-list TEST1-NETS;
+            }
+            then accept;
+        }
+        term REJECT {
+            then reject;
+        }
+    }
+}"""
+
+        self.assertEqual(self.conf.load(textdata), 'rpc_contents')
+
+    @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
             MagicMock(return_value='rpc_contents')
@@ -185,7 +232,7 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(ValueError, self.conf.load,
                           'test.xml', format='set', overwrite=True)
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     @patch('jnpr.junos.utils.config.etree.XML')
     def test_config_load_path_xml(self, mock_etree, mock_open):
         self.conf.dev.Template = MagicMock()
@@ -194,21 +241,21 @@ class TestConfig(unittest.TestCase):
             MagicMock(return_value=mock_etree.return_value)
         self.assertEqual(self.conf.load(path='test.xml'), 'rpc_contents')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_path_text(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path='test.conf')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'text')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_path_set(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path='test.set')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_config_load_try_load_rpcerror(self, mock_open):
         ex = ConfigLoadError(
             rsp=etree.fromstring((
@@ -221,7 +268,13 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(ConfigLoadError, self.conf.load, path='config.conf')
 
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
+    def test_config_load_try_load_rpctimeouterror(self, mock_open):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.load_config = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.load, path='config.conf')
+
+    @patch(builtin_string + '.open')
     def test_config_try_load_exception(self, mock_open):
         class OtherException(Exception):
             pass
@@ -380,7 +433,7 @@ class TestConfig(unittest.TestCase):
 
     def test_config_load_lset_from_rexp_error(self):
         self.conf.rpc.load_config = MagicMock()
-        conf = """nitin>"""
+        conf = """test>"""
         self.assertRaises(RuntimeError, self.conf.load, conf)
 
     def test_load_merge_true(self):
@@ -399,3 +452,136 @@ class TestConfig(unittest.TestCase):
         ex = RpcTimeoutError(self.dev, None, 10)
         self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
         self.assertRaises(RpcTimeoutError, self.conf.commit)
+
+    def test_commit_check_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.dev.rpc.commit_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.commit_check)
+
+    def test_commit_configuration_multi_rpc_error(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        try:
+            self.dev.rpc.commit_configuration()
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, RpcError))
+            if ncclient.__version__ > (0, 4, 5):
+                self.assertEqual(ex.message,
+                                 "error: interface-range 'axp' is not defined\n"
+                                 "error: interface-ranges expansion failed")
+                self.assertEqual(ex.errs, [{'source': None, 'message':
+                                            "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
+                                            'error', 'edit_path': None}, {'source': None, 'message':
+                                                                          'interface-ranges expansion failed', 'bad_element': None,
+                                                                          'severity': 'error', 'edit_path': None}])
+            else:
+                self.assertEqual(ex.message,
+                                 "interface-range 'axp' is not defined")
+
+    @patch('jnpr.junos.utils.config.Config.lock')
+    @patch('jnpr.junos.utils.config.Config.unlock')
+    def test_config_mode_exclusive(self, mock_unlock, mock_lock):
+        with Config(self.dev, mode='exclusive') as conf:
+            conf.rpc.load_config = MagicMock()
+            conf.load('conf', format='set')
+        self.assertTrue(mock_lock.called and mock_unlock.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_batch(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='batch') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(batch=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_private(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='private') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(private=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_dynamic(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='dynamic') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(dynamic=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_close_configuration_ex(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        ex = RpcError(rsp='ok')
+        ex.message = 'Configuration database is not open'
+        self.dev.rpc.close_configuration = MagicMock(side_effect=ex)
+        try:
+            with Config(self.dev, mode='batch') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, RpcError))
+        self.assertTrue(self.dev.rpc.close_configuration.called)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_undefined(self, mock_exec):
+        try:
+            with Config(self.dev, mode='unknown') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertTrue(isinstance(ex, ValueError))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_batch_open_configuration_ex(self, mock_exec):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>syntax error</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        obj = RpcError(rsp=rsp)
+        self.dev.rpc.open_configuration = MagicMock(side_effect=obj)
+        with Config(self.dev, mode='batch') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(batch=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_private_open_configuration_ex(self, mock_exec):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>syntax error</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        obj = RpcError(rsp=rsp)
+        self.dev.rpc.open_configuration = MagicMock(side_effect=obj)
+        with Config(self.dev, mode='private') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(private=True)
+
+    def _read_file(self, fname):
+        from ncclient.xml_ import NCElement
+
+        fpath = os.path.join(os.path.dirname(__file__),
+                             'rpc-reply', fname)
+        foo = open(fpath).read()
+
+        # specific to multi rpc error
+        if fname == 'commit-configuration.xml':
+            raw = etree.XML(foo)
+            obj = RPCReply(raw)
+            obj.parse()
+            if ncclient.__version__ > (0, 4, 5):
+                raise RPCError(etree.XML(foo), errs=obj._errors)
+            else:
+                raise RPCError(etree.XML(foo))
+
+    def _mock_manager(self, *args, **kwargs):
+        if kwargs:
+            device_params = kwargs['device_params']
+            device_handler = make_device_handler(device_params)
+            session = SSHSession(device_handler)
+            return Manager(session, device_handler)
+
+        elif args:
+            return self._read_file(args[0].tag + '.xml')

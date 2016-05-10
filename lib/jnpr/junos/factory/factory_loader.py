@@ -84,7 +84,7 @@ class FactoryLoader(object):
         # however, as this framework expands in capability, this
         # will be enhaced, yo!
 
-        xpath, opt = f_dict.items()[0]       # get first/only key,value
+        xpath, opt = list(f_dict.items())[0]       # get first/only key,value
 
         if opt == 'group':
             fields.group(f_name, xpath)
@@ -95,6 +95,10 @@ class FactoryLoader(object):
 
         # first check to see if the option is a built-in Python
         # type, most commonly would be 'int' for numbers, like counters
+        if isinstance(opt, dict):
+            kvargs.update(opt)
+            fields.str(f_name, xpath, **kvargs)
+            return
 
         astype = __builtins__.get(opt) or globals().get(opt)
         if astype is not None:
@@ -255,6 +259,8 @@ class FactoryLoader(object):
                 self._item_optables.append(k)
             elif 'get' in v:
                 self._item_cfgtables.append(k)
+            elif 'set' in v:
+                self._item_cfgtables.append(k)
             elif 'view' in v:
                 self._item_tables.append(k)
             else:
@@ -268,9 +274,9 @@ class FactoryLoader(object):
         self._catalog_dict = catalog_dict
         self._sortitems()
 
-        map(self._build_optable, self._item_optables)
-        map(self._build_cfgtable, self._item_cfgtables)
-        map(self._build_table, self._item_tables)
-        map(self._build_view, self._item_views)
+        list(map(self._build_optable, self._item_optables))
+        list(map(self._build_cfgtable, self._item_cfgtables))
+        list(map(self._build_table, self._item_tables))
+        list(map(self._build_view, self._item_views))
 
         return self.catalog

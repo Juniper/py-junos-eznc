@@ -20,6 +20,16 @@ class TestVersionInfo(unittest.TestCase):
     def test_version_info_after_type_len_else(self):
         self.assertEqual(version_info('12.1X46-D10').build, None)
 
+    def test_version_info_X_type_non_hyphenated(self):
+        self.assertItemsEqual(
+            version_info('11.4X12.2'),
+            [('build', 2), ('major', (11, 4)), ('minor', '12'), ('type', 'X')])
+
+    def test_version_info_X_type_non_hyphenated_nobuild(self):
+        self.assertItemsEqual(
+            version_info('11.4X12'),
+            [('build', None), ('major', (11, 4)), ('minor', '12'), ('type', 'X')])
+
     def test_version_info_constructor_else_exception(self):
         self.assertEqual(version_info('11.4R7').build, '7')
 
@@ -48,9 +58,8 @@ class TestVersionInfo(unittest.TestCase):
 
     def test_version_to_json(self):
         import json
-        self.assertEqual(
-            json.dumps(version_info('11.4R7.5')),
-            '{"major": [11, 4], "type": "R", "build": 5, "minor": "7"}')
+        self.assertEqual(eval(json.dumps(version_info('11.4R7.5'))), 
+                    {"major": [11, 4], "type": "R", "build": 5, "minor": "7"})
 
     def test_version_to_yaml(self):
         import yaml
@@ -62,6 +71,11 @@ class TestVersionInfo(unittest.TestCase):
         self.assertItemsEqual(
             version_info('11.4R7.5'),
             [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
+
+    def test_version_feature_velocity(self):
+        self.assertItemsEqual(
+            version_info('15.4F7.5'),
+            [('build', 5), ('major', (15, 4)), ('minor', '7'), ('type', 'F')])
 
 
 @attr('unit')
