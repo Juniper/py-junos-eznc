@@ -18,13 +18,11 @@ class Fact(object):
         self.swinfo = rsp  # keep this since we may want it later
         # extract the version
         # First try the <junos-version> tag present in >= 15.1
-
         swinfo= rsp.findtext('junos-version', default=None)
         if not swinfo:
             # For < 15.1, get version from the "junos" package.
             pkginfo = rsp.xpath(
-                './/package-information[normalize-space(name)="junos"]/comment'
-            )[0].text
+                './/package-information[normalize-space(name)="junos"]/comment')[0].text
             try:
                 swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
             except:

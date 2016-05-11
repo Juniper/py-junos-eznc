@@ -188,22 +188,6 @@ class tty_netconf(object):
         except:
             return etree.XML('<error-in-receive/>')
 
-    ######### Added to remove hexadecimal and other unwanted values, to strip reply ######
-    ## rpc reply: ['\x07\x07<rpc-reply >', '<load-configuration-results>', '\x07\x07\x07<ok/>'.....]
-    ### it will be converted to ['<rpc-reply >', '<load-configuration-results>', '<ok/>',.......]
-    ######
-    def xml_strip(self, val):
-        """
-        Function to strip unwanted values
-        :param val:
-        :return: values containing stripped values
-        """
-        obj = re.search(r'<.*?>',val)
-        if obj:
-            return obj.group()
-
-
-
     # -------------------------------------------------------------------------
     # LOW-LEVEL I/O for reading back XML response
     # -------------------------------------------------------------------------
@@ -224,7 +208,6 @@ class tty_netconf(object):
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
-        rxbuf = map(self.xml_strip, rxbuf)
         try:
             as_xml = etree.XML(''.join(rxbuf))
             return as_xml
