@@ -1,0 +1,12 @@
+---
+### ------------------------------------------------------
+### Table-view to configure Autonomous system.
+### ------------------------------------------------------
+AutoSysTable:
+  set: routing-options/autonomous-system
+  key-field:
+    - as_num
+  view: AutoSysView
+AutoSysView:
+  fields:
+    as_num: as-number

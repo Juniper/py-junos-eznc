@@ -3,7 +3,7 @@ from select import select
 import re
 
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '% '
+_SHELL_PROMPT = '(%|#) '
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -35,8 +35,8 @@ class StartShell(object):
 
         :param str this: expected string/pattern.
 
-        :returns: resulting string of data
-        :rtype: str
+        :returns: resulting string of data in a list
+        :rtype: list
 
         .. warning:: need to add a timeout safeguard
         """
@@ -82,8 +82,8 @@ class StartShell(object):
         self._client = client
         self._chan = chan
 
-        got = self.wait_for('(%|>)')
-        if not got[-1].endswith(_SHELL_PROMPT):
+        got = self.wait_for(r'(%|>|#)')
+        if got[-1].endswith(_JUNOS_PROMPT):
             self.send('start shell')
             self.wait_for(_SHELL_PROMPT)
 
@@ -116,7 +116,7 @@ class StartShell(object):
         rc = ''.join(self.wait_for(this))
         self.last_ok = True if rc.find('0') > 0 else False
 
-        return (self.last_ok,got)
+        return (self.last_ok, got)
 
     # -------------------------------------------------------------------------
     # CONTEXT MANAGER
