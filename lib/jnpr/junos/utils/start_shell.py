@@ -46,6 +46,8 @@ class StartShell(object):
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
                 data = chan.recv(_RECVSZ)
+                if isinstance(data, bytes):
+                    data = data.decode('utf-8')
                 got.append(data)
                 if re.search(r'{0}\s?$'.format(this), data):
                     break
