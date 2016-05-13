@@ -106,11 +106,13 @@ class Terminal(object):
         self.notify('TTY', 'logging in ...')
 
         self.state = self._ST_INIT
+        print "\n ********** Entering login state machine \n"
         self._login_state_machine()
 
         # now start NETCONF XML
         self.notify('TTY', ' OK ... starting NETCONF')
         self.nc.open(at_shell=self.at_shell)
+        print "\n ***** inside nc.open ****"
         return True
 
     def logout(self):
@@ -119,6 +121,7 @@ class Terminal(object):
         """
         self.notify('logout', 'logging out ...')
         self.nc.close()
+        print "\n Entering logout state machine ********\n"
         self._logout_state_machine()
         return True
 

@@ -71,11 +71,14 @@ class Telnet(Terminal):
 
     def read(self):
         """ read a single line """
+        print "\n **** read line *****"
         return self._tn.read_until('\n', self.EXPECT_TIMEOUT)
 
     def read_prompt(self):
         got = self._tn.expect(Terminal._RE_PAT, self.EXPECT_TIMEOUT)
+        print "\n ***** got is:",got
         sre = got[1]
+        print "\n ***** sre is:", sre
 
         if 'in use' in got[2]:
             raise RuntimeError("open_fail: port already in use")

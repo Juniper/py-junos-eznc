@@ -38,6 +38,28 @@ class tty_netconf(object):
 
     def open(self, at_shell):
         """ start the XML API process and receive the 'hello' message """
+        nc_cmd = ('junoscript', 'xml-mode')[at_shell]
+        self._tty.write(nc_cmd + ' netconf need-trailer')
+        mark_start = datetime.now()
+        mark_end = mark_start + timedelta(seconds=15)
+        #pdb.set_trace()
+
+        while datetime.now() < mark_end:
+            time.sleep(0.1)
+            line = self._tty.read()
+            if cmdo.verbose == 2:
+                print(line)  #enable to see received NETCONF xml
+            if line.startswith("<!--"):
+                break
+        else:
+            # exceeded the while loop timeout
+            raise RuntimeError("Netconify Error: netconf not responding")
+
+        self.hello = self._receive()
+
+    """
+    def open(self, at_shell):
+        # start the XML API process and receive the 'hello' message 
 
         nc_cmd = ('junoscript', 'xml-mode')[at_shell]
         self._tty.write(nc_cmd + ' netconf need-trailer')
@@ -49,6 +71,7 @@ class tty_netconf(object):
                 break
 
         self.hello = self._receive()
+    """
 
     def close(self, force=False):
         """ issue the XML API to close the session """
@@ -75,7 +98,9 @@ class tty_netconf(object):
         cmd = E('load-configuration', dict(format='text', action=action),
                 E('configuration-text', content)
                 )
+        print "\n cmd: ", cmd
         rsp = self.rpc(etree.tostring(cmd))
+        print "\n rsp is: ", rsp
         return rsp if rsp.findtext('.//ok') is None else True
 
     def commit_check(self):
@@ -183,6 +208,7 @@ class tty_netconf(object):
             cmd = '<{0}/>'.format(cmd)
         self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
         rsp = self._receive()
+        print "\n ***** reply received:",rsp
         try:
             return rsp[0]  # return first child after the <rpc-reply>
         except:
@@ -195,8 +221,11 @@ class tty_netconf(object):
     def _receive(self):
         """ process the XML response into an XML object """
         rxbuf = []
-        while True:
-            line = self._tty.read().strip()
+        mark_start = datetime.now()
+        mark_end = mark_start + timedelta(seconds=30)
+        while datetime.now() < mark_end:
+            time.sleep(0.1)
+            line = self._tty.read().strip().replace('\x07','')
             if cmdo.verbose == 2:
                 print(line)  # enable to see received xml messages
             if not line:
@@ -208,6 +237,7 @@ class tty_netconf(object):
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
+        print "\n ******** rxbuf: ",rxbuf
         try:
             as_xml = etree.XML(''.join(rxbuf))
             return as_xml

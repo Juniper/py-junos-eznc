@@ -192,6 +192,8 @@ class netconifyCmdo(object):
         tty_args['attempts'] = int(self.attempts)
 
         if self.mode == 'telnet':
+            import pdb
+            pdb.set_trace()
             tty_args['host'] = self.host
             tty_args['port'] = self.port
             self.console = ('telnet', self.host, self.port)
@@ -325,13 +327,16 @@ class netconifyCmdo(object):
 
     def _push_config(self):
         """ push the configuration or rollback changes on error """
-
+        #import pdb
+        #pdb.set_trace()
         self._notify('conf', 'loading into device ...')
         content = open(self.junos_conf_file, 'r').read()
         load_args = dict(content=content)
         if self.junos_merge_conf is True:
             load_args['action'] = 'replace'  # merge/replace; yeah, I know ...
         rc = self._tty.nc.load(**load_args)
+        print "\n ***** load_args:",load_args
+        print "\n ***** rc is:",rc
         if rc is not True:
             self.results['failed'] = True
             self.results['errmsg'] = 'failure to load configuration, aborting.'
@@ -348,6 +353,7 @@ class netconifyCmdo(object):
             self._notify('conf_save_err', self.results['errmsg'])
             self._tty.nc.rollback()
             return
+        print "\n ****** rc:",rc
         self._notify('conf', 'commit completed.')
         self.results['changed'] = True
         return
