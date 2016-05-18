@@ -3,7 +3,7 @@ from select import select
 import re
 
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#) '
+_SHELL_PROMPT = '(%|#)\s'
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
