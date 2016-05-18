@@ -3,7 +3,7 @@ from select import select
 import re
 
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#) '
+_SHELL_PROMPT = '(%|#)\s'
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -46,6 +46,8 @@ class StartShell(object):
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
                 data = chan.recv(_RECVSZ)
+                if isinstance(data, bytes):
+                    data = data.decode('utf-8')
                 got.append(data)
                 if re.search(r'{0}\s?$'.format(this), data):
                     break
