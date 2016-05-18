@@ -496,7 +496,7 @@ class Device(object):
         self.connected = True
 
         self._nc_transform = self.transform
-        self._norm_transform = lambda: JXML.normalize_xslt
+        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
         normalize = kvargs.get('normalize', self._normalize)
         if normalize is True:
