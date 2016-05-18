@@ -29,7 +29,7 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_open_with_junos_term(self, mock_wait, mock_connect):
         mock_wait.return_value = ["user > "]
         self.shell.open()
-        mock_wait.assert_called_with('(%|#) ')
+        mock_wait.assert_called_with('(%|#)\s')
 
     @patch('paramiko.SSHClient')
     def test_startshell_close(self, mock_connect):
