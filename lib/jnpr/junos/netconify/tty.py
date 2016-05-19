@@ -38,6 +38,8 @@ class Terminal(object):
     _ST_DONE = 4
     _ST_BAD_PASSWD = 5
     _ST_TTY_NOLOGIN = 6
+    _ST_TTY_OPTION = 7
+    _ST_TTY_HOTKEY = 8 
 
     _re_pat_login = '(?P<login>ogin:\s*$)'
 
@@ -47,7 +49,9 @@ class Terminal(object):
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
         '(?P<shell>%|#\s*$)',
-        '(?P<cli>[^\\-"]>\s*$)'
+        '(?P<cli>[^\\-"]>\s*$)',
+        '(?P<option>Enter your option:\s*$)',
+        '(?P<hotkey>connection: <CTRL>Z)',
     ]
 
     # -----------------------------------------------------------------------
@@ -106,13 +110,11 @@ class Terminal(object):
         self.notify('TTY', 'logging in ...')
 
         self.state = self._ST_INIT
-        print "\n ********** Entering login state machine \n"
         self._login_state_machine()
 
         # now start NETCONF XML
         self.notify('TTY', ' OK ... starting NETCONF')
         self.nc.open(at_shell=self.at_shell)
-        print "\n ***** inside nc.open ****"
         return True
 
     def logout(self):
@@ -121,7 +123,6 @@ class Terminal(object):
         """
         self.notify('logout', 'logging out ...')
         self.nc.close()
-        print "\n Entering logout state machine ********\n"
         self._logout_state_machine()
         return True
 
@@ -244,13 +245,24 @@ class Terminal(object):
             self.at_shell = False
             self.state = self._ST_DONE
 
+        def _ev_option():
+            self.state = self._ST_TTY_OPTION
+            self.write("1")
+
+
+        def _ev_hot_key():
+            self.state = self._ST_TTY_HOTKEY
+            self.write("\n")
+
         _ev_tbl = {
             'loader': _ev_loader,
             'login': _ev_login,
             'passwd': _ev_passwd,
             'badpasswd': _ev_bad_passwd,
             'shell': _ev_shell,
-            'cli': _ev_cli
+            'cli': _ev_cli,
+            'option': _ev_option,
+            'hotkey': _ev_hot_key
         }
 
         _ev_tbl.get(found, _ev_tty_nologin)()

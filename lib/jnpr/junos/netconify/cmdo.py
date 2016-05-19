@@ -99,7 +99,6 @@ class netconifyCmdo(object):
         #     self.results['failed'] = True
         #     self.results['errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
         #     return self.results
-
         global verbose
         debug = self.verbose
         if debug == 1:  # DEBUG LOGIN LEVEL
@@ -192,8 +191,6 @@ class netconifyCmdo(object):
         tty_args['attempts'] = int(self.attempts)
 
         if self.mode == 'telnet':
-            import pdb
-            pdb.set_trace()
             tty_args['host'] = self.host
             tty_args['port'] = self.port
             self.console = ('telnet', self.host, self.port)
@@ -335,8 +332,6 @@ class netconifyCmdo(object):
         if self.junos_merge_conf is True:
             load_args['action'] = 'replace'  # merge/replace; yeah, I know ...
         rc = self._tty.nc.load(**load_args)
-        print "\n ***** load_args:",load_args
-        print "\n ***** rc is:",rc
         if rc is not True:
             self.results['failed'] = True
             self.results['errmsg'] = 'failure to load configuration, aborting.'
@@ -353,7 +348,6 @@ class netconifyCmdo(object):
             self._notify('conf_save_err', self.results['errmsg'])
             self._tty.nc.rollback()
             return
-        print "\n ****** rc:",rc
         self._notify('conf', 'commit completed.')
         self.results['changed'] = True
         return

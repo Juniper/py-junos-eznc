@@ -98,9 +98,7 @@ class tty_netconf(object):
         cmd = E('load-configuration', dict(format='text', action=action),
                 E('configuration-text', content)
                 )
-        print "\n cmd: ", cmd
         rsp = self.rpc(etree.tostring(cmd))
-        print "\n rsp is: ", rsp
         return rsp if rsp.findtext('.//ok') is None else True
 
     def commit_check(self):
@@ -208,7 +206,6 @@ class tty_netconf(object):
             cmd = '<{0}/>'.format(cmd)
         self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
         rsp = self._receive()
-        print "\n ***** reply received:",rsp
         try:
             return rsp[0]  # return first child after the <rpc-reply>
         except:
@@ -237,7 +234,6 @@ class tty_netconf(object):
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
-        print "\n ******** rxbuf: ",rxbuf
         try:
             as_xml = etree.XML(''.join(rxbuf))
             return as_xml
