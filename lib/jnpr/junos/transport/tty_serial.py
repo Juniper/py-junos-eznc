@@ -3,7 +3,7 @@ import re
 from time import sleep
 from datetime import datetime, timedelta
 
-from jnpr.junos.netconify.tty import Terminal
+from jnpr.junos.transport.tty import Terminal
 
 # -------------------------------------------------------------------------
 # Terminal connection over SERIAL CONSOLE

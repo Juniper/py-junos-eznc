@@ -1,7 +1,7 @@
 from time import sleep
 import telnetlib
 
-from jnpr.junos.netconify.tty import Terminal
+from jnpr.junos.transport.tty import Terminal
 
 # -------------------------------------------------------------------------
 # Terminal connection over TELNET CONSOLE
@@ -75,10 +75,6 @@ class Telnet(Terminal):
 
     def read_prompt(self):
         got = self._tn.expect(Terminal._RE_PAT, self.EXPECT_TIMEOUT)
-        sre = got[1]
-        print "\n got is:", got
-        print "\n prompt, got[1] is:", got[2]
-        print "\n found, got[2] is:",got[1]
         if 'in use' in got[2]:
             raise RuntimeError("open_fail: port already in use")
 

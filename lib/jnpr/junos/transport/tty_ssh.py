@@ -3,7 +3,7 @@ import paramiko
 import re
 import logging
 from time import sleep
-from jnpr.junos.netconify.tty import Terminal
+from jnpr.junos.transport.tty import Terminal
 from datetime import datetime, timedelta
 
 _PROMPT = re.compile('|'.join(Terminal._RE_PAT))

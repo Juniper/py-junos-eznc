@@ -1,8 +1,6 @@
 from time import sleep
-from datetime import datetime, timedelta
-from jnpr.junos.netconify import cmdo
 
-from jnpr.junos.netconify.tty_netconf import tty_netconf
+from jnpr.junos.transport.tty_netconf import tty_netconf
 
 __all__ = ['Terminal']
 
@@ -175,12 +173,6 @@ class Terminal(object):
             raise RuntimeError('login_sm_failure')
 
         prompt, found = self.read_prompt()
-
-        if cmdo.verbose == 1:
-            self.notify('\nDEBUG:current state', "{0}".format(self.state))
-            self.notify('DEBUG:login', "IN:{0}:`{1}`".format(found, prompt))
-            self.notify('DEBUG:password', "{0}".format(self.passwd))
-            self.notify('DEBUG:attempt', "{0}".format(attempt))
 
         def _ev_loader():
             self.state = self._ST_LOADER

@@ -1,12 +1,9 @@
 import re
 import time
-from jnpr.junos.netconify import cmdo
 from lxml import etree
 from lxml.builder import E
 from datetime import datetime, timedelta
-
-
-from jnpr.junos.netconify.fact import Fact
+from jnpr.junos.transport.fact import Fact
 
 __all__ = ['xmlmode_netconf']
 
@@ -47,8 +44,6 @@ class tty_netconf(object):
         while datetime.now() < mark_end:
             time.sleep(0.1)
             line = self._tty.read()
-            if cmdo.verbose == 2:
-                print(line)  #enable to see received NETCONF xml
             if line.startswith("<!--"):
                 break
         else:
@@ -223,8 +218,6 @@ class tty_netconf(object):
         while datetime.now() < mark_end:
             time.sleep(0.1)
             line = self._tty.read().strip().replace('\x07','')
-            if cmdo.verbose == 2:
-                print(line)  # enable to see received xml messages
             if not line:
                 continue  # if we got nothin, go again
             if _NETCONF_EOM == line:
