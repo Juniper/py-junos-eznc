@@ -27,6 +27,7 @@ class Serial(Terminal):
 
         self.port = port
         self._ser = serial.Serial()
+        self._rx = self._ser
         self._ser.port = port
         self._ser.timeout = kvargs.get('timeout', self.TIMEOUT)
 

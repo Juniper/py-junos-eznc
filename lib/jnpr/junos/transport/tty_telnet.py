@@ -28,6 +28,7 @@ class Telnet(Terminal):
         # initialize the underlying TTY device
 
         self._tn = telnetlib.Telnet()
+        self._rx = self._tn
         self.host = host
         self.port = port
         self.timeout = kvargs.get('timeout', self.TIMEOUT)

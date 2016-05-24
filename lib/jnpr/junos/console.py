@@ -17,6 +17,7 @@ import traceback
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_ssh import SecureShell
 from jnpr.junos.transport.tty_serial import Serial
+from jnpr.junos.rpcmeta import _RpcMetaExec
 
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
@@ -94,7 +95,7 @@ class NOOBDevice(object):
         """ read-only property """
         raise RuntimeError("facts is read-only!")
 
-    def __init__(self, **kvargs):
+    def __init__(self, *args, **kvargs):
         """
         NoobDevice object constructor.
 
@@ -139,6 +140,7 @@ class NOOBDevice(object):
         self._timeout = kvargs.get('timeout', '0.5')
         self._attempts = kvargs.get('attempts', 10)
         self.gather_facts = kvargs.get('gather_facts', False)
+        self.rpc = _RpcMetaExec(self)
 
     def open(self):
         """
@@ -189,6 +191,11 @@ class NOOBDevice(object):
                 self._hook_exception('close', err)
                 traceback.print_exc()
             self.connected = False
+
+    # execute rpc calls
+    def execute(self, rpc_cmd, **kwargs):
+        return self._tty.nc.rpc(etree.tounicode(rpc_cmd))
+
 
     # -------------------------------------------------------------------------
     # Handlers

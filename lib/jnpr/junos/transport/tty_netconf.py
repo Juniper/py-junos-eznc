@@ -1,6 +1,8 @@
 import re
 import time
 from lxml import etree
+import select
+import socket
 from lxml.builder import E
 from datetime import datetime, timedelta
 from jnpr.junos.transport.fact import Fact
@@ -212,23 +214,44 @@ class tty_netconf(object):
 
     def _receive(self):
         """ process the XML response into an XML object """
-        rxbuf = []
-        mark_start = datetime.now()
-        mark_end = mark_start + timedelta(seconds=30)
+        rxbuf = ''
+        while True:
+            try:
+                rd, wt, err = select.select([self._tty._rx], [], [], 0.1)
+            except select.error as err:
+                raise err
+            except socket.error as err:
+                raise err
+            if rd:
+                line = rd[0].read_until(']]>]]>', 0.1)
+                if not line:
+                    continue
+                if _NETCONF_EOM in line:
+                    rxbuf = rxbuf+line
+                    break
+                else:
+                    rxbuf = rxbuf+line
+        rxbuf = rxbuf.splitlines()
+        if _NETCONF_EOM in rxbuf[-1]:
+            rxbuf.pop()
+
+        """
         while datetime.now() < mark_end:
+            now = datetime.now()
             time.sleep(0.1)
             line = self._tty.read().strip().replace('\x07','')
             if not line:
                 continue  # if we got nothin, go again
-            if _NETCONF_EOM == line:
+            if _NETCONF_EOM in line:
                 break  # check for end-of-message
             rxbuf.append(line)
+        """
 
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
         try:
-            as_xml = etree.XML(''.join(rxbuf))
+            as_xml = etree.XML('\n'.join(rxbuf))
             return as_xml
         except:
             if '</xnm:error>' in rxbuf:

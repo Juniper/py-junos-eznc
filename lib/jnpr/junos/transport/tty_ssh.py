@@ -20,6 +20,7 @@ class SecureShell(Terminal):
         Utility Constructor
         """
         self._ssh = paramiko.SSHClient()
+        self._rx = self._ssh
         self._ssh.load_system_host_keys()
         self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._logger = logging.getLogger('paramiko.transport')
