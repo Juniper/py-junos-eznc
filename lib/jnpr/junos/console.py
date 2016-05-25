@@ -527,7 +527,6 @@ class Console(object):
         got = rpc(cmd)
         return True
 
-
     # -----------------------------------------------------------------------
     # Context Manager
     # -----------------------------------------------------------------------
@@ -536,7 +535,6 @@ class Console(object):
         self.open()
         return self
 
-
-    def __exit__(self):
-        if self.connected:
-            self.close()
+    def __exit__(self, exc_type, exc_val, exc_tb):
+            if self.connected:
+                self.close()
