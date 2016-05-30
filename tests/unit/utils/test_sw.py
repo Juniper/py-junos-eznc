@@ -339,7 +339,6 @@ class TestSW(unittest.TestCase):
         '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
         '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
         '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
-        print ('nitsss', etree.tostring(mock_execute.call_args[0][0]).decode('utf-8)'))
         self.assertTrue((etree.tostring(mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
 
     @patch('jnpr.junos.Device.execute')
