@@ -29,7 +29,7 @@ There is a growing interest and need to automate the network infrastructure into
 
 For questions and general support, please visit our [Google Group](https://groups.google.com/forum/#!forum/junos-python-ez)
 
-For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
 Issues and bugs can be opened in the repository.
 
