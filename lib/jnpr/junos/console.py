@@ -169,7 +169,7 @@ class Console(object):
         return self
 
 
-    def close(self, skip_logout = True):
+    def close(self, skip_logout = False):
         """
         Closes the connection to the device.
         """
