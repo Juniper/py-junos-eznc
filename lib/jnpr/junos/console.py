@@ -14,6 +14,7 @@ from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.device import Device
+from jnpr.junos.facts import *
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
@@ -319,8 +320,10 @@ class Console(object):
 
     def _gather_facts(self):
         self._notify('facts', 'retrieving device facts...')
-        self._tty.nc.facts.gather()
-        self._facts = self._tty.nc.facts.items
+        #self._tty.nc.facts.gather()
+        for gather in FACT_LIST:
+            gather(self, self._facts)
+        #self._facts = self._tty.nc.facts.items
         self.results['facts'] = self._facts
         self._save_name = self._hostname or self._facts[
             'hostname'] or '_'.join(self.console)
