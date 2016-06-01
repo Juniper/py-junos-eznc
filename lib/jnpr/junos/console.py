@@ -13,7 +13,8 @@ from jnpr.junos.transport.tty_ssh import SecureShell
 from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-
+from jnpr.junos.device import Device
+from jnpr.junos.facts import *
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
@@ -21,6 +22,55 @@ QFX_MODE_SWITCH = 'SWITCH'
 
 
 class Console(object):
+
+    def __init__(self, *args, **kvargs):
+        """
+        NoobDevice object constructor.
+
+        :param str host:
+            **REQUIRED** host-name or ipaddress of target device
+
+        :param str user:
+            *OPTIONAL* login user-name, uses $USER if not provided
+
+        :param str passwd:
+            *OPTIONAL* if not provided, assumed ssh-keys are enforced
+
+        :param int port:
+            *OPTIONAL*  port
+
+        :param bool gather_facts:
+            *OPTIONAL* default is ``True``.  If ``False`` then the
+            facts are not gathered on call to :meth:`open`
+
+        """
+
+        # ----------------------------------------
+        # setup instance connection/open variables
+        # ----------------------------------------
+
+        self._tty = None
+        self._facts = {}
+        self.connected = False
+        self._skip_logout = False
+        self.on_notify = kvargs.get('notify', None)
+        self.results = dict(changed=False, failed=False, errmsg=None)
+
+        self._hostname = kvargs.get('host')
+        if self._hostname is None:
+            raise ValueError("You must provide the 'host' value")
+
+        self._auth_user = kvargs.get('user', 'root')
+        self._auth_password = kvargs.get('password') or kvargs.get('passwd')
+        self._port = kvargs.get('port', '/dev/ttyUSB0')
+        self._baud = kvargs.get('baud', '9600')
+        self._mode = kvargs.get('mode', 'telnet')
+        self._timeout = kvargs.get('timeout', '0.5')
+        self._attempts = kvargs.get('attempts', 10)
+        self.gather_facts = kvargs.get('gather_facts', False)
+        self.rpc = _RpcMetaExec(self)
+        self.cli = lambda cmd, format='text', warning=True: \
+            Device.cli.im_func(self, cmd, format, warning)
 
     # ------------------------------------------------------------------------
     # property: hostname
@@ -90,53 +140,6 @@ class Console(object):
         """ read-only property """
         raise RuntimeError("facts is read-only!")
 
-    def __init__(self, *args, **kvargs):
-        """
-        NoobDevice object constructor.
-
-        :param str host:
-            **REQUIRED** host-name or ipaddress of target device
-
-        :param str user:
-            *OPTIONAL* login user-name, uses $USER if not provided
-
-        :param str passwd:
-            *OPTIONAL* if not provided, assumed ssh-keys are enforced
-
-        :param int port:
-            *OPTIONAL*  port
-
-        :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
-            facts are not gathered on call to :meth:`open`
-
-        """
-
-        # ----------------------------------------
-        # setup instance connection/open variables
-        # ----------------------------------------
-
-        self._tty = None
-        self._facts = {}
-        self.connected = False
-        self._skip_logout = False
-        self.on_notify = kvargs.get('notify', None)
-        self.results = dict(changed=False, failed=False, errmsg=None)
-
-        self._hostname = kvargs.get('host')
-        if self._hostname is None:
-            raise ValueError("You must provide the 'host' value")
-
-        self._auth_user = kvargs.get('user', 'root')
-        self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-        self._port = kvargs.get('port', '/dev/ttyUSB0')
-        self._baud = kvargs.get('baud', '9600')
-        self._mode = kvargs.get('mode', 'telnet')
-        self._timeout = kvargs.get('timeout', '0.5')
-        self._attempts = kvargs.get('attempts', 10)
-        self.gather_facts = kvargs.get('gather_facts', False)
-        self.rpc = _RpcMetaExec(self)
-
     def open(self):
         """
         open the connection to the device
@@ -186,67 +189,6 @@ class Console(object):
                 self._hook_exception('close', err)
                 traceback.print_exc()
             self.connected = False
-
-    def cli(self, command, format='text', warning=True):
-        """
-        Executes the CLI command and returns the CLI text output by default.
-
-        :param str command:
-          The CLI command to execute, e.g. "show version"
-
-        :param str format:
-          The return format, by default is text.  You can optionally select
-          "xml" to return the XML structure.
-
-        .. note::
-            You can also use this method to obtain the XML RPC command for a
-            given CLI command by using the pipe filter ``| display xml rpc``. When
-            you do this, the return value is the XML RPC command. For example if
-            you provide as the command ``show version | display xml rpc``, you will
-            get back the XML Element ``<get-software-information>``.
-
-        .. warning::
-            This function is provided for **DEBUG** purposes only!
-            **DO NOT** use this method for general automation purposes as
-            that puts you in the realm of "screen-scraping the CLI".  The purpose of
-            the PyEZ framework is to migrate away from that tooling pattern.
-            Interaction with the device should be done via the RPC function.
-
-        .. warning::
-            You cannot use "pipe" filters with **command** such as ``| match``
-            or ``| count``, etc.  The only value use of the "pipe" is for the
-            ``| display xml rpc`` as noted above.
-        """
-        if 'display xml rpc' not in command and warning is True:
-            warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
-            warnings.resetwarnings()
-
-        try:
-            rsp = self.rpc.cli(command, format)
-            if isinstance(rsp, dict) and format.lower() == 'json':
-                return rsp
-            # rsp returned True means <rpc-reply> is empty, hence return
-            # empty str as would be the case on cli
-            # ex:
-            # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
-            # </rpc-reply>
-            if rsp is True:
-                return ''
-            if rsp.tag in ['output', 'rpc-reply']:
-                return rsp.text
-            if rsp.tag == 'configuration-information':
-                return rsp.findtext('configuration-output')
-            if rsp.tag == 'rpc':
-                return rsp[0]
-            return rsp
-        except EzErrors.RpcError as ex:
-            if ex.message is not '':
-                return "%s: %s" % (ex.message, command)
-            else:
-                return "invalid command: " + command
-        except Exception as ex:
-            return "invalid command: " + command
 
     # execute rpc calls
     def execute(self, rpc_cmd, **kwargs):
@@ -378,8 +320,10 @@ class Console(object):
 
     def _gather_facts(self):
         self._notify('facts', 'retrieving device facts...')
-        self._tty.nc.facts.gather()
-        self._facts = self._tty.nc.facts.items
+        #self._tty.nc.facts.gather()
+        for gather in FACT_LIST:
+            gather(self, self._facts)
+        #self._facts = self._tty.nc.facts.items
         self.results['facts'] = self._facts
         self._save_name = self._hostname or self._facts[
             'hostname'] or '_'.join(self.console)

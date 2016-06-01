@@ -6,6 +6,7 @@ import socket
 from lxml.builder import E
 from datetime import datetime, timedelta
 from jnpr.junos.transport.fact import Fact
+from jnpr.junos import exception as EzErrors
 
 __all__ = ['xmlmode_netconf']
 
@@ -203,10 +204,25 @@ class tty_netconf(object):
             cmd = '<{0}/>'.format(cmd)
         self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
         rsp = self._receive()
+        from jnpr.junos.jxml import remove_namespaces
         try:
-            return rsp[0]  # return first child after the <rpc-reply>
+            rsp = remove_namespaces(rsp[0])  # return first child after the <rpc-reply>
+        except IndexError:
+            if rsp.text.strip() is not '':
+                return rsp
+            # no children, so assume it means we are OK
+            return True
         except:
             return etree.XML('<error-in-receive/>')
+        err_msg = rsp.findtext('error-message')
+        if err_msg:
+            if err_msg=='permission denied':
+                e = EzErrors.PermissionError
+            else:
+                e = EzErrors.RpcError
+            raise e(cmd=cmd, rsp=rsp)
+        return rsp
+
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL I/O for reading back XML response
