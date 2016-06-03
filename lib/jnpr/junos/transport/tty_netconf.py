@@ -5,7 +5,7 @@ import select
 import socket
 from lxml.builder import E
 from datetime import datetime, timedelta
-from jnpr.junos.transport.fact import Fact
+from jnpr.junos.jxml import remove_namespaces
 from jnpr.junos import exception as EzErrors
 
 __all__ = ['xmlmode_netconf']
@@ -30,7 +30,6 @@ class tty_netconf(object):
     def __init__(self, tty):
         self._tty = tty
         self.hello = None
-        self.facts = Fact(self)
 
     # -------------------------------------------------------------------------
     # NETCONF session open and close
@@ -42,7 +41,6 @@ class tty_netconf(object):
         self._tty.write(nc_cmd + ' netconf need-trailer')
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=15)
-        #pdb.set_trace()
 
         while datetime.now() < mark_end:
             time.sleep(0.1)
@@ -54,22 +52,6 @@ class tty_netconf(object):
             raise RuntimeError("Netconify Error: netconf not responding")
 
         self.hello = self._receive()
-
-    """
-    def open(self, at_shell):
-        # start the XML API process and receive the 'hello' message 
-
-        nc_cmd = ('junoscript', 'xml-mode')[at_shell]
-        self._tty.write(nc_cmd + ' netconf need-trailer')
-
-        while True:
-            time.sleep(0.1)
-            line = self._tty.read()
-            if line.startswith("<!--"):
-                break
-
-        self.hello = self._receive()
-    """
 
     def close(self, force=False):
         """ issue the XML API to close the session """
@@ -204,7 +186,6 @@ class tty_netconf(object):
             cmd = '<{0}/>'.format(cmd)
         self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
         rsp = self._receive()
-        from jnpr.junos.jxml import remove_namespaces
         try:
             rsp = remove_namespaces(rsp[0])  # return first child after the <rpc-reply>
         except IndexError:
@@ -251,22 +232,11 @@ class tty_netconf(object):
         if _NETCONF_EOM in rxbuf[-1]:
             rxbuf.pop()
 
-        """
-        while datetime.now() < mark_end:
-            now = datetime.now()
-            time.sleep(0.1)
-            line = self._tty.read().strip().replace('\x07','')
-            if not line:
-                continue  # if we got nothin, go again
-            if _NETCONF_EOM in line:
-                break  # check for end-of-message
-            rxbuf.append(line)
-        """
-
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
         rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
         try:
+            rxbuf = [i.strip() for i in rxbuf if i.strip()!='']
             as_xml = etree.XML('\n'.join(rxbuf))
             return as_xml
         except:

@@ -1,5 +1,8 @@
 from time import sleep
 import telnetlib
+import logging
+
+logger = logging.getLogger("jnpr.junos.tty_telnet")
 
 from jnpr.junos.transport.tty import Terminal
 
@@ -48,11 +51,10 @@ class Telnet(Terminal):
                 break
             except Exception as err:
                 retry -= 1
-                self.notify("TTY busy", "checking back in {0} ...".format(self.RETRY_BACKOFF))
+                logger.info("TTY busy: checking back in {0} ...".format(self.RETRY_BACKOFF))
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
-
         self.write('\n')
 
     def _tty_close(self):
@@ -78,6 +80,4 @@ class Telnet(Terminal):
         got = self._tn.expect(Terminal._RE_PAT, self.EXPECT_TIMEOUT)
         if 'in use' in got[2]:
             raise RuntimeError("open_fail: port already in use")
-
-        # (buffer, RE group)
         return (None, None) if not got[1] else (got[2], got[1].lastgroup)

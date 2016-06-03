@@ -1,6 +1,9 @@
 from time import sleep
+import logging
 
 from jnpr.junos.transport.tty_netconf import tty_netconf
+
+logger = logging.getLogger("jnpr.junos.tty")
 
 __all__ = ['Terminal']
 
@@ -79,7 +82,6 @@ class Terminal(object):
         # misc setup
         self.nc = tty_netconf(self)
         self.state = self._ST_INIT
-        self.notifier = None
         self._badpasswd = 0
         self._loader = 0
 
@@ -87,31 +89,25 @@ class Terminal(object):
     def tty_name(self):
         return self._tty_name
 
-    def notify(self, event, message):
-        if not self.notifier:
-            return
-        self.notifier(self, event, message)
-
     # -----------------------------------------------------------------------
     # Login/logout
     # -----------------------------------------------------------------------
 
-    def login(self, notify=None):
+    def login(self):
         """
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
-        self.notifier = notify
-        self.notify('TTY', 'connecting to TTY:{0} ...'.format(self.tty_name))
+        logger.info('TTY: connecting to TTY:{0} ...'.format(self.tty_name))
         self._tty_open()
 
-        self.notify('TTY', 'logging in ...')
+        logger.info('TTY: logging in......')
 
         self.state = self._ST_INIT
         self._login_state_machine()
 
         # now start NETCONF XML
-        self.notify('TTY', ' OK ... starting NETCONF')
+        logger.info('TTY: OK.....starting NETCONF')
         self.nc.open(at_shell=self.at_shell)
         return True
 
@@ -119,7 +115,7 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        self.notify('logout', 'logging out ...')
+        logger.info('logout: logging out.....')
         self.nc.close()
         self._logout_state_machine()
         return True
@@ -218,8 +214,8 @@ class Terminal(object):
             if self.state == self._ST_INIT:
                 # this means that the shell was left
                 # open.  probably not a good thing,
-                # so issue a notify, but move on.
-                self.notify('login_warn', 'shell login was open!')
+                # so issue a logging message, but move on.
+                logger.warning('login_warn: Shell login was open!!')
 
             self.at_shell = True
             self.state = self._ST_DONE
@@ -228,9 +224,9 @@ class Terminal(object):
         def _ev_cli():
             if self.state == self._ST_INIT:
                 # this means that the shell was left open.  probably not a good thing,
-                # so issue a notify, hit <ENTER> and try again just to be
+                # so issue a logging message, hit <ENTER> and try again just to be
                 # sure...
-                self.notify('login_warn', 'waiting on TTY.')
+                logger.warning('login_warn: waiting on TTY..... ')
                 sleep(5)
                 #  return
 

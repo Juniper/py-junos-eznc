@@ -15,15 +15,18 @@ from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.device import Device
 from jnpr.junos.facts import *
+import logging
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
 QFX_MODE_SWITCH = 'SWITCH'
 
+logger = logging.getLogger("jnpr.junos.console")
+logging.basicConfig(level=logging.DEBUG)
 
 class Console(object):
 
-    def __init__(self, *args, **kvargs):
+    def __init__(self, host, **kvargs):
         """
         NoobDevice object constructor.
 
@@ -31,16 +34,29 @@ class Console(object):
             **REQUIRED** host-name or ipaddress of target device
 
         :param str user:
-            *OPTIONAL* login user-name, uses $USER if not provided
+            *OPTIONAL* login user-name, uses root if not provided
 
         :param str passwd:
-            *OPTIONAL* if not provided, assumed ssh-keys are enforced
+            *OPTIONAL* in console connection for device at zeroized state password is not required
 
         :param int port:
-            *OPTIONAL*  port
+            *OPTIONAL*  port, default is telnet port `23`
+
+        :param int baud:
+            *OPTIONAL*  baud, default baud rate is 9600
+
+        :param str mode:
+            *OPTIONAL*  mode, mode of connection (telnet/serial/ssh)
+            default is telnet
+
+        :param int timeout:
+            *OPTIONAL*  timeout, default is 0.5
+
+        :param int attempts:
+            *OPTIONAL*  attempts, default is 10
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
+            *OPTIONAL* default is ``False``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
 
         """
@@ -53,16 +69,12 @@ class Console(object):
         self._facts = {}
         self.connected = False
         self._skip_logout = False
-        self.on_notify = kvargs.get('notify', None)
         self.results = dict(changed=False, failed=False, errmsg=None)
 
-        self._hostname = kvargs.get('host')
-        if self._hostname is None:
-            raise ValueError("You must provide the 'host' value")
-
+        self._hostname = host
         self._auth_user = kvargs.get('user', 'root')
-        self._auth_password = kvargs.get('password') or kvargs.get('passwd')
-        self._port = kvargs.get('port', '/dev/ttyUSB0')
+        self._auth_password = kvargs.get('password', '') or kvargs.get('passwd', '')
+        self._port = kvargs.get('port', '23')
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
@@ -157,20 +169,15 @@ class Console(object):
         # --------------------
         # login to the CONSOLE
         # --------------------
-
         try:
             self._tty_login()
         except Exception as err:
-            self._hook_exception('login', err)
+            logger.error("ERROR {0}:{1}\n".format('login', str(err)))
             traceback.print_exc()
         self.connected = True
-
-
         if self.gather_facts is True:
             self._gather_facts()
-
         return self
-
 
     def close(self, skip_logout = False):
         """
@@ -180,48 +187,25 @@ class Console(object):
             try:
                 self._tty_logout()
             except Exception as err:
-                self._hook_exception('logout', err)
+                logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
             self.connected = False
         elif self.connected is True:
             try:
                 self._tty._tty_close()
             except Exception as err:
-                self._hook_exception('close', err)
+                logger.error("ERROR {0}:{1}\n".format('close', str(err)))
                 traceback.print_exc()
             self.connected = False
 
     # execute rpc calls
-    def execute(self, rpc_cmd, **kwargs):
+    def execute(self, rpc_cmd):
         return self._tty.nc.rpc(etree.tounicode(rpc_cmd))
-
-
-    # -------------------------------------------------------------------------
-    # Handlers
-    # -------------------------------------------------------------------------
-
-    def _hook_exception(self, event, err):
-        self._notify("ERROR", "{0}:{1}\n".format(event, str(err)))
-        raise
-
-    def _tty_notifier(self, tty, event, message):
-        self._notify("{0}".format(event), message)
-
-    # replace it with log module
-    #
-    #
-    def _notify(self, event, message):
-        if self.on_notify is not None:
-            self.on_notify(self, event, message)
-        elif self.on_notify is not False:
-            print("{0}:{1}".format(event, message))
 
     # -------------------------------------------------------------------------
     # LOGIN/LOGOUT
     # -------------------------------------------------------------------------
 
     def _tty_login(self):
-        ### hack for now
-        ### problem in importing at top, because of circular import issue
         tty_args = {}
         tty_args['user'] = self._auth_user
         tty_args['passwd'] = self._auth_password
@@ -246,128 +230,81 @@ class Console(object):
             self.console = ('serial', self._port)
             self._tty = Serial(**tty_args)
 
-        notify = self.on_notify or self._tty_notifier
-        self._tty.login(notify=notify)
+        self._tty.login()
 
     def _tty_logout(self):
         self._tty.logout()
 
 
-    def _srx_cluster(self, cluster_id, node):
+    def srx_cluster(self, cluster_id, node):
         """ Enable cluster mode on SRX device"""
         srx_args = {}
         srx_args['cluster_id'] = cluster_id
         srx_args['node'] = node
-        self._notify('srx_cluster', 'set device to cluster mode, rebooting')
-        self._notify('srx_cluster', 'Cluster ID: {0}'.format(cluster_id))
-        self._notify('srx_cluster', 'Node: {0}'.format(node))
+        logger.info("{0}:{1}".format('srx_cluster', 'set device to cluster mode, rebooting'))
+        logger.info("srx_cluster: Cluster ID: {0}".format(cluster_id))
+        logger.info("srx_cluster: Node: {0}".format(node))
         self._tty.nc.enablecluster(cluster_id, node)
         self._skip_logout = True
         self.results['changed'] = True
 
-    def _srx_cluster_disable(self):
+    def srx_cluster_disable(self):
         """ Disable cluster mode on SRX device"""
-        self._notify(
-            'srx_cluster',
-            'disable cluster mode on srx device, rebooting')
+        logger.info ('srx_cluster:disable cluster mode on srx device, rebooting')
         self._tty.nc.disablecluster()
         self._skip_logout = True
         self.results['changed'] = True
 
-    def _zeroize(self):
+    def zeroize(self):
         """ perform device ZEROIZE actions """
-        self._notify('zeroize', 'ZEROIZE device, rebooting')
+        logger.info("zeroize : ZEROIZE device, rebooting")
         self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True
 
-    def _shutdown(self, mode):
-        """ shutdown or reboot """
-        self._skip_logout = True
-        self._notify('shutdown', 'shutdown {0}'.format(mode))
-        nc = self._tty.nc
-        shutdown = nc.poweroff if mode == 'poweroff' else nc.reboot
-        shutdown()
-        self._skip_logout = True
-        self.results['changed'] = True
-
-    def _save_facts_json(self, savedir= os.getcwd(), no_save= True):
-        if no_save is True:
-            self._notify('facts', '{0}'.format(self._facts))
-            return
-        fname = self._save_name + '-facts.json'
-        path = os.path.join(savedir, fname)
-        self._notify('facts', 'saving: {0}'.format(path))
-        try:
-            with open(path, 'w+') as f:
-                f.write(json.dumps(self._facts))
-        except:
-            raise RuntimeError(
-                "Netconify Error: can not write file, check directory persmissions")
-
-    def _save_inventory_xml(self, savedir= os.getcwd(), no_save= True):
-        if no_save is True:
-            return
-        if not hasattr(self._tty.nc.facts, 'inventory'):
-            return
-        fname = self._save_name + '-inventory.xml'
-        path = os.path.join(savedir, fname)
-        self._notify('inventory', 'saving: {0}'.format(path))
-        as_xml = etree.tostring(
-            self._tty.nc.facts.inventory, pretty_print=True)
-        with open(path, 'w+') as f:
-            f.write(as_xml)
-
     def _gather_facts(self):
-        self._notify('facts', 'retrieving device facts...')
-        #self._tty.nc.facts.gather()
+        logger.info('facts: retrieving device facts...')
         for gather in FACT_LIST:
             gather(self, self._facts)
-        #self._facts = self._tty.nc.facts.items
         self.results['facts'] = self._facts
-        self._save_name = self._hostname or self._facts[
-            'hostname'] or '_'.join(self.console)
 
-    def push_config(self, fname, action= 'merge'):
-        """ push the configuration or rollback changes on error """
-        if fname is not None and os.path.isfile(fname) is False:
-            self.results['failed'] = True
-            self.results[
-                'errmsg'] = 'ERROR: unknown file: {0}'.format(fname)
-            return self.results
-
-
-        self._notify('conf', 'loading into device ...')
-        content = open(fname, 'r').read()
-        load_args = dict(content=content)
-        load_args['action'] = action  # merge/replace; yeah, I know ...
-        rc = self._tty.nc.load(**load_args)
-        if rc is not True:
-            self.results['failed'] = True
-            self.results['errmsg'] = 'failure to load configuration, aborting.'
-            self._notify('conf_ld_err', self.results['errmsg'])
-            self._tty.nc.rollback()
-            return
-
-        self._notify('conf', 'commit ... please be patient')
-        rc = self._tty.nc.commit()
-        if rc is not True:
-            self.results['failed'] = True
-            self.results[
-                'errmsg'] = 'faiure to commit configuration, aborting.'
-            self._notify('conf_save_err', self.results['errmsg'])
-            self._tty.nc.rollback()
-            return
-        self._notify('conf', 'commit completed.')
-        self.results['changed'] = True
-        return
+    # def push_config(self, fname, action= 'merge'):
+    #     """ push the configuration or rollback changes on error """
+    #     if fname is not None and os.path.isfile(fname) is False:
+    #         self.results['failed'] = True
+    #         self.results[
+    #             'errmsg'] = 'ERROR: unknown file: {0}'.format(fname)
+    #         return self.results
+    #     logger.info("conf: loading into device....")
+    #     content = open(fname, 'r').read()
+    #     load_args = dict(content=content)
+    #     load_args['action'] = action  # merge/replace; yeah, I know ...
+    #     rc = self._tty.nc.load(**load_args)
+    #     if rc is not True:
+    #         self.results['failed'] = True
+    #         self.results['errmsg'] = 'failure to load configuration, aborting.'
+    #         logger.error('conf_ld_err: {0}'.format(self.results['errmsg']))
+    #         self._tty.nc.rollback()
+    #         return
+    #     logger.info('conf:  commit ... please be patient')
+    #     rc = self._tty.nc.commit()
+    #     if rc is not True:
+    #         self.results['failed'] = True
+    #         self.results[
+    #             'errmsg'] = 'faiure to commit configuration, aborting.'
+    #         logger.error('conf_save_err: {0}'.format(self.results['errmsg']))
+    #         self._tty.nc.rollback()
+    #         return
+    #     logger.info('conf,  commit completed')
+    #     self.results['changed'] = True
+    #     return
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # -------------------------------------------------------------------------
     # QFX MODE processing
     # -------------------------------------------------------------------------
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    def _qfx_mode(self, mode):
+    def qfx_mode(self, mode):
 
         # ----------------------------------------------------
         # we need the facts, so if the caller didn't explicity
@@ -387,10 +324,8 @@ class Console(object):
             self.results['errmsg'] = "Not on a QFX device [{0}]".format(
                 self._facts['model'])
             self.results['failed'] = True
-            self._save_facts_json()
-            self._save_inventory_xml()
             self.results['facts'] = self._facts
-            self._notify('qfx', self.results['errmsg'])
+            logger.error('qfx: {0}'.format((self.results['errmsg'])))
             return
 
         now, later = self._qfx_device_mode_get()
@@ -407,26 +342,21 @@ class Console(object):
             fpc0 = inv.xpath('chassis/chassis-module[name="FPC 0"]')[0]
             self._facts['serialnumber'] = fpc0.findtext('serial-number')
             self._facts['model'] = fpc0.findtext('model-number')
-
-        self._save_facts_json()
-        self._save_inventory_xml()
         self.results['facts'] = self._facts
-
-        self._notify('info', "QFX mode now/later: {0}/{1}".format(now, later))
+        logger.info("QFX mode now/later: {0}/{1}".format(now, later))
         if now == later and later == mode:
             # nothing to do
-            self._notify('info', 'No change required')
+            logger.info('No change required')
         else:
-            self._notify('info', 'Action required')
+            logger.info('Action required')
 
         if change is True:
-            self._notify('change',
-                         'Changing the mode to: {0}'.format(mode))
+            logger.info('Change: Changing the mode to: {0}'.format(mode))
             self.results['changed'] = True
             self._qfx_device_mode_set()
 
         if reboot is True:
-            self._notify('change', 'REBOOTING device now!')
+            logger.info('Change: REBOOTING device now!')
             self.results['changed'] = True
             self._tty.nc.reboot()
             # no need to close the tty, since the device is rebooting ...
