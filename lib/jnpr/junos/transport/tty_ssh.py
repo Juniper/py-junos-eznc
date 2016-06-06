@@ -2,12 +2,13 @@ from select import select
 import paramiko
 import re
 import logging
-from time import sleep
+import time
 from jnpr.junos.transport.tty import Terminal
 from datetime import datetime, timedelta
 
 _PROMPT = re.compile('|'.join(Terminal._RE_PAT))
 
+logger = logging.getLogger("jnpr.junos.tty_ssh")
 
 class SecureShell(Terminal):
     RETRY_BACKOFF = 2  # seconds to wait between retries
@@ -42,15 +43,10 @@ class SecureShell(Terminal):
                                   username=self.s_user, password=self.s_passwd, timeout=self.timeout, allow_agent=False, look_for_keys=False)
                 break
             except paramiko.BadHostKeyException:
-                self.notify(
-                    "SSH",
-                    "Invalid host key for {0}".format(
+                logger.error("SSH: Invalid host key for {0}".format(
                         self.host))
             except paramiko.AuthenticationException:
-                self.notify(
-                    "SSH",
-                    "Bad username or password when connecting to {0}".format(
-                        self.host))
+                logger.error("SSH: Bad username or password when connecting to {0}".format(self.host))
         else:
             raise RuntimeError("open_fail: ssh port not ready")
 
@@ -95,10 +91,9 @@ class SecureShell(Terminal):
         mark_end = mark_start + timedelta(seconds=15)
 
         while datetime.now() < mark_end:
-            delta = time.time() - start
             time.sleep(0.1)
             rd, wr, err = select([self._chan], [], [], self.SELECT_WAIT)
-            sleep(0.05)
+            time.sleep(0.05)
             if rd:
                 data = self._chan.recv(self.RECVSZ)
                 got.append(data)
