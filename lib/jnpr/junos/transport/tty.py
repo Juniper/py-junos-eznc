@@ -98,16 +98,16 @@ class Terminal(object):
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
-        logger.info('TTY: connecting to TTY:{0} ...'.format(self.tty_name))
+        logger.debug('TTY: connecting to TTY:{0} ...'.format(self.tty_name))
         self._tty_open()
 
-        logger.info('TTY: logging in......')
+        logger.debug('TTY: logging in......')
 
         self.state = self._ST_INIT
         self._login_state_machine()
 
         # now start NETCONF XML
-        logger.info('TTY: OK.....starting NETCONF')
+        logger.debug('TTY: OK.....starting NETCONF')
         self.nc.open(at_shell=self.at_shell)
         return True
 
@@ -115,7 +115,7 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        logger.info('logout: logging out.....')
+        logger.debug('logout: logging out.....')
         self.nc.close()
         self._logout_state_machine()
         return True

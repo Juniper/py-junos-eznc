@@ -13,7 +13,7 @@ from jnpr.junos.transport.tty_ssh import SecureShell
 from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.device import Device
+from jnpr.junos import Device
 from jnpr.junos.facts import *
 import logging
 
@@ -22,7 +22,7 @@ QFX_MODE_NODE = 'NODE'
 QFX_MODE_SWITCH = 'SWITCH'
 
 logger = logging.getLogger("jnpr.junos.console")
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.INFO)
 
 class Console(object):
 
@@ -173,7 +173,8 @@ class Console(object):
             self._tty_login()
         except Exception as err:
             logger.error("ERROR {0}:{1}\n".format('login', str(err)))
-            traceback.print_exc()
+            logger.error("Complete traceback message: {0}".format(traceback.format_exc()))
+            raise RuntimeError
         self.connected = True
         if self.gather_facts is True:
             self._gather_facts()
@@ -241,64 +242,65 @@ class Console(object):
         srx_args = {}
         srx_args['cluster_id'] = cluster_id
         srx_args['node'] = node
-        logger.info("{0}:{1}".format('srx_cluster', 'set device to cluster mode, rebooting'))
-        logger.info("srx_cluster: Cluster ID: {0}".format(cluster_id))
-        logger.info("srx_cluster: Node: {0}".format(node))
+        logger.debug("{0}:{1}".format('srx_cluster', 'set device to cluster mode, rebooting'))
+        logger.debug("srx_cluster: Cluster ID: {0}".format(cluster_id))
+        logger.debug("srx_cluster: Node: {0}".format(node))
         self._tty.nc.enablecluster(cluster_id, node)
         self._skip_logout = True
         self.results['changed'] = True
 
     def srx_cluster_disable(self):
         """ Disable cluster mode on SRX device"""
-        logger.info ('srx_cluster:disable cluster mode on srx device, rebooting')
+        logger.debug ('srx_cluster:disable cluster mode on srx device, rebooting')
         self._tty.nc.disablecluster()
         self._skip_logout = True
         self.results['changed'] = True
 
     def zeroize(self):
         """ perform device ZEROIZE actions """
-        logger.info("zeroize : ZEROIZE device, rebooting")
+        logger.debug("zeroize : ZEROIZE device, rebooting")
         self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True
 
     def _gather_facts(self):
-        logger.info('facts: retrieving device facts...')
+        logger.debug('facts: retrieving device facts...')
         for gather in FACT_LIST:
             gather(self, self._facts)
         self.results['facts'] = self._facts
 
-    # def push_config(self, fname, action= 'merge'):
-    #     """ push the configuration or rollback changes on error """
-    #     if fname is not None and os.path.isfile(fname) is False:
-    #         self.results['failed'] = True
-    #         self.results[
-    #             'errmsg'] = 'ERROR: unknown file: {0}'.format(fname)
-    #         return self.results
-    #     logger.info("conf: loading into device....")
-    #     content = open(fname, 'r').read()
-    #     load_args = dict(content=content)
-    #     load_args['action'] = action  # merge/replace; yeah, I know ...
-    #     rc = self._tty.nc.load(**load_args)
-    #     if rc is not True:
-    #         self.results['failed'] = True
-    #         self.results['errmsg'] = 'failure to load configuration, aborting.'
-    #         logger.error('conf_ld_err: {0}'.format(self.results['errmsg']))
-    #         self._tty.nc.rollback()
-    #         return
-    #     logger.info('conf:  commit ... please be patient')
-    #     rc = self._tty.nc.commit()
-    #     if rc is not True:
-    #         self.results['failed'] = True
-    #         self.results[
-    #             'errmsg'] = 'faiure to commit configuration, aborting.'
-    #         logger.error('conf_save_err: {0}'.format(self.results['errmsg']))
-    #         self._tty.nc.rollback()
-    #         return
-    #     logger.info('conf,  commit completed')
-    #     self.results['changed'] = True
-    #     return
-
+    """
+    def push_config(self, fname, action= 'merge'):
+        #push the configuration or rollback changes on error
+        if fname is not None and os.path.isfile(fname) is False:
+            self.results['failed'] = True
+            self.results[
+                'errmsg'] = 'ERROR: unknown file: {0}'.format(fname)
+            return self.results
+        logger.info("conf: loading into device....")
+        content = open(fname, 'r').read()
+        load_args = dict(content=content)
+        load_args['action'] = action  # merge/replace; yeah, I know ...
+        rc = self._tty.nc.load(**load_args)
+        if rc is not True:
+            self.results['failed'] = True
+            self.results['errmsg'] = 'failure to load configuration, aborting.'
+            logger.error('conf_ld_err: {0}'.format(self.results['errmsg']))
+            self._tty.nc.rollback()
+            return
+        logger.info('conf:  commit ... please be patient')
+        rc = self._tty.nc.commit()
+        if rc is not True:
+            self.results['failed'] = True
+            self.results[
+                'errmsg'] = 'faiure to commit configuration, aborting.'
+            logger.error('conf_save_err: {0}'.format(self.results['errmsg']))
+            self._tty.nc.rollback()
+            return
+        logger.info('conf,  commit completed')
+        self.results['changed'] = True
+        return
+    """
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # -------------------------------------------------------------------------
     # QFX MODE processing
@@ -343,20 +345,20 @@ class Console(object):
             self._facts['serialnumber'] = fpc0.findtext('serial-number')
             self._facts['model'] = fpc0.findtext('model-number')
         self.results['facts'] = self._facts
-        logger.info("QFX mode now/later: {0}/{1}".format(now, later))
+        logger.debug("QFX mode now/later: {0}/{1}".format(now, later))
         if now == later and later == mode:
             # nothing to do
-            logger.info('No change required')
+            logger.debug('No change required')
         else:
-            logger.info('Action required')
+            logger.debug('Action required')
 
         if change is True:
-            logger.info('Change: Changing the mode to: {0}'.format(mode))
+            logger.debug('Change: Changing the mode to: {0}'.format(mode))
             self.results['changed'] = True
             self._qfx_device_mode_set()
 
         if reboot is True:
-            logger.info('Change: REBOOTING device now!')
+            logger.debug('Change: REBOOTING device now!')
             self.results['changed'] = True
             self._tty.nc.reboot()
             # no need to close the tty, since the device is rebooting ...
