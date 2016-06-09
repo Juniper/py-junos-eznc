@@ -55,6 +55,12 @@ class Console(object):
         :param int attempts:
             *OPTIONAL*  attempts, default is 10
 
+        :param str ssh_config:
+            *OPTIONAL* The path to the SSH configuration file.
+            This can be used to load SSH information from a configuration file.
+            By default ~/.ssh/config is queried it will be used by SCP class.
+            So its assumed ssh is enabled by the time we use SCP functionality.
+
         :param bool gather_facts:
             *OPTIONAL* default is ``False``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
@@ -83,6 +89,8 @@ class Console(object):
         self.rpc = _RpcMetaExec(self)
         self.cli = lambda cmd, format='text', warning=True: \
             Device.cli.im_func(self, cmd, format, warning)
+        self._ssh_config = kvargs.get('ssh_config')
+        self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
 
     # ------------------------------------------------------------------------
     # property: hostname

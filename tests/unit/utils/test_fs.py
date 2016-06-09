@@ -36,11 +36,11 @@ class TestFS(unittest.TestCase):
         self.fs._dev.rpc.file_show.assert_called_with(filename='test/cat.txt')
 
     def test_cwd(self):
-        self.fs._dev.rpc.set_cli_working_directory = MagicMock()
-        folder = 'test/report'
-        self.fs.cwd(folder)
+        self.fs._dev.rpc.set_cli_working_directory = MagicMock(side_effect=self._mock_manager)
+        folder = 'change/directory'
+        self.assertEqual('change/directory', self.fs.cwd(folder))
         self.fs._dev.rpc.set_cli_working_directory.\
-            assert_called_with(directory='test/report')
+            assert_called_with(directory='change/directory')
 
     @patch('jnpr.junos.Device.execute')
     def test_pwd(self, mock_execute):
@@ -291,7 +291,8 @@ class TestFS(unittest.TestCase):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
         elif (fname == 'show-configuration.xml' or
-              fname == 'show-system-alarms.xml'):
+              fname == 'show-system-alarms.xml' or
+              fname == 'set-cli-working-directory.xml'):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
         else:
@@ -313,6 +314,9 @@ class TestFS(unittest.TestCase):
                     return self._read_file('checksum.xml')
                 elif kwargs['path'] == 'test/stat/decode_symbolic_link':
                     return self._read_file('file-list_symlink.xml')
+            if 'directory' in kwargs:
+                if kwargs['directory'] == 'change/directory':
+                    return self._read_file('set-cli-working-directory.xml')
             if 'filename' in kwargs:
                 if kwargs['filename'] == 'test/cat.txt':
                     return self._read_file('file-show.xml')
