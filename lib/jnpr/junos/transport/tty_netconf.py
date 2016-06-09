@@ -64,16 +64,19 @@ class tty_netconf(object):
         self.rpc('close-session')
         # removed flush
 
+    """
+    #using PyEz config methods ....
+
     # -------------------------------------------------------------------------
     # Junos OS configuration methods
     # -------------------------------------------------------------------------
 
     def load(self, content, **kvargs):
-        """
-        load-override a Junos 'conf'-style file into the device.  if the
-        load is successful, return :True:, otherwise return the XML reply
-        structure for further processing
-        """
+
+        #load-override a Junos 'conf'-style file into the device.  if the
+        #load is successful, return :True:, otherwise return the XML reply
+        #structure for further processing
+
         action = kvargs.get('action', 'override')
         cmd = E('load-configuration', dict(format='text', action=action),
                 E('configuration-text', content)
@@ -82,18 +85,18 @@ class tty_netconf(object):
         return rsp if rsp.findtext('.//ok') is None else True
 
     def commit_check(self):
-        """
-        performs the Junos 'commit check' operation.  if successful return
-        :True: otherwise return the response as XML for further processing.
-        """
+
+        #performs the Junos 'commit check' operation.  if successful return
+        #:True: otherwise return the response as XML for further processing.
+
         rsp = self.rpc('<commit-configuration><check/></commit-configuration>')
         return True if 'ok' == rsp.tag else rsp
 
     def commit(self):
-        """
-        performs the Junos 'commit' operation.  if successful return
-        :True: otherwise return the response as XML for further processing.
-        """
+
+        #performs the Junos 'commit' operation.  if successful return
+        #:True: otherwise return the response as XML for further processing.
+
         rsp = self.rpc('<commit-configuration/>')
         if 'ok' == rsp.tag:
             return True     # some devices use 'ok'
@@ -102,25 +105,29 @@ class tty_netconf(object):
         return rsp
 
     def rollback(self):
-        """ rollback that recent changes """
+        #rollback that recent changes
         cmd = E('load-configuration', dict(compare='rollback', rollback="0"))
         return self.rpc(etree.tostring(cmd))
+    """
 
     # -------------------------------------------------------------------------
     # MISC device commands
     # -------------------------------------------------------------------------
 
+    """" using pyEz reboot methods
     def reboot(self, in_min=0):
-        """ issue a reboot to the device """
+        #issue a reboot to the device
         cmd = E('request-reboot', E('in', str(in_min)))
         rsp = self.rpc(etree.tostring(cmd))
         return True
 
+    # using Pyez poweroff method
     def poweroff(self, in_min=0):
-        """ issue a reboot to the device """
+        # issue a reboot to the device
         cmd = E('request-power-off', E('in', str(in_min)))
         rsp = self.rpc(etree.tostring(cmd))
         return True
+    """
 
     def zeroize(self):
         """ issue a reboot to the device """
@@ -131,8 +138,9 @@ class tty_netconf(object):
             pass
         return True
 
+    """" disabling for now
     def enablecluster(self, cluster_id, node):
-        """ issue request chassis cluster command """
+        #issue request chassis cluster command
         cmd = E('set-chassis-cluster-enable',
                 E('cluster-id',
                   str(cluster_id)),
@@ -144,7 +152,7 @@ class tty_netconf(object):
         return True
 
     def disablecluster(self):
-        """ issue set chassis cluster disable to the device nad reboot """
+        # issue set chassis cluster disable to the device nad reboot
         cmd = E.command('set chassis cluster disable reboot')
         rsp = self.rpc(etree.tostring(cmd))
         # No need to check error exception, device will be rebooted even if not
@@ -152,7 +160,7 @@ class tty_netconf(object):
         return True
 
     def enablecluster(self, cluster_id, node):
-        """ issue request chassis cluster command """
+            # issue request chassis cluster command
         cmd = E('set-chassis-cluster-enable',
                 E('cluster-id',
                   str(cluster_id)),
@@ -162,6 +170,7 @@ class tty_netconf(object):
         rsp = self.rpc(etree.tostring(cmd))
         # device will be set to new cluster ID:NODE value
         return True
+    """
 
     # -------------------------------------------------------------------------
     # XML RPC command execution
