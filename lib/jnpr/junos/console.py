@@ -9,7 +9,6 @@ import traceback
 from lxml import etree
 
 from jnpr.junos.transport.tty_telnet import Telnet
-from jnpr.junos.transport.tty_ssh import SecureShell
 from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
@@ -231,18 +230,14 @@ class Console(object):
             tty_args['port'] = self._port
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
-        elif self._mode.upper() == 'SSH':
-            tty_args['host'] = self._hostname
-            tty_args['port'] = self._port
-            tty_args['s_user'] = self._auth_user
-            tty_args['s_passwd'] = self._auth_password
-            self.console = ('ssh', self._hostname, self._port, self._auth_user, self._auth_password)
-            self._tty = SecureShell(**tty_args)
-        else:
+        elif self._mode.upper() == 'SERIAL':
             tty_args['port'] = self._port
             tty_args['baud'] = self._baud
             self.console = ('serial', self._port)
             self._tty = Serial(**tty_args)
+        else:
+            logger.error('Mode should be either telnet or serial')
+            raise AttributeError('Mode to be telnet/serial')
 
         self._tty.login()
 
