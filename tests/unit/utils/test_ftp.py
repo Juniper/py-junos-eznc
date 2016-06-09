@@ -2,12 +2,17 @@
 import unittest
 from nose.plugins.attrib import attr
 from ftplib import FTP
+import sys
 
 from jnpr.junos import Device
 from jnpr.junos.utils.ftp import Ftp
 
 from mock import patch
 
+if sys.version<'3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
 
 @attr('unit')
 class TestFtp(unittest.TestCase):
@@ -53,7 +58,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.connect')
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_ftp_upload_file_errors(self, mock_ftpconnect, mock_ftplogin,
                                     mock_ftpclose, mock_open):
         dev_ftp = Ftp(self.dev)
@@ -66,7 +71,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
     @patch('ftplib.FTP.storbinary')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_ftp_upload_file(self, mock_ftpconnect, mock_ftplogin,
                              mock_ftpclose, mock_ftpstore, mock_open):
         dev_ftp = Ftp(self.dev)
@@ -76,7 +81,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.connect')
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_ftp_dnload_file_errors(self, mock_ftpconnect, mock_ftplogin,
                                     mock_ftpclose, mock_open):
         dev_ftp = Ftp(self.dev)
@@ -88,7 +93,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
     @patch('ftplib.FTP.retrbinary')
-    @patch('__builtin__.open')
+    @patch(builtin_string + '.open')
     def test_ftp_dnload_file(self, mock_ftpconnect, mock_ftplogin,
                              mock_ftpclose, mock_ftpretr, mock_open):
         dev_ftp = Ftp(self.dev)
