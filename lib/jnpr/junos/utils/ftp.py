@@ -3,10 +3,10 @@ FTP utility
 """
 
 import re
-from ftplib import FTP
+import ftplib
 
 
-class Ftp:
+class FTP:
     """
     FTP utility can be used to transfer files to and from device.
     """
@@ -19,8 +19,8 @@ class Ftp:
 
         Supports python *context-manager* pattern.  For example::
 
-            from jnpr.junos.utils.ftp import Ftp
-            with Ftp(dev) as dev_ftp:
+            from jnpr.junos.utils.ftp import FTP
+            with FTP(dev) as dev_ftp:
                 dev_ftp.retrbinary('RETR ' + "/var/home/regress/file1",
                                     open("file1", 'wb').write)
                 dev_ftp.storbinary('STOR ' + "/var/home/regress/file11",
@@ -47,7 +47,7 @@ class Ftp:
         if 'passwd' not in ftpargs:
             ftpargs['passwd'] = self._junos._auth_password
 
-        self._ftp = FTP(self._junos.facts['hostname'])
+        self._ftp = ftplib.FTP(self._junos.facts['hostname'])
         self._ftp.login(**ftpargs)
 
         return self._ftp
