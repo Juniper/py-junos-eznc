@@ -25,7 +25,7 @@ logger = logging.getLogger("jnpr.junos.console")
 
 class Console(object):
 
-    def __init__(self, host, **kvargs):
+    def __init__(self, **kvargs):
         """
         NoobDevice object constructor.
 
@@ -76,7 +76,7 @@ class Console(object):
         self._skip_logout = False
         self.results = dict(changed=False, failed=False, errmsg=None)
 
-        self._hostname = host
+        self._hostname = kvargs.get('host') # hostname is not required in serial mode connection
         self._auth_user = kvargs.get('user', 'root')
         self._auth_password = kvargs.get('password', '') or kvargs.get('passwd', '')
         self._port = kvargs.get('port', '23')
@@ -168,7 +168,7 @@ class Console(object):
         # validate device hostname or IP address
         # ---------------------------------------------------------------
 
-        if self._hostname is None:
+        if self._mode.upper() is 'TELNET' and self._hostname is None:
              self.results['failed'] = True
              self.results['errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
              return self.results
@@ -224,7 +224,6 @@ class Console(object):
         tty_args['passwd'] = self._auth_password
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
-
         if self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
