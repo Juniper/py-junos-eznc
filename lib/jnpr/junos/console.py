@@ -90,7 +90,7 @@ class Console(object):
         self.cli = lambda cmd, format='text', warning=True: \
             Device.cli.im_func(self, cmd, format, warning)
         self._ssh_config = kvargs.get('ssh_config')
-        self._sshconf_path = Device._sshconf_lkup.im_func(self)
+        self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
 
     # ------------------------------------------------------------------------
     # property: hostname
