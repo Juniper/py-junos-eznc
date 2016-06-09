@@ -56,11 +56,12 @@ class Ftp:
         """
         This function is used to upload file to the router from local
         execution server/shell.
-        :param local_file: Full path along with filename which has to
-        be copied to router
+
+        :param local_file: Full path along with filename which has to be
+            copied to router
         :param remote_file: Full path along with filename to which the FILE
-        has to be copied the router. If ignored FILE will be copied to "tmp"
-        :return: True if the transfer succeeds, else False
+            has to be copied the router. If ignored FILE will be copied to "tmp"
+        :returns: True if the transfer succeeds, else False
 
         """
 
@@ -79,13 +80,15 @@ class Ftp:
     def dnload_file(self, local_file, remote_file):
         """
         This function is used to download file from router to local execution
-         server/shell.
-        :param local_file: Full path along with filename to which the FILE
-        has to be copied
-        :param remote_file: Full path along with filename on the router.
-        If ignored FILE will be copied to "tmp"
-        :return: True if the transfer succeeds, else False
+        server/shell.
 
+        :param local_file: Full path along with filename to which the FILE has
+            to be copied
+
+        :param remote_file: Full path along with filename on the router. If
+            ignored FILE will be copied to "tmp"
+
+        :returns: True if the transfer succeeds, else False
         """
 
         try:
