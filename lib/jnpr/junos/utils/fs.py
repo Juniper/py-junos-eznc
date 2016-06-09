@@ -60,7 +60,8 @@ class FS(Util):
 
         :param str path: path to working directory
         """
-        self._dev.rpc.set_cli_working_directory(directory=path)
+        rsp = self._dev.rpc.set_cli_working_directory(directory=path)
+        return rsp.findtext('working-directory')
 
     # -------------------------------------------------------------------------
     # pwd - return current working directory
