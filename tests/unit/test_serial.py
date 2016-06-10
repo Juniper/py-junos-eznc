@@ -3,6 +3,8 @@ from nose.plugins.attrib import attr
 from mock import MagicMock, patch
 import re
 import sys
+from jnpr.junos.utils.config import Config
+
 
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
@@ -35,11 +37,7 @@ class TestSerial(unittest.TestCase):
         mock_read.side_effect = [('cli', 'cli'), ('shell', 'shell'), ('login', 'login')]
         self.dev.close()
 
-    # @patch('jnpr.junos.transport.tty_serial.Serial._tty_open')
-    # def test_connection_error(self, mock_login):
-    #     mock_login.side_effect = RuntimeError
-    #     self.assertRaises(RuntimeError, self.dev.open)
-
     def test_console_connected(self):
         self.assertTrue(self.dev.connected)
 #        self.assertFalse(self.dev.gather_facts)
+

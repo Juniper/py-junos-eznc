@@ -1,12 +1,15 @@
 import unittest2 as unittest
+from jnpr.junos.utils.config import Config
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
 import re
 import sys
+from telnetlib import Telnet
 
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
 from jnpr.junos.transport.tty_telnet import Telnet
+
 
 if sys.version<'3':
     builtin_string = '__builtin__'
@@ -21,13 +24,20 @@ class TestConsole(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
     def setUp(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
-        mock_expect.side_effect=[(1, re.search('(?P<login>ogin:\s*$)', "login: "), '\r\r\nbng-ui-vm-92 login:'),
-                                (2, re.search('(?P<passwd>assword:\s*$)', "password: "), '\r\r\nbng-ui-vm-92 passd:'),
-                                 (3, re.search('(?P<shell>%|#\s*$)', "junos % "), '\r\r\nbng-ui-vm-92 junos %')]
-
-
+        mock_expect.side_effect=[(1, re.search('(?P<login>ogin:\s*$)', "login: "), '\r\r\n ogin:'),
+                                (2, re.search('(?P<passwd>assword:\s*$)', "password: "), '\r\r\n password:'),
+                                (3, re.search('(?P<shell>%|#\s*$)', "junos % "), '\r\r\nroot@device:~ # ')]
         self.dev = Console(host='1.1.1.1', user='lab', password='lab123', mode = 'Telnet')
         self.dev.open()
+
+    @patch('jnpr.junos.transport.tty.tty_netconf.close')
+    @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
+    @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
+    def tearDown(self, mock_write, mock_expect, mock_nc_close):
+        mock_expect.side_effect = [(1, re.search('(?P<cli>[^\\-"]>\s*$)', "cli>"), '\r\r\nroot@device>'),
+                                   (2, re.search('(?P<shell>%|#\s*$)', "junos %"), '\r\r\nroot@device:~ # '),
+                                   (3, re.search('(?P<login>ogin:\s*$)', "login: "), '\r\r\nlogin')]
+        self.dev.close()
 
     @patch('jnpr.junos.console.Console._tty_logout')
     def tearDown(self, mock_tty_logout):
@@ -64,6 +74,38 @@ class TestConsole(unittest.TestCase):
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev._gather_facts()
         self.assertEqual(mock_rpc.call_count, 1)
+
+    @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
+    @patch('jnpr.junos.transport.tty_netconf.select.select')
+    @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.read_until')
+    def test_load_console(self, mock_read_until, mock_select, mock_write):
+        mock_select.return_value = ([self.dev._tty._rx], [], [])
+        xml = """<policy-options>
+                  <policy-statement>
+                    <name>F5-in</name>
+                    <term>
+                        <name>testing</name>
+                        <then>
+                            <accept/>
+                        </then>
+                    </term>
+                    <from>
+                        <protocol>mpls</protocol>
+                    </from>
+                </policy-statement>
+                </policy-options>"""
+
+        mock_read_until.return_value = """
+        <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/15.2I0/junos">
+            <load-configuration-results>
+            <ok/>
+            </load-configuration-results>
+            </rpc-reply>
+            ]]>]]>"""
+        cu = Config(self.dev)
+        cu.load(xml, format='xml')
+        cu.commit()
+
 
 
 

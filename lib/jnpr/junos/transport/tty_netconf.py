@@ -256,3 +256,4 @@ class tty_netconf(object):
                             '<error-in-receive>' + x + '</error-in-receive>')
             else:
                 return etree.XML('<error-in-receive/>')
+

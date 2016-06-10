@@ -146,7 +146,7 @@ class Terminal(object):
             'cli': _ev_cli
         }
 
-        ##### modification #####
+        ### hack for now
         ### in case of telnet to management port, after writing exit on console
         ### it exists completely and returns None
         ###
