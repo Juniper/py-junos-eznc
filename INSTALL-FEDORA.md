@@ -11,7 +11,7 @@ Operating Systems
 
 #### Step 1: Install packages for Junos PyEZ
 
-    sudo yum install -y python-pip python-devel libxml2-devel libxslt-devel gcc openssl
+    sudo yum install -y python-pip python-devel libxml2-devel libxslt-devel gcc openssl libffi-devel
 	
 #### Step 2: Install Junos PyEZ
 
