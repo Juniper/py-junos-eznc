@@ -293,7 +293,10 @@ class Device(object):
             instance.__init__(*args, **kwargs)
             return instance
         else:
-            return super(Device, cls).__new__(cls, *args, **kwargs)
+            if sys.version_info.major==2:
+                return super(Device, cls).__new__(cls, *args, **kwargs)
+            else:
+                return super().__new__(cls)
 
     def __init__(self, *vargs, **kvargs):
         """
