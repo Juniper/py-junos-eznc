@@ -25,10 +25,10 @@ import jinja2
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.console import Console
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -282,6 +282,18 @@ class Device(object):
                 self._conf_auth_user = found.get('user')
                 self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
+
+    def __new__(cls, *args, **kwargs):
+        if int(kwargs.get('port')) == 23 or kwargs.get('mode'):
+            instance = object.__new__(Console, *args, **kwargs)
+            # Python only calls __init__() if the object returned from
+            # __new__() is an instance of the class in which the __new__()
+            # method is contained (here Device class). Hence calling __init__
+            # explicitly.
+            instance.__init__(*args, **kwargs)
+            return instance
+        else:
+            return super(Device, cls).__new__(cls, *args, **kwargs)
 
     def __init__(self, *vargs, **kvargs):
         """
