@@ -284,7 +284,7 @@ class Device(object):
             return sshconf_path
 
     def __new__(cls, *args, **kwargs):
-        if int(kwargs.get('port')) == 23 or kwargs.get('mode'):
+        if kwargs.get('port') in [23, '23'] or kwargs.get('mode'):
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
             # __new__() is an instance of the class in which the __new__()

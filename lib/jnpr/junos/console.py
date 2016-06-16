@@ -55,7 +55,7 @@ class Console(object):
             So its assumed ssh is enabled by the time we use SCP functionality.
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
+            *OPTIONAL* default is ``False``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
 
         """
@@ -78,7 +78,7 @@ class Console(object):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._attempts = kvargs.get('attempts', 10)
-        self.gather_facts = kvargs.get('gather_facts', True)
+        self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
         from jnpr.junos import Device
         self.cli = lambda cmd, format='text', warning=True: \
