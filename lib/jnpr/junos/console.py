@@ -2,17 +2,12 @@
 This file defines the 'netconifyCmdo' class.
 Used by the 'netconify' shell utility.
 """
-import os
-import json
-import warnings
 import traceback
 from lxml import etree
 
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos import exception as EzErrors
-from jnpr.junos import Device
 from jnpr.junos.facts import *
 import logging
 
@@ -21,7 +16,6 @@ QFX_MODE_NODE = 'NODE'
 QFX_MODE_SWITCH = 'SWITCH'
 
 logger = logging.getLogger("jnpr.junos.console")
-#logging.basicConfig(level=logging.INFO)
 
 class Console(object):
 
@@ -86,6 +80,7 @@ class Console(object):
         self._attempts = kvargs.get('attempts', 10)
         self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
+        from jnpr.junos import Device
         self.cli = lambda cmd, format='text', warning=True: \
             Device.cli.im_func(self, cmd, format, warning)
         self._ssh_config = kvargs.get('ssh_config')
