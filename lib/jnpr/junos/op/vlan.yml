@@ -2,6 +2,7 @@
 VlanTable:
   rpc: get-vlan-information
   item: vlan
+  key: vlan-name
   view: VlanView
 
 VlanView:
