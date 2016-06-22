@@ -70,7 +70,7 @@ class TestDevice(unittest.TestCase):
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
 
-        self.dev = Device(host='1.1.1.1', user='rick', password='password123',
+        self.dev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.dev.open()
 
@@ -79,7 +79,7 @@ class TestDevice(unittest.TestCase):
         self.dev.close()
 
     def test_new_console_return(self):
-        dev = Device(host='1.1.1.1', user='rick', password='password123', port=23,
+        dev = Device(host='1.1.1.1', user='test', password='password123', port=23,
                      gather_facts=False)
         self.assertTrue(isinstance(dev, Console))
 
@@ -148,7 +148,7 @@ class TestDevice(unittest.TestCase):
                 self.assertEqual(self.dev.logfile, handle)
 
     def test_device_host_mand_param(self):
-        self.assertRaises(ValueError, Device, user='rick',
+        self.assertRaises(ValueError, Device, user='test',
                           password='password123',
                           gather_facts=False)
 
@@ -165,7 +165,7 @@ class TestDevice(unittest.TestCase):
             self.assertEqual(type(ex), ValueError)
 
     def test_device_repr(self):
-        localdev = Device(host='1.1.1.1', user='rick', password='password123',
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
 
@@ -215,7 +215,7 @@ class TestDevice(unittest.TestCase):
             mock_execute.side_effect = self._mock_manager
             self.dev2 = Device(
                 host='2.2.2.2',
-                user='rick',
+                user='test',
                 password='password123')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
@@ -245,7 +245,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
     def test_device_user(self):
-        self.assertEqual(self.dev.user, 'rick')
+        self.assertEqual(self.dev.user, 'test')
 
     def test_device_get_password(self):
         self.assertEqual(self.dev.password, None)
@@ -269,7 +269,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_open_normalize(self, mock_connect, mock_execute):
         mock_connect.side_effect = self._mock_manager
-        self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+        self.dev2 = Device(host='2.2.2.2', user='test', password='password123')
         self.dev2.open(gather_facts=False, normalize=True)
         self.assertEqual(self.dev2.transform, self.dev2._norm_transform)
 
