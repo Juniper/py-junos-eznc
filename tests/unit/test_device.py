@@ -18,6 +18,7 @@ from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.console import Console
 
 if sys.version<'3':
     builtin_string = '__builtin__'
@@ -76,6 +77,11 @@ class TestDevice(unittest.TestCase):
     @patch('ncclient.operations.session.CloseSession.request')
     def tearDown(self, mock_session):
         self.dev.close()
+
+    def test_new_console_return(self):
+        dev = Device(host='1.1.1.1', user='rick', password='password123', port=23,
+                     gather_facts=False)
+        self.assertTrue(isinstance(dev, Console))
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectAuthError(self, mock_manager):
