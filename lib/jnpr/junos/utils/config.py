@@ -239,6 +239,7 @@ class Config(Util):
             * "conf","text","txt" is curly-text-style
             * "set" - ascii-text, set-style
             * "xml" - ascii-text, XML
+            * "set" - ascii-text, json
 
             .. note:: The format can specifically set using **format**.
 
@@ -310,6 +311,8 @@ class Config(Util):
                 return 'text'
             if ext in ['.set']:
                 return 'set'
+            if ext in ['.json']:
+                return 'json'
             raise ValueError("Unknown file contents from extension: %s" % ext)
 
         def _lset_format(kvargs, rpc_xattrs):
