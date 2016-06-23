@@ -22,7 +22,7 @@ Operating Systems
 
     sudo apt-get install -y python-dev libxslt1-dev libssl-dev libffi-dev
 
-#### Step 3: Install PyPI (the Python Package Index) from source
+#### Step 3: Install the pip package manager from source
 
 	wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
 	
