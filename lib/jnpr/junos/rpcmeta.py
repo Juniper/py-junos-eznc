@@ -58,6 +58,8 @@ class _RpcMetaExec(object):
 
         format='text', then :contents: is a string containing Junos configuration in curly-brace/text format
 
+        format='json', then :contents: is a string containing Junos configuration in json format
+
         <otherwise> :contents: is XML structure
         """
         rpc = E('load-configuration', options)
@@ -66,6 +68,8 @@ class _RpcMetaExec(object):
             rpc.append(E('configuration-set', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))
+        elif ('format' in options) and (options['format'] == 'json'):
+            rpc.append(E('configuration-json', contents))
         else:
             # otherwise, it's just XML Element
             if contents.tag != 'configuration':
