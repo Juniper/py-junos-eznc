@@ -4,11 +4,11 @@ from nose.plugins.attrib import attr
 from mock import MagicMock, patch
 import re
 import sys
-from telnetlib import Telnet
+import os
+from lxml import etree
 
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
-from jnpr.junos.transport.tty_telnet import Telnet
 
 
 if sys.version<'3':
@@ -107,5 +107,38 @@ class TestConsole(unittest.TestCase):
         cu.commit()
 
 
+    @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
+    @patch('jnpr.junos.transport.tty_telnet.Telnet.rawwrite')
+    def test_console_rpc_call(self, mock_write, mock_rcv):
+        mock_rcv.side_effect = self._mock_manager
+        self.dev.rpc.get_chassis_inventory()
+        self.assertTrue(mock_rcv.called)
 
+    @patch('jnpr.junos.transport.tty_netconf.remove_namespaces')
+    @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
+    @patch('jnpr.junos.transport.tty_telnet.Telnet.rawwrite')
+    def test_console_rpc_call_exception(self, mock_write, mock_rcv, mock_ns):
+        mock_rcv.return_value = etree.fromstring('<output>testing</output>')
+        mock_ns.side_effect = IndexError('testing')
+        op = self.dev.rpc.get_chassis_inventory()
+        self.assertEqual(op.tag, 'output')
 
+    # below 2 function will be used in future.
+    def _mock_manager(self, *args, **kwargs):
+        if args:
+            return self._read_file(args[0].tag + '.xml')
+
+    def _read_file(self, fname):
+        from ncclient.xml_ import NCElement
+
+        fpath = os.path.join(os.path.dirname(__file__),
+                             'rpc-reply', fname)
+        with open(fpath) as fp:
+            foo = fp.read()
+        if fname == 'get-system-users-information.xml':
+            return NCElement(foo,
+                             self.dev._conn._device_handler.transform_reply())
+        rpc_reply = NCElement(foo, self.dev._conn.
+                              _device_handler.transform_reply()) \
+            ._NCElement__doc[0]
+        return rpc_reply
