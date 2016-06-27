@@ -49,6 +49,7 @@ class Terminal(object):
         _re_pat_login,
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
+        '(?P<already_closed>session end at .*\n%)',
         '(?P<shell>%|#\s*$)',
         '(?P<cli>[^\\-"]>\s*$)',
         '(?P<option>Enter your option:\s*$)',
@@ -140,10 +141,15 @@ class Terminal(object):
         def _ev_cli():
             self.write('exit')
 
+        # Connection closed by foreign host
+        def _ev_already_closed():
+            return True
+
         _ev_tbl = {
             'login': _ev_login,
             'shell': _ev_shell,
-            'cli': _ev_cli
+            'cli': _ev_cli,
+            'already_closed': _ev_already_closed
         }
 
         ### hack for now
@@ -155,8 +161,9 @@ class Terminal(object):
         else:
             return True
 
-        if found == 'login':
+        if found == 'login' or found == 'already_closed':
             return True
+
         else:
             sleep(1)
             self._logout_state_machine(attempt=attempt + 1)
@@ -192,8 +199,6 @@ class Terminal(object):
             self.state = self._ST_BAD_PASSWD
             self.write('\n')
             self._badpasswd += 1
-            # if self._badpasswd == 3:
-            #     self.passwd = 'pass123'
             if self._badpasswd == 5:
                 raise RuntimeError("bad_passwd")
             # return through and try again ... could have been
