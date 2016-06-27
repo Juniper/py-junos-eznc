@@ -220,6 +220,27 @@ class TestConfig(unittest.TestCase):
 
         self.assertEqual(self.conf.load(textdata), 'rpc_contents')
 
+    def test_config_load_with_format_json(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=etree.fromstring("""<load-configuration-results>
+                            <ok/>
+                        </load-configuration-results>"""))
+        op = self.conf.load('test.json', format='json')
+        self.assertEqual(op.tag, 'load-configuration-results')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
+    @patch(builtin_string + '.open')
+    def test_config_load_with_format_json_from_file_ext(self, mock_open):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=etree.fromstring("""<load-configuration-results>
+                            <ok/>
+                        </load-configuration-results>"""))
+        op = self.conf.load(path='test.json')
+        self.assertEqual(op.tag, 'load-configuration-results')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
     @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
