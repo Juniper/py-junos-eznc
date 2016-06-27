@@ -8,13 +8,23 @@ from datetime import datetime, timedelta
 from jnpr.junos.jxml import remove_namespaces
 from jnpr.junos import exception as EzErrors
 
+import six
+
+
+class PY6:
+    NEW_LINE = six.b('\n')
+    EMPTY_STR = six.b('')
+    NETCONF_EOM = six.b(']]>]]>')
+    STARTS_WITH = six.b("<!--")
+
 __all__ = ['xmlmode_netconf']
 
-_NETCONF_EOM = ']]>]]>'
-_xmlns = re.compile('xmlns=[^>]+')
-_xmlns_strip = lambda text: _xmlns.sub('', text)
-_junosns = re.compile('junos:')
-_junosns_strip = lambda text: _junosns.sub('', text)
+_NETCONF_EOM = six.b(']]>]]>')
+_xmlns = re.compile(six.b('xmlns=[^>]+'))
+_xmlns_strip = lambda text: _xmlns.sub(PY6.EMPTY_STR, text)
+_junosns = re.compile(six.b('junos:'))
+_junosns_strip = lambda text: _junosns.sub(PY6.EMPTY_STR, text)
+
 
 # =========================================================================
 # xmlmode_netconf
@@ -45,7 +55,7 @@ class tty_netconf(object):
         while datetime.now() < mark_end:
             time.sleep(0.1)
             line = self._tty.read()
-            if line.startswith("<!--"):
+            if line.startswith(PY6.STARTS_WITH):
                 break
         else:
             # exceeded the while loop timeout
@@ -64,70 +74,9 @@ class tty_netconf(object):
         self.rpc('close-session')
         # removed flush
 
-    """
-    #using PyEz config methods ....
-
-    # -------------------------------------------------------------------------
-    # Junos OS configuration methods
-    # -------------------------------------------------------------------------
-
-    def load(self, content, **kvargs):
-
-        #load-override a Junos 'conf'-style file into the device.  if the
-        #load is successful, return :True:, otherwise return the XML reply
-        #structure for further processing
-
-        action = kvargs.get('action', 'override')
-        cmd = E('load-configuration', dict(format='text', action=action),
-                E('configuration-text', content)
-                )
-        rsp = self.rpc(etree.tostring(cmd))
-        return rsp if rsp.findtext('.//ok') is None else True
-
-    def commit_check(self):
-
-        #performs the Junos 'commit check' operation.  if successful return
-        #:True: otherwise return the response as XML for further processing.
-
-        rsp = self.rpc('<commit-configuration><check/></commit-configuration>')
-        return True if 'ok' == rsp.tag else rsp
-
-    def commit(self):
-
-        #performs the Junos 'commit' operation.  if successful return
-        #:True: otherwise return the response as XML for further processing.
-
-        rsp = self.rpc('<commit-configuration/>')
-        if 'ok' == rsp.tag:
-            return True     # some devices use 'ok'
-        if len(rsp.xpath('.//commit-success')) > 0:
-            return True
-        return rsp
-
-    def rollback(self):
-        #rollback that recent changes
-        cmd = E('load-configuration', dict(compare='rollback', rollback="0"))
-        return self.rpc(etree.tostring(cmd))
-    """
-
     # -------------------------------------------------------------------------
     # MISC device commands
     # -------------------------------------------------------------------------
-
-    """" using pyEz reboot methods
-    def reboot(self, in_min=0):
-        #issue a reboot to the device
-        cmd = E('request-reboot', E('in', str(in_min)))
-        rsp = self.rpc(etree.tostring(cmd))
-        return True
-
-    # using Pyez poweroff method
-    def poweroff(self, in_min=0):
-        # issue a reboot to the device
-        cmd = E('request-power-off', E('in', str(in_min)))
-        rsp = self.rpc(etree.tostring(cmd))
-        return True
-    """
 
     def zeroize(self):
         """ issue a reboot to the device """
@@ -137,40 +86,6 @@ class tty_netconf(object):
         except:
             pass
         return True
-
-    """" disabling for now
-    def enablecluster(self, cluster_id, node):
-        #issue request chassis cluster command
-        cmd = E('set-chassis-cluster-enable',
-                E('cluster-id',
-                  str(cluster_id)),
-                E('node',
-                  str(node)),
-                E('reboot'))
-        rsp = self.rpc(etree.tostring(cmd))
-        # device will be set to new cluster ID:NODE value
-        return True
-
-    def disablecluster(self):
-        # issue set chassis cluster disable to the device nad reboot
-        cmd = E.command('set chassis cluster disable reboot')
-        rsp = self.rpc(etree.tostring(cmd))
-        # No need to check error exception, device will be rebooted even if not
-        # in cluster
-        return True
-
-    def enablecluster(self, cluster_id, node):
-            # issue request chassis cluster command
-        cmd = E('set-chassis-cluster-enable',
-                E('cluster-id',
-                  str(cluster_id)),
-                E('node',
-                  str(node)),
-                E('reboot'))
-        rsp = self.rpc(etree.tostring(cmd))
-        # device will be set to new cluster ID:NODE value
-        return True
-    """
 
     # -------------------------------------------------------------------------
     # XML RPC command execution
@@ -193,7 +108,7 @@ class tty_netconf(object):
         """
         if not cmd.startswith('<'):
             cmd = '<{0}/>'.format(cmd)
-        self._tty.rawwrite('<rpc>{0}</rpc>'.format(cmd))
+        self._tty.rawwrite(six.b('<rpc>{0}</rpc>'.format(cmd)))
         rsp = self._receive()
         try:
             rsp = remove_namespaces(rsp[0])  # return first child after the <rpc-reply>
@@ -220,7 +135,7 @@ class tty_netconf(object):
 
     def _receive(self):
         """ process the XML response into an XML object """
-        rxbuf = ''
+        rxbuf = PY6.EMPTY_STR
         while True:
             try:
                 rd, wt, err = select.select([self._tty._rx], [], [], 0.1)
@@ -229,7 +144,7 @@ class tty_netconf(object):
             except socket.error as err:
                 raise err
             if rd:
-                line = rd[0].read_until(']]>]]>', 0.1)
+                line = rd[0].read_until(PY6.NETCONF_EOM, 0.1)
                 if not line:
                     continue
                 if _NETCONF_EOM in line:
@@ -243,10 +158,10 @@ class tty_netconf(object):
 
         rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
         rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
-        rxbuf = map(_junosns_strip, rxbuf)  # nuke junos: namespace
+        rxbuf = list(map(_junosns_strip, rxbuf))  # nuke junos: namespace
         try:
-            rxbuf = [i.strip() for i in rxbuf if i.strip()!='']
-            as_xml = etree.XML('\n'.join(rxbuf))
+            rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
+            as_xml = etree.XML(PY6.NEW_LINE.join(rxbuf))
             return as_xml
         except:
             if '</xnm:error>' in rxbuf:

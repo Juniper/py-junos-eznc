@@ -1,14 +1,22 @@
 from time import sleep
 import telnetlib
 import logging
-
-logger = logging.getLogger("jnpr.junos.tty_telnet")
+import six
 
 from jnpr.junos.transport.tty import Terminal
+
+logger = logging.getLogger("jnpr.junos.tty_telnet")
 
 # -------------------------------------------------------------------------
 # Terminal connection over TELNET CONSOLE
 # -------------------------------------------------------------------------
+
+
+class PY6:
+    NEW_LINE = six.b('\n')
+    EMPTY_STR = six.b('')
+    NETCONF_EOM = six.b(']]>]]>')
+    IN_USE = six.b('in use')
 
 
 class Telnet(Terminal):
@@ -66,7 +74,7 @@ class Telnet(Terminal):
 
     def write(self, content):
         """ write content + <ENTER> """
-        self._tn.write(content + '\n')
+        self._tn.write(six.b((content + '\n')))
 
     def rawwrite(self, content):
         """ write content as-is """
@@ -74,10 +82,11 @@ class Telnet(Terminal):
 
     def read(self):
         """ read a single line """
-        return self._tn.read_until('\n', self.EXPECT_TIMEOUT)
+        return self._tn.read_until(PY6.NEW_LINE, self.EXPECT_TIMEOUT)
 
     def read_prompt(self):
-        got = self._tn.expect(Terminal._RE_PAT, self.EXPECT_TIMEOUT)
-        if 'in use' in got[2]:
+        _RE_PAT = [six.b(i) for i in Terminal._RE_PAT]
+        got = self._tn.expect(_RE_PAT, self.EXPECT_TIMEOUT)
+        if PY6.IN_USE in got[2]:
             raise RuntimeError("open_fail: port already in use")
         return (None, None) if not got[1] else (got[2], got[1].lastgroup)
