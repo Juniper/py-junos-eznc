@@ -5,6 +5,7 @@ Used by the 'netconify' shell utility.
 import traceback
 from lxml import etree
 import sys
+import warnings
 
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
@@ -198,8 +199,31 @@ class Console(object):
             raise ex
         self.connected = True
         if self.gather_facts is True:
-            self._gather_facts()
+            self.facts_refresh()
         return self
+
+    def facts_refresh(self, exception_on_failure=False):
+        """
+        Reload the facts from the Junos device into :attr:`facts` property.
+
+        :param bool exception_on_failure: To raise exception or warning when
+                             facts gathering errors out.
+
+        """
+        logger.debug('facts: retrieving device facts...')
+        for gather in FACT_LIST:
+            try:
+                gather(self, self._facts)
+            except:
+                if exception_on_failure:
+                    raise
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call '
+                              '"dev.facts_refresh(exception_on_failure=True)"',
+                              RuntimeWarning)
+                self.results['facts'] = self._facts
+                return
+        self.results['facts'] = self._facts
 
     def close(self, skip_logout=False):
         """
@@ -262,12 +286,6 @@ class Console(object):
         self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True
-
-    def _gather_facts(self):
-        logger.debug('facts: retrieving device facts...')
-        for gather in FACT_LIST:
-            gather(self, self._facts)
-        self.results['facts'] = self._facts
 
     # -----------------------------------------------------------------------
     # Context Manager

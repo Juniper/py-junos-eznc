@@ -73,7 +73,7 @@ class TestConsole(unittest.TestCase):
     def test_console_gather_facts(self, mock_fact_list, mock_rpc):
         from jnpr.junos.facts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
-        self.dev._gather_facts()
+        self.dev.facts_refresh()
         self.assertEqual(mock_rpc.call_count, 1)
 
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
