@@ -4,6 +4,7 @@ Used by the 'netconify' shell utility.
 """
 import traceback
 from lxml import etree
+import sys
 
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
@@ -16,6 +17,7 @@ QFX_MODE_NODE = 'NODE'
 QFX_MODE_SWITCH = 'SWITCH'
 
 logger = logging.getLogger("jnpr.junos.console")
+
 
 class Console(object):
 
@@ -30,7 +32,8 @@ class Console(object):
             *OPTIONAL* login user-name, uses root if not provided
 
         :param str passwd:
-            *OPTIONAL* in console connection for device at zeroized state password is not required
+            *OPTIONAL* in console connection for device at zeroized state
+            password is not required
 
         :param int port:
             *OPTIONAL*  port, default is telnet port `23`
@@ -70,9 +73,14 @@ class Console(object):
         self._skip_logout = False
         self.results = dict(changed=False, failed=False, errmsg=None)
 
-        self._hostname = kvargs.get('host') # hostname is not required in serial mode connection
+        # hostname is not required in serial mode connection
+        self._hostname = kvargs.get('host')
         self._auth_user = kvargs.get('user', 'root')
-        self._auth_password = kvargs.get('password', '') or kvargs.get('passwd', '')
+        self._auth_password = kvargs.get(
+            'password',
+            '') or kvargs.get(
+            'passwd',
+            '')
         self._port = kvargs.get('port', '23')
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
@@ -81,10 +89,15 @@ class Console(object):
         self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
         from jnpr.junos import Device
-        self.cli = lambda cmd, format='text', warning=True: \
-            Device.cli.im_func(self, cmd, format, warning)
+        if sys.version < '3':
+            self.cli = lambda cmd, format='text', warning=True: \
+                Device.cli.im_func(self, cmd, format, warning)
+            self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
+        else:
+            self.cli = lambda cmd, format='text', warning=True: \
+                Device.cli(self, cmd, format, warning)
+            self._sshconf_path = lambda: Device._sshconf_lkup(self)
         self._ssh_config = kvargs.get('ssh_config')
-        self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
 
     # ------------------------------------------------------------------------
     # property: hostname
@@ -164,9 +177,10 @@ class Console(object):
         # ---------------------------------------------------------------
 
         if self._mode.upper() is 'TELNET' and self._hostname is None:
-             self.results['failed'] = True
-             self.results['errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
-             return self.results
+            self.results['failed'] = True
+            self.results[
+                'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
+            return self.results
 
         # --------------------
         # login to the CONSOLE
@@ -175,7 +189,9 @@ class Console(object):
             self._tty_login()
         except RuntimeError as err:
             logger.error("ERROR:  {0}:{1}\n".format('login', str(err)))
-            logger.error("\nComplete traceback message: {0}".format(traceback.format_exc()))
+            logger.error(
+                "\nComplete traceback message: {0}".format(
+                    traceback.format_exc()))
             raise RuntimeError
         except Exception as ex:
             logger.error("Exception occurred: {0} \n".format('login', str(ex)))
@@ -185,7 +201,7 @@ class Console(object):
             self._gather_facts()
         return self
 
-    def close(self, skip_logout = False):
+    def close(self, skip_logout=False):
         """
         Closes the connection to the device.
         """
@@ -201,7 +217,9 @@ class Console(object):
                 self._tty._tty_close()
             except Exception as err:
                 logger.error("ERROR {0}:{1}\n".format('close', str(err)))
-                logger.error("\nComplete traceback message: {0}".format(traceback.format_exc()))
+                logger.error(
+                    "\nComplete traceback message: {0}".format(
+                        traceback.format_exc()))
                 raise err
             self.connected = False
 
@@ -238,7 +256,6 @@ class Console(object):
     def _tty_logout(self):
         self._tty.logout()
 
-
     def zeroize(self):
         """ perform device ZEROIZE actions """
         logger.debug("zeroize : ZEROIZE device, rebooting")
@@ -261,5 +278,5 @@ class Console(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-            if self.connected:
-                self.close()
+        if self.connected:
+            self.close()
