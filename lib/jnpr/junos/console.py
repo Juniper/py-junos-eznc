@@ -94,10 +94,14 @@ class Console(object):
             self.cli = lambda cmd, format='text', warning=True: \
                 Device.cli.im_func(self, cmd, format, warning)
             self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
+            self.facts_refresh = lambda exception_on_failure=False: \
+                Device.facts_refresh.im_func(self, exception_on_failure)
         else:
             self.cli = lambda cmd, format='text', warning=True: \
                 Device.cli(self, cmd, format, warning)
             self._sshconf_path = lambda: Device._sshconf_lkup(self)
+            self.facts_refresh = lambda exception_on_failure=False: \
+                Device.facts_refresh(self, exception_on_failure)
         self._ssh_config = kvargs.get('ssh_config')
 
     # ------------------------------------------------------------------------
@@ -199,31 +203,33 @@ class Console(object):
             raise ex
         self.connected = True
         if self.gather_facts is True:
+            logger.debug('facts: retrieving device facts...')
             self.facts_refresh()
+            self.results['facts'] = self._facts
         return self
 
-    def facts_refresh(self, exception_on_failure=False):
-        """
-        Reload the facts from the Junos device into :attr:`facts` property.
-
-        :param bool exception_on_failure: To raise exception or warning when
-                             facts gathering errors out.
-
-        """
-        logger.debug('facts: retrieving device facts...')
-        for gather in FACT_LIST:
-            try:
-                gather(self, self._facts)
-            except:
-                if exception_on_failure:
-                    raise
-                warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call '
-                              '"dev.facts_refresh(exception_on_failure=True)"',
-                              RuntimeWarning)
-                self.results['facts'] = self._facts
-                return
-        self.results['facts'] = self._facts
+    # def facts_refresh(self, exception_on_failure=False):
+    #     """
+    #     Reload the facts from the Junos device into :attr:`facts` property.
+    #
+    #     :param bool exception_on_failure: To raise exception or warning when
+    #                          facts gathering errors out.
+    #
+    #     """
+    #     logger.debug('facts: retrieving device facts...')
+    #     for gather in FACT_LIST:
+    #         try:
+    #             gather(self, self._facts)
+    #         except:
+    #             if exception_on_failure:
+    #                 raise
+    #             warnings.warn('Facts gathering is incomplete. '
+    #                           'To know the reason call '
+    #                           '"dev.facts_refresh(exception_on_failure=True)"',
+    #                           RuntimeWarning)
+    #             self.results['facts'] = self._facts
+    #             return
+    #     self.results['facts'] = self._facts
 
     def close(self, skip_logout=False):
         """

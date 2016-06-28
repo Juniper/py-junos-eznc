@@ -1,5 +1,6 @@
 import serial
 import re
+import six
 from time import sleep
 from datetime import datetime, timedelta
 
@@ -9,7 +10,7 @@ from jnpr.junos.transport.tty import Terminal
 # Terminal connection over SERIAL CONSOLE
 # -------------------------------------------------------------------------
 
-_PROMPT = re.compile('|'.join(Terminal._RE_PAT))
+_PROMPT = re.compile(six.b('|').join([six.b(i) for i in Terminal._RE_PAT]))
 
 
 class Serial(Terminal):
@@ -75,7 +76,7 @@ class Serial(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = ''
+        rxb = six.b('')
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=self.EXPECT_TIMEOUT)
 

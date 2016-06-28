@@ -10,6 +10,7 @@ import six
 
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
+from jnpr.junos.transport.tty_telnet import Terminal
 
 
 if sys.version<'3':
@@ -28,7 +29,7 @@ class TestConsole(unittest.TestCase):
         mock_expect.side_effect=[(1, re.search('(?P<login>ogin:\s*$)', "login: "), six.b('\r\r\n ogin:')),
                                 (2, re.search('(?P<passwd>assword:\s*$)', "password: "), six.b('\r\r\n password:')),
                                 (3, re.search('(?P<shell>%|#\s*$)', "junos % "), six.b('\r\r\nroot@device:~ # '))]
-        self.dev = Console(host='1.1.1.1', user='lab', password='lab123', mode = 'Telnet')
+        self.dev = Console(host='1.1.1.1', user='lab', password='lab123', mode='Telnet')
         self.dev.open()
 
     @patch('jnpr.junos.transport.tty.tty_netconf.close')
@@ -58,6 +59,28 @@ class TestConsole(unittest.TestCase):
         mock_logout.side_effect = RuntimeError
         self.assertRaises(RuntimeError, self.dev.close)
 
+    @patch('jnpr.junos.transport.tty_telnet.Telnet')
+    @patch('jnpr.junos.console.Console._tty_login')
+    def test_console_tty_open_err(self, mock_login, mock_telnet):
+        with patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.open') as mock_open:
+            mock_telnet.RETRY_OPEN = 1
+            mock_login.side_effect = ValueError
+            self.dev._tty.LOGIN_RETRY = self.dev._tty.RETRY_OPEN = 1
+            self.assertRaises(ValueError, self.dev.open)
+
+    @patch('jnpr.junos.transport.tty_serial.Serial._tty_open')
+    @patch('jnpr.junos.transport.tty_serial.serial.Serial.readline')
+    @patch('jnpr.junos.transport.tty_serial.Serial.write')
+    def test_console_serial(self, mock_write, mock_expect, mock_open):
+        tty_netconf.open = MagicMock()
+        mock_expect.side_effect = [six.b('\r\r\n Login:'),
+                                   six.b('\r\r\n password:'),
+                                   six.b('\r\r\nroot@device:~ # ')]
+        self.dev = Console(host='1.1.1.1', user='lab', password='lab123', mode='serial')
+        self.dev.open()
+        self.assertTrue(self.dev.connected)
+        self.assertFalse(self.dev.gather_facts)
+
     # @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_close')
     # def test_console_close_error2(self, mock_close):
     #     mock_close.side_effect = RuntimeError
@@ -74,7 +97,7 @@ class TestConsole(unittest.TestCase):
         from jnpr.junos.facts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev.facts_refresh()
-        self.assertEqual(mock_rpc.call_count, 1)
+        self.assertEqual(mock_rpc.call_count, 3)
 
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
     @patch('jnpr.junos.transport.tty_netconf.select.select')
