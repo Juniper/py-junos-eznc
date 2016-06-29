@@ -84,7 +84,7 @@ class tty_netconf(object):
         try:
             rsp = self.rpc(etree.tostring(cmd))
         except:
-            pass
+            return False
         return True
 
     # -------------------------------------------------------------------------
