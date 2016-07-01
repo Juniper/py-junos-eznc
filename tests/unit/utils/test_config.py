@@ -19,10 +19,11 @@ from mock import MagicMock, patch
 from lxml import etree
 import os
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
+
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
