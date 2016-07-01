@@ -77,7 +77,8 @@ class TestRoutingEngines(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_routing_engine_exception_ret_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.dev.rpc.get_route_engine_information = MagicMock(side_effect=ValueError)
+        self.dev.rpc.get_route_engine_information = MagicMock(
+            side_effect=ValueError)
         self.assertEqual(routing_engines(self.dev, self.facts), None)
 
     def _read_file(self, fname):
@@ -104,7 +105,9 @@ class TestRoutingEngines(unittest.TestCase):
                 if self.vct is True:
                     return True
                 elif self.vcf is True:
-                    return self._read_file('get-virtual-chassis-information_mmvcf.xml')
+                    return self._read_file(
+                        'get-virtual-chassis-information_mmvcf.xml')
                 else:
-                    return self._read_file('get-virtual-chassis-information.xml')
+                    return self._read_file(
+                        'get-virtual-chassis-information.xml')
             return self._read_file(args[0].tag + '_' + self.mode + '.xml')

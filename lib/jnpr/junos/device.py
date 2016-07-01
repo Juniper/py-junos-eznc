@@ -731,7 +731,7 @@ class Device(object):
             command = command + '| display xml rpc'
             rsp = self.rpc.cli(command)
             if format == 'text':
-                return etree.tostring(rsp[0])
+                return etree.tounicode(rsp[0])
             return rsp[0]
         except:
             return "invalid command: " + command

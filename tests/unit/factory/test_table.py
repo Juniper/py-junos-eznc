@@ -16,13 +16,15 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 import sys
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
 
+
 @attr('unit')
 class TestFactoryTable(unittest.TestCase):
+
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
@@ -63,7 +65,7 @@ class TestFactoryTable(unittest.TestCase):
         self.ppt.get('ge-0/0/0')
         self.ppt.ITEM_NAME_XPATH = ['name', 'missing', 'mtu']
         self.assertEqual(self.ppt.keys(),
-                  [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
+                         [('ge-0/0/0', None, '1514'), ('ge-0/0/1', None, '1514')])
 
     @patch('jnpr.junos.Device.execute')
     def test_keys__keys_pipe(self, mock_execute):
@@ -71,7 +73,9 @@ class TestFactoryTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.lldp = LLDPNeighborTable(self.dev)
         self.lldp.get()
-        self.assertEqual(self.lldp.keys(), ['et-0/0/48', 'et-0/0/49', 'xe-0/0/13'])
+        self.assertEqual(
+            self.lldp.keys(), [
+                'et-0/0/48', 'et-0/0/49', 'xe-0/0/13'])
 
     @patch('jnpr.junos.Device.execute')
     def test_table_repr_xml_not_none(self, mock_execute):

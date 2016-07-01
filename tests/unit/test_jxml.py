@@ -32,7 +32,7 @@ class Test_JXML(unittest.TestCase):
                 </xsl:stylesheet>"""
         import xml.etree.ElementTree as ET
         parser = ET.XMLParser()
-        root   = ET.parse(StringIO(xmldata), parser)
+        root = ET.parse(StringIO(xmldata), parser)
         test = remove_namespaces(root)
         for elem in test.getiterator():
             i = elem.tag.find('}')
@@ -56,4 +56,3 @@ class Test_JXML(unittest.TestCase):
         with open(fpath) as fp:
             foo = fp.read()
         return foo
-

@@ -6,6 +6,7 @@ from nose.plugins.attrib import attr
 from jnpr.junos.op.routes import RouteTable
 import json
 
+
 @attr('functional')
 class TestTable(unittest.TestCase):
 
@@ -30,4 +31,4 @@ class TestTable(unittest.TestCase):
         tbl.get('10.48.21.71')
         self.assertEqual(
             json.loads(tbl.to_json())["10.48.21.71/32"]["protocol"],
-                         "Local")
+            "Local")

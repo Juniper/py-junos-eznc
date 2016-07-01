@@ -36,7 +36,8 @@ class TestFS(unittest.TestCase):
         self.fs._dev.rpc.file_show.assert_called_with(filename='test/cat.txt')
 
     def test_cwd(self):
-        self.fs._dev.rpc.set_cli_working_directory = MagicMock(side_effect=self._mock_manager)
+        self.fs._dev.rpc.set_cli_working_directory = MagicMock(
+            side_effect=self._mock_manager)
         folder = 'change/directory'
         self.assertEqual('change/directory', self.fs.cwd(folder))
         self.fs._dev.rpc.set_cli_working_directory.\
