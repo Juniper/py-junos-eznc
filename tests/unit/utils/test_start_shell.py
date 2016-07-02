@@ -12,6 +12,7 @@ from mock import patch, MagicMock, call
 
 @attr('unit')
 class TestStartShell(unittest.TestCase):
+
     @patch('paramiko.SSHClient')
     def setUp(self, mock_connect):
         self.dev = Device(host='1.1.1.1')
@@ -55,9 +56,9 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_wait_for_regex(self, mock_select):
         mock_select.return_value = ['> ', 2, 3]
         self.shell._chan = MagicMock()
-        #output from command: cli -c "show version"
+        # output from command: cli -c "show version"
         self.shell._chan.recv.return_value = \
-        """
+            """
         ------------
         JUNOS Services Deep Packet Inspection package [15.1
         ---(more)---

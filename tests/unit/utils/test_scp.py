@@ -13,13 +13,15 @@ from jnpr.junos.utils.scp import SCP
 
 from mock import patch
 import sys
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
 
+
 @attr('unit')
 class TestScp(unittest.TestCase):
+
     def setUp(self):
         self.dev = Device(host='1.1.1.1')
 

@@ -21,10 +21,9 @@ class FTP:
 
             from jnpr.junos.utils.ftp import FTP
             with FTP(dev) as dev_ftp:
-                dev_ftp.retrbinary('RETR ' + "/var/home/regress/file1",
-                                    open("file1", 'wb').write)
-                dev_ftp.storbinary('STOR ' + "/var/home/regress/file11",
-                                    open("file11", 'rb'))
+                dev_ftp.upload_file(local_file="testfile")
+                dev_ftp.dnload_file(local_file="testfile",
+                                             remote_file="testfile")
         """
 
         self._junos = junos

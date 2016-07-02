@@ -58,8 +58,8 @@ class TestVersionInfo(unittest.TestCase):
 
     def test_version_to_json(self):
         import json
-        self.assertEqual(eval(json.dumps(version_info('11.4R7.5'))), 
-                    {"major": [11, 4], "type": "R", "build": 5, "minor": "7"})
+        self.assertEqual(eval(json.dumps(version_info('11.4R7.5'))),
+                         {"major": [11, 4], "type": "R", "build": 5, "minor": "7"})
 
     def test_version_to_yaml(self):
         import yaml
@@ -94,7 +94,9 @@ class TestSwver(unittest.TestCase):
         self.dev.rpc.cli = MagicMock()
         self.facts['vc_capable'] = True
         _get_swver(self.dev, self.facts)
-        self.dev.rpc.cli.assert_called_with('show version all-members', format='xml')
+        self.dev.rpc.cli.assert_called_with(
+            'show version all-members',
+            format='xml')
 
     def test_get_swver_vc_capable_standalone(self):
         def raise_ex(*args):
@@ -128,7 +130,6 @@ class TestSwver(unittest.TestCase):
         self.facts['version_RE5'] = '15.3R6.6'
         software_version(self.dev, self.facts)
         self.assertEqual(self.facts['version'], '15.3R6.6')
-
 
     @patch('jnpr.junos.Device.execute')
     def test_swver_txp_master_list(self, mock_execute):

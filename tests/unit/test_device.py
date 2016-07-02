@@ -20,7 +20,7 @@ from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.console import Console
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
@@ -138,7 +138,7 @@ class TestDevice(unittest.TestCase):
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch(builtin_string + '.open', mock):
-            if sys.version >'3':
+            if sys.version > '3':
                 builtin_file = 'io.TextIOWrapper'
             else:
                 builtin_file = builtin_string + '.file'
@@ -292,9 +292,10 @@ class TestDevice(unittest.TestCase):
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
         mock_json_loads.side_effect = [ex,
-                    self._mock_manager(
-                    etree.fromstring('<get-route-information format="json"/>')
-                    )]
+                                       self._mock_manager(
+                                           etree.fromstring(
+                                               '<get-route-information format="json"/>')
+                                       )]
         self.dev.rpc.get_route_information({'format': 'json'})
         self.assertEqual(mock_json_loads.call_count, 2)
 
@@ -326,12 +327,12 @@ class TestDevice(unittest.TestCase):
                                           warning=False))
 
     #@patch('jnpr.junos.Device.execute')
-    def test_device_cli_rpc_reply_with_message(self):#, mock_execute):
+    def test_device_cli_rpc_reply_with_message(self):  # , mock_execute):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertEqual(
             '\nprotocol: operation-failed\nerror: device asdf not found\n',
-                         self.dev.cli('show interfaces terse asdf',
-                                          warning=False))
+            self.dev.cli('show interfaces terse asdf',
+                         warning=False))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
@@ -359,7 +360,7 @@ class TestDevice(unittest.TestCase):
             '<get-system-uptime-information>',
             self.dev.display_xml_rpc(
                 'show system uptime ',
-                format='text').decode('utf-8'))
+                format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
@@ -543,19 +544,19 @@ class TestDevice(unittest.TestCase):
                     fname == 'show-configuration-interfaces.xml' or
                   fname == 'show-interfaces-terse-asdf.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             elif (fname == 'show-configuration.xml' or
                   fname == 'show-system-alarms.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc
+                                      .transform_reply())._NCElement__doc
             elif fname == 'show-interface-terse.json':
                 rpc_reply = json.loads(foo)
             elif fname == 'get-route-information.json':
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc[0]
+                                      .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
@@ -585,7 +586,7 @@ class TestDevice(unittest.TestCase):
                     raise RpcError
 
             else:
-                if args[0].attrib.get('format')=='json':
+                if args[0].attrib.get('format') == 'json':
                     return self._read_file(args[0].tag + '.json')
                 return self._read_file(args[0].tag + '.xml')
 

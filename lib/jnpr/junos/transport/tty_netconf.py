@@ -82,9 +82,9 @@ class tty_netconf(object):
         """ issue a reboot to the device """
         cmd = E.command('request system zeroize')
         try:
-            rsp = self.rpc(etree.tostring(cmd))
+            rsp = self.rpc(etree.tounicode(cmd))
         except:
-            pass
+            return False
         return True
 
     # -------------------------------------------------------------------------
@@ -121,7 +121,7 @@ class tty_netconf(object):
             return etree.XML('<error-in-receive/>')
         err_msg = rsp.findtext('error-message')
         if err_msg:
-            if err_msg=='permission denied':
+            if err_msg == 'permission denied':
                 e = EzErrors.PermissionError
             else:
                 e = EzErrors.RpcError

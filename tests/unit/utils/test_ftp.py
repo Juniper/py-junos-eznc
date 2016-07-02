@@ -9,13 +9,15 @@ import jnpr.junos.utils.ftp
 
 from mock import patch
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
 
+
 @attr('unit')
 class TestFtp(unittest.TestCase):
+
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         self.dev = Device(host='1.1.1.1', user="testuser",
