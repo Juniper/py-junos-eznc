@@ -86,6 +86,8 @@ class Console(object):
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
+        # self.timeout needed by PyEZ utils
+        self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
         self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
@@ -203,33 +205,10 @@ class Console(object):
             raise ex
         self.connected = True
         if self.gather_facts is True:
-            logger.debug('facts: retrieving device facts...')
+            logger.info('facts: retrieving device facts...')
             self.facts_refresh()
             self.results['facts'] = self._facts
         return self
-
-    # def facts_refresh(self, exception_on_failure=False):
-    #     """
-    #     Reload the facts from the Junos device into :attr:`facts` property.
-    #
-    #     :param bool exception_on_failure: To raise exception or warning when
-    #                          facts gathering errors out.
-    #
-    #     """
-    #     logger.debug('facts: retrieving device facts...')
-    #     for gather in FACT_LIST:
-    #         try:
-    #             gather(self, self._facts)
-    #         except:
-    #             if exception_on_failure:
-    #                 raise
-    #             warnings.warn('Facts gathering is incomplete. '
-    #                           'To know the reason call '
-    #                           '"dev.facts_refresh(exception_on_failure=True)"',
-    #                           RuntimeWarning)
-    #             self.results['facts'] = self._facts
-    #             return
-    #     self.results['facts'] = self._facts
 
     def close(self, skip_logout=False):
         """
@@ -254,7 +233,7 @@ class Console(object):
             self.connected = False
 
     # execute rpc calls
-    def execute(self, rpc_cmd):
+    def execute(self, rpc_cmd, *args, **kwargs):
         return self._tty.nc.rpc(etree.tounicode(rpc_cmd))
 
     # -------------------------------------------------------------------------
@@ -288,7 +267,7 @@ class Console(object):
 
     def zeroize(self):
         """ perform device ZEROIZE actions """
-        logger.debug("zeroize : ZEROIZE device, rebooting")
+        logger.info("zeroize : ZEROIZE device, rebooting")
         self._tty.nc.zeroize()
         self._skip_logout = True
         self.results['changed'] = True

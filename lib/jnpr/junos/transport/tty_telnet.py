@@ -74,6 +74,7 @@ class Telnet(Terminal):
 
     def write(self, content):
         """ write content + <ENTER> """
+        logger.debug('Write: %s' % content)
         self._tn.write(six.b((content + '\n')))
 
     def rawwrite(self, content):
@@ -89,4 +90,6 @@ class Telnet(Terminal):
         got = self._tn.expect(_RE_PAT, self.EXPECT_TIMEOUT)
         if PY6.IN_USE in got[2]:
             raise RuntimeError("open_fail: port already in use")
+        if len(got)>=3:
+            logger.debug('Got: %s' % got[2])
         return (None, None) if not got[1] else (got[2], got[1].lastgroup)
