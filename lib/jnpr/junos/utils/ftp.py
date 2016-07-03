@@ -63,8 +63,8 @@ class FTP(ftplib.FTP):
                 else:
                     remote_file = os.path.join(remote_path, local_file)
             self.storbinary('STOR ' + remote_file, open(local_file, 'rb'))
-        except Exception as exp:
-            logger.error(exp.message)
+        except Exception as ex:
+            logger.error(ex)
             return False
         return True
 
@@ -91,8 +91,8 @@ class FTP(ftplib.FTP):
         try:
             self.retrbinary('RETR ' + remote_file,
                                  open(local_file, 'wb').write)
-        except Exception as exp:
-            logger.error(exp.message)
+        except Exception as ex:
+            logger.error(ex)
             return False
         return True
 
