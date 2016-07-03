@@ -32,15 +32,17 @@ class TestFtp(unittest.TestCase):
         dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev)
         assert isinstance(dev_ftp, ftplib.FTP)
 
+    @patch('ftplib.FTP.login')
     @patch('ncclient.manager.connect')
     @patch('ftplib.FTP.connect')
-    def test_ftp_open_erors(self, mock_connect, mock_ftpconnect):
-        dev2 = Device(host='1.1.1.1', user="testuser",
+    def test_ftp_open_erors(self, mock_connect, mock_ftpconnect,
+                            mock_ftplogin):
+        dev = Device(host='1.1.1.1', user="testuser",
                       passwd="testpasswd",
                       gather_facts=False)
-        dev2.open()
-        dev_ftp = jnpr.junos.utils.ftp.FTP(dev2)
-        self.assertRaises(Exception, dev_ftp.open)
+        dev.open()
+        dev_ftp = jnpr.junos.utils.ftp.FTP(dev)
+        mock_ftplogin.assert_called_with('testuser', 'testpasswd', '')
 
     @patch('ftplib.FTP.connect')
     @patch('ftplib.FTP.login')
