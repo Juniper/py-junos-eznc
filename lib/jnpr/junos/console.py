@@ -199,9 +199,9 @@ class Console(object):
             logger.error(
                 "\nComplete traceback message: {0}".format(
                     traceback.format_exc()))
-            raise RuntimeError
+            raise err
         except Exception as ex:
-            logger.error("Exception occurred: {0} \n".format('login', str(ex)))
+            logger.error("Exception occurred: {0}:{1}\n".format('login', str(ex)))
             raise ex
         self.connected = True
         if self.gather_facts is True:
