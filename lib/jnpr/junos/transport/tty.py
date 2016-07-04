@@ -199,8 +199,8 @@ class Terminal(object):
             self.state = self._ST_BAD_PASSWD
             self.write('\n')
             self._badpasswd += 1
-            if self._badpasswd == 5:
-                raise RuntimeError("bad_passwd")
+            if self._badpasswd == 2:
+                raise RuntimeError("Bad username/password")
             # return through and try again ... could have been
             # prior failed attempt
 
