@@ -1,6 +1,7 @@
 from time import sleep
 import logging
 
+from jnpr.junos import exception as EzErrors
 from jnpr.junos.transport.tty_netconf import tty_netconf
 
 logger = logging.getLogger("jnpr.junos.tty")
@@ -74,6 +75,7 @@ class Terminal(object):
           state-machine
         """
         # logic args
+        self.hostname = self.__dict__.get('host')
         self.user = kvargs.get('user', 'root')
         self.passwd = kvargs.get('passwd', '')
         self.c_user = kvargs.get('s_user', self.user)
@@ -200,7 +202,8 @@ class Terminal(object):
             self.write('\n')
             self._badpasswd += 1
             if self._badpasswd == 2:
-                raise RuntimeError("Bad username/password")
+                # raise RuntimeError("Bad username/password")
+                raise EzErrors.ConnectAuthError(self, "Bad username/password")
             # return through and try again ... could have been
             # prior failed attempt
 
