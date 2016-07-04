@@ -3,11 +3,12 @@ import time
 from lxml import etree
 import select
 import socket
+import logging
+
 from lxml.builder import E
 from datetime import datetime, timedelta
 from jnpr.junos.jxml import remove_namespaces
 from jnpr.junos import exception as EzErrors
-
 import six
 
 
@@ -25,6 +26,7 @@ _xmlns_strip = lambda text: _xmlns.sub(PY6.EMPTY_STR, text)
 _junosns = re.compile(six.b('junos:'))
 _junosns_strip = lambda text: _junosns.sub(PY6.EMPTY_STR, text)
 
+logger = logging.getLogger("jnpr.junos.tty_netconf")
 
 # =========================================================================
 # xmlmode_netconf
@@ -108,7 +110,10 @@ class tty_netconf(object):
         """
         if not cmd.startswith('<'):
             cmd = '<{0}/>'.format(cmd)
-        self._tty.rawwrite(six.b('<rpc>{0}</rpc>'.format(cmd)))
+        rpc = six.b('<rpc>{0}</rpc>'.format(cmd))
+        logger.info('Calling rpc: %s' % rpc)
+        self._tty.rawwrite(rpc)
+
         rsp = self._receive()
         try:
             rsp = remove_namespaces(rsp[0])  # return first child after the <rpc-reply>
@@ -136,6 +141,8 @@ class tty_netconf(object):
     def _receive(self):
         """ process the XML response into an XML object """
         rxbuf = PY6.EMPTY_STR
+        lastline = PY6.EMPTY_STR
+        line = PY6.EMPTY_STR
         while True:
             try:
                 rd, wt, err = select.select([self._tty._rx], [], [], 0.1)
@@ -144,7 +151,7 @@ class tty_netconf(object):
             except socket.error as err:
                 raise err
             if rd:
-                line = rd[0].read_until(PY6.NETCONF_EOM, 0.1)
+                line, lastline = rd[0].read_until(PY6.NETCONF_EOM, 0.1), line
                 if not line:
                     continue
                 if _NETCONF_EOM in line:
@@ -152,6 +159,8 @@ class tty_netconf(object):
                     break
                 else:
                     rxbuf = rxbuf+line
+                    if _NETCONF_EOM in lastline+line:
+                        break
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
             rxbuf.pop()
@@ -161,7 +170,9 @@ class tty_netconf(object):
         rxbuf = list(map(_junosns_strip, rxbuf))  # nuke junos: namespace
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
-            as_xml = etree.XML(PY6.NEW_LINE.join(rxbuf))
+            rcvd_data = PY6.NEW_LINE.join(rxbuf)
+            logger.debug('Received: \n%s' % rcvd_data)
+            as_xml = etree.XML(rcvd_data)
             return as_xml
         except:
             if '</xnm:error>' in rxbuf:

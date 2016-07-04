@@ -10,6 +10,7 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
+from jnpr.junos.utils.ftp import FTP
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
 
 """
@@ -129,9 +130,14 @@ class SW(Util):
           uses :meth:`scp._scp_progress` for basic reporting by default.
           See that class method for details.
         """
-        # execute the secure-copy with the Python SCP module
-        with SCP(self._dev, progress=progress) as scp:
-            scp.put(package, remote_path)
+        # execute FTP when connection mode if telnet
+        if hasattr(self._dev, '_mode') and self._dev._mode=='telnet':
+            with FTP(self._dev) as ftp:
+                ftp.put(package, remote_path)
+        else:
+            # execute the secure-copy with the Python SCP module
+            with SCP(self._dev, progress=progress) as scp:
+                scp.put(package, remote_path)
 
     # -------------------------------------------------------------------------
     # pkgadd - used to perform the 'request system software add ...'
