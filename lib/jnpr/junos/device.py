@@ -719,6 +719,7 @@ class Device(object):
     def display_xml_rpc(self, command, format='xml'):
         """
         Executes the CLI command and returns the CLI xml object by default.
+        
         For example::
           print dev.display_xml_rpc('show version').tag
           or
