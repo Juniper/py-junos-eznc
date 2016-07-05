@@ -871,7 +871,7 @@ class Device(object):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(intvtimeout)
             try:
-                s.connect((self.hostname, self._port))
+                s.connect((self.hostname, int(self._port)))
                 s.shutdown(socket.SHUT_RDWR)
                 s.close()
                 break
