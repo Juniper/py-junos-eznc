@@ -290,7 +290,8 @@ class Device(object):
             # __new__() is an instance of the class in which the __new__()
             # method is contained (here Device class). Hence calling __init__
             # explicitly.
-            instance.__init__(*args, **kwargs)
+            kwargs['host']=args[0] if len(args) else kwargs.get('host')
+            instance.__init__(**kwargs)
             return instance
         else:
             if sys.version < '3':
