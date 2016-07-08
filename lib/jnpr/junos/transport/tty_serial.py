@@ -57,7 +57,7 @@ class Serial(Terminal):
 
     def write(self, content):
         """ write content + <RETURN> """
-        self._ser.write(content + '\n')
+        self._ser.write(six.b(content + '\n'))
         self._ser.flush()
 
     def rawwrite(self, content):
