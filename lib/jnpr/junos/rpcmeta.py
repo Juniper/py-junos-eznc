@@ -25,9 +25,10 @@ class _RpcMetaExec(object):
         """
         retrieve configuration from the Junos device
 
-        :filter_xml: is options, defines what to retrieve.  if omitted then the entire configuration is returned
+        :filter_xml: XPath expression consisting of XML tag names separated by slashes,
+                     defines what to retrieve; when omitted then the entire configuration is returned
 
-        :options: is a dict, creates attributes for the RPC
+        :options: is a dictionary of XML attributes to set within the <get-configuration> RPC.
 
         """
         rpc = E('get-configuration', options)
