@@ -144,23 +144,17 @@ class tty_netconf(object):
         lastline = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:
-            try:
-                rd, wt, err = select.select([self._tty._rx], [], [], 0.1)
-            except select.error as err:
-                raise err
-            except socket.error as err:
-                raise err
-            if rd:
-                line, lastline = rd[0].read_until(PY6.NETCONF_EOM, 0.1), line
-                if not line:
-                    continue
-                if _NETCONF_EOM in line:
-                    rxbuf = rxbuf+line
+            line = self._tty.read()
+            if not line:
+                continue
+            if _NETCONF_EOM in line:
+                rxbuf = rxbuf+line
+                break
+            else:
+                rxbuf = rxbuf+line
+                if _NETCONF_EOM in lastline+line:
                     break
-                else:
-                    rxbuf = rxbuf+line
-                    if _NETCONF_EOM in lastline+line:
-                        break
+        lastline = line
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
             rxbuf.pop()
