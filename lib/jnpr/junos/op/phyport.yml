@@ -2,7 +2,7 @@
 PhyPortTable:
   rpc: get-interface-information
   args:
-    interface_name: '[fgx]e*'
+    interface_name: '[fgx][et]-*' 
   args_key: interface_name
   item: physical-interface
   view: PhyPortView
@@ -26,7 +26,7 @@ PhyPortStatsTable:
   rpc: get-interface-information
   args:
     extensive: True
-    interface_name: '[fgx]e*'
+    interface_name: '[fgx][et]-*' 
   args_key: interface_name
   item: physical-interface
   view: PhyPortStatsView
@@ -53,7 +53,7 @@ PhyPortErrorTable:
   rpc: get-interface-information
   args:
     extensive: True
-    interface_name: '[fgx]e*'
+    interface_name: '[fgx][et]-*' 
   args_key: interface_name
   item: physical-interface
   view: PhyPortErrorView
