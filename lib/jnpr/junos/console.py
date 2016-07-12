@@ -37,13 +37,14 @@ class Console(object):
             password is not required
 
         :param int port:
-            *OPTIONAL*  port, default is telnet port `23`
+            *OPTIONAL*  port, defaults to '23' for telnet mode and
+            '/dev/ttyUSB0' for serial.
 
         :param int baud:
             *OPTIONAL*  baud, default baud rate is 9600
 
         :param str mode:
-            *OPTIONAL*  mode, mode of connection (telnet/serial/ssh)
+            *OPTIONAL*  mode, mode of connection (telnet/serial)
             default is telnet
 
         :param int timeout:
@@ -92,19 +93,27 @@ class Console(object):
         self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
         from jnpr.junos import Device
+        self._ssh_config = kvargs.get('ssh_config')
         if sys.version < '3':
             self.cli = lambda cmd, format='text', warning=True: \
                 Device.cli.im_func(self, cmd, format, warning)
-            self._sshconf_path = lambda: Device._sshconf_lkup.im_func(self)
             self.facts_refresh = lambda exception_on_failure=False: \
                 Device.facts_refresh.im_func(self, exception_on_failure)
         else:
             self.cli = lambda cmd, format='text', warning=True: \
                 Device.cli(self, cmd, format, warning)
-            self._sshconf_path = lambda: Device._sshconf_lkup(self)
             self.facts_refresh = lambda exception_on_failure=False: \
                 Device.facts_refresh(self, exception_on_failure)
         self._ssh_config = kvargs.get('ssh_config')
+
+    @property
+    def _sshconf_path(self):
+        from jnpr.junos import Device
+        if sys.version < '3':
+            ssh_conf_fn = lambda: Device._sshconf_lkup.im_func(self)
+        else:
+            ssh_conf_fn = lambda: Device._sshconf_lkup(self)
+        return ssh_conf_fn()
 
     # ------------------------------------------------------------------------
     # property: hostname

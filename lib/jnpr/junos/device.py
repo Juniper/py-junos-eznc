@@ -319,8 +319,19 @@ class Device(object):
             *OPTIONAL* NETCONF port (defaults to 830)
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
-            facts are not gathered on call to :meth:`open`
+            *OPTIONAL* For ssh mode default is ``True``. In case of console
+            connection over telnet/serial it defaults to ``False``.
+            If ``False`` then facts are not gathered on call to :meth:`open`
+
+        :param str mode:
+            *OPTIONAL*  mode, mode for console connection (telnet/serial)
+
+        :param int baud:
+            *OPTIONAL*  baud, Used during serial console mode, default baud
+            rate is 9600
+
+        :param int attempts:
+            *OPTIONAL*  attempts, for console connection. default is 10
 
         :param bool auto_probe:
             *OPTIONAL*  if non-zero then this enables auto_probe at time of
