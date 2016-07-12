@@ -20,7 +20,7 @@ Operating Systems
 
 #### Step 2: Install OS packages required by Junos PyEZ and it's pre-requisite Python packages
 
-    sudo apt-get install -y python-dev libxslt1-dev libssl-dev libffi-dev
+    sudo apt-get install -y --force-yes python-dev libxslt1-dev libssl-dev libffi-dev
 
 #### Step 3: Install the pip package manager from source
 
