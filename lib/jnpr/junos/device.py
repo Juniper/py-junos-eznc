@@ -389,7 +389,7 @@ class Device(object):
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_path = self._sshconf_lkup()
-            # but if user or private key is explit from call, then use it.
+            # but if user or private key is explicit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
             self._ssh_private_key_file = kvargs.get('ssh_private_key_file') or self._conf_ssh_private_key_file
             self._auth_password = kvargs.get('password') or kvargs.get('passwd')
@@ -553,7 +553,7 @@ class Device(object):
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
 
-        :param func to_py':
+        :param func to_py:
           Is a caller provided function that takes the response and
           will convert the results to native python types.  all kvargs
           will be passed to this function as well in the form::
