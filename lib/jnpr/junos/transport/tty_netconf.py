@@ -133,7 +133,6 @@ class tty_netconf(object):
             raise e(cmd=cmd, rsp=rsp)
         return rsp
 
-
     # -------------------------------------------------------------------------
     # LOW-LEVEL I/O for reading back XML response
     # -------------------------------------------------------------------------
@@ -154,12 +153,12 @@ class tty_netconf(object):
                 line, lastline = rd[0].read_until(PY6.NETCONF_EOM, 0.1), line
                 if not line:
                     continue
-                if _NETCONF_EOM in line:
+                if _NETCONF_EOM in line or _NETCONF_EOM in lastline+line:
                     rxbuf = rxbuf+line
                     break
                 else:
                     rxbuf = rxbuf+line
-                    if _NETCONF_EOM in lastline+line:
+                    if _NETCONF_EOM in rxbuf:
                         break
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
