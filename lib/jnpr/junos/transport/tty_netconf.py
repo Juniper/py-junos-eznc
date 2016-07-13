@@ -171,7 +171,12 @@ class tty_netconf(object):
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
             logger.debug('Received: \n%s' % rcvd_data)
-            as_xml = etree.XML(rcvd_data)
+            try:
+                as_xml = etree.XML(rcvd_data)
+            except Exception as ex:
+                if isinstance(ex, etree.XMLSyntaxError):
+                    rcvd_data = rcvd_data[:rcvd_data.index(']]>]]>')]
+                    as_xml = etree.XML(rcvd_data)
             return as_xml
         except:
             if '</xnm:error>' in rxbuf:
