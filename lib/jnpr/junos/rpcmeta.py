@@ -25,9 +25,18 @@ class _RpcMetaExec(object):
         """
         retrieve configuration from the Junos device
 
-        :filter_xml: is options, defines what to retrieve.  if omitted then the entire configuration is returned
+        :filter_xml: fully XML formatted tag which defines what to retrieve,
+                     when omitted the entire configuration is returned;
+                     the following returns the device host-name configured with "set system host-name":
 
-        :options: is a dict, creates attributes for the RPC
+        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
+
+        :options: is a dictionary of XML attributes to set within the <get-configuration> RPC;
+                  the following returns the device host-name either configured with "set system host-name"
+                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems:
+
+        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'), 
+                 options={'database':'committed','inherit':'inherit'})
 
         """
         rpc = E('get-configuration', options)
