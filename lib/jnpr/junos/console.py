@@ -4,13 +4,12 @@ Used by the 'netconify' shell utility.
 """
 import traceback
 from lxml import etree
-import sys
-import warnings
-
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos.facts import *
+from jnpr.junos.device import _Connection
+from jnpr.junos.decorators import timeoutDecorator
 import logging
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
@@ -20,7 +19,7 @@ QFX_MODE_SWITCH = 'SWITCH'
 logger = logging.getLogger("jnpr.junos.console")
 
 
-class Console(object):
+class Console(_Connection):
 
     def __init__(self, **kvargs):
         """
@@ -88,100 +87,29 @@ class Console(object):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         # self.timeout needed by PyEZ utils
-        self.timeout = self._timeout
+        #self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
         self.gather_facts = kvargs.get('gather_facts', False)
         self.rpc = _RpcMetaExec(self)
-        from jnpr.junos import Device
         self._ssh_config = kvargs.get('ssh_config')
-        if sys.version < '3':
-            self.cli = lambda cmd, format='text', warning=True: \
-                Device.cli.im_func(self, cmd, format, warning)
-            self.facts_refresh = lambda exception_on_failure=False: \
-                Device.facts_refresh.im_func(self, exception_on_failure)
-        else:
-            self.cli = lambda cmd, format='text', warning=True: \
-                Device.cli(self, cmd, format, warning)
-            self.facts_refresh = lambda exception_on_failure=False: \
-                Device.facts_refresh(self, exception_on_failure)
-        self._ssh_config = kvargs.get('ssh_config')
+        self._manages = []
 
     @property
-    def _sshconf_path(self):
-        from jnpr.junos import Device
-        if sys.version < '3':
-            ssh_conf_fn = lambda: Device._sshconf_lkup.im_func(self)
-        else:
-            ssh_conf_fn = lambda: Device._sshconf_lkup(self)
-        return ssh_conf_fn()
-
-    # ------------------------------------------------------------------------
-    # property: hostname
-    # ------------------------------------------------------------------------
-
-    @property
-    def hostname(self):
+    def timeout(self):
         """
-        :returns: the host-name of the Junos device.
+        :returns: current console connection timeout value (int) in seconds.
         """
-        return self._hostname
+        return self._timeout
 
-    # ------------------------------------------------------------------------
-    # property: user
-    # ------------------------------------------------------------------------
+    @timeout.setter
+    def timeout(self, value):
+        """
+        Used to change the console connection timeout value (default=0.5 sec).
 
-    @property
-    def user(self):
+        :param int value:
+            New timeout value in seconds
         """
-        :returns: the login user (str) accessing the Junos device
-        """
-        return self._auth_user
-
-    # ------------------------------------------------------------------------
-    # property: password
-    # ------------------------------------------------------------------------
-
-    @property
-    def password(self):
-        """
-        :returns: ``None`` - do not provide the password
-        """
-        return None  # read-only
-
-    @password.setter
-    def password(self, value):
-        """
-        Change the authentication password value.  This is handy in case
-        the calling program needs to attempt different passwords.
-        """
-        self._auth_password = value
-
-    # ------------------------------------------------------------------------
-    # property: port
-    # ------------------------------------------------------------------------
-
-    @property
-    def port(self):
-        """
-        :returns: the port (str) to connect to the Junos device
-        """
-        return self._port
-
-    # ------------------------------------------------------------------------
-    # property: facts
-    # ------------------------------------------------------------------------
-
-    @property
-    def facts(self):
-        """
-        :returns: Device fact dictionary
-        """
-        return self._facts
-
-    @facts.setter
-    def facts(self, value):
-        """ read-only property """
-        raise RuntimeError("facts is read-only!")
+        self._timeout = value
 
     def open(self):
         """
@@ -242,6 +170,7 @@ class Console(object):
             self.connected = False
 
     # execute rpc calls
+    @timeoutDecorator
     def execute(self, rpc_cmd, *args, **kwargs):
         return self._tty.nc.rpc(etree.tounicode(rpc_cmd))
 
@@ -286,7 +215,7 @@ class Console(object):
     # -----------------------------------------------------------------------
 
     def __enter__(self):
-        self.open()
+        self._conn = self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
