@@ -22,7 +22,7 @@ OspfNeighborView:
     neighbor_adjacency_time: neighbor-adjacency-time
 
 OspfInterfaceTable:
-  rpc: get-ospf-interface-information
+  rpc: get_ospf_interface_information
   item: ospf-interface
   key: interface-name
   view: OspfInterfaceView
