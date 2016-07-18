@@ -714,7 +714,7 @@ class Device(object):
             if rsp is True:
                 return ''
             if rsp.tag in ['output', 'rpc-reply']:
-                return rsp.text
+                return etree.tostring(rsp, method="text")
             if rsp.tag == 'configuration-information':
                 return rsp.findtext('configuration-output')
             if rsp.tag == 'rpc':
