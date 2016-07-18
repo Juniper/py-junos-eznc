@@ -56,7 +56,12 @@ class FTP(ftplib.FTP):
                 if not remote_path:
                     remote_file = '/tmp/' + mat.group(1)
                 else:
-                    remote_file = os.path.join(remote_path, mat.group(1))
+                    if re.search('^.*/(.*)$', remote_path) and \
+                            re.search('\.\w+$', remote_path):
+                        remote_file = remote_path
+                        # Looks like remote path is given as file location
+                    else:
+                        remote_file = os.path.join(remote_path, mat.group(1))
             else:
                 if not remote_path:
                     remote_file = os.path.join('/tmp/', local_file)
