@@ -226,14 +226,14 @@ class CfgTable(Table):
 
         def _validate_min_max_value(field_name, value, opt):
             if isinstance(value, (int, float)):
-                if value < opt['minValue'] or value >= opt['maxValue']:
+                if value < opt['minValue'] or value > opt['maxValue']:
                     raise ValueError(
                             'Invalid value %s assigned '
                             'to field %s.\n' % (value, field_name)
                     )
             elif isinstance(value, str):
                 if len(value) < opt['minValue'] or \
-                                len(value) >= opt['maxValue']:
+                                len(value) > opt['maxValue']:
                     raise ValueError(
                             'Invalid value %s assigned '
                             'to field %s.\n' % (value, field_name)
