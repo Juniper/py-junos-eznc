@@ -55,10 +55,11 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         path = os.path.join(path[0], template)
         mtime = os.path.getmtime(path)
         with open(path) as f:
-            # You are trying to decode an object that is already decoded. You have a str,
-            # there is no need to decode from UTF-8 anymore.
+            # You are trying to decode an object that is already decoded.
+            # You have a str, there is no need to decode from UTF-8 anymore.
             # open already decodes to Unicode in Python 3 if you open in text mode.
-            # If you want to open it as bytes, so that you can then decode, you need to open with mode 'rb'.
+            # If you want to open it as bytes, so that you can then decode,
+            # you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
@@ -220,7 +221,6 @@ class _Connection(object):
                 self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
-
     def display_xml_rpc(self, command, format='xml'):
         """
         Executes the CLI command and returns the CLI xml object by default.
@@ -245,7 +245,6 @@ class _Connection(object):
             return rsp[0]
         except:
             return "invalid command: " + command
-
 
     # ------------------------------------------------------------------------
     # Template: retrieves a Jinja2 template
@@ -315,9 +314,16 @@ class _Connection(object):
             for fn in vargs:
                 # bind as instance method, majik.
                 if sys.version < '3':
-                    self.__dict__[fn.__name__] = types.MethodType(fn, self, self.__class__)
+                    self.__dict__[
+                        fn.__name__] = types.MethodType(
+                        fn,
+                        self,
+                        self.__class__)
                 else:
-                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
+                    self.__dict__[
+                        fn.__name__] = types.MethodType(
+                        fn,
+                        self.__class__)
             return
 
         # first verify that the names do not conflict with
@@ -400,10 +406,10 @@ class _Connection(object):
 
         .. note::
             You can also use this method to obtain the XML RPC command for a
-            given CLI command by using the pipe filter ``| display xml rpc``. When
-            you do this, the return value is the XML RPC command. For example if
-            you provide as the command ``show version | display xml rpc``, you will
-            get back the XML Element ``<get-software-information>``.
+            given CLI command by using the pipe filter ``| display xml rpc``.
+            When you do this, the return value is the XML RPC command. For 
+            example if you provide as the command ``show version | display xml rpc``,
+            you will get back the XML Element ``<get-software-information>``.
 
         .. warning::
             This function is provided for **DEBUG** purposes only!
@@ -441,13 +447,12 @@ class _Connection(object):
                 return rsp[0]
             return rsp
         except EzErrors.RpcError as ex:
-            if ex.message is not '':
-                return "%s: %s" % (ex.message, command)
+            if str(ex) is not '':
+                return "%s: %s" % (str(ex), command)
             else:
                 return "invalid command: " + command
         except Exception as ex:
             return "invalid command: " + command
-
 
     # ------------------------------------------------------------------------
     # facts
@@ -468,11 +473,13 @@ class _Connection(object):
                 if exception_on_failure:
                     raise
                 warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"', RuntimeWarning)
+                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
+                              RuntimeWarning)
                 return
 
 
 class Device(_Connection):
+
     """
     Junos Device class.
 
@@ -496,13 +503,13 @@ class Device(_Connection):
             dev.open()   # this will probe before attempting NETCONF connect
 
     """
-    ON_JUNOS = platform.system().upper() == 'JUNOS' or platform.release().startswith('JNPR')
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
+        platform.release().startswith('JNPR')
     auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
-
 
     # ------------------------------------------------------------------------
     # property: transform
@@ -544,7 +551,7 @@ class Device(_Connection):
             # __new__() is an instance of the class in which the __new__()
             # method is contained (here Device class). Hence calling __init__
             # explicitly.
-            kwargs['host']=args[0] if len(args) else kwargs.get('host')
+            kwargs['host'] = args[0] if len(args) else kwargs.get('host')
             instance.__init__(**kwargs)
             return instance
         else:
@@ -643,9 +650,12 @@ class Device(_Connection):
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             # but if user or private key is explicit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') or self._conf_ssh_private_key_file
-            self._auth_password = kvargs.get('password') or kvargs.get('passwd')
+            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
+                self._auth_user
+            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                or self._conf_ssh_private_key_file
+            self._auth_password = kvargs.get(
+                'password') or kvargs.get('passwd')
 
         # -----------------------------
         # initialize instance variables
@@ -857,11 +867,14 @@ class Device(_Connection):
         except RPCError as err:
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
+                'permission denied' \
+                else EzErrors.RpcError
             raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
         # Something unexpected happened - raise it up
         except Exception as err:
-            warnings.warn("An unknown exception occured - please report.", RuntimeWarning)
+            warnings.warn("An unknown exception occured - please report.",
+                          RuntimeWarning)
             raise
 
         # From 14.2 onward, junos supports JSON, so now code can be written as
@@ -877,8 +890,9 @@ class Device(_Connection):
                     return json.loads(rpc_rsp_e.text)
                 except ValueError as ex:
                     # when data is {}{.*} types
-                    if ex.message.startswith('Extra data'):
-                        return json.loads(re.sub('\s?{\s?}\s?','',rpc_rsp_e.text))
+                    if str(ex).startswith('Extra data'):
+                        return json.loads(
+                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
@@ -915,7 +929,6 @@ class Device(_Connection):
             return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
         else:
             return ret_rpc_rsp
-
 
     # -----------------------------------------------------------------------
     # Context Manager
