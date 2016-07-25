@@ -1,0 +1,22 @@
+InterfaceTable:
+  set: interfaces/interface
+  key-field:
+    - name
+    - unit_name
+  view: InterfaceView
+
+InterfaceView:
+  groups:
+    unit: unit
+    bridge: unit/family/bridge
+  fields:
+    name: name
+    disable: { 'disable' : { 'type': 'bool' } }
+    enc : encapsulation
+    native_vlan: native-vlan-id
+  fields_unit:
+    unit_name  : name
+    desc       : description
+  fields_bridge:
+    mode: interface-mode
+    vlan_list: vlan-id-list

@@ -160,7 +160,14 @@ class CfgTable(Table):
 
             add_field = self._grindfield(lxpath[-1], field_value)
             for _add in add_field:
-                if field_name in self.key_field:
+                if len(_add.attrib)>0:
+                    for i in dot.getiterator():
+                        if i.tag == _add.tag:
+                            i.attrib.update(_add.attrib)
+                            break
+                    else:
+                        dot.append(_add)
+                elif field_name in self.key_field:
                     dot.insert(0, _add)
                 else:
                     dot.append(_add)
@@ -226,20 +233,24 @@ class CfgTable(Table):
 
         def _validate_min_max_value(field_name, value, opt):
             if isinstance(value, (int, float)):
-                if value < opt['minValue'] or value > opt['maxValue']:
+                if value < opt['minValue'] or value >= opt['maxValue']:
                     raise ValueError(
                             'Invalid value %s assigned '
                             'to field %s.\n' % (value, field_name)
                     )
             elif isinstance(value, str):
                 if len(value) < opt['minValue'] or \
-                                len(value) > opt['maxValue']:
+                                len(value) >= opt['maxValue']:
                     raise ValueError(
                             'Invalid value %s assigned '
                             'to field %s.\n' % (value, field_name)
                     )
 
-        if isinstance(value, (list, tuple, dict, set)):
+        if isinstance(value, dict) and 'operation' in value:
+            # in case user want to pass operation attr for ex:
+            # <unit operation="delete"/>
+            pass
+        elif isinstance(value, (list, tuple, dict, set)):
             raise ValueError("%s value is invalid %s\n" % (field_name,  value))
         else:
             if 'type' in opt:
@@ -271,6 +282,11 @@ class CfgTable(Table):
         if isinstance(value, (list, tuple, set)):
             for v in value:
                 lst.append(E(xpath.replace('_', '-'), str(v)))
+        elif isinstance(value, bool):
+            if value is True:
+                lst.append(E(xpath.replace('_', '-')))
+        elif isinstance(value, dict) and 'operation' in value:
+            lst.append(E(xpath.replace('_', '-'), value))
         else:
             lst.append(E(xpath.replace('_', '-'), str(value)))
         return lst
