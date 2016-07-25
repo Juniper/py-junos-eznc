@@ -59,7 +59,9 @@ class Telnet(Terminal):
                 break
             except Exception as err:
                 retry -= 1
-                logger.info("TTY busy: checking back in {0} ...".format(self.RETRY_BACKOFF))
+                logger.info(
+                    "TTY busy: checking back in {0} ...".format(
+                        self.RETRY_BACKOFF))
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
@@ -90,6 +92,6 @@ class Telnet(Terminal):
         got = self._tn.expect(_RE_PAT, self.EXPECT_TIMEOUT)
         if PY6.IN_USE in got[2]:
             raise RuntimeError("open_fail: port already in use")
-        if len(got)>=3:
+        if len(got) >= 3:
             logger.debug('Got: %s' % got[2])
         return (None, None) if not got[1] else (got[2], got[1].lastgroup)
