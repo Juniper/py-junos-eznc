@@ -32,8 +32,8 @@ class CfgTable(Table):
                 self.fields = self._view.FIELDS.copy()
             else:
                 raise ValueError(
-                        "%s set table view is not defined.\n"
-                        % (self.__class__.__name__)
+                    "%s set table view is not defined.\n"
+                    % (self.__class__.__name__)
                 )
             if 'key-field' in self._data_dict:
                 key_name = self._data_dict.get('key-field', None)
@@ -43,12 +43,12 @@ class CfgTable(Table):
                     self.key_field = [key_name]
                 else:
                     raise TypeError(
-                            "Key-field %s is of invalid type %s.\n"
-                            % (key_name, type(key_name))
+                        "Key-field %s is of invalid type %s.\n"
+                        % (key_name, type(key_name))
                     )
             else:
                 raise ValueError(
-                        "Table should have key-field attribute defined\n"
+                    "Table should have key-field attribute defined\n"
                 )
             self._type = 'set'
             self._init_field()
@@ -156,11 +156,11 @@ class CfgTable(Table):
 
             lxpath = field_dict['xpath'].split('/')
             if len(lxpath) > 1:
-                dot = self._encode_xpath(top, lxpath[0:len(lxpath)-1])
+                dot = self._encode_xpath(top, lxpath[0:len(lxpath) - 1])
 
             add_field = self._grindfield(lxpath[-1], field_value)
             for _add in add_field:
-                if len(_add.attrib)>0:
+                if len(_add.attrib) > 0:
                     for i in dot.getiterator():
                         if i.tag == _add.tag:
                             i.attrib.update(_add.attrib)
@@ -221,29 +221,29 @@ class CfgTable(Table):
                 field_type = _get_field_type(opt['type'])
                 if not isinstance(value, field_type):
                     raise TypeError(
-                            'Invalid value %s asigned to field %s,'
-                            ' value should be of type %s\n'
-                            % (value, field_name, field_type)
+                        'Invalid value %s asigned to field %s,'
+                        ' value should be of type %s\n'
+                        % (value, field_name, field_type)
                     )
             else:
                 raise TypeError(
-                      'Invalid value %s, should be either of'
-                      ' type string or dictionary.\n' % (opt['type'])
+                    'Invalid value %s, should be either of'
+                    ' type string or dictionary.\n' % (opt['type'])
                 )
 
         def _validate_min_max_value(field_name, value, opt):
             if isinstance(value, (int, float)):
                 if value < opt['minValue'] or value >= opt['maxValue']:
                     raise ValueError(
-                            'Invalid value %s assigned '
-                            'to field %s.\n' % (value, field_name)
+                        'Invalid value %s assigned '
+                        'to field %s.\n' % (value, field_name)
                     )
             elif isinstance(value, str):
                 if len(value) < opt['minValue'] or \
-                                len(value) >= opt['maxValue']:
+                        len(value) >= opt['maxValue']:
                     raise ValueError(
-                            'Invalid value %s assigned '
-                            'to field %s.\n' % (value, field_name)
+                        'Invalid value %s assigned '
+                        'to field %s.\n' % (value, field_name)
                     )
 
         if isinstance(value, dict) and 'operation' in value:
@@ -251,7 +251,7 @@ class CfgTable(Table):
             # <unit operation="delete"/>
             pass
         elif isinstance(value, (list, tuple, dict, set)):
-            raise ValueError("%s value is invalid %s\n" % (field_name,  value))
+            raise ValueError("%s value is invalid %s\n" % (field_name, value))
         else:
             if 'type' in opt:
                 _validate_type(field_name, value, opt)
@@ -268,8 +268,8 @@ class CfgTable(Table):
     def _grindxpath(self, key_xpath, key_value):
         """ returns xpath elements for key values """
         simple = lambda: "[{0}='{1}']".format(
-                        key_xpath.replace('_', '-'),
-                        key_value
+            key_xpath.replace('_', '-'),
+            key_value
         )
         composite = lambda: "[{0}]".format(' and '.join(
                             ["{0}='{1}'".format(xp.replace('_', '-'), xv)
@@ -530,8 +530,8 @@ class CfgTable(Table):
                 if Junos_Configuration is not None:
                     # Convert the onbox XML to ncclient reply
                     config = jxml.conf_transform(
-                            deepcopy(jxml.cscript_conf(Junos_Configuration)),
-                            subSelectionXPath=self._get_xpath
+                        deepcopy(jxml.cscript_conf(Junos_Configuration)),
+                        subSelectionXPath=self._get_xpath
                     )
                     self.xml = config.getroot()
                 else:

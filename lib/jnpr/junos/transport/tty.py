@@ -41,7 +41,7 @@ class Terminal(object):
     _ST_BAD_PASSWD = 5
     _ST_TTY_NOLOGIN = 6
     _ST_TTY_OPTION = 7
-    _ST_TTY_HOTKEY = 8 
+    _ST_TTY_HOTKEY = 8
 
     _re_pat_login = '(?P<login>ogin:\s*$)'
 
@@ -154,9 +154,9 @@ class Terminal(object):
             'already_closed': _ev_already_closed
         }
 
-        ### hack for now
-        ### in case of telnet to management port, after writing exit on console
-        ### it exists completely and returns None
+        # hack for now
+        # in case of telnet to management port, after writing exit on console
+        # it exists completely and returns None
         ###
         if found is not None:
             _ev_tbl[found]()
@@ -244,7 +244,6 @@ class Terminal(object):
         def _ev_option():
             self.state = self._ST_TTY_OPTION
             self.write("1")
-
 
         def _ev_hot_key():
             self.state = self._ST_TTY_HOTKEY
