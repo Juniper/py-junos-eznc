@@ -440,7 +440,7 @@ class _Connection(object):
             if rsp is True:
                 return ''
             if rsp.tag in ['output', 'rpc-reply']:
-                return rsp.text
+                return etree.tounicode(rsp, method="text", with_tail=False)
             if rsp.tag == 'configuration-information':
                 return rsp.findtext('configuration-output')
             if rsp.tag == 'rpc':
