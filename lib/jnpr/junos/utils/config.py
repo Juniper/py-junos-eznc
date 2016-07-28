@@ -51,11 +51,11 @@ class Config(Util):
                             the candidate configuration on one control plane be
                             copied to the other control plane, checked for
                             correct syntax, and committed on both Routing Engines.
-        :param bool force_sync: On dual control plane systems, forces the candidate
-                            configuration on one control plane to be copied to the
-                            other control plane.
-        :param bool full: When true requires all the daemons to check and evaluate
-                            the new configuration.
+        :param bool force_sync: On dual control plane systems, forces the
+                            candidate configuration on one control plane to
+                            be copied to the other control plane.
+        :param bool full: When true requires all the daemons to check and
+                            evaluate the new configuration.
         :param bool detail: When true return commit detail as XML
 
 
@@ -217,7 +217,7 @@ class Config(Util):
     def load(self, *vargs, **kvargs):
         """
         Loads changes into the candidate configuration.  Changes can be
-        in the form of strings (text,set,xml), XML objects, and files.
+        in the form of strings (text,set,xml, json), XML objects, and files.
         Files can be either static snippets of configuration or Jinja2
         templates.  When using Jinja2 Templates, this method will render
         variables into the templates and then load the resulting change;
@@ -239,7 +239,7 @@ class Config(Util):
             * "conf","text","txt" is curly-text-style
             * "set" - ascii-text, set-style
             * "xml" - ascii-text, XML
-            * "set" - ascii-text, json
+            * "json" - ascii-text, json
 
             .. note:: The format can specifically set using **format**.
 
@@ -293,7 +293,7 @@ class Config(Util):
         # note: this cannot be used if format='set', per Junos API.
 
         overwrite = kvargs.get('overwrite', False)
-        if True == overwrite:
+        if overwrite is True:
             rpc_xattrs['action'] = 'override'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
@@ -319,7 +319,7 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs """
             # when format is given, setup the xml attrs appropriately
             if kvargs['format'] == 'set':
-                if True == overwrite:
+                if overwrite is True:
                     raise ValueError(
                         "conflicting args, cannot use 'set' with 'overwrite'")
                 rpc_xattrs['action'] = 'set'
@@ -339,8 +339,11 @@ class Config(Util):
                 kvargs['format'] = 'xml'
             elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
+            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
+                    re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'text'
+            elif re.search(r'^\s*\{', rpc) and re.search(r'.*}\s*$', rpc):
+                kvargs['format'] = 'json'
 
         def try_load(rpc_contents, rpc_xattrs):
             try:
@@ -380,7 +383,7 @@ class Config(Util):
                             "You must define the format of the contents explicitly "
                             "to the function. Ex: format='set'")
                 if kvargs['format'] == 'xml':
-                # covert the XML string into XML structure
+                    # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
             # ~! UNREACHABLE !~#
