@@ -285,6 +285,8 @@ class CfgTable(Table):
         elif isinstance(value, bool):
             if value is True:
                 lst.append(E(xpath.replace('_', '-')))
+            elif value is False:
+                lst.append(E(xpath.replace('_', '-'), {'operation': 'delete'}))
         elif isinstance(value, dict) and 'operation' in value:
             lst.append(E(xpath.replace('_', '-'), value))
         else:
