@@ -29,11 +29,12 @@ class StartShell(object):
         """
         self._nc = nc
 
-    def wait_for(self, this=_SHELL_PROMPT):
+    def wait_for(self, this=_SHELL_PROMPT, retries=600):
         """
         Wait for the result of the command, expecting **this** prompt.
 
         :param str this: expected string/pattern.
+        :param int retries: number of times to retry reading from channel
 
         :returns: resulting string of data in a list
         :rtype: list
@@ -42,7 +43,8 @@ class StartShell(object):
         """
         chan = self._chan
         got = []
-        while True:
+        found = False
+        while retries > 0:
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
                 data = chan.recv(_RECVSZ)
@@ -50,7 +52,11 @@ class StartShell(object):
                     data = data.decode('utf-8')
                 got.append(data)
                 if re.search(r'{0}\s?$'.format(this), data):
+                    found = True
                     break
+                retries -= 1
+        if not found:
+            raise TimedOutWaitingForCharacter(self._nc, this)
         return got
 
     def send(self, data):
