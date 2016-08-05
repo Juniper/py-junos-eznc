@@ -85,14 +85,14 @@ class Telnet(Terminal):
         logger.debug('rawwrite: %s' % content)
         # If baud set to 0 write full speed
         if int(self.baud) == 0:
-            self._tn.write(six.b(content))
+            self._tn.write(content)
             return None
 
         # Write data according to defined baud
         # per 1 byte of data there are 2 additional bits on the line
         # (parity and stop bits)
         for char in content:
-            self._tn.write(six.b(char))
+            self._tn.write(char)
             wtime = 10/float(self.baud)
             sleep(wtime)                          # do not remove
 
