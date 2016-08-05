@@ -184,6 +184,7 @@ class Console(_Connection):
         tty_args['passwd'] = self._auth_password
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
+        tty_args['baud'] = self._baud
         if self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
@@ -191,7 +192,6 @@ class Console(_Connection):
             self._tty = Telnet(**tty_args)
         elif self._mode.upper() == 'SERIAL':
             tty_args['port'] = self._port
-            tty_args['baud'] = self._baud
             self.console = ('serial', self._port)
             self._tty = Serial(**tty_args)
         else:
