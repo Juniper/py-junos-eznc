@@ -1,8 +1,12 @@
+import logging
 import unittest2 as unittest
+
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
+
 from jnpr.junos.transport.tty import Terminal
-import logging
+from jnpr.junos import exception as EzErrors
+
 
 
 @attr('unit')
@@ -19,6 +23,14 @@ class TestTTY(unittest.TestCase):
         self.terminal.read_prompt.return_value = (None, 'badpasswd')
         self.terminal.write = MagicMock()
         self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+
+    def test_login_bad_password_ConnectAuthError(self):
+        self.terminal._badpasswd = 1
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, 'badpasswd')
+        self.terminal.write = MagicMock()
+        self.assertRaises(EzErrors.ConnectAuthError,
+                          self.terminal._login_state_machine)
 
     def test_tty_no_login(self):
         self.terminal._badpasswd = 4
