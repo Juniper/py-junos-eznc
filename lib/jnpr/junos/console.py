@@ -172,7 +172,9 @@ class Console(_Connection):
     # execute rpc calls
     @timeoutDecorator
     def execute(self, rpc_cmd, *args, **kwargs):
-        return self._tty.nc.rpc(etree.tounicode(rpc_cmd))
+        rpc_cmd = etree.tounicode(rpc_cmd) if \
+            isinstance(rpc_cmd, etree._Element) else rpc_cmd
+        return self._tty.nc.rpc(rpc_cmd)
 
     # -------------------------------------------------------------------------
     # LOGIN/LOGOUT
