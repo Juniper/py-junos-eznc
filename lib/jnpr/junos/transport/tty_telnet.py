@@ -43,6 +43,7 @@ class Telnet(Terminal):
         self.host = host
         self.port = port
         self.timeout = kvargs.get('timeout', self.TIMEOUT)
+        self.baud = kvargs.get('baud', 9600)
         self._tty_name = "{0}:{1}".format(host, port)
 
         Terminal.__init__(self, **kvargs)
@@ -81,7 +82,19 @@ class Telnet(Terminal):
 
     def rawwrite(self, content):
         """ write content as-is """
-        self._tn.write(content)
+        logger.debug('rawwrite: %s' % content)
+        # If baud set to 0 write full speed
+        if int(self.baud) == 0:
+            self._tn.write(content)
+            return None
+
+        # Write data according to defined baud
+        # per 1 byte of data there are 2 additional bits on the line
+        # (parity and stop bits)
+        for char in content:
+            self._tn.write(char)
+            wtime = 10/float(self.baud)
+            sleep(wtime)                          # do not remove
 
     def read(self):
         """ read a single line """

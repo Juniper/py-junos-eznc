@@ -350,7 +350,7 @@ class CfgTable(Table):
             xp = '/'.join(lst[0:index])
             if not len(top.xpath(xp)):
                 dot.append(E(lst[index - 1]))
-            dot = dot[-1]
+            dot = dot.find(lst[index - 1])
         return dot
 
     def _keyspec(self):

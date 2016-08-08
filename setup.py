@@ -19,7 +19,8 @@ setup(
     packages=find_packages('lib'),
     package_data={
         'jnpr.junos.op': ['*.yml'],
-        'jnpr.junos.cfgro': ['*.yml']
+        'jnpr.junos.cfgro': ['*.yml'],
+        'jnpr.junos.resources': ['*.yml']
     },
     install_requires=install_reqs,
     classifiers=[
