@@ -33,3 +33,11 @@ class TestTTYTelnet(unittest.TestCase):
     def test_read(self):
         self.tel_conn.read()
         self.tel_conn._tn.read_until.assert_called()
+
+    def test_read_prompt_RuntimeError(self):
+        self.tel_conn.expect = MagicMock()
+        self.tel_conn.expect =(None, None, 'port already in use')
+        self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
+
+
+

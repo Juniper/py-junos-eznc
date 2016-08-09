@@ -1,15 +1,9 @@
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
-import re
 import sys
-from jnpr.junos.utils.config import Config
-
 
 from jnpr.junos.console import Console
-from jnpr.junos.transport.tty_netconf import tty_netconf
-from jnpr.junos.transport.tty_telnet import Telnet
-
 
 if sys.version < '3':
     builtin_string = '__builtin__'
@@ -43,4 +37,8 @@ class TestSerial(unittest.TestCase):
 
     def test_console_connected(self):
         self.assertTrue(self.dev.connected)
-#        self.assertFalse(self.dev.gather_facts)
+
+    def test_close_connection(self):
+        self.dev._tty._ser = MagicMock()
+        self.dev.close(skip_logout=True)
+        self.assertTrue(self.dev._tty._ser.close.called)
