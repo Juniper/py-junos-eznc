@@ -241,7 +241,8 @@ class _Connection(object):
             command = command + '| display xml rpc'
             rsp = self.rpc.cli(command)
             if format == 'text':
-                return etree.tounicode(rsp[0])
+                encode = None if sys.version < '3' else 'unicode'
+                return etree.tostring(rsp[0], encoding=encode)
             return rsp[0]
         except:
             return "invalid command: " + command
@@ -440,7 +441,9 @@ class _Connection(object):
             if rsp is True:
                 return ''
             if rsp.tag in ['output', 'rpc-reply']:
-                return etree.tounicode(rsp, method="text", with_tail=False)
+                encode = None if sys.version < '3' else 'unicode'
+                return etree.tostring(rsp, method="text", with_tail=False,
+                                      encoding=encode)
             if rsp.tag == 'configuration-information':
                 return rsp.findtext('configuration-output')
             if rsp.tag == 'rpc':

@@ -3,6 +3,7 @@ This file defines the 'netconifyCmdo' class.
 Used by the 'netconify' shell utility.
 """
 import traceback
+import sys
 from lxml import etree
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
@@ -171,7 +172,8 @@ class Console(_Connection):
     # execute rpc calls
     @timeoutDecorator
     def execute(self, rpc_cmd, *args, **kwargs):
-        rpc_cmd = etree.tounicode(rpc_cmd) if \
+        encode = None if sys.version < '3' else 'unicode'
+        rpc_cmd = etree.tostring(rpc_cmd, encoding=encode) if \
             isinstance(rpc_cmd, etree._Element) else rpc_cmd
         return self._tty.nc.rpc(rpc_cmd)
 

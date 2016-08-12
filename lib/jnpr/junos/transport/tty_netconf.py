@@ -4,6 +4,7 @@ from lxml import etree
 import select
 import socket
 import logging
+import sys
 
 from lxml.builder import E
 from datetime import datetime, timedelta
@@ -84,7 +85,8 @@ class tty_netconf(object):
         """ issue a reboot to the device """
         cmd = E.command('request system zeroize')
         try:
-            rsp = self.rpc(etree.tounicode(cmd))
+            encode = None if sys.version < '3' else 'unicode'
+            rsp = self.rpc(etree.tostring(cmd, encoding=encode))
         except:
             return False
         return True
