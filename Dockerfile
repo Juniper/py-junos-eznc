@@ -6,8 +6,6 @@ ADD requirements.txt /var/tmp/pyez/requirements.txt
 
 ADD setup.py /var/tmp/pyez/setup.py
 
-ADD env-setup.sh /var/tmp/pyez/env-setup.sh
-
 WORKDIR /var/tmp/pyez/
 
 RUN apk update \
@@ -15,8 +13,6 @@ RUN apk update \
     && apk add build-base gcc g++ make python-dev py-pip py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
     && pip install -r requirements.txt
-
-RUN sh ./env-setup.sh
 
 RUN python ./setup.py    
 
