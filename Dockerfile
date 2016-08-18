@@ -12,8 +12,9 @@ RUN apk update \
     && apk upgrade \
     && apk add build-base gcc g++ make python-dev py-pip py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    && pip install -r requirements.txt \
-    && python ./setup.py    
+    && pip install -r requirements.txt
+
+RUN  python ./setup.py    
 
 RUN apk del -r --purge gcc make g++ \
     && rm -rf /var/cache/apk/*
