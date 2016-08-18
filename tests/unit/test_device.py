@@ -18,8 +18,9 @@ from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.console import Console
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
@@ -69,13 +70,18 @@ class TestDevice(unittest.TestCase):
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
 
-        self.dev = Device(host='1.1.1.1', user='rick', password='password123',
+        self.dev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.dev.open()
 
     @patch('ncclient.operations.session.CloseSession.request')
     def tearDown(self, mock_session):
         self.dev.close()
+
+    def test_new_console_return(self):
+        dev = Device(host='1.1.1.1', user='test', password='password123', port=23,
+                     gather_facts=False)
+        self.assertTrue(isinstance(dev, Console))
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectAuthError(self, mock_manager):
@@ -132,7 +138,7 @@ class TestDevice(unittest.TestCase):
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch(builtin_string + '.open', mock):
-            if sys.version >'3':
+            if sys.version > '3':
                 builtin_file = 'io.TextIOWrapper'
             else:
                 builtin_file = builtin_string + '.file'
@@ -142,7 +148,7 @@ class TestDevice(unittest.TestCase):
                 self.assertEqual(self.dev.logfile, handle)
 
     def test_device_host_mand_param(self):
-        self.assertRaises(ValueError, Device, user='rick',
+        self.assertRaises(ValueError, Device, user='test',
                           password='password123',
                           gather_facts=False)
 
@@ -159,7 +165,7 @@ class TestDevice(unittest.TestCase):
             self.assertEqual(type(ex), ValueError)
 
     def test_device_repr(self):
-        localdev = Device(host='1.1.1.1', user='rick', password='password123',
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
 
@@ -209,7 +215,7 @@ class TestDevice(unittest.TestCase):
             mock_execute.side_effect = self._mock_manager
             self.dev2 = Device(
                 host='2.2.2.2',
-                user='rick',
+                user='test',
                 password='password123')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
@@ -239,7 +245,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
     def test_device_user(self):
-        self.assertEqual(self.dev.user, 'rick')
+        self.assertEqual(self.dev.user, 'test')
 
     def test_device_get_password(self):
         self.assertEqual(self.dev.password, None)
@@ -263,7 +269,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_open_normalize(self, mock_connect, mock_execute):
         mock_connect.side_effect = self._mock_manager
-        self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+        self.dev2 = Device(host='2.2.2.2', user='test', password='password123')
         self.dev2.open(gather_facts=False, normalize=True)
         self.assertEqual(self.dev2.transform, self.dev2._norm_transform)
 
@@ -286,9 +292,10 @@ class TestDevice(unittest.TestCase):
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
         mock_json_loads.side_effect = [ex,
-                    self._mock_manager(
-                    etree.fromstring('<get-route-information format="json"/>')
-                    )]
+                                       self._mock_manager(
+                                           etree.fromstring(
+                                               '<get-route-information format="json"/>')
+                                       )]
         self.dev.rpc.get_route_information({'format': 'json'})
         self.assertEqual(mock_json_loads.call_count, 2)
 
@@ -320,12 +327,12 @@ class TestDevice(unittest.TestCase):
                                           warning=False))
 
     #@patch('jnpr.junos.Device.execute')
-    def test_device_cli_rpc_reply_with_message(self):#, mock_execute):
+    def test_device_cli_rpc_reply_with_message(self):  # , mock_execute):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertEqual(
             '\nprotocol: operation-failed\nerror: device asdf not found\n',
-                         self.dev.cli('show interfaces terse asdf',
-                                          warning=False))
+            self.dev.cli('show interfaces terse asdf',
+                         warning=False))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
@@ -353,7 +360,7 @@ class TestDevice(unittest.TestCase):
             '<get-system-uptime-information>',
             self.dev.display_xml_rpc(
                 'show system uptime ',
-                format='text').decode('utf-8'))
+                format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
@@ -537,19 +544,19 @@ class TestDevice(unittest.TestCase):
                     fname == 'show-configuration-interfaces.xml' or
                   fname == 'show-interfaces-terse-asdf.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             elif (fname == 'show-configuration.xml' or
                   fname == 'show-system-alarms.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc
+                                      .transform_reply())._NCElement__doc
             elif fname == 'show-interface-terse.json':
                 rpc_reply = json.loads(foo)
             elif fname == 'get-route-information.json':
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc[0]
+                                      .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
@@ -579,7 +586,7 @@ class TestDevice(unittest.TestCase):
                     raise RpcError
 
             else:
-                if args[0].attrib.get('format')=='json':
+                if args[0].attrib.get('format') == 'json':
                     return self._read_file(args[0].tag + '.json')
                 return self._read_file(args[0].tag + '.xml')
 

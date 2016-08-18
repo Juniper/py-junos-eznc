@@ -11,7 +11,7 @@ import sys
 
 from six import StringIO
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
@@ -333,14 +333,15 @@ class TestSW(unittest.TestCase):
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = [
-        '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
-        '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
-        '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
-        '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
-        '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
-        '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
-        print ('nitsss', etree.tostring(mock_execute.call_args[0][0]).decode('utf-8)'))
-        self.assertTrue((etree.tostring(mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
+            '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
+            '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
+        self.assertTrue(
+            (etree.tostring(
+                mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):

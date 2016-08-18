@@ -1,5 +1,5 @@
 """
-Pythonifier for AutoSys Table/View
+Pythonifier for interface table/view
 """
 from jnpr.junos.factory import loadyaml
 from os.path import splitext

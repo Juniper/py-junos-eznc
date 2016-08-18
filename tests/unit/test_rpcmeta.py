@@ -65,6 +65,23 @@ class Test_RpcMetaExec(unittest.TestCase):
                          'text')
 
     @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_option_format_json(self, mock_execute_fn):
+        json_commands = """
+            {
+                "configuration" : {
+                    "system" : {
+                        "services" : {
+                            "telnet" : [null]
+                        }
+                    }
+                }
+            }
+        """
+        self.rpc.load_config(json_commands, format='json')
+        self.assertEqual(mock_execute_fn.call_args[0][0].get('format'),
+                         'json')
+
+    @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_vargs(self, mock_execute_fn):
         self.rpc.system_users_information(dict(format='text'))
         self.assertEqual(mock_execute_fn.call_args[0][0].get('format'),

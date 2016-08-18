@@ -25,10 +25,10 @@ import jinja2
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.cfg import Resource
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -55,46 +55,18 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         path = os.path.join(path[0], template)
         mtime = os.path.getmtime(path)
         with open(path) as f:
-            # You are trying to decode an object that is already decoded. You have a str,
-            # there is no need to decode from UTF-8 anymore.
+            # You are trying to decode an object that is already decoded.
+            # You have a str, there is no need to decode from UTF-8 anymore.
             # open already decodes to Unicode in Python 3 if you open in text mode.
-            # If you want to open it as bytes, so that you can then decode, you need to open with mode 'rb'.
+            # If you want to open it as bytes, so that you can then decode,
+            # you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
 _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
-class Device(object):
-    """
-    Junos Device class.
-
-    :attr:`ON_JUNOS`:
-        **READ-ONLY** -
-        Auto-set to ``True`` when this code is running on a Junos device,
-        vs. running on a local-server remotely connecting to a device.
-
-    :attr:`auto_probe`:
-        When non-zero the call to :meth:`open` will probe for NETCONF
-        reachability before proceeding with the NETCONF session establishment.
-        If you want to enable this behavior by default, you could do the
-        following in your code::
-
-            from jnpr.junos import Device
-
-            # set all device open to auto-probe with timeout of 10 sec
-            Device.auto_probe = 10
-
-            dev = Device( ... )
-            dev.open()   # this will probe before attempting NETCONF connect
-
-    """
-    ON_JUNOS = platform.system().upper() == 'JUNOS' or platform.release().startswith('JNPR')
-    auto_probe = 0          # default is no auto-probe
-
-    # -------------------------------------------------------------------------
-    # PROPERTIES
-    # -------------------------------------------------------------------------
+class _Connection(object):
 
     # ------------------------------------------------------------------------
     # property: hostname
@@ -218,6 +190,80 @@ class Device(object):
         raise RuntimeError("facts is read-only!")
 
     # ------------------------------------------------------------------------
+    # property: port
+    # ------------------------------------------------------------------------
+
+    @property
+    def port(self):
+        """
+        :returns: the port (str) to connect to the Junos device
+        """
+        return self._port
+
+    def _sshconf_lkup(self):
+        if self._ssh_config:
+            sshconf_path = os.path.expanduser(self._ssh_config)
+        else:
+            home = os.getenv('HOME')
+            if not home:
+                return None
+            sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
+        if not os.path.exists(sshconf_path):
+            return None
+        else:
+            sshconf = paramiko.SSHConfig()
+            with open(sshconf_path, 'r') as fp:
+                sshconf.parse(fp)
+                found = sshconf.lookup(self._hostname)
+                self._hostname = found.get('hostname', self._hostname)
+                self._port = found.get('port', self._port)
+                self._conf_auth_user = found.get('user')
+                self._conf_ssh_private_key_file = found.get('identityfile')
+            return sshconf_path
+
+    def display_xml_rpc(self, command, format='xml'):
+        """
+        Executes the CLI command and returns the CLI xml object by default.
+
+        For example::
+          print dev.display_xml_rpc('show version').tag
+          or
+          print dev.display_xml_rpc('show version', format='text')
+
+        :param str command:
+          The CLI command to retrieve XML RPC for, e.g. "show version"
+
+        :param str format:
+          The return format, by default is XML.  You can optionally select
+          "text" to return the XML structure as a string.
+        """
+        try:
+            command = command + '| display xml rpc'
+            rsp = self.rpc.cli(command)
+            if format == 'text':
+                encode = None if sys.version < '3' else 'unicode'
+                return etree.tostring(rsp[0], encoding=encode)
+            return rsp[0]
+        except:
+            return "invalid command: " + command
+
+    # ------------------------------------------------------------------------
+    # Template: retrieves a Jinja2 template
+    # ------------------------------------------------------------------------
+
+    def Template(self, filename, parent=None, gvars=None):
+        """
+        Used to return a Jinja2 :class:`Template`.
+
+        :param str filename:
+            file-path to Jinja2 template file on local device
+
+        :returns: Jinja2 :class:`Template` give **filename**.
+        """
+
+        return self._j2ldr.get_template(filename, parent, gvars)
+
+    # ------------------------------------------------------------------------
     # property: manages
     # ------------------------------------------------------------------------
 
@@ -229,6 +275,244 @@ class Device(object):
             instance using the :meth:`bind` method.
         """
         return self._manages
+
+    # ------------------------------------------------------------------------
+    # dealing with bind aspects
+    # ------------------------------------------------------------------------
+
+    def bind(self, *vargs, **kvargs):
+        """
+        Used to attach things to this Device instance and make them a
+        property of the :class:Device instance.  The most common use
+        for bind is attaching Utility instances to a :class:Device.
+        For example::
+
+            from jnpr.junos.utils.config import Config
+
+            dev.bind( cu=Config )
+            dev.cu.lock()
+            # ... load some changes
+            dev.cu.commit()
+            dev.cu.unlock()
+
+        :param list vargs:
+          A list of functions that will get bound as instance methods to
+          this Device instance.
+
+          .. warning:: Experimental.
+
+        :param new_property:
+          name/class pairs that will create resource-managers bound as
+          instance attributes to this Device instance.  See code example above
+        """
+        if len(vargs):
+            for fn in vargs:
+                # check for name clashes before binding
+                if hasattr(self, fn.__name__):
+                    raise ValueError(
+                        "request attribute name %s already exists" %
+                        fn.__name__)
+            for fn in vargs:
+                # bind as instance method, majik.
+                if sys.version < '3':
+                    self.__dict__[
+                        fn.__name__] = types.MethodType(
+                        fn,
+                        self,
+                        self.__class__)
+                else:
+                    self.__dict__[
+                        fn.__name__] = types.MethodType(
+                        fn,
+                        self.__class__)
+            return
+
+        # first verify that the names do not conflict with
+        # existing object attribute names
+
+        for name in kvargs.keys():
+            # check for name-clashes before binding
+            if hasattr(self, name):
+                raise ValueError(
+                    "requested attribute name %s already exists" %
+                    name)
+
+        # now instantiate items and bind to this :Device:
+        for name, thing in kvargs.items():
+            new_inst = thing(self)
+            self.__dict__[name] = new_inst
+            self._manages.append(name)
+
+    @property
+    def _sshconf_path(self):
+        return self._sshconf_lkup()
+
+    # ------------------------------------------------------------------------
+    # probe
+    # ------------------------------------------------------------------------
+
+    def probe(self, timeout=5, intvtimeout=1):
+        """
+        Probe the device to determine if the Device can accept a remote
+        connection.
+        This method is meant to be called *prior* to :open():
+        This method will not work with ssh-jumphost environments.
+
+        :param int timeout:
+          The probe will report ``True``/``False`` if the device report
+          connectivity within this timeout (seconds)
+
+        :param int intvtimeout:
+          Timeout interval on the socket connection. Generally you should not
+          change this value, but you can if you want to twiddle the frequency
+          of the socket attempts on the connection
+
+        :returns: ``True`` if probe is successful, ``False`` otherwise
+        """
+        start = datetime.datetime.now()
+        end = start + datetime.timedelta(seconds=timeout)
+        probe_ok = True
+
+        while datetime.datetime.now() < end:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(intvtimeout)
+            try:
+                s.connect((self.hostname, int(self._port)))
+                s.shutdown(socket.SHUT_RDWR)
+                s.close()
+                break
+            except:
+                time.sleep(1)
+                pass
+        else:
+            elapsed = datetime.datetime.now() - start
+            probe_ok = False
+
+        return probe_ok
+
+    # ------------------------------------------------------------------------
+    # cli - for cheating commands :-)
+    # ------------------------------------------------------------------------
+
+    def cli(self, command, format='text', warning=True):
+        """
+        Executes the CLI command and returns the CLI text output by default.
+
+        :param str command:
+          The CLI command to execute, e.g. "show version"
+
+        :param str format:
+          The return format, by default is text.  You can optionally select
+          "xml" to return the XML structure.
+
+        .. note::
+            You can also use this method to obtain the XML RPC command for a
+            given CLI command by using the pipe filter ``| display xml rpc``.
+            When you do this, the return value is the XML RPC command. For 
+            example if you provide as the command ``show version | display xml rpc``,
+            you will get back the XML Element ``<get-software-information>``.
+
+        .. warning::
+            This function is provided for **DEBUG** purposes only!
+            **DO NOT** use this method for general automation purposes as
+            that puts you in the realm of "screen-scraping the CLI".  The purpose of
+            the PyEZ framework is to migrate away from that tooling pattern.
+            Interaction with the device should be done via the RPC function.
+
+        .. warning::
+            You cannot use "pipe" filters with **command** such as ``| match``
+            or ``| count``, etc.  The only value use of the "pipe" is for the
+            ``| display xml rpc`` as noted above.
+        """
+        if 'display xml rpc' not in command and warning is True:
+            warnings.simplefilter("always")
+            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
+            warnings.resetwarnings()
+
+        try:
+            rsp = self.rpc.cli(command, format)
+            if isinstance(rsp, dict) and format.lower() == 'json':
+                return rsp
+            # rsp returned True means <rpc-reply> is empty, hence return
+            # empty str as would be the case on cli
+            # ex:
+            # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
+            # </rpc-reply>
+            if rsp is True:
+                return ''
+            if rsp.tag in ['output', 'rpc-reply']:
+                encode = None if sys.version < '3' else 'unicode'
+                return etree.tostring(rsp, method="text", with_tail=False,
+                                      encoding=encode)
+            if rsp.tag == 'configuration-information':
+                return rsp.findtext('configuration-output')
+            if rsp.tag == 'rpc':
+                return rsp[0]
+            return rsp
+        except EzErrors.RpcError as ex:
+            if str(ex) is not '':
+                return "%s: %s" % (str(ex), command)
+            else:
+                return "invalid command: " + command
+        except Exception as ex:
+            return "invalid command: " + command
+
+    # ------------------------------------------------------------------------
+    # facts
+    # ------------------------------------------------------------------------
+
+    def facts_refresh(self, exception_on_failure=False):
+        """
+        Reload the facts from the Junos device into :attr:`facts` property.
+
+        :param bool exception_on_failure: To raise exception or warning when
+                             facts gathering errors out.
+
+        """
+        for gather in FACT_LIST:
+            try:
+                gather(self, self._facts)
+            except:
+                if exception_on_failure:
+                    raise
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
+                              RuntimeWarning)
+                return
+
+
+class Device(_Connection):
+
+    """
+    Junos Device class.
+
+    :attr:`ON_JUNOS`:
+        **READ-ONLY** -
+        Auto-set to ``True`` when this code is running on a Junos device,
+        vs. running on a local-server remotely connecting to a device.
+
+    :attr:`auto_probe`:
+        When non-zero the call to :meth:`open` will probe for NETCONF
+        reachability before proceeding with the NETCONF session establishment.
+        If you want to enable this behavior by default, you could do the
+        following in your code::
+
+            from jnpr.junos import Device
+
+            # set all device open to auto-probe with timeout of 10 sec
+            Device.auto_probe = 10
+
+            dev = Device( ... )
+            dev.open()   # this will probe before attempting NETCONF connect
+
+    """
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
+        platform.release().startswith('JNPR')
+    auto_probe = 0          # default is no auto-probe
+
+    # -------------------------------------------------------------------------
+    # PROPERTIES
+    # -------------------------------------------------------------------------
 
     # ------------------------------------------------------------------------
     # property: transform
@@ -262,26 +546,22 @@ class Device(object):
     # CONSTRUCTOR
     # -----------------------------------------------------------------------
 
-    def _sshconf_lkup(self):
-        if self._ssh_config:
-            sshconf_path = os.path.expanduser(self._ssh_config)
+    def __new__(cls, *args, **kwargs):
+        if kwargs.get('port') in [23, '23'] or kwargs.get('mode'):
+            from jnpr.junos.console import Console
+            instance = object.__new__(Console, *args, **kwargs)
+            # Python only calls __init__() if the object returned from
+            # __new__() is an instance of the class in which the __new__()
+            # method is contained (here Device class). Hence calling __init__
+            # explicitly.
+            kwargs['host'] = args[0] if len(args) else kwargs.get('host')
+            instance.__init__(**kwargs)
+            return instance
         else:
-            home = os.getenv('HOME')
-            if not home:
-                return None
-            sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
-        if not os.path.exists(sshconf_path):
-            return None
-        else:
-            sshconf = paramiko.SSHConfig()
-            with open(sshconf_path, 'r') as fp:
-                sshconf.parse(fp)
-                found = sshconf.lookup(self._hostname)
-                self._hostname = found.get('hostname', self._hostname)
-                self._port = found.get('port', self._port)
-                self._conf_auth_user = found.get('user')
-                self._conf_ssh_private_key_file = found.get('identityfile')
-            return sshconf_path
+            if sys.version < '3':
+                return super(Device, cls).__new__(cls, *args, **kwargs)
+            else:
+                return super().__new__(cls)
 
     def __init__(self, *vargs, **kvargs):
         """
@@ -303,8 +583,19 @@ class Device(object):
             *OPTIONAL* NETCONF port (defaults to 830)
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``True``.  If ``False`` then the
-            facts are not gathered on call to :meth:`open`
+            *OPTIONAL* For ssh mode default is ``True``. In case of console
+            connection over telnet/serial it defaults to ``False``.
+            If ``False`` then facts are not gathered on call to :meth:`open`
+
+        :param str mode:
+            *OPTIONAL*  mode, mode for console connection (telnet/serial)
+
+        :param int baud:
+            *OPTIONAL*  baud, Used during serial console mode, default baud
+            rate is 9600
+
+        :param int attempts:
+            *OPTIONAL*  attempts, for console connection. default is 10
 
         :param bool auto_probe:
             *OPTIONAL*  if non-zero then this enables auto_probe at time of
@@ -361,11 +652,13 @@ class Device(object):
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
-            self._sshconf_path = self._sshconf_lkup()
-            # but if user or private key is explit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') or self._conf_ssh_private_key_file
-            self._auth_password = kvargs.get('password') or kvargs.get('passwd')
+            # but if user or private key is explicit from call, then use it.
+            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
+                self._auth_user
+            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                or self._conf_ssh_private_key_file
+            self._auth_password = kvargs.get(
+                'password') or kvargs.get('passwd')
 
         # -----------------------------
         # initialize instance variables
@@ -526,7 +819,7 @@ class Device(object):
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
 
-        :param func to_py':
+        :param func to_py:
           Is a caller provided function that takes the response and
           will convert the results to native python types.  all kvargs
           will be passed to this function as well in the form::
@@ -577,11 +870,14 @@ class Device(object):
         except RPCError as err:
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == 'permission denied' else EzErrors.RpcError
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
+                'permission denied' \
+                else EzErrors.RpcError
             raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
         # Something unexpected happened - raise it up
         except Exception as err:
-            warnings.warn("An unknown exception occured - please report.", RuntimeWarning)
+            warnings.warn("An unknown exception occured - please report.",
+                          RuntimeWarning)
             raise
 
         # From 14.2 onward, junos supports JSON, so now code can be written as
@@ -597,8 +893,9 @@ class Device(object):
                     return json.loads(rpc_rsp_e.text)
                 except ValueError as ex:
                     # when data is {}{.*} types
-                    if ex.message.startswith('Extra data'):
-                        return json.loads(re.sub('\s?{\s?}\s?','',rpc_rsp_e.text))
+                    if str(ex).startswith('Extra data'):
+                        return json.loads(
+                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
@@ -635,234 +932,6 @@ class Device(object):
             return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
         else:
             return ret_rpc_rsp
-
-    # ------------------------------------------------------------------------
-    # cli - for cheating commands :-)
-    # ------------------------------------------------------------------------
-
-    def cli(self, command, format='text', warning=True):
-        """
-        Executes the CLI command and returns the CLI text output by default.
-
-        :param str command:
-          The CLI command to execute, e.g. "show version"
-
-        :param str format:
-          The return format, by default is text.  You can optionally select
-          "xml" to return the XML structure.
-
-        .. note::
-            You can also use this method to obtain the XML RPC command for a
-            given CLI command by using the pipe filter ``| display xml rpc``. When
-            you do this, the return value is the XML RPC command. For example if
-            you provide as the command ``show version | display xml rpc``, you will
-            get back the XML Element ``<get-software-information>``.
-
-        .. warning::
-            This function is provided for **DEBUG** purposes only!
-            **DO NOT** use this method for general automation purposes as
-            that puts you in the realm of "screen-scraping the CLI".  The purpose of
-            the PyEZ framework is to migrate away from that tooling pattern.
-            Interaction with the device should be done via the RPC function.
-
-        .. warning::
-            You cannot use "pipe" filters with **command** such as ``| match``
-            or ``| count``, etc.  The only value use of the "pipe" is for the
-            ``| display xml rpc`` as noted above.
-        """
-        if 'display xml rpc' not in command and warning is True:
-            warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
-            warnings.resetwarnings()
-
-        try:
-            rsp = self.rpc.cli(command, format)
-            if isinstance(rsp, dict) and format.lower() == 'json':
-                return rsp
-            # rsp returned True means <rpc-reply> is empty, hence return
-            # empty str as would be the case on cli
-            # ex:
-            # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
-            # </rpc-reply>
-            if rsp is True:
-                return ''
-            if rsp.tag in ['output', 'rpc-reply']:
-                return rsp.text
-            if rsp.tag == 'configuration-information':
-                return rsp.findtext('configuration-output')
-            if rsp.tag == 'rpc':
-                return rsp[0]
-            return rsp
-        except EzErrors.RpcError as ex:
-            if ex.message is not '':
-                return "%s: %s" % (ex.message, command)
-            else:
-                return "invalid command: " + command
-        except Exception as ex:
-            return "invalid command: " + command
-
-    def display_xml_rpc(self, command, format='xml'):
-        """
-        Executes the CLI command and returns the CLI text output by default.
-
-        :param str command:
-          The CLI command to retrieve XML RPC for, e.g. "show version"
-
-        :param str format:
-          The return format, by default is XML.  You can optionally select
-          "text" to return the XML structure as a string.
-        """
-        try:
-            command = command + '| display xml rpc'
-            rsp = self.rpc.cli(command)
-            if format == 'text':
-                return etree.tostring(rsp[0])
-            return rsp[0]
-        except:
-            return "invalid command: " + command
-
-    # ------------------------------------------------------------------------
-    # Template: retrieves a Jinja2 template
-    # ------------------------------------------------------------------------
-
-    def Template(self, filename, parent=None, gvars=None):
-        """
-        Used to return a Jinja2 :class:`Template`.
-
-        :param str filename:
-            file-path to Jinja2 template file on local device
-
-        :returns: Jinja2 :class:`Template` give **filename**.
-        """
-
-        return self._j2ldr.get_template(filename, parent, gvars)
-
-    # ------------------------------------------------------------------------
-    # dealing with bind aspects
-    # ------------------------------------------------------------------------
-
-    def bind(self, *vargs, **kvargs):
-        """
-        Used to attach things to this Device instance and make them a
-        property of the :class:Device instance.  The most common use
-        for bind is attaching Utility instances to a :class:Device.
-        For example::
-
-            from jnpr.junos.utils.config import Config
-
-            dev.bind( cu=Config )
-            dev.cu.lock()
-            # ... load some changes
-            dev.cu.commit()
-            dev.cu.unlock()
-
-        :param list vargs:
-          A list of functions that will get bound as instance methods to
-          this Device instance.
-
-          .. warning:: Experimental.
-
-        :param new_property:
-          name/class pairs that will create resource-managers bound as
-          instance attributes to this Device instance.  See code example above
-        """
-        if len(vargs):
-            for fn in vargs:
-                # check for name clashes before binding
-                if hasattr(self, fn.__name__):
-                    raise ValueError(
-                        "request attribute name %s already exists" %
-                        fn.__name__)
-            for fn in vargs:
-                # bind as instance method, majik.
-                if sys.version<'3':
-                    self.__dict__[fn.__name__] = types.MethodType(fn, self, self.__class__)
-                else:
-                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
-            return
-
-        # first verify that the names do not conflict with
-        # existing object attribute names
-
-        for name in kvargs.keys():
-            # check for name-clashes before binding
-            if hasattr(self, name):
-                raise ValueError(
-                    "requested attribute name %s already exists" %
-                    name)
-
-        # now instantiate items and bind to this :Device:
-        for name, thing in kvargs.items():
-            new_inst = thing(self)
-            self.__dict__[name] = new_inst
-            self._manages.append(name)
-
-    # ------------------------------------------------------------------------
-    # facts
-    # ------------------------------------------------------------------------
-
-    def facts_refresh(self, exception_on_failure=False):
-        """
-        Reload the facts from the Junos device into :attr:`facts` property.
-
-        :param bool exception_on_failure: To raise exception or warning when
-                             facts gathering errors out.
-
-        """
-        for gather in FACT_LIST:
-            try:
-                gather(self, self._facts)
-            except:
-                if exception_on_failure:
-                    raise
-                warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"', RuntimeWarning)
-                return
-
-
-
-    # ------------------------------------------------------------------------
-    # probe
-    # ------------------------------------------------------------------------
-
-    def probe(self, timeout=5, intvtimeout=1):
-        """
-        Probe the device to determine if the Device can accept a remote
-        connection.
-        This method is meant to be called *prior* to :open():
-        This method will not work with ssh-jumphost environments.
-
-        :param int timeout:
-          The probe will report ``True``/``False`` if the device report
-          connectivity within this timeout (seconds)
-
-        :param int intvtimeout:
-          Timeout interval on the socket connection. Generally you should not
-          change this value, but you can if you want to twiddle the frequency
-          of the socket attempts on the connection
-
-        :returns: ``True`` if probe is successful, ``False`` otherwise
-        """
-        start = datetime.datetime.now()
-        end = start + datetime.timedelta(seconds=timeout)
-        probe_ok = True
-
-        while datetime.datetime.now() < end:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(intvtimeout)
-            try:
-                s.connect((self.hostname, self._port))
-                s.shutdown(socket.SHUT_RDWR)
-                s.close()
-                break
-            except:
-                time.sleep(1)
-                pass
-        else:
-            elapsed = datetime.datetime.now() - start
-            probe_ok = False
-
-        return probe_ok
 
     # -----------------------------------------------------------------------
     # Context Manager

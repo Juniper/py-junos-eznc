@@ -13,13 +13,15 @@ from jnpr.junos.utils.scp import SCP
 
 from mock import patch
 import sys
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
 
+
 @attr('unit')
 class TestScp(unittest.TestCase):
+
     def setUp(self):
         self.dev = Device(host='1.1.1.1')
 
@@ -48,7 +50,7 @@ class TestScp(unittest.TestCase):
     def test_scp_proxycommand(self, os_mock, open_mock, mock_paramiko,
                               mock_connect, mock_proxy):
         os_mock.path.exists.return_value = True
-        self.dev._sshconf_path = '/home/rsherman/.ssh/config'
+        #self.dev._sshconf_path = '/home/rsherman/.ssh/config'
         with SCP(self.dev) as scp:
             scp.get('addrbook.conf')
         mock_proxy.assert_called_any()

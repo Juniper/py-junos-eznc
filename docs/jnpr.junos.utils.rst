@@ -48,3 +48,11 @@ jnpr.junos.utils.util
     :members:
     :undoc-members:
     :show-inheritance:
+
+jnpr.junos.utils.ftp
+----------------------------
+
+.. automodule:: jnpr.junos.utils.ftp
+    :members:
+    :undoc-members:
+    :show-inheritance:
