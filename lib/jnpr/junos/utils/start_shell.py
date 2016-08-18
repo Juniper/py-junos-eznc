@@ -1,6 +1,7 @@
 import paramiko
 from select import select
 import re
+import datetime
 
 _JUNOS_PROMPT = '> '
 _SHELL_PROMPT = '(%|#)\s'
@@ -21,19 +22,27 @@ class StartShell(object):
 
     """
 
-    def __init__(self, nc):
+    def __init__(self, nc, timeout=30):
         """
         Utility Constructor
 
         :param Device nc: The Device object
+
+        :param int timeout:
+          Timeout value in seconds to wait for expected string/pattern.
         """
         self._nc = nc
+        self.timeout = timeout
 
-    def wait_for(self, this=_SHELL_PROMPT):
+    def wait_for(self, this=_SHELL_PROMPT, timeout=0):
         """
         Wait for the result of the command, expecting **this** prompt.
 
         :param str this: expected string/pattern.
+
+        :param int timeout:
+          Timeout value in seconds to wait for expected string/pattern.
+          If not specified defaults to self.timeout.
 
         :returns: resulting string of data in a list
         :rtype: list
@@ -42,7 +51,10 @@ class StartShell(object):
         """
         chan = self._chan
         got = []
-        while True:
+        timeout = timeout or self.timeout
+        timeout = datetime.datetime.now()+datetime.timedelta(
+            seconds=timeout)
+        while timeout > datetime.datetime.now():
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
                 data = chan.recv(_RECVSZ)
@@ -112,10 +124,11 @@ class StartShell(object):
         # run the command and capture the output
         self.send(command)
         got = ''.join(self.wait_for(this))
-
-        # use $? to get the exit code of the command
-        self.send('echo $?')
-        rc = ''.join(self.wait_for(this))
+        rc = ''
+        if re.search(r'(%|>|#)\s?$', got) is not None:
+            # use $? to get the exit code of the command
+            self.send('echo $?')
+            rc = ''.join(self.wait_for(this))
         self.last_ok = True if rc.find('0') > 0 else False
 
         return (self.last_ok, got)
@@ -130,3 +143,4 @@ class StartShell(object):
 
     def __exit__(self, exc_ty, exc_val, exc_tb):
         self.close()
+
