@@ -14,7 +14,7 @@ RUN apk update \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
     && pip install -r requirements.txt
 
-RUN shell ./env-setup.sh
+RUN sh ./env-setup.sh
 
 RUN python ./setup.py    
 
