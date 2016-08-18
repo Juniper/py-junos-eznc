@@ -6,7 +6,7 @@ ADD requirements.txt /var/tmp/pyez/requirements.txt
 
 ADD setup.py /var/tmp/pyez/setup.py
 
-ADD env-setup.sh /var/tmp/pyez/env-setup.py
+ADD env-setup.sh /var/tmp/pyez/env-setup.sh
 
 WORKDIR /var/tmp/pyez/
 
