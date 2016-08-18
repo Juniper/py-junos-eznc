@@ -6,6 +6,4 @@ jinja2>=2.7.1
 PyYAML>=3.10
 netaddr
 six
-<<<<<<< HEAD
 pyserial
->>>>>>> a76c2d1550b72705807cc32c9089f9d1dbff7335
