@@ -154,7 +154,7 @@ def rpc_error(rpc_xml):
 
     def find_strip(x):
         ele = rpc_xml.find(x)
-        return ele.text.strip() if None != ele else None
+        return ele.text.strip() if None != ele and None != ele.text else None
 
     this_err = {}
     this_err['severity'] = find_strip('error-severity')
