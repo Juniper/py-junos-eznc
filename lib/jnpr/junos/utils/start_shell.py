@@ -106,7 +106,7 @@ class StartShell(object):
         self._chan.close()
         self._client.close()
 
-    def run(self, command, this=_SHELL_PROMPT):
+    def run(self, command, this=_SHELL_PROMPT, timeout=0):
         """
         Run a shell command and wait for the response.  The return is a
         tuple. The first item is True/False if exit-code is 0.  The second
@@ -114,23 +114,30 @@ class StartShell(object):
 
         :param str command: the shell command to execute
         :param str this: the exected shell-prompt to wait for
+        :param int timeout:
+          Timeout value in seconds to wait for expected string/pattern (this).
+          If not specified defaults to self.timeout. This timeout is specific
+          to individual run call.
 
         :returns: result of the executed shell command (str)
 
         .. note:: as a *side-effect* this method will set the ``self.last_ok``
                   property.  This property is set to ``True`` if ``$?`` is
-                  "0"; indicating the last shell command was successful.
+                  "0"; indicating the last shell command was successful else
+                  False
         """
+        timeout = timeout or self.timeout
         # run the command and capture the output
         self.send(command)
-        got = ''.join(self.wait_for(this))
-        rc = ''
-        if re.search(r'(%|>|#)\s?$', got) is not None:
+        got = ''.join(self.wait_for(this, timeout))
+        self.last_ok = False
+        if this != _SHELL_PROMPT:
+            self.last_ok = re.search(r'{0}\s?$'.format(this), got) is not None
+        elif re.search(r'{0}\s?$'.format(_SHELL_PROMPT), got) is not None:
             # use $? to get the exit code of the command
             self.send('echo $?')
-            rc = ''.join(self.wait_for(this))
-        self.last_ok = True if rc.find('0') > 0 else False
-
+            rc = ''.join(self.wait_for(_SHELL_PROMPT))
+            self.last_ok = rc.find('0') > 0
         return (self.last_ok, got)
 
     # -------------------------------------------------------------------------
