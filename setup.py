@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
+import sys
 
 # parse requirements
 req_lines = [line.strip() for line in open(
     'requirements.txt').readlines()]
 install_reqs = list(filter(None, req_lines))
+if sys.version_info[:2] == (2, 6):
+    install_reqs.append('importlib>=1.0.3')
 
 setup(
     name="junos-eznc",
