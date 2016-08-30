@@ -103,7 +103,7 @@ class StartShell(object):
         :param str command: the shell command to execute
         :param str this: the exected shell-prompt to wait for
 
-        :returns: result of the executed shell command (str)
+        :returns: (last_ok, result of the executed shell command (str) )
 
         .. note:: as a *side-effect* this method will set the ``self.last_ok``
                   property.  This property is set to ``True`` if ``$?`` is

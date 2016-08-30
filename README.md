@@ -23,11 +23,13 @@ This means that "non-programmers", for example the _Network Engineer_, can use t
 
 ### For "Programmers" - Open and Extensible
 
-There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos PyEZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos PyEZ_ is not specifically tied to any version of Junos or any Junos product family. 
+There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos PyEZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos PyEZ_ is not specifically tied to any version of Junos or any Junos product family.
 
 ### Support
 
 For questions and general support, please visit our [Google Group](https://groups.google.com/forum/#!forum/junos-python-ez)
+
+You can also post your query on stackoverflow with __pyez__ [tag](http://stackoverflow.com/questions/tagged/pyez)
 
 For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
@@ -46,11 +48,11 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 
 ## NOTICE
 
-As of release 1.1.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.4.3 or later.  
+As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
 
 ## INSTALLATION
 
-Installation requires Python 2.6 or 2.7 and associated `pip` tool
+Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
 	
@@ -114,7 +116,9 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
-[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Stacy Smith](https://github.com/stacywsmith)
+
+* v2.0.0: [Ganesh Nalawade](https://github.com/ganeshnalawade), [Jainpriyal](https://github.com/Jainpriyal)
 
 *Former Contributors:*
 
