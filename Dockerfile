@@ -16,3 +16,6 @@ RUN apk update \
 
 WORKDIR /
 
+VOLUME ["$PWD:/scripts"]
+
+CMD sh
