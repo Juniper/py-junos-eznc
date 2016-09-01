@@ -12,6 +12,6 @@ RUN apk update \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
     && pip install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
-    && rm -rf /var/cache/apk/*
-
+    && rm -rf /var/cache/apk/* \
+    && cd /
 
