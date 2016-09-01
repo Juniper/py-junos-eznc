@@ -42,6 +42,7 @@ class TestStartShell(unittest.TestCase):
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
     def test_startshell_run(self, mock_wait):
         self.shell._chan = MagicMock()
+        mock_wait.return_value = ["user % "]
         self.shell.run('ls')
         self.assertTrue(call.send('echo $?') in self.shell._chan.mock_calls)
 
