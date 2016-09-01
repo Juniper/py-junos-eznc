@@ -2,7 +2,9 @@ FROM alpine:3.4
 
 MAINTAINER ssteiner@juniper.net
 
-ADD requirements.txt
+WORKDIR /tmp
+
+ADD requirements.txt /tmp/.
 
 RUN apk update \
     && apk upgrade \
