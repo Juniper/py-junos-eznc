@@ -115,9 +115,6 @@ class TestScp(unittest.TestCase):
         self.assertEqual(mock_sshclient.mock_calls[0][2]['key_filename'],
                          '/Users/test/testkey')
 
-        # self.assertEqual(mock_scpclient.mock_calls[0][2]['progress'].__name__,
-        #                  '_scp_progress')
-
     @contextmanager
     def capture(self, command, *args, **kwargs):
         out, sys.stdout = sys.stdout, StringIO()
