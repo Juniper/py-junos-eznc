@@ -73,11 +73,8 @@ class SCP(object):
 
         .. note:: This method uses the same username/password authentication
                    credentials as used by :class:`jnpr.junos.device.Device`.
-
-        .. warning:: The :class:`jnpr.junos.device.Device` ``ssh_private_key_file``
-                     option is currently **not** supported.
-
-        .. todo:: add support for ``ssh_private_key_file``.
+                   It can also use ``ssh_private_key_file`` option if provided
+                   to the :class:`jnpr.junos.device.Device` 
 
         :returns: SCPClient object
         """
