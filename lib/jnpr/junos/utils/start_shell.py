@@ -59,7 +59,7 @@ class StartShell(object):
             if rd:
                 data = chan.recv(_RECVSZ)
                 if isinstance(data, bytes):
-                    data = data.decode('utf-8', errors='replace')
+                    data = data.decode('utf-8', 'replace')
                 got.append(data)
                 if re.search(r'{0}\s?$'.format(this), data):
                     break
