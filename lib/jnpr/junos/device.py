@@ -919,7 +919,7 @@ class Device(_Connection):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text.strip() is not '':
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
