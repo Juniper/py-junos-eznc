@@ -480,6 +480,13 @@ class _Connection(object):
                               RuntimeWarning)
                 return
 
+    # -----------------------------------------------------------------------
+    # OVERLOADS
+    # -----------------------------------------------------------------------
+
+    def __repr__(self):
+        return "Device(%s)" % self.hostname
+
 
 class Device(_Connection):
 
@@ -534,13 +541,6 @@ class Device(_Connection):
             New transform lambda
         """
         self._conn._device_handler.transform_reply = func
-
-    # -----------------------------------------------------------------------
-    # OVERLOADS
-    # -----------------------------------------------------------------------
-
-    def __repr__(self):
-        return "Device(%s)" % self.hostname
 
     # -----------------------------------------------------------------------
     # CONSTRUCTOR
@@ -919,7 +919,7 @@ class Device(_Connection):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
+            if rpc_rsp_e.text.strip() is not '':
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
