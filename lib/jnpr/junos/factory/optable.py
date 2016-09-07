@@ -3,6 +3,7 @@ from lxml import etree
 
 # local
 from jnpr.junos.factory.table import Table
+from jnpr.junos.jxml import remove_namespaces
 
 
 class OpTable(Table):
@@ -44,7 +45,7 @@ class OpTable(Table):
 
         if self._path is not None:
             # for loading from local file-path
-            self.xml = etree.parse(self._path).getroot()
+            self.xml = remove_namespaces(etree.parse(self._path).getroot())
             return self
 
         if self._lxml is not None:
