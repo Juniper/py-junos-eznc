@@ -480,6 +480,13 @@ class _Connection(object):
                               RuntimeWarning)
                 return
 
+    # -----------------------------------------------------------------------
+    # OVERLOADS
+    # -----------------------------------------------------------------------
+
+    def __repr__(self):
+        return "Device(%s)" % self.hostname
+
 
 class Device(_Connection):
 
@@ -534,13 +541,6 @@ class Device(_Connection):
             New transform lambda
         """
         self._conn._device_handler.transform_reply = func
-
-    # -----------------------------------------------------------------------
-    # OVERLOADS
-    # -----------------------------------------------------------------------
-
-    def __repr__(self):
-        return "Device(%s)" % self.hostname
 
     # -----------------------------------------------------------------------
     # CONSTRUCTOR

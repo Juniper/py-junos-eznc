@@ -73,11 +73,8 @@ class SCP(object):
 
         .. note:: This method uses the same username/password authentication
                    credentials as used by :class:`jnpr.junos.device.Device`.
-
-        .. warning:: The :class:`jnpr.junos.device.Device` ``ssh_private_key_file``
-                     option is currently **not** supported.
-
-        .. todo:: add support for ``ssh_private_key_file``.
+                   It can also use ``ssh_private_key_file`` option if provided
+                   to the :class:`jnpr.junos.device.Device` 
 
         :returns: SCPClient object
         """
@@ -92,6 +89,7 @@ class SCP(object):
         # through a jumphost.
 
         config = {}
+        kwargs = {}
         ssh_config = getattr(junos, '_sshconf_path')
         if ssh_config:
             config = paramiko.SSHConfig()
@@ -101,6 +99,9 @@ class SCP(object):
         if config.get("proxycommand"):
             sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
 
+        if self._junos._ssh_private_key_file is not None:
+            kwargs['key_filename']=self._junos._ssh_private_key_file
+
         self._ssh.connect(hostname=junos._hostname,
                           port=(
                               22, int(
@@ -108,7 +109,7 @@ class SCP(object):
                               junos._hostname == 'localhost'],
                           username=junos._auth_user,
                           password=junos._auth_password,
-                          sock=sock
+                          sock=sock, **kwargs
                           )
         return SCPClient(self._ssh.get_transport(), **scpargs)
 

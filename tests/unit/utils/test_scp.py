@@ -99,6 +99,22 @@ class TestScp(unittest.TestCase):
         self.assertEqual(mock_scpclient.mock_calls[0][2]['progress'].__name__,
                          '_scp_progress')
 
+    @patch('ncclient.manager.connect')
+    @patch('paramiko.SSHClient.connect')
+    @patch('scp.SCPClient.put')
+    @patch('scp.SCPClient.__init__')
+    def test_ssh_private_key_file(self, mock_scpclient, mock_put,
+                                  mock_sshclient, mock_ncclient):
+        mock_scpclient.return_value = None
+        package = 'test.tgz'
+        dev = Device(host='1.1.1.1', user='user',
+                     ssh_private_key_file='/Users/test/testkey')
+        dev.open(gather_facts=False)
+        with SCP(dev) as scp:
+            scp.put(package)
+        self.assertEqual(mock_sshclient.mock_calls[0][2]['key_filename'],
+                         '/Users/test/testkey')
+
     @contextmanager
     def capture(self, command, *args, **kwargs):
         out, sys.stdout = sys.stdout, StringIO()
