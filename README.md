@@ -1,4 +1,4 @@
-[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://img.shields.io/pypi/dm/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc) [![Coverage Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
+[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Downloads](https://img.shields.io/pypi/dm/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc) [![Coverage Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc) [![](https://images.microbadger.com/badges/image/juniper/pyez.svg)](https://microbadger.com/images/juniper/pyez)
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
@@ -55,7 +55,7 @@ As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/py
 Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
-	
+
 Installing from Git is also supported (OS must have git installed).
 
 	To install the latest MASTER code
@@ -63,7 +63,7 @@ Installing from Git is also supported (OS must have git installed).
 	-or-
 	To install a specific version, branch, tag, etc.
 	pip install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
-	
+
 ## UPGRADE
 
 Upgrading has the same requirements as installation and has the same format with the addition of -UPGRADE
@@ -109,7 +109,7 @@ Example output for an SRX-210 device:
 ## LICENSE
 
 Apache 2.0
-  
+
 # CONTRIBUTORS
 
 Juniper Networks is actively contributing to and maintaining this repo. Please contact jnpr-community-netdev@juniper.net for any queries.
