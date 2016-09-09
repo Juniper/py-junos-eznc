@@ -458,6 +458,135 @@ class _Connection(object):
             return "invalid command: " + command
 
     # ------------------------------------------------------------------------
+    # execute
+    # ------------------------------------------------------------------------
+
+    @normalizeDecorator
+    @timeoutDecorator
+    def execute(self, rpc_cmd, **kvargs):
+        """
+        Executes an XML RPC and returns results as either XML or native python
+
+        :param rpc_cmd:
+          can either be an XML Element or xml-as-string.  In either case
+          the command starts with the specific command element, i.e., not the
+          <rpc> element itself
+
+        :param func to_py:
+          Is a caller provided function that takes the response and
+          will convert the results to native python types.  all kvargs
+          will be passed to this function as well in the form::
+
+            to_py( self, rpc_rsp, **kvargs )
+
+        :raises ValueError:
+            When the **rpc_cmd** is of unknown origin
+
+        :raises PermissionError:
+            When the requested RPC command is not allowed due to
+            user-auth class privilege controls on Junos
+
+        :raises RpcError:
+            When an ``rpc-error`` element is contained in the RPC-reply
+
+        :returns:
+            RPC-reply as XML object.  If **to_py** is provided, then
+            that function is called, and return of that function is
+            provided back to the caller; presumably to convert the XML to
+            native python data-types (e.g. ``dict``).
+        """
+
+        if self.connected is not True:
+            raise EzErrors.ConnectClosedError(self)
+
+        if isinstance(rpc_cmd, str):
+            rpc_cmd_e = etree.XML(rpc_cmd)
+        elif isinstance(rpc_cmd, etree._Element):
+            rpc_cmd_e = rpc_cmd
+        else:
+            raise ValueError(
+                "Dont know what to do with rpc of type %s" %
+                rpc_cmd.__class__.__name__)
+
+        # invoking a bad RPC will cause a connection object exception
+        # will will be raised directly to the caller ... for now ...
+        # @@@ need to trap this and re-raise accordingly.
+
+        try:
+            rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
+        except NcOpErrors.TimeoutExpiredError:
+            # err is a TimeoutExpiredError from ncclient,
+            # which has no such attribute as xml.
+            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
+        except NcErrors.TransportError:
+            raise EzErrors.ConnectClosedError(self)
+        except RPCError as err:
+            rsp = JXML.remove_namespaces(err.xml)
+            # see if this is a permission error
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
+                'permission denied' \
+                else EzErrors.RpcError
+            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
+        # Something unexpected happened - raise it up
+        except Exception as err:
+            warnings.warn("An unknown exception occured - please report.",
+                          RuntimeWarning)
+            raise
+
+        # From 14.2 onward, junos supports JSON, so now code can be written as
+        # dev.rpc.get_route_engine_information({'format': 'json'})
+
+        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+            if self._facts == {}:
+                self.facts_refresh()
+            ver_info = self._facts['version_info']
+            if ver_info.major[0] >= 15 or \
+                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+                try:
+                    return json.loads(rpc_rsp_e.text)
+                except ValueError as ex:
+                    # when data is {}{.*} types
+                    if str(ex).startswith('Extra data'):
+                        return json.loads(
+                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+            else:
+                warnings.warn("Native JSON support is only from 14.2 onwards",
+                              RuntimeWarning)
+
+        # This section is here for the possible use of something other than ncclient
+        # for RPCs that have embedded rpc-errors, need to check for those now
+
+        # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
+        # if len(rpc_errs):
+        #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
+
+        # skip the <rpc-reply> element and pass the caller first child element
+        # generally speaking this is what they really want. If they want to
+        # uplevel they can always call the getparent() method on it.
+
+        try:
+            ret_rpc_rsp = rpc_rsp_e[0]
+        except IndexError:
+            # For cases where reply are like
+            # <rpc-reply>
+            #    protocol: operation-failed
+            #    error: device asdf not found
+            # </rpc-reply>
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
+                return rpc_rsp_e
+            # no children, so assume it means we are OK
+            return True
+
+        # if the caller provided a "to Python" conversion function, then invoke
+        # that now and return the results of that function.  otherwise just
+        # return the RPC results as XML
+
+        if kvargs.get('to_py'):
+            return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
+        else:
+            return ret_rpc_rsp
+
+    # ------------------------------------------------------------------------
     # facts
     # ------------------------------------------------------------------------
 
@@ -479,6 +608,7 @@ class _Connection(object):
                               'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
                               RuntimeWarning)
                 return
+
 
     # -----------------------------------------------------------------------
     # OVERLOADS
@@ -808,130 +938,9 @@ class Device(_Connection):
         self._conn.close_session()
         self.connected = False
 
-    @normalizeDecorator
-    @timeoutDecorator
-    def execute(self, rpc_cmd, **kvargs):
-        """
-        Executes an XML RPC and returns results as either XML or native python
 
-        :param rpc_cmd:
-          can either be an XML Element or xml-as-string.  In either case
-          the command starts with the specific command element, i.e., not the
-          <rpc> element itself
-
-        :param func to_py:
-          Is a caller provided function that takes the response and
-          will convert the results to native python types.  all kvargs
-          will be passed to this function as well in the form::
-
-            to_py( self, rpc_rsp, **kvargs )
-
-        :raises ValueError:
-            When the **rpc_cmd** is of unknown origin
-
-        :raises PermissionError:
-            When the requested RPC command is not allowed due to
-            user-auth class privilege controls on Junos
-
-        :raises RpcError:
-            When an ``rpc-error`` element is contained in the RPC-reply
-
-        :returns:
-            RPC-reply as XML object.  If **to_py** is provided, then
-            that function is called, and return of that function is
-            provided back to the caller; presumably to convert the XML to
-            native python data-types (e.g. ``dict``).
-        """
-
-        if self.connected is not True:
-            raise EzErrors.ConnectClosedError(self)
-
-        if isinstance(rpc_cmd, str):
-            rpc_cmd_e = etree.XML(rpc_cmd)
-        elif isinstance(rpc_cmd, etree._Element):
-            rpc_cmd_e = rpc_cmd
-        else:
-            raise ValueError(
-                "Dont know what to do with rpc of type %s" %
-                rpc_cmd.__class__.__name__)
-
-        # invoking a bad RPC will cause a connection object exception
-        # will will be raised directly to the caller ... for now ...
-        # @@@ need to trap this and re-raise accordingly.
-
-        try:
-            rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
-        except NcOpErrors.TimeoutExpiredError:
-            # err is a TimeoutExpiredError from ncclient,
-            # which has no such attribute as xml.
-            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
-        except NcErrors.TransportError:
-            raise EzErrors.ConnectClosedError(self)
-        except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
-            # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
-                'permission denied' \
-                else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
-        # Something unexpected happened - raise it up
-        except Exception as err:
-            warnings.warn("An unknown exception occured - please report.",
-                          RuntimeWarning)
-            raise
-
-        # From 14.2 onward, junos supports JSON, so now code can be written as
-        # dev.rpc.get_route_engine_information({'format': 'json'})
-
-        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
-            if self._facts == {}:
-                self.facts_refresh()
-            ver_info = self._facts['version_info']
-            if ver_info.major[0] >= 15 or \
-                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
-                try:
-                    return json.loads(rpc_rsp_e.text)
-                except ValueError as ex:
-                    # when data is {}{.*} types
-                    if str(ex).startswith('Extra data'):
-                        return json.loads(
-                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
-            else:
-                warnings.warn("Native JSON support is only from 14.2 onwards",
-                              RuntimeWarning)
-
-        # This section is here for the possible use of something other than ncclient
-        # for RPCs that have embedded rpc-errors, need to check for those now
-
-        # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
-        # if len(rpc_errs):
-        #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
-
-        # skip the <rpc-reply> element and pass the caller first child element
-        # generally speaking this is what they really want. If they want to
-        # uplevel they can always call the getparent() method on it.
-
-        try:
-            ret_rpc_rsp = rpc_rsp_e[0]
-        except IndexError:
-            # For cases where reply are like
-            # <rpc-reply>
-            #    protocol: operation-failed
-            #    error: device asdf not found
-            # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
-                return rpc_rsp_e
-            # no children, so assume it means we are OK
-            return True
-
-        # if the caller provided a "to Python" conversion function, then invoke
-        # that now and return the results of that function.  otherwise just
-        # return the RPC results as XML
-
-        if kvargs.get('to_py'):
-            return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
-        else:
-            return ret_rpc_rsp
+    def _rpc_reply(self, rpc_cmd_e):
+        return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager

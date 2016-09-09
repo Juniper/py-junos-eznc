@@ -163,7 +163,7 @@ class TestConsole(unittest.TestCase):
         from jnpr.junos.facts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev.facts_refresh()
-        self.assertEqual(mock_rpc.call_count, 3)
+        self.assertEqual(mock_rpc.call_count, 6)
 
     @patch('jnpr.junos.console.Console._tty_login')
     @patch('jnpr.junos.console.FACT_LIST')
@@ -176,10 +176,11 @@ class TestConsole(unittest.TestCase):
                                           'model': '', 'vc_capable': False,
                                           'personality': 'UNKNOWN'})
 
+    @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
     @patch('jnpr.junos.transport.tty_netconf.select.select')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.read_until')
-    def test_load_console(self, mock_read_until, mock_select, mock_write):
+    def test_load_console(self, mock_read_until, mock_select, mock_write, mock_parse):
         mock_select.return_value = ([self.dev._tty._rx], [], [])
         xml = """<policy-options>
                   <policy-statement>
@@ -204,22 +205,22 @@ class TestConsole(unittest.TestCase):
             </rpc-reply>
             ]]>]]>""")
         cu = Config(self.dev)
-        cu.load(xml, format='xml')
+        op = cu.load(xml, format='xml')
         cu.commit()
 
+    @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.rawwrite')
-    def test_console_rpc_call(self, mock_write, mock_rcv):
-        mock_rcv.side_effect = self._mock_manager
-        self.dev.rpc.get_chassis_inventory()
-        self.assertTrue(mock_rcv.called)
+    def test_console_rpc_call(self, mock_write, mock_rcv, mock_parse):
+        self.dev._tty.nc.rpc = MagicMock(side_effect=self._mock_manager)
+        op = self.dev.rpc.get_chassis_inventory()
+        self.assertEqual(op.tag, 'chassis-inventory')
 
-    @patch('jnpr.junos.transport.tty_netconf.remove_namespaces')
+    @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.rawwrite')
-    def test_console_rpc_call_exception(self, mock_write, mock_rcv, mock_ns):
-        mock_rcv.return_value = etree.fromstring('<output>testing</output>')
-        mock_ns.side_effect = IndexError('testing')
+    def test_console_rpc_call_exception(self, mock_write, mock_rcv, mock_parse):
+        mock_rcv.return_value = '<output>testing</output>'
         op = self.dev.rpc.get_chassis_inventory()
         self.assertEqual(op.tag, 'output')
 
@@ -230,7 +231,7 @@ class TestConsole(unittest.TestCase):
     # below 2 function will be used in future.
     def _mock_manager(self, *args, **kwargs):
         if args:
-            return self._read_file(args[0].tag + '.xml')
+            return self._read_file(etree.XML(args[0]).tag + '.xml')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -238,11 +239,4 @@ class TestConsole(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         with open(fpath) as fp:
-            foo = fp.read()
-        if fname == 'get-system-users-information.xml':
-            return NCElement(foo,
-                             self.dev._conn._device_handler.transform_reply())
-        rpc_reply = NCElement(foo, self.dev._conn.
-                              _device_handler.transform_reply()) \
-            ._NCElement__doc[0]
-        return rpc_reply
+            return fp.read()

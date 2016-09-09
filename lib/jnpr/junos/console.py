@@ -4,14 +4,26 @@ Used by the 'netconify' shell utility.
 """
 import traceback
 import sys
+import logging
+import warnings
+
+# 3rd-party packages
+import ncclient.transport.errors as NcErrors
+import ncclient.operations.errors as NcOpErrors
+from ncclient.devices.junos import JunosDeviceHandler
 from lxml import etree
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
-from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos.facts import *
+from ncclient.operations.rpc import RPCReply, RPCError
+from ncclient.xml_ import NCElement
 from jnpr.junos.device import _Connection
-from jnpr.junos.decorators import timeoutDecorator
-import logging
+
+# local modules
+from jnpr.junos.rpcmeta import _RpcMetaExec
+from jnpr.junos import exception as EzErrors
+from jnpr.junos.facts import *
+from jnpr.junos import jxml as JXML
+from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
@@ -94,6 +106,9 @@ class Console(_Connection):
         self.rpc = _RpcMetaExec(self)
         self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
+        self.junos_dev_handler = JunosDeviceHandler(device_params=
+                                                    {'name': 'junos',
+                                                     'local': False})
 
     @property
     def timeout(self):
@@ -169,20 +184,21 @@ class Console(_Connection):
                 raise err
             self.connected = False
 
-    # execute rpc calls
-    @timeoutDecorator
-    def execute(self, rpc_cmd, *args, **kwargs):
+    def _rpc_reply(self, rpc_cmd_e):
         encode = None if sys.version < '3' else 'unicode'
-        rpc_cmd = etree.tostring(rpc_cmd, encoding=encode) if \
-            isinstance(rpc_cmd, etree._Element) else rpc_cmd
-        return self._tty.nc.rpc(rpc_cmd)
+        rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) if \
+                isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e
+        reply = self._tty.nc.rpc(rpc_cmd)
+        reply = reply.decode('utf-8') if isinstance(reply, bytes) else reply
+        rpc_rsp_e = NCElement(reply, self.junos_dev_handler.transform_reply())._NCElement__doc
+        return rpc_rsp_e
 
     # -------------------------------------------------------------------------
     # LOGIN/LOGOUT
     # -------------------------------------------------------------------------
 
     def _tty_login(self):
-        tty_args = {}
+        tty_args = dict()
         tty_args['user'] = self._auth_user
         tty_args['passwd'] = self._auth_password
         tty_args['timeout'] = float(self._timeout)
