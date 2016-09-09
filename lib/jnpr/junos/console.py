@@ -189,7 +189,6 @@ class Console(_Connection):
         rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) if \
                 isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e
         reply = self._tty.nc.rpc(rpc_cmd)
-        reply = reply.decode('utf-8') if isinstance(reply, bytes) else reply
         rpc_rsp_e = NCElement(reply, self.junos_dev_handler.transform_reply())._NCElement__doc
         return rpc_rsp_e
 

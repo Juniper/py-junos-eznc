@@ -117,6 +117,7 @@ class tty_netconf(object):
         self._tty.rawwrite(rpc)
 
         rsp = self._receive()
+        rsp = rsp.decode('utf-8') if isinstance(rsp, bytes) else rsp
         reply = RPCReply(rsp)
         errors = reply.errors
         if len(errors) > 1:
