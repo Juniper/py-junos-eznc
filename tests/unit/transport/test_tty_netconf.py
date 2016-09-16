@@ -29,8 +29,9 @@ class TestTTYNetconf(unittest.TestCase):
         self.tty_net._tty.write.assert_called_with(
             'junoscript netconf need-trailer')
 
+    @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
-    def test_rpc(self, mock_rcv):
+    def test_rpc(self, mock_rcv, mock_parse):
         mock_rcv.return_value = ']]>]]>'
         self.tty_net.rpc('get-interface-information')
         self.tty_net._tty.rawwrite.assert_called_with(

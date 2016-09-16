@@ -71,7 +71,7 @@ class Test_RpcError(unittest.TestCase):
         rsp = etree.XML(rpc_xml)
         obj = RpcError(rsp=rsp)
         err = 'RpcError(severity: error, bad_element: bgp, message: syntax error)'
-        self.assertEquals(str, type(obj.__repr__()))
+        self.assertEqual(str, type(obj.__repr__()))
         self.assertEqual(obj.__repr__(), err)
 
     def test_rpcerror_jxml_check(self):
