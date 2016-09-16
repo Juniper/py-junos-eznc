@@ -1,3 +1,29 @@
+# Release 2.0.1
+
+  * StartShell to take timeout (30 second by default) as paramter
+  * Proper exception handling in case of Console connection #595
+  * Fix: Config.lock() return exception when normalize is on
+  * Added microbadge badge for the Docker image #593
+  * Fix: print dev for Console conn was printing object not Device(....) #591
+  * Fix: To take care of special chars with StartShell->run function call #589
+  * Fix: ssh private key file to be considered for scp util #586
+  * Added Dockerfile to enable automated image builds on project commits #585
+
+
+# Release 2.0.0
+
+  * Console connection using PyEZ
+  * Python >=3.4 support
+  * Configuration Tables to Define and Configure Structured Resources
+  * JSON Config load
+  * FTP Utility
+  * Multi RPC error
+  * various bug fixes
+
+Refer below link for more details:
+https://github.com/Juniper/py-junos-eznc/releases/tag/2.0.0
+
+
 # Release 1.0
 
 # Junos PyEZ Overview
