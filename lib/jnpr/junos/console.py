@@ -99,6 +99,9 @@ class Console(_Connection):
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
+        self._normalize = kvargs.get('normalize', False)
+        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
+        self.transform = self._norm_transform
         # self.timeout needed by PyEZ utils
         #self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
