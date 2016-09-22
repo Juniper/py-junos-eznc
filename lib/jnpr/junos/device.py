@@ -411,8 +411,7 @@ class _Connection(object):
     def cli_to_rpc_string(self,command):
         rsp = self.cli_to_rpc_dict(command)
         rpc_string = "rpc.%s(" % (rsp['method_name'])
-        for (key, value) in rsp['arguments'].items():
-            rpc_string += "%s=%s," % (key, str(value))
+        rpc_string += ', '.join('='.join((rsp['arguments'].items()))
         rpc_string += ")"
         return rpc_string
 
@@ -453,8 +452,8 @@ class _Connection(object):
         if 'display xml rpc' not in command and warning is True:
             warnings.simplefilter("always")
             warnings.warn("CLI command is for debug use only!\n" +
-                          "Instead of: cli('%s')\n" +
-                          "Use: %s" % (command,self.cli_to_rpc_string(command)),
+                          "Instead of: cli('%s')\n" % (command) +
+                          "Use: %s" % (self.cli_to_rpc_string(command)),
                           RuntimeWarning)
             warnings.resetwarnings()
 
