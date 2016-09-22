@@ -390,6 +390,24 @@ class _Connection(object):
 
         return probe_ok
 
+    def convert_cli_to_rpc(self,command):
+        # Strip off any pipe modifiers
+        (command,_,_) = command.partition('|')
+        # Strip any leading or trailing whitespace
+        command = command.strip()
+        # Get the equivalent RPC
+        rpc = self.display_xml_rpc(command)
+        # Build the response
+        response = {}
+        response['rpc'] = rpc.tag
+        response['method_name'] = rpc.tag.replace('-','_')
+        arguments = {}
+        for child in rpc.iter():
+            arguments[child.tag] = child.text or True
+        response['arguments'] = arguments
+        response['attributes'] = rpc.attrib
+        return response
+
     # ------------------------------------------------------------------------
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
