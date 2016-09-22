@@ -413,7 +413,7 @@ class _Connection(object):
         rpc_string = "rpc.%s(" % (rsp['method_name'])
         arguments = ()
         for (key,value) in rsp['arguments'].items():
-            arguments += '='.join(key,str(value))
+            arguments.append("%s=%s" % (key,str(value)))
         rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
