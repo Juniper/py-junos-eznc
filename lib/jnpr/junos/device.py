@@ -390,7 +390,7 @@ class _Connection(object):
 
         return probe_ok
 
-    def convert_cli_to_rpc(self,command):
+    def cli_to_rpc_dict(self,command):
         # Strip off any pipe modifiers
         (command,_,_) = command.partition('|')
         # Strip any leading or trailing whitespace
@@ -408,6 +408,14 @@ class _Connection(object):
         response['attributes'] = rpc.attrib
         return response
 
+    def cli_to_rpc_string(self,command):
+        response = self.cli_to_rpc_dict(command)
+        rpc_string = "rpc.%s(" % (resp['method_name'])
+        for (key, value) in resp['arguments'].items():
+            rpc_string += "%s=%s," % (key, str(value))
+        rpc_string += ")"
+        return rpc_string
+    
     # ------------------------------------------------------------------------
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
@@ -443,15 +451,10 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
-            resp = self.convert_cli_to_rpc(command)
-            rpc_string = "rpc.%s(" % (resp['method_name'])
-            for (key,value) in resp['arguments'].items():
-                rpc_string += "%s=%s," % (key,str(value))
-            rpc_string += ")"
             warnings.simplefilter("always")
             warnings.warn("CLI command is for debug use only!\n" +
                           "Instead of: cli('%s')\n" +
-                          "Use: %s"% (command,rpc_string),
+                          "Use: %s" % (command,self.cli_to_rpc_string(command)),
                           RuntimeWarning)
             warnings.resetwarnings()
 
