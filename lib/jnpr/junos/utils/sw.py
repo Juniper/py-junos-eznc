@@ -169,7 +169,12 @@ class SW(Util):
             args = dict(no_validate=True, package_name=remote_package)
         args.update(kvargs)
 
-        rsp = self.rpc.request_package_add(**args)
+        if kvargs.get('issu', False):
+            rsp = self.rpc.request_package_in_service_upgrade(**args)
+        elif kvargs.get('nssu', False):
+            rsp = self.rpc.request_package_nonstop_upgrade(**args)
+        else:
+            rsp = self.rpc.request_package_add(**args)
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
@@ -384,7 +389,23 @@ class SW(Util):
         :param bool force_host:
           (Optional) Force the addition of host software package or bundle
           (ignore warnings) on the QFX5100 device.
+
+        :param bool issu:
+          (Optional) When ``True`` allows unified in-service software upgrade
+          (ISSU) feature enables you to upgrade between two different Junos OS
+          releases with no disruption on the control plane and with minimal
+          disruption of traffic.
+
+        :param bool nssu:
+          (Optional) When ``True`` allows nonstop software upgrade (NSSU)
+          enables you to upgrade the software running on a Juniper Networks
+          EX Series Virtual Chassis or a Juniper Networks EX Series Ethernet
+          Switch with redundant Routing Engines with a single command and minimal
+          disruption to network traffic.
         """
+        if kwargs.get('issu', False) and kwargs.get('nssu', False):
+            raise TypeError('install function can either take issu or nssu')
+
         def _progress(report):
             if progress is True:
                 self.progress(self._dev, report)
