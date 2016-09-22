@@ -443,8 +443,16 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
+            resp = self.convert_cli_to_rpc(command)
+            rpc_string = "rpc.%s(" % (resp['method_name'])
+            for (key,value) in resp['arguments']:
+                rpc_string += "%s=%s," % (key,value)
+            rpc_string += ")"
             warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
+            warnings.warn("CLI command is for debug use only!\n" +
+                          "Instead of: cli('%s')\n" +
+                          "Use: %s"% (command,rpc_string),
+                          RuntimeWarning)
             warnings.resetwarnings()
 
         try:
