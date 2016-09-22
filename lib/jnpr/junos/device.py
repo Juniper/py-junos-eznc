@@ -409,13 +409,13 @@ class _Connection(object):
         return response
 
     def cli_to_rpc_string(self,command):
-        response = self.cli_to_rpc_dict(command)
-        rpc_string = "rpc.%s(" % (resp['method_name'])
-        for (key, value) in resp['arguments'].items():
+        rsp = self.cli_to_rpc_dict(command)
+        rpc_string = "rpc.%s(" % (rsp['method_name'])
+        for (key, value) in rsp['arguments'].items():
             rpc_string += "%s=%s," % (key, str(value))
         rpc_string += ")"
         return rpc_string
-    
+
     # ------------------------------------------------------------------------
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
