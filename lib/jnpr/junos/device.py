@@ -411,7 +411,10 @@ class _Connection(object):
     def cli_to_rpc_string(self,command):
         rsp = self.cli_to_rpc_dict(command)
         rpc_string = "rpc.%s(" % (rsp['method_name'])
-        rpc_string += ', '.join('='.join((rsp['arguments'].items())))
+        arguments = ()
+        for (key,value) in rsp['arguments']:
+            arguments += '='.join(key,str(value))
+        rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
 
