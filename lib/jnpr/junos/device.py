@@ -412,7 +412,7 @@ class _Connection(object):
         rsp = self.cli_to_rpc_dict(command)
         rpc_string = "rpc.%s(" % (rsp['method_name'])
         arguments = ()
-        for (key,value) in rsp['arguments']:
+        for (key,value) in rsp['arguments'].items():
             arguments += '='.join(key,str(value))
         rpc_string += ', '.join(arguments)
         rpc_string += ")"
