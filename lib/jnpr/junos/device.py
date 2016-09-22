@@ -402,7 +402,7 @@ class _Connection(object):
         response['rpc'] = rpc.tag
         response['method_name'] = rpc.tag.replace('-','_')
         arguments = {}
-        for child in rpc.iter():
+        for child in rpc:
             arguments[child.tag] = child.text or True
         response['arguments'] = arguments
         response['attributes'] = rpc.attrib
