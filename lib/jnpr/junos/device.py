@@ -416,12 +416,20 @@ class _Connection(object):
         if 'attributes' in rsp:
             attributes = []
             for (key,value) in rsp['attributes'].items():
+                if type(value) == 'str':
+                    value = "'" + value + "'"
+                else:
+                    value = str(value)
                 attributes.append("%s: %s" % (key,str(value)))
             rpc_string += '{' + ', '.join(attributes) + '}, '
         if 'arguments' in rsp:
             arguments = []
             for (key,value) in rsp['arguments'].items():
-                arguments.append("%s=%s" % (key,str(value)))
+                if type(value) == 'str':
+                    value = "'" + value + "'"
+                else:
+                    value = str(value)
+                arguments.append("%s=%s" % (key,value))
             rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
@@ -462,9 +470,9 @@ class _Connection(object):
         """
         if 'display xml rpc' not in command and warning is True:
             warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!\n" +
-                          "Instead of: cli('%s')\n" % (command) +
-                          "Use: %s" % (self.cli_to_rpc_string(command)),
+            warnings.warn("\nCLI command is for debug use only!\n" +
+                          "Instead of:\ncli('%s')\n" % (command) +
+                          "Use:\n%s" % (self.cli_to_rpc_string(command)),
                           RuntimeWarning)
             warnings.resetwarnings()
 
