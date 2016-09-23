@@ -407,16 +407,16 @@ class _Connection(object):
                     value = str(value)
                 attributes.append("%s: %s" % (key,str(value)))
             rpc_string += '{' + ', '.join(attributes) + '}, '
-            arguments = []
-            for child in rpc:
-                key = child.tag.replace('-','_')
-                if child.text:
-                    value = "'" + child.text + "'"
-                else:
-                    value = "True"
-                arguments.append("%s=%s" % (key,value))
-            if arguments:
-                rpc_string += ', '.join(arguments)
+        arguments = []
+        for child in rpc:
+            key = child.tag.replace('-','_')
+            if child.text:
+                value = "'" + child.text + "'"
+            else:
+                value = "True"
+            arguments.append("%s=%s" % (key,value))
+        if arguments:
+            rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
 
