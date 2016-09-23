@@ -485,7 +485,7 @@ class _Connection(object):
             if rpc_string is not None:
                 warning_string = "\nCLI command is for debug use only!\n"
                 warning_string += "Instead of:\ncli('%s')\n" % (command)
-                warning_string += "Use:\n%s\n" % rpc_string)
+                warning_string += "Use:\n%s\n" % (rpc_string)
                 warnings.simplefilter("always")
                 warnings.warn(warning_string, RuntimeWarning)
                 warnings.resetwarnings()
