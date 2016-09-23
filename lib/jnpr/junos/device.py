@@ -391,12 +391,35 @@ class _Connection(object):
         return probe_ok
 
     def cli_to_rpc_string(self,command):
+        """
+        Translate a CLI command string into the equivalent RPC method call.
+
+        Translates a CLI command string into a string which represents the
+        equivalent line of code using an RPC instead of a CLI command. Handles
+        RPCs with both attributes and arguments.
+
+        .. note::
+            This method does NOT actually invoke the RPC equivalent.
+
+        :param str command:
+          The CLI command to translate, e.g. "show version"
+
+        :returns: (str) representing the RPC meta-method (including
+                  attributes and arguments) which could be invoked instead of
+                  cli(command). Returns None if there is no equivalent RPC for
+                  command.
+        """
+
         # Strip off any pipe modifiers
         (command,_,_) = command.partition('|')
         # Strip any leading or trailing whitespace
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
+        if isinstance(rpc,str):
+            if rpc.startswith("invalid command"):
+                # No RPC is available.
+                return None
         rpc_string = "rpc.%s(" % (rpc.tag.replace('-','_'))
         if rpc.attrib:
             attributes = []
@@ -439,15 +462,17 @@ class _Connection(object):
             You can also use this method to obtain the XML RPC command for a
             given CLI command by using the pipe filter ``| display xml rpc``.
             When you do this, the return value is the XML RPC command. For 
-            example if you provide as the command ``show version | display xml rpc``,
-            you will get back the XML Element ``<get-software-information>``.
+            example if you provide as the command
+            ``show version | display xml rpc``, you will get back the XML
+            Element ``<get-software-information>``.
 
         .. warning::
             This function is provided for **DEBUG** purposes only!
             **DO NOT** use this method for general automation purposes as
-            that puts you in the realm of "screen-scraping the CLI".  The purpose of
-            the PyEZ framework is to migrate away from that tooling pattern.
-            Interaction with the device should be done via the RPC function.
+            that puts you in the realm of "screen-scraping the CLI".
+            The purpose of the PyEZ framework is to migrate away from that
+            tooling pattern. Interaction with the device should be done via
+            the RPC function.
 
         .. warning::
             You cannot use "pipe" filters with **command** such as ``| match``
@@ -455,12 +480,15 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
-            warning_string = "\nCLI command is for debug use only!\n"
-            warning_string += "Instead of:\ncli('%s')\n" % (command)
-            warning_string += "Use:\n%s\n" % (self.cli_to_rpc_string(command))
-            warnings.simplefilter("always")
-            warnings.warn(warning_string, RuntimeWarning)
-            warnings.resetwarnings()
+            # Get the equivalent rpc metamethod
+            rpc_string = self.cli_to_rpc_string(command)
+            if rpc_string is not None:
+                warning_string = "\nCLI command is for debug use only!\n"
+                warning_string += "Instead of:\ncli('%s')\n" % (command)
+                warning_string += "Use:\n%s\n" % rpc_string)
+                warnings.simplefilter("always")
+                warnings.warn(warning_string, RuntimeWarning)
+                warnings.resetwarnings()
 
         try:
             rsp = self.rpc.cli(command, format)
