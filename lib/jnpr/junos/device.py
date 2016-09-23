@@ -407,7 +407,6 @@ class _Connection(object):
                     value = str(value)
                 attributes.append("%s: %s" % (key,str(value)))
             rpc_string += '{' + ', '.join(attributes) + '}, '
-        if child in rpc:
             arguments = []
             for child in rpc:
                 key = child.tag.replace('-','_')
@@ -416,7 +415,8 @@ class _Connection(object):
                 else:
                     value = "True"
                 arguments.append("%s=%s" % (key,value))
-            rpc_string += ', '.join(arguments)
+            if arguments:
+                rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
 
