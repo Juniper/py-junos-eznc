@@ -403,18 +403,26 @@ class _Connection(object):
         response['method_name'] = rpc.tag.replace('-','_')
         arguments = {}
         for child in rpc:
-            arguments[child.tag] = child.text or True
-        response['arguments'] = arguments
-        response['attributes'] = rpc.attrib
+            arguments[child.tag.replace('-','_')] = child.text or True
+        if arguments:
+            response['arguments'] = arguments
+        if rpc.attrib:
+            response['attributes'] = rpc.attrib
         return response
 
     def cli_to_rpc_string(self,command):
         rsp = self.cli_to_rpc_dict(command)
         rpc_string = "rpc.%s(" % (rsp['method_name'])
-        arguments = ()
-        for (key,value) in rsp['arguments'].items():
-            arguments.append("%s=%s" % (key,str(value)))
-        rpc_string += ', '.join(arguments)
+        if 'attributes' in rsp:
+            attributes = []
+            for (key,value) in rsp['attributes'].items():
+                attributes.append("%s: %s" % (key,str(value)))
+            rpc_string += '{' + ', '.join(attributes) + '}, '
+        if 'arguments' in rsp:
+            arguments = []
+            for (key,value) in rsp['arguments'].items():
+                arguments.append("%s=%s" % (key,str(value)))
+            rpc_string += ', '.join(arguments)
         rpc_string += ")"
         return rpc_string
 
