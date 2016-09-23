@@ -397,7 +397,7 @@ class _Connection(object):
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        rpc_string = "rpc.%s(" % rpc.tag.replace('-','_'))
+        rpc_string = "rpc.%s(" % (rpc.tag.replace('-','_'))
         if rpc.attrib:
             attributes = []
             for (key,value) in rpc.attrib.items():
