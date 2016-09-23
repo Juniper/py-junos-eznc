@@ -473,7 +473,7 @@ class _Connection(object):
             warning_string += "Instead of:\ncli('%s')\n" % (command)
             warning_string += "Use:\n%s" % (self.cli_to_rpc_string(command))
             warnings.simplefilter("always")
-            warnings.warn(warning_string, RuntimeWarning)
+            warnings.warn_explicit(warning_string, RuntimeWarning, None, None)
             warnings.resetwarnings()
 
         try:
