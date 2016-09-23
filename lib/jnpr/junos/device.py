@@ -417,7 +417,7 @@ class _Connection(object):
             attributes = []
             for (key,value) in rsp['attributes'].items():
                 if type(value) == 'str':
-                    value = "'" + value + "'"
+                    value = '\'' + value + '\''
                 else:
                     value = str(value)
                 attributes.append("%s: %s" % (key,str(value)))
@@ -426,7 +426,7 @@ class _Connection(object):
             arguments = []
             for (key,value) in rsp['arguments'].items():
                 if type(value) == 'str':
-                    value = "'" + value + "'"
+                    value = '\'' + value + '\''
                 else:
                     value = str(value)
                 arguments.append("%s=%s" % (key,value))
