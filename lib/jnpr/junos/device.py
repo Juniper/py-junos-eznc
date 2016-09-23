@@ -416,7 +416,7 @@ class _Connection(object):
         if 'attributes' in rsp:
             attributes = []
             for (key,value) in rsp['attributes'].items():
-                if type(value) == 'str':
+                if isinstance(value,str):
                     value = '\'' + value + '\''
                 else:
                     value = str(value)
@@ -425,7 +425,7 @@ class _Connection(object):
         if 'arguments' in rsp:
             arguments = []
             for (key,value) in rsp['arguments'].items():
-                if type(value) == 'str':
+                if isinstance(value,str):
                     value = '\'' + value + '\''
                 else:
                     value = str(value)
