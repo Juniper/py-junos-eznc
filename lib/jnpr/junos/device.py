@@ -390,45 +390,31 @@ class _Connection(object):
 
         return probe_ok
 
-    def cli_to_rpc_dict(self,command):
+    def cli_to_rpc_string(self,command):
         # Strip off any pipe modifiers
         (command,_,_) = command.partition('|')
         # Strip any leading or trailing whitespace
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        # Build the response
-        response = {}
-        response['rpc'] = rpc.tag
-        response['method_name'] = rpc.tag.replace('-','_')
-        arguments = {}
-        for child in rpc:
-            arguments[child.tag.replace('-','_')] = child.text or True
-        if arguments:
-            response['arguments'] = arguments
+        rpc_string = "rpc.%s(" % rpc.tag.replace('-','_'))
         if rpc.attrib:
-            response['attributes'] = rpc.attrib
-        return response
-
-    def cli_to_rpc_string(self,command):
-        rsp = self.cli_to_rpc_dict(command)
-        rpc_string = "rpc.%s(" % (rsp['method_name'])
-        if 'attributes' in rsp:
             attributes = []
-            for (key,value) in rsp['attributes'].items():
+            for (key,value) in rpc.attrib.items():
                 if isinstance(value,str):
                     value = '\'' + value + '\''
                 else:
                     value = str(value)
                 attributes.append("%s: %s" % (key,str(value)))
             rpc_string += '{' + ', '.join(attributes) + '}, '
-        if 'arguments' in rsp:
+        if child in rpc:
             arguments = []
-            for (key,value) in rsp['arguments'].items():
-                if isinstance(value,str):
-                    value = '\'' + value + '\''
+            for child in rpc:
+                key = child.tag.replace('-','_')
+                if child.text:
+                    value = "'" + child.text + "'"
                 else:
-                    value = str(value)
+                    value = "True"
                 arguments.append("%s=%s" % (key,value))
             rpc_string += ', '.join(arguments)
         rpc_string += ")"
@@ -471,9 +457,9 @@ class _Connection(object):
         if 'display xml rpc' not in command and warning is True:
             warning_string = "\nCLI command is for debug use only!\n"
             warning_string += "Instead of:\ncli('%s')\n" % (command)
-            warning_string += "Use:\n%s" % (self.cli_to_rpc_string(command))
+            warning_string += "Use:\n%s\n" % (self.cli_to_rpc_string(command))
             warnings.simplefilter("always")
-            warnings.warn_explicit(warning_string, RuntimeWarning, None, None)
+            warnings.warn(warning_string, RuntimeWarning)
             warnings.resetwarnings()
 
         try:
