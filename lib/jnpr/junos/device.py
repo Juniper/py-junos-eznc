@@ -469,11 +469,11 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
+            warning_string = "\nCLI command is for debug use only!\n"
+            warning_string += "Instead of:\ncli('%s')\n" % (command)
+            warning_string += "Use:\n%s" % (self.cli_to_rpc_string(command))
             warnings.simplefilter("always")
-            warnings.warn("\nCLI command is for debug use only!\n" +
-                          "Instead of:\ncli('%s')\n" % (command) +
-                          "Use:\n%s" % (self.cli_to_rpc_string(command)),
-                          RuntimeWarning)
+            warnings.warn(warning_string, RuntimeWarning)
             warnings.resetwarnings()
 
         try:
