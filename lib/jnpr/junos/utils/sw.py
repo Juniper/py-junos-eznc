@@ -170,8 +170,10 @@ class SW(Util):
         args.update(kvargs)
 
         if kvargs.get('issu', False):
+            kvargs.pop('issu')  # Removing issu=True from kwargs
             rsp = self.rpc.request_package_in_service_upgrade(**args)
         elif kvargs.get('nssu', False):
+            kvargs.pop('nssu')  # Removing nssu=True from kwargs
             rsp = self.rpc.request_package_nonstop_upgrade(**args)
         else:
             rsp = self.rpc.request_package_add(**args)
@@ -195,8 +197,15 @@ class SW(Util):
             * ``True`` if validation passes
             * error (str) otherwise
         """
-        rsp = self.rpc.request_package_validate(
-            package_name=remote_package, **kwargs).getparent()
+        if kwargs.get('nssu', False):
+            kwargs.pop('nssu') # Removing nssu=True from kwargs
+        if kwargs.get('issu', False):
+            kwargs.pop('issu')   # Removing issu=True from kwargs
+            rsp = self.rpc.check_in_service_upgrade(
+                package_name=remote_package, **kwargs).getparent()
+        else:
+            rsp = self.rpc.request_package_validate(
+                package_name=remote_package, **kwargs).getparent()
         errcode = int(rsp.findtext('package-result'))
         return True if 0 == errcode else rsp.findtext('output').strip()
 
@@ -402,9 +411,13 @@ class SW(Util):
           EX Series Virtual Chassis or a Juniper Networks EX Series Ethernet
           Switch with redundant Routing Engines with a single command and minimal
           disruption to network traffic.
+
+        :returns:
+            * ``True`` when the installation is successful
+            * ``False`` otherwise
         """
         if kwargs.get('issu', False) and kwargs.get('nssu', False):
-            raise TypeError('install function can either take issu or nssu')
+            raise TypeError('install function can either take issu or nssu not both')
 
         def _progress(report):
             if progress is True:
@@ -452,8 +465,11 @@ class SW(Util):
                     "validating software against current config,"
                     " please be patient ...")
                 v_ok = self.validate(remote_package, dev_timeout=timeout)
+
                 if v_ok is not True:
-                    return v_ok  # will be the string of output
+                    # will be the string of output
+                    _progress("software validation message: %s"%v_ok)
+                    return False
 
             if self._multi_RE is False:
                 # simple case of device with only one RE
