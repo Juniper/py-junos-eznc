@@ -108,6 +108,20 @@ class TestSW(unittest.TestCase):
         with self.capture(SW.progress, self.dev, 'running') as output:
             self.assertEqual('1.1.1.1: running\n', output)
 
+    def test_sw_progress(self):
+        with self.capture(SW.progress, self.dev, 'running') as output:
+            self.assertEqual('1.1.1.1: running\n', output)
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    def test_sw_progress_true(self, scp_put, mock_paramiko, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        with self.capture(SW.progress, self.dev, 'testing') as output:
+            self.sw.install('test.tgz', progress=True, checksum=345,
+                            cleanfs=False)
+            self.assertEqual('1.1.1.1: testing\n', output)
+
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
     def test_sw_put(self, mock_scp_put, mock_scp):
@@ -194,6 +208,23 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'package.tgz'
         self.assertTrue(self.sw.validate(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'package.tgz'
+        self.assertTrue(self.sw.validate(package, issu=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu(self, mock_execute):
+        rpc_reply = """<rpc-reply><output>mgd: commit complete
+                        Validation succeeded
+                        </output>
+                        <package-result>1</package-result>
+                        </rpc-reply>"""
+        mock_execute.side_effect = etree.fromstring(rpc_reply)
+        package = 'package.tgz'
+        self.assertFalse(self.sw.validate(package, issu=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_remote_checksum_not_found(self, mock_execute):
