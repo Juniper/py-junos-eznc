@@ -62,6 +62,7 @@ class SW(Util):
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
+        self.log = lambda report : None
 
     # -----------------------------------------------------------------------
     # CLASS METHODS
@@ -169,45 +170,72 @@ class SW(Util):
             args = dict(no_validate=True, package_name=remote_package)
         args.update(kvargs)
 
-        if kvargs.get('issu', False):
-            kvargs.pop('issu')  # Removing issu=True from kwargs
-            rsp = self.rpc.request_package_in_service_upgrade(**args)
-        elif kvargs.get('nssu', False):
-            kvargs.pop('nssu')  # Removing nssu=True from kwargs
-            rsp = self.rpc.request_package_nonstop_upgrade(**args)
-        else:
-            rsp = self.rpc.request_package_add(**args)
+        rsp = self.rpc.request_package_add(**args)
+        return self._parse_pkgadd_response(rsp)
 
+
+        # -------------------------------------------------------------------------
+        # pkgaddNSSU - used to perform NSSU upgrade
+        # -------------------------------------------------------------------------
+
+    def pkgaddNSSU(self, remote_package, **kvargs):
+        """
+        Issue the 'request system software nonstop-upgrade' command on the package.
+
+        :param str remote_package:
+        The file-path to the install package on the remote (Junos) device.
+        """
+
+        rsp = self.rpc.request_package_nonstop_upgrade(
+            package_name=remote_package, **kvargs)
+        return self._parse_pkgadd_response(rsp)
+
+    # -------------------------------------------------------------------------
+    # pkgaddISSU - used to perform ISSU upgrade
+    # -------------------------------------------------------------------------
+
+    def pkgaddISSU(self, remote_package, **kvargs):
+        """
+        Issue the 'request system software nonstop-upgrade' command on the package.
+
+        :param str remote_package:
+          The file-path to the install package on the remote (Junos) device.
+        """
+
+        rsp = self.rpc.request_package_in_service_upgrade(
+            package_name=remote_package, **kvargs)
+        return self._parse_pkgadd_response(rsp)
+
+    def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
-
-        # return True if rc == 0 else got.findtext('output').strip()
-        return True if rc == 0 else False
+        if rc != 0:
+            self.log("software pkgadd message: %s" % got.findtext('output'))
+        return rc == 0
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package, **kwargs):
+    def validate(self, remote_package, issu=False, **kwargs):
         """
         Issues the 'request' operation to validate the package against the
         config.
 
         :returns:
-            * ``True`` if validation passes
-            * error (str) otherwise
+            * ``True`` if validation passes. i.e return code (rc) value is 0
+            * * ``False`` otherwise
         """
-        if kwargs.get('nssu', False):
-            kwargs.pop('nssu') # Removing nssu=True from kwargs
-        if kwargs.get('issu', False):
-            kwargs.pop('issu')   # Removing issu=True from kwargs
+        if issu:
             rsp = self.rpc.check_in_service_upgrade(
                 package_name=remote_package, **kwargs).getparent()
         else:
             rsp = self.rpc.request_package_validate(
                 package_name=remote_package, **kwargs).getparent()
-        errcode = int(rsp.findtext('package-result'))
-        return True if 0 == errcode else rsp.findtext('output').strip()
+        rc = int(rsp.findtext('package-result'))
+        if rc != 0:
+            self.log("software validation message: %s" % rsp.findtext('output'))
+        return 0 == rc
 
     def remote_checksum(self, remote_package, timeout=300):
         """
@@ -312,8 +340,8 @@ class SW(Util):
     # -------------------------------------------------------------------------
 
     def install(self, package=None, pkg_set=None, remote_path='/var/tmp', progress=None,
-                validate=False, checksum=None, cleanfs=True, no_copy=False,
-                timeout=1800, **kwargs):
+                validate=False, checksum=None, cleanfs=True, no_copy=False, issu=False,
+                nssu=False, timeout=1800, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -416,14 +444,17 @@ class SW(Util):
             * ``True`` when the installation is successful
             * ``False`` otherwise
         """
-        if kwargs.get('issu', False) and kwargs.get('nssu', False):
-            raise TypeError('install function can either take issu or nssu not both')
+        if issu is True and nssu is True:
+            raise TypeError(
+                'install function can either take issu or nssu not both')
 
         def _progress(report):
             if progress is True:
                 self.progress(self._dev, report)
             elif callable(progress):
                 progress(self._dev, report)
+
+        self.log = _progress
 
         # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
@@ -464,14 +495,21 @@ class SW(Util):
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, dev_timeout=timeout)
+                v_ok = self.validate(remote_package, issu, dev_timeout=timeout,
+                                     **kwargs)
 
                 if v_ok is not True:
-                    # will be the string of output
-                    _progress("software validation message: %s"%v_ok)
-                    return False
+                    return v_ok
 
-            if self._multi_RE is False:
+            if issu is True:
+                _progress("ISSU: installing software ... please be patient ...")
+                return self.pkgaddISSU(remote_package,
+                                       dev_timeout=timeout, **kwargs)
+            elif nssu is True:
+                _progress("NSSU: installing software ... please be patient ...")
+                return self.pkgaddNSSU(remote_package,
+                                       dev_timeout=timeout, **kwargs)
+            elif self._multi_RE is False:
                 # simple case of device with only one RE
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
