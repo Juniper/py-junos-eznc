@@ -111,13 +111,23 @@ class TestSW(unittest.TestCase):
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
     def test_sw_put(self, mock_scp_put, mock_scp):
-        # mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
         self.assertTrue(
             call(
                 'test.tgz',
                 '/var/tmp') in mock_scp_put.mock_calls)
+
+    @patch('jnpr.junos.utils.sw.FTP')
+    def test_sw_put_ftp(self, mock_ftp_put):
+        dev = Device(host='1.1.1.1', user='rick', password='password123',
+                     mode='telnet', port=23, gather_facts=False)
+        sw = SW(dev)
+        sw.put(package='test.tgz')
+        self.assertTrue(
+            call(
+                'test.tgz',
+                '/var/tmp') in mock_ftp_put.mock_calls)
 
     @patch('jnpr.junos.utils.scp.SCP.__exit__')
     @patch('jnpr.junos.utils.scp.SCP.__init__')
@@ -137,6 +147,37 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'test.tgz'
         self.assertTrue(self.sw.pkgadd(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, issu=True, no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_nssu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu_nssu_both_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertRaises(TypeError, self.sw.install, package,
+                          nssu=True, issu=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_pkgaddISSU(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.pkgaddISSU(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_pkgaddNSSU(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.pkgaddNSSU(package))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_pkgadd_pkg_set(self, mock_execute):

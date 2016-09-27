@@ -160,7 +160,6 @@ class SW(Util):
           be passed within **kvargs**, following the RPC syntax
           methodology (dash-2-underscore,etc.)
 
-        .. todo:: Add way to notify user why installation failed.
         .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
