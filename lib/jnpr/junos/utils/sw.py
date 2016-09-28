@@ -494,8 +494,7 @@ class SW(Util):
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, issu, dev_timeout=timeout,
-                                     **kwargs)
+                v_ok = self.validate(remote_package, issu, dev_timeout=timeout)
 
                 if v_ok is not True:
                     return v_ok
