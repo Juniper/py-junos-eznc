@@ -396,7 +396,7 @@ class _Connection(object):
 
         Translates a CLI command string into a string which represents the
         equivalent line of code using an RPC instead of a CLI command. Handles
-        RPCs with both attributes and arguments.
+        RPCs with arguments.
 
         .. note::
             This method does NOT actually invoke the RPC equivalent.
@@ -407,7 +407,7 @@ class _Connection(object):
         :returns: (str) representing the RPC meta-method (including
                   attributes and arguments) which could be invoked instead of
                   cli(command). Returns None if there is no equivalent RPC for
-                  command.
+                  command or if command is not a valid CLI command.
         """
 
         # Strip off any pipe modifiers
@@ -417,19 +417,9 @@ class _Connection(object):
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
         if isinstance(rpc,str):
-            if rpc.startswith("invalid command"):
-                # No RPC is available.
-                return None
+            # No RPC is available.
+            return None
         rpc_string = "rpc.%s(" % (rpc.tag.replace('-','_'))
-        if rpc.attrib:
-            attributes = []
-            for (key,value) in rpc.attrib.items():
-                if isinstance(value,str):
-                    value = '\'' + value + '\''
-                else:
-                    value = str(value)
-                attributes.append("%s: %s" % (key,str(value)))
-            rpc_string += '{' + ', '.join(attributes) + '}, '
         arguments = []
         for child in rpc:
             key = child.tag.replace('-','_')
@@ -511,10 +501,7 @@ class _Connection(object):
                 return rsp[0]
             return rsp
         except EzErrors.RpcError as ex:
-            if str(ex) is not '':
-                return "%s: %s" % (str(ex), command)
-            else:
-                return "invalid command: " + command
+            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
             return "invalid command: " + command
 

@@ -385,6 +385,12 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(val, 'invalid command: show version')
 
     @patch('jnpr.junos.Device.execute')
+    def test_device_cli_rpc_exception(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        val = self.dev.cli('foo')
+        self.assertEqual(val, 'invalid command: foo: RpcError')
+
+    @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(
