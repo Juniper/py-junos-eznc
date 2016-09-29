@@ -62,6 +62,8 @@ class RpcError(Exception):
             return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
                 .format(self.__class__.__name__, self.rpc_error['severity'],
                         self.rpc_error['bad_element'], self.message)
+        else:
+            return self.__class__.__name__
 
     __str__ = __repr__
 
