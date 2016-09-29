@@ -57,9 +57,9 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         with open(path) as f:
             # You are trying to decode an object that is already decoded.
             # You have a str, there is no need to decode from UTF-8 anymore.
-            # open already decodes to Unicode in Python 3 if you open in text mode.
-            # If you want to open it as bytes, so that you can then decode,
-            # you need to open with mode 'rb'.
+            # open already decodes to Unicode in Python 3 if you open in text
+            # mode. If you want to open it as bytes, so that you can then
+            # decode, you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
@@ -136,7 +136,7 @@ class _Connection(object):
             When **value** is not a ``file`` object
         """
         # got an existing file that we need to close
-        if (not value) and (None != self._logfile):
+        if (not value) and (self._logfile is not None):
             rc = self._logfile.close()
             self._logfile = False
             return rc
@@ -390,7 +390,7 @@ class _Connection(object):
 
         return probe_ok
 
-    def cli_to_rpc_string(self,command):
+    def cli_to_rpc_string(self, command):
         """
         Translate a CLI command string into the equivalent RPC method call.
 
@@ -411,23 +411,23 @@ class _Connection(object):
         """
 
         # Strip off any pipe modifiers
-        (command,_,_) = command.partition('|')
+        (command, _, _) = command.partition('|')
         # Strip any leading or trailing whitespace
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        if isinstance(rpc,str):
+        if isinstance(rpc, str):
             # No RPC is available.
             return None
-        rpc_string = "rpc.%s(" % (rpc.tag.replace('-','_'))
+        rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
         arguments = []
         for child in rpc:
-            key = child.tag.replace('-','_')
+            key = child.tag.replace('-', '_')
             if child.text:
                 value = "'" + child.text + "'"
             else:
                 value = "True"
-            arguments.append("%s=%s" % (key,value))
+            arguments.append("%s=%s" % (key, value))
         if arguments:
             rpc_string += ', '.join(arguments)
         rpc_string += ")"
@@ -451,7 +451,7 @@ class _Connection(object):
         .. note::
             You can also use this method to obtain the XML RPC command for a
             given CLI command by using the pipe filter ``| display xml rpc``.
-            When you do this, the return value is the XML RPC command. For 
+            When you do this, the return value is the XML RPC command. For
             example if you provide as the command
             ``show version | display xml rpc``, you will get back the XML
             Element ``<get-software-information>``.
@@ -601,9 +601,9 @@ class _Connection(object):
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
 
-        # This section is here for the possible use of something other than ncclient
-        # for RPCs that have embedded rpc-errors, need to check for those now
-
+        # This section is here for the possible use of something other than
+        # ncclient for RPCs that have embedded rpc-errors, need to check for
+        # those now.
         # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
         # if len(rpc_errs):
         #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
@@ -653,10 +653,10 @@ class _Connection(object):
                 if exception_on_failure:
                     raise
                 warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
+                              'To know the reason call '
+                              '"dev.facts_refresh(exception_on_failure=True)"',
                               RuntimeWarning)
                 return
-
 
     # -----------------------------------------------------------------------
     # OVERLOADS
@@ -985,7 +985,6 @@ class Device(_Connection):
         """
         self._conn.close_session()
         self.connected = False
-
 
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
