@@ -208,8 +208,9 @@ class SW(Util):
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
-        if rc != 0:
-            self.log("software pkgadd message: %s" % got.findtext('output'))
+        output_msg = '\n'.join([i.text for i in got.findall('output')])
+        self.log("software pkgadd package-result: %s\nOutput: %s" % (
+            rc, output_msg))
         return rc == 0
 
     # -------------------------------------------------------------------------
@@ -232,8 +233,9 @@ class SW(Util):
             rsp = self.rpc.request_package_validate(
                 package_name=remote_package, **kwargs).getparent()
         rc = int(rsp.findtext('package-result'))
-        if rc != 0:
-            self.log("software validation message: %s" % rsp.findtext('output'))
+        output_msg = '\n'.join([i.text for i in rsp.findall('output')])
+        self.log("software validate package-result: %s\nOutput: %s" % (
+            rc, output_msg))
         return 0 == rc
 
     def remote_checksum(self, remote_package, timeout=300):
@@ -446,6 +448,9 @@ class SW(Util):
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
+        elif (issu is True or nssu is True) and self._multi_RE is not True:
+            raise TypeError(
+                'ISSU/NSSU requires Multi RE setup')
 
         def _progress(report):
             if progress is True:

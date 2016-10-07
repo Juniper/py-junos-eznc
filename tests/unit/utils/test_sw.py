@@ -35,6 +35,8 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
+         'version_RE0': '16.1-20160925.0',
+         'version_RE1': '16.1-20160925.0',
          'model': 'FIREFLY-PERIMETER',
          'RE0': {'status': 'Testing',
                  'last_reboot_reason': 'Router rebooted after a '
@@ -77,7 +79,7 @@ class TestSW(unittest.TestCase):
     def test_sw_constructor_multi_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw = SW(self.dev)
-        self.assertFalse(self.sw._multi_RE)
+        self.assertTrue(self.sw._multi_RE)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_constructor_multi_vc(self, mock_execute):
@@ -178,6 +180,14 @@ class TestSW(unittest.TestCase):
     def test_sw_install_issu_nssu_both_error(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'test.tgz'
+        self.assertRaises(TypeError, self.sw.install, package,
+                          nssu=True, issu=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu_single_re_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.sw._multi_RE = False
         self.assertRaises(TypeError, self.sw.install, package,
                           nssu=True, issu=True)
 
@@ -330,11 +340,11 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
         mock_pkgadd.return_value = True
-        self.dev._facts = {
+        self.dev._facts = {'2RE': True,
             'domain': None, 'RE1': {
                 'status': 'OK', 'model': 'RE-EX8208',
                 'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
-            'version_RE1': '12.3R7.7', 'version_RE0': '12.3', '2RE': True,
+            'version_RE1': '12.3R7.7', 'version_RE0': '12.3',
             'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
             'RE0': {'status': 'OK', 'model': 'RE-EX8208',
                     'mastership_state': 'master'}, 'switch_style': 'VLAN',
@@ -405,6 +415,7 @@ class TestSW(unittest.TestCase):
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = [
+            '<request-package-add><force-host/><no-validate/><re1/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
             '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
@@ -470,6 +481,7 @@ class TestSW(unittest.TestCase):
     def test_sw_reboot_mixed_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._mixed_VC = True
+        self.sw._multi_VC = True
         self.sw.reboot()
         self.assertTrue('all-members' in
                         (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
