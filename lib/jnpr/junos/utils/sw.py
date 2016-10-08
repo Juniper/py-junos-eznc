@@ -2,7 +2,6 @@
 import hashlib
 import re
 from os import path
-import sys
 
 # 3rd-party modules
 from lxml.builder import E
@@ -10,7 +9,6 @@ from lxml.builder import E
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
-from jnpr.junos.utils.ftp import FTP
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
 
 """
@@ -26,7 +24,6 @@ def _hashfile(afile, hasher, blocksize=65536):
         hasher.update(buf)
         buf = afile.read(blocksize)
     return hasher.hexdigest()
-
 
 class SW(Util):
 
@@ -59,8 +56,7 @@ class SW(Util):
             x for x in dev.facts.keys() if x.startswith('version_RE')]
         self._multi_RE = bool(len(self._RE_list) > 1)
         self._multi_VC = bool(
-            self._multi_RE is True and dev.facts.get('vc_capable') is True and
-            dev.facts.get('vc_mode') != 'Disabled')
+            self._multi_RE is True and dev.facts.get('vc_capable') is True)
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
 
     # -----------------------------------------------------------------------
@@ -109,13 +105,13 @@ class SW(Util):
     @classmethod
     def progress(cls, dev, report):
         """ simple progress report function """
-        print (dev.hostname + ": " + report)
+        print dev.hostname + ": " + report
 
     # -------------------------------------------------------------------------
     # put - SCP put the image onto the device
     # -------------------------------------------------------------------------
 
-    def put(self, package, remote_path='/var/tmp', progress=None):
+    def put(self, package, remote_path='/var/tmp', progress=True):
         """
         SCP 'put' the package file from the local server to the remote device.
 
@@ -126,18 +122,13 @@ class SW(Util):
           The directory on the device where the package will be copied to.
 
         :param func progress:
-          Callback function to indicate progress.  If set to ``True``
-          uses :meth:`scp._scp_progress` for basic reporting by default.
-          See that class method for details.
+          Callback function to indicate progress.  If set to True uses :meth:`scp._scp_progress`
+          for basic reporting by default.  See that class method for details.
         """
-        # execute FTP when connection mode if telnet
-        if hasattr(self._dev, '_mode') and self._dev._mode=='telnet':
-            with FTP(self._dev) as ftp:
-                ftp.put(package, remote_path)
-        else:
-            # execute the secure-copy with the Python SCP module
-            with SCP(self._dev, progress=progress) as scp:
-                scp.put(package, remote_path)
+        # execute the secure-copy with the Python SCP module
+        with SCP(self._dev, progress=progress) as scp:
+            scp.put(package, remote_path)
+
 
     # -------------------------------------------------------------------------
     # pkgadd - used to perform the 'request system software add ...'
@@ -170,6 +161,52 @@ class SW(Util):
         args.update(kvargs)
 
         rsp = self.rpc.request_package_add(**args)
+
+        got = rsp.getparent()
+        rc = int(got.findtext('package-result').strip())
+
+        # return True if rc == 0 else got.findtext('output').strip()
+        return True if rc == 0 else False
+
+    # -------------------------------------------------------------------------
+    # pkgaddNSSU - used to perform NSSU upgrade
+    # -------------------------------------------------------------------------
+
+    def pkgaddNSSU(self, remote_package, dev_timeout):
+        """
+        Issue the 'request system software nonstop-upgrade' command on the package.
+
+        :param str remote_package:
+          The file-path to the install package on the remote (Junos) device.
+
+        .. todo:: Add way to notify user why installation failed.
+        .. warning:: Refer to the restrictions listed in :meth:`install`.
+		"""
+
+        rsp = self.rpc.request_package_nonstop_upgrade(package_name=remote_package)
+
+        got = rsp.getparent()
+        rc = int(got.findtext('package-result').strip())
+
+        # return True if rc == 0 else got.findtext('output').strip()
+        return True if rc == 0 else False
+
+    # -------------------------------------------------------------------------
+    # pkgaddISSU - used to perform ISSU upgrade
+    # -------------------------------------------------------------------------
+
+    def pkgaddISSU(self, remote_package, dev_timeout):
+        """
+        Issue the 'request system software nonstop-upgrade' command on the package.
+
+        :param str remote_package:
+          The file-path to the install package on the remote (Junos) device.
+
+        .. todo:: Add way to notify user why installation failed.
+        .. warning:: Refer to the restrictions listed in :meth:`install`.
+        """
+        
+        rsp = self.rpc.request_package_in_service_upgrade(package_name=remote_package)
 
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
@@ -218,10 +255,7 @@ class SW(Util):
             rsp = self.rpc.get_checksum_information(path=remote_package, dev_timeout=timeout)
             return rsp.findtext('.//checksum').strip()
         except RpcError as e:
-
-            # e.errs is list of dictionaries
-            if hasattr(e, 'errs') and \
-                    list(filter(lambda x: 'No such file or directory' in x['message'], e.errs)):
+            if hasattr(e, 'errs') and ('No such file or directory' in e.errs['message']):
                 return None
             else:
                 raise
@@ -241,8 +275,7 @@ class SW(Util):
         :param str remote_path:
             file-path to directory on remote device
         :param func progress:
-            call-back function for progress updates. If set to ``True`` uses
-          :meth:`sw.progress` for basic reporting by default.
+            call-back function for progress updates
         :param bool cleanfs:
             When ``True`` (default) this method will perform the
             "storage cleanup" on the device.
@@ -261,9 +294,7 @@ class SW(Util):
         cleanfs = kvargs.get('cleanfs', True)
 
         def _progress(report):
-            if progress is True:
-                self.progress(self._dev, report)
-            elif callable(progress):
+            if progress is not None:
                 progress(self._dev, report)
 
         if checksum is None:
@@ -297,9 +328,7 @@ class SW(Util):
     # install - complete installation process, but not reboot
     # -------------------------------------------------------------------------
 
-    def install(self, package=None, pkg_set=None, remote_path='/var/tmp', progress=None,
-                validate=False, checksum=None, cleanfs=True, no_copy=False,
-                timeout=1800, **kwargs):
+    def install(self, package=None, pkg_set=None, remote_path='/var/tmp', progress=None, upType=None, validate=False, checksum=None, cleanfs=True, no_copy=False, timeout=1800, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -309,7 +338,7 @@ class SW(Util):
         3. SCP copies the package to the :remote_path: directory
         4. computes remote MD5 checksum and matches it to the local value
         5. validates the package if :validate: is True
-        6. installs the package
+        6. installs the package using the given upgrade type (upType)(
 
         .. warning:: This process has been validated on the following deployments.
 
@@ -320,7 +349,6 @@ class SW(Util):
                       * EX virtual-chassis when all same HW model
                       * QFX virtual-chassis when all same HW model
                       * QFX/EX mixed virtual-chassis
-                      * Mixed mode VC
 
                       Known Restrictions:
 
@@ -343,7 +371,10 @@ class SW(Util):
         :param str remote_path:
           The directory on the Junos device where the package file will be
           SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
-
+          
+        :param str upType:
+		  The type of upgrade going to be run. S for standard, N for NSSU, I for ISSU.
+		  
         :param bool validate:
           When ``True`` this method will perform a config validation against
           the new image
@@ -366,9 +397,6 @@ class SW(Util):
             def myprogress(dev, report):
               print "host: %s, report: %s" % (dev.hostname, report)
 
-          If set to ``True``, it uses :meth:`sw.progress`
-          for basic reporting by default.
-
         :param bool no_copy:
           When ``True`` the software package will not be SCP'd to the device.
           Default is ``False``.
@@ -386,9 +414,7 @@ class SW(Util):
           (ignore warnings) on the QFX5100 device.
         """
         def _progress(report):
-            if progress is True:
-                self.progress(self._dev, report)
-            elif callable(progress):
+            if progress is not None:
                 progress(self._dev, report)
 
         # ---------------------------------------------------------------------
@@ -401,7 +427,7 @@ class SW(Util):
 
         if no_copy is False:
             copy_ok = True
-            if (sys.version<'3' and isinstance(package, (str, unicode))) or isinstance(package, str):
+            if isinstance(package, str):
                 copy_ok = self.safe_copy(package, remote_path=remote_path,
                                          progress=progress, cleanfs=cleanfs,
                                          checksum=checksum)
@@ -424,7 +450,8 @@ class SW(Util):
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
         # ---------------------------------------------------------------------
-        if package is not None:
+        print upType
+		if package is not None:
             remote_package = remote_path + '/' + path.basename(package)
             if validate is True:  # in case of Mixed VC it cant be used
                 _progress(
@@ -437,7 +464,7 @@ class SW(Util):
             if self._multi_RE is False:
                 # simple case of device with only one RE
                 _progress("installing software ... please be patient ...")
-                add_ok = self.pkgadd(
+                add_ok = self.pkgupgrade(
                     remote_package,
                     dev_timeout=timeout,
                     **kwargs)
@@ -445,22 +472,36 @@ class SW(Util):
             else:
                 # we need to update multiple devices
                 if self._multi_VC is True:
-                    ok = True
-                    # extract the VC number out of the 'version_RE<n>' string
-                    vc_members = [
-                        re.search(
-                            '(\d+)',
-                            x).group(1) for x in self._RE_list]
-                    for vc_id in vc_members:
-                        _progress(
-                            "installing software on VC member: {0} ... please be"
-                            " patient ...".format(vc_id))
-                        ok &= self.pkgadd(
-                            remote_package,
-                            member=vc_id,
-                            dev_timeout=timeout,
-                            **kwargs)
-                    return ok
+                	ok = True
+                	# Standard package add upgrade
+                   	if upType == 'S':
+					# extract the VC number out of the 'version_RE<n>' string
+                    		vc_members = [
+                        		re.search(
+                           		'(\d+)',
+                            		x).group(1) for x in self._RE_list]
+                    		for vc_id in vc_members:
+                    			_progress(
+                           		"installing software on VC member: {0} ... please be"
+                            		" patient ...".format(vc_id))
+                    			ok &= self.pkgadd(
+                        			remote_package,
+                        			member=vc_id,
+                        			dev_timeout=timeout,
+                        			**kwargs)
+                    		return ok
+            # NSSU upgrade
+			elif upType == 'N':
+				ok &= self.pkgaddNSSU(
+					remote_package,
+					dev_timeout=timeout)
+				return ok
+			# ISSU upgrade
+			elif upType == 'I':
+				ok &= self.pkgaddISSU(
+					remote_package,
+                                        dev_timeout=timeout)
+                                return ok
                 else:
                     # then this is a device with two RE that supports the "re0"
                     # and "re1" options to the command (M, MX tested only)
@@ -487,7 +528,7 @@ class SW(Util):
                 '/' +
                 path.basename(pkg) for pkg in pkg_set]
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
+            add_ok = self.pkgupgrade(pkg_set, dev_timeout=timeout, **kwargs)
             return add_ok
 
     # -------------------------------------------------------------------------
