@@ -416,15 +416,30 @@ class TestSW(unittest.TestCase):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = [
             '<request-package-add><force-host/><no-validate/><re1/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/><re1/></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><re1/><force-host/></request-package-add>',
+            '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name><re1/></request-package-add>',
+            '<request-package-add><force-host/><re1/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><no-validate/><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+            '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>',
+            '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/><re1/></request-package-add>',
+            '<request-package-add><re1/><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+            '<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
+            '<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>',
+            '<request-package-add><re1/><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><no-validate/><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/><re1/></request-package-add>',
+            '<request-package-add><no-validate/><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/><no-validate/></request-package-add>',
+            '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>',
             '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
             '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
             '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
             '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
-        self.assertTrue(
-            (etree.tostring(
-                mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
+        self.assertTrue(etree.tostring(
+                mock_execute.call_args[0][0]).decode('utf-8') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
