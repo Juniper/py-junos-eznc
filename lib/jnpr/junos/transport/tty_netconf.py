@@ -164,8 +164,8 @@ class tty_netconf(object):
             try:
                 etree.XML(rcvd_data)
             except XMLSyntaxError:
-                if ']]>]]>' in rcvd_data:
-                    rcvd_data = rcvd_data[:rcvd_data.index(']]>]]>')]
+                if _NETCONF_EOM in rcvd_data:
+                    rcvd_data = rcvd_data[:rcvd_data.index(_NETCONF_EOM)]
                     etree.XML(rcvd_data)     # just to recheck
                 else:
                     parser = etree.XMLParser(recover=True)

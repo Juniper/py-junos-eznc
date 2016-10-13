@@ -983,8 +983,9 @@ class Device(_Connection):
         """
         Closes the connection to the device.
         """
-        self._conn.close_session()
-        self.connected = False
+        if self.connected is True:
+            self._conn.close_session()
+            self.connected = False
 
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
