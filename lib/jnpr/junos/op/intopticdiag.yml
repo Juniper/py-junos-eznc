@@ -1,9 +1,8 @@
 ---
-
 PhyPortDiagTable:
   rpc: get-interface-optics-diagnostics-information
   args:
-    interface_name: '[fgx][et]-*' 
+    interface_name: '[efgx][et]-*'
   args_key: interface_name
   item: physical-interface
   view: PhyPortDiagView
