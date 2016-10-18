@@ -7,6 +7,7 @@ import logging
 import sys
 
 from lxml.builder import E
+from lxml.etree import XMLSyntaxError
 from datetime import datetime, timedelta
 from ncclient.operations.rpc import RPCReply, RPCError
 from ncclient.xml_ import to_ele
@@ -162,10 +163,14 @@ class tty_netconf(object):
             logger.debug('Received: \n%s' % rcvd_data)
             try:
                 etree.XML(rcvd_data)
-            except Exception as ex:
-                if isinstance(ex, etree.XMLSyntaxError):
-                    rcvd_data = rcvd_data[:rcvd_data.index(']]>]]>')]
-                    etree.XML(rcvd_data)
+            except XMLSyntaxError:
+                if _NETCONF_EOM in rcvd_data:
+                    rcvd_data = rcvd_data[:rcvd_data.index(_NETCONF_EOM)]
+                    etree.XML(rcvd_data)     # just to recheck
+                else:
+                    parser = etree.XMLParser(recover=True)
+                    rcvd_data = etree.tostring(etree.XML(rcvd_data,
+                                                         parser=parser))
             return rcvd_data
         except:
             if '</xnm:error>' in rxbuf:
