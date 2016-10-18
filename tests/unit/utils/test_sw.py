@@ -502,6 +502,15 @@ class TestSW(unittest.TestCase):
                         (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_reboot_mixed_vc_all_re_false(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._mixed_VC = True
+        self.sw._multi_VC = True
+        self.sw.reboot(all_re=False)
+        self.assertTrue('all-members' not in
+                        (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
         rsp = etree.XML('<rpc-reply><a>test</a></rpc-reply>')
         mock_execute.side_effect = RpcError(rsp=rsp)
