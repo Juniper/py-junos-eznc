@@ -35,6 +35,8 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
+         'version_RE0': '16.1-20160925.0',
+         'version_RE1': '16.1-20160925.0',
          'model': 'FIREFLY-PERIMETER',
          'RE0': {'status': 'Testing',
                  'last_reboot_reason': 'Router rebooted after a '
@@ -77,7 +79,7 @@ class TestSW(unittest.TestCase):
     def test_sw_constructor_multi_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw = SW(self.dev)
-        self.assertFalse(self.sw._multi_RE)
+        self.assertTrue(self.sw._multi_RE)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_constructor_multi_vc(self, mock_execute):
@@ -108,16 +110,40 @@ class TestSW(unittest.TestCase):
         with self.capture(SW.progress, self.dev, 'running') as output:
             self.assertEqual('1.1.1.1: running\n', output)
 
+    def test_sw_progress(self):
+        with self.capture(SW.progress, self.dev, 'running') as output:
+            self.assertEqual('1.1.1.1: running\n', output)
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('paramiko.SSHClient')
+    @patch('scp.SCPClient.put')
+    def test_sw_progress_true(self, scp_put, mock_paramiko, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        with self.capture(SW.progress, self.dev, 'testing') as output:
+            self.sw.install('test.tgz', progress=True, checksum=345,
+                            cleanfs=False)
+            self.assertEqual('1.1.1.1: testing\n', output)
+
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')
     def test_sw_put(self, mock_scp_put, mock_scp):
-        # mock_scp_put.side_effect = self.mock_put
         package = 'test.tgz'
         self.sw.put(package)
         self.assertTrue(
             call(
                 'test.tgz',
                 '/var/tmp') in mock_scp_put.mock_calls)
+
+    @patch('jnpr.junos.utils.sw.FTP')
+    def test_sw_put_ftp(self, mock_ftp_put):
+        dev = Device(host='1.1.1.1', user='rick', password='password123',
+                     mode='telnet', port=23, gather_facts=False)
+        sw = SW(dev)
+        sw.put(package='test.tgz')
+        self.assertTrue(
+            call(
+                'test.tgz',
+                '/var/tmp') in mock_ftp_put.mock_calls)
 
     @patch('jnpr.junos.utils.scp.SCP.__exit__')
     @patch('jnpr.junos.utils.scp.SCP.__init__')
@@ -139,6 +165,45 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, issu=True, no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_nssu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu_nssu_both_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertRaises(TypeError, self.sw.install, package,
+                          nssu=True, issu=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu_single_re_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.sw._multi_RE = False
+        self.assertRaises(TypeError, self.sw.install, package,
+                          nssu=True, issu=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_pkgaddISSU(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.pkgaddISSU(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_pkgaddNSSU(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.pkgaddNSSU(package))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_pkgadd_pkg_set(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         pkg_set = ['abc.tgz', 'pqr.tgz']
@@ -153,6 +218,23 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         package = 'package.tgz'
         self.assertTrue(self.sw.validate(package))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'package.tgz'
+        self.assertTrue(self.sw.validate(package, issu=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu(self, mock_execute):
+        rpc_reply = """<rpc-reply><output>mgd: commit complete
+                        Validation succeeded
+                        </output>
+                        <package-result>1</package-result>
+                        </rpc-reply>"""
+        mock_execute.side_effect = etree.fromstring(rpc_reply)
+        package = 'package.tgz'
+        self.assertFalse(self.sw.validate(package, issu=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_remote_checksum_not_found(self, mock_execute):
@@ -258,11 +340,11 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
         mock_pkgadd.return_value = True
-        self.dev._facts = {
+        self.dev._facts = {'2RE': True,
             'domain': None, 'RE1': {
                 'status': 'OK', 'model': 'RE-EX8208',
                 'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
-            'version_RE1': '12.3R7.7', 'version_RE0': '12.3', '2RE': True,
+            'version_RE1': '12.3R7.7', 'version_RE0': '12.3',
             'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
             'RE0': {'status': 'OK', 'model': 'RE-EX8208',
                     'mastership_state': 'master'}, 'switch_style': 'VLAN',
@@ -333,15 +415,31 @@ class TestSW(unittest.TestCase):
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = [
+            '<request-package-add><force-host/><no-validate/><re1/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/><re1/></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><re1/><force-host/></request-package-add>',
+            '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name><re1/></request-package-add>',
+            '<request-package-add><force-host/><re1/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><no-validate/><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+            '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>',
+            '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/><re1/></request-package-add>',
+            '<request-package-add><re1/><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
+            '<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
+            '<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>',
+            '<request-package-add><re1/><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><no-validate/><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/><re1/></request-package-add>',
+            '<request-package-add><no-validate/><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/><no-validate/></request-package-add>',
+            '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>',
             '<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>',
             '<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
             '<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
             '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>',
             '<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>']
-        self.assertTrue(
-            (etree.tostring(
-                mock_execute.call_args[0][0])).decode('utf-8)') in rpc)
+        self.assertTrue(etree.tostring(
+                mock_execute.call_args[0][0]).decode('utf-8') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
@@ -398,6 +496,7 @@ class TestSW(unittest.TestCase):
     def test_sw_reboot_mixed_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._mixed_VC = True
+        self.sw._multi_VC = True
         self.sw.reboot()
         self.assertTrue('all-members' in
                         (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))

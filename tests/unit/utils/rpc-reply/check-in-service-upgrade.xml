@@ -1,0 +1,26 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/10.4R3/junos">
+    <pipe>
+    <more-no-more/>
+    </pipe>
+    <cli>
+        <ignore-signals>
+            hup
+        </ignore-signals>
+    </cli>
+    <output>
+        Verified junos-install-mx-x86-64-16.1-20160925.0 signed by PackageDevelopmentEc_2016
+        Verified manifest signed by PackageDevelopmentEc_2016
+        Checking PIC combinations
+        Verified fips-mode signed by PackageDevelopmentEc_2016
+        Verified jail-runtime signed by PackageDevelopmentEc_2016
+        Verified jdocs signed by PackageDevelopmentEc_2016
+        Verified jpfe-X960 signed by PackageDevelopmentEc_2016
+        Verified jpfe-common signed by PackageDevelopmentEc_2016
+        Verified jpfe-wrlinux signed by PackageDevelopmentEc_2016
+        Verified jsd signed by PackageDevelopmentEc_2016
+        Verified vrr-mx signed by PackageDevelopmentEc_2016
+    </output>
+        <package-result>
+            0
+        </package-result>
+</rpc-reply>
