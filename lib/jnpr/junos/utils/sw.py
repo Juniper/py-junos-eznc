@@ -572,7 +572,7 @@ class SW(Util):
     # reboot - system reboot
     # -------------------------------------------------------------------------
 
-    def reboot(self, in_min=0, at=None):
+    def reboot(self, in_min=0, at=None, all_re=True):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -584,6 +584,9 @@ class SW(Util):
 
         :param str at: date and time the reboot should take place. The
             string must match the junos cli reboot syntax
+
+        :param bool all_re: In case of dual re or VC setup, function by default
+            will reboot all. If all is False will only reboot connected device
 
         :returns:
             * reboot message (string) if command successful
@@ -597,10 +600,11 @@ class SW(Util):
         else:
             cmd = E('request-reboot', E('at', str(at)))
 
-        if self._multi_RE is True and self._multi_VC is False:
-            cmd.append(E('both-routing-engines'))
-        elif self._mixed_VC is True:
-            cmd.append(E('all-members'))
+        if all_re is True:
+            if self._multi_RE is True and self._multi_VC is False:
+                cmd.append(E('both-routing-engines'))
+            elif self._mixed_VC is True:
+                cmd.append(E('all-members'))
         try:
             rsp = self.rpc(cmd)
             got = rsp.getparent().findtext('.//request-reboot-status').strip()
