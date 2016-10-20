@@ -15,17 +15,15 @@ def facts_chassis(junos, facts):
         (2) hostname, domain, and fqdn are retrieved from configuration data;
             inherited configs are checked.
     """
-    try:
-        rsp = junos.rpc.get_chassis_inventory()
-        if rsp.tag == 'error':
-            raise RuntimeError()
-    except:
-        # this means that the RPC caused a trap.  this should generally
-        # never happen, but we'll trap it cleanly for now
-        facts['2RE'] = False
-        facts['model'] = ''
-        facts['serialnumber'] = ''
-        return
+    # Set default values.
+    facts['2RE'] = False
+    facts['RE_hw_mi'] = False
+    facts['model'] = 'UNKNOWN'
+    facts['serialnumber'] = 'UNKNOWN'
+
+    rsp = junos.rpc.get_chassis_inventory()
+    if rsp.tag == 'error':
+        raise RuntimeError()
 
     if rsp.tag == 'output':
         # this means that there was an error; due to the
@@ -36,17 +34,19 @@ def facts_chassis(junos, facts):
     if rsp.tag == 'multi-routing-engine-results':
         facts['2RE'] = True
         facts['RE_hw_mi'] = True
-        x_ch = rsp.xpath('.//chassis-inventory')[0].find('chassis')
     else:
         facts['2RE'] = False
-        x_ch = rsp.find('chassis')
 
-    facts['model'] = x_ch.findtext('description')
-
-    try:
-        facts['serialnumber'] = x_ch.find('serial-number').text
-    except:
+    facts['model'] = rsp.findtext('.//chassis[1]/description','UNKNOWN')
+    facts['serialnumber'] = rsp.findtext('.//chassis[1]/serial-number',None)
+    if facts['serialnumber'] is None:
         # if the toplevel chassis does not have a serial-number, then
         # check the Backplane chassis-module
-        facts['serialnumber'] = x_ch.xpath(
-            'chassis-module[name="Backplane" or name="Midplane"]/serial-number')[0].text
+        facts['serialnumber'] = rsp.findtext('.//chassis-module[name="Backplane"]/serial-number',None)
+        if facts['serialnumber'] is None:
+            # if there's no Backplane serial-number, then
+            # check the Midplane chassis-module
+            facts['serialnumber'] = rsp.findtext('.//chassis-module[name="Midplane"]/serial-number','UNKNOWN')
+
+    if facts['model'] == 'UNKNOWN' or facts['serialnumber'] == 'UNKNOWN':
+        raise RpcError()

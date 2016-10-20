@@ -646,17 +646,20 @@ class _Connection(object):
                              facts gathering errors out.
 
         """
+        should_warn = False
         for gather in FACT_LIST:
             try:
                 gather(self, self._facts)
             except:
                 if exception_on_failure:
                     raise
-                warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call '
-                              '"dev.facts_refresh(exception_on_failure=True)"',
-                              RuntimeWarning)
-                return
+                should_warn = True
+        if should_warn is True:
+            warnings.warn('Facts gathering is incomplete. '
+                          'To know the reason call '
+                          '"dev.facts_refresh(exception_on_failure=True)"',
+                          RuntimeWarning)
+        return
 
     # -----------------------------------------------------------------------
     # OVERLOADS
