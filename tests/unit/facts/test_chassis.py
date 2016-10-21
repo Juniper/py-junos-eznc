@@ -40,9 +40,7 @@ class TestChassis(unittest.TestCase):
     def test_chassis_exception_RuntimeError(self):
         xmldata = etree.XML('<rpc-reply><error>test</error></rpc-reply>')
         self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
-        chassis(self.dev, self.facts)
-        self.assertFalse(self.facts['2RE'])
-        self.assertEqual(self.facts['model'], self.facts['serialnumber'])
+        self.assertRaises(RuntimeError, chassis, self.dev, self.facts)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
