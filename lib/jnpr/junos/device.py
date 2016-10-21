@@ -4,6 +4,7 @@ import types
 import platform
 import warnings
 import traceback
+from collections import OrderedDict
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -469,6 +470,49 @@ class _Connection(object):
             or ``| count``, etc.  The only value use of the "pipe" is for the
             ``| display xml rpc`` as noted above.
         """
+
+        def _count(txt, none):
+            count = len(txt.splitlines())
+            return 'Count: {count} lines'.format(count=count)
+            # will return the exact output, as Junos displays
+            # e.g.:
+            # > show system processes extensive | match root | count
+            # Count: 113 lines
+
+        def _match(txt, pattern):
+            rgx = '^.*({pattern}).*$'.format(pattern=pattern)
+            matched = [
+                line for line in txt.splitlines()
+                if re.search(rgx, line)
+            ]
+            return '\n'.join(matched)
+
+        def _filter(txt, command):
+            if not txt:
+                return txt
+
+            _OF_MAP = OrderedDict()
+            _OF_MAP['match'] = _match
+            _OF_MAP['count'] = _count
+            # the operations order matter in this case!
+
+            exploded_command = command.split('|')
+            pipe_oper_args = {}
+            for pipe in exploded_command[1:]:
+                exploded_pipe = pipe.split()
+                pipe_oper = exploded_pipe[0]  # always there
+                pipe_args = ''.join(exploded_pipe[1:2])
+                # will not throw error when there's no arg
+                pipe_oper_args[pipe_oper] = pipe_args
+
+            for oper in _OF_MAP.keys():
+                # to make sure the operation sequence is correct
+                if oper not in pipe_oper_args.keys():
+                    continue
+                txt = _OF_MAP[oper](txt, pipe_oper_args[oper])
+
+            return txt
+
         if 'display xml rpc' not in command and warning is True:
             # Get the equivalent rpc metamethod
             rpc_string = self.cli_to_rpc_string(command)
@@ -493,10 +537,12 @@ class _Connection(object):
                 return ''
             if rsp.tag in ['output', 'rpc-reply']:
                 encode = None if sys.version < '3' else 'unicode'
-                return etree.tostring(rsp, method="text", with_tail=False,
+                txt = etree.tostring(rsp, method="text", with_tail=False,
                                       encoding=encode)
+                return _filter(txt, command)
             if rsp.tag == 'configuration-information':
-                return rsp.findtext('configuration-output')
+                txt = rsp.findtext('configuration-output')
+                return _filter(txt, command)
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
