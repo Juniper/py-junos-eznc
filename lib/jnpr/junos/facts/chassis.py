@@ -1,4 +1,5 @@
 from jnpr.junos.exception import ConnectNotMasterError
+from jnpr.junos.exception import RpcError
 
 
 def facts_chassis(junos, facts):

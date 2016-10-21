@@ -10,6 +10,7 @@ import os
 from jnpr.junos import Device
 from jnpr.junos.facts.chassis import facts_chassis as chassis
 from jnpr.junos.exception import ConnectNotMasterError
+from jnpr.junos.exception import RpcError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -41,6 +42,11 @@ class TestChassis(unittest.TestCase):
         xmldata = etree.XML('<rpc-reply><error>test</error></rpc-reply>')
         self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
         self.assertRaises(RuntimeError, chassis, self.dev, self.facts)
+
+    def test_chassis_exception_RpcError(self):
+        xmldata = etree.XML('<rpc-reply><chassis-inventory/></rpc-reply>')
+        self.dev.rpc.get_chassis_inventory = MagicMock(side_effect=xmldata)
+        self.assertRaises(RpcError, chassis, self.dev, self.facts)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
