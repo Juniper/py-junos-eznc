@@ -163,7 +163,7 @@ class TestConsole(unittest.TestCase):
         from jnpr.junos.facts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev.facts_refresh()
-        self.assertEqual(mock_rpc.call_count, 6)
+        self.assertEqual(mock_rpc.call_count, 8)
 
     @patch('jnpr.junos.console.Console._tty_login')
     @patch('jnpr.junos.console.FACT_LIST')
@@ -172,8 +172,13 @@ class TestConsole(unittest.TestCase):
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev.gather_facts = True
         self.dev.open()
-        self.assertEqual(self.dev.facts, {'2RE': False, 'serialnumber': '',
-                                          'model': '', 'vc_capable': False,
+        self.assertEqual(self.dev.facts, {'2RE': False,
+                                          'RE_hw_mi': False,
+                                          'ifd_style': 'CLASSIC',
+                                          'serialnumber': 'UNKNOWN',
+                                          'model': 'UNKNOWN',
+                                          'vc_capable': False,
+                                          'switch_style': 'NONE',
                                           'personality': 'UNKNOWN'})
 
     @patch('ncclient.operations.rpc.RPCReply.parse')
