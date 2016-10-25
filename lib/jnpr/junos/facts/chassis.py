@@ -39,15 +39,10 @@ def facts_chassis(junos, facts):
         facts['2RE'] = False
 
     facts['model'] = rsp.findtext('.//chassis[1]/description','UNKNOWN')
-    facts['serialnumber'] = rsp.findtext('.//chassis[1]/serial-number',None)
-    if facts['serialnumber'] is None:
-        # if the toplevel chassis does not have a serial-number, then
-        # check the Backplane chassis-module
-        facts['serialnumber'] = rsp.findtext('.//chassis-module[name="Backplane"]/serial-number',None)
-        if facts['serialnumber'] is None:
-            # if there's no Backplane serial-number, then
-            # check the Midplane chassis-module
-            facts['serialnumber'] = rsp.findtext('.//chassis-module[name="Midplane"]/serial-number','UNKNOWN')
+    facts['serialnumber'] = (rsp.findtext('.//chassis[1]/serial-number') or
+        rsp.findtext('.//chassis-module[name="Backplane"]/serial-number') or
+        rsp.findtext('.//chassis-module[name="Midplane"]/serial-number',
+                     'UNKNOWN'))
 
     if facts['model'] == 'UNKNOWN' or facts['serialnumber'] == 'UNKNOWN':
         raise RpcError()
