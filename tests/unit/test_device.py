@@ -241,6 +241,14 @@ class TestDevice(unittest.TestCase):
             self.dev.facts_refresh()
             self.assertTrue(mock_warnings.warn.called)
 
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_facts_error_exception_on_error(self, mock_warnings, mock_execute):
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
