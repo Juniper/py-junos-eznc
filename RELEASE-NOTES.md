@@ -1,3 +1,14 @@
+# Release 2.0.2-dev 2016-Oct-26
+
+  * Enhance the warning message produced by the cli() method to recommend the corresponding rpc() call. #60
+  * Enhance the sw.install() method with basic ISSU and NSSU support using the issu and nssu boolean arguments. #606
+  ** NSSU support has not yet been tested and should currently be considered experimental.
+  * Fix: Updated the interface-name glob pattern to correctly match et-x/y/z interfaces in several tables and views. #609
+  * Fix: To take care of special chars on screen during console connection. #610
+  * Enhance reboot() method to take a bool param all_re to decide if only connected dev to be rebooted or all. #613
+  * Fix: Address issue with fact gathering stopping when it encounters a problem. #615
+
+
 # Release 2.0.1
 
   * StartShell to take timeout (30 second by default) as paramter
