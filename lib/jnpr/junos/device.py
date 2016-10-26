@@ -25,6 +25,7 @@ import jinja2
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.factcache import _FactCache
 from jnpr.junos.facts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
@@ -854,6 +855,7 @@ class Device(_Connection):
 
         self.connected = False
         self.rpc = _RpcMetaExec(self)
+        self.nfacts = _FactCache(self)
 
     # -----------------------------------------------------------------------
     # Basic device methods
