@@ -26,7 +26,7 @@ import jinja2
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.factcache import _FactCache
-from jnpr.junos.facts import *
+from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 
@@ -179,14 +179,18 @@ class _Connection(object):
     # ------------------------------------------------------------------------
 
     @property
-    def facts(self):
+    def ofacts(self):
         """
         :returns: Device fact dictionary
         """
-        return self._facts
+        if self._fact_style != 'old' and self._fact_style != 'both':
+            raise RuntimeError("Old-style facts gathering is not in use!")
+        if self._ofacts == {} and self.connected:
+            self.facts_refresh()
+        return self._ofacts
 
-    @facts.setter
-    def facts(self, value):
+    @ofacts.setter
+    def ofacts(self, value):
         """ read-only property """
         raise RuntimeError("facts is read-only!")
 
@@ -586,10 +590,8 @@ class _Connection(object):
         # dev.rpc.get_route_engine_information({'format': 'json'})
 
         if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
-            if self._facts == {}:
-                self.facts_refresh()
-            ver_info = self._facts['version_info']
-            if ver_info.major[0] >= 15 or \
+            ver_info = self.facts.get('version_info')
+            if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
                 try:
                     return json.loads(rpc_rsp_e.text)
@@ -639,27 +641,67 @@ class _Connection(object):
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self, exception_on_failure=False):
+    def facts_refresh(self,
+                      exception_on_failure=False,
+                      warnings_on_failure=None,
+                      keys=None):
         """
-        Reload the facts from the Junos device into :attr:`facts` property.
+        Refresh the facts from the Junos device into :attr:`facts` property.
+        For old-style facts, this causes all facts to be immediately reloaded.
+        For new-style facts, the current fact value(s) are deleted, and the
+        fact is reloaded on demand.
 
-        :param bool exception_on_failure: To raise exception or warning when
-                             facts gathering errors out.
-
+        :param bool exception_on_failure: To raise exception when facts
+                                          gathering errors out. If True when
+                                          new-style fact gathering is in use,
+                                          causes all facts to be reloaded rather
+                                          than being loaded on demand.
+        :param bool warnings_on_failure: To print a warning when fact gathering
+                                         errors out.
+                                         warnings_on_failure=True is the default
+                                         for old-style facts.
+                                         warnings_on_failure=False is the
+                                         default for new-style facts.
+                                         If True when new-style fact gathering
+                                         is in use, causes all facts to be
+                                         reloaded rather than being loaded on
+                                         demand.
+        :param str, set, list, or tuple keys: The set of keys in facts to
+                                              refresh. Can only be set if
+                                              new-style facts are in use and
+                                              exception_on_failure==False and
+                                              warnings==False.
         """
-        should_warn = False
-        for gather in FACT_LIST:
-            try:
-                gather(self, self._facts)
-            except:
-                if exception_on_failure:
-                    raise
-                should_warn = True
-        if should_warn is True:
-            warnings.warn('Facts gathering is incomplete. '
-                          'To know the reason call '
-                          '"dev.facts_refresh(exception_on_failure=True)"',
-                          RuntimeWarning)
+        if (self._fact_style != 'old' and
+            self._fact_style != 'new' and
+            self._fact_style != 'both'):
+            raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
+        if self._fact_style == 'old' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = True
+            if keys is not None:
+                raise RuntimeError("The keys argument can not be specified "
+                                   "when old-style fact gathering is in use!")
+            should_warn = False
+            for gather in FACT_LIST:
+                try:
+                    gather(self, self._ofacts)
+                except:
+                    if exception_on_failure:
+                        raise
+                    should_warn = True
+            if (warnings_on_failure is True and should_warn is True and
+                self._fact_style != 'both'):
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call '
+                              '"dev.facts_refresh(exception_on_failure=True)"',
+                              RuntimeWarning)
+        if self._fact_style == 'new' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = False
+            self.facts.refresh(exception_on_failure=exception_on_failure,
+                               warnings_on_failure=warnings_on_failure,
+                               keys=keys)
         return
 
     # -----------------------------------------------------------------------
@@ -767,7 +809,16 @@ class Device(_Connection):
         :param bool gather_facts:
             *OPTIONAL* For ssh mode default is ``True``. In case of console
             connection over telnet/serial it defaults to ``False``.
-            If ``False`` then facts are not gathered on call to :meth:`open`
+            If ``False`` and old-style fact gathering is in use then facts are
+            not gathered on call to :meth:`open`. This argument is a no-op when
+            new-style fact gathering is in use (the default.)
+
+        :param str fact_style:
+            *OPTIONAL*  The style of fact gathering to use. Valid values are:
+            'new', 'old', or 'both'. The default is 'new'. The value 'both' is
+            only present for debugging purposes. It will be removed in a future
+            release. The value 'old' is only present to workaround bugs in
+            new-style fact gathering. It will be removed in a future release.
 
         :param str mode:
             *OPTIONAL*  mode, mode for console connection (telnet/serial)
@@ -811,6 +862,11 @@ class Device(_Connection):
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
+        self._fact_style = kvargs.get('fact_style', 'new')
+        if self._fact_style != 'new':
+            warnings.warn('fact-style %s will be removed in a future release.' %
+                          (self._fact_style),
+                          RuntimeWarning)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -849,13 +905,16 @@ class Device(_Connection):
         self._conn = None
         self._j2ldr = _Jinja2ldr
         self._manages = []
-        self._facts = {}
+        self._ofacts = {}
 
         # public attributes
 
         self.connected = False
         self.rpc = _RpcMetaExec(self)
-        self.nfacts = _FactCache(self)
+        if self._fact_style == 'old':
+            self.facts = self.ofacts
+        else:
+            self.facts = _FactCache(self)
 
     # -----------------------------------------------------------------------
     # Basic device methods
