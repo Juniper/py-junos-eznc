@@ -1,6 +1,6 @@
+from abc import ABCMeta
 import collections
 import warnings
-from abc import ABCMeta
 
 import jnpr.junos.facts
 import jnpr.junos.exception
@@ -14,6 +14,7 @@ class _FactCache(collections.MutableMapping):
     def __init__(self,device):
         self._device = device
         self._cache = dict()
+        self._call_stack = list()
         self._callbacks = jnpr.junos.facts._callbacks
         self._exception_on_failure = False
         self._warnings_on_failure = False
@@ -26,8 +27,17 @@ class _FactCache(collections.MutableMapping):
                            (key,key))
         if key not in self._cache:
             # A known fact, but not yet cached. Go get it and cache it.
+            if self._callbacks[key] in self._call_stack:
+                raise jnpr.junos.exception.FactLoopError(
+                    "A loop was detected while gathering the %s fact. The %s "
+                    "module has already been called. Please report this error."
+                    % (key, self._callbacks[key].__module__))
+            else:
+                self._call_stack.append(self._callbacks[key])
             try:
                 new_facts = self._callbacks[key](self._device)
+            except jnpr.junos.exception.FactLoopError:
+                raise
             except Exception as err:
                 # An exception was raised. No facts were returned.
                 # Raise the exception to the user?
@@ -57,6 +67,8 @@ class _FactCache(collections.MutableMapping):
                     else:
                         # Cache the returned fact
                         self._cache[new_key] = new_facts[new_key]
+            finally:
+                self._call_stack.pop()
         if key in self._cache:
             # key fact is cached. Return it.
             if self._device._fact_style == 'both':

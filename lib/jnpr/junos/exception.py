@@ -4,6 +4,12 @@ from lxml.etree import _Element
 from ncclient.operations.rpc import RPCError
 
 
+class FactLoopError(RuntimeError):
+    """
+    Generated when there is a loop in fact gathering.
+    """
+    pass
+
 class RpcError(Exception):
 
     """
