@@ -27,7 +27,7 @@ class Telnet(Terminal):
     def __init__(self, host, port, **kvargs):
         """
         :host:
-          The hostname or ip-addr of the ternminal server
+          The hostname or ip-addr of the terminal server
 
         :port:
           The TCP port that maps to the TTY device on the
