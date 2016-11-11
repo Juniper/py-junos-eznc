@@ -75,6 +75,11 @@ class Console(_Connection):
             *OPTIONAL* default is ``False``.  If ``False`` then the
             facts are not gathered on call to :meth:`open`
 
+        :param bool console_has_banner:
+            *OPTIONAL* default is ``False``.  If ``False`` then in case of a
+            hung state, <close-session/> rpc is sent to the console.
+            If ``True``, after sleep(5), a new-line is sent
+
         """
 
         # ----------------------------------------
@@ -106,6 +111,7 @@ class Console(_Connection):
         #self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
         self.gather_facts = kvargs.get('gather_facts', False)
+        self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
         self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
@@ -209,6 +215,7 @@ class Console(_Connection):
         if self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
+            tty_args['console_has_banner'] = self.console_has_banner
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
         elif self._mode.upper() == 'SERIAL':

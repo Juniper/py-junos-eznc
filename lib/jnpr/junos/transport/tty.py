@@ -81,6 +81,7 @@ class Terminal(object):
         self.c_user = kvargs.get('s_user', self.user)
         self.c_passwd = kvargs.get('s_passwd', self.passwd)
         self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
+        self.console_has_banner = kvargs.get('console_has_banner') or False
 
         # misc setup
         self.nc = tty_netconf(self)
@@ -212,11 +213,14 @@ class Terminal(object):
                 # assume we're in a hung state, i.e. we don't see
                 # a login prompt for whatever reason
                 self.state = self._ST_TTY_NOLOGIN
-                self.write('<close-session/>')  # @@@ this is a hack
-                # if console connection have a banner or warning
-                # comment-out line above and uncoment lines bellow ... better hack
-                # sleep(5)
-                # self.write('\n')
+                if self.console_has_banner:
+                    # if console connection has a banner or warning,
+                    # use this hack
+                    sleep(5)
+                    self.write('\n')
+                else:
+                    # @@@ this is still a hack - used by default
+                    self.write('<close-session/>')
 
         def _ev_shell():
             if self.state == self._ST_INIT:
