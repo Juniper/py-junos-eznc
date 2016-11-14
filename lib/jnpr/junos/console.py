@@ -84,6 +84,12 @@ class Console(_Connection):
             only present for debugging purposes. It will be removed in a future
             release. The value 'old' is only present to workaround bugs in
             new-style fact gathering. It will be removed in a future release.
+
+        :param bool console_has_banner:
+            *OPTIONAL* default is ``False``.  If ``False`` then in case of a
+            hung state, <close-session/> rpc is sent to the console.
+            If ``True``, after sleep(5), a new-line is sent
+
         """
 
         # ----------------------------------------
@@ -120,6 +126,7 @@ class Console(_Connection):
             warnings.warn('fact-style %s will be removed in a future release.' %
                           (self._fact_style),
                           RuntimeWarning)
+        self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
         self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
@@ -233,6 +240,7 @@ class Console(_Connection):
         if self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
+            tty_args['console_has_banner'] = self.console_has_banner
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
         elif self._mode.upper() == 'SERIAL':

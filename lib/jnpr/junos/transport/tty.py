@@ -17,13 +17,13 @@ class Terminal(object):
 
     """
     Terminal is used to bootstrap Junos New Out of the Box (NOOB) device
-    over the CONSOLE port.  The general use-case is to setup the minimal
+    over the CONSOLE port. The general use-case is to setup the minimal
     configuration so that the device is IP reachable using SSH
     and NETCONF for remote management.
 
     Serial is needed for Junos devices that do not support
     the DHCP 'auto-installation' or 'ZTP' feature; i.e. you *MUST*
-    to the NOOB configuration via the CONSOLE.
+    do the NOOB configuration via the CONSOLE.
 
     Serial is also useful for situations even when the Junos
     device supports auto-DHCP, but is not an option due to the
@@ -67,7 +67,7 @@ class Terminal(object):
           defaults to 'root'
 
         :kvargs['passwd']:
-          defaults to empty; NOOB Junos devics there is
+          defaults to empty; NOOB Junos device there is
           no root password initially
 
         :kvargs['attempts']:
@@ -81,6 +81,7 @@ class Terminal(object):
         self.c_user = kvargs.get('s_user', self.user)
         self.c_passwd = kvargs.get('s_passwd', self.passwd)
         self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
+        self.console_has_banner = kvargs.get('console_has_banner') or False
 
         # misc setup
         self.nc = tty_netconf(self)
@@ -156,7 +157,7 @@ class Terminal(object):
 
         # hack for now
         # in case of telnet to management port, after writing exit on console
-        # it exists completely and returns None
+        # it exits completely and returns None
         ###
         if found is not None:
             _ev_tbl[found]()
@@ -187,7 +188,7 @@ class Terminal(object):
             self._login_state_machine(attempt=0)
             self._loader += 1
             if self._loader == 2:
-                raise RuntimeError("propably corrupted image, stuck in loader")
+                raise RuntimeError("probably corrupted image, stuck in loader")
 
         def _ev_login():
             self.state = self._ST_LOGIN
@@ -212,11 +213,14 @@ class Terminal(object):
                 # assume we're in a hung state, i.e. we don't see
                 # a login prompt for whatever reason
                 self.state = self._ST_TTY_NOLOGIN
-                self.write('<close-session/>')  # @@@ this is a hack
-                # if console connection have a banner or warning
-                # comment-out line above and uncoment lines bellow ... better hack
-                # sleep(5)
-                # self.write('\n')
+                if self.console_has_banner:
+                    # if console connection has a banner or warning,
+                    # use this hack
+                    sleep(5)
+                    self.write('\n')
+                else:
+                    # @@@ this is still a hack - used by default
+                    self.write('<close-session/>')
 
         def _ev_shell():
             if self.state == self._ST_INIT:
