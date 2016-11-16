@@ -647,6 +647,7 @@ class _Connection(object):
                       keys=None):
         """
         Refresh the facts from the Junos device into :attr:`facts` property.
+        See :module:`jnpr.junos.facts` for a complete list of available facts.
         For old-style facts, this causes all facts to be immediately reloaded.
         For new-style facts, the current fact value(s) are deleted, and the
         fact is reloaded on demand.
@@ -699,7 +700,7 @@ class _Connection(object):
         if self._fact_style == 'new' or self._fact_style == 'both':
             if warnings_on_failure is None:
                 warnings_on_failure = False
-            self.facts.refresh(exception_on_failure=exception_on_failure,
+            self.facts._refresh(exception_on_failure=exception_on_failure,
                                warnings_on_failure=warnings_on_failure,
                                keys=keys)
         return

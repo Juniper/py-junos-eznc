@@ -7,11 +7,32 @@ import jnpr.junos.exception
 
 class _FactCache(collections.MutableMapping):
     """
+    Implements a dictionary-like object which performs on-demand fact gathering.
 
+    This class should not be used directly. An instance of this class is
+    available as the :attr:`facts` attribute of a Device object.
+
+    **Dictionary magic methods:**
+      * :meth:`__getitem__`: Gets the value of a given key in the dictionary.
+      * :meth:`__delitem__`: Called when a key is deleted from the dictionary.
+      * :meth:`__setitem__`: Called when a key is set on the dictionary.
+      * :meth:`__iter__`: Called when iterating over the keys of the dictionary.
+      * :meth:`__len__`: Called when getting the length of the dictionary.
+      * :meth:`__repr__`: Called when representing the dictionary as a string.
+
+    **Additional methods:**
+      * :meth:`_refresh`: Refreshes the fact cache.
     """
+    # Used to register the class as a dict.
     __metaclass__ = ABCMeta
 
     def __init__(self,device):
+        """
+        _FactCache object constructor.
+
+        :param device: The device object for which fact gathering will be
+          performed.
+        """
         self._device = device
         self._cache = dict()
         self._call_stack = list()
@@ -21,6 +42,33 @@ class _FactCache(collections.MutableMapping):
         self._should_warn = False
 
     def __getitem__(self, key):
+        """
+        Return the value of a particular key in the dictionary.
+
+        If the fact has already been cached, the value is simply returned from
+        the cache. If the value has not been cached, then the appropriate
+        callback function is invoked to gather the fact from the device. The
+        value is cached, and then returned.
+
+        If _warnings_on_failure is True, then a warning is logged if there is an
+        error gathering a fact from the device.
+
+        :param key: The key who's value is returned.
+
+        :returns value: The value of the key fact. If key is a known fact, but
+            there is an error gathering the fact, then the value None is
+            returned.
+
+        :raises KeyError:
+            When key is not a known fact (there is no callback present to
+            gather the fact.)
+
+        :raises jnpr.junos.exception.FactLoopError:
+            When there is a loop attempting to gather the fact.
+
+        :raises other exceptions as defined by the fact gathering modules:
+            When an error is encountered and _exception_on_failure is True.
+        """
         if key not in self._callbacks:
             # Not a fact that we know how to provide.
             raise KeyError('%s: There is no function to gather the %s fact' %
@@ -33,8 +81,11 @@ class _FactCache(collections.MutableMapping):
                     "module has already been called. Please report this error."
                     % (key, self._callbacks[key].__module__))
             else:
+                # Add the callback we are about to invoke to the _call_stack in
+                # order to detect loops in fact gathering.
                 self._call_stack.append(self._callbacks[key])
             try:
+                # Invoke the callback
                 new_facts = self._callbacks[key](self._device)
             except jnpr.junos.exception.FactLoopError:
                 raise
@@ -48,11 +99,11 @@ class _FactCache(collections.MutableMapping):
                     self._should_warn = True
                 # Set all of the facts which should have been returned
                 # by this callback to the default value of None.
-                current_callback = self._callbacks[key]
                 for new_key in self._callbacks:
                     if self._callbacks[key] is self._callbacks[new_key]:
                         self._cache[new_key] = None
             else:
+                # No exception
                 for new_key in new_facts:
                     if (new_key not in self._callbacks or
                         self._callbacks[key] is not self._callbacks[new_key]):
@@ -68,10 +119,13 @@ class _FactCache(collections.MutableMapping):
                         # Cache the returned fact
                         self._cache[new_key] = new_facts[new_key]
             finally:
+                # Always pop the current callback from _call_stack,
+                # regardless of whether or not an exception was raised.
                 self._call_stack.pop()
         if key in self._cache:
             # key fact is cached. Return it.
             if self._device._fact_style == 'both':
+                # Compare old and new-style values.
                 if key in self._device._ofacts:
                     if self._cache[key] != self._device._ofacts[key]:
                         raise RuntimeError('New and old-style facts do not '
@@ -90,18 +144,44 @@ class _FactCache(collections.MutableMapping):
                                                 key))
 
     def __delitem__(self, key):
+        """
+        Facts are read-only. Don't allow deleting an item.
+        """
         raise RuntimeError("facts are read-only!")
 
     def __setitem__(self, key, value):
+        """
+        Facts are read-only. Don't allow setting an item.
+        """
         raise RuntimeError("facts are read-only!")
 
     def __iter__(self):
+        """
+        An iterator of known facts.
+
+        :returns iterator: of all of the facts we know how to gather,
+        regardless of whether or not they've already been cached.
+        """
         return iter(self._callbacks)
 
     def __len__(self):
+        """
+        The length of all known facts.
+
+        :returns length: of all of the facts we know how to gather,
+        regardless of whether or not they've already been cached.
+        """
         return len(self._callbacks)
 
     def __repr__(self):
+        """
+        A string representation of the facts dictionary.
+
+        :returns string: a string representation of the dictionary.
+          Because this returns the value of every fact, it has the
+          side-effect of causing any ungathered facts to be gathered and then
+          cached.
+        """
         string = ''
         for key in self:
             current = "'%s': %s" % (key,repr(self.get(key)))
@@ -111,11 +191,33 @@ class _FactCache(collections.MutableMapping):
                 string = current
         return '{' + string + '}'
 
-    def refresh(self,
+    def _refresh(self,
                 exception_on_failure=False,
                 warnings_on_failure=False,
                 keys=None):
         """
+        Empty the cache to force a refresh of one or more facts.
+
+        Empties the fact gathering cache for all keys (if keys == None) or a set
+        of keys. This causes the fact to be gathered and cached upon next
+        access. If either eception_on_failure or warnings_on_failure is true,
+        then all facts are accessed by getting the string representation of the
+        facts. This causes all facts to immediately be populated so that any
+        exceptions or warnings are generated during the call to _refresh().
+
+        :param exception_on_failure: A boolean which indicates if an exception
+          should be raised upon a failure gathering facts.
+
+        :param warnings_on_failure: A boolean which indicates if an warning
+          should be logged upon a failure gathering facts.
+
+        :param keys: A single key as a string, or an iterable of keys as a list
+          or tuple. The specified keys are emptied from the cache. If None, all
+          keys are emptied from the cache.
+
+        :raises RuntimeError:
+            When keys contains an unknown fact.
+
         """
         refresh_keys = ()
         if keys is not None:
@@ -151,4 +253,6 @@ class _FactCache(collections.MutableMapping):
                 self._warnings_on_failure = False
                 self._should_warn = False
 
+# Make this class looks like a regular dict.
+# Ensures isinstance() and issubclass() behave the same as for a dict.
 _FactCache.register(dict)

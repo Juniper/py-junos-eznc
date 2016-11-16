@@ -2,10 +2,20 @@ from jnpr.junos.exception import ConnectNotMasterError
 from jnpr.junos.exception import RpcError
 
 def provides_facts():
-    return ('RE_hw_mi','serialnumber',)
+    """
+    Returns a dictionary keyed on the facts provided by this module. The value
+    of each key is the doc string describing the fact.
+    """
+    return {'RE_hw_mi': "(Routing Engine hardware multi-instance) A boolean "
+                        "indicating if this is a multi-chassis system.",
+            'serialnumber':  "A string containing the serial number of the "
+                             "device's chassis. If there is no chassis serial "
+                             "number, the serial number of the backplane or "
+                             "midplane is returned.",}
 
 def get_facts(device):
     """
+    Gathers facts from the <get-chassis-inventory/> RPC.
     """
     rsp = device.rpc.get_chassis_inventory()
     if rsp.tag == 'error':

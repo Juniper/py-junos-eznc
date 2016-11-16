@@ -1,18 +1,18 @@
 # Import any exceptions raised in this module.
-from jnpr.junos.exception import ConnectNotMasterError
+from jnpr.junos.exception import RpcError
 
 # The name of this file should be based on the RPCs which are invoked in this
 # file. This avoids accidentally inovking the same RPC multiple times when we
 # could invoke it just once and gather multiple facts from the output.
 
 # Must have a provide_facts() function
-# Must return a tuple with string values
-# Each fact that is handled/returned by this module.
+# Must return a dictionary. The keys of the dictionary are each fact that is
+# handled/returned by this module. The value of item in the dictionary is the
+# documentation string describing the particular fact.
 def provides_facts():
     """
-    Doc String details.
-    Returns:
-
+    Returns a dictionary keyed on the facts provided by this module. The value
+    of each key is the doc string describing the fact.
     """
     return ('foo','bar',)
 
@@ -28,7 +28,7 @@ def provides_facts():
 # given fact, then set the value for that fact to None.
 def get_facts(device):
     """
-    Doc String details.
+    Gathers facts from the <get-foo-bar-information/> RPC.
     """
     # Invoke an RPC on device.
     # Try to avoid cli() or shell()
