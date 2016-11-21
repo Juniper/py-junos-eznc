@@ -26,6 +26,7 @@ IsisAdjacencyView:
 
 _IsisAdjacencyLogTable:
   item: isis-adjacency-log
+  key: adjacency-when
   view: _IsisAdjacencyLogView
 
 _IsisAdjacencyLogView:
