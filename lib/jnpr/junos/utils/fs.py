@@ -20,6 +20,7 @@ class FS(Util):
     * :meth:`rmdir`: remove a directory
     * :meth:`stat`: return file/dir information
     * :meth:`storage_usage`: return storage usage
+    * :meth:`directory_usage`: return directory usage in bytes
     * :meth:`storage_cleanup`: perform storage storage_cleanup
     * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
     * :meth:`symlink`: create a symlink
@@ -264,6 +265,35 @@ class FS(Util):
         return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
 
     # -------------------------------------------------------------------------
+    # directory_usage - filesystem directory usage
+    # -------------------------------------------------------------------------
+
+    def directory_usage(self, path="."):
+        """
+        Returns the directory usage, similar to the unix "du" command.
+
+        :returns: approximate directory usage, including subdirectories, in bytes
+        """
+        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth="0")
+
+        used_space = rsp.findtext("directory/used-space")
+
+        if used_space is None:
+            return None
+
+        used_space = used_space.strip()
+
+        multiplier = {
+            'B': 1,
+            'K': 1024,
+            'M': 1024**2,
+            'G': 1024**3,
+            'T': 1024**4,
+        }
+
+        return int(float(used_space[:-1]) * multiplier[used_space[-1]])
+
+    # -------------------------------------------------------------------------
     ### storage_cleanup_check, storage_cleanip
     # -------------------------------------------------------------------------
 
@@ -388,8 +418,8 @@ class FS(Util):
         return rsp.text
 
     # -------------------------------------------------------------------------
-    # !!!!! methods that use SSH shell commands, requires that the user
-    # !!!!! has 'start shell' priveldges
+    # !!!!! methods that use SSH shell commands, require that the user
+    # !!!!! has 'start shell' privileges
     # -------------------------------------------------------------------------
 
     def _ssh_exec(self, command):

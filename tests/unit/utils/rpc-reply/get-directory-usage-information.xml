@@ -1,0 +1,13 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junosjunos">
+    <directory-usage-information>
+        <directory>
+            <directory-name>/var/tmp</directory-name>
+            <used-space used-blocks="456076">
+                223M
+            </used-space>
+        </directory>
+    </directory-usage-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
