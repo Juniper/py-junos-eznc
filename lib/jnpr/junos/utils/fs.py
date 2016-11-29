@@ -3,6 +3,8 @@ from lxml.builder import E
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.start_shell import StartShell
 
+from jnpr.junos.exception import RpcError
+
 
 class FS(Util):
     """
@@ -20,7 +22,7 @@ class FS(Util):
     * :meth:`rmdir`: remove a directory
     * :meth:`stat`: return file/dir information
     * :meth:`storage_usage`: return storage usage
-    * :meth:`directory_usage`: return directory usage in bytes
+    * :meth:`directory_usage`: return directory usage
     * :meth:`storage_cleanup`: perform storage storage_cleanup
     * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
     * :meth:`symlink`: create a symlink
@@ -268,30 +270,34 @@ class FS(Util):
     # directory_usage - filesystem directory usage
     # -------------------------------------------------------------------------
 
-    def directory_usage(self, path="."):
+    def directory_usage(self, path=".", depth=0):
         """
         Returns the directory usage, similar to the unix "du" command.
 
-        :returns: approximate directory usage, including subdirectories, in bytes
+        :returns: dict of directory usage, including subdirectories if depth > 0
         """
-        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth="0")
+        BLOCK_SIZE = 512
 
-        used_space = rsp.findtext("directory/used-space")
+        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth=str(depth))
 
-        if used_space is None:
-            return None
+        if rsp.findtext("directory/used-space") is None:
+            # Likely, no such directory
+            raise RpcError(rsp=rsp)
 
-        used_space = used_space.strip()
+        dirs = rsp.xpath("//directory")
+        result = {}
 
-        multiplier = {
-            'B': 1,
-            'K': 1024,
-            'M': 1024**2,
-            'G': 1024**3,
-            'T': 1024**4,
-        }
+        for directory in dirs:
+            dir_name = directory.findtext("directory-name").strip()
+            dir_size = directory.findtext("used-space").strip()
+            dir_blocks = int(directory.find("used-space").get("used-blocks").strip())
+            result[dir_name] = {
+                "size": dir_size,
+                "blocks": dir_blocks,
+                "bytes": dir_blocks * BLOCK_SIZE,
+            }
 
-        return int(float(used_space[:-1]) * multiplier[used_space[-1]])
+        return result
 
     # -------------------------------------------------------------------------
     ### storage_cleanup_check, storage_cleanip

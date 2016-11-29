@@ -269,7 +269,15 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.fs.directory_usage(path="/var/tmp"), 233832448)
+        self.assertEqual(self.fs.directory_usage(path="/var/tmp"),
+                         {'/var/tmp': {'blocks': 456076, 'bytes': 233510912, 'size': '223M'},
+                          '/var/tmp/gres-tp': {'blocks': 68, 'bytes': 34816, 'size': '34K'},
+                          '/var/tmp/install': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/pics': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/rtsdb': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/sec-download': {'blocks': 8, 'bytes': 4096, 'size': '4.0K'},
+                          '/var/tmp/vi.recover': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'}}
+                         )
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
