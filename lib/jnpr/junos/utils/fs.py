@@ -280,22 +280,25 @@ class FS(Util):
 
         rsp = self._dev.rpc.get_directory_usage_information(path=path, depth=str(depth))
 
-        if rsp.findtext("directory/used-space") is None:
-            # Likely, no such directory
-            raise RpcError(rsp=rsp)
-
-        dirs = rsp.xpath("//directory")
         result = {}
 
-        for directory in dirs:
+        for directory in rsp.findall(".//directory"):
             dir_name = directory.findtext("directory-name").strip()
-            dir_size = directory.findtext("used-space").strip()
-            dir_blocks = int(directory.find("used-space").get("used-blocks").strip())
-            result[dir_name] = {
-                "size": dir_size,
-                "blocks": dir_blocks,
-                "bytes": dir_blocks * BLOCK_SIZE,
-            }
+            if dir_name is None:
+                raise RpcError(rsp=rsp)
+
+            used_space = directory.find('used-space')
+            if used_space is not None:
+                dir_size = used_space.text.strip()
+                dir_blocks = used_space.get('used-blocks')
+                if dir_blocks is not None:
+                    dir_blocks = int(dir_blocks)
+                    dir_bytes = dir_blocks * BLOCK_SIZE
+                    result[dir_name] = {
+                        "size": dir_size,
+                        "blocks": dir_blocks,
+                        "bytes": dir_bytes,
+                    }
 
         return result
 
