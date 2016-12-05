@@ -264,43 +264,46 @@ class SW(Util):
                  'backup Routing engine must be running the same software\n'
                  'version before you can perform a unified ISSU.')
         if not (self._dev.facts['2RE'] and self._dev.facts['version_RE0'] == self._dev.facts['version_RE1']):
-            self.log('The master Routing Engine and backup Routing Engine must be running\n'
-                     'the same software version before it can perform a unified ISSU')
+            self.log('Requirement FAILED: The master Routing Engine (%s) and \n'
+                     'backup Routing Engine (%s) must be running the same \n'
+                     'software version before it can perform a unified ISSU' %
+                     (self._dev.facts['version_RE0'],
+                      self._dev.facts['version_RE1']))
             return False
+        self.log('Checking GRES status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'))
-        self.log('Checking GRES status')
         if conf.find('chassis/redundancy/graceful-switchover') is None:
-            self.log('GRES is not Enabled in configuration')
+            self.log('Requirement FAILED: GRES is not Enabled in configuration')
             return False
         self.log('Checking NSR status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'))
         if conf.find('routing-options/nonstop-routing') is None:
-            self.log('NSR is not Enabled in configuration')
+            self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
         self.log('Checking commit synchronize status')
         conf = self._dev.rpc.get_config(
             filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'))
         if conf.find('system/commit/synchronize') is None:
-            self.log('commit synchronize is not Enabled in configuration')
+            self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
             return False
-        self.log('Verifying that NSR is configured on the master Routing Engine\n'
-                 '(re0) by using the "show task replication" command.')
+        self.log('Verifying that NSR is configured on the current Routing Engine\n'
+                 'by using the "show task replication" command.')
         op = self._dev.rpc.get_routing_task_replication_state()
         if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
-            self.log('Either Stateful Replication is not Enabled or RE mode\n'
+            self.log('Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\n'
                      'is not Master')
             return False
         self.log('Verify that GRES is enabled on the backup Routing Engine\n'
-                 '(re1) by using the show system switchover command.')
+                 'by using the show system switchover command.')
         op = self._dev.rpc.request_shell_execute(routing_engine='backup',
                                                  command="cli show system switchover")
-        output = op.findtext('.//output')
+        output = op.findtext('.//output', default='')
         gres_status = re.search('Graceful switchover: (\w+)', output, re.I)
         if not (gres_status is not None and
                 gres_status.group(1).lower() == 'on'):
-            self.log('Graceful switchover status is not On')
+            self.log('Requirement FAILED: Graceful switchover status is not On')
             return False
         return True
 
