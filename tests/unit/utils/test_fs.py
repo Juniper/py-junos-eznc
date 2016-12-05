@@ -269,7 +269,7 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1),
+        self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1), 
                          {'/var/tmp': {'blocks': 456076, 'bytes': 233510912, 'size': '223M'},
                           '/var/tmp/gres-tp': {'blocks': 68, 'bytes': 34816, 'size': '34K'},
                           '/var/tmp/install': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
