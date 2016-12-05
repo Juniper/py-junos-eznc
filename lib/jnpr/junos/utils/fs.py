@@ -286,7 +286,7 @@ class FS(Util):
         if directories is None:
             raise RpcError(rsp=rsp)
 
-        for directory in directories
+        for directory in directories:
             dir_name = directory.findtext("directory-name")
             if dir_name is not None:
                 dir_name = dir_name.strip()
