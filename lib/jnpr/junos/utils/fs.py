@@ -3,6 +3,8 @@ from lxml.builder import E
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.start_shell import StartShell
 
+from jnpr.junos.exception import RpcError
+
 
 class FS(Util):
     """
@@ -20,6 +22,7 @@ class FS(Util):
     * :meth:`rmdir`: remove a directory
     * :meth:`stat`: return file/dir information
     * :meth:`storage_usage`: return storage usage
+    * :meth:`directory_usage`: return directory usage
     * :meth:`storage_cleanup`: perform storage storage_cleanup
     * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
     * :meth:`symlink`: create a symlink
@@ -264,6 +267,42 @@ class FS(Util):
         return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
 
     # -------------------------------------------------------------------------
+    # directory_usage - filesystem directory usage
+    # -------------------------------------------------------------------------
+
+    def directory_usage(self, path=".", depth=0):
+        """
+        Returns the directory usage, similar to the unix "du" command.
+
+        :returns: dict of directory usage, including subdirectories if depth > 0
+        """
+        BLOCK_SIZE = 512
+
+        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth=str(depth))
+
+        result = {}
+
+        for directory in rsp.findall(".//directory"):
+            dir_name = directory.findtext("directory-name").strip()
+            if dir_name is None:
+                raise RpcError(rsp=rsp)
+
+            used_space = directory.find('used-space')
+            if used_space is not None:
+                dir_size = used_space.text.strip()
+                dir_blocks = used_space.get('used-blocks')
+                if dir_blocks is not None:
+                    dir_blocks = int(dir_blocks)
+                    dir_bytes = dir_blocks * BLOCK_SIZE
+                    result[dir_name] = {
+                        "size": dir_size,
+                        "blocks": dir_blocks,
+                        "bytes": dir_bytes,
+                    }
+
+        return result
+
+    # -------------------------------------------------------------------------
     ### storage_cleanup_check, storage_cleanip
     # -------------------------------------------------------------------------
 
@@ -388,8 +427,8 @@ class FS(Util):
         return rsp.text
 
     # -------------------------------------------------------------------------
-    # !!!!! methods that use SSH shell commands, requires that the user
-    # !!!!! has 'start shell' priveldges
+    # !!!!! methods that use SSH shell commands, require that the user
+    # !!!!! has 'start shell' privileges
     # -------------------------------------------------------------------------
 
     def _ssh_exec(self, command):

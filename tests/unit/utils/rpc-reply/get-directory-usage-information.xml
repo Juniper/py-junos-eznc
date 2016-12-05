@@ -1,0 +1,49 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X47/junos">
+    <directory-usage-information>
+        <directory>
+            <directory-name>/var/tmp</directory-name>
+            <directory>
+                <directory-name>/var/tmp/install</directory-name>
+                <used-space used-blocks="4">
+                    2.0K
+                </used-space>
+            </directory>
+            <directory>
+                <directory-name>/var/tmp/vi.recover</directory-name>
+                <used-space used-blocks="4">
+                    2.0K
+                </used-space>
+            </directory>
+            <directory>
+                <directory-name>/var/tmp/pics</directory-name>
+                <used-space used-blocks="4">
+                    2.0K
+                </used-space>
+            </directory>
+            <directory>
+                <directory-name>/var/tmp/gres-tp</directory-name>
+                <used-space used-blocks="68">
+                    34K
+                </used-space>
+            </directory>
+            <directory>
+                <directory-name>/var/tmp/rtsdb</directory-name>
+                <used-space used-blocks="4">
+                    2.0K
+                </used-space>
+            </directory>
+            <directory>
+                <directory-name>/var/tmp/sec-download</directory-name>
+                <used-space used-blocks="8">
+                    4.0K
+                </used-space>
+            </directory>
+            <used-space used-blocks="456076">
+                223M
+            </used-space>
+        </directory>
+    </directory-usage-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
