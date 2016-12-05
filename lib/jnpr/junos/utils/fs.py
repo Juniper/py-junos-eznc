@@ -283,7 +283,7 @@ class FS(Util):
         result = {}
 
         directories = rsp.findall(".//directory")
-        if directories is None:
+        if not directories:
             raise RpcError(rsp=rsp)
 
         for directory in directories:
