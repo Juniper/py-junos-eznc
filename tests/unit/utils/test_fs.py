@@ -10,6 +10,7 @@ from ncclient.transport import SSHSession
 
 from jnpr.junos import Device
 from jnpr.junos.utils.fs import FS
+from jnpr.junos.exception import RpcError
 
 from mock import patch, MagicMock, call
 
@@ -280,6 +281,16 @@ class TestFS(unittest.TestCase):
                          )
 
     @patch('jnpr.junos.Device.execute')
+    def test_directory_usage_no_directory(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_error1
+        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+
+    @patch('jnpr.junos.Device.execute')
+    def test_directory_usage_no_dir_name(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_error2
+        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+
+    @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_cleanup(),
@@ -351,3 +362,13 @@ class TestFS(unittest.TestCase):
                 return self._read_file('request-system-storage-cleanup.xml')
             elif args[0].tag == 'file-archive':
                 return self._read_file('file-archive.xml')
+
+    def _mock_manager_error1(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information_error1.xml')
+
+    def _mock_manager_error2(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information_error2.xml')
