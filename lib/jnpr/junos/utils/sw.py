@@ -251,9 +251,9 @@ class SW(Util):
             * Check GRES is enabled
             * Check NSR is enabled
             * Check commit synchronize is enabled
-            * Verify that NSR is configured on the master Routing Engine (re0)
+            * Verify that NSR is configured on the master Routing Engine
                 by using the "show task replication" command.
-            * Verify that GRES is enabled on the backup Routing Engine (re1)
+            * Verify that GRES is enabled on the backup Routing Engine
                 by using the show system switchover command.
 
         :returns:
@@ -272,19 +272,22 @@ class SW(Util):
             return False
         self.log('Checking GRES status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'))
+            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
         if conf.find('chassis/redundancy/graceful-switchover') is None:
             self.log('Requirement FAILED: GRES is not Enabled in configuration')
             return False
         self.log('Checking NSR status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'))
+            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
         if conf.find('routing-options/nonstop-routing') is None:
             self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
         self.log('Checking commit synchronize status')
         conf = self._dev.rpc.get_config(
-            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'))
+            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
         if conf.find('system/commit/synchronize') is None:
             self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
             return False
@@ -296,7 +299,7 @@ class SW(Util):
                      'is not Master')
             return False
         self.log('Verify that GRES is enabled on the backup Routing Engine\n'
-                 'by using the show system switchover command.')
+                 'by using the command "show system switchover"')
         op = self._dev.rpc.request_shell_execute(routing_engine='backup',
                                                  command="cli show system switchover")
         output = op.findtext('.//output', default='')
