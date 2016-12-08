@@ -221,7 +221,7 @@ class SW(Util):
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package, issu=False, **kwargs):
+    def validate(self, remote_package, issu=False, nssu=False, **kwargs):
         """
         Issues the 'request' operation to validate the package against the
         config.
@@ -230,6 +230,8 @@ class SW(Util):
             * ``True`` if validation passes. i.e return code (rc) value is 0
             * * ``False`` otherwise
         """
+        if nssu and not self._issu_nssu_requirement_validation():
+                return False
         if issu:
             if not self._issu_requirement_validation():
                 return False
@@ -251,11 +253,6 @@ class SW(Util):
             * The master Routing Engine and backup Routing Engine must be
                 running the same software version before you can perform a
                 unified ISSU.
-            * Check GRES is enabled
-            * Check NSR is enabled
-            * Check commit synchronize is enabled
-            * Verify that NSR is configured on the master Routing Engine
-                by using the "show task replication" command.
             * Verify that GRES is enabled on the backup Routing Engine
                 by using the show system switchover command.
 
@@ -273,36 +270,7 @@ class SW(Util):
                      (self._dev.facts['version_RE0'],
                       self._dev.facts['version_RE1']))
             return False
-        self.log('Checking GRES status')
-        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit',
-                     'commit-scripts': 'apply'})
-        if conf.find('chassis/redundancy/graceful-switchover') is None:
-            self.log('Requirement FAILED: GRES is not Enabled in configuration')
-            return False
-        self.log('Checking NSR status')
-        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit',
-                     'commit-scripts': 'apply'})
-        if conf.find('routing-options/nonstop-routing') is None:
-            self.log('Requirement FAILED: NSR is not Enabled in configuration')
-            return False
-        self.log('Checking commit synchronize status')
-        conf = self._dev.rpc.get_config(
-            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit',
-                     'commit-scripts': 'apply'})
-        if conf.find('system/commit/synchronize') is None:
-            self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
-            return False
-        self.log('Verifying that NSR is configured on the current Routing Engine\n'
-                 'by using the "show task replication" command.')
-        op = self._dev.rpc.get_routing_task_replication_state()
-        if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
-            self.log('Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\n'
-                     'is not Master')
+        if not self._issu_nssu_requirement_validation():
             return False
         self.log('Verify that GRES is enabled on the backup Routing Engine\n'
                  'by using the command "show system switchover"')
@@ -332,6 +300,52 @@ class SW(Util):
             self.log('Requirement FAILED: Graceful switchover status is not On')
             return False
         self.log('Graceful switchover status is On')
+        return True
+
+    def _issu_nssu_requirement_validation(self):
+        """
+        Checks:
+            * Check GRES is enabled
+            * Check NSR is enabled
+            * Check commit synchronize is enabled
+            * Verify that NSR is configured on the master Routing Engine
+                by using the "show task replication" command.
+
+        :returns:
+            * ``True`` if validation passes.
+            * * ``False`` otherwise
+        """
+        self.log('Checking GRES status')
+        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
+            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('chassis/redundancy/graceful-switchover') is None:
+            self.log('Requirement FAILED: GRES is not Enabled in configuration')
+            return False
+        self.log('Checking commit synchronize status')
+        conf = self._dev.rpc.get_config(
+            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('system/commit/synchronize') is None:
+            self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
+            return False
+        self.log('Checking NSR status')
+        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
+            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('routing-options/nonstop-routing') is None:
+            self.log('Requirement FAILED: NSR is not Enabled in configuration')
+            return False
+        self.log('Verifying that NSR is configured on the current Routing Engine\n'
+                 'by using the "show task replication" command.')
+        op = self._dev.rpc.get_routing_task_replication_state()
+        if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
+            self.log('Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\n'
+                     'is not Master')
+            return False
         return True
 
     def remote_checksum(self, remote_package, timeout=300):
@@ -599,7 +613,7 @@ class SW(Util):
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, issu, dev_timeout=timeout)
+                v_ok = self.validate(remote_package, issu, nssu, dev_timeout=timeout)
 
                 if v_ok is not True:
                     return v_ok
