@@ -267,6 +267,19 @@ class TestFS(unittest.TestCase):
                            'total': '4F'}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_directory_usage(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1), 
+                         {'/var/tmp': {'blocks': 456076, 'bytes': 233510912, 'size': '223M'},
+                          '/var/tmp/gres-tp': {'blocks': 68, 'bytes': 34816, 'size': '34K'},
+                          '/var/tmp/install': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/pics': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/rtsdb': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'},
+                          '/var/tmp/sec-download': {'blocks': 8, 'bytes': 4096, 'size': '4.0K'},
+                          '/var/tmp/vi.recover': {'blocks': 4, 'bytes': 2048, 'size': '2.0K'}}
+                         )
+
+    @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_cleanup(),
@@ -332,6 +345,8 @@ class TestFS(unittest.TestCase):
                     return self._read_file('show-cli-directory.xml')
             elif args[0].tag == 'get-system-storage':
                 return self._read_file('get-system-storage.xml')
+            elif args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information.xml')
             elif args[0].tag == 'request-system-storage-cleanup':
                 return self._read_file('request-system-storage-cleanup.xml')
             elif args[0].tag == 'file-archive':

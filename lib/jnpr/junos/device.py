@@ -57,9 +57,9 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         with open(path) as f:
             # You are trying to decode an object that is already decoded.
             # You have a str, there is no need to decode from UTF-8 anymore.
-            # open already decodes to Unicode in Python 3 if you open in text mode.
-            # If you want to open it as bytes, so that you can then decode,
-            # you need to open with mode 'rb'.
+            # open already decodes to Unicode in Python 3 if you open in text
+            # mode. If you want to open it as bytes, so that you can then
+            # decode, you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
@@ -136,7 +136,7 @@ class _Connection(object):
             When **value** is not a ``file`` object
         """
         # got an existing file that we need to close
-        if (not value) and (None != self._logfile):
+        if (not value) and (self._logfile is not None):
             rc = self._logfile.close()
             self._logfile = False
             return rc
@@ -390,6 +390,49 @@ class _Connection(object):
 
         return probe_ok
 
+    def cli_to_rpc_string(self, command):
+        """
+        Translate a CLI command string into the equivalent RPC method call.
+
+        Translates a CLI command string into a string which represents the
+        equivalent line of code using an RPC instead of a CLI command. Handles
+        RPCs with arguments.
+
+        .. note::
+            This method does NOT actually invoke the RPC equivalent.
+
+        :param str command:
+          The CLI command to translate, e.g. "show version"
+
+        :returns: (str) representing the RPC meta-method (including
+                  attributes and arguments) which could be invoked instead of
+                  cli(command). Returns None if there is no equivalent RPC for
+                  command or if command is not a valid CLI command.
+        """
+
+        # Strip off any pipe modifiers
+        (command, _, _) = command.partition('|')
+        # Strip any leading or trailing whitespace
+        command = command.strip()
+        # Get the equivalent RPC
+        rpc = self.display_xml_rpc(command)
+        if isinstance(rpc, str):
+            # No RPC is available.
+            return None
+        rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
+        arguments = []
+        for child in rpc:
+            key = child.tag.replace('-', '_')
+            if child.text:
+                value = "'" + child.text + "'"
+            else:
+                value = "True"
+            arguments.append("%s=%s" % (key, value))
+        if arguments:
+            rpc_string += ', '.join(arguments)
+        rpc_string += ")"
+        return rpc_string
+
     # ------------------------------------------------------------------------
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
@@ -408,16 +451,18 @@ class _Connection(object):
         .. note::
             You can also use this method to obtain the XML RPC command for a
             given CLI command by using the pipe filter ``| display xml rpc``.
-            When you do this, the return value is the XML RPC command. For 
-            example if you provide as the command ``show version | display xml rpc``,
-            you will get back the XML Element ``<get-software-information>``.
+            When you do this, the return value is the XML RPC command. For
+            example if you provide as the command
+            ``show version | display xml rpc``, you will get back the XML
+            Element ``<get-software-information>``.
 
         .. warning::
             This function is provided for **DEBUG** purposes only!
             **DO NOT** use this method for general automation purposes as
-            that puts you in the realm of "screen-scraping the CLI".  The purpose of
-            the PyEZ framework is to migrate away from that tooling pattern.
-            Interaction with the device should be done via the RPC function.
+            that puts you in the realm of "screen-scraping the CLI".
+            The purpose of the PyEZ framework is to migrate away from that
+            tooling pattern. Interaction with the device should be done via
+            the RPC function.
 
         .. warning::
             You cannot use "pipe" filters with **command** such as ``| match``
@@ -425,9 +470,15 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
-            warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
-            warnings.resetwarnings()
+            # Get the equivalent rpc metamethod
+            rpc_string = self.cli_to_rpc_string(command)
+            if rpc_string is not None:
+                warning_string = "\nCLI command is for debug use only!\n"
+                warning_string += "Instead of:\ncli('%s')\n" % (command)
+                warning_string += "Use:\n%s\n" % (rpc_string)
+                warnings.simplefilter("always")
+                warnings.warn(warning_string, RuntimeWarning)
+                warnings.resetwarnings()
 
         try:
             rsp = self.rpc.cli(command, format)
@@ -450,10 +501,7 @@ class _Connection(object):
                 return rsp[0]
             return rsp
         except EzErrors.RpcError as ex:
-            if str(ex) is not '':
-                return "%s: %s" % (str(ex), command)
-            else:
-                return "invalid command: " + command
+            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
             return "invalid command: " + command
 
@@ -553,9 +601,9 @@ class _Connection(object):
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
 
-        # This section is here for the possible use of something other than ncclient
-        # for RPCs that have embedded rpc-errors, need to check for those now
-
+        # This section is here for the possible use of something other than
+        # ncclient for RPCs that have embedded rpc-errors, need to check for
+        # those now.
         # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
         # if len(rpc_errs):
         #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
@@ -598,17 +646,20 @@ class _Connection(object):
                              facts gathering errors out.
 
         """
+        should_warn = False
         for gather in FACT_LIST:
             try:
                 gather(self, self._facts)
             except:
                 if exception_on_failure:
                     raise
-                warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
-                              RuntimeWarning)
-                return
-
+                should_warn = True
+        if should_warn is True:
+            warnings.warn('Facts gathering is incomplete. '
+                          'To know the reason call '
+                          '"dev.facts_refresh(exception_on_failure=True)"',
+                          RuntimeWarning)
+        return
 
     # -----------------------------------------------------------------------
     # OVERLOADS
@@ -782,6 +833,7 @@ class Device(_Connection):
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or \
                 self._auth_user
@@ -935,9 +987,9 @@ class Device(_Connection):
         """
         Closes the connection to the device.
         """
-        self._conn.close_session()
-        self.connected = False
-
+        if self.connected is True:
+            self._conn.close_session()
+            self.connected = False
 
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
