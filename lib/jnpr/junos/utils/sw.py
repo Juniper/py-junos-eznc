@@ -12,6 +12,7 @@ from lxml import etree
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.ftp import FTP
+from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
 
 """
@@ -210,7 +211,8 @@ class SW(Util):
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
-        output_msg = '\n'.join([i.text for i in got.findall('output')])
+        output_msg = '\n'.join([i.text for i in got.findall('output')
+                                if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
             rc, output_msg))
         return rc == 0
@@ -237,7 +239,8 @@ class SW(Util):
             rsp = self.rpc.request_package_validate(
                 package_name=remote_package, **kwargs).getparent()
         rc = int(rsp.findtext('package-result'))
-        output_msg = '\n'.join([i.text for i in rsp.findall('output')])
+        output_msg = '\n'.join([i.text for i in rsp.findall('output')
+                                if i.text is not None])
         self.log("software validate package-result: %s\nOutput: %s" % (
             rc, output_msg))
         return 0 == rc
@@ -273,21 +276,24 @@ class SW(Util):
         self.log('Checking GRES status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
         if conf.find('chassis/redundancy/graceful-switchover') is None:
             self.log('Requirement FAILED: GRES is not Enabled in configuration')
             return False
         self.log('Checking NSR status')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
         if conf.find('routing-options/nonstop-routing') is None:
             self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
         self.log('Checking commit synchronize status')
         conf = self._dev.rpc.get_config(
             filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit', 'commit-scripts': 'apply'})
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
         if conf.find('system/commit/synchronize') is None:
             self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
             return False
@@ -300,14 +306,32 @@ class SW(Util):
             return False
         self.log('Verify that GRES is enabled on the backup Routing Engine\n'
                  'by using the command "show system switchover"')
-        op = self._dev.rpc.request_shell_execute(routing_engine='backup',
+        output = ''
+        try:
+            op = self._dev.rpc.request_shell_execute(routing_engine='backup',
                                                  command="cli show system switchover")
-        output = op.findtext('.//output', default='')
+            output = op.findtext('.//output', default='')
+        except RpcError:
+            # request-shell-execute rpc is not available for <14.1
+            with StartShell(self._dev) as ss:
+                ss.run('cli', '> ', timeout=5)
+                if ss.run('request routing-engine login other-routing-engine')[0]:
+                    # depending on user permission, prompt will go to either cli
+                    # or shell, below line of code prompt will finally end up in
+                    # cli mode
+                    ss.run('cli', '> ', timeout=5)
+                    data = ss.run('show system switchover', '> ', timeout=5)
+                    output = data[1]
+                    ss.run('exit')
+                else:
+                    self.log('Requirement FAILED: Not able run "show system switchover"')
+                    return False
         gres_status = re.search('Graceful switchover: (\w+)', output, re.I)
         if not (gres_status is not None and
                 gres_status.group(1).lower() == 'on'):
             self.log('Requirement FAILED: Graceful switchover status is not On')
             return False
+        self.log('Graceful switchover status is On')
         return True
 
     def remote_checksum(self, remote_package, timeout=300):
