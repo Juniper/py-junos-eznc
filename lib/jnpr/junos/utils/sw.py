@@ -253,6 +253,11 @@ class SW(Util):
             * The master Routing Engine and backup Routing Engine must be
                 running the same software version before you can perform a
                 unified ISSU.
+            * Check GRES is enabled
+            * Check NSR is enabled
+            * Check commit synchronize is enabled
+            * Verify that NSR is configured on the master Routing Engine
+                by using the "show task replication" command.
             * Verify that GRES is enabled on the backup Routing Engine
                 by using the show system switchover command.
 
@@ -315,7 +320,7 @@ class SW(Util):
             * ``True`` if validation passes.
             * * ``False`` otherwise
         """
-        self.log('Checking GRES status')
+        self.log('Checking GRES configuration')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
             options={'database': 'committed', 'inherit': 'inherit',
@@ -323,7 +328,7 @@ class SW(Util):
         if conf.find('chassis/redundancy/graceful-switchover') is None:
             self.log('Requirement FAILED: GRES is not Enabled in configuration')
             return False
-        self.log('Checking commit synchronize status')
+        self.log('Checking commit synchronize configuration')
         conf = self._dev.rpc.get_config(
             filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
             options={'database': 'committed', 'inherit': 'inherit',
@@ -331,7 +336,7 @@ class SW(Util):
         if conf.find('system/commit/synchronize') is None:
             self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
             return False
-        self.log('Checking NSR status')
+        self.log('Checking NSR configuration')
         conf = self._dev.rpc.get_config(filter_xml=etree.XML(
             '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
             options={'database': 'committed', 'inherit': 'inherit',
@@ -339,7 +344,7 @@ class SW(Util):
         if conf.find('routing-options/nonstop-routing') is None:
             self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
-        self.log('Verifying that NSR is configured on the current Routing Engine\n'
+        self.log('Verifying that GRES status on the current Routing Engine is Enabled\n'
                  'by using the "show task replication" command.')
         op = self._dev.rpc.get_routing_task_replication_state()
         if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
