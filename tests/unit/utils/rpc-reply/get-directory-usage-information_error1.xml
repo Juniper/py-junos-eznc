@@ -1,0 +1,7 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X47/junos">
+    <directory-usage-information>
+    </directory-usage-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

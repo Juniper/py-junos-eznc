@@ -282,9 +282,15 @@ class FS(Util):
 
         result = {}
 
-        for directory in rsp.findall(".//directory"):
-            dir_name = directory.findtext("directory-name").strip()
-            if dir_name is None:
+        directories = rsp.findall(".//directory")
+        if not directories:
+            raise RpcError(rsp=rsp)
+
+        for directory in directories:
+            dir_name = directory.findtext("directory-name")
+            if dir_name is not None:
+                dir_name = dir_name.strip()
+            else:
                 raise RpcError(rsp=rsp)
 
             used_space = directory.find('used-space')
