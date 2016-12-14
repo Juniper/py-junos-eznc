@@ -7,6 +7,7 @@ from jnpr.junos.exception import RpcError
 
 
 class FS(Util):
+
     """
     Filesystem (FS) utilities:
 
@@ -231,7 +232,9 @@ class FS(Util):
         if brief is True:
             results['files'] = [f.findtext('file-name').strip() for f in files]
         else:
-            results['files'] = dict((f.findtext('file-name').strip(), FS._decode_file(f)) for f in files)
+            results['files'] = dict(
+                (f.findtext('file-name').strip(),
+                 FS._decode_file(f)) for f in files)
 
         return results
 
@@ -278,12 +281,14 @@ class FS(Util):
         """
         BLOCK_SIZE = 512
 
-        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth=str(depth))
+        rsp = self._dev.rpc.get_directory_usage_information(
+            path=path,
+            depth=str(depth))
 
         result = {}
 
         for directory in rsp.findall(".//directory"):
-            dir_name = directory.findtext("directory-name").strip()
+            dir_name = directory.findtext("directory-name")
             if dir_name is None:
                 raise RpcError(rsp=rsp)
 
@@ -294,7 +299,7 @@ class FS(Util):
                 if dir_blocks is not None:
                     dir_blocks = int(dir_blocks)
                     dir_bytes = dir_blocks * BLOCK_SIZE
-                    result[dir_name] = {
+                    result[dir_name.strip()] = {
                         "size": dir_size,
                         "blocks": dir_blocks,
                         "bytes": dir_bytes,
@@ -303,7 +308,7 @@ class FS(Util):
         return result
 
     # -------------------------------------------------------------------------
-    ### storage_cleanup_check, storage_cleanip
+    # storage_cleanup_check, storage_cleanip
     # -------------------------------------------------------------------------
 
     @classmethod
@@ -369,8 +374,8 @@ class FS(Util):
 
     def cp(self, from_path, to_path):
         """
-        Perform a local file copy where **from_path** and **to_path** can be any
-        valid Junos path argument.  Refer to the Junos "file copy" command
+        Perform a local file copy where **from_path** and **to_path** can be
+        any valid Junos path argument.  Refer to the Junos "file copy" command
         documentation for details.
 
         :param str from_path: source file-path
