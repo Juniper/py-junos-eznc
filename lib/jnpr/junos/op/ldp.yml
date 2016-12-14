@@ -28,6 +28,7 @@ LdpNeighborView:
 
 _LdpNeighborHelloFlagsTable:
   item: ldp-neighbor-hello-flags
+  key: ldp-neighbor-hello-flag
   view: _LdpNeighborHelloFlagsView
 
 _LdpNeighborHelloFlagsView:
@@ -36,6 +37,7 @@ _LdpNeighborHelloFlagsView:
 
 _LdpNeighborTypesTable:
   item: ldp-neighbor-types
+  key: ldp-neighbor-type
   view: _LdpNeighborTypesView
 
 _LdpNeighborTypesView:

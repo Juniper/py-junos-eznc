@@ -8,10 +8,11 @@ Operating Systems
 ---------------
 - Fedora 19
 - Fedora 20
+- CentOS 7
 
 #### Step 1: Install packages for Junos PyEZ
 
-    sudo yum install -y python-pip python-devel libxml2-devel libxslt-devel gcc openssl libffi-devel
+    sudo yum install -y python-pip python-devel libxml2-devel libxslt-devel gcc openssl openssl-devel libffi-devel
 	
 #### Step 2: Install Junos PyEZ
 

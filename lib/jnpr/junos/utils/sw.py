@@ -6,11 +6,13 @@ import sys
 
 # 3rd-party modules
 from lxml.builder import E
+from lxml import etree
 
 # local modules
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.ftp import FTP
+from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
 
 """
@@ -62,7 +64,7 @@ class SW(Util):
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
-        self.log = lambda report : None
+        self.log = lambda report: None
 
     # -----------------------------------------------------------------------
     # CLASS METHODS
@@ -132,7 +134,7 @@ class SW(Util):
           See that class method for details.
         """
         # execute FTP when connection mode if telnet
-        if hasattr(self._dev, '_mode') and self._dev._mode=='telnet':
+        if hasattr(self._dev, '_mode') and self._dev._mode == 'telnet':
             with FTP(self._dev) as ftp:
                 ftp.put(package, remote_path)
         else:
@@ -149,8 +151,8 @@ class SW(Util):
         Issue the 'request system software add' command on the package.
         The "no-validate" options is set by default.  If you want to validate
         the image, do that using the specific :meth:`validate` method.  Also,
-        if you want to reboot the device, suggest using the :meth:`reboot` method
-        rather ``reboot=True``.
+        if you want to reboot the device, suggest using the :meth:`reboot`
+        method rather ``reboot=True``.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
@@ -172,14 +174,14 @@ class SW(Util):
         rsp = self.rpc.request_package_add(**args)
         return self._parse_pkgadd_response(rsp)
 
-
         # -------------------------------------------------------------------------
         # pkgaddNSSU - used to perform NSSU upgrade
         # -------------------------------------------------------------------------
 
     def pkgaddNSSU(self, remote_package, **kvargs):
         """
-        Issue 'request system software nonstop-upgrade' command on the package.
+        Issue the 'request system software nonstop-upgrade' command on the
+        package.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
@@ -195,7 +197,8 @@ class SW(Util):
 
     def pkgaddISSU(self, remote_package, **kvargs):
         """
-        Issue the 'request system software nonstop-upgrade' command on the package.
+        Issue the 'request system software nonstop-upgrade' command on the
+        package.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
@@ -208,7 +211,8 @@ class SW(Util):
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         rc = int(got.findtext('package-result').strip())
-        output_msg = '\n'.join([i.text for i in got.findall('output')])
+        output_msg = '\n'.join([i.text for i in got.findall('output')
+                                if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
             rc, output_msg))
         return rc == 0
@@ -217,7 +221,7 @@ class SW(Util):
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package, issu=False, **kwargs):
+    def validate(self, remote_package, issu=False, nssu=False, **kwargs):
         """
         Issues the 'request' operation to validate the package against the
         config.
@@ -226,17 +230,128 @@ class SW(Util):
             * ``True`` if validation passes. i.e return code (rc) value is 0
             * * ``False`` otherwise
         """
+        if nssu and not self._issu_nssu_requirement_validation():
+                return False
         if issu:
+            if not self._issu_requirement_validation():
+                return False
             rsp = self.rpc.check_in_service_upgrade(
                 package_name=remote_package, **kwargs).getparent()
         else:
             rsp = self.rpc.request_package_validate(
                 package_name=remote_package, **kwargs).getparent()
         rc = int(rsp.findtext('package-result'))
-        output_msg = '\n'.join([i.text for i in rsp.findall('output')])
+        output_msg = '\n'.join([i.text for i in rsp.findall('output')
+                                if i.text is not None])
         self.log("software validate package-result: %s\nOutput: %s" % (
             rc, output_msg))
         return 0 == rc
+
+    def _issu_requirement_validation(self):
+        """
+        Checks:
+            * The master Routing Engine and backup Routing Engine must be
+                running the same software version before you can perform a
+                unified ISSU.
+            * Check GRES is enabled
+            * Check NSR is enabled
+            * Check commit synchronize is enabled
+            * Verify that NSR is configured on the master Routing Engine
+                by using the "show task replication" command.
+            * Verify that GRES is enabled on the backup Routing Engine
+                by using the show system switchover command.
+
+        :returns:
+            * ``True`` if validation passes.
+            * * ``False`` otherwise
+        """
+        self.log('ISSU requirement validation: The master Routing Engine and\n'
+                 'backup Routing engine must be running the same software\n'
+                 'version before you can perform a unified ISSU.')
+        if not (self._dev.facts['2RE'] and self._dev.facts['version_RE0'] == self._dev.facts['version_RE1']):
+            self.log('Requirement FAILED: The master Routing Engine (%s) and \n'
+                     'backup Routing Engine (%s) must be running the same \n'
+                     'software version before it can perform a unified ISSU' %
+                     (self._dev.facts['version_RE0'],
+                      self._dev.facts['version_RE1']))
+            return False
+        if not self._issu_nssu_requirement_validation():
+            return False
+        self.log('Verify that GRES is enabled on the backup Routing Engine\n'
+                 'by using the command "show system switchover"')
+        output = ''
+        try:
+            op = self._dev.rpc.request_shell_execute(routing_engine='backup',
+                                                 command="cli show system switchover")
+            output = op.findtext('.//output', default='')
+        except RpcError:
+            # request-shell-execute rpc is not available for <14.1
+            with StartShell(self._dev) as ss:
+                ss.run('cli', '> ', timeout=5)
+                if ss.run('request routing-engine login other-routing-engine')[0]:
+                    # depending on user permission, prompt will go to either cli
+                    # or shell, below line of code prompt will finally end up in
+                    # cli mode
+                    ss.run('cli', '> ', timeout=5)
+                    data = ss.run('show system switchover', '> ', timeout=5)
+                    output = data[1]
+                    ss.run('exit')
+                else:
+                    self.log('Requirement FAILED: Not able run "show system switchover"')
+                    return False
+        gres_status = re.search('Graceful switchover: (\w+)', output, re.I)
+        if not (gres_status is not None and
+                gres_status.group(1).lower() == 'on'):
+            self.log('Requirement FAILED: Graceful switchover status is not On')
+            return False
+        self.log('Graceful switchover status is On')
+        return True
+
+    def _issu_nssu_requirement_validation(self):
+        """
+        Checks:
+            * Check GRES is enabled
+            * Check NSR is enabled
+            * Check commit synchronize is enabled
+            * Verify that NSR is configured on the master Routing Engine
+                by using the "show task replication" command.
+
+        :returns:
+            * ``True`` if validation passes.
+            * * ``False`` otherwise
+        """
+        self.log('Checking GRES configuration')
+        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
+            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('chassis/redundancy/graceful-switchover') is None:
+            self.log('Requirement FAILED: GRES is not Enabled in configuration')
+            return False
+        self.log('Checking commit synchronize configuration')
+        conf = self._dev.rpc.get_config(
+            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('system/commit/synchronize') is None:
+            self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
+            return False
+        self.log('Checking NSR configuration')
+        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
+            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
+            options={'database': 'committed', 'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
+        if conf.find('routing-options/nonstop-routing') is None:
+            self.log('Requirement FAILED: NSR is not Enabled in configuration')
+            return False
+        self.log('Verifying that GRES status on the current Routing Engine is Enabled\n'
+                 'by using the "show task replication" command.')
+        op = self._dev.rpc.get_routing_task_replication_state()
+        if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
+            self.log('Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\n'
+                     'is not Master')
+            return False
+        return True
 
     def remote_checksum(self, remote_package, timeout=300):
         """
@@ -258,7 +373,9 @@ class SW(Util):
         :raises RpcError: RPC errors other than **remote_package** not found.
         """
         try:
-            rsp = self.rpc.get_checksum_information(path=remote_package, dev_timeout=timeout)
+            rsp = self.rpc.get_checksum_information(
+                path=remote_package,
+                dev_timeout=timeout)
             return rsp.findtext('.//checksum').strip()
         except RpcError as e:
 
@@ -340,9 +457,9 @@ class SW(Util):
     # install - complete installation process, but not reboot
     # -------------------------------------------------------------------------
 
-    def install(self, package=None, pkg_set=None, remote_path='/var/tmp', progress=None,
-                validate=False, checksum=None, cleanfs=True, no_copy=False, issu=False,
-                nssu=False, timeout=1800, **kwargs):
+    def install(self, package=None, pkg_set=None, remote_path='/var/tmp',
+                progress=None, validate=False, checksum=None, cleanfs=True,
+                no_copy=False, issu=False, nssu=False, timeout=1800, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -373,19 +490,20 @@ class SW(Util):
         You can get a progress report on this process by providing a **progress**
         callback.
 
-        .. note:: You will need to invoke the :meth:`reboot` method explicitly to reboot
-                  the device.
+        .. note:: You will need to invoke the :meth:`reboot` method explicitly
+                   to reboot the device.
 
         :param str package:
           The file-path to the install package tarball on the local filesystem
 
         :param list pkg_set:
-          The file-paths as list/tuple of the install package tarballs on the local
-          filesystem which will be installed on mixed VC setup.
+          The file-paths as list/tuple of the install package tarballs on the
+          local filesystem which will be installed on mixed VC setup.
 
         :param str remote_path:
           The directory on the Junos device where the package file will be
-          SCP'd to or where the package is stored on the device; the default is ``/var/tmp``.
+          SCP'd to or where the package is stored on the device; the default is
+          ``/var/tmp``.
 
         :param bool validate:
           When ``True`` this method will perform a config validation against
@@ -395,8 +513,8 @@ class SW(Util):
           MD5 hexdigest of the package file. If this is not provided, then this
           method will perform the calculation. If you are planning on using the
           same image for multiple updates, you should consider using the
-          :meth:`local_md5` method to pre calculate this value and then provide to
-          this method.
+          :meth:`local_md5` method to pre calculate this value and then provide
+          to this method.
 
         :param bool cleanfs:
           When ``True`` will perform a 'storeage cleanup' before SCP'ing the
@@ -438,8 +556,8 @@ class SW(Util):
           (Optional) When ``True`` allows nonstop software upgrade (NSSU)
           enables you to upgrade the software running on a Juniper Networks
           EX Series Virtual Chassis or a Juniper Networks EX Series Ethernet
-          Switch with redundant Routing Engines with a single command and minimal
-          disruption to network traffic.
+          Switch with redundant Routing Engines with a single command and
+          minimal disruption to network traffic.
 
         :returns:
             * ``True`` when the installation is successful
@@ -470,7 +588,8 @@ class SW(Util):
 
         if no_copy is False:
             copy_ok = True
-            if (sys.version<'3' and isinstance(package, (str, unicode))) or isinstance(package, str):
+            if (sys.version < '3' and isinstance(package, (str, unicode))) \
+                    or isinstance(package, str):
                 copy_ok = self.safe_copy(package, remote_path=remote_path,
                                          progress=progress, cleanfs=cleanfs,
                                          checksum=checksum)
@@ -499,17 +618,19 @@ class SW(Util):
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, issu, dev_timeout=timeout)
+                v_ok = self.validate(remote_package, issu, nssu, dev_timeout=timeout)
 
                 if v_ok is not True:
                     return v_ok
 
             if issu is True:
-                _progress("ISSU: installing software ... please be patient ...")
+                _progress(
+                    "ISSU: installing software ... please be patient ...")
                 return self.pkgaddISSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
             elif nssu is True:
-                _progress("NSSU: installing software ... please be patient ...")
+                _progress(
+                    "NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
             elif self._multi_RE is False:
@@ -531,8 +652,8 @@ class SW(Util):
                             x).group(1) for x in self._RE_list]
                     for vc_id in vc_members:
                         _progress(
-                            "installing software on VC member: {0} ... please be"
-                            " patient ...".format(vc_id))
+                            "installing software on VC member: {0} ... please "
+                            "be patient ...".format(vc_id))
                         ok &= self.pkgadd(
                             remote_package,
                             member=vc_id,
