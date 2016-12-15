@@ -4,13 +4,14 @@ def provides_facts():
     of each key is the doc string describing the fact.
     """
     return {'model': "An uppercase string containing the device's model.",
-            'hostname': 'A string containing the hostname of the device.',}
+            'hostname': 'A string containing the hostname of the device.', }
+
 
 def get_facts(device):
     """
     Gathers facts from the <get-software-information/> RPC.
     """
-    rsp = device.rpc.get_software_information()
+    rsp = device.rpc.get_software_information(normalize=True)
 
     model = rsp.findtext('.//product-model')
     if model:
@@ -22,4 +23,4 @@ def get_facts(device):
     hostname = rsp.findtext('.//host-name')
 
     return {'model': model,
-            'hostname': hostname}
+            'hostname': hostname, }

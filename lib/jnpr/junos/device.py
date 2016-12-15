@@ -655,12 +655,12 @@ class _Connection(object):
         :param bool exception_on_failure: To raise exception when facts
                                           gathering errors out. If True when
                                           new-style fact gathering is in use,
-                                          causes all facts to be reloaded rather
-                                          than being loaded on demand.
+                                          causes all facts to be reloaded
+                                          rather than being loaded on demand.
         :param bool warnings_on_failure: To print a warning when fact gathering
                                          errors out.
-                                         warnings_on_failure=True is the default
-                                         for old-style facts.
+                                         warnings_on_failure=True is the
+                                         default for old-style facts.
                                          warnings_on_failure=False is the
                                          default for new-style facts.
                                          If True when new-style fact gathering
@@ -672,10 +672,14 @@ class _Connection(object):
                                               new-style facts are in use and
                                               exception_on_failure==False and
                                               warnings==False.
+
+        :raises RuntimeError:
+            If old-style fact gathering is in use and a keys argument is
+            specified.
         """
         if (self._fact_style != 'old' and
-            self._fact_style != 'new' and
-            self._fact_style != 'both'):
+           self._fact_style != 'new' and
+           self._fact_style != 'both'):
             raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
         if self._fact_style == 'old' or self._fact_style == 'both':
             if warnings_on_failure is None:
@@ -692,7 +696,7 @@ class _Connection(object):
                         raise
                     should_warn = True
             if (warnings_on_failure is True and should_warn is True and
-                self._fact_style != 'both'):
+               self._fact_style != 'both'):
                 warnings.warn('Facts gathering is incomplete. '
                               'To know the reason call '
                               '"dev.facts_refresh(exception_on_failure=True)"',
@@ -701,8 +705,8 @@ class _Connection(object):
             if warnings_on_failure is None:
                 warnings_on_failure = False
             self.facts._refresh(exception_on_failure=exception_on_failure,
-                               warnings_on_failure=warnings_on_failure,
-                               keys=keys)
+                                warnings_on_failure=warnings_on_failure,
+                                keys=keys)
         return
 
     # -----------------------------------------------------------------------
@@ -865,7 +869,8 @@ class Device(_Connection):
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
         if self._fact_style != 'new':
-            warnings.warn('fact-style %s will be removed in a future release.' %
+            warnings.warn('fact-style %s will be removed in a future '
+                          'release.' %
                           (self._fact_style),
                           RuntimeWarning)
 

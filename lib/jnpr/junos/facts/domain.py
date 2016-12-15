@@ -2,14 +2,16 @@ from lxml import etree
 from jnpr.junos.exception import PermissionError
 from jnpr.junos.utils.fs import FS
 
+
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'domain': "The domain name configured at [edit system domain-name] "
-                      "configuration hierarchy.",
-            'fqdn' : "The device's hostname + domain",}
+    return {'domain': "The domain name configured at the [edit system "
+                      "domain-name] configuration hierarchy.",
+            'fqdn': "The device's hostname + domain", }
+
 
 def get_facts(device):
     """
@@ -30,11 +32,14 @@ def get_facts(device):
         rsp = device.rpc.get_config(filter_xml=etree.XML(domain_config),
                                     options={'database': 'committed',
                                              'inherit': 'inherit',
-                                             'commit-scripts': 'apply',})
+                                             'commit-scripts': 'apply', })
         domain = rsp.findtext('.//domain-name')
+    # Ignore if user can't view the configuration.
     except PermissionError:
         pass
 
+    # Try to read the domain from the resolv.conf file. This only requires
+    # view permissions.
     if domain is None:
         fs = FS(device)
         file_content = (fs.cat('/etc/resolv.conf') or
@@ -44,10 +49,10 @@ def get_facts(device):
             idx = words.index('domain') + 1
             domain = words[idx]
 
-    if domain:
-        hostname = device.facts['hostname']
-        if hostname:
-            fqdn = hostname + '.' + domain
+    # Set the fqdn
+    fqdn = device.facts['hostname']
+    if fqdn is not None and domain is not None:
+        fqdn = fqdn + '.' + domain
 
     return {'domain': domain,
-            'fqdn': fqdn,}
+            'fqdn': fqdn, }

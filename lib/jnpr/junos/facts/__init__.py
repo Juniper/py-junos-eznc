@@ -1,9 +1,10 @@
 """
-Docstring to be replaced by __doc__
+This static string is replaced by the dynamic __doc__ variable on import.
 """
 import importlib
 import os
 import sys
+
 
 def _get_list_of_fact_module_names():
     """
@@ -19,12 +20,13 @@ def _get_list_of_fact_module_names():
     module_names = []
     facts_dir = os.path.dirname(__file__)
     for file in os.listdir(facts_dir):
-        if (os.path.isfile(os.path.join(facts_dir,file)) and
-            not os.path.islink(os.path.join(facts_dir,file))):
+        if (os.path.isfile(os.path.join(facts_dir, file)) and
+           not os.path.islink(os.path.join(facts_dir, file))):
             if file.endswith('.py') and not file.startswith('_'):
-                (module_name,_) = file.rsplit('.py',1)
-                module_names.append('%s.%s' % (__name__,module_name))
+                (module_name, _) = file.rsplit('.py', 1)
+                module_names.append('%s.%s' % (__name__, module_name))
     return module_names
+
 
 def _import_fact_modules():
     """
@@ -38,6 +40,7 @@ def _import_fact_modules():
         modules.append(importlib.import_module(name))
     return modules
 
+
 def _build_fact_callbacks_and_doc_strings():
     """
     Imports the fact modules and returns callbacks and doc_strings.
@@ -46,6 +49,12 @@ def _build_fact_callbacks_and_doc_strings():
       A tuple of callbacks and doc_strings.
       callbacks - a dict of the callback function to invoke for each fact.
       doc_strings - a dict of the doc string for each fact.
+
+    :raises:
+      RuntimeError if more than one module claims to provide the same fact.
+                   This is an indication of incorrectly written fact module(s).
+                   In order to remain deterministic, each fact must be
+                   provided by a single module.
     """
     callbacks = {}
     doc_strings = {}
@@ -56,13 +65,14 @@ def _build_fact_callbacks_and_doc_strings():
                 callbacks[key] = module.get_facts
                 doc_strings[key] = new_doc_strings[key]
             else:
-                raise RuntimeError('Both the %s module and the %s module claim '
-                                   'to provide the %s fact. Please report this '
-                                   ' error.' %
+                raise RuntimeError('Both the %s module and the %s module '
+                                   'claim to provide the %s fact. Please '
+                                   'report this error.' %
                                    (callbacks[key].__module__,
                                     module.__name__,
                                     key))
     return (callbacks, doc_strings)
+
 
 # Replaces the doc string defined at the top of this module file.
 __doc__ = """
@@ -85,8 +95,8 @@ The following dictionary keys represent the available facts and their meaning:
 """
 
 # Import all of the fact modules and build the callbacks and doc strings
-(_callbacks,_doc_strings) = _build_fact_callbacks_and_doc_strings()
+(_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
-# Append the doc string with the documentation for each fact.
-for key in sorted(_doc_strings,cmp=lambda a,b: cmp(a.lower(), b.lower())):
-    __doc__ += ':%s:\n  %s\n' % (key,_doc_strings[key])
+# Append the doc string (__doc__) with the documentation for each fact.
+for key in sorted(_doc_strings, cmp=lambda a, b: cmp(a.lower(), b.lower())):
+    __doc__ += ':%s:\n  %s\n' % (key, _doc_strings[key])

@@ -1,12 +1,14 @@
 from jnpr.junos.exception import RPCError
 
+
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
     return {'srx_cluster': "A boolean indicating if the device is part of an "
-                           "SRX cluster.",}
+                           "SRX cluster.", }
+
 
 def get_facts(device):
     """
@@ -14,7 +16,8 @@ def get_facts(device):
     """
     srx_cluster = None
     try:
-        rsp = device.rpc.get_chassis_cluster_status(redundancy_group="0")
+        rsp = device.rpc.get_chassis_cluster_status(normalize=True,
+                                                    redundancy_group="0")
         if rsp:
             if rsp.tag == 'error':
                 srx_cluster = False
@@ -25,4 +28,4 @@ def get_facts(device):
         # <get-chassis-cluster-status/> RPC.
         # That's OK. Just ignore it and leave srx_cluster = None.
         pass
-    return {'srx_cluster': srx_cluster,}
+    return {'srx_cluster': srx_cluster, }
