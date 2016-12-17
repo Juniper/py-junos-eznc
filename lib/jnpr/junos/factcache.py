@@ -128,21 +128,30 @@ class _FactCache(collections.MutableMapping):
             if self._device._fact_style == 'both':
                 # Compare old and new-style values.
                 if key in self._device._ofacts:
-                    # Skip RE0 and RE1 key comparisons. The old facts gathering
-                    # code has an up_time key. The new facts gathering
-                    # code maintains this key for RE0 and RE1 facts, but it's
-                    # not comparable (because it depends on when the fact was
-                    # gathered and is therefore not really a "fact".) The new
-                    # RE_info fact omits the up_time fact for this reason.
-                    if not key in ['RE0','RE1']:
+                    # Skip key comparisons for certain keys.
+                    #
+                    # The old facts gathering code has an up_time key.
+                    # The new facts gathering code maintains this key for RE0
+                    # and RE1 facts, but it's not comparable (because it
+                    # depends on when the fact was gathered and is therefore
+                    # not really a "fact".) The new re_info fact omits the
+                    # up_time field for this reason.
+                    #
+                    # The old facts gathering code didn't return a correct
+                    # value for the master fact when the system was a VC.
+                    # The new fact gathering code still returns the master fact
+                    # but returns a correct value for VCs. It also returns a
+                    # new re_master fact which is much more useful.
+                    if not key in ['RE0','RE1','master']:
                         if self._cache[key] != self._device._ofacts[key]:
-                            raise RuntimeError('New and old-style facts do not '
-                                               'match for the %s fact.\n'
-                                               '    New-style value: %s\n'
-                                               '    Old-style value: %s\n' %
-                                               (key,
-                                                self._cache[key],
-                                                self._device._ofacts[key]))
+                            warnings.warn('New and old-style facts do not '
+                                          'match for the %s fact.\n'
+                                          '    New-style value: %s\n'
+                                          '    Old-style value: %s\n' %
+                                          (key,
+                                           self._cache[key],
+                                           self._device._ofacts[key]),
+                                          RuntimeWarning)
             return self._cache[key]
         else:
             # key fact was not returned by callback
@@ -167,10 +176,15 @@ class _FactCache(collections.MutableMapping):
         """
         An iterator of known facts.
 
-        :returns iterator: of all of the facts we know how to gather,
-        regardless of whether or not they've already been cached.
+        :returns iterator: of all of the 'non-hidden' facts we know how to
+        gather, regardless of whether or not they've already been cached. Fact
+        names which are hidden start with an underscore and are not returned.
         """
-        return iter(self._callbacks)
+        callbacks = {}
+        for key in self._callbacks:
+            if not key.startswith('_'):
+                callbacks[key] = self._callbacks[key]
+        return iter(callbacks)
 
     def __len__(self):
         """
@@ -192,11 +206,12 @@ class _FactCache(collections.MutableMapping):
         """
         string = ''
         for key in self:
-            current = "'%s': %s" % (key, repr(self.get(key)))
-            if string:
-                string = ', '.join([string, current])
-            else:
-                string = current
+            if not key.startswith('_'):
+                current = "'%s': %s" % (key, repr(self.get(key)))
+                if string:
+                    string = ', '.join([string, current])
+                else:
+                    string = current
         return '{' + string + '}'
 
     def _refresh(self,

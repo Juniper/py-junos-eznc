@@ -13,7 +13,9 @@ def provides_facts():
             'vc_mode': "A string indicating the current virtual chassis "
                        "mode of the device.",
             'vc_fabric': "A boolean indicating if the device is currently in "
-                         "fabric mode.", }
+                         "fabric mode.",
+            'vc_master': "A string indicating the chassis/node which is "
+                         "currently the master of the VC.", }
 
 
 def get_facts(device):
@@ -23,6 +25,8 @@ def get_facts(device):
     vc_capable = None
     vc_mode = None
     vc_fabric = None
+    vc_master = None
+
     try:
         rsp = device.rpc.get_virtual_chassis_information(normalize=True)
         # MX issue where command returns, but without content. In this case,
@@ -37,6 +41,18 @@ def get_facts(device):
                         vc_fabric = True
                     else:
                         vc_fabric = False
+                for member_id in rsp.xpath(
+                        ".//member-role[starts-with(.,'Master')]"
+                        "/preceding-sibling::member-id"):
+                    if vc_master is None:
+                        vc_master = member_id.text
+                    else:
+                        old_vc_master = vc_master
+                        vc_master = None
+                        raise ValueError("Member %s and member %s both claim "
+                                         "to be master of the VC." %
+                                         (old_vc_master, member_id.text))
+
         else:
             vc_capable = False
     except RpcError:
@@ -44,6 +60,8 @@ def get_facts(device):
         # <get-virtual-chassis-information/> RPC.
         # That's OK. Set vc_capable = False.
         vc_capable = False
+
     return {'vc_capable': vc_capable,
             'vc_mode': vc_mode,
-            'vc_fabric': vc_fabric, }
+            'vc_fabric': vc_fabric,
+            'vc_master': vc_master, }
