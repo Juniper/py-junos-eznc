@@ -18,7 +18,7 @@ def get_facts(device):
     try:
         rsp = device.rpc.get_chassis_cluster_status(normalize=True,
                                                     redundancy_group="0")
-        if rsp:
+        if rsp is not None:
             if rsp.tag == 'error':
                 srx_cluster = False
             else:

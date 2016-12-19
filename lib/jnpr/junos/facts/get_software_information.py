@@ -160,7 +160,13 @@ def get_facts(device):
 
     rsp = _get_software_information(device)
 
-    for re_sw_info in rsp.findall('.//software-information'):
+    si_rsp = None
+    if rsp.tag == 'software-information':
+        si_rsp = [rsp]
+    else:
+        si_rsp = rsp.findall('.//software-information')
+
+    for re_sw_info in si_rsp:
         re_name = re_sw_info.findtext('../re-name','re0')
         re_model = re_sw_info.findtext('./product-model')
         re_hostname = re_sw_info.findtext('./host-name')

@@ -72,8 +72,9 @@ def get_facts(device):
     node_masters = {}
     for current_re in re_list:
         node = current_re.findtext('../../re-name','default')
-        slot = current_re.findtext('slot')
-        info = {'mastership_state': current_re.findtext('mastership-state'),
+        slot = current_re.findtext('slot','0')
+        info = {'mastership_state': current_re.findtext('mastership-state',
+                                                        'master'),
                 'status': current_re.findtext('status'),
                 'model': current_re.findtext('model'),
                 'last_reboot_reason':
