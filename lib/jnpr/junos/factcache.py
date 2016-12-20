@@ -247,7 +247,7 @@ class _FactCache(collections.MutableMapping):
                 refresh_keys = (keys,)
             else:
                 refresh_keys = keys
-        if refresh_keys:
+        if refresh_keys is not None:
             for key in refresh_keys:
                 if key in self._cache:
                     del self._cache[key]
@@ -264,13 +264,13 @@ class _FactCache(collections.MutableMapping):
             except Exception:
                 if exception_on_failure:
                     raise
+            finally:
                 if warnings_on_failure and self._should_warn:
                     warnings.warn('Facts gathering is incomplete. '
                                   'To know the reason call '
                                   '"dev.facts_refresh('
                                   'exception_on_failure=True)"',
                                   RuntimeWarning)
-            finally:
                 self._exception_on_failure = False
                 self._warnings_on_failure = False
                 self._should_warn = False

@@ -6,7 +6,7 @@ from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 from lxml import etree
 
-from jnpr.junos.facts.domain import facts_domain
+from jnpr.junos.ofacts.domain import facts_domain
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 
@@ -15,13 +15,14 @@ from jnpr.junos.exception import RpcError
 class TestDomain(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect):
+    @patch('jnpr.junos.device.warnings')
+    def setUp(self, mock_warnings, mock_connect):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+                          gather_facts=False, fact_style='old')
         self.dev.open()
         self.facts = {}
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
+    @patch('jnpr.junos.ofacts.domain.FS.cat')
     def test_resolv_conf(self, mock_fs_cat):
         mock_fs_cat.return_value =\
             """# domain juniper.net
@@ -33,7 +34,7 @@ class TestDomain(unittest.TestCase):
         self.assertEqual(self.facts['domain'], 'juniper.net')
         self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
+    @patch('jnpr.junos.ofacts.domain.FS.cat')
     def test_resolv_conf_no_domain(self, mock_fs_cat):
         mock_fs_cat.return_value =\
             """
@@ -45,7 +46,7 @@ class TestDomain(unittest.TestCase):
         self.assertEqual(self.facts['domain'], None)
         self.assertEqual(self.facts['fqdn'], 'test')
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
+    @patch('jnpr.junos.ofacts.domain.FS.cat')
     def test_resolv_conf_file_absent_under_etc(self, mock_fs_cat):
         mock_fs_cat.side_effect = [None, 'domain juniper.net']
         self.facts['hostname'] = 'test'
@@ -63,7 +64,7 @@ class TestDomain(unittest.TestCase):
         self.assertEqual(self.facts['domain'], 'testing.net')
         self.assertEqual(self.facts['fqdn'], 'test.testing.net')
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
+    @patch('jnpr.junos.ofacts.domain.FS.cat')
     def test_domain_rpc_error(self, mock_fs_cat):
         self.dev.rpc.get_config = MagicMock(side_effect=RpcError)
         mock_fs_cat.return_value =\

@@ -7,8 +7,8 @@ from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.swver import facts_software_version as software_version, version_info
-from jnpr.junos.facts.swver import _get_swver
+from jnpr.junos.ofacts.swver import facts_software_version as software_version, version_info
+from jnpr.junos.ofacts.swver import _get_swver
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from jnpr.junos.exception import RpcError
@@ -82,10 +82,11 @@ class TestVersionInfo(unittest.TestCase):
 class TestSwver(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect):
+    @patch('jnpr.junos.device.warnings')
+    def setUp(self, mock_warnings, mock_connect):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+                          gather_facts=False, fact_style='old')
         self.dev.open()
         self.facts = {}
         self.facts['vc_capable'] = False
@@ -148,7 +149,7 @@ class TestSwver(unittest.TestCase):
     #     self.assertEqual(self.facts['version'], '12.3R6.6')
 
     @patch('jnpr.junos.Device.execute')
-    @patch('jnpr.junos.facts.swver.re.findall')
+    @patch('jnpr.junos.facts.get_software_information.re.findall')
     def test_swver_exception_handling(self, mock_re_findall, mock_execute):
         mock_execute.side_effect = self._mock_manager
         mock_re_findall.side_effect = IndexError

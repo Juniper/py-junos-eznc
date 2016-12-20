@@ -230,15 +230,16 @@ class TestDevice(unittest.TestCase):
 
             """
             self.dev.facts_refresh()
+            self.dev.facts._cache['current_re'] = ['re0']
             assert self.dev.facts['version'] == facts['version']
 
     @patch('jnpr.junos.Device.execute')
-    @patch('jnpr.junos.device.warnings')
+    @patch('jnpr.junos.factcache.warnings')
     def test_device_facts_error(self, mock_warnings, mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.dev.facts_refresh()
+            self.dev.facts_refresh(warnings_on_failure=True)
             self.assertTrue(mock_warnings.warn.called)
 
     @patch('jnpr.junos.Device.execute')
@@ -295,7 +296,7 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.device.json.loads')
     def test_device_rpc_json_ex(self, mock_json_loads):
-        self.dev._facts = facts
+        self.dev.facts = facts
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
@@ -613,7 +614,7 @@ class TestDevice(unittest.TestCase):
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
-        if kwargs:
+        if kwargs and 'normalize' not in kwargs:
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)

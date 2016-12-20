@@ -7,7 +7,7 @@ from mock import patch
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.srx_cluster import facts_srx_cluster as srx_cluster
+from jnpr.junos.ofacts.srx_cluster import facts_srx_cluster as srx_cluster
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -17,10 +17,11 @@ from ncclient.transport import SSHSession
 class TestSrxCluster(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect):
+    @patch('jnpr.junos.device.warnings')
+    def setUp(self, mock_warnings, mock_connect):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+                          gather_facts=False, fact_style='old')
         self.dev.open()
         self.facts = {}
 
@@ -32,7 +33,8 @@ class TestSrxCluster(unittest.TestCase):
         srx_cluster(self.dev, self.facts)
         self.assertTrue(self.facts['srx_cluster'])
 
-    def test_srx_cluster_none(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_srx_cluster_none(self, mock_warnings):
         self.facts['personality'] = 'MX'
         self.assertEqual(srx_cluster(self.dev, self.facts), None)
 

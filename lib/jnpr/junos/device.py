@@ -486,7 +486,7 @@ class _Connection(object):
                 warnings.resetwarnings()
 
         try:
-            rsp = self.rpc.cli(command, format)
+            rsp = self.rpc.cli(command=command, format=format)
             if isinstance(rsp, dict) and format.lower() == 'json':
                 return rsp
             # rsp returned True means <rpc-reply> is empty, hence return

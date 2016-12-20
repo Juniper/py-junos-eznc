@@ -7,7 +7,7 @@ from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.routing_engines import facts_routing_engines as routing_engines
+from jnpr.junos.ofacts.routing_engines import facts_routing_engines as routing_engines
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -17,10 +17,11 @@ from ncclient.transport import SSHSession
 class TestRoutingEngines(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect):
+    @patch('jnpr.junos.device.warnings')
+    def setUp(self, mock_warnings, mock_connect):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+                          gather_facts=False, fact_style='old')
         self.dev.open()
         self.facts = {}
         self.mode = ''

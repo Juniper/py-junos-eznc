@@ -1,5 +1,5 @@
 import re
-from jnpr.junos.facts.get_software_information import version_info
+from jnpr.junos.facts.swver import version_info
 
 
 def _get_swver(dev, facts):

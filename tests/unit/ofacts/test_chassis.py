@@ -8,7 +8,7 @@ from lxml import etree
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.facts.chassis import facts_chassis as chassis
+from jnpr.junos.ofacts.chassis import facts_chassis as chassis
 from jnpr.junos.exception import ConnectNotMasterError
 from jnpr.junos.exception import RpcError
 
@@ -20,10 +20,11 @@ from ncclient.transport import SSHSession
 class TestChassis(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect):
+    @patch('jnpr.junos.device.warnings')
+    def setUp(self, mock_warnings, mock_connect):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
-                          gather_facts=False)
+                          gather_facts=False, fact_style='old')
         self.dev.open()
         self.facts = {}
 

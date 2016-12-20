@@ -550,7 +550,9 @@ class TestConfig(unittest.TestCase):
             self.assertTrue(isinstance(ex, ValueError))
 
     @patch('jnpr.junos.Device.execute')
-    def test_config_mode_batch_open_configuration_ex(self, mock_exec):
+    @patch('jnpr.junos.utils.config.warnings')
+    def test_config_mode_batch_open_configuration_ex(self,
+                                                     mock_warnings, mock_exec):
         rpc_xml = '''
             <rpc-error>
             <error-severity>warning</error-severity>
@@ -566,7 +568,10 @@ class TestConfig(unittest.TestCase):
         self.dev.rpc.open_configuration.assert_called_with(batch=True)
 
     @patch('jnpr.junos.Device.execute')
-    def test_config_mode_private_open_configuration_ex(self, mock_exec):
+    @patch('jnpr.junos.utils.config.warnings')
+    def test_config_mode_private_open_configuration_ex(self,
+                                                       mock_warnings,
+                                                       mock_exec):
         rpc_xml = '''
             <rpc-error>
             <error-severity>warning</error-severity>
