@@ -43,7 +43,7 @@ class PyEzJSONEncoder(json.JSONEncoder):
     Used to encode facts and rpc instances into JSON.`.
     """
     def default(self, obj):
-        from jnpr.junos.ofacts.swver import version_info
+        from jnpr.junos.facts.get_software_information import version_info
         if isinstance(obj, version_info):
             obj = obj.v_dict
         elif isinstance(obj, etree._Element):

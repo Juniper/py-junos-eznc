@@ -36,7 +36,8 @@ def get_facts(device):
             # RPC, but doesn't really support bridging. It raises an RPC
             # error for the CLI command (via <command> RPC), so we use
             # the CLI command to make sure the device really does support
-            # bridge domains. In this case, an RpcError is raised with
+            # bridge domains. In this case, an RpcError is raised with a
+            # bad_element of 'bridge'.
             #
             # However, on the backup RE for devices that really do support
             # bridge domains, we get an RpcError stating:

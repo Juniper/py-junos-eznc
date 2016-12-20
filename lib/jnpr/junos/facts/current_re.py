@@ -14,7 +14,7 @@ def provides_facts():
 
 def get_facts(device):
     """
-    Gathers facts from the <file-list/> RPC.
+    The RPC-equivalent of show interfaces terse on private routing instance.
     """
     current_re = None
 
@@ -22,12 +22,16 @@ def get_facts(device):
               normalize=True,
               routing_instance='__juniper_private1__',
               terse=True, )
+    # Get the local IPv4 addresses from the response.
     for ifa in rsp.iterfind(".//address-family[address-family-name='inet']/"
                             "interface-address/ifa-local"):
         ifa_text = ifa.text
         if ifa_text is not None:
+            # Separate the IP from the mask
             (ip, _, _) = ifa.text.partition('/')
             if ip is not None:
+                # Use the _iri_hostname fact to map the IP address to
+                # an internal routing instance hostname.
                 if ip in device.facts['_iri_hostname']:
                     if current_re is None:
                         # Make a copy, not a reference

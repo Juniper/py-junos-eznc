@@ -1,6 +1,3 @@
-import re
-
-
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
