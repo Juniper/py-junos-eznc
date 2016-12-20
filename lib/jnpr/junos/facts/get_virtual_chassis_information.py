@@ -36,7 +36,7 @@ def get_facts(device):
             if rsp is not None:
                 vc_mode = rsp.findtext('.//virtual-chassis-mode')
                 vc_id_info = rsp.find('.//virtual-chassis-id-information')
-                if vc_id_info:
+                if vc_id_info is not None:
                     if vc_id_info.get('style') == 'fabric':
                         vc_fabric = True
                     else:

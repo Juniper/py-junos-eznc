@@ -28,11 +28,13 @@ def get_facts(device):
     if re.match('^(EX)|(QFX)', model):
         personality = 'SWITCH'
     elif model.startswith('MX'):
-        personality = 'MX'
-        serial_number = device.facts['serialnumber']
-        if serial_number.startswith('VMX'):
+        # The VMX has an RE type of 'RE-VMX'
+        if (device.facts['re_info']['default']['default']['model'] ==
+                'RE-VMX'):
+            personality = 'VMX'
             virtual = True
         else:
+            personality = 'MX'
             virtual = False
     elif model.startswith('VMX'):
         personality = 'MX'
@@ -52,7 +54,7 @@ def get_facts(device):
     elif model.startswith('PTX'):
         personality = 'PTX'
         # The vPTX has an RE type of 'RE-VIRTUAL'
-        if (device.facts['RE_info']['default']['default']['model'] ==
+        if (device.facts['re_info']['default']['default']['model'] ==
            'RE-VIRTUAL'):
             virtual = True
         else:

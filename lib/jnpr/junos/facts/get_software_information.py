@@ -1,5 +1,5 @@
 import re
-
+from jnpr.junos.exception import RpcError
 
 class version_info(object):
 
@@ -105,18 +105,18 @@ def version_yaml_representer(dumper, version):
 
 
 def _get_software_information(device):
-    # See if device is VC Capable
-    if device.facts['vc_capable'] is True:
-        try:
-            return device.rpc.cli("show version all-members", format='xml',
-                                  normalize=True)
-        except:
-            pass
     # See if device understands "invoke-on all-routing-engines"
     try:
         return device.rpc.cli("show version invoke-on all-routing-engines",
                               format='xml', normalize=True)
-    except:
+    except RpcError:
+        # See if device is VC Capable
+        if device.facts['vc_capable'] is True:
+            try:
+                return device.rpc.cli("show version all-members", format='xml',
+                                      normalize=True)
+            except:
+                pass
         return device.rpc.get_software_information(normalize=True)
 
 
@@ -194,7 +194,30 @@ def get_facts(device):
         if re_version is not None:
             junos_info[re_name] = { 'text': re_version,
                                     'object': version_info(re_version), }
+
+        # Check to see if re_name is the RE we are currently connected to.
+        # There are at least three cases to handle.
+        this_re = False
+        # 1) re_name is in the current_re fact. The easy case.
         if re_name in device.facts['current_re']:
+            this_re = True
+        # 2) Some single-RE devices (discovered on EX2200 running 11.4R1)
+        # don't include 'reX' in the current_re list. Check for this
+        # condition and still set default hostname, model, and version
+        elif (re_name == 're0' and 're1' not in device.facts['current_re'] and
+             'master' in device.facts['current_re']):
+            this_re = True
+        # 3) For an lcc in a TX(P) re_name is 're0' or 're1', but the current_re
+        # fact is ['lcc1-re0', 'member1-re0', ...]. Check to see if any
+        # iri_name endswith the name of the
+        elif this_re is False:
+            for iri_name in device.facts['current_re']:
+                if iri_name.endswith('-' + re_name):
+                    this_re = True
+                    break
+        # Set hostname, model, and version facts if the RE we are currently
+        # connected to.
+        if this_re is True:
             if hostname is None:
                 hostname = re_hostname
             if model is None:
