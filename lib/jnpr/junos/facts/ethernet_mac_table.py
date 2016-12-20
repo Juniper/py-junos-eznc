@@ -1,5 +1,6 @@
 from jnpr.junos.exception import RpcError
 
+
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
@@ -53,7 +54,7 @@ def get_facts(device):
                 switch_style = 'NONE'
             # Probably a non-master RE on an MX.
             elif (err.rpc_error['message'] ==
-                      'the l2-learning subsystem is not running'):
+                  'the l2-learning subsystem is not running'):
                 switch_style = 'BRIDGE_DOMAIN'
 
     return {'switch_style': switch_style, }

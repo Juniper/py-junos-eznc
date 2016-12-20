@@ -142,7 +142,7 @@ class _FactCache(collections.MutableMapping):
                     # The new fact gathering code still returns the master fact
                     # but returns a correct value for VCs. It also returns a
                     # new re_master fact which is much more useful.
-                    if not key in ['RE0','RE1','master']:
+                    if key not in ['RE0', 'RE1', 'master']:
                         if self._cache[key] != self._device._ofacts[key]:
                             warnings.warn('New and old-style facts do not '
                                           'match for the %s fact.\n'

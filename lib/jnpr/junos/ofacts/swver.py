@@ -47,8 +47,8 @@ def facts_software_version(junos, facts):
         versions = []
 
         if isinstance(f_master, list):
-            xpath = './multi-routing-engine-item[re-name="{0}"' \
-                    ']/software-information/host-name'.format(f_master[0].lower())
+            xpath = './multi-routing-engine-item[re-name="{0}"]/software-' \
+                    'information/host-name'.format(f_master[0].lower())
         else:
             xpath = './multi-routing-engine-item[re-name="{0}"' \
                     ']/software-information/host-name'.format(f_master.lower())
@@ -74,8 +74,8 @@ def facts_software_version(junos, facts):
             if not swinfo:
                 # For < 15.1, get version from the "junos" package.
                 pkginfo = re_sw.xpath(
-                    'package-information[normalize-space(name)="junos"]/comment'
-                )[0].text
+                    'package-information[normalize-space(name)='
+                    '"junos"]/comment')[0].text
                 try:
                     swinfo = re.findall(r'\[(.*)\]', pkginfo)[0]
                 except:

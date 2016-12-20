@@ -5,7 +5,11 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'current_re': 'A list', }
+    return {'current_re': "A list of internal routing instance hostnames "
+                          "for the current RE. These hostnames identify "
+                          "things like the RE's slot ('re0' or 're1'), the "
+                          "RE's mastership state ('master' or 'backup'), "
+                          "and node in a VC ('member0' or 'member1')", }
 
 
 def get_facts(device):
@@ -22,7 +26,7 @@ def get_facts(device):
                             "interface-address/ifa-local"):
         ifa_text = ifa.text
         if ifa_text is not None:
-            (ip,_,_) = ifa.text.partition('/')
+            (ip, _, _) = ifa.text.partition('/')
             if ip is not None:
                 if ip in device.facts['_iri_hostname']:
                     if current_re is None:

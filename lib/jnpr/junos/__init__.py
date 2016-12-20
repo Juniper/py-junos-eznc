@@ -26,8 +26,8 @@ if sys.version_info[:2] == (2, 6):
 __version__ = version.VERSION
 __date__ = version.DATE
 
-#import time
-#__date__ = time.strftime("%Y-%b-%d")
+# import time
+# __date__ = time.strftime("%Y-%b-%d")
 
 # Set default JSON encoder
 json._default_encoder = PyEzJSONEncoder()

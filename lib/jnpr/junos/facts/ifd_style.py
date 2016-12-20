@@ -20,4 +20,3 @@ def get_facts(device):
         ifd_style = 'SWITCH'
 
     return {'ifd_style': ifd_style, }
-

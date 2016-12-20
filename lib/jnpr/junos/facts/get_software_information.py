@@ -1,6 +1,7 @@
 import re
 from jnpr.junos.exception import RpcError
 
+
 class version_info(object):
 
     def __init__(self, verstr):
@@ -22,7 +23,8 @@ class version_info(object):
                     self.build = None
                 else:
                     self.build = int(after_type[1])
-            # X type not hyphen format, perhaps "11.4X12.1", just extract build rev or set None
+            # X type not hyphen format, perhaps "11.4X12.1", just extract
+            # build rev or set None
             else:
                 if len(after_type) < 2:
                     self.build = None
@@ -60,11 +62,9 @@ class version_info(object):
                  )
         return retstr
 
-
     def _cmp_tuple(self, other):
         length = len(self) if len(self) < len(other) else len(other)
         return self.as_tuple[0:length]
-
 
     def __len__(self):
         length = 0
@@ -75,26 +75,20 @@ class version_info(object):
                 length += 1
         return length
 
-
     def __lt__(self, other):
         return self._cmp_tuple(other) < other
-
 
     def __le__(self, other):
         return self._cmp_tuple(other) <= other
 
-
     def __gt__(self, other):
         return self._cmp_tuple(other) > other
-
 
     def __ge__(self, other):
         return self._cmp_tuple(other) >= other
 
-
     def __eq__(self, other):
         return self._cmp_tuple(other) == other
-
 
     def __ne__(self, other):
         return self._cmp_tuple(other) != other
@@ -125,23 +119,33 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'junos_info': 'A two-level dictionary where FILL IN',
+    return {'junos_info': "A two-level dictionary providing Junos software "
+                          "version information for each RE in the system. "
+                          "The first-level key is the name of the RE. The "
+                          "second level key is 'text' for the version as a "
+                          "string and 'object' for the version as a "
+                          "version_info object.",
             'hostname': 'A string containing the hostname of the current '
                         'Routing Engine.',
             'hostname_info': 'A dictionary keyed on Routing Engine name. The '
                              'value of each key is the hostname of the '
                              'Routing Engine.',
-            'model': 'An uppercase string containing the chassis model of the '
-                     'current Routing Engine.',
+            'model': 'An uppercase string containing the model of the chassis '
+                     'in which the current Routing Engine resides.',
             'model_info': 'A dictionary keyed on Routing Engine name. The '
                           'value of each key is an uppercase string '
-                          'containing the chassis model for the Routing '
-                          'Engine.',
+                          'containing the model of the chassis in which the '
+                          'Routing Engine resides.',
             'version': 'A string containing the Junos version of the current '
                        'Routing Engine.',
-            'version_info': '',
-            'version_RE0': '',
-            'version_RE1': '', }
+            'version_info': 'The Junos version of the current Routing Engine '
+                            'as a version_info object.',
+            'version_RE0': "A string containing the Junos version of the "
+                           "RE in slot 0. (Assuming the system contains an "
+                           "RE0.)",
+            'version_RE1': "A string containing the Junos version of the "
+                           "RE in slot 1. (Assuming the system contains an "
+                           "RE1)", }
 
 
 def get_facts(device):
@@ -167,7 +171,7 @@ def get_facts(device):
         si_rsp = rsp.findall('.//software-information')
 
     for re_sw_info in si_rsp:
-        re_name = re_sw_info.findtext('../re-name','re0')
+        re_name = re_sw_info.findtext('../re-name', 're0')
         re_model = re_sw_info.findtext('./product-model')
         re_hostname = re_sw_info.findtext('./host-name')
         # First try the <junos-version> tag present in >= 15.1
@@ -192,8 +196,8 @@ def get_facts(device):
         if junos_info is None and re_version is not None:
             junos_info = {}
         if re_version is not None:
-            junos_info[re_name] = { 'text': re_version,
-                                    'object': version_info(re_version), }
+            junos_info[re_name] = {'text': re_version,
+                                   'object': version_info(re_version), }
 
         # Check to see if re_name is the RE we are currently connected to.
         # There are at least three cases to handle.
@@ -205,11 +209,11 @@ def get_facts(device):
         # don't include 'reX' in the current_re list. Check for this
         # condition and still set default hostname, model, and version
         elif (re_name == 're0' and 're1' not in device.facts['current_re'] and
-             'master' in device.facts['current_re']):
+              'master' in device.facts['current_re']):
             this_re = True
-        # 3) For an lcc in a TX(P) re_name is 're0' or 're1', but the current_re
-        # fact is ['lcc1-re0', 'member1-re0', ...]. Check to see if any
-        # iri_name endswith the name of the
+        # 3) For an lcc in a TX(P) re_name is 're0' or 're1', but the
+        # current_re fact is ['lcc1-re0', 'member1-re0', ...]. Check to see
+        # if any iri_name endswith the name of the
         elif this_re is False:
             for iri_name in device.facts['current_re']:
                 if iri_name.endswith('-' + re_name):

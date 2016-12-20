@@ -80,15 +80,21 @@ PyEZ maintains a dictionary of read-only facts about the Junos device.
 
 These facts are accessed as a dictionary on the `facts` attribute of a `Device`
 object instance. For example, if `dev` is an instance of a `Device` object,
-the hostname of the device can be accessed with:
-  `dev.facts['hostname']`
+the hostname of the device can be accessed with::
 
-Force a refresh of all facts with:
-  `dev.facts_refresh()`
-Force a refresh of a single fact with:
-  `dev.facts_refresh(keys='hostname')`
-Force a refresh of a set of facts with:
-  `dev.facts_refresh(keys=('hostname','domain','fqdn'))`
+    dev.facts['hostname']
+
+Force a refresh of all facts with::
+
+    dev.facts_refresh()
+
+Force a refresh of a single fact with::
+
+    dev.facts_refresh(keys='hostname')
+
+Force a refresh of a set of facts with::
+
+    dev.facts_refresh(keys=('hostname','domain','fqdn'))
 
 The following dictionary keys represent the available facts and their meaning:
 

@@ -1,5 +1,6 @@
 import re
 
+
 def facts_switch_style(junos, facts):
     persona = facts['personality']
 

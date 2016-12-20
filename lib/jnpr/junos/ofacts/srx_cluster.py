@@ -23,6 +23,6 @@ def facts_srx_cluster(junos, facts):
 
     except:
         # this device doesn't support SRX chassis clustering; i.e.
-        # since we arbitrarily execute the RPC on all devices, if we 
+        # since we arbitrarily execute the RPC on all devices, if we
         # hit this exception we just ignore, A-OK, yo!
         pass

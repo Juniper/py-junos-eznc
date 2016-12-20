@@ -20,7 +20,7 @@ def provides_facts():
             're_info': "A three-level dictionary with information about "
                        "the Routing Engines in the device. The first-level "
                        "key is the chassis or node name. The second-level key "
-                       "is the slot number, the third keys are: "
+                       "is the slot number, the third-level keys are: "
                        "mastership_state, status, model, and "
                        "last_reboot_reason. A first-level key with a value "
                        "of 'default' will always be present and represents "
@@ -29,7 +29,7 @@ def provides_facts():
                        "'master' node in a VC.) A second-level key with a "
                        "value of 'default' will always be present "
                        "for the default chassis/node and represents the "
-                       "first Routing Engine on the first node/chassis."
+                       "first Routing Engine on the first node/chassis. "
                        "(Note: the first RE of a chassis/node is not "
                        "necessarily the 'master' RE of the chassis/node. See "
                        "the RE_master fact for info on the 'master' RE of "
@@ -42,7 +42,7 @@ def provides_facts():
                          "is the chassis or node name. A key with a value "
                          "of 'default' will always be present and represents "
                          "the first node/chassis of the system. (Note: the "
-                         "first chasis/node of the system is not necessarily "
+                         "first chassis/node of the system is not necessarily "
                          "the 'master' node in a VC. See the vc_master fact "
                          "to determine which chassis/node is the master of "
                          "a VC.)", }
@@ -71,8 +71,8 @@ def get_facts(device):
     master_list = []
     node_masters = {}
     for current_re in re_list:
-        node = current_re.findtext('../../re-name','default')
-        slot = current_re.findtext('slot','0')
+        node = current_re.findtext('../../re-name', 'default')
+        slot = current_re.findtext('slot', '0')
         info = {'mastership_state': current_re.findtext('mastership-state',
                                                         'master'),
                 'status': current_re.findtext('status'),
@@ -100,7 +100,7 @@ def get_facts(device):
             del info['up_time']
         if re_info is None:
             re_info = {}
-        if not node in re_info:
+        if node not in re_info:
             re_info[node] = {}
         # Save with second-level key as a string.
         re_info[node][slot] = info
@@ -122,7 +122,7 @@ def get_facts(device):
             node_masters['default'] = node_masters[first_node]
     # Fill in the 'default' second-level key if at least one RE was found.
     if first_slot is not None:
-        re_info['default']['default']= re_info['default'][first_slot]
+        re_info['default']['default'] = re_info['default'][first_slot]
 
     # Set the 'master' fact to a string or list based on the number of members.
     master_list_len = len(master_list)
