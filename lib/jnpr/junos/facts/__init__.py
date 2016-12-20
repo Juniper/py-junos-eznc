@@ -2,6 +2,7 @@
 This static string is replaced by the dynamic __doc__ variable on import.
 """
 import importlib
+import functools
 import os
 import sys
 
@@ -104,5 +105,7 @@ The following dictionary keys represent the available facts and their meaning:
 (_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
 # Append the doc string (__doc__) with the documentation for each fact.
-for key in sorted(_doc_strings, cmp=lambda a, b: cmp(a.lower(), b.lower())):
+for key in sorted(_doc_strings,
+                  key=functools.cmp_to_key(lambda a, b: cmp(a.lower(),
+                                                            b.lower()))):
     __doc__ += ':%s:\n  %s\n' % (key, _doc_strings[key])
