@@ -1,8 +1,8 @@
 from jnpr.junos.device import Device
 from jnpr.junos.console import Console
 from jnpr.junos.factory.to_json import PyEzJSONEncoder
-from jnpr.junos.facts.get_software_information import version_info
-from jnpr.junos.facts.get_software_information import version_yaml_representer
+from jnpr.junos.facts.swver import version_info
+from jnpr.junos.facts.swver import version_yaml_representer
 from . import jxml
 from . import jxml as JXML
 from . import version
