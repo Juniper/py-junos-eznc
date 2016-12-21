@@ -2,7 +2,6 @@
 This static string is replaced by the dynamic __doc__ variable on import.
 """
 import importlib
-import functools
 import os
 import sys
 
