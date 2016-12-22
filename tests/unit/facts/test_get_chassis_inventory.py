@@ -26,11 +26,13 @@ class TestChassis(unittest.TestCase):
     def test_serialnumber_fact_from_chassis(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_chassis_serialnumber
         self.assertEqual(self.dev.facts['serialnumber'],'JN1249018AFB')
+        self.assertFalse(self.dev.facts['RE_hw_mi'])
 
     @patch('jnpr.junos.Device.execute')
     def test_serialnumber_fact_from_backplane(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_backplane_serialnumber
         self.assertEqual(self.dev.facts['serialnumber'],'123456789')
+        self.assertTrue(self.dev.facts['RE_hw_mi'])
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.facts.get_chassis_inventory.ConnectNotMasterError')
@@ -74,13 +76,13 @@ class TestChassis(unittest.TestCase):
 
     def _mock_manager_backplane_serialnumber(self, *args, **kwargs):
         if args:
-            return self._read_file('backplane_serialnumber_' + args[0].tag +
-                                   '.xml')
+            return self._read_file('chassis_backplane_serialnumber_' +
+                                   args[0].tag + '.xml')
 
     def _mock_manager_connect_not_master(self, *args, **kwargs):
         if args:
-            return self._read_file('chassis_connect_not_master_' + args[0].tag +
-                                   '.xml')
+            return self._read_file('chassis_connect_not_master_' +
+                                   args[0].tag + '.xml')
 
     def _mock_manager_error_xml(self, *args, **kwargs):
         if args:
