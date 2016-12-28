@@ -33,10 +33,7 @@ def provides_facts():
                        "(Note: the first RE of a chassis/node is not "
                        "necessarily the 'master' RE of the chassis/node. See "
                        "the RE_master fact for info on the 'master' RE of "
-                       "each chassis/node.) When the second-level key is an "
-                       "integer number, it will be present as both a string "
-                       "and an integer so that the user doesn't have to worry "
-                       "about converting between string and integer.",
+                       "each chassis/node.)",
             're_master': "A dictionary indicating which RE slot is master for "
                          "each chassis/node in the system. The dictionary key "
                          "is the chassis or node name. A key with a value "
@@ -104,12 +101,6 @@ def get_facts(device):
             re_info[node] = {}
         # Save with second-level key as a string.
         re_info[node][slot] = info
-        # Try to also save with the second-level key as a number.
-        try:
-            slot_num = int(slot)
-            re_info[node][slot_num] = info
-        except ValueError:
-            pass
         # If it's a master RE, then save in node_masters and master_list
         if ('mastership_state' in info and
            info['mastership_state'].lower().startswith('master')):
