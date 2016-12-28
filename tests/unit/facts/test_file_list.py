@@ -13,7 +13,7 @@ from ncclient.transport import SSHSession
 
 
 @attr('unit')
-class TestCurrentRe(unittest.TestCase):
+class TestFileList(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
@@ -23,10 +23,14 @@ class TestCurrentRe(unittest.TestCase):
         self.dev.open()
 
     @patch('jnpr.junos.Device.execute')
-    def test_current_re_fact(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_current_re
-        self.assertEqual(self.dev.facts['current_re'],
-                         ['re0', 'master', 'node', 'fwdd', 'member', 'pfem'])
+    def test_home_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_file_list
+        self.assertEqual(self.dev.facts['HOME'],'/var/home/user')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_home_fact_multi_dir(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_file_list2
+        self.assertEqual(self.dev.facts['HOME'],'/var/home/user')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -47,7 +51,12 @@ class TestCurrentRe(unittest.TestCase):
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
 
-    def _mock_manager_current_re(self, *args, **kwargs):
+    def _mock_manager_file_list(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_' + args[0].tag +
+            return self._read_file('file_list_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_file_list2(self, *args, **kwargs):
+        if args:
+            return self._read_file('file_list2_' + args[0].tag +
                                    '.xml')

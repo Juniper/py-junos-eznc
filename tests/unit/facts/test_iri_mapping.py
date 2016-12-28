@@ -13,7 +13,7 @@ from ncclient.transport import SSHSession
 
 
 @attr('unit')
-class TestCurrentRe(unittest.TestCase):
+class TestIriMapping(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
@@ -23,10 +23,16 @@ class TestCurrentRe(unittest.TestCase):
         self.dev.open()
 
     @patch('jnpr.junos.Device.execute')
-    def test_current_re_fact(self, mock_execute):
+    def test_iri_host_to_ip_mapping_fact(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_current_re
-        self.assertEqual(self.dev.facts['current_re'],
-                         ['re0', 'master', 'node', 'fwdd', 'member', 'pfem'])
+        self.assertEqual(self.dev.facts['_iri_ip']['re0'],
+                         ['128.0.0.4', '10.0.0.4'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_iri_ip_to_host_mapping_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re
+        self.assertEqual(self.dev.facts['_iri_hostname']['128.0.0.1'],
+                         ['master', 'node', 'fwdd', 'member', 'pfem'])
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -49,5 +55,5 @@ class TestCurrentRe(unittest.TestCase):
 
     def _mock_manager_current_re(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_' + args[0].tag +
+            return self._read_file('iri_mapping_' + args[0].tag +
                                    '.xml')

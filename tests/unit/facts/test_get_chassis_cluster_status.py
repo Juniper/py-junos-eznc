@@ -5,15 +5,17 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import os
+from lxml import etree
 
 from jnpr.junos import Device
+from jnpr.junos.exception import RpcError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 
 @attr('unit')
-class TestCurrentRe(unittest.TestCase):
+class TestGetChassisClusterStatus(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
@@ -23,10 +25,19 @@ class TestCurrentRe(unittest.TestCase):
         self.dev.open()
 
     @patch('jnpr.junos.Device.execute')
-    def test_current_re_fact(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_current_re
-        self.assertEqual(self.dev.facts['current_re'],
-                         ['re0', 'master', 'node', 'fwdd', 'member', 'pfem'])
+    def test_srx_cluster_fact_none(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_rpc_error
+        self.assertEqual(self.dev.facts['srx_cluster'],None)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_srx_cluster_fact_false(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_false
+        self.assertEqual(self.dev.facts['srx_cluster'],False)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_srx_cluster_fact_true(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_true
+        self.assertEqual(self.dev.facts['srx_cluster'],True)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -47,7 +58,14 @@ class TestCurrentRe(unittest.TestCase):
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
 
-    def _mock_manager_current_re(self, *args, **kwargs):
+    def _mock_manager_rpc_error(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_' + args[0].tag +
-                                   '.xml')
+            raise RpcError()
+
+    def _mock_manager_false(self, *args, **kwargs):
+        if args:
+            return self._read_file('cluster_false_' + args[0].tag + '.xml')
+
+    def _mock_manager_true(self, *args, **kwargs):
+        if args:
+            return self._read_file('cluster_true_' + args[0].tag + '.xml')

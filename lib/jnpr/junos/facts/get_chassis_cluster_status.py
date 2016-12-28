@@ -1,4 +1,4 @@
-from jnpr.junos.exception import RPCError
+from jnpr.junos.exception import RpcError
 
 
 def provides_facts():
