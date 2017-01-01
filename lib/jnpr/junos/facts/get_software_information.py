@@ -137,9 +137,9 @@ def get_facts(device):
     if version is None:
         version = '0.0I0.0'
     ver_info = version_info(version)
-    if 're0' in junos_info:
+    if junos_info is not None and 're0' in junos_info:
         version_RE0 = junos_info['re0']['text']
-    if 're1' in junos_info:
+    if junos_info is not None and 're1' in junos_info:
         version_RE1 = junos_info['re1']['text']
 
     return {'junos_info': junos_info,

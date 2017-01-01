@@ -1,0 +1,345 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1I0/junos">
+    <multi-routing-engine-results>
+        <multi-routing-engine-item>
+            <re-name>member0</re-name>
+            <software-information>
+                <host-name>reefbreak1</host-name>
+                <product-model>mx240</product-model>
+                <product-name>mx240</product-name>
+                <junos-version>15.1-20161209.0</junos-version>
+                <package-information>
+                    <name>os-kernel</name>
+                    <comment>JUNOS OS Kernel 64-bit  [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-libs</name>
+                    <comment>JUNOS OS libs [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-runtime</name>
+                    <comment>JUNOS OS runtime [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>zoneinfo</name>
+                    <comment>JUNOS OS time zone information [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-libs-compat32</name>
+                    <comment>JUNOS OS libs compat32 [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-compat32</name>
+                    <comment>JUNOS OS 32-bit compatibility [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base</name>
+                    <comment>JUNOS py base [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-crypto</name>
+                    <comment>JUNOS OS crypto [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>netstack</name>
+                    <comment>JUNOS network stack and utilities [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-libs-compat32</name>
+                    <comment>JUNOS libs compat32 [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-runtime</name>
+                    <comment>JUNOS runtime [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-platform</name>
+                    <comment>JUNOS platform support [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-modules</name>
+                    <comment>JUNOS modules [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-libs</name>
+                    <comment>JUNOS libs [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-dp-crypto-support-platform</name>
+                    <comment>JUNOS mtx Data Plane Crypto Support [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-daemons</name>
+                    <comment>JUNOS daemons [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cos</name>
+                    <comment>JUNOS Services COS [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-platform</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (MX/EX92XX Common) [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T Common) [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>fips-mode</name>
+                    <comment>JUNOS FIPS mode utilities [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>member1</re-name>
+            
+            <software-information>
+                <host-name>beachbreak</host-name>
+                <product-model>mx240</product-model>
+                <product-name>mx240</product-name>
+                <junos-version>15.1-20161209.0</junos-version>
+                <package-information>
+                    <name>os-kernel</name>
+                    <comment>JUNOS OS Kernel 64-bit  [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-libs</name>
+                    <comment>JUNOS OS libs [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-runtime</name>
+                    <comment>JUNOS OS runtime [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>zoneinfo</name>
+                    <comment>JUNOS OS time zone information [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-libs-compat32</name>
+                    <comment>JUNOS OS libs compat32 [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-compat32</name>
+                    <comment>JUNOS OS 32-bit compatibility [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base</name>
+                    <comment>JUNOS py base [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>os-crypto</name>
+                    <comment>JUNOS OS crypto [20160921.201501_fbsd-builder_stable_10]</comment>
+                </package-information>
+                <package-information>
+                    <name>netstack</name>
+                    <comment>JUNOS network stack and utilities [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-libs-compat32</name>
+                    <comment>JUNOS libs compat32 [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-runtime</name>
+                    <comment>JUNOS runtime [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-platform</name>
+                    <comment>JUNOS platform support [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-modules</name>
+                    <comment>JUNOS modules [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-libs</name>
+                    <comment>JUNOS libs [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-dp-crypto-support-platform</name>
+                    <comment>JUNOS mtx Data Plane Crypto Support [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-daemons</name>
+                    <comment>JUNOS daemons [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cos</name>
+                    <comment>JUNOS Services COS [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-platform</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (MX/EX92XX Common) [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T Common) [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+                <package-information>
+                    <name>fips-mode</name>
+                    <comment>JUNOS FIPS mode utilities [20161209.011156_builder_release_151_throttle]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+    </multi-routing-engine-results>
+</rpc-reply>
