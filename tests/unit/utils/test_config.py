@@ -411,6 +411,21 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'xml')
 
+    def test_config_load_lset_from_rexp_json(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """{
+            "configuration" : {
+                "system" : {
+                    "services" : {
+                        "telnet" : [null]
+                    }
+                }
+            }
+        }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
     def test_config_load_lset_from_rexp_set(self):
         self.conf.rpc.load_config = MagicMock()
         conf = """set system domain-name englab.nitin.net"""
