@@ -1,5 +1,5 @@
-<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos">
-    <file-content filename="/etc/hosts.junos" junos:seconds="1483305414" filesize="53098" encoding="text">
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1R2/junos">
+    <file-content filename="/etc/hosts.junos" junos:seconds="1483311151" filesize="53073" encoding="text">
         #$Id: hosts.junos,v 1.7.72.1 2009-04-16 05:22:03 kdickman Exp $
         #
         # File mapping AF_INET/AF_INET6 hostnames for REs on Single and Multichassis
@@ -88,7 +88,6 @@
         128.0.0.54       esc1
         128.0.0.55       esc0-ipmi
         128.0.0.56       esc1-ipmi
-        128.0.0.63       localre
         
         128.0.1.16       fpc0.pic0
         128.0.1.17       fpc1.pic0

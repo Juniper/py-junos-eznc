@@ -27,6 +27,7 @@ def get_facts(device):
 
     if re.match('^(EX)|(QFX)', model):
         personality = 'SWITCH'
+        virtual = False
     elif model.startswith('MX'):
         # The VMX has an RE type of 'RE-VMX'
         if (device.facts['re_info']['default']['default']['model'] ==

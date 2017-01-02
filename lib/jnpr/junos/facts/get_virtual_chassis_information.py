@@ -52,7 +52,6 @@ def get_facts(device):
                         raise ValueError("Member %s and member %s both claim "
                                          "to be master of the VC." %
                                          (old_vc_master, member_id.text))
-
         else:
             vc_capable = False
     except RpcError:

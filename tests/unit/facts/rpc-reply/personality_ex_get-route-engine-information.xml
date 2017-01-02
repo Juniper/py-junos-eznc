@@ -1,0 +1,26 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/13.3R2/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/13.3R2/junos-chassis">
+        <route-engine>
+            <slot>0</slot>
+            <mastership-state>master</mastership-state>
+            <status>OK</status>
+            <temperature junos:celsius="38">38 degrees C / 100 degrees F</temperature>
+            <cpu-temperature junos:celsius="38">38 degrees C / 100 degrees F</cpu-temperature>
+            <memory-dram-size>1024</memory-dram-size>
+            <memory-buffer-utilization>66</memory-buffer-utilization>
+            <cpu-user>68</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>32</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>0</cpu-idle>
+            <model>EX4200-48T, 8 POE</model>
+            <serial-number>BP0212121453</serial-number>
+            <start-time junos:seconds="1467421457">2016-07-01 18:04:17 PDT</start-time>
+            <up-time junos:seconds="15884861">183 days, 20 hours, 27 minutes, 41 seconds</up-time>
+            <last-reboot-reason>0x1:power cycle/failure </last-reboot-reason>
+            <load-average-one>1.98</load-average-one>
+            <load-average-five>2.16</load-average-five>
+            <load-average-fifteen>2.20</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+</rpc-reply>
