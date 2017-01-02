@@ -32,7 +32,7 @@ from mock import patch, MagicMock, call, mock_open
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
-         '2RE': False, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
+         '2RE': True, 'serialnumber': 'aaf5fe5f9b88', 'fqdn': 'firefly',
          'virtual': True, 'switch_style': 'NONE', 'version': '12.1X46-D15.3',
          'HOME': '/cf/var/home/rick', 'srx_cluster': False,
          'version_RE0': '16.1-20160925.0',
@@ -222,11 +222,38 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_config = MagicMock()
         package = 'package.tgz'
         self.assertTrue(self.sw.validate(package, issu=True))
 
     @patch('jnpr.junos.Device.execute')
-    def test_sw_validate_issu(self, mock_execute):
+    def test_sw_validate_issu_2re_false(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.facts['2RE'] = False
+        package = 'package.tgz'
+        self.assertFalse(self.sw.validate(package, issu=True))
+        self.dev.facts['2RE'] = True
+
+    @patch('paramiko.SSHClient')
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_sw_validate_issu_request_shell_execute_raise(self, mock_ss,
+                                                          mock_ssh):
+        # mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.request_shell_execute = MagicMock()
+        self.dev.rpc = MagicMock()
+        self.dev.rpc.get_routing_task_replication_state.return_value = \
+            self._read_file('get-routing-task-replication-state.xml')
+        self.dev.rpc.check_in_service_upgrade.return_value = \
+            self._read_file('check-in-service-upgrade.xml')
+        self.dev.rpc.request_shell_execute.side_effect = \
+            RpcError(rsp='not ok')
+        package = 'package.tgz'
+        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss:
+            ss.return_value = (True, 'Graceful switchover: On')
+            self.assertTrue(self.sw.validate(package, issu=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu_validation_succeeded(self, mock_execute):
         rpc_reply = """<rpc-reply><output>mgd: commit complete
                         Validation succeeded
                         </output>
