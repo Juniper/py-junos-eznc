@@ -1,0 +1,21 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos">
+    <switchover-information xmlns="http://xml.juniper.net/junos/16.1I0/junos-switchover">
+        <switchover-state>On</switchover-state>
+        <switchover-mode>
+            <gres-mode/>
+        </switchover-mode>
+        <configuration-state>
+            <configuration-ready/>
+        </configuration-state>
+        <replication-state>
+            <replication-synchronizing/>
+        </replication-state>
+    </switchover-information>
+    <gresreadiness-status><switchover-status/>
+    
+    <output>Not Ready</output>
+</gresreadiness-status>
+<cli>
+    <banner>{backup}</banner>
+</cli>
+    </rpc-reply>
