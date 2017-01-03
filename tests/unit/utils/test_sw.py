@@ -314,6 +314,51 @@ class TestSW(unittest.TestCase):
             'Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\nis not Master')
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu_commit_sync_off(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_config = MagicMock()
+        self.dev.rpc.get_config.return_value = etree.fromstring("""
+        <configuration>
+            <chassis>
+                <redundancy>
+                    <graceful-switchover>
+                    </graceful-switchover>
+                </redundancy>
+            </chassis>
+        </configuration>""")
+        self.sw.log = MagicMock()
+        self.assertFalse(self.sw.validate('package.tgz', issu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: commit synchronize is not Enabled in configuration')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu_nonstop_routing_off(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_config = MagicMock()
+        self.dev.rpc.get_config.side_effect = iter([etree.fromstring("""
+        <configuration>
+            <chassis>
+                <redundancy>
+                    <graceful-switchover>
+                    </graceful-switchover>
+                </redundancy>
+            </chassis>
+        </configuration>"""), etree.fromstring("""
+        <configuration>
+            <system>
+                <commit>
+                    <synchronize/>
+                </commit>
+            </system>
+        </configuration>"""), etree.fromstring("""<configuration>
+        <routing-options></routing-options>
+        </configuration>""")])
+        self.sw.log = MagicMock()
+        self.assertFalse(self.sw.validate('package.tgz', issu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: NSR is not Enabled in configuration')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_validation_succeeded(self, mock_execute):
         rpc_reply = """<rpc-reply><output>mgd: commit complete
                         Validation succeeded
