@@ -1,34 +1,26 @@
 from __future__ import print_function
-
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
-import unittest2 as unittest
-from nose.plugins.attrib import attr
-
 import os
 import sys
-
 from six import StringIO
-
-if sys.version < '3':
-    builtin_string = '__builtin__'
-else:
-    builtin_string = 'builtins'
-
+import unittest2 as unittest
+from nose.plugins.attrib import attr
 from contextlib import contextmanager
-
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError, SwRollbackError, RpcTimeoutError
 from jnpr.junos.utils.sw import SW
 from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-
 from lxml import etree
-
 from mock import patch, MagicMock, call, mock_open
 
+if sys.version < '3':
+    builtin_string = '__builtin__'
+else:
+    builtin_string = 'builtins'
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_info': version_info('12.1X46-D15.3'),
@@ -165,6 +157,12 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_install_single_re(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'test.tgz'
@@ -179,12 +177,26 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu_nssu_both_error(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        package = 'test.tgz'
-        self.assertRaises(TypeError, self.sw.install, package,
-                          nssu=True, issu=True)
+        # self.assertRaises(TypeError, self.sw.install, package,
+        #                   nssu=True, issu=True)
+        try:
+            self.sw.install('test.tgz', issu=True, nssu=True)
+        except TypeError as ex:
+            self.assertEqual(
+                ex.message,
+                'install function can either take issu or nssu not both')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu_single_re_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        try:
+            self.sw.install('test.tgz', issu=True)
+        except TypeError as ex:
+            self.assertEqual(ex.message, 'ISSU/NSSU requires Multi RE setup')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_issu_nssu_single_re_error(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'test.tgz'
         self.sw._multi_RE = False
@@ -216,29 +228,74 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        package = 'package.tgz'
-        self.assertTrue(self.sw.validate(package))
+        self.assertTrue(self.sw.validate('package.tgz'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_nssu(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw.log = MagicMock()
+        # get_config returns false
+        self.assertFalse(self.sw.validate('package.tgz', nssu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: GRES is not Enabled in configuration')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.dev.rpc.get_config = MagicMock()
-        package = 'package.tgz'
-        self.assertTrue(self.sw.validate(package, issu=True))
+        self.assertTrue(self.sw.validate('package.tgz', issu=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_val_issu_request_shell_execute_gres_on(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_config = MagicMock()
+        self.dev.rpc.request_shell_execute = MagicMock()
+        self.dev.rpc.request_shell_execute.return_value = etree.fromstring(
+            """<rpc-reply>
+        <output>Graceful switchover: On</output>
+        </rpc-reply>""")
+        self.assertTrue(self.sw.validate('package.tgz', issu=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_2re_false(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.dev.facts['2RE'] = False
-        package = 'package.tgz'
-        self.assertFalse(self.sw.validate(package, issu=True))
+        self.assertFalse(self.sw.validate('package.tgz', issu=True))
         self.dev.facts['2RE'] = True
 
     @patch('paramiko.SSHClient')
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
-    def test_sw_validate_issu_request_shell_execute_raise(self, mock_ss,
-                                                          mock_ssh):
-        # mock_execute.side_effect = self._mock_manager
+    def test_sw_validate_issu_request_shell_execute(self, mock_ss,
+                                                    mock_ssh):
+        self._issu_test_helper()
+        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss:
+            ss.return_value = (True, 'Graceful switchover: On')
+            self.assertTrue(self.sw.validate('package.tgz', issu=True))
+
+    @patch('paramiko.SSHClient')
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_sw_validate_issu_ss_login_other_re_fail(self, mock_ss,
+                                                     mock_ssh):
+        self._issu_test_helper()
+        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss:
+            ss.return_value = (False, 'Graceful switchover: On')
+            self.assertFalse(self.sw.validate('package.tgz', issu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: Not able run "show system switchover"')
+
+    @patch('paramiko.SSHClient')
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_sw_validate_issu_ss_graceful_off(self, mock_ss,
+                                              mock_ssh):
+        self._issu_test_helper()
+        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss:
+            ss.return_value = (True, 'Graceful switchover: Off')
+            self.assertFalse(self.sw.validate('package.tgz', issu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: Graceful switchover status is not On')
+
+    def _issu_test_helper(self):
+        self.sw.log = MagicMock()
         self.dev.rpc.request_shell_execute = MagicMock()
         self.dev.rpc = MagicMock()
         self.dev.rpc.get_routing_task_replication_state.return_value = \
@@ -247,10 +304,6 @@ class TestSW(unittest.TestCase):
             self._read_file('check-in-service-upgrade.xml')
         self.dev.rpc.request_shell_execute.side_effect = \
             RpcError(rsp='not ok')
-        package = 'package.tgz'
-        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss:
-            ss.return_value = (True, 'Graceful switchover: On')
-            self.assertTrue(self.sw.validate(package, issu=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_validation_succeeded(self, mock_execute):
@@ -368,16 +421,16 @@ class TestSW(unittest.TestCase):
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
         mock_pkgadd.return_value = True
         self.dev._facts = {'2RE': True,
-            'domain': None, 'RE1': {
-                'status': 'OK', 'model': 'RE-EX8208',
-                'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
-            'version_RE1': '12.3R7.7', 'version_RE0': '12.3',
-            'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
-            'RE0': {'status': 'OK', 'model': 'RE-EX8208',
-                    'mastership_state': 'master'}, 'switch_style': 'VLAN',
-            'version': '12.3R5-S3.1', 'master': 'RE0', 'hostname': 'XXXXXX',
-            'HOME': '/var/home/sn', 'vc_mode': 'Disabled', 'model': 'EX8208',
-            'vc_capable': True, 'personality': 'SWITCH'}
+                           'domain': None, 'RE1': {
+                               'status': 'OK', 'model': 'RE-EX8208',
+                               'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
+                           'version_RE1': '12.3R7.7', 'version_RE0': '12.3',
+                           'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
+                           'RE0': {'status': 'OK', 'model': 'RE-EX8208',
+                                   'mastership_state': 'master'}, 'switch_style': 'VLAN',
+                           'version': '12.3R5-S3.1', 'master': 'RE0', 'hostname': 'XXXXXX',
+                           'HOME': '/var/home/sn', 'vc_mode': 'Disabled', 'model': 'EX8208',
+                           'vc_capable': True, 'personality': 'SWITCH'}
         sw = self.get_sw()
         sw.install(package='abc.tgz', no_copy=True)
         self.assertFalse(sw._multi_VC)
@@ -473,7 +526,7 @@ class TestSW(unittest.TestCase):
             '<request-package-add><re1/><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>']
 
         self.assertTrue(etree.tostring(
-                mock_execute.call_args[0][0]).decode('utf-8') in rpc)
+            mock_execute.call_args[0][0]).decode('utf-8') in rpc)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
