@@ -577,8 +577,8 @@ class TestSW(unittest.TestCase):
             '<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/><no-validate/></request-package-add>',
             '<request-package-add><re1/><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>',
             '<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>',
-            '<request-package-add><re1/><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>']
-
+            '<request-package-add><re1/><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>',
+            '<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>']
         self.assertTrue(etree.tostring(
             mock_execute.call_args[0][0]).decode('utf-8') in rpc)
 
