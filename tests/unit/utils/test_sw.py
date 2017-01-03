@@ -177,13 +177,11 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu_nssu_both_error(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        # self.assertRaises(TypeError, self.sw.install, package,
-        #                   nssu=True, issu=True)
         try:
             self.sw.install('test.tgz', issu=True, nssu=True)
         except TypeError as ex:
             self.assertEqual(
-                ex.message,
+                str(ex),
                 'install function can either take issu or nssu not both')
 
     @patch('jnpr.junos.Device.execute')
@@ -193,7 +191,7 @@ class TestSW(unittest.TestCase):
         try:
             self.sw.install('test.tgz', issu=True)
         except TypeError as ex:
-            self.assertEqual(ex.message, 'ISSU/NSSU requires Multi RE setup')
+            self.assertEqual(str(ex), 'ISSU/NSSU requires Multi RE setup')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu_nssu_single_re_error(self, mock_execute):
@@ -306,6 +304,16 @@ class TestSW(unittest.TestCase):
             RpcError(rsp='not ok')
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_validate_issu_stateful_replication_off(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.dev.rpc.get_config = MagicMock()
+        self.dev.rpc.get_routing_task_replication_state = MagicMock()
+        self.sw.log = MagicMock()
+        self.assertFalse(self.sw.validate('package.tgz', issu=True))
+        self.sw.log.assert_called_with(
+            'Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\nis not Master')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_validation_succeeded(self, mock_execute):
         rpc_reply = """<rpc-reply><output>mgd: commit complete
                         Validation succeeded
@@ -394,12 +402,13 @@ class TestSW(unittest.TestCase):
         mock_validate.return_value = False
         self.assertFalse(self.sw.install('file', validate=True, no_copy=True))
 
+    @patch(builtin_string+'.print')
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
-    def test_sw_install_multi_mx(self, mock_pkgadd):
+    def test_sw_install_multi_mx(self, mock_pkgadd, mock_print):
         mock_pkgadd.return_value = True
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        self.assertTrue(self.sw.install('file', no_copy=True))
+        self.assertTrue(self.sw.install('file', no_copy=True, progress=True))
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_multi_vc(self, mock_pkgadd):

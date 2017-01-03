@@ -1,8 +1,10 @@
 # stdlib
+from __future__ import print_function
 import hashlib
 import re
 from os import path
 import sys
+
 
 # 3rd-party modules
 from lxml.builder import E
