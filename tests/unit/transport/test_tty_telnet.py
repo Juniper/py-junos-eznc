@@ -3,7 +3,7 @@ import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
 from jnpr.junos.transport.tty_telnet import Telnet
-
+import six
 
 @attr('unit')
 class TestTTYTelnet(unittest.TestCase):
@@ -54,10 +54,10 @@ class TestTTYTelnet(unittest.TestCase):
         self.tel_conn._tn.expect.return_value = (
             None,
             None,
-            'port already in use')
+            six.b('port already in use'))
         self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
 
-    def test_tty_telnet_read_prompt_sys_py3(self):
+    def test_tty_telnet_rawwrite_sys_py3(self):
         with patch.object(sys.modules['sys'], 'version', '3.x') \
                 as mock_sys:
             self.tel_conn._tty_open()
