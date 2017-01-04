@@ -34,10 +34,24 @@ class TestTTYTelnet(unittest.TestCase):
         self.tel_conn.read()
         self.tel_conn._tn.read_until.assert_called()
 
+    @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet')
+    def test_tty_telnet_baud(self, mock_telnet):
+        tel_conn = Telnet(host='1.1.1.1', user='test',
+                          password='password123', port=23,
+                          timeout=30, baud=0)
+        tel_conn._tty_open()
+        tel_conn.rawwrite('<rpc>')
+        tel_conn._tn.write.assert_called_with('<rpc>')
+
     def test_read_prompt_RuntimeError(self):
         self.tel_conn.expect = MagicMock()
-        self.tel_conn.expect =(None, None, 'port already in use')
+        self.tel_conn.expect = (None, None, 'port already in use')
         self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
 
-
-
+    def test_read_prompt_in_use_RuntimeError(self):
+        self.tel_conn.expect = MagicMock()
+        self.tel_conn._tn.expect.return_value = (
+            None,
+            None,
+            'port already in use')
+        self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
