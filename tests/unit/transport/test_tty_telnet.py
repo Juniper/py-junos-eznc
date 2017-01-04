@@ -1,3 +1,4 @@
+import sys
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
@@ -55,3 +56,11 @@ class TestTTYTelnet(unittest.TestCase):
             None,
             'port already in use')
         self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
+
+    def test_tty_telnet_read_prompt_sys_py3(self):
+        with patch.object(sys.modules['sys'], 'version', '3.x') \
+                as mock_sys:
+            self.tel_conn._tty_open()
+            content = MagicMock()
+            self.tel_conn.rawwrite(content)
+            content.decode.assert_called_with('utf-8')
