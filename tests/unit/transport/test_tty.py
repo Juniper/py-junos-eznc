@@ -110,6 +110,14 @@ class TestTTY(unittest.TestCase):
                              'probably corrupted image, stuck in loader')
 
     @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_login_state_machine_hotkey(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, 'hotkey')
+        self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+        self.assertEqual(self.terminal.state, 8)  # 8 is for hot keys
+
+    @patch('jnpr.junos.transport.tty.sleep')
     def test_tty_ev_tty_nologin(self, mock_sleep):
         self.terminal.write = MagicMock()
         self.terminal.read_prompt = MagicMock()
