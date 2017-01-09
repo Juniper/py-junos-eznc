@@ -12,4 +12,5 @@ LLDPNeighborView:
     remote_type: lldp-remote-chassis-id-subtype
     remote_chassis_id: lldp-remote-chassis-id
     remote_port_desc: lldp-remote-port-description
+    remote_port_id: lldp-remote-port-id
     remote_sysname: lldp-remote-system-name
