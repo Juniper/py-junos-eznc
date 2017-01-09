@@ -411,6 +411,21 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'xml')
 
+    def test_config_load_lset_from_rexp_json(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """{
+            "configuration" : {
+                "system" : {
+                    "services" : {
+                        "telnet" : [null]
+                    }
+                }
+            }
+        }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
     def test_config_load_lset_from_rexp_set(self):
         self.conf.rpc.load_config = MagicMock()
         conf = """set system domain-name englab.nitin.net"""
@@ -586,9 +601,52 @@ class TestConfig(unittest.TestCase):
             conf.load('conf', format='set')
         self.dev.rpc.open_configuration.assert_called_with(private=True)
 
-    def _read_file(self, fname):
-        from ncclient.xml_ import NCElement
+    def test__enter__private_exception_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.open_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, Config.__enter__,
+                          Config(self.dev, mode='private'))
 
+    def test__enter__private_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='private'))
+
+    def test__enter__dyanamic_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='dynamic'))
+
+    def test__enter__batch_exception_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.open_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, Config.__enter__,
+                          Config(self.dev, mode='batch'))
+
+    def test__enter__batch_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='batch'))
+
+    def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()

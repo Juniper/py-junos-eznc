@@ -1,8 +1,10 @@
 # stdlib
+from __future__ import print_function
 import hashlib
 import re
 from os import path
 import sys
+
 
 # 3rd-party modules
 from lxml.builder import E
@@ -283,6 +285,9 @@ class SW(Util):
         try:
             op = self._dev.rpc.request_shell_execute(routing_engine='backup',
                                                  command="cli show system switchover")
+            if op.findtext('.//switchover-state', default='').lower() == 'on':
+                self.log('Graceful switchover status is On')
+                return True
             output = op.findtext('.//output', default='')
         except RpcError:
             # request-shell-execute rpc is not available for <14.1

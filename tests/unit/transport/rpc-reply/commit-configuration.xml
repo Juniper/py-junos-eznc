@@ -1,0 +1,21 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/15.2D0/junos">
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>
+interface-range 'axp' is not defined
+</error-message>
+</rpc-error>
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>
+interface-ranges expansion failed
+</error-message>
+</rpc-error>
+<cli>
+    <banner></banner>
+</cli>
+</rpc-reply>
