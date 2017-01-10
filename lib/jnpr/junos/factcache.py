@@ -241,7 +241,7 @@ class _FactCache(collections.MutableMapping):
         :raises RuntimeError:
             When keys contains an unknown fact.
         """
-        refresh_keys = ()
+        refresh_keys = None
         if keys is not None:
             if isinstance('str', type(keys)):
                 refresh_keys = (keys,)
