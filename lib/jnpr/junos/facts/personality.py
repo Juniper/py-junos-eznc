@@ -23,7 +23,7 @@ def get_facts(device):
 
     if model == 'Virtual Chassis':
         # Set model to the model of the first RE in the multi-chassis system.
-        model = device.facts['RE_info']['default']['default']['model']
+        model = device.facts['re_info']['default']['default']['model']
 
     if re.match('^(EX)|(QFX)', model):
         personality = 'SWITCH'
@@ -32,7 +32,7 @@ def get_facts(device):
         # The VMX has an RE type of 'RE-VMX'
         if (device.facts['re_info']['default']['default']['model'] ==
                 'RE-VMX'):
-            personality = 'VMX'
+            personality = 'MX'
             virtual = True
         else:
             personality = 'MX'

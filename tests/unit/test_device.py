@@ -250,6 +250,28 @@ class TestDevice(unittest.TestCase):
             mock_cat.side_effect = IOError('File cant be handled')
             self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
 
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_old_style_facts_error_exception_on_error(self,
+                                                            mock_warnings,
+                                                            mock_execute):
+        self.dev._fact_style = 'old'
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
+
+    def test_device_facts_refresh_unknown_fact_style(self):
+        self.dev._fact_style = 'bad'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh()
+
+    def test_device_facts_refresh_old_fact_style_with_keys(self):
+        self.dev._fact_style = 'old'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh(keys='domain')
+
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
@@ -287,6 +309,14 @@ class TestDevice(unittest.TestCase):
             self.dev.facts = 'test'
         except RuntimeError as ex:
             self.assertEqual(RuntimeError, type(ex))
+
+    def test_device_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            ofacts = self.dev.ofacts
+
+    def test_device_set_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            self.dev.ofacts = False
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli(self, mock_execute):

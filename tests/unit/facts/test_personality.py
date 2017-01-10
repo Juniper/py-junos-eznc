@@ -26,63 +26,93 @@ class TestPersonality(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_personality_ex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_ex
-        self.assertEqual(self.dev.facts['personality'],'SWITCH')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'SWITCH')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_m(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_m
-        self.assertEqual(self.dev.facts['personality'],'M')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'M')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_mx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_mx
-        self.assertEqual(self.dev.facts['personality'],'MX')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'MX')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_olive(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_olive
-        self.assertEqual(self.dev.facts['personality'],'OLIVE')
-        self.assertEqual(self.dev.facts['virtual'],True)
+        self.assertEqual(self.dev.facts['personality'], 'OLIVE')
+        self.assertEqual(self.dev.facts['virtual'], True)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_ptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_ptx
-        self.assertEqual(self.dev.facts['personality'],'PTX')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'PTX')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_srx_branch(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_srx_branch
-        self.assertEqual(self.dev.facts['personality'],'SRX_BRANCH')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'SRX_BRANCH')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_srx_high_end(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_srx_high_end
-        self.assertEqual(self.dev.facts['personality'],'SRX_HIGHEND')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'SRX_HIGHEND')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_t(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_t
-        self.assertEqual(self.dev.facts['personality'],'T')
-        self.assertEqual(self.dev.facts['virtual'],False)
+        self.assertEqual(self.dev.facts['personality'], 'T')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_vmx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_vmx
-        self.assertEqual(self.dev.facts['personality'],'VMX')
-        self.assertEqual(self.dev.facts['virtual'],True)
+        self.assertEqual(self.dev.facts['personality'], 'MX')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_old_vmx(self):
+        self.dev.facts._cache['model'] = 'VMX'
+        self.assertEqual(self.dev.facts['personality'], 'MX')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_vjx(self):
+        self.dev.facts._cache['model'] = 'VJX'
+        self.assertEqual(self.dev.facts['personality'], 'SRX_BRANCH')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_old_vrr(self):
+        self.dev.facts._cache['model'] = 'VRR'
+        self.assertEqual(self.dev.facts['personality'], 'MX')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_firefly(self):
+        self.dev.facts._cache['model'] = 'FiReFlY'
+        self.assertEqual(self.dev.facts['personality'], 'SRX_BRANCH')
+        self.assertEqual(self.dev.facts['virtual'], True)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_vptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_vptx
-        self.assertEqual(self.dev.facts['personality'],'PTX')
-        self.assertEqual(self.dev.facts['virtual'],True)
+        self.assertEqual(self.dev.facts['personality'], 'PTX')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_virtual_chassis(self):
+        self.dev.facts._cache['model'] = 'Virtual Chassis'
+        self.dev.facts._cache['re_info'] = {'default':
+                                                {'default':
+                                                    { 'model':'QFX5100'}
+                                                }
+                                           }
+        self.assertEqual(self.dev.facts['personality'], 'SWITCH')
+        self.assertEqual(self.dev.facts['virtual'], False)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

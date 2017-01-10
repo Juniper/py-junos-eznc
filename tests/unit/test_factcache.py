@@ -190,13 +190,17 @@ class TestFactCache(unittest.TestCase):
         self.assertEqual(self.dev.facts['bar'], 'bar')
         self.assertEqual(self.dev.facts['_hidden'], True)
 
-    def test_factcache_refresh_exception_on_failure(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_factcache_refresh_exception_on_failure(self, mock_warn):
         with self.assertRaises(ValueError):
             # Refresh all facts with exception on failure
             self.dev.facts._refresh(exception_on_failure=True)
 
+    @patch('jnpr.junos.device.warnings')
     @patch('jnpr.junos.factcache.warnings')
-    def test_factcache_refresh_warnings_on_failure(self, mock_warn):
+    def test_factcache_refresh_warnings_on_failure(self,
+                                                   mock_warn,
+                                                   mock_device_warn):
         # Refresh all facts with warnings on failure
         self.dev.facts._refresh(warnings_on_failure=True)
         mock_warn.assert_called_once('Facts gathering is incomplete. '

@@ -64,6 +64,18 @@ class TestConsole(unittest.TestCase):
             mode='Telnet')
         self.assertTrue(self.dev.open()['failed'])
 
+    @patch('jnpr.junos.console.warnings')
+    def test_telnet_old_fact_warning(self, mock_warn):
+        self.dev = Console(
+            host='1.1.1.1',
+            user='lab',
+            password='lab123',
+            mode='Telnet',
+            fact_style='old')
+        mock_warn.assert_called_once('fact-style old will be removed in a '
+                                     'future release.',
+                                     RuntimeWarning)
+
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_open')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
@@ -148,7 +160,7 @@ class TestConsole(unittest.TestCase):
         self.assertRaises(AttributeError, dev.open)
 
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_close')
-    def test_console_close_error(self, mock_close):
+    def test_console_close_error_skip_logout(self, mock_close):
         mock_close.side_effect = RuntimeError
         self.assertRaises(RuntimeError, self.dev.close, skip_logout=True)
 
