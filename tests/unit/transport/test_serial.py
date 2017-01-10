@@ -26,13 +26,16 @@ class TestSerial(unittest.TestCase):
             ('login', 'login'), ('passwd', 'passwd'), ('shell', 'shell')]
         self.dev.open()
 
+    @patch('jnpr.junos.transport.tty.sleep')
     @patch('jnpr.junos.transport.tty.tty_netconf.close')
     @patch('jnpr.junos.transport.tty_serial.Serial.read_prompt')
     @patch('jnpr.junos.transport.tty_serial.Serial.write')
     @patch('jnpr.junos.transport.tty_serial.Serial._tty_close')
-    def tearDown(self, mock_serial_close, mock_write, mock_read, mock_close):
-        mock_read.side_effect = [
-            ('cli', 'cli'), ('shell', 'shell'), ('login', 'login')]
+    def tearDown(self, mock_serial_close, mock_write, mock_read, mock_close,
+                 mock_sleep):
+        # mock_read.side_effect = [('shell', 'shell'), ('login', 'login'),
+        mock_read.side_effect = [('shell', 'shell'), ('login', 'login'),
+                                 ('cli', 'cli'), ]
         self.dev.close()
 
     def test_console_connected(self):
@@ -42,3 +45,25 @@ class TestSerial(unittest.TestCase):
         self.dev._tty._ser = MagicMock()
         self.dev.close(skip_logout=True)
         self.assertTrue(self.dev._tty._ser.close.called)
+
+    @patch('jnpr.junos.transport.tty_serial.serial.Serial.open')
+    def test_tty_serial_open_exception(self, mock_open):
+        dev = Console(port='USB/ttyUSB0', baud=9600, mode='Serial')
+        mock_open.side_effect = OSError
+        self.assertRaises(RuntimeError, dev.open)
+
+    def test_tty_serial_rawwrite(self):
+        self.dev._tty._ser = MagicMock()
+        self.dev._tty.rawwrite('test')
+        self.dev._tty._ser.write.assert_called_with('test')
+
+    def test_tty_serial_read(self):
+        self.dev._tty._ser = MagicMock()
+        self.dev._tty.read()
+        self.dev._tty._ser.readline.assert_is_called()
+
+    def test_tty_serial_read_prompt(self):
+        self.dev._tty._ser = MagicMock()
+        self.dev._tty.EXPECT_TIMEOUT = 0.1
+        self.dev._tty._ser.readline.side_effect = ['', 'test']
+        self.assertEqual(self.dev._tty.read_prompt()[0], None)
