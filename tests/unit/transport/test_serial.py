@@ -26,13 +26,16 @@ class TestSerial(unittest.TestCase):
             ('login', 'login'), ('passwd', 'passwd'), ('shell', 'shell')]
         self.dev.open()
 
+    @patch('jnpr.junos.transport.tty.sleep')
     @patch('jnpr.junos.transport.tty.tty_netconf.close')
     @patch('jnpr.junos.transport.tty_serial.Serial.read_prompt')
     @patch('jnpr.junos.transport.tty_serial.Serial.write')
     @patch('jnpr.junos.transport.tty_serial.Serial._tty_close')
-    def tearDown(self, mock_serial_close, mock_write, mock_read, mock_close):
-        mock_read.side_effect = [
-            ('already_closed', 'already_closed')]
+    def tearDown(self, mock_serial_close, mock_write, mock_read, mock_close,
+                 mock_sleep):
+        # mock_read.side_effect = [('shell', 'shell'), ('login', 'login'),
+        mock_read.side_effect = [('shell', 'shell'), ('login', 'login'),
+                                 ('cli', 'cli'), ]
         self.dev.close()
 
     def test_console_connected(self):
