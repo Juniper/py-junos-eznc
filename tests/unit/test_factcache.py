@@ -114,7 +114,7 @@ class TestFactCache(unittest.TestCase):
         self.dev.facts._callbacks = {'foo': get_foo_fact,
                                      'bar': get_bar_fact}
         # Now, get the length of the facts
-        self.assertEqual(str(self.dev.facts),"{'foo': 'foo', 'bar': 'bar'}")
+        self.assertEqual(str(self.dev.facts), "{'bar': 'bar', 'foo': 'foo'}")
 
     def test_factcache_refresh_single_key(self):
         # Override the callbacks

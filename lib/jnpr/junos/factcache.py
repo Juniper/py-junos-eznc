@@ -205,7 +205,7 @@ class _FactCache(collections.MutableMapping):
           cached.
         """
         string = ''
-        for key in self:
+        for key in sorted(self):
             if not key.startswith('_'):
                 current = "'%s': %s" % (key, repr(self.get(key)))
                 if string:
