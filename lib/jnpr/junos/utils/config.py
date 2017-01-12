@@ -502,7 +502,7 @@ class Config(Util):
         Rollback the candidate config to either the last active or
         a specific rollback number.
 
-        :param str rb_id: The rollback id value [0-49], defaults to ``0``.
+        :param int rb_id: The rollback id value [0-49], defaults to ``0``.
 
         :returns:
             ``True`` always when successful
