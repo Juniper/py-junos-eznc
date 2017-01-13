@@ -819,6 +819,7 @@ class Device(_Connection):
             self._hostname = 'localhost'
             self._ssh_private_key_file = None
             self._ssh_config = None
+            self._allow_agent = False
         else:
             # --------------------------
             # making a remote connection
@@ -838,6 +839,12 @@ class Device(_Connection):
             self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
             self._auth_password = kvargs.get(
                 'password') or kvargs.get('passwd')
+            # we want to enable the ssh-agent if-and-only-if we are
+            # not given a password or an ssh key file.
+            # in this condition it means we want to query the agent
+            # for available ssh keys
+            self._allow_agent = bool((self._auth_password is None) and
+                                     (self._ssh_private_key_file is None))
 
         # -----------------------------
         # initialize instance variables
@@ -904,14 +911,6 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
-            # not given a password or an ssh key file.
-            # in this condition it means we want to query the agent
-            # for available ssh keys
-
-            allow_agent = bool((self._auth_password is None) and
-                               (self._ssh_private_key_file is None))
-
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -920,7 +919,7 @@ class Device(_Connection):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
-                allow_agent=allow_agent,
+                allow_agent=self._allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
 
