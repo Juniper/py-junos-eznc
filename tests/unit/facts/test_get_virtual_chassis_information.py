@@ -56,6 +56,22 @@ class TestGetVirtualChassisInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['vc_fabric'],None)
         self.assertEqual(self.dev.facts['vc_master'],None)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_vc_mmvcf(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_vc_mmvcf
+        self.assertEqual(self.dev.facts['vc_capable'],True)
+        self.assertEqual(self.dev.facts['vc_mode'],'Mixed')
+        self.assertEqual(self.dev.facts['vc_fabric'],True)
+        self.assertEqual(self.dev.facts['vc_master'],'0')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_vc_mmvc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_vc_mmvc
+        self.assertEqual(self.dev.facts['vc_capable'],True)
+        self.assertEqual(self.dev.facts['vc_mode'],'Mixed')
+        self.assertEqual(self.dev.facts['vc_fabric'],False)
+        self.assertEqual(self.dev.facts['vc_master'],'0')
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -82,6 +98,14 @@ class TestGetVirtualChassisInformation(unittest.TestCase):
     def _mock_manager_vc_dual_master(self, *args, **kwargs):
         if args:
             return self._read_file('vc_dual_master_' + args[0].tag + '.xml')
+
+    def _mock_manager_vc_mmvcf(self, *args, **kwargs):
+        if args:
+            return self._read_file('vc_mmvcf_' + args[0].tag + '.xml')
+
+    def _mock_manager_vc_mmvc(self, *args, **kwargs):
+        if args:
+            return self._read_file('vc_mmvc_' + args[0].tag + '.xml')
 
     def _mock_manager_vc_error(self, *args, **kwargs):
         if args:

@@ -1,4 +1,3 @@
-from abc import ABCMeta
 import collections
 import warnings
 
@@ -24,9 +23,6 @@ class _FactCache(collections.MutableMapping):
     **Additional methods:**
       * :meth:`_refresh`: Refreshes the fact cache.
     """
-    # Used to register the class as a dict.
-    __metaclass__ = ABCMeta
-
     def __init__(self, device):
         """
         _FactCache object constructor.
@@ -234,9 +230,9 @@ class _FactCache(collections.MutableMapping):
         :param warnings_on_failure: A boolean which indicates if an warning
           should be logged upon a failure gathering facts.
 
-        :param keys: A single key as a string, or an iterable of keys as a list
-          or tuple. The specified keys are emptied from the cache. If None, all
-          keys are emptied from the cache.
+        :param keys: A single key as a string, or an iterable of keys (such
+          as a list, set, or or tuple.) The specified keys are emptied from
+          the cache. If None, all keys are emptied from the cache.
 
         :raises RuntimeError:
             When keys contains an unknown fact.
@@ -249,8 +245,9 @@ class _FactCache(collections.MutableMapping):
                 refresh_keys = keys
         if refresh_keys is not None:
             for key in refresh_keys:
-                if key in self._cache:
-                    del self._cache[key]
+                if key in self._callbacks:
+                    if key in self._cache:
+                        del self._cache[key]
                 else:
                     raise RuntimeError('The %s fact can not be refreshed. %s '
                                        'is not a known fact.' % (key, key))
@@ -274,7 +271,3 @@ class _FactCache(collections.MutableMapping):
                 self._exception_on_failure = False
                 self._warnings_on_failure = False
                 self._should_warn = False
-
-# Make this class look like a regular dict.
-# Ensures isinstance() and issubclass() behave the same as for a dict.
-_FactCache.register(dict)

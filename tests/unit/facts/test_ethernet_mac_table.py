@@ -45,9 +45,14 @@ class TestEthernetMacTable(unittest.TestCase):
         self.assertEqual(self.dev.facts['switch_style'],'NONE')
 
     @patch('jnpr.junos.Device.execute')
-    def test_ethernet_mac_table_non_master_bd(self, mock_execute):
+    def test_ethernet_mac_table_non_master_bd_ptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_ptx
         self.assertEqual(self.dev.facts['switch_style'],'NONE')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_ethernet_mac_table_non_master_bd_mx(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_mx_non_master_re
+        self.assertEqual(self.dev.facts['switch_style'],'BRIDGE_DOMAIN')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

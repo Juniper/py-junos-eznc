@@ -653,33 +653,47 @@ class _Connection(object):
         fact is reloaded on demand.
 
         :param bool exception_on_failure: To raise exception when facts
-                                          gathering errors out. If True when
-                                          new-style fact gathering is in use,
-                                          causes all facts to be reloaded
-                                          rather than being loaded on demand.
+          gathering errors out. If True when new-style fact gathering is in
+          use, causes all facts to be reloaded rather than being loaded on
+          demand.
         :param bool warnings_on_failure: To print a warning when fact gathering
-                                         errors out.
-                                         warnings_on_failure=True is the
-                                         default for old-style facts.
-                                         warnings_on_failure=False is the
-                                         default for new-style facts.
-                                         If True when new-style fact gathering
-                                         is in use, causes all facts to be
-                                         reloaded rather than being loaded on
-                                         demand.
+          errors out. The default for old-style facts gathering is
+          warnings_on_failure=True. The default for new-style facts gathering
+          is warnings_on_failure=False. If True when new-style fact gathering
+          is in use, causes all facts to be reloaded rather than being loaded
+          on demand.
         :param str, set, list, or tuple keys: The set of keys in facts to
-                                              refresh. Can only be set if
-                                              new-style facts are in use and
-                                              exception_on_failure==False and
-                                              warnings==False.
+          refresh. Note: Old-style facts gathering does not support
+          gathering individual facts, so this argument can only be
+          specified when new-style fact gathering is in use. In addition,
+          setting exception_on_failure or warnings_on_failure to True causes
+          all facts to be immediately refreshed, rather than being refreshed
+          on demand. For this reason, the keys argument can not be specified if
+          exception_on_failure or warnings_on_failure are True.
+
+        An example of specifying the keys argument as a string:
+        ```
+        dev.facts_refresh(keys='hostname')
+        ```
+
+        An example of specifying the keys argument as a tuple:
+        ```
+        dev.facts_refresh(keys=('hostname', 'hostname_info', 'domain', 'fqdn'))
+        ```
+        or as a list:
+        ```
+        dev.facts_refresh(keys=['hostname', 'hostname_info', 'domain', 'fqdn'])
+        ```
+        or as a set:
+        ```
+        dev.facts_refresh(keys={'hostname', 'hostname_info', 'domain', 'fqdn'})
+        ```
 
         :raises RuntimeError:
             If old-style fact gathering is in use and a keys argument is
             specified.
         """
-        if (self._fact_style != 'old' and
-           self._fact_style != 'new' and
-           self._fact_style != 'both'):
+        if self._fact_style not in ['old', 'new', 'both']:
             raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
         if self._fact_style == 'old' or self._fact_style == 'both':
             if warnings_on_failure is None:
