@@ -1,0 +1,100 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos">
+    <software-information>
+        <host-name>cots</host-name>
+        <product-model>mx80</product-model>
+        <product-name>mx80</product-name>
+        <junos-version>16.1-20160720.0</junos-version>
+        <package-information>
+            <name>junos</name>
+            <comment>JUNOS Base OS boot [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jbase</name>
+            <comment>JUNOS Base OS Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jcrypto</name>
+            <comment>JUNOS Crypto Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jpfe</name>
+            <comment>JUNOS Packet Forwarding Engine Support (MX80) [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jweb</name>
+            <comment>JUNOS Web Management [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jdocs</name>
+            <comment>JUNOS Online Documentation [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jsdn-powerpc</name>
+            <comment>JUNOS SDN Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-alg</name>
+            <comment>JUNOS Services Application Level Gateways [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-jflow</name>
+            <comment>JUNOS Services Jflow Container package [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-sfw</name>
+            <comment>JUNOS Services Stateful Firewall [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-nat</name>
+            <comment>JUNOS Services NAT [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-rpm</name>
+            <comment>JUNOS Services RPM [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-cpcd</name>
+            <comment>JUNOS Services Captive Portal and Content Delivery Container package [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jmacsec</name>
+            <comment>JUNOS Macsec Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-crypto-base</name>
+            <comment>JUNOS Services Crypto [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jservices-ipsec</name>
+            <comment>JUNOS Services IPSec [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jcrypto-dp-support</name>
+            <comment>JUNOS DP Crypto Software Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>py-base-powerpc</name>
+            <comment>JUNOS py-base-powerpc [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>py-extensions-powerpc</name>
+            <comment>JUNOS py-extensions-powerpc [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jsd</name>
+            <comment>JUNOS jsd [powerpc-16.1-20160720.0-jet-1]</comment>
+        </package-information>
+        <package-information>
+            <name>jkernel</name>
+            <comment>JUNOS Kernel Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>jroute</name>
+            <comment>JUNOS Routing Software Suite [16.1-20160720.0]</comment>
+        </package-information>
+        <package-information>
+            <name>atf-base-powerpc</name>
+            <comment>JUNOS atf-base-powerpc [15.1I20161229_0005_cbowers]</comment>
+        </package-information>
+    </software-information>
+</rpc-reply>

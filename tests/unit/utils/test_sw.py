@@ -47,7 +47,7 @@ class TestSW(unittest.TestCase):
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
-        self.dev._facts = facts
+        self.dev.facts = facts
         self.sw = self.get_sw()
 
     @patch('jnpr.junos.Device.execute')

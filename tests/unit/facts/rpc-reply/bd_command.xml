@@ -1,0 +1,4 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F5/junos">
+    <l2ald-rtb-mac-count>
+    </l2ald-rtb-mac-count>
+</rpc-reply>

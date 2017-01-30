@@ -1,0 +1,24 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1R1/junos">
+    <output>
+    <directory-list root-path="/var/home/user/" junos:seconds="1482888720" junos:style="brief">
+        <directory name="/var/home/user/">
+            <directory-name>/var/home/user/</directory-name>
+            <total-file-blocks>28</total-file-blocks>
+            <file-information>
+                <file-name>.ssh</file-name>
+                <file-directory junos:format="/"/>
+            </file-information>
+            <file-information>
+                <file-name>baseline.config</file-name>
+            </file-information>
+            <file-information>
+                <file-name>change.config</file-name>
+            </file-information>
+            <file-information>
+                <file-name>junos_comment_config.xml</file-name>
+            </file-information>
+            <total-files>3</total-files>
+        </directory>
+    </directory-list>
+    </output>
+</rpc-reply>

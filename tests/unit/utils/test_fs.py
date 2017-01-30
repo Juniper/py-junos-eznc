@@ -1,4 +1,5 @@
 import unittest
+from mock import patch
 from nose.plugins.attrib import attr
 import os
 
@@ -27,7 +28,8 @@ class TestFS(unittest.TestCase):
         self.dev.open()
         self.fs = FS(self.dev)
 
-    def test_cat_wrong_path_return_none(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_cat_wrong_path_return_none(self, mock_warnings):
         path = 'test/report'
         self.assertEqual(self.fs.cat(path), None)
 
@@ -51,7 +53,8 @@ class TestFS(unittest.TestCase):
         self.fs.pwd()
         self.assertEqual(self.fs.pwd(), '/cf/var/home/rick')
 
-    def test_checksum_return_none(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_checksum_return_none(self, mock_warnings):
         path = 'test/report'
         self.assertEqual(self.fs.checksum(path), None)
 

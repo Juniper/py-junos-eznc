@@ -230,15 +230,16 @@ class TestDevice(unittest.TestCase):
 
             """
             self.dev.facts_refresh()
+            self.dev.facts._cache['current_re'] = ['re0']
             assert self.dev.facts['version'] == facts['version']
 
     @patch('jnpr.junos.Device.execute')
-    @patch('jnpr.junos.device.warnings')
+    @patch('jnpr.junos.factcache.warnings')
     def test_device_facts_error(self, mock_warnings, mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.dev.facts_refresh()
+            self.dev.facts_refresh(warnings_on_failure=True)
             self.assertTrue(mock_warnings.warn.called)
 
     @patch('jnpr.junos.Device.execute')
@@ -248,6 +249,28 @@ class TestDevice(unittest.TestCase):
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
             self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_old_style_facts_error_exception_on_error(self,
+                                                            mock_warnings,
+                                                            mock_execute):
+        self.dev._fact_style = 'old'
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
+
+    def test_device_facts_refresh_unknown_fact_style(self):
+        self.dev._fact_style = 'bad'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh()
+
+    def test_device_facts_refresh_old_fact_style_with_keys(self):
+        self.dev._fact_style = 'old'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh(keys='domain')
 
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
@@ -287,6 +310,14 @@ class TestDevice(unittest.TestCase):
         except RuntimeError as ex:
             self.assertEqual(RuntimeError, type(ex))
 
+    def test_device_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            ofacts = self.dev.ofacts
+
+    def test_device_set_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            self.dev.ofacts = False
+
     @patch('jnpr.junos.Device.execute')
     def test_device_cli(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -295,7 +326,7 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.device.json.loads')
     def test_device_rpc_json_ex(self, mock_json_loads):
-        self.dev._facts = facts
+        self.dev.facts = facts
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
@@ -613,7 +644,7 @@ class TestDevice(unittest.TestCase):
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
-        if kwargs:
+        if kwargs and 'normalize' not in kwargs:
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)

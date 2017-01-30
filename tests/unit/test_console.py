@@ -64,6 +64,18 @@ class TestConsole(unittest.TestCase):
             mode='Telnet')
         self.assertTrue(self.dev.open()['failed'])
 
+    @patch('jnpr.junos.console.warnings')
+    def test_telnet_old_fact_warning(self, mock_warn):
+        self.dev = Console(
+            host='1.1.1.1',
+            user='lab',
+            password='lab123',
+            mode='Telnet',
+            fact_style='old')
+        mock_warn.assert_called_once('fact-style old will be removed in a '
+                                     'future release.',
+                                     RuntimeWarning)
+
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_open')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
@@ -109,7 +121,7 @@ class TestConsole(unittest.TestCase):
 
     def test_console_connected(self):
         self.assertTrue(self.dev.connected)
-        self.assertFalse(self.dev.gather_facts)
+        self.assertFalse(self.dev._gather_facts)
 
     @patch('jnpr.junos.console.Console._tty_logout')
     def test_console_close_error(self, mock_logout):
@@ -140,7 +152,7 @@ class TestConsole(unittest.TestCase):
             mode='serial')
         self.dev.open()
         self.assertTrue(self.dev.connected)
-        self.assertFalse(self.dev.gather_facts)
+        self.assertFalse(self.dev._gather_facts)
 
     def test_wrong_mode(self):
         dev = Console(host='1.1.1.1', user='lab', password='lab123',
@@ -148,7 +160,7 @@ class TestConsole(unittest.TestCase):
         self.assertRaises(AttributeError, dev.open)
 
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_close')
-    def test_console_close_error(self, mock_close):
+    def test_console_close_error_skip_logout(self, mock_close):
         mock_close.side_effect = RuntimeError
         self.assertRaises(RuntimeError, self.dev.close, skip_logout=True)
 
@@ -159,18 +171,25 @@ class TestConsole(unittest.TestCase):
 
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf.rpc')
     @patch('jnpr.junos.console.FACT_LIST')
-    def test_console_gather_facts(self, mock_fact_list, mock_rpc):
-        from jnpr.junos.facts.session import facts_session
+    @patch('jnpr.junos.device.warnings')
+    def test_console_gather_facts(self, mock_warnings, mock_fact_list,
+                                  mock_rpc):
+        self.dev._fact_style = 'old'
+        from jnpr.junos.ofacts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
         self.dev.facts_refresh()
         self.assertEqual(mock_rpc.call_count, 8)
 
     @patch('jnpr.junos.console.Console._tty_login')
     @patch('jnpr.junos.console.FACT_LIST')
-    def test_console_gather_facts_true(self, mock_fact_list, tty_login):
-        from jnpr.junos.facts.session import facts_session
+    @patch('jnpr.junos.device.warnings')
+    def test_console_gather_facts_true(self, mock_warnings, mock_fact_list,
+                                       tty_login):
+        self.dev._fact_style = 'old'
+        self.dev.facts = self.dev.ofacts
+        from jnpr.junos.ofacts.session import facts_session
         mock_fact_list.__iter__.return_value = [facts_session]
-        self.dev.gather_facts = True
+        self.dev._gather_facts = True
         self.dev.open()
         self.assertEqual(self.dev.facts, {'2RE': False,
                                           'RE_hw_mi': False,

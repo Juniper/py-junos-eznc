@@ -1,0 +1,22 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
+    <chassis-cluster-status>
+        <cluster-id>1</cluster-id>
+        <redundancy-group>
+            <cluster-id>1</cluster-id>
+            <redundancy-group-id>0</redundancy-group-id>
+            <redundancy-group-failover-count>1</redundancy-group-failover-count>
+            <device-stats>
+                <device-name>node0</device-name>
+                <device-priority>100</device-priority>
+                <redundancy-group-status>primary</redundancy-group-status>
+                <preempt>no</preempt>
+                <failover-mode>no</failover-mode>
+                <device-name>node1</device-name>
+                <device-priority>0</device-priority>
+                <redundancy-group-status>lost</redundancy-group-status>
+                <preempt>n/a</preempt>
+                <failover-mode>n/a</failover-mode>
+            </device-stats>
+        </redundancy-group>
+    </chassis-cluster-status>
+</rpc-reply>

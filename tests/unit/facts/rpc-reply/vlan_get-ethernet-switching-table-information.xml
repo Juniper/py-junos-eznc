@@ -1,0 +1,9 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/11.4R1/junos">
+    <ethernet-switching-table-information xmlns="http://xml.juniper.net/junos/11.4R1/junos-esw" junos:style="summary">
+        <ethernet-switching-table junos:style="summary">
+            <mac-table-entry junos:style="summary">
+                <mac-table-total-count>0</mac-table-total-count>
+            </mac-table-entry>
+        </ethernet-switching-table>
+    </ethernet-switching-table-information>
+</rpc-reply>

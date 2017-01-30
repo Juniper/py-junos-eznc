@@ -1,0 +1,46 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/11.4R1/junos">
+    <software-information>
+        <host-name>sw1</host-name>
+        <product-model>ex2200-c-12t-2g</product-model>
+        <product-name>ex2200-c-12t-2g</product-name>
+        <package-information>
+            <name>junos</name>
+            <comment>JUNOS Base OS boot [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jbase</name>
+            <comment>JUNOS Base OS Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jkernel-ex-2200</name>
+            <comment>JUNOS Kernel Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jcrypto-ex</name>
+            <comment>JUNOS Crypto Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jdocs-ex</name>
+            <comment>JUNOS Online Documentation [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jswitch-ex</name>
+            <comment>JUNOS Enterprise Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jpfe-ex22x</name>
+            <comment>JUNOS Packet Forwarding Engine Enterprise Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jroute-ex</name>
+            <comment>JUNOS Routing Software Suite [11.4R1.6]</comment>
+        </package-information>
+        <package-information>
+            <name>jweb-ex</name>
+            <comment>JUNOS Web Management [11.4R1.6]</comment>
+        </package-information>
+    </software-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

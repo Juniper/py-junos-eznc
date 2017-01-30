@@ -1,0 +1,8 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1R1/junos">
+    <file-content filename="/etc/resolv.conf" junos:seconds="1482724871" filesize="119" encoding="text">
+        search juniper.net jnpr.net
+        nameserver 10.0.0.1
+        nameserver 10.0.0.2
+        # domain juniper.net
+    </file-content>
+</rpc-reply>

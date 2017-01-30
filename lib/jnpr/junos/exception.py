@@ -4,14 +4,21 @@ from lxml.etree import _Element
 from ncclient.operations.rpc import RPCError
 
 
+class FactLoopError(RuntimeError):
+    """
+    Generated when there is a loop in fact gathering.
+    """
+    pass
+
+
 class RpcError(Exception):
 
     """
     Parent class for all junos-pyez RPC Exceptions
     """
 
-    def __init__(
-            self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
+    def __init__(self, cmd=None, rsp=None, errs=None, dev=None,
+                 timeout=None, re=None):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
@@ -42,8 +49,8 @@ class RpcError(Exception):
             self.message = errs.message
         else:
             self.errs = errs
-            self.message = "\n".join(["%s: %s" %(err['severity'].strip(),
-                                                 err['message'].strip())
+            self.message = "\n".join(["%s: %s" % (err['severity'].strip(),
+                                                  err['message'].strip())
                                       for err in errs if err['message'] is not None
                                       and err['severity'] is not None]) \
                 if isinstance(errs, list) else ''
@@ -150,7 +157,8 @@ class RpcTimeoutError(RpcError):
 
     def __repr__(self):
         return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
-            .format(self.__class__.__name__, self.dev.hostname, self.cmd, self.timeout)
+            .format(self.__class__.__name__, self.dev.hostname,
+                    self.cmd, self.timeout)
 
     __str__ = __repr__
 
@@ -215,7 +223,8 @@ class ConnectError(Exception):
     def __repr__(self):
         if self._orig:
             return "{0}(host: {1}, msg: {2})".format(self.__class__.__name__,
-                                                     self.dev.hostname, self._orig)
+                                                     self.dev.hostname,
+                                                     self._orig)
         else:
             return "{0}({1})".format(self.__class__.__name__,
                                      self.dev.hostname)

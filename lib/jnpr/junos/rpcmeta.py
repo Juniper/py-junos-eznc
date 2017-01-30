@@ -92,11 +92,11 @@ class _RpcMetaExec(object):
     # cli
     # -----------------------------------------------------------------------
 
-    def cli(self, command, format='text'):
+    def cli(self, command, format='text', normalize=False):
         rpc = E('command', command)
         if format.lower() in ['text', 'json']:
             rpc.attrib['format'] = format
-        return self._junos.execute(rpc)
+        return self._junos.execute(rpc, normalize=normalize)
 
     # -----------------------------------------------------------------------
     # method missing

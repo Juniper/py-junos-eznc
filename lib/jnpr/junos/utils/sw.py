@@ -186,7 +186,7 @@ class SW(Util):
         package.
 
         :param str remote_package:
-        The file-path to the install package on the remote (Junos) device.
+          The file-path to the install package on the remote (Junos) device.
         """
 
         rsp = self.rpc.request_package_nonstop_upgrade(
@@ -407,7 +407,7 @@ class SW(Util):
             file-path to directory on remote device
         :param func progress:
             call-back function for progress updates. If set to ``True`` uses
-          :meth:`sw.progress` for basic reporting by default.
+            :meth:`sw.progress` for basic reporting by default.
         :param bool cleanfs:
             When ``True`` (default) this method will perform the
             "storage cleanup" on the device.

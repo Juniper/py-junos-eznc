@@ -21,7 +21,8 @@ from jnpr.junos.device import _Connection
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.facts import *
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 
@@ -72,8 +73,17 @@ class Console(_Connection):
             So its assumed ssh is enabled by the time we use SCP functionality.
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``False``.  If ``False`` then the
-            facts are not gathered on call to :meth:`open`
+            *OPTIONAL* Defaults to ``False``. If ``False`` and old-style fact
+            gathering is in use then facts are not gathered on call to
+            :meth:`open`. This argument is a no-op when new-style fact gathering
+            is in use (the default.)
+
+        :param str fact_style:
+            *OPTIONAL*  The style of fact gathering to use. Valid values are:
+            'new', 'old', or 'both'. The default is 'new'. The value 'both' is
+            only present for debugging purposes. It will be removed in a future
+            release. The value 'old' is only present to workaround bugs in
+            new-style fact gathering. It will be removed in a future release.
 
         :param bool console_has_banner:
             *OPTIONAL* default is ``False``.  If ``False`` then in case of a
@@ -87,7 +97,7 @@ class Console(_Connection):
         # ----------------------------------------
 
         self._tty = None
-        self._facts = {}
+        self._ofacts = {}
         self.connected = False
         self._skip_logout = False
         self.results = dict(changed=False, failed=False, errmsg=None)
@@ -110,7 +120,12 @@ class Console(_Connection):
         # self.timeout needed by PyEZ utils
         #self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
-        self.gather_facts = kvargs.get('gather_facts', False)
+        self._gather_facts = kvargs.get('gather_facts', False)
+        self._fact_style = kvargs.get('fact_style', 'new')
+        if self._fact_style != 'new':
+            warnings.warn('fact-style %s will be removed in a future release.' %
+                          (self._fact_style),
+                          RuntimeWarning)
         self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
         self._ssh_config = kvargs.get('ssh_config')
@@ -118,6 +133,10 @@ class Console(_Connection):
         self.junos_dev_handler = JunosDeviceHandler(device_params=
                                                     {'name': 'junos',
                                                      'local': False})
+        if self._fact_style == 'old':
+            self.facts = self.ofacts
+        else:
+            self.facts = _FactCache(self)
 
     @property
     def timeout(self):
@@ -136,9 +155,14 @@ class Console(_Connection):
         """
         self._timeout = value
 
-    def open(self):
+    def open(self, *vargs, **kvargs):
         """
-        open the connection to the device
+        Opens a connection to the device using existing login/auth
+        information.
+
+        :param bool gather_facts:
+            If set to ``True``/``False`` will override the device
+            instance value for only this open process
         """
 
         # ---------------------------------------------------------------
@@ -165,10 +189,11 @@ class Console(_Connection):
             logger.error("Exception occurred: {0}:{1}\n".format('login', str(ex)))
             raise ex
         self.connected = True
-        if self.gather_facts is True:
+        gather_facts = kvargs.get('gather_facts', self._gather_facts)
+        if gather_facts is True:
             logger.info('facts: retrieving device facts...')
             self.facts_refresh()
-            self.results['facts'] = self._facts
+            self.results['facts'] = self.facts
         return self
 
     def close(self, skip_logout=False):

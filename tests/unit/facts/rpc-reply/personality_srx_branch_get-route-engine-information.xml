@@ -1,0 +1,30 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/12.1X46/junos-chassis">
+        <route-engine>
+            <status>OK</status>
+            <temperature junos:celsius="56">56 degrees C / 132 degrees F</temperature>
+            <memory-system-total>2048</memory-system-total>
+            <memory-system-total-used>1044</memory-system-total-used>
+            <memory-system-total-util>51</memory-system-total-util>
+            <memory-control-plane>1088</memory-control-plane>
+            <memory-control-plane-used>511</memory-control-plane-used>
+            <memory-control-plane-util>47</memory-control-plane-util>
+            <memory-data-plane>960</memory-data-plane>
+            <memory-data-plane-used>528</memory-data-plane-used>
+            <memory-data-plane-util>55</memory-data-plane-util>
+            <cpu-user>13</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>15</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>72</cpu-idle>
+            <model>RE-SRX210HE2</model>
+            <serial-number>ACKD0351</serial-number>
+            <start-time junos:seconds="1482973544">2016-12-28 17:05:44 PST</start-time>
+            <up-time junos:seconds="336278">3 days, 21 hours, 24 minutes, 38 seconds</up-time>
+            <last-reboot-reason>0x200:normal shutdown</last-reboot-reason>
+            <load-average-one>0.60</load-average-one>
+            <load-average-five>0.33</load-average-five>
+            <load-average-fifteen>0.27</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+</rpc-reply>
