@@ -1,5 +1,35 @@
 """
-This static string is replaced by the dynamic __doc__ variable on import.
+A dictionary-like object of read-only facts about the Junos device.
+
+These facts are accessed as the `facts` attribute of a `Device` object
+instance. For example, if `dev` is an instance of a `Device` object,
+the hostname of the device can be accessed with::
+
+    dev.facts['hostname']
+
+Force a refresh of all facts with::
+
+    dev.facts_refresh()
+
+Force a refresh of a single fact with::
+
+    dev.facts_refresh(keys='hostname')
+
+Force a refresh of a set of facts with::
+
+    dev.facts_refresh(keys=('hostname','domain','fqdn'))
+
+NOTE: The dictionary key for each available fact is guaranteed to exist. If
+      there is a problem gathering the value of a specific fact/key, or if
+      the fact is not supported on a given platform, then the fact/key will
+      have the value None (the None object, not a string.)
+
+      Accessing a dictionary key which does not correspond to an available fact
+      will raise a KeyError (the same behavior as accessing a non-existent key
+      of a normal dict.)
+
+The following dictionary keys represent the available facts and their meaning:
+
 """
 import importlib
 import os
@@ -74,35 +104,9 @@ def _build_fact_callbacks_and_doc_strings():
     return (callbacks, doc_strings)
 
 
-# Replaces the doc string defined at the top of this module file.
-__doc__ = """
-PyEZ maintains a dictionary of read-only facts about the Junos device.
-
-These facts are accessed as a dictionary on the `facts` attribute of a `Device`
-object instance. For example, if `dev` is an instance of a `Device` object,
-the hostname of the device can be accessed with::
-
-    dev.facts['hostname']
-
-Force a refresh of all facts with::
-
-    dev.facts_refresh()
-
-Force a refresh of a single fact with::
-
-    dev.facts_refresh(keys='hostname')
-
-Force a refresh of a set of facts with::
-
-    dev.facts_refresh(keys=('hostname','domain','fqdn'))
-
-The following dictionary keys represent the available facts and their meaning:
-
-"""
-
 # Import all of the fact modules and build the callbacks and doc strings
 (_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
 # Append the doc string (__doc__) with the documentation for each fact.
-for key in sorted(_doc_strings,key=lambda s: s.lower()):
+for key in sorted(_doc_strings, key=lambda s: s.lower()):
     __doc__ += ':%s:\n  %s\n' % (key, _doc_strings[key])

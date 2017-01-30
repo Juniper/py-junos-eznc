@@ -2,6 +2,7 @@ import collections
 import warnings
 
 import jnpr.junos.facts
+from jnpr.junos.facts import __doc__ as facts_doc
 import jnpr.junos.exception
 
 
@@ -271,3 +272,8 @@ class _FactCache(collections.MutableMapping):
                 self._exception_on_failure = False
                 self._warnings_on_failure = False
                 self._should_warn = False
+
+    # Precede the class's documentation with the documentation on the specific
+    # facts from  the jnpr.junos.facts package.
+    __doc__ = (facts_doc + "Implementation details on the _FactCache class:" +
+               __doc__)
