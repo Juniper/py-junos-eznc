@@ -40,8 +40,7 @@ def get_facts(device):
                             for host in device.facts['_iri_hostname'][ip]:
                                 if host not in current_re:
                                     current_re.append(host)
-    except RpcError as e:
-        # some devices (NFX *cough*) does not support private routing instance!
-        return {'current_re': 'master'}
+    except RpcError:
+        pass
 
     return {'current_re': current_re, }
