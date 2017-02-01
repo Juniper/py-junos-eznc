@@ -24,8 +24,8 @@ def _get_software_information(device):
                 software_information = device.rpc.get_software_information(local=True, normalize=True)
 
             return software_information
-        except Exception as e:
-            print str(e)
+        except:
+            pass
 
 
 def provides_facts():
