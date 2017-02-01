@@ -16,7 +16,16 @@ def _get_software_information(device):
                                       normalize=True)
             except:
                 pass
-        return device.rpc.get_software_information(normalize=True)
+
+        try:
+            software_information = device.rpc.get_software_information(normalize=True)
+            # NFX returns True to this call, append local=True for 15.1X53-D40 and -D45
+            if type(software_information) is bool:
+                software_information = device.rpc.get_software_information(local=True, normalize=True)
+
+            return software_information
+        except Exception as e:
+            print str(e)
 
 
 def provides_facts():
@@ -84,11 +93,22 @@ def get_facts(device):
         if re_version is None:
             # For < 15.1, get version from the "junos" package.
             try:
-                re_pkg_info = re_sw_info.xpath(
+                junos_pkg_info = re_sw_info.xpath(
                     './package-information[name="junos"]/comment'
-                )[0].text
+                )
+                if len(junos_pkg_info):
+                    re_pkg_info = junos_pkg_info[0].text
+                else:
+                    # check JDM variants
+                    jdm_pkg_info = re_sw_info.xpath(
+                        './package-information[starts-with(name, "Junos")]/comment'
+                    )
+                    if len(jdm_pkg_info):
+                        re_pkg_info = jdm_pkg_info[0].text
+
                 re_version = re.findall(r'\[(.*)\]', re_pkg_info)[0]
-            except:
+
+            except Exception:
                 re_version = None
         if model_info is None and re_model is not None:
             model_info = {}
