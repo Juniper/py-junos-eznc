@@ -91,6 +91,9 @@ class Serial(Terminal):
                 break         # done reading
         else:
             # exceeded the while loop timeout
+            self._ser.reset_input_buffer()
             return (None, None)
 
+        # clear the input buffer, the next read will refill as necessary
+        self._ser.reset_input_buffer()
         return (rxb, found.lastgroup)

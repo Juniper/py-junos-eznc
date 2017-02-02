@@ -72,6 +72,9 @@ def get_facts(device):
     elif 'OLIVE' == model:
         personality = 'OLIVE'
         virtual = True
+    elif model.startswith("NFX"):
+        personality = 'NFX'
+        virtual = False
 
     return {'personality': personality,
             'virtual': virtual, }

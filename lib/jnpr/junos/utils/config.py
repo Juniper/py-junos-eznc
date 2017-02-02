@@ -192,9 +192,17 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        rsp = self.rpc.get_configuration(dict(
-            compare='rollback', rollback=str(rb_id), format='text'
-        ))
+        try:
+            rsp = self.rpc.get_configuration(dict(
+                compare='rollback', rollback=str(rb_id), format='text'
+            ))
+        except RpcError as err:
+            if err.message == "mgd: statement must contain additional statements":
+                # fix for PR #655, JDM 15.1X53-D45 responses with extraneous warning message
+                return "Unable to parse diff from response!"
+
+            # otherwise, this is a legitimate error
+            return None
 
         diff_txt = rsp.find('configuration-output').text
         return None if diff_txt == "\n" else diff_txt
