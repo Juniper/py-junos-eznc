@@ -997,8 +997,8 @@ class Device(_Connection):
                                (self._ssh_private_key_file is None))
 
             # set connection timeout by Device.timeout                         
-            timeout = (self.__class__.timeout) \                                
-                    if isinstance(self.__class__.timeout, int) else (None)      
+            timeout = (self.__class__.timeout) \
+                    if isinstance(self.__class__.timeout, int) else (None)
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
