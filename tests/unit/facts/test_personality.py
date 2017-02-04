@@ -98,6 +98,11 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(self.dev.facts['personality'], 'SRX_BRANCH')
         self.assertEqual(self.dev.facts['virtual'], True)
 
+    def test_personality_nfx(self):
+        self.dev.facts._cache['model'] = 'NFX250_S2_10_T'
+        self.assertEqual(self.dev.facts['personality'], 'NFX')
+        self.assertEqual(self.dev.facts['virtual'], False)
+
     @patch('jnpr.junos.Device.execute')
     def test_personality_vptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_vptx

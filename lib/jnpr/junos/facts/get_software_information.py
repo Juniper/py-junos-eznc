@@ -14,9 +14,18 @@ def _get_software_information(device):
             try:
                 return device.rpc.cli("show version all-members", format='xml',
                                       normalize=True)
-            except:
+            except Exception:
                 pass
-        return device.rpc.get_software_information(normalize=True)
+        try:
+            sw_info = device.rpc.get_software_information(normalize=True)
+            if sw_info is True:
+                # Possibly an NFX which requires 'local' and 'detail' args.
+                sw_info = device.rpc.get_software_information(local=True,
+                                                              detail=True,
+                                                              normalize=True)
+            return sw_info
+        except Exception:
+            pass
 
 
 def provides_facts():
@@ -84,11 +93,18 @@ def get_facts(device):
         if re_version is None:
             # For < 15.1, get version from the "junos" package.
             try:
-                re_pkg_info = re_sw_info.xpath(
+                re_pkg_info = re_sw_info.findtext(
                     './package-information[name="junos"]/comment'
-                )[0].text
-                re_version = re.findall(r'\[(.*)\]', re_pkg_info)[0]
-            except:
+                )
+                if re_pkg_info is not None:
+                    re_version = re.findall(r'\[(.*)\]', re_pkg_info)[0]
+                else:
+                    # NFX JDM case
+                    re_pkg_info = re_sw_info.findtext(
+                        './version-information[component="MGD"]/release'
+                    )
+                    re_version = re.findall(r'(.*\d+)', re_pkg_info)[0]
+            except Exception:
                 re_version = None
         if model_info is None and re_model is not None:
             model_info = {}
@@ -105,18 +121,22 @@ def get_facts(device):
                                    'object': version_info(re_version), }
 
         # Check to see if re_name is the RE we are currently connected to.
-        # There are at least three cases to handle.
+        # There are at least four cases to handle.
         this_re = False
-        # 1) re_name is in the current_re fact. The easy case.
-        if re_name in device.facts['current_re']:
+        # 1) this device doesn't support the current_re fact and there's only
+        #    one RE.
+        if device.facts['current_re'] is None and len(si_rsp) == 1:
             this_re = True
-        # 2) Some single-RE devices (discovered on EX2200 running 11.4R1)
+        # 2) re_name is in the current_re fact. The easy case.
+        elif re_name in device.facts['current_re']:
+            this_re = True
+        # 3) Some single-RE devices (discovered on EX2200 running 11.4R1)
         # don't include 'reX' in the current_re list. Check for this
         # condition and still set default hostname, model, and version
         elif (re_name == 're0' and 're1' not in device.facts['current_re'] and
               'master' in device.facts['current_re']):
             this_re = True
-        # 3) For an lcc in a TX(P) re_name is 're0' or 're1', but the
+        # 4) For an lcc in a TX(P) re_name is 're0' or 're1', but the
         # current_re fact is ['lcc1-re0', 'member1-re0', ...]. Check to see
         # if any iri_name endswith the name of the
         elif this_re is False:
