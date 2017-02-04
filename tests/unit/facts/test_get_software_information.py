@@ -132,6 +132,20 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['version_RE0'],'11.4R1.6')
         self.assertEqual(self.dev.facts['version_RE1'],None)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_info_nfx(self, mock_execute):
+        self.dev.facts._cache['vc_capable']=False
+        mock_execute.side_effect = self._mock_manager_nfx
+        self.assertEqual(self.dev.facts['hostname'], 'jdm')
+        self.assertEqual(self.dev.facts['model'],'NFX250_S2_10_T')
+        self.assertEqual(self.dev.facts['version'],'15.1X53-D45.3')
+        self.assertEqual(self.dev.facts['version_RE0'],'15.1X53-D45.3')
+        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['model_info'],
+                         {'re0': 'NFX250_S2_10_T'})
+        self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
+                         '15.1X53-D45.3')
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -197,3 +211,13 @@ class TestGetSoftwareInformation(unittest.TestCase):
                 raise RpcError()
             else:
                 return self._read_file('sw_info_ex_' + args[0].tag + '.xml')
+
+    def _mock_manager_nfx(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'command'):
+                raise RpcError()
+            elif (args[0].tag == 'get-software-information' and
+                  args[0].find('./*') is None):
+                return True
+            else:
+                return self._read_file('sw_info_nfx_' + args[0].tag + '.xml')
