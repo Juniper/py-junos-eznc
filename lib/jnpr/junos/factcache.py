@@ -1,5 +1,6 @@
 import collections
 import warnings
+from pprint import pformat
 
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc
@@ -192,7 +193,7 @@ class _FactCache(collections.MutableMapping):
         """
         return len(self._callbacks)
 
-    def __repr__(self):
+    def __str__(self):
         """
         A string representation of the facts dictionary.
 
@@ -210,6 +211,17 @@ class _FactCache(collections.MutableMapping):
                 else:
                     string = current
         return '{' + string + '}'
+
+    def __repr__(self):
+        """
+        A formated string representation of the facts dictionary.
+
+        :returns string: a formated string representation of the dictionary.
+          Because this returns the value of every fact, it has the
+          side-effect of causing any ungathered facts to be gathered and then
+          cached.
+        """
+        return pformat(self._cache)
 
     def _refresh(self,
                  exception_on_failure=False,
