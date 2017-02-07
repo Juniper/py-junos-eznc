@@ -971,7 +971,7 @@ class Device(_Connection):
             When the device does not have NETCONF enabled
 
         :raises ConnectTimeoutError:
-            When the the :meth:`Device.timeout` value is exceeded
+            When the OS determined maximum timeout value is exceeded
             during the attempt to connect to the remote device
 
         :raises ConnectError:
