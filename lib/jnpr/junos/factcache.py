@@ -221,12 +221,7 @@ class _FactCache(collections.MutableMapping):
           side-effect of causing any ungathered facts to be gathered and then
           cached.
         """
-        # below 3 line will help in populating _cache. Otherwise pprint
-        # sometime return empty dictionary
-        for key in sorted(self):
-            if not key.startswith('_'):
-                self.get(key)
-        return pformat(self._cache)
+        return pformat(dict(self))
 
     def _refresh(self,
                  exception_on_failure=False,
