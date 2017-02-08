@@ -25,6 +25,15 @@ class _RpcMetaExec(object):
         """
         retrieve configuration from the Junos device
 
+        For example::
+            dev.rpc.get_config()
+            dev.rpc.get_config(model='openconfig')
+            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'), options={'format': 'json'})
+            dev.rpc.get_config(filter_xml=etree.XML('<bgp><neighbors></neighbors></bgp>'), model='openconfig')
+            dev.rpc.get_config(filter_xml=etree.XML('<bgp/>'), model='openconfig')
+            dev.rpc.get_config(filter_xml='<system><services/></system>')
+            dev.rpc.get_config(filter_xml='system/services')
+
         :filter_xml: fully XML formatted tag which defines what to retrieve,
                      when omitted the entire configuration is returned;
                      the following returns the device host-name configured with "set system host-name":
@@ -48,8 +57,18 @@ class _RpcMetaExec(object):
         rpc = E('get-configuration', options)
 
         if filter_xml is not None:
+            if not isinstance(filter_xml, etree._Element):
+                if re.search("^<.*>$", filter_xml):
+                    filter_xml = etree.XML(filter_xml)
+                else:
+                    filter_data = None
+                    for tag in filter_xml.split('/')[::-1]:
+                        filter_data = E(tag) if filter_data is None else E(
+                            tag,
+                            filter_data)
+                    filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
-            # it does not already have one
+            # it does not already have one (not in case of yang model config)
             if filter_xml.tag != 'configuration' and not nmspaces.get(model):
                 etree.SubElement(rpc, 'configuration').append(filter_xml)
             else:
@@ -78,6 +97,7 @@ class _RpcMetaExec(object):
           dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
           or
           dev.rpc.get(filter_select='bgp/neighbors')
+          dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
 
         :param str filter_select:
           The select attribute will be treated as an XPath expression and
