@@ -506,10 +506,10 @@ class _Connection(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
-        except EzErrors.RpcError as ex:
-            return "invalid command: %s: %s" % (command, ex)
         except EzErrors.ConnectClosedError as ex:
             raise ex
+        except EzErrors.RpcError as ex:
+            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
             return "invalid command: " + command
 
