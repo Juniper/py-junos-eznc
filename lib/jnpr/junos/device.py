@@ -929,8 +929,6 @@ class Device(_Connection):
         self._ofacts = {}
 
         # public attributes
-
-        self.connected = False
         self.rpc = _RpcMetaExec(self)
         if self._fact_style == 'old':
             self.facts = self.ofacts
@@ -940,6 +938,19 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
     # Basic device methods
     # -----------------------------------------------------------------------
+    @property
+    def connected(self):
+        if self._conn is None:
+            return False
+        else:
+            return self._conn.connected
+
+    @connected.setter
+    def connected(self, value):
+        if self._conn != None and value in [True, False]:
+            self._conn._connected = value
+
+
 
     def open(self, *vargs, **kvargs):
         """
