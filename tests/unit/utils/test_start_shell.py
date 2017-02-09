@@ -1,6 +1,3 @@
-__author__ = "Rick Sherman"
-__credits__ = "Jeremy Schulman, Nitin Kumar"
-
 import unittest
 from nose.plugins.attrib import attr
 
@@ -9,9 +6,13 @@ from jnpr.junos.utils.start_shell import StartShell
 
 from mock import patch, MagicMock, call
 
+__author__ = "Rick Sherman"
+__credits__ = "Jeremy Schulman, Nitin Kumar"
+
 
 @attr('unit')
 class TestStartShell(unittest.TestCase):
+
     @patch('paramiko.SSHClient')
     def setUp(self, mock_connect):
         self.dev = Device(host='1.1.1.1')
@@ -41,6 +42,7 @@ class TestStartShell(unittest.TestCase):
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
     def test_startshell_run(self, mock_wait):
         self.shell._chan = MagicMock()
+        mock_wait.return_value = ["user % "]
         self.shell.run('ls')
         self.assertTrue(call.send('echo $?') in self.shell._chan.mock_calls)
 
@@ -55,9 +57,9 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_wait_for_regex(self, mock_select):
         mock_select.return_value = ['> ', 2, 3]
         self.shell._chan = MagicMock()
-        #output from command: cli -c "show version"
+        # output from command: cli -c "show version"
         self.shell._chan.recv.return_value = \
-        """
+            """
         ------------
         JUNOS Services Deep Packet Inspection package [15.1
         ---(more)---
@@ -72,3 +74,15 @@ class TestStartShell(unittest.TestCase):
             shell._chan = MagicMock()
             shell.send('test')
             mock_close.assert_called_once(call())
+
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_startshell_run_regex(self, mock_wait_for):
+        self.shell._chan = MagicMock()
+        mock_wait_for.return_value = [
+            """
+        ------------
+        JUNOS Services Deep Packet Inspection package [15.1
+        ---(more)---
+        """]
+        self.assertTrue(self.shell.run('show version',
+                                       '---\(more\s?\d*%?\)---\n\s*|%')[0])

@@ -1,0 +1,52 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1R1/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/14.1R1/junos-chassis">
+        <route-engine>
+            <slot>0</slot>
+            <mastership-state>master</mastership-state>
+            <mastership-priority>master</mastership-priority>
+            <status>OK</status>
+            <temperature junos:celsius="49">49 degrees C / 120 degrees F</temperature>
+            <cpu-temperature junos:celsius="53">53 degrees C / 127 degrees F</cpu-temperature>
+            <memory-dram-size>3584</memory-dram-size>
+            <memory-installed-size>4096</memory-installed-size>
+            <memory-buffer-utilization>39</memory-buffer-utilization>
+            <cpu-user>9</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>6</cpu-system>
+            <cpu-interrupt>2</cpu-interrupt>
+            <cpu-idle>83</cpu-idle>
+            <model>RE-A-2000</model>
+            <serial-number>1000717151</serial-number>
+            <start-time junos:seconds="1476650382">2016-10-16 13:39:42 PDT</start-time>
+            <up-time junos:seconds="6660430">77 days, 2 hours, 7 minutes, 10 seconds</up-time>
+            <last-reboot-reason>0x1:power cycle/failure </last-reboot-reason>
+            <load-average-one>0.39</load-average-one>
+            <load-average-five>0.77</load-average-five>
+            <load-average-fifteen>0.92</load-average-fifteen>
+        </route-engine>
+        <route-engine>
+            <slot>1</slot>
+            <mastership-state>backup</mastership-state>
+            <mastership-priority>backup</mastership-priority>
+            <status>OK</status>
+            <temperature junos:celsius="45">45 degrees C / 113 degrees F</temperature>
+            <cpu-temperature junos:celsius="49">49 degrees C / 120 degrees F</cpu-temperature>
+            <memory-dram-size>3584</memory-dram-size>
+            <memory-installed-size>4096</memory-installed-size>
+            <memory-buffer-utilization>16</memory-buffer-utilization>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>0</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>99</cpu-idle>
+            <model>RE-A-2000</model>
+            <serial-number>9009037326</serial-number>
+            <start-time junos:seconds="1169424041">2007-01-21 16:00:41 PST</start-time>
+            <up-time junos:seconds="6660419">77 days, 2 hours, 6 minutes, 59 seconds</up-time>
+            <last-reboot-reason>0x1:power cycle/failure </last-reboot-reason>
+            <load-average-one>0.00</load-average-one>
+            <load-average-five>0.00</load-average-five>
+            <load-average-fifteen>0.00</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+</rpc-reply>

@@ -50,12 +50,13 @@ class Config(Util):
         :param bool sync: On dual control plane systems, requests that
                             the candidate configuration on one control plane be
                             copied to the other control plane, checked for
-                            correct syntax, and committed on both Routing Engines.
-        :param bool force_sync: On dual control plane systems, forces the candidate
-                            configuration on one control plane to be copied to the
-                            other control plane.
-        :param bool full: When true requires all the daemons to check and evaluate
-                            the new configuration.
+                            correct syntax, and committed on both Routing
+                            Engines.
+        :param bool force_sync: On dual control plane systems, forces the
+                            candidate configuration on one control plane to
+                            be copied to the other control plane.
+        :param bool full: When true requires all the daemons to check and
+                            evaluate the new configuration.
         :param bool detail: When true return commit detail as XML
 
 
@@ -192,17 +193,27 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        rsp = self.rpc.get_configuration(dict(
-            compare='rollback', rollback=str(rb_id), format='text'
-        ))
+        try:
+            rsp = self.rpc.get_configuration(dict(
+                compare='rollback', rollback=str(rb_id), format='text'
+            ))
+        except RpcError as err:
+            if (err.rpc_error['severity'] == 'warning' and
+                err.message == "mgd: statement must contain additional "
+                               "statements"):
+                # Fix for Issue #655, JDM 15.1X53-D45 responses with
+                # extraneous warning message
+                return "Unable to parse diff from response!"
+            else:
+                raise
 
         diff_txt = rsp.find('configuration-output').text
         return None if diff_txt == "\n" else diff_txt
 
     def pdiff(self, rb_id=0):
         """
-        Helper method that calls ``print`` on the diff (patch-format) between the
-        current candidate and the provided rollback.
+        Helper method that calls ``print`` on the diff (patch-format) between
+        the current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
 
@@ -217,7 +228,7 @@ class Config(Util):
     def load(self, *vargs, **kvargs):
         """
         Loads changes into the candidate configuration.  Changes can be
-        in the form of strings (text,set,xml), XML objects, and files.
+        in the form of strings (text,set,xml, json), XML objects, and files.
         Files can be either static snippets of configuration or Jinja2
         templates.  When using Jinja2 Templates, this method will render
         variables into the templates and then load the resulting change;
@@ -239,6 +250,7 @@ class Config(Util):
             * "conf","text","txt" is curly-text-style
             * "set" - ascii-text, set-style
             * "xml" - ascii-text, XML
+            * "json" - ascii-text, json
 
             .. note:: The format can specifically set using **format**.
 
@@ -261,10 +273,10 @@ class Config(Util):
           the file contents are ``Jinja2`` format and will require
           template-rendering.
 
-          .. note:: This parameter is used in conjunction with **template_vars**.
-                     The template filename extension will be used to determine
-                     the format-style of the contents, or you can override
-                     using **format**.
+          .. note:: This parameter is used in conjunction with
+                    **template_vars**. The template filename extension will
+                    be used to determine the format-style of the contents,
+                    or you can override using **format**.
 
         :param jinja2.Template template:
           A Jinja2 Template object.  Same description as *template_path*,
@@ -278,9 +290,10 @@ class Config(Util):
         :returns:
             RPC-reply as XML object.
 
-        :raises: ConfigLoadError: When errors detected while loading candidate configuration.
-                             You can use the Exception errs variable
-                             to identify the specific problems
+        :raises: ConfigLoadError: When errors detected while loading candidate
+                                  configuration. You can use the Exception
+                                  errs variable  to identify the specific
+                                  problems.
         """
         rpc_xattrs = {}
         rpc_xattrs['format'] = 'xml'        # default to XML format
@@ -292,7 +305,7 @@ class Config(Util):
         # note: this cannot be used if format='set', per Junos API.
 
         overwrite = kvargs.get('overwrite', False)
-        if True == overwrite:
+        if overwrite is True:
             rpc_xattrs['action'] = 'override'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
@@ -310,13 +323,15 @@ class Config(Util):
                 return 'text'
             if ext in ['.set']:
                 return 'set'
+            if ext in ['.json']:
+                return 'json'
             raise ValueError("Unknown file contents from extension: %s" % ext)
 
         def _lset_format(kvargs, rpc_xattrs):
             """ setup the kvargs/rpc_xattrs """
             # when format is given, setup the xml attrs appropriately
             if kvargs['format'] == 'set':
-                if True == overwrite:
+                if overwrite is True:
                     raise ValueError(
                         "conflicting args, cannot use 'set' with 'overwrite'")
                 rpc_xattrs['action'] = 'set'
@@ -336,8 +351,11 @@ class Config(Util):
                 kvargs['format'] = 'xml'
             elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
                 kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and re.search(r'.*}\s*$', rpc):
+            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
+                    re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'text'
+            elif re.search(r'^\s*\{', rpc) and re.search(r'.*}\s*$', rpc):
+                kvargs['format'] = 'json'
 
         def try_load(rpc_contents, rpc_xattrs):
             try:
@@ -374,10 +392,10 @@ class Config(Util):
                     else:
                         raise RuntimeError(
                             "Not able to resolve the config format "
-                            "You must define the format of the contents explicitly "
-                            "to the function. Ex: format='set'")
+                            "You must define the format of the contents "
+                            "explicitly to the function. Ex: format='set'")
                 if kvargs['format'] == 'xml':
-                # covert the XML string into XML structure
+                    # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
             return try_load(rpc_contents, rpc_xattrs)
             # ~! UNREACHABLE !~#
@@ -496,7 +514,7 @@ class Config(Util):
         Rollback the candidate config to either the last active or
         a specific rollback number.
 
-        :param str rb_id: The rollback id value [0-49], defaults to ``0``.
+        :param int rb_id: The rollback id value [0-49], defaults to ``0``.
 
         :returns:
             ``True`` always when successful
@@ -528,16 +546,18 @@ class Config(Util):
             * "delete" - removes the rescue configuration
             * "reload" - loads the rescue config as candidate (no-commit)
 
-        :param str format: identifies the return format when **action** is "get":
+        :param str format: identifies the return format when **action** is
+                           "get":
 
             * "text" (default) - ascii-text format
             * "xml" - as XML object
 
         :return:
 
-            * When **action** is 'get', then the contents of the rescue configuration
-              is returned in the specified *format*.  If there is no rescue configuration
-              saved, then the return value is ``None``.
+            * When **action** is 'get', then the contents of the rescue
+              configuration is returned in the specified *format*.  If there
+              is no rescue configuration saved, then the return value is
+              ``None``.
 
             * ``True`` when **action** is "save".
 
@@ -545,8 +565,8 @@ class Config(Util):
 
             .. note:: ``True`` regardless if a rescue configuration exists.
 
-            * When **action** is 'reload', return is ``True`` if a rescue configuration
-              exists, and ``False`` otherwise.
+            * When **action** is 'reload', return is ``True`` if a rescue
+              configuration exists, and ``False`` otherwise.
 
             .. note:: The rescue configuration is only loaded as the candidate,
                       and not committed.  You must commit to make the rescue
@@ -582,8 +602,9 @@ class Config(Util):
             """
             try:
                 got = self.rpc.get_rescue_information(format=format)
-                return got.findtext('configuration-information/configuration-output') \
-                    if 'text' == format else got
+                return got.findtext(
+                    'configuration-information/configuration-output'
+                ) if 'text' == format else got
             except:
                 return None
 
@@ -615,7 +636,8 @@ class Config(Util):
 
     def __init__(self, dev, mode=None):
         """
-        :param str mode: Can be used *only* when creating Config object using context manager
+        :param str mode: Can be used *only* when creating Config object using
+                         context manager
 
             * "private" - Work in private database
             * "dynamic" - Work in dynamic database
@@ -624,11 +646,12 @@ class Config(Util):
 
             Example::
 
-                # mode can be private/dynamic/exclusive/batch
-                with Config(dev, mode='exclusive') as cu:
-                    cu.load('set system services netconf traceoptions file xyz', format='set')
-                    print cu.diff()
-                    cu.commit()
+            # mode can be private/dynamic/exclusive/batch
+            with Config(dev, mode='exclusive') as cu:
+                cu.load('set system services netconf traceoptions file xyz',
+                        format='set')
+                print cu.diff()
+                cu.commit()
         """
         self.mode = mode
         Util.__init__(self, dev=dev)
@@ -644,7 +667,8 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
-                    if err.message != 'uncommitted changes will be discarded on exit':
+                    if (err.message != 'uncommitted changes will be discarded '
+                                       'on exit'):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -664,7 +688,8 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
-                    if err.message != 'uncommitted changes will be discarded on exit':
+                    if (err.message != 'uncommitted changes will be discarded '
+                                       'on exit'):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:

@@ -108,7 +108,7 @@ class Test_Decorators(unittest.TestCase):
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=True)
             calls = [call(), call(self.dev._norm_transform), call('o.g.')]
-            #print mock_transform.call_args_list
+            # print mock_transform.call_args_list
             mock_transform.assert_has_calls(calls)
 
     # Test default of false and passing true keyword and a func exception
@@ -123,7 +123,7 @@ class Test_Decorators(unittest.TestCase):
             with self.assertRaises(Exception):
                 decorator(self.dev, normalize=True)
             calls = [call(), call(self.dev._norm_transform), call('o.g.')]
-            #print mock_transform.call_args_list
+            # print mock_transform.call_args_list
             mock_transform.assert_has_calls(calls)
 
     # Test default of false and passing false keyword

@@ -65,6 +65,23 @@ class Test_RpcMetaExec(unittest.TestCase):
                          'text')
 
     @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_option_format_json(self, mock_execute_fn):
+        json_commands = """
+            {
+                "configuration" : {
+                    "system" : {
+                        "services" : {
+                            "telnet" : [null]
+                        }
+                    }
+                }
+            }
+        """
+        self.rpc.load_config(json_commands, format='json')
+        self.assertEqual(mock_execute_fn.call_args[0][0].get('format'),
+                         'json')
+
+    @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_vargs(self, mock_execute_fn):
         self.rpc.system_users_information(dict(format='text'))
         self.assertEqual(mock_execute_fn.call_args[0][0].get('format'),
@@ -90,7 +107,7 @@ class Test_RpcMetaExec(unittest.TestCase):
 
     def test_rpcmeta_exec_rpc_format_json_14_2(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.dev._facts['version_info'] = version_info('14.2X46-D15.3')
+        self.dev.facts._cache['version_info'] = version_info('14.2X46-D15.3')
         op = self.rpc.get_system_users_information(dict(format='json'))
         self.assertEqual(op['system-users-information'][0]
                          ['uptime-information'][0]['date-time'][0]['data'],
@@ -98,7 +115,7 @@ class Test_RpcMetaExec(unittest.TestCase):
 
     def test_rpcmeta_exec_rpc_format_json_gt_14_2(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.dev._facts['version_info'] = version_info('15.1X46-D15.3')
+        self.dev.facts._cache['version_info'] = version_info('15.1X46-D15.3')
         op = self.rpc.get_system_users_information(dict(format='json'))
         self.assertEqual(op['system-users-information'][0]
                          ['uptime-information'][0]['date-time'][0]['data'],
@@ -107,7 +124,7 @@ class Test_RpcMetaExec(unittest.TestCase):
     @patch('jnpr.junos.device.warnings')
     def test_rpcmeta_exec_rpc_format_json_lt_14_2(self, mock_warn):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
-        self.dev._facts['version_info'] = version_info('13.1X46-D15.3')
+        self.dev.facts._cache['version_info'] = version_info('13.1X46-D15.3')
         self.rpc.get_system_users_information(dict(format='json'))
         mock_warn.assert_has_calls(call.warn(
             'Native JSON support is only from 14.2 onwards', RuntimeWarning))

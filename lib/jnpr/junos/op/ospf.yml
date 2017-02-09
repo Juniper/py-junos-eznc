@@ -20,3 +20,15 @@ OspfNeighborView:
     bdr_address: bdr-address
     neighbor_up_time: neighbor-up-time
     neighbor_adjacency_time: neighbor-adjacency-time
+
+OspfInterfaceTable:
+  rpc: get-ospf-interface-information
+  item: ospf-interface
+  key: interface-name
+  view: OspfInterfaceView
+  
+OspfInterfaceView:
+  fields:
+    interface_name: interface-name
+    ospf_interface_state: ospf-interface-state
+    neighbor_count: neighbor-count

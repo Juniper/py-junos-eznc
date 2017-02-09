@@ -1,0 +1,9 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos">
+    <task-replication-state>
+        <task-gres-state>Enabled</task-gres-state>
+        <task-re-mode>Master</task-re-mode>
+    </task-replication-state>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

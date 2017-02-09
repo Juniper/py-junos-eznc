@@ -1,0 +1,10 @@
+/docs/*
+/tests/*
+/vagrant/*
+INSTALL*
+COPYRIGHT
+LICENSE
+MANIFEST.md
+RELEASE-NOTES.md
+development.txt
+docreq.txt

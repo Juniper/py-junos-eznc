@@ -1,7 +1,5 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import unittest
+from mock import patch
 from nose.plugins.attrib import attr
 import os
 
@@ -10,8 +8,13 @@ from ncclient.transport import SSHSession
 
 from jnpr.junos import Device
 from jnpr.junos.utils.fs import FS
+from jnpr.junos.exception import RpcError
 
 from mock import patch, MagicMock, call
+from lxml import etree
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 
 @attr('unit')
@@ -25,7 +28,8 @@ class TestFS(unittest.TestCase):
         self.dev.open()
         self.fs = FS(self.dev)
 
-    def test_cat_wrong_path_return_none(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_cat_wrong_path_return_none(self, mock_warnings):
         path = 'test/report'
         self.assertEqual(self.fs.cat(path), None)
 
@@ -36,11 +40,12 @@ class TestFS(unittest.TestCase):
         self.fs._dev.rpc.file_show.assert_called_with(filename='test/cat.txt')
 
     def test_cwd(self):
-        self.fs._dev.rpc.set_cli_working_directory = MagicMock()
-        folder = 'test/report'
-        self.fs.cwd(folder)
+        self.fs._dev.rpc.set_cli_working_directory = MagicMock(
+            side_effect=self._mock_manager)
+        folder = 'change/directory'
+        self.assertEqual('change/directory', self.fs.cwd(folder))
         self.fs._dev.rpc.set_cli_working_directory.\
-            assert_called_with(directory='test/report')
+            assert_called_with(directory='change/directory')
 
     @patch('jnpr.junos.Device.execute')
     def test_pwd(self, mock_execute):
@@ -48,7 +53,8 @@ class TestFS(unittest.TestCase):
         self.fs.pwd()
         self.assertEqual(self.fs.pwd(), '/cf/var/home/rick')
 
-    def test_checksum_return_none(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_checksum_return_none(self, mock_warnings):
         path = 'test/report'
         self.assertEqual(self.fs.checksum(path), None)
 
@@ -266,6 +272,52 @@ class TestFS(unittest.TestCase):
                            'total': '4F'}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_directory_usage(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1),
+                         {'/var/tmp': {'blocks': 456076, 'bytes': 233510912,
+                                       'size': '223M'},
+                          '/var/tmp/gres-tp': {'blocks': 68, 'bytes': 34816,
+                                               'size': '34K'},
+                          '/var/tmp/install': {'blocks': 4, 'bytes': 2048,
+                                               'size': '2.0K'},
+                          '/var/tmp/pics': {'blocks': 4, 'bytes': 2048,
+                                            'size': '2.0K'},
+                          '/var/tmp/rtsdb': {'blocks': 4, 'bytes': 2048,
+                                             'size': '2.0K'},
+                          '/var/tmp/sec-download': {'blocks': 8, 'bytes': 4096,
+                                                    'size': '4.0K'},
+                          '/var/tmp/vi.recover': {'blocks': 4, 'bytes': 2048,
+                                                  'size': '2.0K'}}
+                         )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_directory_usage_error(self, mock_execute):
+        mock_execute.return_value = etree.fromstring("""
+            <directory-usage-information>
+                <directory>
+                    <used-space used-blocks="456076">
+                        223M
+                    </used-space>
+                </directory>
+            </directory-usage-information>""")
+        self.assertRaises(
+            RpcError,
+            self.fs.directory_usage,
+            path="/var/tmp",
+            depth=1)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_directory_usage_no_directory(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_error1
+        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+
+    @patch('jnpr.junos.Device.execute')
+    def test_directory_usage_no_dir_name(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_error2
+        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+
+    @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.storage_cleanup(),
@@ -291,7 +343,8 @@ class TestFS(unittest.TestCase):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())
         elif (fname == 'show-configuration.xml' or
-              fname == 'show-system-alarms.xml'):
+              fname == 'show-system-alarms.xml' or
+              fname == 'set-cli-working-directory.xml'):
             rpc_reply = NCElement(foo, self.dev._conn._device_handler
                                   .transform_reply())._NCElement__doc
         else:
@@ -313,6 +366,9 @@ class TestFS(unittest.TestCase):
                     return self._read_file('checksum.xml')
                 elif kwargs['path'] == 'test/stat/decode_symbolic_link':
                     return self._read_file('file-list_symlink.xml')
+            if 'directory' in kwargs:
+                if kwargs['directory'] == 'change/directory':
+                    return self._read_file('set-cli-working-directory.xml')
             if 'filename' in kwargs:
                 if kwargs['filename'] == 'test/cat.txt':
                     return self._read_file('file-show.xml')
@@ -327,7 +383,19 @@ class TestFS(unittest.TestCase):
                     return self._read_file('show-cli-directory.xml')
             elif args[0].tag == 'get-system-storage':
                 return self._read_file('get-system-storage.xml')
+            elif args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information.xml')
             elif args[0].tag == 'request-system-storage-cleanup':
                 return self._read_file('request-system-storage-cleanup.xml')
             elif args[0].tag == 'file-archive':
                 return self._read_file('file-archive.xml')
+
+    def _mock_manager_error1(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information_error1.xml')
+
+    def _mock_manager_error2(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-directory-usage-information':
+                return self._read_file('get-directory-usage-information_error2.xml')

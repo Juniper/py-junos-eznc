@@ -19,10 +19,11 @@ from mock import MagicMock, patch
 from lxml import etree
 import os
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
+
 
 @attr('unit')
 class TestConfig(unittest.TestCase):
@@ -220,6 +221,27 @@ class TestConfig(unittest.TestCase):
 
         self.assertEqual(self.conf.load(textdata), 'rpc_contents')
 
+    def test_config_load_with_format_json(self):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=etree.fromstring("""<load-configuration-results>
+                            <ok/>
+                        </load-configuration-results>"""))
+        op = self.conf.load('test.json', format='json')
+        self.assertEqual(op.tag, 'load-configuration-results')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
+    @patch(builtin_string + '.open')
+    def test_config_load_with_format_json_from_file_ext(self, mock_open):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=etree.fromstring("""<load-configuration-results>
+                            <ok/>
+                        </load-configuration-results>"""))
+        op = self.conf.load(path='test.json')
+        self.assertEqual(op.tag, 'load-configuration-results')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
     @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
@@ -389,6 +411,21 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'xml')
 
+    def test_config_load_lset_from_rexp_json(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """{
+            "configuration" : {
+                "system" : {
+                    "services" : {
+                        "telnet" : [null]
+                    }
+                }
+            }
+        }"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'json')
+
     def test_config_load_lset_from_rexp_set(self):
         self.conf.rpc.load_config = MagicMock()
         conf = """set system domain-name englab.nitin.net"""
@@ -528,7 +565,9 @@ class TestConfig(unittest.TestCase):
             self.assertTrue(isinstance(ex, ValueError))
 
     @patch('jnpr.junos.Device.execute')
-    def test_config_mode_batch_open_configuration_ex(self, mock_exec):
+    @patch('jnpr.junos.utils.config.warnings')
+    def test_config_mode_batch_open_configuration_ex(self,
+                                                     mock_warnings, mock_exec):
         rpc_xml = '''
             <rpc-error>
             <error-severity>warning</error-severity>
@@ -544,7 +583,10 @@ class TestConfig(unittest.TestCase):
         self.dev.rpc.open_configuration.assert_called_with(batch=True)
 
     @patch('jnpr.junos.Device.execute')
-    def test_config_mode_private_open_configuration_ex(self, mock_exec):
+    @patch('jnpr.junos.utils.config.warnings')
+    def test_config_mode_private_open_configuration_ex(self,
+                                                       mock_warnings,
+                                                       mock_exec):
         rpc_xml = '''
             <rpc-error>
             <error-severity>warning</error-severity>
@@ -559,9 +601,52 @@ class TestConfig(unittest.TestCase):
             conf.load('conf', format='set')
         self.dev.rpc.open_configuration.assert_called_with(private=True)
 
-    def _read_file(self, fname):
-        from ncclient.xml_ import NCElement
+    def test__enter__private_exception_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.open_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, Config.__enter__,
+                          Config(self.dev, mode='private'))
 
+    def test__enter__private_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='private'))
+
+    def test__enter__dyanamic_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='dynamic'))
+
+    def test__enter__batch_exception_RpcTimeoutError(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.open_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(RpcTimeoutError, Config.__enter__,
+                          Config(self.dev, mode='batch'))
+
+    def test__enter__batch_exception_RpcError(self):
+        rpc_xml ="""<rpc-error>
+            <error-severity>error</error-severity>
+            <error-message>syntax error</error-message>
+            </rpc-error>"""
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.open_configuration = \
+            MagicMock(side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, Config.__enter__,
+                          Config(self.dev, mode='batch'))
+
+    def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()

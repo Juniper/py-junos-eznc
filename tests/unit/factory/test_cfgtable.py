@@ -84,6 +84,7 @@ globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data)))
 
 @attr('unit')
 class TestFactoryCfgTable(unittest.TestCase):
+
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
@@ -183,7 +184,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.bgp.set()
         xml = self.bgp.get_table_xml()
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
+            xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
         )
 
     @patch('jnpr.junos.Device.execute')
@@ -196,10 +197,10 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.bgp.load()
         xml = self.bgp.get_table_xml()
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
+            xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
         )
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/name')[1].text, 'external_2'
+            xml.xpath('protocols/bgp/group/name')[1].text, 'external_2'
         )
 
     @patch('jnpr.junos.Device.execute')
@@ -212,15 +213,15 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.bgp.set()
         xml = self.bgp.get_table_xml()
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
+            xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
         )
         self.assertEqual(
-                xml.xpath(
-                        'protocols/bgp/group/neighbor/name'
-                )[0].text, '30.30.10.10'
+            xml.xpath(
+                'protocols/bgp/group/neighbor/name'
+            )[0].text, '30.30.10.10'
         )
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/type')[0].text, 'external'
+            xml.xpath('protocols/bgp/group/type')[0].text, 'external'
         )
 
     @patch('jnpr.junos.Device.execute')
@@ -231,7 +232,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.bgp.set()
         xml = self.bgp.get_table_xml()
         self.assertEqual(
-                xml.xpath('protocols/bgp/group/name')[0].text, 'external_3'
+            xml.xpath('protocols/bgp/group/name')[0].text, 'external_3'
         )
 
     @patch('jnpr.junos.Device.execute')

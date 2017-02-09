@@ -1,0 +1,285 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1R2/junos">
+    <multi-routing-engine-results>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>re0</re-name>
+            
+            <software-information>
+                <host-name>ulam</host-name>
+                <product-model>t1600</product-model>
+                <product-name>t1600</product-name>
+                <junos-version>15.1R2.9</junos-version>
+                <package-information>
+                    <name>junos</name>
+                    <comment>JUNOS Base OS boot [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jbase</name>
+                    <comment>JUNOS Base OS Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jplatform</name>
+                    <comment>JUNOS platform Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jweb</name>
+                    <comment>JUNOS Web Management [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime</name>
+                    <comment>JUNOS Runtime Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jmacsec</name>
+                    <comment>JUNOS Macsec Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base-i386</name>
+                    <comment>JUNOS py-base-i386 [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jkernel</name>
+                    <comment>JUNOS Kernel Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto</name>
+                    <comment>JUNOS Crypto Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (T-Series) [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jroute</name>
+                    <comment>JUNOS Routing Software Suite [15.1R2.9]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>re1</re-name>
+            
+            <software-information>
+                <host-name>ulam1</host-name>
+                <product-model>t1600</product-model>
+                <product-name>t1600</product-name>
+                <junos-version>15.1R2.9</junos-version>
+                <package-information>
+                    <name>junos</name>
+                    <comment>JUNOS Base OS boot [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jbase</name>
+                    <comment>JUNOS Base OS Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jplatform</name>
+                    <comment>JUNOS platform Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jweb</name>
+                    <comment>JUNOS Web Management [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime</name>
+                    <comment>JUNOS Runtime Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jmacsec</name>
+                    <comment>JUNOS Macsec Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base-i386</name>
+                    <comment>JUNOS py-base-i386 [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jkernel</name>
+                    <comment>JUNOS Kernel Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto</name>
+                    <comment>JUNOS Crypto Software Suite [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (T-Series) [15.1R2.9]</comment>
+                </package-information>
+                <package-information>
+                    <name>jroute</name>
+                    <comment>JUNOS Routing Software Suite [15.1R2.9]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+    </multi-routing-engine-results>
+</rpc-reply>

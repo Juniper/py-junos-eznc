@@ -18,8 +18,9 @@ from jnpr.junos.facts.swver import version_info
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.console import Console
 
-if sys.version<'3':
+if sys.version < '3':
     builtin_string = '__builtin__'
 else:
     builtin_string = 'builtins'
@@ -69,13 +70,18 @@ class TestDevice(unittest.TestCase):
     def setUp(self, mock_connect):
         mock_connect.side_effect = self._mock_manager
 
-        self.dev = Device(host='1.1.1.1', user='rick', password='password123',
+        self.dev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.dev.open()
 
     @patch('ncclient.operations.session.CloseSession.request')
     def tearDown(self, mock_session):
         self.dev.close()
+
+    def test_new_console_return(self):
+        dev = Device(host='1.1.1.1', user='test', password='password123', port=23,
+                     gather_facts=False)
+        self.assertTrue(isinstance(dev, Console))
 
     @patch('jnpr.junos.device.netconf_ssh')
     def test_device_ConnectAuthError(self, mock_manager):
@@ -132,7 +138,7 @@ class TestDevice(unittest.TestCase):
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
         with patch(builtin_string + '.open', mock):
-            if sys.version >'3':
+            if sys.version > '3':
                 builtin_file = 'io.TextIOWrapper'
             else:
                 builtin_file = builtin_string + '.file'
@@ -142,7 +148,7 @@ class TestDevice(unittest.TestCase):
                 self.assertEqual(self.dev.logfile, handle)
 
     def test_device_host_mand_param(self):
-        self.assertRaises(ValueError, Device, user='rick',
+        self.assertRaises(ValueError, Device, user='test',
                           password='password123',
                           gather_facts=False)
 
@@ -159,7 +165,7 @@ class TestDevice(unittest.TestCase):
             self.assertEqual(type(ex), ValueError)
 
     def test_device_repr(self):
-        localdev = Device(host='1.1.1.1', user='rick', password='password123',
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
 
@@ -209,7 +215,7 @@ class TestDevice(unittest.TestCase):
             mock_execute.side_effect = self._mock_manager
             self.dev2 = Device(
                 host='2.2.2.2',
-                user='rick',
+                user='test',
                 password='password123')
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
@@ -224,22 +230,53 @@ class TestDevice(unittest.TestCase):
 
             """
             self.dev.facts_refresh()
+            self.dev.facts._cache['current_re'] = ['re0']
             assert self.dev.facts['version'] == facts['version']
 
     @patch('jnpr.junos.Device.execute')
-    @patch('jnpr.junos.device.warnings')
+    @patch('jnpr.junos.factcache.warnings')
     def test_device_facts_error(self, mock_warnings, mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.dev.facts_refresh()
+            self.dev.facts_refresh(warnings_on_failure=True)
             self.assertTrue(mock_warnings.warn.called)
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_facts_error_exception_on_error(self, mock_warnings, mock_execute):
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_old_style_facts_error_exception_on_error(self,
+                                                            mock_warnings,
+                                                            mock_execute):
+        self.dev._fact_style = 'old'
+        with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
+            mock_execute.side_effect = self._mock_manager
+            mock_cat.side_effect = IOError('File cant be handled')
+            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+
+
+    def test_device_facts_refresh_unknown_fact_style(self):
+        self.dev._fact_style = 'bad'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh()
+
+    def test_device_facts_refresh_old_fact_style_with_keys(self):
+        self.dev._fact_style = 'old'
+        with self.assertRaises(RuntimeError):
+            self.dev.facts_refresh(keys='domain')
 
     def test_device_hostname(self):
         self.assertEqual(self.dev.hostname, '1.1.1.1')
 
     def test_device_user(self):
-        self.assertEqual(self.dev.user, 'rick')
+        self.assertEqual(self.dev.user, 'test')
 
     def test_device_get_password(self):
         self.assertEqual(self.dev.password, None)
@@ -263,7 +300,7 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_device_open_normalize(self, mock_connect, mock_execute):
         mock_connect.side_effect = self._mock_manager
-        self.dev2 = Device(host='2.2.2.2', user='rick', password='password123')
+        self.dev2 = Device(host='2.2.2.2', user='test', password='password123')
         self.dev2.open(gather_facts=False, normalize=True)
         self.assertEqual(self.dev2.transform, self.dev2._norm_transform)
 
@@ -273,6 +310,14 @@ class TestDevice(unittest.TestCase):
         except RuntimeError as ex:
             self.assertEqual(RuntimeError, type(ex))
 
+    def test_device_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            ofacts = self.dev.ofacts
+
+    def test_device_set_ofacts_exception(self):
+        with self.assertRaises(RuntimeError):
+            self.dev.ofacts = False
+
     @patch('jnpr.junos.Device.execute')
     def test_device_cli(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -281,16 +326,41 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.device.json.loads')
     def test_device_rpc_json_ex(self, mock_json_loads):
-        self.dev._facts = facts
+        self.dev.facts = facts
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
         mock_json_loads.side_effect = [ex,
-                    self._mock_manager(
-                    etree.fromstring('<get-route-information format="json"/>')
-                    )]
+                                       self._mock_manager(
+                                           etree.fromstring(
+                                               '<get-route-information format="json"/>')
+                                       )]
         self.dev.rpc.get_route_information({'format': 'json'})
         self.assertEqual(mock_json_loads.call_count, 2)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_to_rpc_string(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli_to_rpc_string('show system uptime')
+        self.assertEqual("rpc.get_system_uptime_information()",data)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_to_rpc_string_strip_pipes(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli_to_rpc_string('show system uptime | match foo | count')
+        self.assertEqual("rpc.get_system_uptime_information()",data)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_to_rpc_string_complex(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli_to_rpc_string('show interfaces ge-0/0/0.0 routing-instance all media')
+        self.assertEqual("rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')",data)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_device_cli_to_rpc_string_invalid(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli_to_rpc_string('foo')
+        self.assertEqual(None,data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_format_json(self, mock_execute):
@@ -314,23 +384,37 @@ class TestDevice(unittest.TestCase):
         self.assertTrue('Alarm' in self.dev.cli('show system alarms',
                                                 warning=False))
 
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.device.warnings')
+    def test_device_cli_output_warning(self, mock_warnings, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        data = self.dev.cli('show interfaces ge-0/0/0.0 routing-instance all media',
+                            format = 'xml')
+        ip = data.findtext('logical-interface[name="ge-0/0/0.0"]/'
+                           'address-family[address-family-name="inet"]/'
+                           'interface-address/ifa-local')
+        self.assertTrue('192.168.100.1' in ip)
+        self.assertTrue(mock_warnings.warn.called)
+        rpc_string = "rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')"
+        self.assertIn(rpc_string, mock_warnings.warn.call_args[0][0])
+
     def test_device_cli_blank_output(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertEqual('', self.dev.cli('show configuration interfaces',
                                           warning=False))
 
     #@patch('jnpr.junos.Device.execute')
-    def test_device_cli_rpc_reply_with_message(self):#, mock_execute):
+    def test_device_cli_rpc_reply_with_message(self):  # , mock_execute):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertEqual(
             '\nprotocol: operation-failed\nerror: device asdf not found\n',
-                         self.dev.cli('show interfaces terse asdf',
-                                          warning=False))
+            self.dev.cli('show interfaces terse asdf',
+                         warning=False))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertEqual(self.dev.cli('show system uptime | display xml rpc',
+        self.assertEqual(self.dev.cli('show system uptime| display xml rpc',
                                       warning=False)
                          .tag, 'get-system-uptime-information')
 
@@ -340,10 +424,16 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(val, 'invalid command: show version')
 
     @patch('jnpr.junos.Device.execute')
+    def test_device_cli_rpc_exception(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        val = self.dev.cli('foo')
+        self.assertEqual(val, 'invalid command: foo: RpcError')
+
+    @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_rpc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(
-            self.dev.display_xml_rpc('show system uptime ').tag,
+            self.dev.display_xml_rpc('show system uptime').tag,
             'get-system-uptime-information')
 
     @patch('jnpr.junos.Device.execute')
@@ -352,8 +442,8 @@ class TestDevice(unittest.TestCase):
         self.assertIn(
             '<get-system-uptime-information>',
             self.dev.display_xml_rpc(
-                'show system uptime ',
-                format='text').decode('utf-8'))
+                'show system uptime',
+                format='text'))
 
     @patch('jnpr.junos.Device.execute')
     def test_device_display_xml_exception(self, mock_execute):
@@ -378,7 +468,8 @@ class TestDevice(unittest.TestCase):
 #         self.assertRaises(RpcError, self.dev.execute,
 #                           '<load-configuration-error/>')
 
-    def test_device_execute_unknown_exception(self):
+    @patch('jnpr.junos.device.warnings')
+    def test_device_execute_unknown_exception(self, mock_warnings):
         class MyException(Exception):
             pass
         self.dev._conn.rpc = MagicMock(side_effect=MyException)
@@ -537,23 +628,23 @@ class TestDevice(unittest.TestCase):
                     fname == 'show-configuration-interfaces.xml' or
                   fname == 'show-interfaces-terse-asdf.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             elif (fname == 'show-configuration.xml' or
                   fname == 'show-system-alarms.xml'):
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc
+                                      .transform_reply())._NCElement__doc
             elif fname == 'show-interface-terse.json':
                 rpc_reply = json.loads(foo)
             elif fname == 'get-route-information.json':
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())
+                                      .transform_reply())
             else:
                 rpc_reply = NCElement(foo, self.dev._conn._device_handler
-                                  .transform_reply())._NCElement__doc[0]
+                                      .transform_reply())._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
-        if kwargs:
+        if kwargs and 'normalize' not in kwargs:
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
@@ -569,17 +660,26 @@ class TestDevice(unittest.TestCase):
                     return self._read_file('show-configuration.xml')
                 elif args[0].text == 'show system alarms':
                     return self._read_file('show-system-alarms.xml')
-                elif args[0].text == 'show system uptime | display xml rpc':
+                elif args[0].text == 'show system uptime| display xml rpc':
                     return self._read_file('show-system-uptime-rpc.xml')
                 elif args[0].text == 'show configuration interfaces':
                     return self._read_file('show-configuration-interfaces.xml')
                 elif args[0].text == 'show interfaces terse asdf':
                     return self._read_file('show-interfaces-terse-asdf.xml')
+                elif args[0].text == 'show interfaces ge-0/0/0.0 ' \
+                                     'routing-instance all media':
+                    return self._read_file(
+                        'show-interfaces-routing-instance-media.xml')
+                elif args[0].text == 'show interfaces ge-0/0/0.0 ' \
+                                     'routing-instance all media| display ' \
+                                     'xml rpc':
+                    return self._read_file(
+                        'show-interfaces-routing-instance-media-rpc.xml')
                 else:
                     raise RpcError
 
             else:
-                if args[0].attrib.get('format')=='json':
+                if args[0].attrib.get('format') == 'json':
                     return self._read_file(args[0].tag + '.json')
                 return self._read_file(args[0].tag + '.xml')
 

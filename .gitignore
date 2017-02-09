@@ -52,3 +52,12 @@ vagrant/chef
 
 # Puppet
 vagrant/puppet/*.sh
+
+# Window File Explorer
+desktop.ini
+
+# Mac OS X Finder
+.DS_Store
+
+# PyCharm
+.idea

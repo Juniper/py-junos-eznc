@@ -25,9 +25,18 @@ class _RpcMetaExec(object):
         """
         retrieve configuration from the Junos device
 
-        :filter_xml: is options, defines what to retrieve.  if omitted then the entire configuration is returned
+        :filter_xml: fully XML formatted tag which defines what to retrieve,
+                     when omitted the entire configuration is returned;
+                     the following returns the device host-name configured with "set system host-name":
 
-        :options: is a dict, creates attributes for the RPC
+        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
+
+        :options: is a dictionary of XML attributes to set within the <get-configuration> RPC;
+                  the following returns the device host-name either configured with "set system host-name"
+                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems:
+
+        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'), 
+                 options={'database':'committed','inherit':'inherit'})
 
         """
         rpc = E('get-configuration', options)
@@ -58,6 +67,8 @@ class _RpcMetaExec(object):
 
         format='text', then :contents: is a string containing Junos configuration in curly-brace/text format
 
+        format='json', then :contents: is a string containing Junos configuration in json format
+
         <otherwise> :contents: is XML structure
         """
         rpc = E('load-configuration', options)
@@ -66,6 +77,8 @@ class _RpcMetaExec(object):
             rpc.append(E('configuration-set', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))
+        elif ('format' in options) and (options['format'] == 'json'):
+            rpc.append(E('configuration-json', contents))
         else:
             # otherwise, it's just XML Element
             if contents.tag != 'configuration':
@@ -79,11 +92,11 @@ class _RpcMetaExec(object):
     # cli
     # -----------------------------------------------------------------------
 
-    def cli(self, command, format='text'):
+    def cli(self, command, format='text', normalize=False):
         rpc = E('command', command)
         if format.lower() in ['text', 'json']:
             rpc.attrib['format'] = format
-        return self._junos.execute(rpc)
+        return self._junos.execute(rpc, normalize=normalize)
 
     # -----------------------------------------------------------------------
     # method missing

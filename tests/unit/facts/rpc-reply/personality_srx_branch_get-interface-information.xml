@@ -1,0 +1,118 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <interface-information xmlns="http://xml.juniper.net/junos/12.1X46/junos-interface" junos:style="terse">
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+            <logical-interface>
+                <name>sp-0/0/0.16383</name>
+                <admin-status>up</admin-status>
+                <oper-status>up</oper-status>
+                <filter-information>
+                </filter-information>
+                <address-family>
+                    <address-family-name>inet</address-family-name>
+                    <interface-address>
+                        <ifa-local>10.0.0.1</ifa-local>
+                        <ifa-destination junos:emit="emit">10.0.0.16</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>10.0.0.6</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>128.0.0.1</ifa-local>
+                        <ifa-destination junos:emit="emit">128.0.1.16</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>128.0.0.6</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                </address-family>
+            </logical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+            <logical-interface>
+                <name>lo0.16385</name>
+                <admin-status>up</admin-status>
+                <oper-status>up</oper-status>
+                <filter-information>
+                </filter-information>
+                <address-family>
+                    <address-family-name>inet</address-family-name>
+                    <interface-address>
+                        <ifa-local>10.0.0.1</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>10.0.0.16</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>128.0.0.1</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>128.0.0.4</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                    <interface-address>
+                        <ifa-local>128.0.1.16</ifa-local>
+                        <ifa-destination junos:emit="emit">0/0</ifa-destination>
+                    </interface-address>
+                </address-family>
+            </logical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+        <physical-interface>
+        </physical-interface>
+    </interface-information>
+</rpc-reply>

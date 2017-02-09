@@ -1,0 +1,8 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1X53/junos">
+    <l2ng-l2ald-rtb-macdb xmlns="http://xml.juniper.net/junos/14.1X53/junos-l2al">
+        <l2ng-l2ald-ethernet-switching-table-summary>
+            <l2ng-l2-total-mac-count>0</l2ng-l2-total-mac-count>
+            <l2ng-l2-total-smac-count>0</l2ng-l2-total-smac-count>
+        </l2ng-l2ald-ethernet-switching-table-summary>
+    </l2ng-l2ald-rtb-macdb>
+</rpc-reply>

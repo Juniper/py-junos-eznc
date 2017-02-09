@@ -1,0 +1,341 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1X70/junos">
+    <multi-routing-engine-results>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>re0</re-name>
+            
+            <software-information>
+                <host-name>musa</host-name>
+                <product-model>ptx5000</product-model>
+                <product-name>ptx5000</product-name>
+                <junos-version>16.1X70-D10.5</junos-version>
+                <package-information>
+                    <name>junos</name>
+                    <comment>JUNOS Base OS boot [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jbase</name>
+                    <comment>JUNOS Base OS Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jplatform</name>
+                    <comment>JUNOS platform Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jweb</name>
+                    <comment>JUNOS Web Management [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime</name>
+                    <comment>JUNOS Runtime Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-pcef</name>
+                    <comment>JUNOS Services PCEF package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jdpi</name>
+                    <comment>JUNOS Services Deep Packet Inspection package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-lrf</name>
+                    <comment>JUNOS Services Logging Report Framework package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jmacsec</name>
+                    <comment>JUNOS Macsec Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto-dp-support</name>
+                    <comment>JUNOS DP Crypto Software Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base-i386</name>
+                    <comment>JUNOS py-base-i386 [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-extensions-i386</name>
+                    <comment>JUNOS py-extensions-i386 [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jsd</name>
+                    <comment>JUNOS jsd [16.1X70-D10.5-jet-1]</comment>
+                </package-information>
+                <package-information>
+                    <name>jkernel</name>
+                    <comment>JUNOS 64-bit Kernel Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto64</name>
+                    <comment>JUNOS Crypto Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime64</name>
+                    <comment>JUNOS 64-bit Runtime Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (T-Series) [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jroute</name>
+                    <comment>JUNOS Routing Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>re1</re-name>
+            
+            <software-information>
+                <host-name>musa1</host-name>
+                <product-model>ptx5000</product-model>
+                <product-name>ptx5000</product-name>
+                <junos-version>16.1X70-D10.5</junos-version>
+                <package-information>
+                    <name>junos</name>
+                    <comment>JUNOS Base OS boot [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jbase</name>
+                    <comment>JUNOS Base OS Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jplatform</name>
+                    <comment>JUNOS platform Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jweb</name>
+                    <comment>JUNOS Web Management [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime</name>
+                    <comment>JUNOS Runtime Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs</name>
+                    <comment>JUNOS Online Documentation [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-aacl</name>
+                    <comment>JUNOS Services AACL Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-alg</name>
+                    <comment>JUNOS Services Application Level Gateways [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-appid</name>
+                    <comment>JUNOS AppId Services [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-bgf</name>
+                    <comment>JUNOS Border Gateway Function package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-cpcd</name>
+                    <comment>JUNOS Services Captive Portal and Content Delivery Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-hcm</name>
+                    <comment>JUNOS Services HTTP Content Management package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-idp</name>
+                    <comment>JUNOS IDP Services [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jflow</name>
+                    <comment>JUNOS Services Jflow Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-llpdf</name>
+                    <comment>JUNOS Services LL-PDF Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mobile</name>
+                    <comment>JUNOS Services MobileNext Software package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-mss</name>
+                    <comment>JUNOS Services Mobile Subscriber Service Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-nat</name>
+                    <comment>JUNOS Services NAT [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-pcef</name>
+                    <comment>JUNOS Services PCEF package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ptsp</name>
+                    <comment>JUNOS Services PTSP Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-rpm</name>
+                    <comment>JUNOS Services RPM [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-sfw</name>
+                    <comment>JUNOS Services Stateful Firewall [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-voice</name>
+                    <comment>JUNOS Voice Services Container package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-jdpi</name>
+                    <comment>JUNOS Services Deep Packet Inspection package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-lrf</name>
+                    <comment>JUNOS Services Logging Report Framework package [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jmacsec</name>
+                    <comment>JUNOS Macsec Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-crypto-base</name>
+                    <comment>JUNOS Services Crypto [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ssl</name>
+                    <comment>JUNOS Services SSL [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jservices-ipsec</name>
+                    <comment>JUNOS Services IPSec [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto-dp-support</name>
+                    <comment>JUNOS DP Crypto Software Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-base-i386</name>
+                    <comment>JUNOS py-base-i386 [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>py-extensions-i386</name>
+                    <comment>JUNOS py-extensions-i386 [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jsd</name>
+                    <comment>JUNOS jsd [16.1X70-D10.5-jet-1]</comment>
+                </package-information>
+                <package-information>
+                    <name>jkernel</name>
+                    <comment>JUNOS 64-bit Kernel Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jcrypto64</name>
+                    <comment>JUNOS Crypto Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jruntime64</name>
+                    <comment>JUNOS 64-bit Runtime Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe-common</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (M/T/EX Common) [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jpfe</name>
+                    <comment>JUNOS Packet Forwarding Engine Support (T-Series) [16.1X70-D10.5]</comment>
+                </package-information>
+                <package-information>
+                    <name>jroute</name>
+                    <comment>JUNOS Routing Software Suite [16.1X70-D10.5]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+    </multi-routing-engine-results>
+</rpc-reply>

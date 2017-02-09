@@ -63,6 +63,7 @@ statement not found
 </rpc-reply>
 '''
 
+
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
 
@@ -70,7 +71,7 @@ class Test_RpcError(unittest.TestCase):
         rsp = etree.XML(rpc_xml)
         obj = RpcError(rsp=rsp)
         err = 'RpcError(severity: error, bad_element: bgp, message: syntax error)'
-        self.assertEquals(str, type(obj.__repr__()))
+        self.assertEqual(str, type(obj.__repr__()))
         self.assertEqual(obj.__repr__(), err)
 
     def test_rpcerror_jxml_check(self):
@@ -91,7 +92,9 @@ class Test_RpcError(unittest.TestCase):
         self.dev = Device(host='1.1.1.1', user='rick')
         obj = ConnectError(self.dev, msg='underlying exception info')
         self.assertEqual(obj.msg, 'underlying exception info')
-        self.assertEqual(repr(obj), 'ConnectError(host: 1.1.1.1, msg: underlying exception info)')
+        self.assertEqual(
+            repr(obj),
+            'ConnectError(host: 1.1.1.1, msg: underlying exception info)')
 
     def test_CommitError_repr(self):
         rsp = etree.XML(commit_xml)

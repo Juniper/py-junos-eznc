@@ -1,3 +1,40 @@
+# Release 2.0.2-dev 2016-Oct-26
+
+  * Enhance the warning message produced by the cli() method to recommend the corresponding rpc() call. #60
+  * Enhance the sw.install() method with basic ISSU and NSSU support using the issu and nssu boolean arguments. #606
+  ** NSSU support has not yet been tested and should currently be considered experimental.
+  * Fix: Updated the interface-name glob pattern to correctly match et-x/y/z interfaces in several tables and views. #609
+  * Fix: To take care of special chars on screen during console connection. #610
+  * Enhance reboot() method to take a bool param all_re to decide if only connected dev to be rebooted or all. #613
+  * Fix: Address issue with fact gathering stopping when it encounters a problem. #615
+
+
+# Release 2.0.1
+
+  * StartShell to take timeout (30 second by default) as paramter
+  * Proper exception handling in case of Console connection #595
+  * Fix: Config.lock() return exception when normalize is on
+  * Added microbadge badge for the Docker image #593
+  * Fix: print dev for Console conn was printing object not Device(....) #591
+  * Fix: To take care of special chars with StartShell->run function call #589
+  * Fix: ssh private key file to be considered for scp util #586
+  * Added Dockerfile to enable automated image builds on project commits #585
+
+
+# Release 2.0.0
+
+  * Console connection using PyEZ
+  * Python >=3.4 support
+  * Configuration Tables to Define and Configure Structured Resources
+  * JSON Config load
+  * FTP Utility
+  * Multi RPC error
+  * various bug fixes
+
+Refer below link for more details:
+https://github.com/Juniper/py-junos-eznc/releases/tag/2.0.0
+
+
 # Release 1.0
 
 # Junos PyEZ Overview
