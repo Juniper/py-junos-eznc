@@ -17,6 +17,7 @@ import re
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+from ncclient.transport.session import SessionListener
 import ncclient.operations.errors as NcOpErrors
 from ncclient.operations import RPCError
 import paramiko
@@ -507,6 +508,8 @@ class _Connection(object):
             return rsp
         except EzErrors.RpcError as ex:
             return "invalid command: %s: %s" % (command, ex)
+        except EzErrors.ConnectClosedError as ex:
+            raise ex
         except Exception as ex:
             return "invalid command: " + command
 
@@ -730,6 +733,32 @@ class _Connection(object):
     def __repr__(self):
         return "Device(%s)" % self.hostname
 
+class DeviceSessionListener(SessionListener):
+
+    """Base class for :class:`Session` listeners, which are notified when a new
+    NETCONF message is received or an error occurs.
+
+    .. note::
+        Avoid time-intensive tasks in a callback's context.
+    """
+    def __init__(self, device):
+        self._device = device
+    def callback(self, root, raw):
+        """Called when a new XML document is received. The *root* argument allows the callback to determine whether it wants to further process the document.
+
+        Here, *root* is a tuple of *(tag, attributes)* where *tag* is the qualified name of the root element and *attributes* is a dictionary of its attributes (also qualified names).
+
+        *raw* will contain the XML document as a string.
+        """
+        pass
+
+    def errback(self, ex):
+        """Called when an error occurs.
+
+        :type ex: :exc:`Exception`
+        """
+        self._device.connected = False
+        raise NcErrors.TransportError
 
 class Device(_Connection):
 
@@ -924,6 +953,7 @@ class Device(_Connection):
         # ------------------------------
 
         self._conn = None
+        self.connected = False
         self._j2ldr = _Jinja2ldr
         self._manages = []
         self._ofacts = {}
@@ -940,17 +970,12 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
     @property
     def connected(self):
-        if self._conn is None:
-            return False
-        else:
-            return self._conn.connected
+        return self._connected
 
     @connected.setter
     def connected(self, value):
-        if self._conn != None and value in [True, False]:
-            self._conn._connected = value
-
-
+        if value in [True, False]:
+            self._connected = value
 
     def open(self, *vargs, **kvargs):
         """
@@ -1018,7 +1043,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
-
+            self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
