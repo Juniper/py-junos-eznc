@@ -735,11 +735,8 @@ class _Connection(object):
 
 class DeviceSessionListener(SessionListener):
 
-    """Base class for :class:`Session` listeners, which are notified when a new
-    NETCONF message is received or an error occurs.
-
-    .. note::
-        Avoid time-intensive tasks in a callback's context.
+    """
+    Listens to Session class of Netconf Transport and detects errors in the transport.
     """
     def __init__(self, device):
         self._device = device
@@ -754,6 +751,7 @@ class DeviceSessionListener(SessionListener):
 
     def errback(self, ex):
         """Called when an error occurs.
+        Set the device's connected status to False, and then raise a TransportError.
 
         :type ex: :exc:`Exception`
         """
@@ -953,12 +951,12 @@ class Device(_Connection):
         # ------------------------------
 
         self._conn = None
-        self.connected = False
         self._j2ldr = _Jinja2ldr
         self._manages = []
         self._ofacts = {}
 
         # public attributes
+        self.connected = False
         self.rpc = _RpcMetaExec(self)
         if self._fact_style == 'old':
             self.facts = self.ofacts
