@@ -1,0 +1,16 @@
+---
+
+# Taken from https://github.com/rickmur/PyEZtests/blob/master/vlanEls.yml
+
+ElsVlanTable:
+  rpc: get-vlan-information
+  item: l2ng-l2ald-vlan-instance-group
+  view: ElsVlanView
+  key: l2ng-l2rtb-vlan-tag
+
+ElsVlanView:
+  fields:
+    instance: l2ng-l2rtb-name
+    vlan_name: l2ng-l2rtb-vlan-name
+    tag: l2ng-l2rtb-vlan-tag
+    members: .//l2ng-l2rtb-vlan-member-interface

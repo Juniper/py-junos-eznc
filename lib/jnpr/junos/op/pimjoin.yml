@@ -1,0 +1,39 @@
+---
+
+# Taken from https://github.com/gavmckee80/PyEz-Examples/blob/master/pimjoin.yml
+
+PimJoinTable:
+ rpc: get-pim-join-information
+ args:
+  extensive: True
+ args_key: group
+ item: join-family/join-group
+ key: multicast-source-address
+ view: PimJoinView
+
+PimJoinView:
+ fields:
+  group: multicast-group-address
+  style: '@style'
+  sparse: {pim-group-flags/sparse: flag}
+  spt: {pim-group-flags/spt: flag}
+  rpt: {pim-group-flags/rptree: flag}
+  wildcard: {pim-group-flags/rptree: flag}
+  src_address: multicast-source-address  
+  uptime: {uptime/@seconds: int}
+  rpf_interface: upstream-interface-name
+  rpf_neighbor: upstream-neighbor
+  rp_join: {upstream-state-flags/join-to-rp: flag}
+  oil_count: {downstream-interface-count: int}
+  oil: _DownStreamInterfaceTable
+
+_DownStreamInterfaceTable:
+  item: downstream-interfaces/downstream-interface
+  key: pim-interface-name
+  view: _DownStreamInterfaceView
+
+_DownStreamInterfaceView:
+  fields: 
+    interface: pim-interface-name
+
+

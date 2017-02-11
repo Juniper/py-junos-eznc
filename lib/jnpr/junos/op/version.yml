@@ -1,0 +1,12 @@
+---
+
+# Taken from https://github.com/spkrishnan/macsec/blob/master/junver.yml
+
+VersionTable:
+  rpc: get-software-information
+  item: multi-routing-engine-item/software-information/package-information
+  view: VersionView
+
+VersionView:
+  fields:
+   name: name

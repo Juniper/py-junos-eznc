@@ -1,0 +1,17 @@
+---
+
+# Taken from https://github.com/eatmoreonions/python-junos/blob/master/srx/partitioninfo.yml
+
+PartitionTable:
+  rpc:  get-snapshot-information
+  args:
+    media: internal
+  item:  .//multi-routing-engine-item/snapshot-information
+  key: snapshot-medium
+  view:  PartitionView
+
+PartitionView:
+  fields:
+    medium: snapshot-medium
+    package: software-version/package/package-name
+    version: software-version/package/package-version

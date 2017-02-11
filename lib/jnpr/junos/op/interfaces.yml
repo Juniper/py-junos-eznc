@@ -1,0 +1,30 @@
+---
+
+# Taken from https://github.com/macrujugl/pyez/blob/master/interfaces_table.yml
+
+IfacesEthernetTable:
+   rpc: get-interface-information
+   args:
+     interface-name: 'lt-*'
+   args_key: 'interface-name'
+   item: physical-interface
+   key: name
+   view: IfacesEthernetView
+
+IfacesEthernetView:
+   fields:
+     Name: name
+     AdminStatus: admin-status
+     OperStatus: oper-status
+     MTU: mtu
+     SubInterfaces: _SubIntTable
+     
+_SubIntTable:
+   item: logical-interface
+   key: name
+   view: _SubIntView
+
+_SubIntView:
+   fields:
+      LogicalInterfaceName: name
+      LogicalInterfaceAddress: address-family/interface-address/ifa-local

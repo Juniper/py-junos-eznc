@@ -1,0 +1,22 @@
+---
+
+# Taken from https://github.com/tamihiro/cm_demo/blob/master/cm_sess/netconf_yaml/preflist.yml
+
+PrefListTable:
+  rpc: get-configuration
+  item: policy-options/prefix-list
+  key: name
+  view: PrefListView
+
+PrefListView:
+  fields:
+    name: name
+    entries: _PrefListEntryTable
+
+_PrefListEntryTable:
+  item: prefix-list-item
+  view: _PrefListItemView
+
+_PrefListItemView:
+  fields:
+    prefix: name
