@@ -753,7 +753,6 @@ class DeviceSessionListener(SessionListener):
         :type ex: :exc:`Exception`
         """
         self._device.connected = False
-        raise NcErrors.TransportError
 
 
 class Device(_Connection):
