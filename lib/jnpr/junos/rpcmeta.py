@@ -1,6 +1,7 @@
 import re
 from lxml import etree
 from lxml.builder import E
+from jnpr.junos import jxml as JXML
 
 
 class _RpcMetaExec(object):
@@ -21,7 +22,7 @@ class _RpcMetaExec(object):
     # get_config
     # -----------------------------------------------------------------------
 
-    def get_config(self, filter_xml=None, options={}, model=None, **kwargs):
+    def get_config(self, filter_xml=None, options={}, model=None, remove_ns=True, **kwargs):
         """
         retrieve configuration from the Junos device
 
@@ -53,6 +54,10 @@ class _RpcMetaExec(object):
         :model: Can provide yang model openconfig/custom. When model is provided and filter_xml is
                 None, xml is enclosed under <data> so that we we get junos configuration as well as other model data.
 
+        :remove_ns: remove namespaces, if value assigned is False, function will return xml with namespaces.
+                The same xml returned can be loaded back to devices. This comes handy in case of yang based configs.
+                dev.rpc.get_config(filter_xml='bgp', model='openconfig', remove_ns=False)
+
         """
 
         nmspaces = {'openconfig': "http://openconfig.net/yang/",
@@ -80,7 +85,13 @@ class _RpcMetaExec(object):
                     ns = nmspaces.get(model.lower())
                     filter_xml.attrib['xmlns'] = ns + filter_xml.tag
                 rpc.append(filter_xml)
-        response = self._junos.execute(rpc, **kwargs)
+        transform = self._junos.transform
+        if remove_ns is False:
+            self._junos.transform = lambda: JXML.strip_namespaces_prefix
+        try:
+            response = self._junos.execute(rpc, **kwargs)
+        finally:
+            self._junos.transform = transform
         # in case of model provided top level should be data
         # return response
         if model is not None and filter_xml is None and options.get('format') \
