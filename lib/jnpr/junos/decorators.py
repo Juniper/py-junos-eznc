@@ -89,18 +89,18 @@ def ignoreWarnDecorator(function):
                     result = function(*args, **kwargs)
                     return result
                 except RpcError as ex:
-                    ex.xml = JXML.remove_namespaces(ex.xml)
+                    ex.rpc_xml = JXML.remove_namespaces(ex.rpc_xml)
                     if hasattr(ex, 'rpc_error') and\
                                     ex.rpc_error['severity'] == 'warning':
                         if ignore_warn_msg is None:
-                            return ex.xml
+                            return ex.rpc_xml
                         elif isinstance(ignore_warn_msg, (str, unicode)):
                             if re.search(ignore_warn_msg, ex.message, re.I):
-                                return ex.xml
+                                return ex.rpc_xml
                         elif isinstance(ignore_warn_msg, list):
                             for warn_msg in ignore_warn_msg:
                                 if re.search(warn_msg, ex.message, re.I):
-                                    return ex.xml
+                                    return ex.rpc_xml
                         raise ex
                     else:
                         raise ex

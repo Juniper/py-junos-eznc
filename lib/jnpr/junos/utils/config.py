@@ -40,7 +40,7 @@ class Config(Util):
     # ------------------------------------------------------------------------
     # commit
     # ------------------------------------------------------------------------
-
+    @ignoreWarnDecorator
     def commit(self, **kvargs):
         """
         Commit a configuration.

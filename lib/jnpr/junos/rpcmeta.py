@@ -33,6 +33,9 @@ class _RpcMetaExec(object):
             dev.rpc.get_config(filter_xml=etree.XML('<bgp/>'), model='openconfig')
             dev.rpc.get_config(filter_xml='<system><services/></system>')
             dev.rpc.get_config(filter_xml='system/services')
+            # custom yang example
+            dev.rpc.get_config(filter_xml='l2vpn', model='custom')
+
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
                      when omitted the entire configuration is returned;
@@ -47,7 +50,8 @@ class _RpcMetaExec(object):
         config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
                  options={'database':'committed','inherit':'inherit'})
 
-        :model: Can provide yang model openconfig/custom
+        :model: Can provide yang model openconfig/custom. When model is provided and filter_xml is
+                None, xml is enclosed under <data> so that we we get junos configuration as well as other model data.
 
         """
 
@@ -77,8 +81,13 @@ class _RpcMetaExec(object):
                     filter_xml.attrib['xmlns'] = ns + filter_xml.tag
                 rpc.append(filter_xml)
         response = self._junos.execute(rpc, **kwargs)
-        # in case of model provided top level should be rpc-reply or data??
-        return response if model is None else response.getparent()
+        # in case of model provided top level should be data
+        # return response
+        if model is not None and filter_xml is None and options.get('format') \
+                is not 'json':
+            response = response.getparent()
+            response.tag = 'data'
+        return response
 
     # -----------------------------------------------------------------------
     # get
@@ -90,14 +99,12 @@ class _RpcMetaExec(object):
         <get> rpc
 
         For example::
-          dev.rpc.get()
-          or
-          dev.rpc.get(ignore_warning=True)
-          or
-          dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
-          or
-          dev.rpc.get(filter_select='bgp/neighbors')
-          dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
+            dev.rpc.get()
+            dev.rpc.get(ignore_warning=True)
+            dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
+            dev.rpc.get(filter_select='bgp/neighbors')
+            dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
+            dev.rpc.get('mpls', ignore_warning=True)
 
         :param str filter_select:
           The select attribute will be treated as an XPath expression and
