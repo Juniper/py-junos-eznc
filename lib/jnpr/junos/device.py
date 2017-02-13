@@ -733,30 +733,28 @@ class _Connection(object):
     def __repr__(self):
         return "Device(%s)" % self.hostname
 
+
 class DeviceSessionListener(SessionListener):
 
     """
-    Listens to Session class of Netconf Transport and detects errors in the transport.
+    Listens to Session class of Netconf Transport
+    and detects errors in the transport.
     """
     def __init__(self, device):
         self._device = device
+
     def callback(self, root, raw):
-        """Called when a new XML document is received. The *root* argument allows the callback to determine whether it wants to further process the document.
-
-        Here, *root* is a tuple of *(tag, attributes)* where *tag* is the qualified name of the root element and *attributes* is a dictionary of its attributes (also qualified names).
-
-        *raw* will contain the XML document as a string.
-        """
+        """Required by implementation but not used here."""
         pass
 
     def errback(self, ex):
         """Called when an error occurs.
-        Set the device's connected status to False, and then raise a TransportError.
-
+        Set the device's connected status to False.
         :type ex: :exc:`Exception`
         """
         self._device.connected = False
         raise NcErrors.TransportError
+
 
 class Device(_Connection):
 
