@@ -28,14 +28,18 @@ class _RpcMetaExec(object):
 
         For example::
             dev.rpc.get_config()
-            dev.rpc.get_config(model='openconfig')
-            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'), options={'format': 'json'})
-            dev.rpc.get_config(filter_xml=etree.XML('<bgp><neighbors></neighbors></bgp>'), model='openconfig')
-            dev.rpc.get_config(filter_xml=etree.XML('<bgp/>'), model='openconfig')
             dev.rpc.get_config(filter_xml='<system><services/></system>')
             dev.rpc.get_config(filter_xml='system/services')
+            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'), options={'format': 'json'})
+            # to fetch junos as well as yang model configs
+            dev.rpc.get_config(model=True)
+            # openconfig yang example
+            dev.rpc.get_config(filter_xml='bgp', model='openconfig')
+            dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>', model='openconfig')
             # custom yang example
             dev.rpc.get_config(filter_xml='l2vpn', model='custom')
+            # ietf yang example
+            dev.rpc.get_config(filter_xml='interfaces', model='ietf')
 
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
@@ -51,8 +55,8 @@ class _RpcMetaExec(object):
         config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
                  options={'database':'committed','inherit':'inherit'})
 
-        :model: Can provide yang model openconfig/custom. When model is provided and filter_xml is
-                None, xml is enclosed under <data> so that we we get junos configuration as well as other model data.
+        :model: Can provide yang model openconfig/custom/ietf. When model is True and filter_xml is
+                None, xml is enclosed under <data> so that we we get junos as well as other model configurations.
 
         :remove_ns: remove namespaces, if value assigned is False, function will return xml with namespaces.
                 The same xml returned can be loaded back to devices. This comes handy in case of yang based configs.
@@ -61,7 +65,8 @@ class _RpcMetaExec(object):
         """
 
         nmspaces = {'openconfig': "http://openconfig.net/yang/",
-                    'custom': "http://yang.juniper.net/customyang/"}
+                    'custom': "http://yang.juniper.net/customyang/",
+                    'ietf': "urn:ietf:params:xml:ns:yang:ietf-"}
 
         rpc = E('get-configuration', options)
 
@@ -94,7 +99,7 @@ class _RpcMetaExec(object):
             self._junos.transform = transform
         # in case of model provided top level should be data
         # return response
-        if model is not None and filter_xml is None and options.get('format') \
+        if model and filter_xml is None and options.get('format') \
                 is not 'json':
             response = response.getparent()
             response.tag = 'data'
