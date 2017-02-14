@@ -1020,7 +1020,8 @@ class Device(_Connection):
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
 
-            self._conn._session.transport.set_keepalive(self._ssh_keepalives)
+            self._conn._session.transport.set_keepalive(
+                int(self._ssh_keepalives))
 
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
