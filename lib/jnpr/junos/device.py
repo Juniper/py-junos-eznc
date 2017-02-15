@@ -553,7 +553,14 @@ class _Connection(object):
         """
 
         if self.connected is not True:
-            raise EzErrors.ConnectClosedError(self)
+            if self.autoreconnect > 0:
+                self.autoreconnect -= 1
+                self.open()
+                result = self.execute(rpc_cmd, **kvargs)
+                self.autoreconnect += 1
+                return result
+            else:
+                raise EzErrors.ConnectClosedError(self)
 
         if isinstance(rpc_cmd, str):
             rpc_cmd_e = etree.XML(rpc_cmd)
@@ -893,6 +900,11 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param int autoreconnect
+            *OPTIONAL* default is ``0``.  If greater than ``0`` then the
+            execute() method will attempt to reconnect this many times if
+            it detects that the connection is closed.
         """
 
         # ----------------------------------------
@@ -906,6 +918,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self.autoreconnect = kvargs.get('autoreconnect', 0)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -971,6 +984,14 @@ class Device(_Connection):
     def connected(self, value):
         if value in [True, False]:
             self._connected = value
+
+    @property
+    def autoreconnect(self):
+        return self._autoreconnect
+
+    @autoreconnect.setter
+    def autoreconnect(self, value):
+        self._autoreconnect = value
 
     def open(self, *vargs, **kvargs):
         """
