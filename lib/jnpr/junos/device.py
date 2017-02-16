@@ -982,7 +982,9 @@ class Device(_Connection):
 
     @connected.setter
     def connected(self, value):
-        if value in [True, False]:
+        if type(value) is not bool:
+            raise TypeError("Device.connected can only be set to a be boolean value")
+        else:
             self._connected = value
 
     @property
