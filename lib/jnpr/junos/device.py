@@ -993,7 +993,11 @@ class Device(_Connection):
 
     @autoreconnect.setter
     def autoreconnect(self, value):
-        self._autoreconnect = value
+        value = int(value)
+        if value < 0:
+            raise ValueError("Device.autoreconnect can only be set to >= 0 ")
+        else:
+            self._autoreconnect = value
 
     def open(self, *vargs, **kvargs):
         """
