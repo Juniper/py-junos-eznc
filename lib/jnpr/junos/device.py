@@ -599,6 +599,13 @@ class _Connection(object):
             native python data-types (e.g. ``dict``).
         """
 
+        if not self.connected:
+            # Note that this will automatically open the device
+            # connection if autoreconnect is configured
+            if self._reconnect():
+                return self.execute(rpc_cmd, **kvargs)
+            else:
+                raise EzErrors.ConnectClosedError(self)
         if isinstance(rpc_cmd, str):
             rpc_cmd_e = etree.XML(rpc_cmd)
         elif isinstance(rpc_cmd, etree._Element):
