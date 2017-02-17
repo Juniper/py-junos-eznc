@@ -354,6 +354,51 @@ class _Connection(object):
         return self._sshconf_lkup()
 
     # ------------------------------------------------------------------------
+    # _reconnect
+    # ------------------------------------------------------------------------
+
+    def _reconnect(self):
+        """
+        Attempts to reconnect to the device.
+
+        This method should only be called by Device.execute if and only if it traps a
+        transport-related exception.
+
+        :returns ```True``` if autoreconnect succeeded.  ``False`` if autoconnect failed.
+
+        :raises ProbeError:
+            When **auto_probe** is ``True`` and the probe activity
+            exceeds the timeout
+
+        :raises ConnectAuthError:
+            When provided authentication credentials fail to login
+
+        :raises ConnectRefusedError:
+            When the device does not have NETCONF enabled
+
+        :raises ConnectTimeoutError:
+            When the the :meth:`Device.timeout` value is exceeded
+            during the attempt to connect to the remote device
+
+        :raises ConnectError:
+            When an error, other than the above, occurs.  The
+            originating ``Exception`` is assigned as ``err._orig``
+            and re-raised to the caller.
+        """
+        if self.autoreconnect > 0:
+            self.autoreconnect -= 1
+            try:
+                self.open()
+                self.autoreconnect += 1
+                if self.connected:
+                    return True
+                else:
+                    return False
+            except (EzErrors.ConnectAuthError, EzErrors.ConnectAuthError, EzErrors.ConnectRefusedError,
+                    EzErrors.ConnectTimeoutError, EzErrors.ConnectError, EzErrors.ConnectUnknownHostError ) as e:
+                raise e
+
+    # ------------------------------------------------------------------------
     # probe
     # ------------------------------------------------------------------------
 
@@ -552,16 +597,6 @@ class _Connection(object):
             native python data-types (e.g. ``dict``).
         """
 
-        if self.connected is not True:
-            if self.autoreconnect > 0:
-                self.autoreconnect -= 1
-                self.open()
-                result = self.execute(rpc_cmd, **kvargs)
-                self.autoreconnect += 1
-                return result
-            else:
-                raise EzErrors.ConnectClosedError(self)
-
         if isinstance(rpc_cmd, str):
             rpc_cmd_e = etree.XML(rpc_cmd)
         elif isinstance(rpc_cmd, etree._Element):
@@ -577,12 +612,18 @@ class _Connection(object):
 
         try:
             rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
-        except NcOpErrors.TimeoutExpiredError:
-            # err is a TimeoutExpiredError from ncclient,
-            # which has no such attribute as xml.
-            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
-        except NcErrors.TransportError:
-            raise EzErrors.ConnectClosedError(self)
+        # except NcOpErrors.TimeoutExpiredError:
+        #     # err is a TimeoutExpiredError from ncclient,
+        #     # which has no such attribute as xml.
+        #     raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
+        except (NcErrors.TransportError, NcOpErrors.TimeoutExpiredError) as e:
+            if self._reconnect():
+                return self.execute(rpc_cmd)
+            else:
+                if type(e) is NcErrors.TransportError:
+                    raise EzErrors.ConnectClosedError(self)
+                elif type(e) is NcOpErrors.TimeoutExpiredError:
+                    raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except RPCError as err:
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
@@ -759,8 +800,8 @@ class DeviceSessionListener(SessionListener):
         Set the device's connected status to False.
         :type ex: :exc:`Exception`
         """
+        #print "An exception was caught by the device listener: %s" % ex
         self._device.connected = False
-
 
 class Device(_Connection):
 
