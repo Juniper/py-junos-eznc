@@ -391,15 +391,14 @@ class _Connection(object):
             try:
                 self.open()
                 self.autoreconnect += 1
-                if self.connected:
-                    return True
-                else:
-                    return False
+                return True
             except (EzErrors.ConnectAuthError, EzErrors.ConnectAuthError,
                     EzErrors.ConnectRefusedError, EzErrors.ConnectTimeoutError,
                     EzErrors.ConnectError, EzErrors.ConnectUnknownHostError) \
                     as e:
                 raise e
+        else:
+            return False
 
     # ------------------------------------------------------------------------
     # probe
@@ -621,13 +620,12 @@ class _Connection(object):
         #     raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except (NcErrors.TransportError, NcOpErrors.TimeoutExpiredError) as e:
             if self._reconnect():
-                return self.execute(rpc_cmd)
-            else:
-                if type(e) is NcErrors.TransportError:
-                    raise EzErrors.ConnectClosedError(self)
-                elif type(e) is NcOpErrors.TimeoutExpiredError:
-                    raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag,
-                                                   self.timeout)
+                return self.execute(rpc_cmd, **kvargs)
+            elif type(e) is NcErrors.TransportError:
+                raise EzErrors.ConnectClosedError(self)
+            elif type(e) is NcOpErrors.TimeoutExpiredError:
+                raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag,
+                                               self.timeout)
         except RPCError as err:
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
