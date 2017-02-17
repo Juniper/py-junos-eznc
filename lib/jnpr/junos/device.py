@@ -361,10 +361,11 @@ class _Connection(object):
         """
         Attempts to reconnect to the device.
 
-        This method should only be called by Device.execute if and only if it traps a
-        transport-related exception.
+        This method should only be called by Device.execute
+        if and only if it traps a transport-related exception.
 
-        :returns ```True``` if autoreconnect succeeded.  ``False`` if autoconnect failed.
+        :returns ```True``` if autoreconnect succeeded.
+        ``False`` if autoconnect failed.
 
         :raises ProbeError:
             When **auto_probe** is ``True`` and the probe activity
@@ -394,8 +395,10 @@ class _Connection(object):
                     return True
                 else:
                     return False
-            except (EzErrors.ConnectAuthError, EzErrors.ConnectAuthError, EzErrors.ConnectRefusedError,
-                    EzErrors.ConnectTimeoutError, EzErrors.ConnectError, EzErrors.ConnectUnknownHostError ) as e:
+            except (EzErrors.ConnectAuthError, EzErrors.ConnectAuthError,
+                    EzErrors.ConnectRefusedError, EzErrors.ConnectTimeoutError,
+                    EzErrors.ConnectError, EzErrors.ConnectUnknownHostError) \
+                    as e:
                 raise e
 
     # ------------------------------------------------------------------------
@@ -623,7 +626,8 @@ class _Connection(object):
                 if type(e) is NcErrors.TransportError:
                     raise EzErrors.ConnectClosedError(self)
                 elif type(e) is NcOpErrors.TimeoutExpiredError:
-                    raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
+                    raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag,
+                                                   self.timeout)
         except RPCError as err:
             rsp = JXML.remove_namespaces(err.xml)
             # see if this is a permission error
@@ -800,8 +804,9 @@ class DeviceSessionListener(SessionListener):
         Set the device's connected status to False.
         :type ex: :exc:`Exception`
         """
-        #print "An exception was caught by the device listener: %s" % ex
+
         self._device.connected = False
+
 
 class Device(_Connection):
 
@@ -1024,7 +1029,9 @@ class Device(_Connection):
     @connected.setter
     def connected(self, value):
         if type(value) is not bool:
-            raise TypeError("Device.connected can only be set to a be boolean value")
+            raise TypeError(
+                "Device.connected can only be set to a be boolean value"
+            )
         else:
             self._connected = value
 
