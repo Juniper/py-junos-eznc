@@ -17,6 +17,7 @@ import re
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+from ncclient.transport.session import SessionListener
 import ncclient.operations.errors as NcOpErrors
 from ncclient.operations import RPCError
 import paramiko
@@ -506,6 +507,8 @@ class _Connection(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
+        except EzErrors.ConnectClosedError as ex:
+            raise ex
         except EzErrors.RpcError as ex:
             return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
@@ -733,6 +736,27 @@ class _Connection(object):
         return "Device(%s)" % self.hostname
 
 
+class DeviceSessionListener(SessionListener):
+
+    """
+    Listens to Session class of Netconf Transport
+    and detects errors in the transport.
+    """
+    def __init__(self, device):
+        self._device = device
+
+    def callback(self, root, raw):
+        """Required by implementation but not used here."""
+        pass
+
+    def errback(self, ex):
+        """Called when an error occurs.
+        Set the device's connected status to False.
+        :type ex: :exc:`Exception`
+        """
+        self._device.connected = False
+
+
 class Device(_Connection):
 
     """
@@ -931,7 +955,6 @@ class Device(_Connection):
         self._ofacts = {}
 
         # public attributes
-
         self.connected = False
         self.rpc = _RpcMetaExec(self)
         if self._fact_style == 'old':
@@ -942,6 +965,14 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
     # Basic device methods
     # -----------------------------------------------------------------------
+    @property
+    def connected(self):
+        return self._connected
+
+    @connected.setter
+    def connected(self, value):
+        if value in [True, False]:
+            self._connected = value
 
     def open(self, *vargs, **kvargs):
         """
@@ -1009,7 +1040,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
-
+            self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)

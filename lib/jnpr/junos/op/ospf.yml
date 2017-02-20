@@ -32,3 +32,27 @@ OspfInterfaceView:
     interface_name: interface-name
     ospf_interface_state: ospf-interface-state
     neighbor_count: neighbor-count
+
+ospfTable:
+ rpc: get-ospf-overview-information
+ item: ospf-overview
+ key: ospf-area-overview/ospf-area
+ view: ospfView
+
+ospfView:
+ fields:
+  router_id: ospf-router-id
+  area: ospf-area-overview/ospf-area
+  neighbors: ospf-area-overview/ospf-nbr-up-count
+
+
+OspfRoutesTable:
+ rpc: get-ospf-route-information
+ item: ospf-topology-route-table/ospf-route
+ key: ospf-route-entry/address-prefix
+ view: OspfRoutesView
+
+OspfRoutesView:
+ fields:
+  prefix: ospf-route-entry/address-prefix
+  interface: ospf-route-entry/ospf-next-hop/next-hop-name/interface-name
