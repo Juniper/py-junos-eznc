@@ -379,20 +379,26 @@ class Config(Util):
         # end-of: private helpers
         # ---------------------------------------------------------------------
 
-        if len(vargs) !=0  and\
+        if len(vargs) !=0 and\
                         vargs[0].__class__.__base__.__name__ == 'PybindBase':
             from pyangbind.lib.serialise import pybindIETFJSONEncoder
             conf = json.loads(json.dumps(
-                pybindIETFJSONEncoder.generate_element(vargs[0], flt=True),
-                cls=pybindIETFJSONEncoder, indent=4))
+                    pybindIETFJSONEncoder.generate_element(vargs[0], flt=True),
+                    cls=pybindIETFJSONEncoder, indent=4))
             conf_xml = jxmlease.emit_xml(conf,
-                                         full_document=False).encode('utf-8')
+                                             full_document=False).encode('utf-8')
             parser = etree.XMLParser(recover=True)
-            conf_xml = etree.fromstring(conf_xml, parser)
-            conf_xml.set('xmlns', "http://openconfig.net/yang/bgp")
-            conf_xml = E('edit-config', E('config', conf_xml))
-            # print etree.tostring(conf_xml)
-            return self._dev.execute(conf_xml)
+            rpc_contents = etree.fromstring(conf_xml, parser)
+
+            def _get_namespace(data):
+                yang_name = data._yang_name
+                yang_name_list = yang_name.split('-')
+                if yang_name_list[0]=='openconfig':
+                    ns = "http://openconfig.net/yang/{}".format(yang_name_list[1])
+                return ns
+            rpc_contents.set('xmlns', _get_namespace(vargs[0]))
+            # rpc_contents.set('xmlns', "http://openconfig.net/yang/interfaces")
+            return try_load(rpc_contents, rpc_xattrs)
 
         if 'format' in kvargs:
             _lset_format(kvargs, rpc_xattrs)
