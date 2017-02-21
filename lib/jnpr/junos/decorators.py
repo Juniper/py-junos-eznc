@@ -80,37 +80,29 @@ def normalizeDecorator(function):
 def ignoreWarnDecorator(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if 'ignore_warning' in kwargs or 'ignore_warning_message' in kwargs:
-            ignore_warn_msg = kwargs.pop('ignore_warning_message', None)
-            ignore_warn = kwargs.pop('ignore_warning', None) or \
-                          ignore_warn_msg is not None
-            if ignore_warn is True:
-                try:
-                    result = function(*args, **kwargs)
-                    return result
-                except RpcError as ex:
-                    ex.rpc_xml = JXML.remove_namespaces(ex.rpc_xml)
-                    if hasattr(ex, 'rpc_error') and\
-                                    ex.rpc_error['severity'] == 'warning':
-                        if ignore_warn_msg is None:
+        if 'ignore_warning' in kwargs:
+            ignore_warn = kwargs['ignore_warning']
+            try:
+                result = function(*args, **kwargs)
+                return result
+            except RpcError as ex:
+                ex.rpc_xml = JXML.remove_namespaces(ex.rpc_xml)
+                if hasattr(ex, 'rpc_error') and\
+                        ex.rpc_error['severity'] == 'warning':
+                    if ignore_warn is True:
+                        return ex.rpc_xml
+                    elif isinstance(ignore_warn, (str, unicode)):
+                        if re.search(ignore_warn, ex.message, re.I):
                             return ex.rpc_xml
-                        elif isinstance(ignore_warn_msg, (str, unicode)):
-                            if re.search(ignore_warn_msg, ex.message, re.I):
+                    elif isinstance(ignore_warn, list):
+                        for warn_msg in ignore_warn:
+                            if re.search(warn_msg, ex.message, re.I):
                                 return ex.rpc_xml
-                        elif isinstance(ignore_warn_msg, list):
-                            for warn_msg in ignore_warn_msg:
-                                if re.search(warn_msg, ex.message, re.I):
-                                    return ex.rpc_xml
-                        raise ex
-                    else:
-                        raise ex
-                except Exception:
-                    raise
-            else:
-                try:
-                    return function(*args, **kwargs)
-                except Exception:
-                    raise
+                    raise ex
+                else:
+                    raise ex
+            except Exception:
+                raise
         else:
             try:
                 return function(*args, **kwargs)
