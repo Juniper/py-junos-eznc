@@ -1,6 +1,3 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import unittest
 import sys
 from nose.plugins.attrib import attr
@@ -18,6 +15,9 @@ from ncclient.operations import RPCError, RPCReply
 from mock import MagicMock, patch
 from lxml import etree
 import os
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 if sys.version < '3':
     builtin_string = '__builtin__'
