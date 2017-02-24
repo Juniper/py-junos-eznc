@@ -78,6 +78,21 @@ def normalizeDecorator(function):
 
 
 def ignoreWarnDecorator(function):
+    """
+    Ignore warning if ignore_warning provided and the rpc-reply severity level
+    is warning
+
+    For example::
+        dev.rpc.get(ignore_warning=True)
+        dev.rpc.get(ignore_warning='vrrp subsystem not running')
+        dev.rpc.get(ignore_warning='vrrp subsystem not running', 'statement not found')
+        cu.load(cnf, ignore_warning='statement not found')
+
+    :ignore_warning: It can take take boolean value or string or list of string.
+        if True, it will ignore all warning. If sring, it will ignore warning if
+        the statement matches given string. If list of strings, it will try to check
+        if warning statement is from any of the given strings in the list:
+    """
     @wraps(function)
     def wrapper(*args, **kwargs):
         if 'ignore_warning' in kwargs:

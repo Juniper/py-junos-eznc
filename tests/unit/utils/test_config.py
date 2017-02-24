@@ -169,6 +169,25 @@ class TestConfig(unittest.TestCase):
             assert_called_with(
                 {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
 
+    def test_config_diff_exception(self):
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp='ok'))
+        self.assertRaises(RpcError, self.conf.diff)
+
+    def test_config_diff_exception_severity_warning(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>mgd: statement must contain additional statements</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertEqual(self.conf.diff(),
+                         "Unable to parse diff from response!")
+
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='Stuff')
         self.conf.pdiff()

@@ -30,12 +30,14 @@ class _RpcMetaExec(object):
             dev.rpc.get_config()
             dev.rpc.get_config(filter_xml='<system><services/></system>')
             dev.rpc.get_config(filter_xml='system/services')
-            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'), options={'format': 'json'})
+            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'),
+                            options={'format': 'json'})
             # to fetch junos as well as yang model configs
             dev.rpc.get_config(model=True)
             # openconfig yang example
             dev.rpc.get_config(filter_xml='bgp', model='openconfig')
-            dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>', model='openconfig')
+            dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>',
+                            model='openconfig')
             # custom yang example
             dev.rpc.get_config(filter_xml='l2vpn', model='custom')
             # ietf yang example
@@ -44,7 +46,8 @@ class _RpcMetaExec(object):
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
                      when omitted the entire configuration is returned;
-                     the following returns the device host-name configured with "set system host-name":
+                     the following returns the device host-name configured
+                     with "set system host-name":
 
         config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
 
@@ -55,13 +58,18 @@ class _RpcMetaExec(object):
         config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
                  options={'database':'committed','inherit':'inherit'})
 
-        :model: Can provide yang model openconfig/custom/ietf. When model is True and filter_xml is
-                None, xml is enclosed under <data> so that we we get junos as well as other model configurations.
+        :param str model: Can provide yang model openconfig/custom/ietf. When
+                model is True and filter_xml is None, xml is enclosed under <data> so
+                that we we get junos as well as other model configurations:
 
-        :remove_ns: remove namespaces, if value assigned is False, function will return xml with namespaces.
-                The same xml returned can be loaded back to devices. This comes handy in case of yang based configs.
-                dev.rpc.get_config(filter_xml='bgp', model='openconfig', remove_ns=False)
+        :param bool remove_ns: remove namespaces, if value assigned is False, function
+                will return xml with namespaces. The same xml returned can be
+                loaded back to devices. This comes handy in case of yang based
+                configs
 
+            For example::
+                dev.rpc.get_config(filter_xml='bgp', model='openconfig',
+                        remove_ns=False)
         """
 
         nmspaces = {'openconfig': "http://openconfig.net/yang/",

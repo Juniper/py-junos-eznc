@@ -129,6 +129,11 @@ class Test_RpcMetaExec(unittest.TestCase):
         mock_warn.assert_has_calls(call.warn(
             'Native JSON support is only from 14.2 onwards', RuntimeWarning))
 
+    def test_get_rpc(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(filter_select='bgp')
+        self.assertEqual(resp.tag, 'data')
+
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             if 'normalize' in kwargs and args:
@@ -148,7 +153,7 @@ class Test_RpcMetaExec(unittest.TestCase):
                              'rpc-reply', fname)
         with open(fpath) as fp:
             foo = fp.read()
-        if fname == 'get-system-users-information.xml':
+        if fname == 'get-system-users-information.xml' or fname == 'get.xml':
             return NCElement(foo,
                              self.dev._conn._device_handler.transform_reply())
         rpc_reply = NCElement(foo, self.dev._conn.
