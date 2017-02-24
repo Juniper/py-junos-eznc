@@ -22,7 +22,8 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect, mock_ftp_connect, mock_ftpconnect, mock_ftplogin):
+    def setUp(self, mock_connect, mock_ftp_connect, mock_ftpconnect,
+              mock_ftplogin):
         self.dev = Device(host='1.1.1.1', user="testuser",
                           passwd="testpasswd",
                           gather_facts=False)
@@ -40,6 +41,7 @@ class TestFtp(unittest.TestCase):
         dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev)
         mock_ftplogin.assert_called_with('testuser', 'testpasswd', '')
     #
+
     @patch('ftplib.FTP.close')
     def test_ftp_close(self, mock_close):
         self.dev_ftp.open()
@@ -67,7 +69,7 @@ class TestFtp(unittest.TestCase):
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file_errors(self, mock_open):
         self.assertEqual(self.dev_ftp.get(local_path="testfile",
-                                             remote_file="testfile"), False)
+                                          remote_file="testfile"), False)
 
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file_get(self, mock_open):
@@ -90,7 +92,7 @@ class TestFtp(unittest.TestCase):
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file(self, mock_ftpretr, mock_open):
         self.assertEqual(self.dev_ftp.get(local_path="testfile",
-                                             remote_file="testfile"), True)
+                                          remote_file="testfile"), True)
 
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')

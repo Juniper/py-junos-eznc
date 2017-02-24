@@ -26,20 +26,20 @@ class TestGetRouteEngineInformation(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_re_info_dual(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_dual_re
-        self.assertEqual(self.dev.facts['2RE'],True)
-        self.assertEqual(self.dev.facts['master'],'RE0')
+        self.assertEqual(self.dev.facts['2RE'], True)
+        self.assertEqual(self.dev.facts['master'], 'RE0')
         self.assertEqual(self.dev.facts['RE0'],
-            {'status': 'OK',
-             'last_reboot_reason': 'Router rebooted after a normal shutdown.',
-             'model': 'RE-S-1800x4',
-             'up_time': '9 days, 22 hours, 27 minutes, 12 seconds',
-             'mastership_state': 'master'})
+                         {'status': 'OK',
+                          'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+                          'model': 'RE-S-1800x4',
+                          'up_time': '9 days, 22 hours, 27 minutes, 12 seconds',
+                          'mastership_state': 'master'})
         self.assertEqual(self.dev.facts['RE1'],
-            {'status': 'OK',
-             'last_reboot_reason': 'Router rebooted after a normal shutdown.',
-             'model': 'RE-S-1800x4',
-             'up_time': '9 days, 22 hours, 26 minutes, 48 seconds',
-             'mastership_state': 'backup'})
+                         {'status': 'OK',
+                          'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+                          'model': 'RE-S-1800x4',
+                          'up_time': '9 days, 22 hours, 26 minutes, 48 seconds',
+                          'mastership_state': 'backup'})
         self.assertEqual(self.dev.facts['re_info'],
                          {'default': {'1': {'status': 'OK',
                                             'last_reboot_reason': 'Router '
@@ -59,57 +59,57 @@ class TestGetRouteEngineInformation(unittest.TestCase):
                                             'mastership_state': 'master'},
                                       'default': {'status': 'OK',
                                                   'last_reboot_reason':
-                                                      'Router rebooted after a '
-                                                      'normal shutdown.',
+                                                  'Router rebooted after a '
+                                                  'normal shutdown.',
                                                   'model': 'RE-S-1800x4',
                                                   'mastership_state': 'master'}
                                       }
-                         })
-        self.assertEqual(self.dev.facts['re_master'],{'default': '0'})
+                          })
+        self.assertEqual(self.dev.facts['re_master'], {'default': '0'})
 
     @patch('jnpr.junos.Device.execute')
     def test_re_info_single(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_single_re
-        self.assertEqual(self.dev.facts['2RE'],False)
-        self.assertEqual(self.dev.facts['master'],'RE0')
+        self.assertEqual(self.dev.facts['2RE'], False)
+        self.assertEqual(self.dev.facts['master'], 'RE0')
         self.assertEqual(self.dev.facts['RE0'],
-            {'status': 'OK',
-             'last_reboot_reason': 'Router rebooted after a normal shutdown.',
-             'model': 'RE-VMX',
-             'up_time': '29 days, 22 hours, 41 minutes, 35 seconds',
-             'mastership_state': 'master'})
-        self.assertEqual(self.dev.facts['RE1'],None)
+                         {'status': 'OK',
+                          'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+                          'model': 'RE-VMX',
+                          'up_time': '29 days, 22 hours, 41 minutes, 35 seconds',
+                          'mastership_state': 'master'})
+        self.assertEqual(self.dev.facts['RE1'], None)
         self.assertEqual(self.dev.facts['re_info'],
-            {'default': {'default': {'status': 'OK',
-                                     'last_reboot_reason': 'Router rebooted '
-                                                           'after a normal '
-                                                           'shutdown.',
-                                     'model': 'RE-VMX',
-                                     'mastership_state': 'master'},
-                         '0': {'status': 'OK',
-                               'last_reboot_reason': 'Router rebooted after a '
-                                                     'normal shutdown.',
-                               'model': 'RE-VMX',
-                               'mastership_state': 'master'}}})
-        self.assertEqual(self.dev.facts['re_master'],{'default': '0'})
+                         {'default': {'default': {'status': 'OK',
+                                                  'last_reboot_reason': 'Router rebooted '
+                                                  'after a normal '
+                                                  'shutdown.',
+                                                  'model': 'RE-VMX',
+                                                  'mastership_state': 'master'},
+                                      '0': {'status': 'OK',
+                                            'last_reboot_reason': 'Router rebooted after a '
+                                            'normal shutdown.',
+                                            'model': 'RE-VMX',
+                                            'mastership_state': 'master'}}})
+        self.assertEqual(self.dev.facts['re_master'], {'default': '0'})
 
     @patch('jnpr.junos.Device.execute')
     def test_re_info_mx_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_mx_vc
-        self.assertEqual(self.dev.facts['2RE'],True)
-        self.assertEqual(self.dev.facts['master'],['RE1', 'RE0'])
+        self.assertEqual(self.dev.facts['2RE'], True)
+        self.assertEqual(self.dev.facts['master'], ['RE1', 'RE0'])
         self.assertEqual(self.dev.facts['RE0'],
-            {'status': 'OK',
-             'last_reboot_reason': 'Router rebooted after a normal shutdown.',
-             'model': 'RE-S-1800x4',
-             'up_time': '16 days, 13 hours, 17 minutes, 25 seconds',
-             'mastership_state': 'backup'})
+                         {'status': 'OK',
+                          'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+                          'model': 'RE-S-1800x4',
+                          'up_time': '16 days, 13 hours, 17 minutes, 25 seconds',
+                          'mastership_state': 'backup'})
         self.assertEqual(self.dev.facts['RE1'],
-            {'status': 'OK',
-             'last_reboot_reason': 'Router rebooted after a normal shutdown.',
-             'model': 'RE-S-1800x4',
-             'up_time': '18 days, 22 hours, 3 minutes, 18 seconds',
-             'mastership_state': 'master'})
+                         {'status': 'OK',
+                          'last_reboot_reason': 'Router rebooted after a normal shutdown.',
+                          'model': 'RE-S-1800x4',
+                          'up_time': '18 days, 22 hours, 3 minutes, 18 seconds',
+                          'mastership_state': 'master'})
         self.assertEqual(self.dev.facts['re_info'],
                          {'default': {'1': {'status': 'OK',
                                             'last_reboot_reason': 'Router '
@@ -129,11 +129,11 @@ class TestGetRouteEngineInformation(unittest.TestCase):
                                             'mastership_state': 'backup'},
                                       'default': {'status': 'OK',
                                                   'last_reboot_reason':
-                                                      'Router rebooted after '
-                                                      'a normal shutdown.',
+                                                  'Router rebooted after '
+                                                  'a normal shutdown.',
                                                   'model': 'RE-S-1800x4',
                                                   'mastership_state':
-                                                      'backup'}},
+                                                  'backup'}},
                           'member1': {'1': {'status': 'OK',
                                             'last_reboot_reason': 'Router '
                                                                   'rebooted '
@@ -167,14 +167,14 @@ class TestGetRouteEngineInformation(unittest.TestCase):
                                             'model': 'RE-S-1800x4',
                                             'mastership_state': 'backup'},
                                       'default':
-                                          {'status': 'OK',
-                                           'last_reboot_reason': 'Router '
-                                                                 'rebooted '
-                                                                 'after a '
-                                                                 'normal '
-                                                                 'shutdown.',
-                                           'model': 'RE-S-1800x4',
-                                           'mastership_state': 'backup'}}})
+                                      {'status': 'OK',
+                                       'last_reboot_reason': 'Router '
+                                       'rebooted '
+                                       'after a '
+                                       'normal '
+                                       'shutdown.',
+                                       'model': 'RE-S-1800x4',
+                                       'mastership_state': 'backup'}}})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

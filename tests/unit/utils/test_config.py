@@ -627,7 +627,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__private_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -638,7 +638,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__dyanamic_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -655,7 +655,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='batch'))
 
     def test__enter__batch_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""

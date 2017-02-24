@@ -100,14 +100,14 @@ class TestFactCache(unittest.TestCase):
                                      'bar': get_bar_fact,
                                      '_hidden': get_foo_bar_fact}
         # Now, get the length of the facts
-        self.assertEqual(len(list(self.dev.facts)),2)
+        self.assertEqual(len(list(self.dev.facts)), 2)
 
     def test_factcache_len_facts(self):
         # Override the callbacks
         self.dev.facts._callbacks = {'foo': get_foo_fact,
                                      'bar': get_bar_fact}
         # Now, get the length of the facts
-        self.assertEqual(len(self.dev.facts),2)
+        self.assertEqual(len(self.dev.facts), 2)
 
     def test_factcache_repr_facts(self):
         # Override the callbacks
@@ -150,7 +150,7 @@ class TestFactCache(unittest.TestCase):
         self.assertEqual(self.dev.facts['bar'], 'before')
         self.assertEqual(self.dev.facts['_hidden'], 'before')
         # Refresh the foo and _hidden facts
-        self.dev.facts._refresh(keys=('foo','_hidden'))
+        self.dev.facts._refresh(keys=('foo', '_hidden'))
         # Confirm the values now
         self.assertEqual(self.dev.facts['foo'], 'foo')
         self.assertEqual(self.dev.facts['bar'], 'before')
@@ -216,15 +216,19 @@ class TestFactCache(unittest.TestCase):
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
 
+
 def get_foo_fact(device):
     return {'foo': 'foo'}
+
 
 def get_foo_bar_fact(device):
     return {'foo': 'foo',
             'bar': 'bar', }
 
+
 def get_bar_fact(device):
     return {'bar': 'bar', }
+
 
 def get_hidden_fact(device):
     return {'_hidden': True, }

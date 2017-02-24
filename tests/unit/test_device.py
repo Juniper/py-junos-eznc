@@ -244,23 +244,29 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.device.warnings')
-    def test_device_facts_error_exception_on_error(self, mock_warnings, mock_execute):
+    def test_device_facts_error_exception_on_error(
+            self, mock_warnings, mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+            self.assertRaises(
+                IOError,
+                self.dev.facts_refresh,
+                exception_on_failure=True)
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.device.warnings')
     def test_device_old_style_facts_error_exception_on_error(self,
-                                                            mock_warnings,
-                                                            mock_execute):
+                                                             mock_warnings,
+                                                             mock_execute):
         self.dev._fact_style = 'old'
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
-
+            self.assertRaises(
+                IOError,
+                self.dev.facts_refresh,
+                exception_on_failure=True)
 
     def test_device_facts_refresh_unknown_fact_style(self):
         self.dev._fact_style = 'bad'
@@ -342,25 +348,29 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_to_rpc_string(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string('show system uptime')
-        self.assertEqual("rpc.get_system_uptime_information()",data)
+        self.assertEqual("rpc.get_system_uptime_information()", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_strip_pipes(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli_to_rpc_string('show system uptime | match foo | count')
-        self.assertEqual("rpc.get_system_uptime_information()",data)
+        data = self.dev.cli_to_rpc_string(
+            'show system uptime | match foo | count')
+        self.assertEqual("rpc.get_system_uptime_information()", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_complex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli_to_rpc_string('show interfaces ge-0/0/0.0 routing-instance all media')
-        self.assertEqual("rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')",data)
+        data = self.dev.cli_to_rpc_string(
+            'show interfaces ge-0/0/0.0 routing-instance all media')
+        self.assertEqual(
+            "rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')",
+            data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_invalid(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string('foo')
-        self.assertEqual(None,data)
+        self.assertEqual(None, data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_format_json(self, mock_execute):
@@ -389,7 +399,7 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_output_warning(self, mock_warnings, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli('show interfaces ge-0/0/0.0 routing-instance all media',
-                            format = 'xml')
+                            format='xml')
         ip = data.findtext('logical-interface[name="ge-0/0/0.0"]/'
                            'address-family[address-family-name="inet"]/'
                            'interface-address/ifa-local')

@@ -18,4 +18,3 @@ class TestJunosInit(unittest.TestCase):
                 as mock_sys:
             from jnpr import junos
             self.assertEqual(mock_sys, (2, 6, 3))
-
