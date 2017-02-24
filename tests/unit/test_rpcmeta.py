@@ -148,7 +148,13 @@ class Test_RpcMetaExec(unittest.TestCase):
     def test_get_config_filter_xml_model(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         resp = self.dev.rpc.get_config('bgp/neighbors', model='openconfig')
-        self.assertEqual(resp.tag, 'configuration')
+        self.assertEqual(resp.tag, 'bgp')
+
+    def test_get_config_remove_ns(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get_config('bgp/neighbors', model='openconfig',
+                                       remove_ns=False)
+        self.assertEqual(resp.tag, '{http://openconfig.net/yang/bgp}bgp')
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
@@ -160,6 +166,8 @@ class Test_RpcMetaExec(unittest.TestCase):
             return Manager(session, device_handler)
 
         if args:
+            if len(args[0]) > 0 and args[0][0].tag == 'bgp':
+                return self._read_file(args[0].tag + '_bgp_openconfig.xml')
             return self._read_file(args[0].tag + '.xml')
 
     def _read_file(self, fname):
