@@ -150,6 +150,22 @@ class Test_RpcMetaExec(unittest.TestCase):
         resp = self.dev.rpc.get_config('bgp/neighbors', model='openconfig')
         self.assertEqual(resp.tag, 'bgp')
 
+    def test_get_rpc_ignore_warning_bool(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning=True)
+        self.assertEqual(resp.tag, 'data')
+
+    def test_get_rpc_ignore_warning_str(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning='vrrp subsystem not running')
+        self.assertEqual(resp.tag, 'data')
+
+    def test_get_rpc_ignore_warning_list(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning=['vrrp subsystem not running',
+                                                'statement not found'])
+        self.assertEqual(resp.tag, 'data')
+
     # below test need to be fixed for Python 3.x
     """
     def test_get_config_remove_ns(self):

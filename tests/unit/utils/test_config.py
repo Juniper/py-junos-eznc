@@ -188,6 +188,19 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.diff(),
                          "Unable to parse diff from response!")
 
+    def test_config_diff_exception_severity_warning_still_raise(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>statement not found</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, self.conf.diff)
+
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='Stuff')
         self.conf.pdiff()
