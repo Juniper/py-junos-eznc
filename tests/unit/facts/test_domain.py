@@ -1,14 +1,17 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
+__author__ = "Stacy Smith"
+__credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
+import os
 from lxml import etree
 
-from jnpr.junos.facts.domain import facts_domain
 from jnpr.junos import Device
-from jnpr.junos.exception import RpcError
+from jnpr.junos.exception import PermissionError
+
+from ncclient.manager import Manager, make_device_handler
+from ncclient.transport import SSHSession
 
 
 @attr('unit')
@@ -16,62 +19,63 @@ class TestDomain(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):
+        mock_connect.side_effect = self._mock_manager_setup
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
         self.dev.open()
-        self.facts = {}
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
-    def test_resolv_conf(self, mock_fs_cat):
-        mock_fs_cat.return_value =\
-            """# domain juniper.net
-        search englab.juniper.net spglab.juniper.net juniper.net jnpr.net
-        nameserver 10.11.12.13
-        """
-        self.facts['hostname'] = 'test'
-        facts_domain(self.dev, self.facts)
-        self.assertEqual(self.facts['domain'], 'juniper.net')
-        self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
+    @patch('jnpr.junos.Device.execute')
+    def test_domain_fact_from_config(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_domain_config
+        self.assertEqual(self.dev.facts['domain'],'juniper.net')
+        self.assertEqual(self.dev.facts['fqdn'],'r0.juniper.net')
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
-    def test_resolv_conf_no_domain(self, mock_fs_cat):
-        mock_fs_cat.return_value =\
-            """
-        search englab.juniper.net spglab.juniper.net juniper.net jnpr.net
-        nameserver 10.11.12.13
-        """
-        self.facts['hostname'] = 'test'
-        facts_domain(self.dev, self.facts)
-        self.assertEqual(self.facts['domain'], None)
-        self.assertEqual(self.facts['fqdn'], 'test')
+    @patch('jnpr.junos.Device.execute')
+    def test_domain_fact_from_file(self, mock_execute):
+        self.dev.facts._cache['hostname'] = 'r0'
+        mock_execute.side_effect = self._mock_manager_domain_file
+        self.assertEqual(self.dev.facts['domain'],'juniper.net')
+        self.assertEqual(self.dev.facts['fqdn'],'r0.juniper.net')
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
-    def test_resolv_conf_file_absent_under_etc(self, mock_fs_cat):
-        mock_fs_cat.side_effect = [None, 'domain juniper.net']
-        self.facts['hostname'] = 'test'
-        facts_domain(self.dev, self.facts)
-        self.assertEqual(self.facts['domain'], 'juniper.net')
-        self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
+    def _read_file(self, fname):
+        from ncclient.xml_ import NCElement
 
-    def test_domain_in_configuration(self):
-        xmldata = etree.XML("""<configuration><system>
-                <domain-name>testing.net</domain-name>
-                </system></configuration>""")
-        self.dev.rpc.get_config = MagicMock(side_effect=xmldata)
-        self.facts['hostname'] = 'test'
-        facts_domain(self.dev, self.facts)
-        self.assertEqual(self.facts['domain'], 'testing.net')
-        self.assertEqual(self.facts['fqdn'], 'test.testing.net')
+        fpath = os.path.join(os.path.dirname(__file__),
+                             'rpc-reply', fname)
+        foo = open(fpath).read()
 
-    @patch('jnpr.junos.facts.domain.FS.cat')
-    def test_domain_rpc_error(self, mock_fs_cat):
-        self.dev.rpc.get_config = MagicMock(side_effect=RpcError)
-        mock_fs_cat.return_value =\
-            """# domain juniper.net
-        search englab.juniper.net spglab.juniper.net juniper.net jnpr.net
-        nameserver 10.11.12.13
-        """
-        self.facts['hostname'] = 'test'
-        facts_domain(self.dev, self.facts)
-        self.assertEqual(self.facts['domain'], 'juniper.net')
-        self.assertEqual(self.facts['fqdn'], 'test.juniper.net')
+        rpc_reply = NCElement(foo,
+                              self.dev._conn._device_handler
+                              .transform_reply())._NCElement__doc[0]
+        return rpc_reply
+
+    def _mock_manager_setup(self, *args, **kwargs):
+        if kwargs:
+            device_params = kwargs['device_params']
+            device_handler = make_device_handler(device_params)
+            session = SSHSession(device_handler)
+            return Manager(session, device_handler)
+
+    def _mock_manager_domain_config(self, *args, **kwargs):
+        if args:
+            return self._read_file('domain_config_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_domain_file(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-configuration':
+                xml = """
+                    <rpc-error>
+                        <error-type>protocol</error-type>
+                        <error-tag>operation-failed</error-tag>
+                        <error-severity>error</error-severity>
+                        <error-message>permission denied</error-message>
+                        <error-info>
+                            <bad-element>system</bad-element>
+                        </error-info>
+                    </rpc-error>
+                """
+                rsp = etree.XML(xml)
+                raise PermissionError(rsp=rsp)
+            else:
+                return self._read_file('domain_file_' + args[0].tag + '.xml')

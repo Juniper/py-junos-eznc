@@ -1,0 +1,4 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F5/junos">
+    <output>
+        Aborted! This command can only be used on the master routing engine.</output>
+    </rpc-reply>

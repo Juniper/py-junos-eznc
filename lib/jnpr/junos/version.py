@@ -1,2 +1,2 @@
-VERSION = "2.0.1"
-DATE = "2016-Sept-01"
+VERSION = "2.0.2-dev"
+DATE = "2016-Oct-26"

@@ -88,14 +88,14 @@ class FTP(ftplib.FTP):
         if os.path.isdir(local_path):
             mat = re.search('^.*/(.*)$', remote_file)
             if mat:
-                local_file=os.path.join(local_path, mat.group(1))
+                local_file = os.path.join(local_path, mat.group(1))
             else:
-                local_file=local_path
+                local_file = local_path
         else:
             local_file = local_path
         try:
             self.retrbinary('RETR ' + remote_file,
-                                 open(local_file, 'wb').write)
+                            open(local_file, 'wb').write)
         except Exception as ex:
             logger.error(ex)
             return False

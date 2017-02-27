@@ -3,8 +3,11 @@ from lxml.builder import E
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.start_shell import StartShell
 
+from jnpr.junos.exception import RpcError
+
 
 class FS(Util):
+
     """
     Filesystem (FS) utilities:
 
@@ -20,6 +23,7 @@ class FS(Util):
     * :meth:`rmdir`: remove a directory
     * :meth:`stat`: return file/dir information
     * :meth:`storage_usage`: return storage usage
+    * :meth:`directory_usage`: return directory usage
     * :meth:`storage_cleanup`: perform storage storage_cleanup
     * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
     * :meth:`symlink`: create a symlink
@@ -228,7 +232,9 @@ class FS(Util):
         if brief is True:
             results['files'] = [f.findtext('file-name').strip() for f in files]
         else:
-            results['files'] = dict((f.findtext('file-name').strip(), FS._decode_file(f)) for f in files)
+            results['files'] = dict(
+                (f.findtext('file-name').strip(),
+                 FS._decode_file(f)) for f in files)
 
         return results
 
@@ -264,7 +270,51 @@ class FS(Util):
         return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
 
     # -------------------------------------------------------------------------
-    ### storage_cleanup_check, storage_cleanip
+    # directory_usage - filesystem directory usage
+    # -------------------------------------------------------------------------
+
+    def directory_usage(self, path=".", depth=0):
+        """
+        Returns the directory usage, similar to the unix "du" command.
+
+        :returns: dict of directory usage, including subdirectories if depth > 0
+        """
+        BLOCK_SIZE = 512
+
+        rsp = self._dev.rpc.get_directory_usage_information(
+            path=path,
+            depth=str(depth))
+
+        result = {}
+
+        directories = rsp.findall(".//directory")
+        if not directories:
+            raise RpcError(rsp=rsp)
+
+        for directory in directories:
+            dir_name = directory.findtext("directory-name")
+            if dir_name is not None:
+                dir_name = dir_name.strip()
+            else:
+                raise RpcError(rsp=rsp)
+
+            used_space = directory.find('used-space')
+            if used_space is not None:
+                dir_size = used_space.text.strip()
+                dir_blocks = used_space.get('used-blocks')
+                if dir_blocks is not None:
+                    dir_blocks = int(dir_blocks)
+                    dir_bytes = dir_blocks * BLOCK_SIZE
+                    result[dir_name.strip()] = {
+                        "size": dir_size,
+                        "blocks": dir_blocks,
+                        "bytes": dir_bytes,
+                    }
+
+        return result
+
+    # -------------------------------------------------------------------------
+    # storage_cleanup_check, storage_cleanip
     # -------------------------------------------------------------------------
 
     @classmethod
@@ -330,8 +380,8 @@ class FS(Util):
 
     def cp(self, from_path, to_path):
         """
-        Perform a local file copy where **from_path** and **to_path** can be any
-        valid Junos path argument.  Refer to the Junos "file copy" command
+        Perform a local file copy where **from_path** and **to_path** can be
+        any valid Junos path argument.  Refer to the Junos "file copy" command
         documentation for details.
 
         :param str from_path: source file-path
@@ -388,8 +438,8 @@ class FS(Util):
         return rsp.text
 
     # -------------------------------------------------------------------------
-    # !!!!! methods that use SSH shell commands, requires that the user
-    # !!!!! has 'start shell' priveldges
+    # !!!!! methods that use SSH shell commands, require that the user
+    # !!!!! has 'start shell' privileges
     # -------------------------------------------------------------------------
 
     def _ssh_exec(self, command):

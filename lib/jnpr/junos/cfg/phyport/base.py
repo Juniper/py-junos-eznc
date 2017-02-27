@@ -80,6 +80,6 @@ class PhyPortBase(Resource):
     def _r_list(self):
         got = self.R.get_interface_information(
             media=True,
-            interface_name="[xgf]e*")
+            interface_name="[efgx][et]-*")
         self._rlist = [
             name.text.strip() for name in got.xpath('physical-interface/name')]

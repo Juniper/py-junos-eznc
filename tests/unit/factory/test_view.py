@@ -3,7 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from nose.plugins.attrib import attr
-from mock import MagicMock
+from mock import MagicMock, patch
 from jnpr.junos import Device
 from jnpr.junos.factory.view import View
 from jnpr.junos.op.phyport import PhyPortStatsTable, PhyPortStatsView
@@ -58,11 +58,13 @@ class TestFactoryView(unittest.TestCase):
                 self.v.asview(PhyPortStatsTable)),
             PhyPortStatsTable)
 
-    def test_view_refresh_can_refresh_false(self):
+    @patch('jnpr.junos.factory.view.warnings')
+    def test_view_refresh_can_refresh_false(self, mock_warnings):
         self.v._table.can_refresh = False
         self.assertRaises(RuntimeError, self.v.refresh)
 
-    def test_view_refresh_can_refresh_true(self):
+    @patch('jnpr.junos.factory.view.warnings')
+    def test_view_refresh_can_refresh_true(self, mock_warnings):
         self.v._table.can_refresh = True
         self.v._table._rpc_get = MagicMock()
         self.v.refresh()

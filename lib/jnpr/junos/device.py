@@ -17,6 +17,7 @@ import re
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+from ncclient.transport.session import SessionListener
 import ncclient.operations.errors as NcOpErrors
 from ncclient.operations import RPCError
 import paramiko
@@ -25,7 +26,8 @@ import jinja2
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.facts import *
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 
@@ -57,9 +59,9 @@ class _MyTemplateLoader(jinja2.BaseLoader):
         with open(path) as f:
             # You are trying to decode an object that is already decoded.
             # You have a str, there is no need to decode from UTF-8 anymore.
-            # open already decodes to Unicode in Python 3 if you open in text mode.
-            # If you want to open it as bytes, so that you can then decode,
-            # you need to open with mode 'rb'.
+            # open already decodes to Unicode in Python 3 if you open in text
+            # mode. If you want to open it as bytes, so that you can then
+            # decode, you need to open with mode 'rb'.
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
@@ -136,7 +138,7 @@ class _Connection(object):
             When **value** is not a ``file`` object
         """
         # got an existing file that we need to close
-        if (not value) and (None != self._logfile):
+        if (not value) and (self._logfile is not None):
             rc = self._logfile.close()
             self._logfile = False
             return rc
@@ -178,14 +180,18 @@ class _Connection(object):
     # ------------------------------------------------------------------------
 
     @property
-    def facts(self):
+    def ofacts(self):
         """
         :returns: Device fact dictionary
         """
-        return self._facts
+        if self._fact_style != 'old' and self._fact_style != 'both':
+            raise RuntimeError("Old-style facts gathering is not in use!")
+        if self._ofacts == {} and self.connected:
+            self.facts_refresh()
+        return self._ofacts
 
-    @facts.setter
-    def facts(self, value):
+    @ofacts.setter
+    def ofacts(self, value):
         """ read-only property """
         raise RuntimeError("facts is read-only!")
 
@@ -390,6 +396,49 @@ class _Connection(object):
 
         return probe_ok
 
+    def cli_to_rpc_string(self, command):
+        """
+        Translate a CLI command string into the equivalent RPC method call.
+
+        Translates a CLI command string into a string which represents the
+        equivalent line of code using an RPC instead of a CLI command. Handles
+        RPCs with arguments.
+
+        .. note::
+            This method does NOT actually invoke the RPC equivalent.
+
+        :param str command:
+          The CLI command to translate, e.g. "show version"
+
+        :returns: (str) representing the RPC meta-method (including
+                  attributes and arguments) which could be invoked instead of
+                  cli(command). Returns None if there is no equivalent RPC for
+                  command or if command is not a valid CLI command.
+        """
+
+        # Strip off any pipe modifiers
+        (command, _, _) = command.partition('|')
+        # Strip any leading or trailing whitespace
+        command = command.strip()
+        # Get the equivalent RPC
+        rpc = self.display_xml_rpc(command)
+        if isinstance(rpc, str):
+            # No RPC is available.
+            return None
+        rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
+        arguments = []
+        for child in rpc:
+            key = child.tag.replace('-', '_')
+            if child.text:
+                value = "'" + child.text + "'"
+            else:
+                value = "True"
+            arguments.append("%s=%s" % (key, value))
+        if arguments:
+            rpc_string += ', '.join(arguments)
+        rpc_string += ")"
+        return rpc_string
+
     # ------------------------------------------------------------------------
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
@@ -408,16 +457,18 @@ class _Connection(object):
         .. note::
             You can also use this method to obtain the XML RPC command for a
             given CLI command by using the pipe filter ``| display xml rpc``.
-            When you do this, the return value is the XML RPC command. For 
-            example if you provide as the command ``show version | display xml rpc``,
-            you will get back the XML Element ``<get-software-information>``.
+            When you do this, the return value is the XML RPC command. For
+            example if you provide as the command
+            ``show version | display xml rpc``, you will get back the XML
+            Element ``<get-software-information>``.
 
         .. warning::
             This function is provided for **DEBUG** purposes only!
             **DO NOT** use this method for general automation purposes as
-            that puts you in the realm of "screen-scraping the CLI".  The purpose of
-            the PyEZ framework is to migrate away from that tooling pattern.
-            Interaction with the device should be done via the RPC function.
+            that puts you in the realm of "screen-scraping the CLI".
+            The purpose of the PyEZ framework is to migrate away from that
+            tooling pattern. Interaction with the device should be done via
+            the RPC function.
 
         .. warning::
             You cannot use "pipe" filters with **command** such as ``| match``
@@ -425,12 +476,18 @@ class _Connection(object):
             ``| display xml rpc`` as noted above.
         """
         if 'display xml rpc' not in command and warning is True:
-            warnings.simplefilter("always")
-            warnings.warn("CLI command is for debug use only!", RuntimeWarning)
-            warnings.resetwarnings()
+            # Get the equivalent rpc metamethod
+            rpc_string = self.cli_to_rpc_string(command)
+            if rpc_string is not None:
+                warning_string = "\nCLI command is for debug use only!\n"
+                warning_string += "Instead of:\ncli('%s')\n" % (command)
+                warning_string += "Use:\n%s\n" % (rpc_string)
+                warnings.simplefilter("always")
+                warnings.warn(warning_string, RuntimeWarning)
+                warnings.resetwarnings()
 
         try:
-            rsp = self.rpc.cli(command, format)
+            rsp = self.rpc.cli(command=command, format=format)
             if isinstance(rsp, dict) and format.lower() == 'json':
                 return rsp
             # rsp returned True means <rpc-reply> is empty, hence return
@@ -449,36 +506,225 @@ class _Connection(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
+        except EzErrors.ConnectClosedError as ex:
+            raise ex
         except EzErrors.RpcError as ex:
-            if str(ex) is not '':
-                return "%s: %s" % (str(ex), command)
-            else:
-                return "invalid command: " + command
+            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
             return "invalid command: " + command
+
+    # ------------------------------------------------------------------------
+    # execute
+    # ------------------------------------------------------------------------
+
+    @normalizeDecorator
+    @timeoutDecorator
+    def execute(self, rpc_cmd, **kvargs):
+        """
+        Executes an XML RPC and returns results as either XML or native python
+
+        :param rpc_cmd:
+          can either be an XML Element or xml-as-string.  In either case
+          the command starts with the specific command element, i.e., not the
+          <rpc> element itself
+
+        :param func to_py:
+          Is a caller provided function that takes the response and
+          will convert the results to native python types.  all kvargs
+          will be passed to this function as well in the form::
+
+            to_py( self, rpc_rsp, **kvargs )
+
+        :raises ValueError:
+            When the **rpc_cmd** is of unknown origin
+
+        :raises PermissionError:
+            When the requested RPC command is not allowed due to
+            user-auth class privilege controls on Junos
+
+        :raises RpcError:
+            When an ``rpc-error`` element is contained in the RPC-reply
+
+        :returns:
+            RPC-reply as XML object.  If **to_py** is provided, then
+            that function is called, and return of that function is
+            provided back to the caller; presumably to convert the XML to
+            native python data-types (e.g. ``dict``).
+        """
+
+        if self.connected is not True:
+            raise EzErrors.ConnectClosedError(self)
+
+        if isinstance(rpc_cmd, str):
+            rpc_cmd_e = etree.XML(rpc_cmd)
+        elif isinstance(rpc_cmd, etree._Element):
+            rpc_cmd_e = rpc_cmd
+        else:
+            raise ValueError(
+                "Dont know what to do with rpc of type %s" %
+                rpc_cmd.__class__.__name__)
+
+        # invoking a bad RPC will cause a connection object exception
+        # will will be raised directly to the caller ... for now ...
+        # @@@ need to trap this and re-raise accordingly.
+
+        try:
+            rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
+        except NcOpErrors.TimeoutExpiredError:
+            # err is a TimeoutExpiredError from ncclient,
+            # which has no such attribute as xml.
+            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
+        except NcErrors.TransportError:
+            raise EzErrors.ConnectClosedError(self)
+        except RPCError as err:
+            rsp = JXML.remove_namespaces(err.xml)
+            # see if this is a permission error
+            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
+                'permission denied' \
+                else EzErrors.RpcError
+            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
+        # Something unexpected happened - raise it up
+        except Exception as err:
+            warnings.warn("An unknown exception occured - please report.",
+                          RuntimeWarning)
+            raise
+
+        # From 14.2 onward, junos supports JSON, so now code can be written as
+        # dev.rpc.get_route_engine_information({'format': 'json'})
+
+        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+            ver_info = self.facts.get('version_info')
+            if ver_info and ver_info.major[0] >= 15 or \
+                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+                try:
+                    return json.loads(rpc_rsp_e.text)
+                except ValueError as ex:
+                    # when data is {}{.*} types
+                    if str(ex).startswith('Extra data'):
+                        return json.loads(
+                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+            else:
+                warnings.warn("Native JSON support is only from 14.2 onwards",
+                              RuntimeWarning)
+
+        # This section is here for the possible use of something other than
+        # ncclient for RPCs that have embedded rpc-errors, need to check for
+        # those now.
+        # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
+        # if len(rpc_errs):
+        #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
+
+        # skip the <rpc-reply> element and pass the caller first child element
+        # generally speaking this is what they really want. If they want to
+        # uplevel they can always call the getparent() method on it.
+
+        try:
+            ret_rpc_rsp = rpc_rsp_e[0]
+        except IndexError:
+            # For cases where reply are like
+            # <rpc-reply>
+            #    protocol: operation-failed
+            #    error: device asdf not found
+            # </rpc-reply>
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
+                return rpc_rsp_e
+            # no children, so assume it means we are OK
+            return True
+
+        # if the caller provided a "to Python" conversion function, then invoke
+        # that now and return the results of that function.  otherwise just
+        # return the RPC results as XML
+
+        if kvargs.get('to_py'):
+            return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
+        else:
+            return ret_rpc_rsp
 
     # ------------------------------------------------------------------------
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self, exception_on_failure=False):
+    def facts_refresh(self,
+                      exception_on_failure=False,
+                      warnings_on_failure=None,
+                      keys=None):
         """
-        Reload the facts from the Junos device into :attr:`facts` property.
+        Refresh the facts from the Junos device into :attr:`facts` property.
+        See :module:`jnpr.junos.facts` for a complete list of available facts.
+        For old-style facts, this causes all facts to be immediately reloaded.
+        For new-style facts, the current fact value(s) are deleted, and the
+        fact is reloaded on demand.
 
-        :param bool exception_on_failure: To raise exception or warning when
-                             facts gathering errors out.
+        :param bool exception_on_failure: To raise exception when facts
+          gathering errors out. If True when new-style fact gathering is in
+          use, causes all facts to be reloaded rather than being loaded on
+          demand.
+        :param bool warnings_on_failure: To print a warning when fact gathering
+          errors out. The default for old-style facts gathering is
+          warnings_on_failure=True. The default for new-style facts gathering
+          is warnings_on_failure=False. If True when new-style fact gathering
+          is in use, causes all facts to be reloaded rather than being loaded
+          on demand.
+        :param str, set, list, or tuple keys: The set of keys in facts to
+          refresh. Note: Old-style facts gathering does not support
+          gathering individual facts, so this argument can only be
+          specified when new-style fact gathering is in use. In addition,
+          setting exception_on_failure or warnings_on_failure to True causes
+          all facts to be immediately refreshed, rather than being refreshed
+          on demand. For this reason, the keys argument can not be specified if
+          exception_on_failure or warnings_on_failure are True.
 
+        An example of specifying the keys argument as a string:
+        ```
+        dev.facts_refresh(keys='hostname')
+        ```
+
+        An example of specifying the keys argument as a tuple:
+        ```
+        dev.facts_refresh(keys=('hostname', 'hostname_info', 'domain', 'fqdn'))
+        ```
+        or as a list:
+        ```
+        dev.facts_refresh(keys=['hostname', 'hostname_info', 'domain', 'fqdn'])
+        ```
+        or as a set:
+        ```
+        dev.facts_refresh(keys={'hostname', 'hostname_info', 'domain', 'fqdn'})
+        ```
+
+        :raises RuntimeError:
+            If old-style fact gathering is in use and a keys argument is
+            specified.
         """
-        for gather in FACT_LIST:
-            try:
-                gather(self, self._facts)
-            except:
-                if exception_on_failure:
-                    raise
+        if self._fact_style not in ['old', 'new', 'both']:
+            raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
+        if self._fact_style == 'old' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = True
+            if keys is not None:
+                raise RuntimeError("The keys argument can not be specified "
+                                   "when old-style fact gathering is in use!")
+            should_warn = False
+            for gather in FACT_LIST:
+                try:
+                    gather(self, self._ofacts)
+                except:
+                    if exception_on_failure:
+                        raise
+                    should_warn = True
+            if (warnings_on_failure is True and should_warn is True and
+               self._fact_style != 'both'):
                 warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call "dev.facts_refresh(exception_on_failure=True)"',
+                              'To know the reason call '
+                              '"dev.facts_refresh(exception_on_failure=True)"',
                               RuntimeWarning)
-                return
+        if self._fact_style == 'new' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = False
+            self.facts._refresh(exception_on_failure=exception_on_failure,
+                                warnings_on_failure=warnings_on_failure,
+                                keys=keys)
+        return
 
     # -----------------------------------------------------------------------
     # OVERLOADS
@@ -486,6 +732,27 @@ class _Connection(object):
 
     def __repr__(self):
         return "Device(%s)" % self.hostname
+
+
+class DeviceSessionListener(SessionListener):
+
+    """
+    Listens to Session class of Netconf Transport
+    and detects errors in the transport.
+    """
+    def __init__(self, device):
+        self._device = device
+
+    def callback(self, root, raw):
+        """Required by implementation but not used here."""
+        pass
+
+    def errback(self, ex):
+        """Called when an error occurs.
+        Set the device's connected status to False.
+        :type ex: :exc:`Exception`
+        """
+        self._device.connected = False
 
 
 class Device(_Connection):
@@ -585,7 +852,16 @@ class Device(_Connection):
         :param bool gather_facts:
             *OPTIONAL* For ssh mode default is ``True``. In case of console
             connection over telnet/serial it defaults to ``False``.
-            If ``False`` then facts are not gathered on call to :meth:`open`
+            If ``False`` and old-style fact gathering is in use then facts are
+            not gathered on call to :meth:`open`. This argument is a no-op when
+            new-style fact gathering is in use (the default.)
+
+        :param str fact_style:
+            *OPTIONAL*  The style of fact gathering to use. Valid values are:
+            'new', 'old', or 'both'. The default is 'new'. The value 'both' is
+            only present for debugging purposes. It will be removed in a future
+            release. The value 'old' is only present to workaround bugs in
+            new-style fact gathering. It will be removed in a future release.
 
         :param str mode:
             *OPTIONAL*  mode, mode for console connection (telnet/serial)
@@ -629,6 +905,12 @@ class Device(_Connection):
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
+        self._fact_style = kvargs.get('fact_style', 'new')
+        if self._fact_style != 'new':
+            warnings.warn('fact-style %s will be removed in a future '
+                          'release.' %
+                          (self._fact_style),
+                          RuntimeWarning)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -652,6 +934,7 @@ class Device(_Connection):
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or \
                 self._auth_user
@@ -667,16 +950,27 @@ class Device(_Connection):
         self._conn = None
         self._j2ldr = _Jinja2ldr
         self._manages = []
-        self._facts = {}
+        self._ofacts = {}
 
         # public attributes
-
         self.connected = False
         self.rpc = _RpcMetaExec(self)
+        if self._fact_style == 'old':
+            self.facts = self.ofacts
+        else:
+            self.facts = _FactCache(self)
 
     # -----------------------------------------------------------------------
     # Basic device methods
     # -----------------------------------------------------------------------
+    @property
+    def connected(self):
+        return self._connected
+
+    @connected.setter
+    def connected(self, value):
+        if value in [True, False]:
+            self._connected = value
 
     def open(self, *vargs, **kvargs):
         """
@@ -744,7 +1038,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
-
+            self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
@@ -805,133 +1099,12 @@ class Device(_Connection):
         """
         Closes the connection to the device.
         """
-        self._conn.close_session()
-        self.connected = False
+        if self.connected is True:
+            self._conn.close_session()
+            self.connected = False
 
-    @normalizeDecorator
-    @timeoutDecorator
-    def execute(self, rpc_cmd, **kvargs):
-        """
-        Executes an XML RPC and returns results as either XML or native python
-
-        :param rpc_cmd:
-          can either be an XML Element or xml-as-string.  In either case
-          the command starts with the specific command element, i.e., not the
-          <rpc> element itself
-
-        :param func to_py:
-          Is a caller provided function that takes the response and
-          will convert the results to native python types.  all kvargs
-          will be passed to this function as well in the form::
-
-            to_py( self, rpc_rsp, **kvargs )
-
-        :raises ValueError:
-            When the **rpc_cmd** is of unknown origin
-
-        :raises PermissionError:
-            When the requested RPC command is not allowed due to
-            user-auth class privilege controls on Junos
-
-        :raises RpcError:
-            When an ``rpc-error`` element is contained in the RPC-reply
-
-        :returns:
-            RPC-reply as XML object.  If **to_py** is provided, then
-            that function is called, and return of that function is
-            provided back to the caller; presumably to convert the XML to
-            native python data-types (e.g. ``dict``).
-        """
-
-        if self.connected is not True:
-            raise EzErrors.ConnectClosedError(self)
-
-        if isinstance(rpc_cmd, str):
-            rpc_cmd_e = etree.XML(rpc_cmd)
-        elif isinstance(rpc_cmd, etree._Element):
-            rpc_cmd_e = rpc_cmd
-        else:
-            raise ValueError(
-                "Dont know what to do with rpc of type %s" %
-                rpc_cmd.__class__.__name__)
-
-        # invoking a bad RPC will cause a connection object exception
-        # will will be raised directly to the caller ... for now ...
-        # @@@ need to trap this and re-raise accordingly.
-
-        try:
-            rpc_rsp_e = self._conn.rpc(rpc_cmd_e)._NCElement__doc
-        except NcOpErrors.TimeoutExpiredError:
-            # err is a TimeoutExpiredError from ncclient,
-            # which has no such attribute as xml.
-            raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
-        except NcErrors.TransportError:
-            raise EzErrors.ConnectClosedError(self)
-        except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
-            # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
-                'permission denied' \
-                else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
-        # Something unexpected happened - raise it up
-        except Exception as err:
-            warnings.warn("An unknown exception occured - please report.",
-                          RuntimeWarning)
-            raise
-
-        # From 14.2 onward, junos supports JSON, so now code can be written as
-        # dev.rpc.get_route_engine_information({'format': 'json'})
-
-        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
-            if self._facts == {}:
-                self.facts_refresh()
-            ver_info = self._facts['version_info']
-            if ver_info.major[0] >= 15 or \
-                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
-                try:
-                    return json.loads(rpc_rsp_e.text)
-                except ValueError as ex:
-                    # when data is {}{.*} types
-                    if str(ex).startswith('Extra data'):
-                        return json.loads(
-                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
-            else:
-                warnings.warn("Native JSON support is only from 14.2 onwards",
-                              RuntimeWarning)
-
-        # This section is here for the possible use of something other than ncclient
-        # for RPCs that have embedded rpc-errors, need to check for those now
-
-        # rpc_errs = rpc_rsp_e.xpath('.//rpc-error')
-        # if len(rpc_errs):
-        #     raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rpc_errs[0])
-
-        # skip the <rpc-reply> element and pass the caller first child element
-        # generally speaking this is what they really want. If they want to
-        # uplevel they can always call the getparent() method on it.
-
-        try:
-            ret_rpc_rsp = rpc_rsp_e[0]
-        except IndexError:
-            # For cases where reply are like
-            # <rpc-reply>
-            #    protocol: operation-failed
-            #    error: device asdf not found
-            # </rpc-reply>
-            if rpc_rsp_e.text.strip() is not '':
-                return rpc_rsp_e
-            # no children, so assume it means we are OK
-            return True
-
-        # if the caller provided a "to Python" conversion function, then invoke
-        # that now and return the results of that function.  otherwise just
-        # return the RPC results as XML
-
-        if kvargs.get('to_py'):
-            return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
-        else:
-            return ret_rpc_rsp
+    def _rpc_reply(self, rpc_cmd_e):
+        return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager

@@ -17,6 +17,8 @@ RUN apk update \
     && apk upgrade \
     && apk add build-base gcc g++ make python-dev py-pip py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
+    ca-certificates openssl wget \
+    && update-ca-certificates \
     && pip install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
     && python setup.py install \

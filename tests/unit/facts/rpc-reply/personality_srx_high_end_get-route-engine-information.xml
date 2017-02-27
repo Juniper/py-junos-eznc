@@ -1,0 +1,24 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.3X48/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/12.3X48/junos-chassis">
+        <route-engine>
+            <slot>0</slot>
+            <mastership-state>master</mastership-state>
+            <mastership-priority>master (default)</mastership-priority>
+            <memory-dram-size>1023</memory-dram-size>
+            <memory-installed-size>1023</memory-installed-size>
+            <memory-buffer-utilization>43</memory-buffer-utilization>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>4</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>96</cpu-idle>
+            <model>RE-PPC-1200-A</model>
+            <start-time junos:seconds="1477947622">2016-10-31 14:00:22 PDT</start-time>
+            <up-time junos:seconds="5359398">62 days, 43 minutes, 18 seconds</up-time>
+            <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+            <load-average-one>0.01</load-average-one>
+            <load-average-five>0.02</load-average-five>
+            <load-average-fifteen>0.00</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+</rpc-reply>

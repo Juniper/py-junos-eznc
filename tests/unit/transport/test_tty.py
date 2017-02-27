@@ -8,7 +8,6 @@ from jnpr.junos.transport.tty import Terminal
 from jnpr.junos import exception as EzErrors
 
 
-
 @attr('unit')
 class TestTTY(unittest.TestCase):
 
@@ -74,3 +73,66 @@ class TestTTY(unittest.TestCase):
         self.assertRaises(RuntimeError, self.terminal._login_state_machine)
         self.terminal.write.assert_called_with("1")
         self.assertEqual(self.terminal.state, 7)
+
+    def test_tty_ev_already_closed(self):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, 'already_closed')
+        self.assertTrue(self.terminal._logout_state_machine())
+
+    def test_tty_already_logout(self):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, None)
+        self.assertTrue(self.terminal._logout_state_machine())
+
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_login_state_machine_loader(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal._loader = 1
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.side_effect = iter([(None, 'loader'),
+                                                      (None, 'hotkey'),
+                                                      (None, 'shell')])
+        self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_login_state_machine_loader(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal._loader = 1
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.side_effect = iter([(None, 'loader'),
+                                                      (None, 'shell')])
+        try:
+            self.terminal._login_state_machine()
+        except RuntimeError as ex:
+            self.assertEqual(str(ex),
+                             'probably corrupted image, stuck in loader')
+
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_login_state_machine_hotkey(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, 'hotkey')
+        self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+        self.assertEqual(self.terminal.state, 8)  # 8 is for hot keys
+
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_ev_tty_nologin(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, None)
+        self.terminal.console_has_banner = True
+        self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+        self.terminal.write.assert_called_with('\n')
+
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_logout_state_machine_attempt_10(self, mock_sleep):
+        self.terminal.write = MagicMock()
+        self.terminal.read_prompt = MagicMock()
+        self.terminal.read_prompt.return_value = (None, 'cli')
+        try:
+            self.terminal._logout_state_machine()
+        except RuntimeError as ex:
+            self.assertEqual(str(ex),
+                             'logout_sm_failure')

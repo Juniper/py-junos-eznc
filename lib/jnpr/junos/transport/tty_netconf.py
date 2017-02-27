@@ -7,9 +7,10 @@ import logging
 import sys
 
 from lxml.builder import E
+from lxml.etree import XMLSyntaxError
 from datetime import datetime, timedelta
-from jnpr.junos.jxml import remove_namespaces
-from jnpr.junos import exception as EzErrors
+from ncclient.operations.rpc import RPCReply, RPCError
+from ncclient.xml_ import to_ele
 import six
 
 
@@ -117,23 +118,13 @@ class tty_netconf(object):
         self._tty.rawwrite(rpc)
 
         rsp = self._receive()
-        try:
-            rsp = remove_namespaces(
-                rsp[0])  # return first child after the <rpc-reply>
-        except IndexError:
-            if rsp.text.strip() is not '':
-                return rsp
-            # no children, so assume it means we are OK
-            return True
-        except:
-            return etree.XML('<error-in-receive/>')
-        err_msg = rsp.findtext('error-message')
-        if err_msg:
-            if err_msg == 'permission denied':
-                e = EzErrors.PermissionError
-            else:
-                e = EzErrors.RpcError
-            raise e(cmd=cmd, rsp=rsp)
+        rsp = rsp.decode('utf-8') if isinstance(rsp, bytes) else rsp
+        reply = RPCReply(rsp)
+        errors = reply.errors
+        if len(errors) > 1:
+            raise RPCError(to_ele(reply._raw), errs=errors)
+        elif len(errors) == 1:
+            raise reply.error
         return rsp
 
     # -------------------------------------------------------------------------
@@ -143,7 +134,6 @@ class tty_netconf(object):
     def _receive(self):
         """ process the XML response into an XML object """
         rxbuf = PY6.EMPTY_STR
-        lastline = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:
             try:
@@ -167,20 +157,21 @@ class tty_netconf(object):
         if _NETCONF_EOM in rxbuf[-1]:
             rxbuf.pop()
 
-        rxbuf[0] = _xmlns_strip(rxbuf[0])  # nuke the xmlns
-        rxbuf[1] = _xmlns_strip(rxbuf[1])  # nuke the xmlns
-        rxbuf = list(map(_junosns_strip, rxbuf))  # nuke junos: namespace
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
             logger.debug('Received: \n%s' % rcvd_data)
             try:
-                as_xml = etree.XML(rcvd_data)
-            except Exception as ex:
-                if isinstance(ex, etree.XMLSyntaxError):
-                    rcvd_data = rcvd_data[:rcvd_data.index(']]>]]>')]
-                    as_xml = etree.XML(rcvd_data)
-            return as_xml
+                etree.XML(rcvd_data)
+            except XMLSyntaxError:
+                if _NETCONF_EOM in rcvd_data:
+                    rcvd_data = rcvd_data[:rcvd_data.index(_NETCONF_EOM)]
+                    etree.XML(rcvd_data)     # just to recheck
+                else:
+                    parser = etree.XMLParser(recover=True)
+                    rcvd_data = etree.tostring(etree.XML(rcvd_data,
+                                                         parser=parser))
+            return rcvd_data
         except:
             if '</xnm:error>' in rxbuf:
                 for x in rxbuf:

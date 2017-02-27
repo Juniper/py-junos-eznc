@@ -1,0 +1,7 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1R1/junos">
+    <configuration junos:commit-seconds="1481740774" junos:commit-localtime="2016-12-14 10:39:34 PST" junos:commit-user="user">
+            <system>
+                <domain-name>juniper.net</domain-name>
+            </system>
+        </configuration>
+    </rpc-reply>                        

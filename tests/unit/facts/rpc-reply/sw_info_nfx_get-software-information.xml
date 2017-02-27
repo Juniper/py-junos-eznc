@@ -1,0 +1,109 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1I0/junos">
+    <software-information>
+        <host-name>jdm</host-name>
+        <product-model>nfx250_s2_10_t</product-model>
+        <product-name>nfx250_s2_10_t</product-name>
+        <package-information>
+            <name>JUNOS Host Software</name>
+            <comment>JUNOS Host Software [3.14.61-rt58-WR7.0.0.13_ovp:3.0.2]</comment>
+        </package-information>
+        <package-information>
+            <name>Junos Host Software package[1]</name>
+            <comment>JUNOS Host nfx-2 control-plane flex package [15.1X53-D45.3]</comment>
+        </package-information>
+        <package-information>
+            <name>Junos Host Software package[2]</name>
+            <comment>JUNOS Host nfx-2 platform package [15.1X53-D45.3]</comment>
+        </package-information>
+        <package-information>
+            <name>Junos Host Software package[3]</name>
+            <comment>JUNOS Host nfx-2 base package [15.1X53-D45.3]</comment>
+        </package-information>
+        <package-information>           
+            <name>Junos Host Software package[4]</name>
+            <comment>JUNOS Host nfx-2 data-plane package [15.1X53-D45.3]</comment>
+        </package-information>
+        <package-information>
+            <name>Junos Host Software package[5]</name>
+            <comment>JUNOS Host qfx-jdm package [15.1X53-D45.3]</comment>
+        </package-information>
+        <package-information>
+            <name>KERNEL</name>
+            <comment>KERNEL (null)</comment>
+        </package-information>
+        <version-information>
+            <component>MGD</component>
+            <major>15</major>
+            <minor>1</minor>
+            <release-category>I</release-category>
+            <build-number>0</build-number>
+            <builder>dc-builder</builder>
+            <build-date>2016-11-16 14:00:34 UTC</build-date>
+            <release>15.1X53-D45.3.secure [dc-builder]</release>
+        </version-information>
+        <cli>                           
+            <display-version>
+            </display-version>
+        </cli>
+        <version-information>
+            <component></component>
+            <major>0</major>
+            <minor>0</minor>
+            <release-category></release-category>
+            <build-number>0</build-number>
+            <builder></builder>
+            <build-date></build-date>
+            <release></release>
+        </version-information>
+        <version-information>
+            <component></component>
+            <major>0</major>
+            <minor>0</minor>
+            <release-category></release-category>
+            <build-number>0</build-number>
+            <builder></builder>
+            <build-date></build-date>
+            <release></release>
+        </version-information>          
+        <version-information>
+            <component></component>
+            <major>0</major>
+            <minor>0</minor>
+            <release-category></release-category>
+            <build-number>0</build-number>
+            <builder></builder>
+            <build-date></build-date>
+            <release></release>
+        </version-information>
+        <version-information>
+            <component>SDXD</component>
+            <major>15</major>
+            <minor>1</minor>
+            <release-category>I</release-category>
+            <build-number>0</build-number>
+            <builder>dc-builder</builder>
+            <build-date>2016-11-16 14:01:02 UTC</build-date>
+            <release>15.1X53-D45.3.secure [dc-builder]</release>
+        </version-information>
+        <version-information>
+            <component>jdm-actions-dd</component>
+            <major>15</major>           
+            <minor>1</minor>
+            <release-category>I</release-category>
+            <build-number>0</build-number>
+            <builder>dc-builder</builder>
+            <build-date>2016-11-16 13:53:02 UTC</build-date>
+            <release>15.1X53-D45.3.secure [dc-builder]</release>
+        </version-information>
+        <version-information>
+            <component>jdmd-actions-dd</component>
+            <major>15</major>
+            <minor>1</minor>
+            <release-category>I</release-category>
+            <build-number>0</build-number>
+            <builder>dc-builder</builder>
+            <build-date>2016-11-16 13:53:06 UTC</build-date>
+            <release>15.1X53-D45.3.secure [dc-builder]</release>
+        </version-information>
+    </software-information>
+</rpc-reply>
