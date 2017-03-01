@@ -76,6 +76,8 @@ Your local scripts will be mounted to /scripts in the container
 
 `cd scripts`
 
+See [DOCKER-EXAMPLES.md](DOCKER-EXAMPLES.md) for some example usage.
+
 ## Upgrade
 
 Upgrading has the same requirements as installation and has the same format with the addition of -UPGRADE
