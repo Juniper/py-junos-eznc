@@ -22,7 +22,8 @@ class _RpcMetaExec(object):
     # get_config
     # -----------------------------------------------------------------------
 
-    def get_config(self, filter_xml=None, options={}, model=None, remove_ns=True, **kwargs):
+    def get_config(self, filter_xml=None, options={}, model=None, namespace=None,
+                   remove_ns=True, **kwargs):
         """
         retrieve configuration from the Junos device
 
@@ -62,6 +63,10 @@ class _RpcMetaExec(object):
                 model is True and filter_xml is None, xml is enclosed under <data> so
                 that we we get junos as well as other model configurations:
 
+        :param str namespace: User can have their own defined namespace in the
+                yang models, In such cases they need to provide that namespace
+                so that it can be used to fetch yang modeled configs:
+
         :param bool remove_ns: remove namespaces, if value assigned is False, function
                 will return xml with namespaces. The same xml returned can be
                 loaded back to devices. This comes handy in case of yang based
@@ -91,12 +96,14 @@ class _RpcMetaExec(object):
                     filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
             # it does not already have one (not in case of yang model config)
-            if filter_xml.tag != 'configuration' and not nmspaces.get(model):
+            if filter_xml.tag != 'configuration' and model is None and \
+                            namespace is None:
                 etree.SubElement(rpc, 'configuration').append(filter_xml)
             else:
-                if model is not None:
-                    ns = nmspaces.get(model.lower())
-                    filter_xml.attrib['xmlns'] = ns + filter_xml.tag
+                if model is not None or namespace is not None:
+                    ns = namespace or (nmspaces.get(model.lower()) + \
+                                      filter_xml.tag)
+                    filter_xml.attrib['xmlns'] = ns
                 rpc.append(filter_xml)
         transform = self._junos.transform
         if remove_ns is False:
