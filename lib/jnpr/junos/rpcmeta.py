@@ -27,53 +27,59 @@ class _RpcMetaExec(object):
         """
         retrieve configuration from the Junos device
 
-        For example::
-            dev.rpc.get_config()
-            dev.rpc.get_config(filter_xml='<system><services/></system>')
-            dev.rpc.get_config(filter_xml='system/services')
-            dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'),
+        .. code-block:: python
+
+           dev.rpc.get_config()
+           dev.rpc.get_config(filter_xml='<system><services/></system>')
+           dev.rpc.get_config(filter_xml='system/services')
+           dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'),
                             options={'format': 'json'})
-            # to fetch junos as well as yang model configs
-            dev.rpc.get_config(model=True)
-            # openconfig yang example
-            dev.rpc.get_config(filter_xml='bgp', model='openconfig')
-            dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>',
+           # to fetch junos as well as yang model configs
+           dev.rpc.get_config(model=True)
+           # openconfig yang example
+           dev.rpc.get_config(filter_xml='bgp', model='openconfig')
+           dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>',
                             model='openconfig')
-            # custom yang example
-            dev.rpc.get_config(filter_xml='l2vpn', model='custom')
-            # ietf yang example
-            dev.rpc.get_config(filter_xml='interfaces', model='ietf')
+           # custom yang example
+           dev.rpc.get_config(filter_xml='l2vpn', model='custom')
+           # ietf yang example
+           dev.rpc.get_config(filter_xml='interfaces', model='ietf')
 
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
                      when omitted the entire configuration is returned;
                      the following returns the device host-name configured
-                     with "set system host-name":
+                     with "set system host-name"
 
-        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
+        .. code-block:: python
+
+           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
 
         :options: is a dictionary of XML attributes to set within the <get-configuration> RPC;
                   the following returns the device host-name either configured with "set system host-name"
-                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems:
+                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems
 
-        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
+        .. code-block:: python
+
+           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
                  options={'database':'committed','inherit':'inherit'})
 
         :param str model: Can provide yang model openconfig/custom/ietf. When
                 model is True and filter_xml is None, xml is enclosed under <data> so
-                that we we get junos as well as other model configurations:
+                that we we get junos as well as other model configurations
 
         :param str namespace: User can have their own defined namespace in the
                 yang models, In such cases they need to provide that namespace
-                so that it can be used to fetch yang modeled configs:
+                so that it can be used to fetch yang modeled configs
 
         :param bool remove_ns: remove namespaces, if value assigned is False, function
                 will return xml with namespaces. The same xml returned can be
                 loaded back to devices. This comes handy in case of yang based
                 configs
 
-            For example::
-                dev.rpc.get_config(filter_xml='bgp', model='openconfig',
+        .. code-block:: python
+
+           dev.rpc.get_config(filter_xml='bgp', model='openconfig',
                         remove_ns=False)
         """
 
@@ -129,13 +135,14 @@ class _RpcMetaExec(object):
         Retrieve running configuration and device state information using
         <get> rpc
 
-        For example::
-            dev.rpc.get()
-            dev.rpc.get(ignore_warning=True)
-            dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
-            dev.rpc.get(filter_select='bgp/neighbors')
-            dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
-            dev.rpc.get('mpls', ignore_warning=True)
+        .. code-block:: python
+
+           dev.rpc.get()
+           dev.rpc.get(ignore_warning=True)
+           dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
+           dev.rpc.get(filter_select='bgp/neighbors')
+           dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
+           dev.rpc.get('mpls', ignore_warning=True)
 
         :param str filter_select:
           The select attribute will be treated as an XPath expression and

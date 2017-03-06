@@ -649,14 +649,14 @@ class Config(Util):
             * "batch" - Work in batch database
             * "exclusive" - Work with Locking the candidate configuration
 
-            Example::
+        .. code-block:: python
 
-            # mode can be private/dynamic/exclusive/batch
-            with Config(dev, mode='exclusive') as cu:
-                cu.load('set system services netconf traceoptions file xyz',
-                        format='set')
-                print cu.diff()
-                cu.commit()
+           # mode can be private/dynamic/exclusive/batch
+           with Config(dev, mode='exclusive') as cu:
+               cu.load('set system services netconf traceoptions file xyz',
+                       format='set')
+               print cu.diff()
+               cu.commit()
         """
         self.mode = mode
         Util.__init__(self, dev=dev)
