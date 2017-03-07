@@ -1,7 +1,7 @@
 import unittest2 as unittest
 from jnpr.junos.utils.config import Config
 from nose.plugins.attrib import attr
-from mock import MagicMock, patch
+from mock import patch, MagicMock, call
 import re
 import sys
 import os
@@ -72,9 +72,10 @@ class TestConsole(unittest.TestCase):
             password='lab123',
             mode='Telnet',
             fact_style='old')
-        mock_warn.assert_called_once('fact-style old will be removed in a '
+        mock_warn.assert_has_calls([call.warn(
+            'fact-style old will be removed in a '
                                      'future release.',
-                                     RuntimeWarning)
+                                    RuntimeWarning)])
 
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_open')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')

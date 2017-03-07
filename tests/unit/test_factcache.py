@@ -3,8 +3,7 @@ __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest2 as unittest
 from nose.plugins.attrib import attr
-from mock import patch, MagicMock
-import os
+from mock import patch, MagicMock, call
 from jnpr.junos.exception import FactLoopError
 
 from jnpr.junos import Device
@@ -61,11 +60,12 @@ class TestFactCache(unittest.TestCase):
         # RunTimeWarning because the values of the new and old-style facts
         # do not match
         foo = self.dev.facts['foo']
-        mock_warn.assert_called_once('New and old-style facts do not '
+        mock_warn.assert_has_calls([call.warn(
+            'New and old-style facts do not '
                                      'match for the foo fact.\n'
                                      '    New-style value: foo\n'
                                      '    Old-style value: bar\n',
-                                     RuntimeWarning)
+                                    RuntimeWarning)])
 
     def test_factcache_fail_to_return_expected_fact(self):
         # Create a callback for the foo fact.
@@ -203,11 +203,15 @@ class TestFactCache(unittest.TestCase):
                                                    mock_device_warn):
         # Refresh all facts with warnings on failure
         self.dev.facts._refresh(warnings_on_failure=True)
-        mock_warn.assert_called_once('Facts gathering is incomplete. '
-                                     'To know the reason call '
-                                     '"dev.facts_refresh('
-                                     'exception_on_failure=True)"',
-                                     RuntimeWarning)
+        mock_warn.assert_has_calls([call.warn(
+            'Facts gathering is incomplete. To know the reason call '
+            '"dev.facts_refresh(exception_on_failure=True)"',
+                                    RuntimeWarning)])
+        # mock_warn.assert_called_once('Facts gathering is incomplete. '
+        #                              'To know the reason call '
+        #                              '"dev.facts_refresh('
+        #                              'exception_on_failure=True)"',
+        #                              RuntimeWarning)
 
     def _mock_manager_setup(self, *args, **kwargs):
         if kwargs:
