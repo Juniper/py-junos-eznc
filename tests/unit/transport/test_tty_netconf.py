@@ -65,7 +65,7 @@ class TestTTYNetconf(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf.rpc')
     def test_close_force_false(self, mock_rpc):
         self.tty_net.close(False)
-        mock_rpc.assert_not_called_with('close-session')
+        self.assertTrue('close-session' not in mock_rpc.call_args_list)
 
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf.rpc')
     def test_zeroize_exception(self, mock_rpc):
