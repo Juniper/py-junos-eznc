@@ -60,3 +60,10 @@ Inventory Report
 ----------------------------------------------------------------------------------------------------
 All done. Please see errors.txt for any errors.
 ```
+
+## Make a bash alias to use it as an executable:
+
+```
+$ alias pyez="docker run -it --rm -v $PWD:/scripts juniper/pyez python"
+$ pyez some_script.py
+```
