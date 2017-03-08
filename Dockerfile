@@ -1,6 +1,6 @@
 FROM alpine:3.4
 
-MAINTAINER ssteiner@juniper.net
+MAINTAINER Stephen Steiner <ssteiner@juniper.net>
 
 RUN mkdir /source \
     && mkdir /scripts
@@ -28,5 +28,3 @@ RUN apk update \
 WORKDIR /scripts
 
 VOLUME /scripts
-
-CMD sh

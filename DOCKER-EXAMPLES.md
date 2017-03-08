@@ -44,7 +44,7 @@ Cannot connect to device: ConnectTimeoutError(vmx.local)
 
 ## As a PyEZ terminal
 
-`docker run -it juniper/pyez`
+`docker run -it juniper/pyez sh`
 
 ```
 $ cd fetcher/
