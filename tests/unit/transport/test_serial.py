@@ -60,7 +60,7 @@ class TestSerial(unittest.TestCase):
     def test_tty_serial_read(self):
         self.dev._tty._ser = MagicMock()
         self.dev._tty.read()
-        self.dev._tty._ser.readline.assert_is_called()
+        self.dev._tty._ser.readline.assert_called()
 
     def test_tty_serial_read_prompt(self):
         self.dev._tty._ser = MagicMock()

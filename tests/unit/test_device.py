@@ -177,19 +177,19 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.device.os')
     @patch(builtin_string + '.open')
     @patch('paramiko.config.SSHConfig.lookup')
-    def test_device__sshconf_lkup(self, os_mock, open_mock, mock_paramiko):
+    def test_device__sshconf_lkup(self, mock_paramiko, open_mock, os_mock):
         os_mock.path.exists.return_value = True
         self.dev._sshconf_lkup()
-        mock_paramiko.assert_called_any()
+        mock_paramiko.assert_called_once_with('1.1.1.1')
 
     @patch('jnpr.junos.device.os')
     @patch(builtin_string + '.open')
     @patch('paramiko.config.SSHConfig.lookup')
-    def test_device__sshconf_lkup_def(self, os_mock, open_mock, mock_paramiko):
+    def test_device__sshconf_lkup_def(self, mock_paramiko, open_mock, os_mock):
         os_mock.path.exists.return_value = True
         self.dev._ssh_config = '/home/rsherman/.ssh/config'
         self.dev._sshconf_lkup()
-        mock_paramiko.assert_called_any()
+        mock_paramiko.assert_called_once_with('1.1.1.1')
 
     @patch('os.getenv')
     def test_device__sshconf_lkup_path_not_exists(self, mock_env):
