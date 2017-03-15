@@ -268,6 +268,17 @@ class Config(Util):
           If set to ``True`` will set the load-config action to merge.
           the default load-config action is 'replace'
 
+        :param bool update:
+          If set to ``True`` Compare a complete loaded configuration against
+          the candidate configuration. For each hierarchy level or
+          configuration object that is different in the two configurations,
+          the version in the loaded configuration replaces the version in the
+          candidate configuration. When the configuration is later committed,
+          only system processes that are affected by the changed configuration
+          elements parse the new configuration.
+
+          .. note:: This option cannot be used if **format** is "set".
+
         :param str template_path:
           Similar to the **path** parameter, but this indicates that
           the file contents are ``Jinja2`` format and will require
@@ -307,6 +318,8 @@ class Config(Util):
         overwrite = kvargs.get('overwrite', False)
         if overwrite is True:
             rpc_xattrs['action'] = 'override'
+        if kvargs.get('update') is True:
+            rpc_xattrs['action'] = 'update'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
 
@@ -331,9 +344,10 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs """
             # when format is given, setup the xml attrs appropriately
             if kvargs['format'] == 'set':
-                if overwrite is True:
+                if overwrite is True or kvargs.get('update') is True:
                     raise ValueError(
-                        "conflicting args, cannot use 'set' with 'overwrite'")
+                        "conflicting args, cannot use 'set' with '%s'" %
+                        ('overwrite' if overwrite is True else 'update'))
                 rpc_xattrs['action'] = 'set'
                 kvargs['format'] = 'text'
             rpc_xattrs['format'] = kvargs['format']
