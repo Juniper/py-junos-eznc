@@ -86,3 +86,13 @@ class TestStartShell(unittest.TestCase):
         """]
         self.assertTrue(self.shell.run('show version',
                                        '---\(more\s?\d*%?\)---\n\s*|%')[0])
+
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_startshell_run_this_None(self, mock_wait_for):
+        self.shell._chan = MagicMock()
+        mock_wait_for.return_value = [
+            """
+        ------------
+        JUNOS Services Deep Packet Inspection package [15.1
+        """]
+        self.assertTrue(self.shell.run('show version', this=None)[0])
