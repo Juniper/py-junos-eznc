@@ -206,6 +206,119 @@ class _Connection(object):
         """
         return self._port
 
+    # ------------------------------------------------------------------------
+    # property: master
+    # ------------------------------------------------------------------------
+
+    @property
+    def master(self):
+        """
+        The mastership state of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering and the
+            value of currently cached facts. If there is a chance the
+            mastership state may have changed since the facts were cached,
+            then dev.facts_refresh() should be invoked prior to checking
+            this property. If old-style fact gathering is in use,
+            this property will return None.
+
+        :returns: True if the current RE is the master Routing Engine. False if
+                  the current RE is not the master Routing Engine. None if
+                  unable to determine the state of the current Routing Engine.
+        """
+        master = None
+
+        # Make sure the 'current_re' fact has a value
+        if self.facts.get('current_re') is not None:
+            # Typical master case
+            if 'master' in self.facts['current_re']:
+                master = True
+            # Typical backup case
+            elif 'backup' in self.facts['current_re']:
+                master = False
+            # Some single chanssis and single RE platforms don't have
+            # 'master' in the 'current_re' fact. It's best to check if it's a
+            #  single chassis and single RE platform based on the
+            # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
+            elif (self.facts.get('2RE') is False and
+                  self.facts.get('RE_hw_mi') is False and
+                  're0' in self.facts['current_re']):
+                master = True
+            else:
+                # Might be a multi-chassis case where this RE is neither the
+                # master or the backup for the entire system. In that case,
+                # it's either a chassis master or a chassis backup.
+                for re_state in self.facts['current_re']:
+                    # Multi-chassis case. A chassis master/backup, but
+                    # not the system master/backup.
+                    if '-backup' in re_state or '-master' in re_state:
+                        master = False
+                        break
+        return master
+
+    @master.setter
+    def master(self, value):
+        """ read-only property """
+        raise RuntimeError("master is read-only!")
+
+    # ------------------------------------------------------------------------
+    # property: re_name
+    # ------------------------------------------------------------------------
+
+    @property
+    def re_name(self):
+        """
+        The name of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering. If
+            old-style fact gathering is in use, this property will return None.
+
+        :returns: A string containing the name of the current Routing Engine or
+                  None if unable to determine the state of the current
+                  Routing Engine.
+        """
+        re_name = None
+
+        # Make sure the 'current_re' and 'hostname_info' facts have values
+        if (self.facts.get('current_re') is not None and
+           self.facts.get('hostname_info') is not None):
+            # re_name should be the intersection of the values in the
+            # 'current_re' fact and the keys in the 'hostname_info' fact.
+            intersect = (set(self.facts['current_re']) &
+                         set(self.facts['hostname_info'].keys()))
+            # intersect should usually contain a single element (the RE's
+            # name) if things worked correctly.
+            if len(intersect) == 1:
+                re_name = list(intersect)[0]
+            # If intersect contains no elements
+            elif len(intersect) == 0:
+                # Look for the first value
+                # in 'current_re' which contains '-re'.
+                for re_state in self.facts['current_re']:
+                    if '-re' in re_state:
+                        re_name = re_state
+                        break
+                if re_name is None:
+                    # Still haven't figured it out, if there's only one key
+                    # in 'hostname_info', assume that.
+                    all_re_names = list(self.facts['hostname_info'].keys())
+                    if len(all_re_names) == 1:
+                        re_name = all_re_names[0]
+        return re_name
+
+    @re_name.setter
+    def re_name(self, value):
+        """ read-only property """
+        raise RuntimeError("re_name is read-only!")
+
     def _sshconf_lkup(self):
         if self._ssh_config:
             sshconf_path = os.path.expanduser(self._ssh_config)

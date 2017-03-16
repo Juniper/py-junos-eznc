@@ -1,9 +1,9 @@
-__author__ = "Rick Sherman, Nitin Kumar"
+__author__ = "Rick Sherman, Nitin Kumar, Stacy Smith"
 __credits__ = "Jeremy Schulman"
 
 import unittest2 as unittest
 from nose.plugins.attrib import attr
-from mock import MagicMock, patch, mock_open
+from mock import MagicMock, patch, mock_open, call
 import os
 from lxml import etree
 import sys
@@ -79,8 +79,8 @@ class TestDevice(unittest.TestCase):
         self.dev.close()
 
     def test_new_console_return(self):
-        dev = Device(host='1.1.1.1', user='test', password='password123', port=23,
-                     gather_facts=False)
+        dev = Device(host='1.1.1.1', user='test', password='password123',
+                     port=23, gather_facts=False)
         self.assertTrue(isinstance(dev, Console))
 
     @patch('jnpr.junos.device.netconf_ssh')
@@ -101,7 +101,8 @@ class TestDevice(unittest.TestCase):
         from datetime import timedelta, datetime
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
-                                                  currenttime + timedelta(minutes=4)]
+                                                  currenttime +
+                                                  timedelta(minutes=4)]
         self.assertRaises(EzErrors.ConnectTimeoutError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
@@ -112,7 +113,8 @@ class TestDevice(unittest.TestCase):
         from datetime import timedelta, datetime
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [currenttime,
-                                                  currenttime + timedelta(minutes=4)]
+                                                  currenttime +
+                                                  timedelta(minutes=4)]
         self.assertRaises(EzErrors.ConnectError, self.dev.open)
 
     @patch('jnpr.junos.device.netconf_ssh')
@@ -163,6 +165,124 @@ class TestDevice(unittest.TestCase):
             self.dev.logfile = True
         except Exception as ex:
             self.assertEqual(type(ex), ValueError)
+
+    def test_device_master_is_master(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['re1', 'master', 'node',
+                                               'fwdd', 'member', 'pfem']
+        self.assertEqual(localdev.master, True)
+
+    def test_device_master_is_backup(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['re0', 'backup']
+        self.assertEqual(localdev.master, False)
+
+    def test_device_master_is_re0_only(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['2RE'] = False
+        localdev.facts._cache['RE_hw_mi'] = False
+        localdev.facts._cache['current_re'] = ['re0']
+        self.assertEqual(localdev.master, True)
+
+    def test_device_master_is_multi_chassis_non_master1(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['2RE'] = True
+        localdev.facts._cache['current_re'] = ['lcc1-re1', 'member1-re1',
+                                               'lcc1-backup', 'member1-backup']
+        self.assertEqual(localdev.master, False)
+
+    def test_device_master_is_multi_chassis_non_master2(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['2RE'] = True
+        localdev.facts._cache['current_re'] = ['lcc1-re0', 'member1-re0',
+                                               'lcc1-master', 'member1-master',
+                                               'member1']
+        self.assertEqual(localdev.master, False)
+
+    def test_device_master_is_none1(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = None
+        self.assertEqual(localdev.master, None)
+
+    def test_device_master_is_none2(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['2RE'] = True
+        localdev.facts._cache['current_re'] = ['foo', 'bar']
+        self.assertEqual(localdev.master, None)
+
+    @patch('jnpr.junos.device.warnings')
+    def test_device_master_is_old_facts(self, mock_warn):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          fact_style='old', gather_facts=False)
+        mock_warn.assert_has_calls([call.warn('fact-style old will be removed '
+                                              'in a future release.',
+                                              RuntimeWarning)])
+        self.assertEqual(localdev.master, None)
+
+    def test_device_master_setter(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        with self.assertRaises(RuntimeError):
+            localdev.master = 'foo'
+
+    def test_device_re_name_is_re0(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['re0', 'backup']
+        localdev.facts._cache['hostname_info'] = {'re0': 'tapir',
+                                                  're1': 'tapir1'}
+        self.assertEqual(localdev.re_name, 're0')
+
+    def test_device_re_name_is_lcc_re1(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['lcc1-re1', 'member1-re1',
+                                               'lcc1-backup', 'member1-backup']
+        localdev.facts._cache['hostname_info'] = {'re0': 'mj1'}
+        self.assertEqual(localdev.re_name, 'lcc1-re1')
+
+    def test_device_re_name_is_re0_only(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['foo']
+        localdev.facts._cache['hostname_info'] = {'re0': 'mj1'}
+        self.assertEqual(localdev.re_name, 're0')
+
+    def test_device_re_name_is_none1(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = None
+        self.assertEqual(localdev.re_name, None)
+
+    def test_device_re_name_is_none2(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['re1', 'master', 'node',
+                                               'fwdd', 'member', 'pfem']
+        localdev.facts._cache['hostname_info'] = None
+        self.assertEqual(localdev.re_name, None)
+
+    @patch('jnpr.junos.device.warnings')
+    def test_device_re_name_is_old_facts(self, mock_warn):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          fact_style='old', gather_facts=False)
+        mock_warn.assert_has_calls([call.warn('fact-style old will be removed '
+                                              'in a future release.',
+                                              RuntimeWarning)])
+        self.assertEqual(localdev.re_name, None)
+
+    def test_device_re_name_setter(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        with self.assertRaises(RuntimeError):
+            localdev.re_name = 'foo'
 
     def test_device_repr(self):
         localdev = Device(host='1.1.1.1', user='test', password='password123',
@@ -244,23 +364,25 @@ class TestDevice(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.device.warnings')
-    def test_device_facts_error_exception_on_error(self, mock_warnings, mock_execute):
+    def test_device_facts_error_exception_on_error(self, mock_warnings,
+                                                   mock_execute):
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
+            self.assertRaises(IOError, self.dev.facts_refresh,
+                              exception_on_failure=True)
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.device.warnings')
     def test_device_old_style_facts_error_exception_on_error(self,
-                                                            mock_warnings,
-                                                            mock_execute):
+                                                             mock_warnings,
+                                                             mock_execute):
         self.dev._fact_style = 'old'
         with patch('jnpr.junos.utils.fs.FS.cat') as mock_cat:
             mock_execute.side_effect = self._mock_manager
             mock_cat.side_effect = IOError('File cant be handled')
-            self.assertRaises(IOError, self.dev.facts_refresh, exception_on_failure=True)
-
+            self.assertRaises(IOError, self.dev.facts_refresh,
+                              exception_on_failure=True)
 
     def test_device_facts_refresh_unknown_fact_style(self):
         self.dev._fact_style = 'bad'
@@ -330,11 +452,10 @@ class TestDevice(unittest.TestCase):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         ex = ValueError('Extra data ')
         ex.message = 'Extra data '  # for py3 as we dont have message thr
-        mock_json_loads.side_effect = [ex,
-                                       self._mock_manager(
-                                           etree.fromstring(
-                                               '<get-route-information format="json"/>')
-                                       )]
+        mock_json_loads.side_effect = [
+            ex,
+            self._mock_manager(etree.fromstring(
+                                   '<get-route-information format="json"/>'))]
         self.dev.rpc.get_route_information({'format': 'json'})
         self.assertEqual(mock_json_loads.call_count, 2)
 
@@ -342,25 +463,29 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_to_rpc_string(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string('show system uptime')
-        self.assertEqual("rpc.get_system_uptime_information()",data)
+        self.assertEqual("rpc.get_system_uptime_information()", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_strip_pipes(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli_to_rpc_string('show system uptime | match foo | count')
-        self.assertEqual("rpc.get_system_uptime_information()",data)
+        data = self.dev.cli_to_rpc_string(
+                   'show system uptime | match foo | count')
+        self.assertEqual("rpc.get_system_uptime_information()", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_complex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli_to_rpc_string('show interfaces ge-0/0/0.0 routing-instance all media')
-        self.assertEqual("rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')",data)
+        data = self.dev.cli_to_rpc_string(
+                   'show interfaces ge-0/0/0.0 routing-instance all media')
+        self.assertEqual("rpc.get_interface_information("
+                         "routing_instance='all', media=True, "
+                         "interface_name='ge-0/0/0.0')", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_invalid(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string('foo')
-        self.assertEqual(None,data)
+        self.assertEqual(None, data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_format_json(self, mock_execute):
@@ -388,14 +513,15 @@ class TestDevice(unittest.TestCase):
     @patch('jnpr.junos.device.warnings')
     def test_device_cli_output_warning(self, mock_warnings, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        data = self.dev.cli('show interfaces ge-0/0/0.0 routing-instance all media',
-                            format = 'xml')
+        data = self.dev.cli('show interfaces ge-0/0/0.0 routing-instance '
+                            'all media', format='xml')
         ip = data.findtext('logical-interface[name="ge-0/0/0.0"]/'
                            'address-family[address-family-name="inet"]/'
                            'interface-address/ifa-local')
         self.assertTrue('192.168.100.1' in ip)
         self.assertTrue(mock_warnings.warn.called)
-        rpc_string = "rpc.get_interface_information(routing_instance='all', media=True, interface_name='ge-0/0/0.0')"
+        rpc_string = "rpc.get_interface_information(routing_instance='all', "\
+                     "media=True, interface_name='ge-0/0/0.0')"
         self.assertIn(rpc_string, mock_warnings.warn.call_args[0][0])
 
     def test_device_cli_blank_output(self):
@@ -403,8 +529,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual('', self.dev.cli('show configuration interfaces',
                                           warning=False))
 
-    #@patch('jnpr.junos.Device.execute')
-    def test_device_cli_rpc_reply_with_message(self):  # , mock_execute):
+    def test_device_cli_rpc_reply_with_message(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertEqual(
             '\nprotocol: operation-failed\nerror: device asdf not found\n',
