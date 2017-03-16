@@ -316,6 +316,13 @@ class Config(Util):
         # note: this cannot be used if format='set', per Junos API.
 
         overwrite = kvargs.get('overwrite', False)
+
+        # cant us dict comprehension as not supported in python 2.6
+        actions = filter(lambda item: kvargs.get(item, False),
+                         ('overwrite', 'merge', 'update'))
+        if len(actions) >= 2:
+            raise ValueError('actions can be only one among %s'
+                             % ', '.join(actions))
         if overwrite is True:
             rpc_xattrs['action'] = 'override'
         if kvargs.get('update') is True:

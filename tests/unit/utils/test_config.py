@@ -253,6 +253,10 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'text')
 
+    def test_config_load_update_merge_overwrite(self):
+        self.assertRaises(ValueError, self.conf.load, path='test.jnpr',
+                          update=True, merge=True, overwrite=True)
+
     @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = \
