@@ -314,7 +314,7 @@ class Config(Util):
 
         actions = filter(lambda item: kvargs.get(item, False),
                          ('overwrite', 'merge', 'update'))
-        if len(actions) >= 2:
+        if len(list(actions)) >= 2:
             raise ValueError('actions can be only one among %s'
                              % ', '.join(actions))
 
