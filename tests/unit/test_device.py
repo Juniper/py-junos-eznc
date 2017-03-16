@@ -183,6 +183,7 @@ class TestDevice(unittest.TestCase):
         localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         localdev.facts._cache['2RE'] = False
+        localdev.facts._cache['RE_hw_mi'] = False
         localdev.facts._cache['current_re'] = ['re0']
         self.assertEqual(localdev.master, True)
 
