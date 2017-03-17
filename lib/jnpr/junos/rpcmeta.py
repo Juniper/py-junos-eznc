@@ -41,7 +41,8 @@ class _RpcMetaExec(object):
            dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>',
                             model='openconfig')
            # custom yang example
-           dev.rpc.get_config(filter_xml='l2vpn', model='custom')
+           dev.rpc.get_config(filter_xml='l2vpn', model='custom',
+                        namespace="http://yang.juniper.net/customyang/l2vpn")
            # ietf yang example
            dev.rpc.get_config(filter_xml='interfaces', model='ietf')
 
@@ -66,11 +67,11 @@ class _RpcMetaExec(object):
 
         :param str model: Can provide yang model openconfig/custom/ietf. When
                 model is True and filter_xml is None, xml is enclosed under <data> so
-                that we we get junos as well as other model configurations
+                that we get junos as well as other model configurations
 
         :param str namespace: User can have their own defined namespace in the
-                yang models, In such cases they need to provide that namespace
-                so that it can be used to fetch yang modeled configs
+                custom yang models, In such cases they need to provide that
+                namespace so that it can be used to fetch yang modeled configs
 
         :param bool remove_ns: remove namespaces, if value assigned is False, function
                 will return xml with namespaces. The same xml returned can be
@@ -84,7 +85,6 @@ class _RpcMetaExec(object):
         """
 
         nmspaces = {'openconfig': "http://openconfig.net/yang/",
-                    'custom': "http://yang.juniper.net/customyang/",
                     'ietf': "urn:ietf:params:xml:ns:yang:ietf-"}
 
         rpc = E('get-configuration', options)
@@ -107,6 +107,9 @@ class _RpcMetaExec(object):
                 etree.SubElement(rpc, 'configuration').append(filter_xml)
             else:
                 if model is not None or namespace is not None:
+                    if model == 'custom' and namespace is None:
+                        raise AttributeError('For "custom" model, '
+                                             'explicitly provide "namespace"')
                     ns = namespace or (nmspaces.get(model.lower()) + \
                                       filter_xml.tag)
                     filter_xml.attrib['xmlns'] = ns
@@ -227,7 +230,8 @@ class _RpcMetaExec(object):
             # kvargs are the command parameter/values
             if kvargs:
                 for arg_name, arg_value in kvargs.items():
-                    if arg_name not in ['dev_timeout', 'normalize']:
+                    if arg_name not in ['dev_timeout', 'normalize',
+                                        'ignore_warning']:
                         arg_name = re.sub('_', '-', arg_name)
                         if isinstance(arg_value, (tuple, list)):
                             for a in arg_value:
@@ -248,6 +252,7 @@ class _RpcMetaExec(object):
             # gather any decorator keywords
             timeout = kvargs.get('dev_timeout')
             normalize = kvargs.get('normalize')
+            ignore_warn = kvargs.get('ignore_warning')
 
             dec_args = {}
 
@@ -255,7 +260,8 @@ class _RpcMetaExec(object):
                 dec_args['dev_timeout'] = timeout
             if normalize is not None:
                 dec_args['normalize'] = normalize
-
+            if ignore_warn is not None:
+                dec_args['ignore_warning'] = ignore_warn
             # now invoke the command against the
             # associated :junos: device and return
             # the results per :junos:execute()
