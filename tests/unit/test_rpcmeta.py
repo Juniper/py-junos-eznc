@@ -126,8 +126,8 @@ class Test_RpcMetaExec(unittest.TestCase):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.dev.facts._cache['version_info'] = version_info('13.1X46-D15.3')
         self.rpc.get_system_users_information(dict(format='json'))
-        mock_warn.assert_has_calls(call.warn(
-            'Native JSON support is only from 14.2 onwards', RuntimeWarning))
+        mock_warn.assert_has_calls([call.warn(
+            'Native JSON support is only from 14.2 onwards', RuntimeWarning)])
 
     def test_get_rpc(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)

@@ -69,11 +69,11 @@ class TestStartShell(unittest.TestCase):
 
     @patch('jnpr.junos.utils.start_shell.StartShell.open')
     @patch('jnpr.junos.utils.start_shell.StartShell.close')
-    def test_startshell_context(self, mock_open, mock_close):
+    def test_startshell_context(self, mock_close, mock_open):
         with StartShell(self.dev) as shell:
             shell._chan = MagicMock()
             shell.send('test')
-            mock_close.assert_called_once(call())
+        mock_close.assert_called_once_with()
 
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
     def test_startshell_run_regex(self, mock_wait_for):

@@ -137,7 +137,7 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.fs.ls(path, followlink=False)
-        mock_decode_file.assert_has_calls(call().get('link'))
+        mock_decode_file.assert_has_calls([call().get('link')])
 
     def test_ls_brief_true(self):
         path = 'test/stat/decode_dir'
