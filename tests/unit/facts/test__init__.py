@@ -8,6 +8,7 @@ import importlib
 
 import jnpr.junos.facts
 
+
 @attr('unit')
 class TestFactInitialization(unittest.TestCase):
 

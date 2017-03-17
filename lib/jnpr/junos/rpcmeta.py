@@ -1,6 +1,7 @@
 import re
 from lxml import etree
 from lxml.builder import E
+from jnpr.junos import jxml as JXML
 
 
 class _RpcMetaExec(object):
@@ -21,35 +22,143 @@ class _RpcMetaExec(object):
     # get_config
     # -----------------------------------------------------------------------
 
-    def get_config(self, filter_xml=None, options={}):
+    def get_config(self, filter_xml=None, options={}, model=None, namespace=None,
+                   remove_ns=True, **kwargs):
         """
         retrieve configuration from the Junos device
 
+        .. code-block:: python
+
+           dev.rpc.get_config()
+           dev.rpc.get_config(filter_xml='<system><services/></system>')
+           dev.rpc.get_config(filter_xml='system/services')
+           dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'),
+                            options={'format': 'json'})
+           # to fetch junos as well as yang model configs
+           dev.rpc.get_config(model=True)
+           # openconfig yang example
+           dev.rpc.get_config(filter_xml='bgp', model='openconfig')
+           dev.rpc.get_config(filter_xml='<bgp><neighbors></neighbors></bgp>',
+                            model='openconfig')
+           # custom yang example
+           dev.rpc.get_config(filter_xml='l2vpn', model='custom',
+                        namespace="http://yang.juniper.net/customyang/l2vpn")
+           # ietf yang example
+           dev.rpc.get_config(filter_xml='interfaces', model='ietf')
+
+
         :filter_xml: fully XML formatted tag which defines what to retrieve,
                      when omitted the entire configuration is returned;
-                     the following returns the device host-name configured with "set system host-name":
+                     the following returns the device host-name configured
+                     with "set system host-name"
 
-        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
+        .. code-block:: python
+
+           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
 
         :options: is a dictionary of XML attributes to set within the <get-configuration> RPC;
                   the following returns the device host-name either configured with "set system host-name"
-                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems:
+                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems
 
-        config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'), 
+        .. code-block:: python
+
+           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
                  options={'database':'committed','inherit':'inherit'})
 
+        :param str model: Can provide yang model openconfig/custom/ietf. When
+                model is True and filter_xml is None, xml is enclosed under <data> so
+                that we get junos as well as other model configurations
+
+        :param str namespace: User can have their own defined namespace in the
+                custom yang models, In such cases they need to provide that
+                namespace so that it can be used to fetch yang modeled configs
+
+        :param bool remove_ns: remove namespaces, if value assigned is False, function
+                will return xml with namespaces. The same xml returned can be
+                loaded back to devices. This comes handy in case of yang based
+                configs
+
+        .. code-block:: python
+
+           dev.rpc.get_config(filter_xml='bgp', model='openconfig',
+                        remove_ns=False)
         """
+
+        nmspaces = {'openconfig': "http://openconfig.net/yang/",
+                    'ietf': "urn:ietf:params:xml:ns:yang:ietf-"}
+
         rpc = E('get-configuration', options)
 
         if filter_xml is not None:
+            if not isinstance(filter_xml, etree._Element):
+                if re.search("^<.*>$", filter_xml):
+                    filter_xml = etree.XML(filter_xml)
+                else:
+                    filter_data = None
+                    for tag in filter_xml.split('/')[::-1]:
+                        filter_data = E(tag) if filter_data is None else E(
+                            tag,
+                            filter_data)
+                    filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
-            # it does not already have one
-            cfg_tag = 'configuration'
-            at_here = rpc if cfg_tag == filter_xml.tag else E(cfg_tag)
-            at_here.append(filter_xml)
-            if at_here is not rpc: rpc.append(at_here)
+            # it does not already have one (not in case of yang model config)
+            if filter_xml.tag != 'configuration' and model is None and \
+                            namespace is None:
+                etree.SubElement(rpc, 'configuration').append(filter_xml)
+            else:
+                if model is not None or namespace is not None:
+                    if model == 'custom' and namespace is None:
+                        raise AttributeError('For "custom" model, '
+                                             'explicitly provide "namespace"')
+                    ns = namespace or (nmspaces.get(model.lower()) + \
+                                      filter_xml.tag)
+                    filter_xml.attrib['xmlns'] = ns
+                rpc.append(filter_xml)
+        transform = self._junos.transform
+        if remove_ns is False:
+            self._junos.transform = lambda: JXML.strip_namespaces_prefix
+        try:
+            response = self._junos.execute(rpc, **kwargs)
+        finally:
+            self._junos.transform = transform
+        # in case of model provided top level should be data
+        # return response
+        if model and filter_xml is None and options.get('format') \
+                is not 'json':
+            response = response.getparent()
+            response.tag = 'data'
+        return response
 
-        return self._junos.execute(rpc)
+    # -----------------------------------------------------------------------
+    # get
+    # -----------------------------------------------------------------------
+
+    def get(self, filter_select=None, **kwargs):
+        """
+        Retrieve running configuration and device state information using
+        <get> rpc
+
+        .. code-block:: python
+
+           dev.rpc.get()
+           dev.rpc.get(ignore_warning=True)
+           dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
+           dev.rpc.get(filter_select='bgp/neighbors')
+           dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
+           dev.rpc.get('mpls', ignore_warning=True)
+
+        :param str filter_select:
+          The select attribute will be treated as an XPath expression and
+          used to filter the returned data.
+
+        :returns: xml object
+        """
+        # junos only support filter type to be xpath
+        filter_params = {'type': 'xpath'}
+        if filter_select is not None:
+            filter_params['source'] = filter_select
+        rpc = E('get', E('filter', filter_params))
+        return self._junos.execute(rpc, **kwargs)
 
     # -----------------------------------------------------------------------
     # load_config
@@ -121,7 +230,8 @@ class _RpcMetaExec(object):
             # kvargs are the command parameter/values
             if kvargs:
                 for arg_name, arg_value in kvargs.items():
-                    if arg_name not in ['dev_timeout', 'normalize']:
+                    if arg_name not in ['dev_timeout', 'normalize',
+                                        'ignore_warning']:
                         arg_name = re.sub('_', '-', arg_name)
                         if isinstance(arg_value, (tuple, list)):
                             for a in arg_value:
@@ -142,6 +252,7 @@ class _RpcMetaExec(object):
             # gather any decorator keywords
             timeout = kvargs.get('dev_timeout')
             normalize = kvargs.get('normalize')
+            ignore_warn = kvargs.get('ignore_warning')
 
             dec_args = {}
 
@@ -149,7 +260,8 @@ class _RpcMetaExec(object):
                 dec_args['dev_timeout'] = timeout
             if normalize is not None:
                 dec_args['normalize'] = normalize
-
+            if ignore_warn is not None:
+                dec_args['ignore_warning'] = ignore_warn
             # now invoke the command against the
             # associated :junos: device and return
             # the results per :junos:execute()

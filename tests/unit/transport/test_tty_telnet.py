@@ -5,6 +5,7 @@ from mock import MagicMock, patch
 from jnpr.junos.transport.tty_telnet import Telnet
 import six
 
+
 @attr('unit')
 class TestTTYTelnet(unittest.TestCase):
 

@@ -27,17 +27,17 @@ class TestGetChassisClusterStatus(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_srx_cluster_fact_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_rpc_error
-        self.assertEqual(self.dev.facts['srx_cluster'],None)
+        self.assertEqual(self.dev.facts['srx_cluster'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_srx_cluster_fact_false(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_false
-        self.assertEqual(self.dev.facts['srx_cluster'],False)
+        self.assertEqual(self.dev.facts['srx_cluster'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_srx_cluster_fact_true(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_true
-        self.assertEqual(self.dev.facts['srx_cluster'],True)
+        self.assertEqual(self.dev.facts['srx_cluster'], True)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

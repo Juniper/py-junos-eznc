@@ -447,7 +447,7 @@ class TestSW(unittest.TestCase):
         mock_validate.return_value = False
         self.assertFalse(self.sw.install('file', validate=True, no_copy=True))
 
-    @patch(builtin_string+'.print')
+    @patch(builtin_string + '.print')
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_multi_mx(self, mock_pkgadd, mock_print):
         mock_pkgadd.return_value = True

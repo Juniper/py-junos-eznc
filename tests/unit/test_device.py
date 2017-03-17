@@ -455,7 +455,7 @@ class TestDevice(unittest.TestCase):
         mock_json_loads.side_effect = [
             ex,
             self._mock_manager(etree.fromstring(
-                                   '<get-route-information format="json"/>'))]
+                '<get-route-information format="json"/>'))]
         self.dev.rpc.get_route_information({'format': 'json'})
         self.assertEqual(mock_json_loads.call_count, 2)
 
@@ -469,14 +469,14 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_to_rpc_string_strip_pipes(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string(
-                   'show system uptime | match foo | count')
+            'show system uptime | match foo | count')
         self.assertEqual("rpc.get_system_uptime_information()", data)
 
     @patch('jnpr.junos.Device.execute')
     def test_device_cli_to_rpc_string_complex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli_to_rpc_string(
-                   'show interfaces ge-0/0/0.0 routing-instance all media')
+            'show interfaces ge-0/0/0.0 routing-instance all media')
         self.assertEqual("rpc.get_interface_information("
                          "routing_instance='all', media=True, "
                          "interface_name='ge-0/0/0.0')", data)

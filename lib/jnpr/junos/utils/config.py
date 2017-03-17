@@ -2,15 +2,19 @@
 import os
 import re
 import warnings
+import json
 
 # 3rd-party modules
 from lxml import etree
+from lxml.builder import E
 from ncclient.operations import RPCError
+import jxmlease
 
 # package modules
 from jnpr.junos.exception import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
+from jnpr.junos.decorators import ignoreWarnDecorator
 
 """
 Configuration Utilities
@@ -36,7 +40,7 @@ class Config(Util):
     # ------------------------------------------------------------------------
     # commit
     # ------------------------------------------------------------------------
-
+    @ignoreWarnDecorator
     def commit(self, **kvargs):
         """
         Commit a configuration.
@@ -225,6 +229,7 @@ class Config(Util):
     # helper on loading configs
     # -------------------------------------------------------------------------
 
+    @ignoreWarnDecorator
     def load(self, *vargs, **kvargs):
         """
         Loads changes into the candidate configuration.  Changes can be
@@ -664,14 +669,14 @@ class Config(Util):
             * "batch" - Work in batch database
             * "exclusive" - Work with Locking the candidate configuration
 
-            Example::
+        .. code-block:: python
 
-            # mode can be private/dynamic/exclusive/batch
-            with Config(dev, mode='exclusive') as cu:
-                cu.load('set system services netconf traceoptions file xyz',
-                        format='set')
-                print cu.diff()
-                cu.commit()
+           # mode can be private/dynamic/exclusive/batch
+           with Config(dev, mode='exclusive') as cu:
+               cu.load('set system services netconf traceoptions file xyz',
+                       format='set')
+               print cu.diff()
+               cu.commit()
         """
         self.mode = mode
         Util.__init__(self, dev=dev)

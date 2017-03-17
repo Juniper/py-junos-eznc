@@ -1,6 +1,3 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import unittest
 import os
 from nose.plugins.attrib import attr
@@ -13,6 +10,9 @@ from ncclient.transport import SSHSession
 
 from mock import patch, MagicMock, call
 from lxml import etree
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 
 @attr('unit')
@@ -129,6 +129,58 @@ class Test_RpcMetaExec(unittest.TestCase):
         mock_warn.assert_has_calls([call.warn(
             'Native JSON support is only from 14.2 onwards', RuntimeWarning)])
 
+    def test_get_rpc(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(filter_select='bgp')
+        self.assertEqual(resp.tag, 'data')
+
+    def test_get_config_filter_xml_string_xml(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get_config(
+            filter_xml='<system><services/></system>')
+        self.assertEqual(resp.tag, 'configuration')
+
+    def test_get_config_filter_xml_string(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get_config(filter_xml='system/services')
+        self.assertEqual(resp.tag, 'configuration')
+
+    def test_get_config_filter_xml_model(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get_config('bgp/neighbors', model='openconfig')
+        self.assertEqual(resp.tag, 'bgp')
+
+    def test_get_rpc_ignore_warning_bool(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning=True)
+        self.assertEqual(resp.tag, 'data')
+
+    def test_get_rpc_ignore_warning_str(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning='vrrp subsystem not running')
+        self.assertEqual(resp.tag, 'data')
+
+    def test_get_rpc_ignore_warning_list(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get(ignore_warning=['vrrp subsystem not running',
+                                                'statement not found'])
+        self.assertEqual(resp.tag, 'data')
+
+    # below test need to be fixed for Python 3.x
+    """
+    def test_get_config_remove_ns(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        resp = self.dev.rpc.get_config('bgp/neighbors', model='openconfig',
+                                       remove_ns=False)
+        self.assertEqual(resp.tag, '{http://openconfig.net/yang/bgp}bgp')
+    """
+    #
+
+    def test_model_true(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        data = self.dev.rpc.get_config(model=True)
+        self.assertEqual(data.tag, 'data')
+
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             if 'normalize' in kwargs and args:
@@ -139,6 +191,8 @@ class Test_RpcMetaExec(unittest.TestCase):
             return Manager(session, device_handler)
 
         if args:
+            if len(args[0]) > 0 and args[0][0].tag == 'bgp':
+                return self._read_file(args[0].tag + '_bgp_openconfig.xml')
             return self._read_file(args[0].tag + '.xml')
 
     def _read_file(self, fname):
@@ -148,10 +202,6 @@ class Test_RpcMetaExec(unittest.TestCase):
                              'rpc-reply', fname)
         with open(fpath) as fp:
             foo = fp.read()
-        if fname == 'get-system-users-information.xml':
-            return NCElement(foo,
-                             self.dev._conn._device_handler.transform_reply())
-        rpc_reply = NCElement(foo, self.dev._conn.
-                              _device_handler.transform_reply())\
-            ._NCElement__doc[0]
+        return NCElement(foo,
+                         self.dev._conn._device_handler.transform_reply())
         return rpc_reply

@@ -1,6 +1,3 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import unittest
 import sys
 from nose.plugins.attrib import attr
@@ -18,6 +15,9 @@ from ncclient.operations import RPCError, RPCReply
 from mock import MagicMock, patch
 from lxml import etree
 import os
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 if sys.version < '3':
     builtin_string = '__builtin__'
@@ -168,6 +168,38 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration.\
             assert_called_with(
                 {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
+
+    def test_config_diff_exception(self):
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp='ok'))
+        self.assertRaises(RpcError, self.conf.diff)
+
+    def test_config_diff_exception_severity_warning(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>mgd: statement must contain additional statements</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertEqual(self.conf.diff(),
+                         "Unable to parse diff from response!")
+
+    def test_config_diff_exception_severity_warning_still_raise(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>statement not found</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, self.conf.diff)
 
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='Stuff')
@@ -623,7 +655,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__private_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -634,7 +666,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__dyanamic_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -651,7 +683,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='batch'))
 
     def test__enter__batch_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""

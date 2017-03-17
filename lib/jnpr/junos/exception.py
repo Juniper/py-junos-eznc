@@ -56,6 +56,7 @@ class RpcError(Exception):
                 if isinstance(errs, list) else ''
 
         if isinstance(self.rsp, _Element):
+            self.rpc_xml = rsp[0] if 'rpc-reply' == rsp.tag else rsp
             self.rpc_error = jxml.rpc_error(self.rsp)
             self.message = self.message or self.rpc_error['message']
             if self.errs is None or not isinstance(self.errs, list):

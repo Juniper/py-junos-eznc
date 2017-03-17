@@ -27,32 +27,32 @@ class TestEthernetMacTable(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_els(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_els
-        self.assertEqual(self.dev.facts['switch_style'],'VLAN_L2NG')
+        self.assertEqual(self.dev.facts['switch_style'], 'VLAN_L2NG')
 
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_vlan(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_vlan
-        self.assertEqual(self.dev.facts['switch_style'],'VLAN')
+        self.assertEqual(self.dev.facts['switch_style'], 'VLAN')
 
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_bd(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_bd
-        self.assertEqual(self.dev.facts['switch_style'],'BRIDGE_DOMAIN')
+        self.assertEqual(self.dev.facts['switch_style'], 'BRIDGE_DOMAIN')
 
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_none(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_none
-        self.assertEqual(self.dev.facts['switch_style'],'NONE')
+        self.assertEqual(self.dev.facts['switch_style'], 'NONE')
 
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_non_master_bd_ptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_ptx
-        self.assertEqual(self.dev.facts['switch_style'],'NONE')
+        self.assertEqual(self.dev.facts['switch_style'], 'NONE')
 
     @patch('jnpr.junos.Device.execute')
     def test_ethernet_mac_table_non_master_bd_mx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_mx_non_master_re
-        self.assertEqual(self.dev.facts['switch_style'],'BRIDGE_DOMAIN')
+        self.assertEqual(self.dev.facts['switch_style'], 'BRIDGE_DOMAIN')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -113,11 +113,11 @@ class TestEthernetMacTable(unittest.TestCase):
                 rsp = etree.XML(xml)
                 err = RpcError(rsp=rsp)
                 err.rpc_error['bad_element'] = 'none'
-                err.rpc_error['message'] = 'the l2-learning subsystem is not running'
+                err.rpc_error[
+                    'message'] = 'the l2-learning subsystem is not running'
                 raise err
             else:
                 return None
-
 
     def _mock_manager_ptx(self, *args, **kwargs):
         if args:
@@ -141,4 +141,3 @@ class TestEthernetMacTable(unittest.TestCase):
                 raise err
             else:
                 return None
-

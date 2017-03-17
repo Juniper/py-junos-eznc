@@ -205,7 +205,8 @@ class TestConsole(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
     @patch('jnpr.junos.transport.tty_netconf.select.select')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.read_until')
-    def test_load_console(self, mock_read_until, mock_select, mock_write, mock_parse):
+    def test_load_console(
+            self, mock_read_until, mock_select, mock_write, mock_parse):
         mock_select.return_value = ([self.dev._tty._rx], [], [])
         xml = """<policy-options>
                   <policy-statement>
@@ -244,7 +245,8 @@ class TestConsole(unittest.TestCase):
     @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.rawwrite')
-    def test_console_rpc_call_exception(self, mock_write, mock_rcv, mock_parse):
+    def test_console_rpc_call_exception(
+            self, mock_write, mock_rcv, mock_parse):
         mock_rcv.return_value = '<output>testing</output>'
         op = self.dev.rpc.get_chassis_inventory()
         self.assertEqual(op.tag, 'output')

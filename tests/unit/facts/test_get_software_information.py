@@ -32,14 +32,14 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(
             self.dev.facts['junos_info']['re0']['object'].as_tuple,
             (16, 1, 'R', '1', 11))
-        self.assertEqual(self.dev.facts['hostname'],'r0')
-        self.assertEqual(self.dev.facts['model'],'MX960')
-        self.assertEqual(self.dev.facts['model_info'],{'re0': 'MX960'})
-        self.assertEqual(self.dev.facts['version'],'16.1R1.11')
+        self.assertEqual(self.dev.facts['hostname'], 'r0')
+        self.assertEqual(self.dev.facts['model'], 'MX960')
+        self.assertEqual(self.dev.facts['model_info'], {'re0': 'MX960'})
+        self.assertEqual(self.dev.facts['version'], '16.1R1.11')
         self.assertEqual(self.dev.facts['version_info'].as_tuple,
                          (16, 1, 'R', '1', 11))
-        self.assertEqual(self.dev.facts['version_RE0'],'16.1R1.11')
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['version_RE0'], '16.1R1.11')
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_vc(self, mock_execute):
@@ -54,16 +54,15 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(
             self.dev.facts['junos_info']['member1']['object'].as_tuple,
             (15, 1, 'I', '20161209', '0'))
-        self.assertEqual(self.dev.facts['hostname'],'reefbreak1')
-        self.assertEqual(self.dev.facts['model'],'MX240')
+        self.assertEqual(self.dev.facts['hostname'], 'reefbreak1')
+        self.assertEqual(self.dev.facts['model'], 'MX240')
         self.assertEqual(self.dev.facts['model_info'],
                          {'member1': 'MX240', 'member0': 'MX240'})
-        self.assertEqual(self.dev.facts['version'],'15.1-20161209.0')
+        self.assertEqual(self.dev.facts['version'], '15.1-20161209.0')
         self.assertEqual(self.dev.facts['version_info'].as_tuple,
                          (15, 1, 'I', '20161209', '0'))
-        self.assertEqual(self.dev.facts['version_RE0'],None)
-        self.assertEqual(self.dev.facts['version_RE1'],None)
-
+        self.assertEqual(self.dev.facts['version_RE0'], None)
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_simple(self, mock_execute):
@@ -72,25 +71,25 @@ class TestGetSoftwareInformation(unittest.TestCase):
                          '12.3X48-D40.5')
         self.assertEqual(self.dev.facts['junos_info']['re0']['object'].as_tuple,
                          (12, 3, 'X', (48, 'D', 40), 5))
-        self.assertEqual(self.dev.facts['hostname'],'lsys500')
-        self.assertEqual(self.dev.facts['model'],'SRX3600')
-        self.assertEqual(self.dev.facts['model_info'],{'re0': 'SRX3600'})
-        self.assertEqual(self.dev.facts['version'],'12.3X48-D40.5')
+        self.assertEqual(self.dev.facts['hostname'], 'lsys500')
+        self.assertEqual(self.dev.facts['model'], 'SRX3600')
+        self.assertEqual(self.dev.facts['model_info'], {'re0': 'SRX3600'})
+        self.assertEqual(self.dev.facts['version'], '12.3X48-D40.5')
         self.assertEqual(self.dev.facts['version_info'].as_tuple,
                          (12, 3, 'X', (48, 'D', 40), 5))
-        self.assertEqual(self.dev.facts['version_RE0'],'12.3X48-D40.5')
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['version_RE0'], '12.3X48-D40.5')
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_no_version(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_no_version
-        self.assertEqual(self.dev.facts['junos_info'],None)
+        self.assertEqual(self.dev.facts['junos_info'], None)
         self.assertEqual(self.dev.facts['hostname'], 'lsys500')
-        self.assertEqual(self.dev.facts['model'],'SRX3600')
-        self.assertEqual(self.dev.facts['model_info'],{'re0': 'SRX3600'})
-        self.assertEqual(self.dev.facts['version'],'0.0I0.0')
-        self.assertEqual(self.dev.facts['version_RE0'],None)
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['model'], 'SRX3600')
+        self.assertEqual(self.dev.facts['model_info'], {'re0': 'SRX3600'})
+        self.assertEqual(self.dev.facts['version'], '0.0I0.0')
+        self.assertEqual(self.dev.facts['version_RE0'], None)
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_dual(self, mock_execute):
@@ -100,12 +99,12 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['junos_info']['re1']['text'],
                          '15.1F5.15')
         self.assertEqual(self.dev.facts['hostname'], 'baku')
-        self.assertEqual(self.dev.facts['model'],'MX480')
+        self.assertEqual(self.dev.facts['model'], 'MX480')
         self.assertEqual(self.dev.facts['model_info'],
                          {'re0': 'MX480', 're1': 'MX480'})
-        self.assertEqual(self.dev.facts['version'],'15.1F5.15-C1.12')
-        self.assertEqual(self.dev.facts['version_RE0'],'15.1F5.15-C1.12')
-        self.assertEqual(self.dev.facts['version_RE1'],'15.1F5.15')
+        self.assertEqual(self.dev.facts['version'], '15.1F5.15-C1.12')
+        self.assertEqual(self.dev.facts['version_RE0'], '15.1F5.15-C1.12')
+        self.assertEqual(self.dev.facts['version_RE1'], '15.1F5.15')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_txp(self, mock_execute):
@@ -113,11 +112,11 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
                          '13.3R9-S2.1')
         self.assertEqual(self.dev.facts['hostname'], 'dj')
-        self.assertEqual(self.dev.facts['model'],'T1600')
+        self.assertEqual(self.dev.facts['model'], 'T1600')
         self.assertEqual(self.dev.facts['model_info'], {'re0': 'T1600'})
-        self.assertEqual(self.dev.facts['version'],'13.3R9-S2.1')
-        self.assertEqual(self.dev.facts['version_RE0'],'13.3R9-S2.1')
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['version'], '13.3R9-S2.1')
+        self.assertEqual(self.dev.facts['version_RE0'], '13.3R9-S2.1')
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_ex(self, mock_execute):
@@ -125,22 +124,22 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
                          '11.4R1.6')
         self.assertEqual(self.dev.facts['hostname'], 'sw1')
-        self.assertEqual(self.dev.facts['model'],'EX2200-C-12T-2G')
+        self.assertEqual(self.dev.facts['model'], 'EX2200-C-12T-2G')
         self.assertEqual(self.dev.facts['model_info'],
                          {'re0': 'EX2200-C-12T-2G'})
-        self.assertEqual(self.dev.facts['version'],'11.4R1.6')
-        self.assertEqual(self.dev.facts['version_RE0'],'11.4R1.6')
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['version'], '11.4R1.6')
+        self.assertEqual(self.dev.facts['version_RE0'], '11.4R1.6')
+        self.assertEqual(self.dev.facts['version_RE1'], None)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_nfx(self, mock_execute):
-        self.dev.facts._cache['vc_capable']=False
+        self.dev.facts._cache['vc_capable'] = False
         mock_execute.side_effect = self._mock_manager_nfx
         self.assertEqual(self.dev.facts['hostname'], 'jdm')
-        self.assertEqual(self.dev.facts['model'],'NFX250_S2_10_T')
-        self.assertEqual(self.dev.facts['version'],'15.1X53-D45.3')
-        self.assertEqual(self.dev.facts['version_RE0'],'15.1X53-D45.3')
-        self.assertEqual(self.dev.facts['version_RE1'],None)
+        self.assertEqual(self.dev.facts['model'], 'NFX250_S2_10_T')
+        self.assertEqual(self.dev.facts['version'], '15.1X53-D45.3')
+        self.assertEqual(self.dev.facts['version_RE0'], '15.1X53-D45.3')
+        self.assertEqual(self.dev.facts['version_RE1'], None)
         self.assertEqual(self.dev.facts['model_info'],
                          {'re0': 'NFX250_S2_10_T'})
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
@@ -178,13 +177,13 @@ class TestGetSoftwareInformation(unittest.TestCase):
             else:
                 return self._read_file('sw_info_vc_' + args[0].tag + '.xml')
 
-
     def _mock_manager_simple(self, *args, **kwargs):
         if args:
             if (args[0].tag == 'command'):
                 raise RpcError()
             else:
-                return self._read_file('sw_info_simple_' + args[0].tag + '.xml')
+                return self._read_file(
+                    'sw_info_simple_' + args[0].tag + '.xml')
 
     def _mock_manager_no_version(self, *args, **kwargs):
         if args:
