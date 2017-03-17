@@ -1,6 +1,5 @@
 VERSION = "2.1.dev0"
-DATE = "2017-Mar-16"
-AUTHOR = "Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith"
+DATE = "2017-Mar-17"
 
 # Augment with the internal version if present
 try:
