@@ -44,7 +44,7 @@ Cannot connect to device: ConnectTimeoutError(vmx.local)
 
 ## As a PyEZ terminal
 
-`docker run -it juniper/pyez`
+`docker run -it juniper/pyez sh`
 
 ```
 $ cd fetcher/
@@ -59,4 +59,11 @@ Password:
 Inventory Report
 ----------------------------------------------------------------------------------------------------
 All done. Please see errors.txt for any errors.
+```
+
+## Make a bash alias to use it as an executable:
+
+```
+$ alias pyez="docker run -it --rm -v $PWD:/scripts juniper/pyez python"
+$ pyez some_script.py
 ```
