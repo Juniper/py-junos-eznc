@@ -119,14 +119,20 @@ def ignoreWarnDecorator(function):
                             if isinstance(ignore_warn, (str, unicode)):
                                 if not re.search(ignore_warn, err['message'],
                                                  re.I):
+                                    # Message did not match.
                                     raise ex
                             elif isinstance(ignore_warn, list):
                                 for warn_msg in ignore_warn:
-                                    if not re.search(warn_msg, err['message'],
-                                                     re.I):
-                                        raise ex
+                                    if re.search(warn_msg, err['message'],
+                                                 re.I):
+                                        # Warning matches. Break skips else.
+                                        break
+                                else:
+                                    # Message didn't match any of the
+                                    # ignore_warn pattern values.
+                                    raise ex
                         else:
-                            # Not a warning
+                            # Not a warning (probably an error).
                             raise ex
                     # Every err was a warning that matched ignore_warn
                     return ex.rpc_xml
