@@ -3,11 +3,16 @@ __author__ = "Rick Sherman"
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 
+from lxml import etree
+
 from jnpr.junos.device import Device
+from jnpr.junos.exception import RpcError
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.decorators import ignoreWarnDecorator
 
 from mock import patch, PropertyMock, call
 
+from ncclient.operations.rpc import RPCError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
@@ -136,6 +141,22 @@ class Test_Decorators(unittest.TestCase):
             decorator = normalizeDecorator(function)
             decorator(self.dev, normalize=False)
             self.assertFalse(mock_transform.called)
+
+    # Test default with ignore_warn missing.
+    def test_ignore_warning_missing(self):
+        def method(self, x):
+            return x
+        decorator = ignoreWarnDecorator(method)
+        response = decorator(self.dev, 'foo')
+        self.assertEqual('foo', response)
+
+    # Test default with ignore_warn False.
+    def test_ignore_warning_false(self):
+        def method(self, x):
+            return x
+        decorator = ignoreWarnDecorator(method)
+        response = decorator(self.dev, 'foo', ignore_warning=False)
+        self.assertEqual('foo', response)
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
