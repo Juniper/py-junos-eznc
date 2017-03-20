@@ -1212,7 +1212,7 @@ class Device(_Connection):
 
     def close(self):
         """
-        Closes the connection to the device.
+        Closes the connection to the device only if connected.
         """
         if self.connected is True:
             self._conn.close_session()
