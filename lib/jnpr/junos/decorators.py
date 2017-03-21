@@ -114,7 +114,6 @@ def ignoreWarnDecorator(function):
                 result = function(*args, **kwargs)
                 return result
             except RpcError as ex:
-                ex.rpc_xml = JXML.remove_namespaces(ex.rpc_xml)
                 if hasattr(ex, 'errs'):
                     for err in ex.errs:
                         if err['severity'] == 'warning':
@@ -140,7 +139,7 @@ def ignoreWarnDecorator(function):
                             # Not a warning (probably an error).
                             raise ex
                     # Every err was a warning that matched ignore_warn
-                    return ex.rpc_xml
+                    return ex.xml
                 else:
                     # Safety net.
                     # I can't think of a situation where this would occur.

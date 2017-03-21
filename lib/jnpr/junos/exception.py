@@ -33,6 +33,9 @@ class RpcError(Exception):
         self.timeout = timeout
         self.re = re
         self.rpc_error = None
+        xml = None
+        if isinstance(rsp, _Element):
+            xml = JXML.remove_namespaces(rsp)
         # To handle errors coming from ncclient, Here errs is list of RPCError
         if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
             self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
@@ -47,6 +50,10 @@ class RpcError(Exception):
                             self.rsp = JXML.remove_namespaces(error.xml)
                             break
             self.message = errs.message
+            if (xml is None and
+               hasattr(errs, 'xml') and
+               isinstance(errs.xml, _Element)):
+                xml = JXML.remove_namespaces(errs.xml)
         else:
             self.errs = errs
             self.message = "\n".join(["%s: %s" % (err['severity'].strip(),
@@ -56,11 +63,22 @@ class RpcError(Exception):
                 if isinstance(errs, list) else ''
 
         if isinstance(self.rsp, _Element):
-            self.rpc_xml = rsp[0] if 'rpc-reply' == rsp.tag else rsp
             self.rpc_error = jxml.rpc_error(self.rsp)
             self.message = self.message or self.rpc_error['message']
             if self.errs is None or not isinstance(self.errs, list):
                 self.errs = [self.rpc_error]
+        if isinstance(xml, _Element) and xml.tag == 'rpc-reply':
+            for child in xml.findall('*'):
+                if child.tag != 'rpc-error':
+                    self.xml = child
+                    break
+            else:
+                if xml.text is not None and xml.text.strip() is not '':
+                    self.xml = xml
+                # no non rpc-error children
+                self.xml = True
+        else:
+            self.xml = xml
 
     def __repr__(self):
         """
