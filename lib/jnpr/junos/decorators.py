@@ -1,6 +1,7 @@
 # stdlib
 from functools import wraps
 import re
+import sys
 
 from jnpr.junos.exception import RpcError
 from jnpr.junos import jxml as JXML
@@ -117,7 +118,10 @@ def ignoreWarnDecorator(function):
                 if hasattr(ex, 'errs'):
                     for err in ex.errs:
                         if err['severity'] == 'warning':
-                            if isinstance(ignore_warn, (str, unicode)):
+                            if ((sys.version < '3' and
+                                 isinstance(ignore_warn, (str, unicode))) or
+                                (sys.version >= '3' and
+                                     isinstance(ignore_warn, str))):
                                 if not re.search(ignore_warn, err['message'],
                                                  re.I):
                                     # Message did not match.
