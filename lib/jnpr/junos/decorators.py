@@ -79,8 +79,8 @@ def normalizeDecorator(function):
 
 def ignoreWarnDecorator(function):
     """
-    Ignore warning if ignore_warning provided and the rpc-reply severity level
-    is warning
+    Ignore warnings if all <rpc-error> elements are at severity 'warning' and
+    match one of the values of the ignore_warning argument.
 
     For example::
         dev.rpc.get(ignore_warning=True)
@@ -89,11 +89,12 @@ def ignoreWarnDecorator(function):
                                     'statement not found'])
         cu.load(cnf, ignore_warning='statement not found')
 
-    :ignore_warning: It can take take boolean value or string or list of
-        string. If True, it will ignore all warning. If string, it will
-        ignore warning if the statement matches given string. If list of
-        strings, it will try to check if warning statement is from any of the
-        given strings in the list.
+    :ignore_warning: A boolean, string or list of string.
+        If the value is True, it will ignore all warnings regarldess of the
+        warning message. If the value is a string, it will ignore warning(s) if
+        the message of each warning matches the string. If the value is a list
+        of strings, ignore warning(s) if the message of each warning matches at
+        least one of the strings in the list.
 
     .. note::
             When the value of ignore_warning is a string, or list of strings,
