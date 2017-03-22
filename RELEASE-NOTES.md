@@ -33,6 +33,8 @@
 - update ospf view, add bgp/inventory #665 
 - Updated doc string for close function #686 
 - Add Travis builds for Python 3.5 and 3.6 #687 
+- StartShell.run to take this as None for non returning commands #680
+- Modify ignore_warning return value to mimic normal RPC return value. #688
 
 
 # Release 2.0.1
