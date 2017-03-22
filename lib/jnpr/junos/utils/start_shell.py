@@ -1,7 +1,8 @@
-import paramiko
 from select import select
 import re
 import datetime
+
+from jnpr.junos.utils.misc import get_ssh_client
 
 _JUNOS_PROMPT = '> '
 _SHELL_PROMPT = '(%|#)\s'
@@ -83,16 +84,7 @@ class StartShell(object):
         :class:`paramiko.SSHClient` instance.
         """
         junos = self._nc
-
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=junos.hostname,
-                       port=(22, junos._port)[junos.hostname == 'localhost'],
-                       username=junos._auth_user,
-                       password=junos._auth_password,
-                       )
-
+        client = get_ssh_client(junos)
         chan = client.invoke_shell()
         self._client = client
         self._chan = chan

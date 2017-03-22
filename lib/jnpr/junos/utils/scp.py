@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 import inspect
 
-import paramiko
 from scp import SCPClient
+
+from jnpr.junos.utils.misc import get_ssh_client
 
 """
 Secure Copy Utility
@@ -81,36 +82,7 @@ class SCP(object):
         #@@@ should check for multi-calls to connect to ensure we don't keep
         #@@@ opening new connections
         junos = self._junos
-        self._ssh = paramiko.SSHClient()
-        self._ssh.load_system_host_keys()
-        self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        # use junos._hostname since this will be correct if we are going
-        # through a jumphost.
-
-        config = {}
-        kwargs = {}
-        ssh_config = getattr(junos, '_sshconf_path')
-        if ssh_config:
-            config = paramiko.SSHConfig()
-            config.parse(open(ssh_config))
-            config = config.lookup(junos._hostname)
-        sock = None
-        if config.get("proxycommand"):
-            sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
-
-        if self._junos._ssh_private_key_file is not None:
-            kwargs['key_filename']=self._junos._ssh_private_key_file
-
-        self._ssh.connect(hostname=junos._hostname,
-                          port=(
-                              22, int(
-                                  junos._port))[
-                              junos._hostname == 'localhost'],
-                          username=junos._auth_user,
-                          password=junos._auth_password,
-                          sock=sock, **kwargs
-                          )
+        self._ssh = get_ssh_client(junos)
         return SCPClient(self._ssh.get_transport(), **scpargs)
 
     def close(self):

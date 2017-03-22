@@ -338,7 +338,6 @@ class _Connection(object):
                 self._hostname = found.get('hostname', self._hostname)
                 self._port = found.get('port', self._port)
                 self._conf_auth_user = found.get('user')
-                self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
 
     def display_xml_rpc(self, command, format='xml'):
@@ -1036,6 +1035,7 @@ class Device(_Connection):
             self._hostname = 'localhost'
             self._ssh_private_key_file = None
             self._ssh_config = None
+            self._allow_agent = False
         else:
             # --------------------------
             # making a remote connection
@@ -1046,17 +1046,21 @@ class Device(_Connection):
             # user will default to $USER
             self._auth_user = os.getenv('USER')
             self._conf_auth_user = None
-            self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
             self._auth_user = kvargs.get('user') or self._conf_auth_user or \
                 self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
-                or self._conf_ssh_private_key_file
+            self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
             self._auth_password = kvargs.get(
                 'password') or kvargs.get('passwd')
+            # we want to enable the ssh-agent if-and-only-if we are
+            # not given a password or an ssh key file.
+            # in this condition it means we want to query the agent
+            # for available ssh keys
+            self._allow_agent = bool((self._auth_password is None) and
+                                     (self._ssh_private_key_file is None))
 
         # -----------------------------
         # initialize instance variables
@@ -1134,14 +1138,6 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
-            # not given a password or an ssh key file.
-            # in this condition it means we want to query the agent
-            # for available ssh keys
-
-            allow_agent = bool((self._auth_password is None) and
-                               (self._ssh_private_key_file is None))
-
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -1150,7 +1146,7 @@ class Device(_Connection):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
-                allow_agent=allow_agent,
+                allow_agent=self._allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
             self._conn._session.add_listener(DeviceSessionListener(self))
