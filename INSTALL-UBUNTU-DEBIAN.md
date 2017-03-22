@@ -20,11 +20,11 @@ Operating Systems
 
 #### Step 2: Install Python and PIP
 
-    For Python 2.x:
+    - For Python 2.x:
         sudo apt-get install python-dev
         wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
 
-    For Python 3.x:
+    - For Python 3.x:
         sudo apt-get install python3-dev
         wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python3
 

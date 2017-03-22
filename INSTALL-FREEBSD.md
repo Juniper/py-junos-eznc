@@ -11,9 +11,9 @@ Operating Systems
 
 #### Step 1: Install Python and PIP
 
-    For Python 2.7:
+    - For Python 2.7:
         sudo pkg install py27-pip
-    For Python 3.5:
+    - For Python 3.5:
         sudo pkg install python35
         curl https://bootstrap.pypa.io/get-pip.py | sudo /usr/local/bin/python3.5
 
