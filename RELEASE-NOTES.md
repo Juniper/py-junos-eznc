@@ -1,12 +1,38 @@
-# Release 2.0.2-dev 2016-Oct-26
+# Release 2.1.0 - 22 Mar 2017
+### Features Added:
+- Enhanced fact gathering. Facts are now gathered "on demand." Additional facts are added. 
+   The definition of facts and return values are properly documented. #638
+- Support for YANG get RPCs. #672 
+- Add an `ignore_warning` argument to suppress `RpcError` exceptions for warnings. #672/#685
+- Enhanced the `sw.install()` method with basic ISSU and NSSU support using the issu and nssu
+   boolean arguments. #606/#630/#632
+   ** NSSU support has not yet been tested and should currently be considered experimental.
+- Provide a master property and a re_name property for Device. #682
+- Enhanced `reboot()` method to take an `all_re` boolean parameter which controls if only the connected
+   Routing Engine, or all Routing Engines, are rebooted. #613
+- Enhanced the warning message produced by the `cli()` method to recommend the corresponding
+   `dev.rpc.<method>()` call. #603
+- Add support for `update` parameter to configuration `load()` method. #681
+- Added `directory_usage` to utils #629/#631/#636
+- Adding support for NFX/JDM fact gathering. #652/#659
+- Connected property. #664 
 
-  * Enhance the warning message produced by the cli() method to recommend the corresponding rpc() call. #60
-  * Enhance the sw.install() method with basic ISSU and NSSU support using the issu and nssu boolean arguments. #606
-  ** NSSU support has not yet been tested and should currently be considered experimental.
-  * Fix: Updated the interface-name glob pattern to correctly match et-x/y/z interfaces in several tables and views. #609
-  * Fix: To take care of special chars on screen during console connection. #610
-  * Enhance reboot() method to take a bool param all_re to decide if only connected dev to be rebooted or all. #613
-  * Fix: Address issue with fact gathering stopping when it encounters a problem. #615
+### Bugs Fixed:
+- Updated the interface-name glob pattern to correctly match `et-<x>/<y>/<z>` interfaces
+   in several tables and views. #609 
+- Take care of special chars on screen during console connection. #610
+- Address issue with fact gathering stopping when it encounters a problem. #615
+- Minor typos fixed in `RuntimeError` exception message and in comments. #621
+- Added `console_has_banner` parameter. #622
+- Add CentOS Support to install instructions #623 
+- Key value is needed in `_IsisAdjacencyLogTable` #627 
+- Improved functionality and documentation of Docker build. #637/#673/#674/#677
+- added remote port ID to lldp.yml (OP) #645
+- Fix documentation for `rollback()` #647
+- Fix for fact gathering pprint. #660/#661
+- update ospf view, add bgp/inventory #665 
+- Updated doc string for close function #686 
+- Add Travis builds for Python 3.5 and 3.6 #687 
 
 
 # Release 2.0.1
