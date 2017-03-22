@@ -30,7 +30,8 @@ class FTP(ftplib.FTP):
 
         self._junos = junos
         self._ftpargs = ftpargs
-        ftplib.FTP.__init__(self, self._junos._hostname, self._junos._auth_user,
+        ftplib.FTP.__init__(self, self._junos._hostname,
+                            self._junos._auth_user,
                             self._junos._auth_password)
 
     # dummy function, as connection is created by ftb lib in __init__ only

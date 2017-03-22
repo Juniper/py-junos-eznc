@@ -235,9 +235,9 @@ class Terminal(object):
 
         def _ev_cli():
             if self.state == self._ST_INIT:
-                # this means that the shell was left open.  probably not a good thing,
-                # so issue a logging message, hit <ENTER> and try again just to be
-                # sure...
+                # this means that the shell was left open.  probably not a
+                # good thing, so issue a logging message, hit <ENTER> and try
+                # again just to be sure...
                 logger.warning('login_warn: waiting on TTY..... ')
                 sleep(5)
                 #  return

@@ -88,7 +88,7 @@ class _FactCache(collections.MutableMapping):
                 new_facts = self._callbacks[key](self._device)
             except jnpr.junos.exception.FactLoopError:
                 raise
-            except Exception as err:
+            except Exception:
                 # An exception was raised. No facts were returned.
                 # Raise the exception to the user?
                 if self._exception_on_failure:
@@ -270,7 +270,7 @@ class _FactCache(collections.MutableMapping):
             self._exception_on_failure = exception_on_failure
             self._warnings_on_failure = warnings_on_failure
             try:
-                _ = str(self._device.facts)
+                str(self._device.facts)
             except Exception:
                 if exception_on_failure:
                     raise

@@ -150,4 +150,3 @@ class StartShell(object):
 
     def __exit__(self, exc_ty, exc_val, exc_tb):
         self.close()
-

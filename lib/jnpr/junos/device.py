@@ -3,7 +3,6 @@ import os
 import types
 import platform
 import warnings
-import traceback
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -505,7 +504,6 @@ class _Connection(object):
                 time.sleep(1)
                 pass
         else:
-            elapsed = datetime.datetime.now() - start
             probe_ok = False
 
         return probe_ok
