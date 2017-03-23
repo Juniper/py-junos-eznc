@@ -12,14 +12,14 @@ Operating Systems
 #### Step 1: Install Python and PIP
 
     - For Python 2.x:
-        sudo yum install python-pip python-devel python-cryptography
+        sudo yum install python-pip python-devel
 
     - For Python 3.x:
-        sudo yum install python3-devel python3-cryptography
+        sudo yum install python3-devel
 
 #### Step 1: Install packages for Junos PyEZ
 
-    sudo yum install libxml2-devel libxslt-devel gcc openssl-devel libffi-devel
+    sudo yum install libxml2-devel libxslt-devel gcc openssl-devel libffi-devel redhat-rpm-config
 	
 #### Step 2: Install Junos PyEZ
 
