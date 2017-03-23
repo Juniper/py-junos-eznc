@@ -7,15 +7,24 @@ These instructions were tested on a 64-bit systems from https://github.com/opsco
 Operating Systems
 ---------------
 - Fedora 25
-
+- Fedora 24
+- CentOS 7.3
+- CentOS 6.8
 
 #### Step 1: Install Python and PIP
 
-    - For Python 2.x:
+##### For Python 2.x:
+###### For Fedora:
         sudo yum install python-pip python-devel
+###### For CentOS:
+        sudo yum install python-devel
+        wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
 
-    - For Python 3.x:
+##### For Python 3.x:
+###### For Fedora:
         sudo yum install python3-devel
+###### For CentOS:
+        (Python 3 packages for CentOS are not provided.)
 
 #### Step 1: Install packages for Junos PyEZ
 
@@ -23,10 +32,10 @@ Operating Systems
 	
 #### Step 2: Install Junos PyEZ
 
-    - For Python 2.x:
+##### For Python 2.x:
         sudo pip install junos-eznc
 
-    - For Python 2.x:
+##### For Python 3.x:
         sudo pip3 install junos-eznc
 
 #### Step 3: Verify 
@@ -48,12 +57,12 @@ Development code can be installed directly from GitHub based on any branch, comm
 
 #### Step 4b: Install Junos PyEZ from GitHub
 
-    - For Python 2.x:
+##### For Python 2.x:
 	    sudo pip install git+https://github.com/Juniper/py-junos-eznc.git
 	    or
 	    sudo pip install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
 
-    - For Python 3.x:
+##### For Python 3.x:
 	    sudo pip3 install git+https://github.com/Juniper/py-junos-eznc.git
 	    or
 	    sudo pip3 install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
