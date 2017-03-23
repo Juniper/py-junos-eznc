@@ -65,14 +65,16 @@ class FactoryLoader(object):
     def _fieldfunc_True(self, value_rhs):
         def true_test(x):
             if value_rhs.startswith('regex('):
-                return True if bool(re.search(value_rhs.strip('regex()'), x)) else False
+                return True if bool(re.search(value_rhs.strip('regex()'),
+                                              x)) else False
             return x == value_rhs
         return true_test
 
     def _fieldfunc_False(self, value_rhs):
         def false_test(x):
             if value_rhs.startswith('regex('):
-                return False if bool(re.search(value_rhs.strip('regex()'), x)) else True
+                return False if bool(re.search(value_rhs.strip('regex()'),
+                                               x)) else True
             return x != value_rhs
         return false_test
 

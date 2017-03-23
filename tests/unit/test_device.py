@@ -1,6 +1,3 @@
-__author__ = "Rick Sherman, Nitin Kumar, Stacy Smith"
-__credits__ = "Jeremy Schulman"
-
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open, call
@@ -19,6 +16,9 @@ from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.console import Console
+
+__author__ = "Rick Sherman, Nitin Kumar, Stacy Smith"
+__credits__ = "Jeremy Schulman"
 
 if sys.version < '3':
     builtin_string = '__builtin__'

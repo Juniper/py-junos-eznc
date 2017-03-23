@@ -1,5 +1,4 @@
 import unittest
-from mock import patch
 from nose.plugins.attrib import attr
 import os
 

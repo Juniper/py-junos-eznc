@@ -27,12 +27,15 @@ class TestConsole(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
     def setUp(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
-        mock_expect.side_effect = [(1, re.search('(?P<login>ogin:\s*$)', "login: "), six.b('\r\r\n ogin:')),
-                                   (2,
-                                    re.search('(?P<passwd>assword:\s*$)',
-                                              "password: "),
-                                       six.b('\r\r\n password:')),
-                                   (3, re.search('(?P<shell>%|#\s*$)', "junos % "), six.b('\r\r\nroot@device:~ # '))]
+        mock_expect.side_effect = [(1, re.search('(?P<login>ogin:\s*$)',
+                                                 "login: "),
+                                    six.b('\r\r\n ogin:')),
+                                   (2, re.search('(?P<passwd>assword:\s*$)',
+                                                 "password: "),
+                                    six.b('\r\r\n password:')),
+                                   (3, re.search('(?P<shell>%|#\s*$)',
+                                                 "junos % "),
+                                    six.b('\r\r\nroot@device:~ # '))]
         self.dev = Console(
             host='1.1.1.1',
             user='lab',
@@ -44,12 +47,15 @@ class TestConsole(unittest.TestCase):
     # @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
     # @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
     # def tearDown(self, mock_write, mock_expect, mock_nc_close):
-    #     mock_expect.side_effect = [(1, re.search('(?P<cli>[^\\-"]>\s*$)', "cli>"), six.b('\r\r\nroot@device>')),
-    #                                (2,
-    # re.search('(?P<shell>%|#\s*$)',
-    #                                           "junos %"),
-    # six.b('\r\r\nroot@device:~ # ')),
-    #                                (3, re.search('(?P<login>ogin:\s*$)', "login: "), six.b('\r\r\nlogin'))]
+    #     mock_expect.side_effect = [(1, re.search('(?P<cli>[^\\-"]>\s*$)',
+    #                                              "cli>"),
+    #                                 six.b('\r\r\nroot@device>')),
+    #                                (2, re.search('(?P<shell>%|#\s*$)',
+    #                                              "junos %"),
+    #                                 six.b('\r\r\nroot@device:~ # ')),
+    #                                (3, re.search('(?P<login>ogin:\s*$)',
+    #                                              "login: "),
+    #                                 six.b('\r\r\nlogin'))]
     #     self.dev.close()
 
     @patch('jnpr.junos.console.Console._tty_logout')
@@ -73,21 +79,25 @@ class TestConsole(unittest.TestCase):
             mode='Telnet',
             fact_style='old')
         mock_warn.assert_has_calls([call.warn(
-            'fact-style old will be removed in a '
-                                     'future release.',
-                                    RuntimeWarning)])
+            'fact-style old will be removed in a future release.',
+            RuntimeWarning)])
 
     @patch('jnpr.junos.transport.tty_telnet.Telnet._tty_open')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
     @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
     def test_login_bad_password(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
-        mock_expect.side_effect = [(1, re.search('(?P<login>ogin:\s*$)', "login: "), six.b('\r\r\n ogin:')),
+        mock_expect.side_effect = [(1,
+                                    re.search('(?P<login>ogin:\s*$)',
+                                              "login: "),
+                                    six.b('\r\r\n ogin:')),
                                    (2,
                                     re.search('(?P<passwd>assword:\s*$)',
                                               "password: "),
-                                       six.b('\r\r\n password:')),
-                                   (3, re.search('(?P<badpasswd>ogin incorrect)', "login incorrect"),
+                                    six.b('\r\r\n password:')),
+                                   (3,
+                                    re.search('(?P<badpasswd>ogin incorrect)',
+                                              "login incorrect"),
                                     six.b('\r\r\nlogin incorrect'))]
         self.dev = Console(
             host='1.1.1.1',
@@ -104,15 +114,18 @@ class TestConsole(unittest.TestCase):
             self, mock_write, mock_expect, mock_open, mock_logout):
         tty_netconf.open = MagicMock()
 
-        mock_expect.side_effect = [(1, re.search('(?P<login>ogin:\s*$)', "login: "),
+        mock_expect.side_effect = [(1, re.search('(?P<login>ogin:\s*$)',
+                                                 "login: "),
                                     six.b('\r\r\n ogin:')),
                                    (2,
                                     re.search('(?P<passwd>assword:\s*$)',
                                               "password: "),
                                        six.b('\r\r\n password:')),
-                                   (3, re.search('(?P<shell>%|#\s*$)', "junos % "),
+                                   (3, re.search('(?P<shell>%|#\s*$)',
+                                                 "junos % "),
                                     six.b('\r\r\nroot@device:~ # '))]
-        with Console(host='1.1.1.1', user='lab', password='lab123', mode='Telnet') as dev:
+        with Console(host='1.1.1.1', user='lab',
+                     password='lab123', mode='Telnet') as dev:
             self.assertTrue(isinstance(self.dev, Console))
 
     @patch('jnpr.junos.console.Console._tty_login')
@@ -132,7 +145,8 @@ class TestConsole(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_telnet.Telnet')
     @patch('jnpr.junos.console.Console._tty_login')
     def test_console_tty_open_err(self, mock_login, mock_telnet):
-        with patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.open') as mock_open:
+        with patch('jnpr.junos.transport.tty_telnet.'
+                   'telnetlib.Telnet.open') as mock_open:
             mock_telnet.RETRY_OPEN = 1
             mock_login.side_effect = ValueError
             self.dev._tty.LOGIN_RETRY = self.dev._tty.RETRY_OPEN = 1

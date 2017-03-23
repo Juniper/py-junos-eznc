@@ -58,8 +58,9 @@ class RpcError(Exception):
             self.errs = errs
             self.message = "\n".join(["%s: %s" % (err['severity'].strip(),
                                                   err['message'].strip())
-                                      for err in errs if err['message'] is not None
-                                      and err['severity'] is not None]) \
+                                      for err in errs
+                                      if err['message'] is not None and
+                                      err['severity'] is not None]) \
                 if isinstance(errs, list) else ''
 
         if isinstance(self.rsp, _Element):

@@ -33,7 +33,6 @@ The following dictionary keys represent the available facts and their meaning:
 """
 import importlib
 import os
-import sys
 
 
 def _get_list_of_fact_module_names():

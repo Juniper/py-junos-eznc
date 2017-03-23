@@ -1,6 +1,3 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import os
 import unittest
 from io import StringIO
@@ -8,6 +5,9 @@ from nose.plugins.attrib import attr
 from mock import patch
 from jnpr.junos.jxml import NAME, INSERT, remove_namespaces, cscript_conf
 from lxml import etree
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 
 @attr('unit')

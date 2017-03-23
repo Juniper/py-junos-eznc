@@ -270,9 +270,11 @@ class SW(Util):
         self.log('ISSU requirement validation: The master Routing Engine and\n'
                  'backup Routing engine must be running the same software\n'
                  'version before you can perform a unified ISSU.')
-        if not (self._dev.facts['2RE'] and self._dev.facts['version_RE0'] == self._dev.facts['version_RE1']):
-            self.log('Requirement FAILED: The master Routing Engine (%s) and \n'
-                     'backup Routing Engine (%s) must be running the same \n'
+        if not (self._dev.facts['2RE'] and
+                self._dev.facts['version_RE0'] ==
+                self._dev.facts['version_RE1']):
+            self.log('Requirement FAILED: The master Routing Engine (%s) and\n'
+                     'backup Routing Engine (%s) must be running the same\n'
                      'software version before it can perform a unified ISSU' %
                      (self._dev.facts['version_RE0'],
                       self._dev.facts['version_RE1']))
@@ -283,8 +285,9 @@ class SW(Util):
                  'by using the command "show system switchover"')
         output = ''
         try:
-            op = self._dev.rpc.request_shell_execute(routing_engine='backup',
-                                                 command="cli show system switchover")
+            op = self._dev.rpc.request_shell_execute(
+                     routing_engine='backup',
+                     command="cli show system switchover")
             if op.findtext('.//switchover-state', default='').lower() == 'on':
                 self.log('Graceful switchover status is On')
                 return True
@@ -293,21 +296,24 @@ class SW(Util):
             # request-shell-execute rpc is not available for <14.1
             with StartShell(self._dev) as ss:
                 ss.run('cli', '> ', timeout=5)
-                if ss.run('request routing-engine login other-routing-engine')[0]:
-                    # depending on user permission, prompt will go to either cli
-                    # or shell, below line of code prompt will finally end up in
-                    # cli mode
+                if ss.run('request routing-engine '
+                          'login other-routing-engine')[0]:
+                    # depending on user permission, prompt will go to either
+                    # cli or shell, below line of code prompt will finally end
+                    # up in cli mode
                     ss.run('cli', '> ', timeout=5)
                     data = ss.run('show system switchover', '> ', timeout=5)
                     output = data[1]
                     ss.run('exit')
                 else:
-                    self.log('Requirement FAILED: Not able run "show system switchover"')
+                    self.log('Requirement FAILED: Not able run '
+                             '"show system switchover"')
                     return False
         gres_status = re.search('Graceful switchover: (\w+)', output, re.I)
         if not (gres_status is not None and
                 gres_status.group(1).lower() == 'on'):
-            self.log('Requirement FAILED: Graceful switchover status is not On')
+            self.log('Requirement FAILED: Graceful switchover status '
+                     'is not On')
             return False
         self.log('Graceful switchover status is On')
         return True
@@ -326,35 +332,59 @@ class SW(Util):
             * * ``False`` otherwise
         """
         self.log('Checking GRES configuration')
-        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><chassis><redundancy><graceful-switchover/></redundancy></chassis></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit',
-                     'commit-scripts': 'apply'})
+        conf = self._dev.rpc.get_config(filter_xml=etree.XML('''
+                   <configuration>
+                       <chassis>
+                           <redundancy>
+                               <graceful-switchover/>
+                           </redundancy>
+                       </chassis>
+                   </configuration>'''),
+                                        options={'database': 'committed',
+                                                 'inherit': 'inherit',
+                                                 'commit-scripts': 'apply'})
         if conf.find('chassis/redundancy/graceful-switchover') is None:
-            self.log('Requirement FAILED: GRES is not Enabled in configuration')
+            self.log('Requirement FAILED: GRES is not Enabled '
+                     'in configuration')
             return False
         self.log('Checking commit synchronize configuration')
         conf = self._dev.rpc.get_config(
-            filter_xml=etree.XML('<configuration><system><commit><synchronize/></commit></system></configuration>'),
+            filter_xml=etree.XML('''
+            <configuration>
+                <system>
+                    <commit>
+                        <synchronize/>
+                    </commit>
+                </system>
+            </configuration>'''),
             options={'database': 'committed', 'inherit': 'inherit',
                      'commit-scripts': 'apply'})
         if conf.find('system/commit/synchronize') is None:
-            self.log('Requirement FAILED: commit synchronize is not Enabled in configuration')
+            self.log('Requirement FAILED: commit synchronize is not '
+                     'Enabled in configuration')
             return False
         self.log('Checking NSR configuration')
-        conf = self._dev.rpc.get_config(filter_xml=etree.XML(
-            '<configuration><routing-options><nonstop-routing/></routing-options></configuration>'),
-            options={'database': 'committed', 'inherit': 'inherit',
-                     'commit-scripts': 'apply'})
+        conf = self._dev.rpc.get_config(
+                   filter_xml=etree.XML('''
+                   <configuration>
+                       <routing-options>
+                           <nonstop-routing/>
+                       </routing-options>
+                   </configuration>
+                   '''),
+                   options={'database': 'committed',
+                            'inherit': 'inherit',
+                            'commit-scripts': 'apply'})
         if conf.find('routing-options/nonstop-routing') is None:
             self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
-        self.log('Verifying that GRES status on the current Routing Engine is Enabled\n'
-                 'by using the "show task replication" command.')
+        self.log('Verifying that GRES status on the current Routing Engine '
+                 'is Enabled by using the "show task replication" command.')
         op = self._dev.rpc.get_routing_task_replication_state()
-        if not (op.findtext('task-gres-state') == 'Enabled' and op.findtext('task-re-mode') == 'Master'):
-            self.log('Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\n'
-                     'is not Master')
+        if not (op.findtext('task-gres-state') == 'Enabled' and
+                op.findtext('task-re-mode') == 'Master'):
+            self.log('Requirement FAILED: Either Stateful Replication is not '
+                     'Enabled or RE mode\nis not Master')
             return False
         return True
 
@@ -386,7 +416,8 @@ class SW(Util):
 
             # e.errs is list of dictionaries
             if hasattr(e, 'errs') and \
-                    list(filter(lambda x: 'No such file or directory' in x['message'], e.errs)):
+                    list(filter(lambda x: 'No such file or directory' in
+                                x['message'], e.errs)):
                 return None
             else:
                 raise
@@ -476,7 +507,8 @@ class SW(Util):
         5. validates the package if :validate: is True
         6. installs the package
 
-        .. warning:: This process has been validated on the following deployments.
+        .. warning:: This process has been validated on the following
+                     deployments.
 
                       Tested:
 
@@ -492,8 +524,8 @@ class SW(Util):
                       * SRX cluster
                       * MX virtual-chassis
 
-        You can get a progress report on this process by providing a **progress**
-        callback.
+        You can get a progress report on this process by providing a
+        **progress** callback.
 
         .. note:: You will need to invoke the :meth:`reboot` method explicitly
                    to reboot the device.
@@ -623,7 +655,8 @@ class SW(Util):
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, issu, nssu, dev_timeout=timeout)
+                v_ok = self.validate(remote_package, issu, nssu,
+                                     dev_timeout=timeout)
 
                 if v_ok is not True:
                     return v_ok

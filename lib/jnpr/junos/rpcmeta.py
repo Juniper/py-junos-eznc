@@ -22,8 +22,8 @@ class _RpcMetaExec(object):
     # get_config
     # -----------------------------------------------------------------------
 
-    def get_config(self, filter_xml=None, options={}, model=None, namespace=None,
-                   remove_ns=True, **kwargs):
+    def get_config(self, filter_xml=None, options={}, model=None,
+                   namespace=None, remove_ns=True, **kwargs):
         """
         retrieve configuration from the Junos device
 
@@ -32,8 +32,9 @@ class _RpcMetaExec(object):
            dev.rpc.get_config()
            dev.rpc.get_config(filter_xml='<system><services/></system>')
            dev.rpc.get_config(filter_xml='system/services')
-           dev.rpc.get_config(filter_xml=etree.XML('<system><services/></system>'),
-                            options={'format': 'json'})
+           dev.rpc.get_config(
+               filter_xml=etree.XML('<system><services/></system>'),
+               options={'format': 'json'})
            # to fetch junos as well as yang model configs
            dev.rpc.get_config(model=True)
            # openconfig yang example
@@ -54,29 +55,42 @@ class _RpcMetaExec(object):
 
         .. code-block:: python
 
-           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'))
+           config = dev.rpc.get_config(filter_xml=etree.XML('''
+               <configuration>
+                   <system>
+                       <host-name/>
+                   </system>
+               </configuration>'''))
 
-        :options: is a dictionary of XML attributes to set within the <get-configuration> RPC;
-                  the following returns the device host-name either configured with "set system host-name"
-                  and if unconfigured, the value inherited from apply-group re0|re1, typical for multi-RE systems
+        :options: is a dictionary of XML attributes to set within the
+                  <get-configuration> RPC; the following returns the device
+                  host-name either configured with "set system host-name"
+                  and if unconfigured, the value inherited from
+                  apply-group re0|re1, typical for multi-RE systems
 
         .. code-block:: python
 
-           config = dev.rpc.get_config(filter_xml=etree.XML('<configuration><system><host-name/></system></configuration>'),
+           config = dev.rpc.get_config(filter_xml=etree.XML('''
+                        <configuration>
+                            <system>
+                                <host-name/>
+                            </system>
+                        </configuration>'''),
                  options={'database':'committed','inherit':'inherit'})
 
         :param str model: Can provide yang model openconfig/custom/ietf. When
-                model is True and filter_xml is None, xml is enclosed under <data> so
-                that we get junos as well as other model configurations
+                model is True and filter_xml is None, xml is enclosed under
+                <data> so that we get junos as well as other model
+                configurations
 
         :param str namespace: User can have their own defined namespace in the
                 custom yang models, In such cases they need to provide that
                 namespace so that it can be used to fetch yang modeled configs
 
-        :param bool remove_ns: remove namespaces, if value assigned is False, function
-                will return xml with namespaces. The same xml returned can be
-                loaded back to devices. This comes handy in case of yang based
-                configs
+        :param bool remove_ns: remove namespaces, if value assigned is False,
+                function will return xml with namespaces. The same xml
+                returned can be loaded back to devices. This comes handy in
+                case of yang based configs
 
         .. code-block:: python
 
@@ -102,16 +116,16 @@ class _RpcMetaExec(object):
                     filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
             # it does not already have one (not in case of yang model config)
-            if filter_xml.tag != 'configuration' and model is None and \
-                            namespace is None:
+            if (filter_xml.tag != 'configuration' and model is None and
+               namespace is None):
                 etree.SubElement(rpc, 'configuration').append(filter_xml)
             else:
                 if model is not None or namespace is not None:
                     if model == 'custom' and namespace is None:
                         raise AttributeError('For "custom" model, '
                                              'explicitly provide "namespace"')
-                    ns = namespace or (nmspaces.get(model.lower()) + \
-                                      filter_xml.tag)
+                    ns = namespace or (nmspaces.get(model.lower()) +
+                                       filter_xml.tag)
                     filter_xml.attrib['xmlns'] = ns
                 rpc.append(filter_xml)
         transform = self._junos.transform
@@ -144,7 +158,8 @@ class _RpcMetaExec(object):
            dev.rpc.get(ignore_warning=True)
            dev.rpc.get(filter_select='bgp') or dev.rpc.get('bgp')
            dev.rpc.get(filter_select='bgp/neighbors')
-           dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']/timers/state/hold-time")
+           dev.rpc.get("/bgp/neighbors/neighbor[neighbor-address='10.10.0.1']"
+                       "/timers/state/hold-time")
            dev.rpc.get('mpls', ignore_warning=True)
 
         :param str filter_select:
@@ -168,15 +183,19 @@ class _RpcMetaExec(object):
         """
         loads :contents: onto the Junos device, does not commit the change.
 
-        :options: is a dictionary of XML attributes to set within the <load-configuration> RPC.
+        :options: is a dictionary of XML attributes to set within the
+                  <load-configuration> RPC.
 
         The :contents: are interpreted by the :options: as follows:
 
-        format='text' and action='set', then :contents: is a string containing a series of "set" commands
+        format='text' and action='set', then :contents: is a string containing
+            a series of "set" commands
 
-        format='text', then :contents: is a string containing Junos configuration in curly-brace/text format
+        format='text', then :contents: is a string containing Junos
+            configuration in curly-brace/text format
 
-        format='json', then :contents: is a string containing Junos configuration in json format
+        format='json', then :contents: is a string containing Junos
+            configuration in json format
 
         <otherwise> :contents: is XML structure
         """

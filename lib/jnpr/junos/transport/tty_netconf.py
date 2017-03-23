@@ -87,7 +87,7 @@ class tty_netconf(object):
         cmd = E.command('request system zeroize')
         try:
             encode = None if sys.version < '3' else 'unicode'
-            rsp = self.rpc(etree.tostring(cmd, encoding=encode))
+            self.rpc(etree.tostring(cmd, encoding=encode))
         except:
             return False
         return True

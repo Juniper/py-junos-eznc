@@ -102,10 +102,6 @@ class TestSW(unittest.TestCase):
         with self.capture(SW.progress, self.dev, 'running') as output:
             self.assertEqual('1.1.1.1: running\n', output)
 
-    def test_sw_progress(self):
-        with self.capture(SW.progress, self.dev, 'running') as output:
-            self.assertEqual('1.1.1.1: running\n', output)
-
     @patch('jnpr.junos.Device.execute')
     @patch('paramiko.SSHClient')
     @patch('scp.SCPClient.put')

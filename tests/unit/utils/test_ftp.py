@@ -38,7 +38,7 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.connect')
     def test_ftp_open_erors(self, mock_ftpconnect,
                             mock_ftplogin):
-        dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev)
+        jnpr.junos.utils.ftp.FTP(self.dev)
         mock_ftplogin.assert_called_with('testuser', 'testpasswd', '')
     #
 
@@ -78,7 +78,7 @@ class TestFtp(unittest.TestCase):
 
     @patch('ftplib.FTP.retrbinary')
     @patch(builtin_string + '.open')
-    def test_ftp_dnload_file_get(self, mock_open, mock_ftpretr):
+    def test_ftp_dnload_file_get_retr(self, mock_open, mock_ftpretr):
         self.assertEqual(self.dev_ftp.get(remote_file="/var/tmp/testfile"),
                          True)
 

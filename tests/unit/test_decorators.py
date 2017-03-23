@@ -1,5 +1,3 @@
-__author__ = "Rick Sherman"
-
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 
@@ -16,6 +14,8 @@ from mock import patch, PropertyMock, call
 from ncclient.operations.rpc import RPCError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+
+__author__ = "Rick Sherman"
 
 
 @attr('unit')
@@ -257,7 +257,7 @@ class Test_Decorators(unittest.TestCase):
             delete policy-options prefix-list foo
         """
         with self.assertRaises(ConfigLoadError):
-            cu.load(config, ignore_warning=['foo','bar'])
+            cu.load(config, ignore_warning=['foo', 'bar'])
 
     # Test with ignore_warning=['foo', 'bar], and
     # three warnings which are 'foo boom', 'boom bar', and 'foo bar'

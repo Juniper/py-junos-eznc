@@ -66,7 +66,7 @@ class PhyPortBase(Resource):
         xml.append(
             Resource.xmltag_set_or_del(
                 'disable',
-                (self.admin == False)))
+                (self.admin is False)))
         return True
 
     def _xml_change_mtu(self, xml):
