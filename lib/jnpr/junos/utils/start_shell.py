@@ -52,7 +52,7 @@ class StartShell(object):
         chan = self._chan
         got = []
         timeout = timeout or self.timeout
-        timeout = datetime.datetime.now()+datetime.timedelta(
+        timeout = datetime.datetime.now() + datetime.timedelta(
             seconds=timeout)
         while timeout > datetime.datetime.now():
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)

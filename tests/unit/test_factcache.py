@@ -1,6 +1,3 @@
-__author__ = "Stacy Smith"
-__credits__ = "Jeremy Schulman, Nitin Kumar"
-
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock, call
@@ -10,6 +7,9 @@ from jnpr.junos import Device
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+
+__author__ = "Stacy Smith"
+__credits__ = "Jeremy Schulman, Nitin Kumar"
 
 
 @attr('unit')
@@ -61,10 +61,8 @@ class TestFactCache(unittest.TestCase):
         # do not match
         foo = self.dev.facts['foo']
         mock_warn.assert_has_calls([call.warn(
-            'New and old-style facts do not '
-                                     'match for the foo fact.\n'
-                                     '    New-style value: foo\n'
-                                     '    Old-style value: bar\n',
+            'New and old-style facts do not match for the foo fact.\n'
+            '    New-style value: foo\n    Old-style value: bar\n',
                                     RuntimeWarning)])
 
     def test_factcache_fail_to_return_expected_fact(self):
