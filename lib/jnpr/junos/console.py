@@ -20,6 +20,7 @@ from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos.factcache import _FactCache
 from jnpr.junos import jxml as JXML
 from jnpr.junos.ofacts import *
+from jnpr.junos.decorators import ignoreWarnDecorator
 
 QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
 QFX_MODE_NODE = 'NODE'
@@ -214,6 +215,7 @@ class Console(_Connection):
                 raise err
             self.connected = False
 
+    @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
         encode = None if sys.version < '3' else 'unicode'
         rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) \

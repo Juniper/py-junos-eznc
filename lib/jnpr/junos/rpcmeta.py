@@ -179,7 +179,7 @@ class _RpcMetaExec(object):
     # load_config
     # -----------------------------------------------------------------------
 
-    def load_config(self, contents, **options):
+    def load_config(self, contents, ignore_warning=False, **options):
         """
         loads :contents: onto the Junos device, does not commit the change.
 
@@ -214,7 +214,7 @@ class _RpcMetaExec(object):
             else:
                 rpc.append(contents)
 
-        return self._junos.execute(rpc)
+        return self._junos.execute(rpc, ignore_warning=ignore_warning)
 
     # -----------------------------------------------------------------------
     # cli

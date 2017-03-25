@@ -3,7 +3,9 @@ from functools import wraps
 import re
 import sys
 
-from jnpr.junos.exception import RpcError
+from lxml import etree
+from ncclient.operations.rpc import RPCError
+from ncclient.xml_ import NCElement
 from jnpr.junos import jxml as JXML
 
 
@@ -107,44 +109,65 @@ def ignoreWarnDecorator(function):
             complicated match conditions.
     """
     @wraps(function)
-    def wrapper(*args, **kwargs):
-        ignore_warn = kwargs.pop('ignore_warning', False)
-        if ignore_warn:
-            try:
-                result = function(*args, **kwargs)
-                return result
-            except RpcError as ex:
-                if hasattr(ex, 'errs'):
-                    for err in ex.errs:
-                        if err['severity'] == 'warning':
-                            if ((sys.version < '3' and
-                                 isinstance(ignore_warn, (str, unicode))) or
-                                (sys.version >= '3' and
-                                 isinstance(ignore_warn, str))):
-                                if not re.search(ignore_warn, err['message'],
-                                                 re.I):
-                                    # Message did not match.
-                                    raise ex
-                            elif isinstance(ignore_warn, list):
-                                for warn_msg in ignore_warn:
-                                    if re.search(warn_msg, err['message'],
-                                                 re.I):
-                                        # Warning matches. Break skips else.
-                                        break
-                                else:
-                                    # Message didn't match any of the
-                                    # ignore_warn pattern values.
-                                    raise ex
-                        else:
-                            # Not a warning (probably an error).
-                            raise ex
-                    # Every err was a warning that matched ignore_warn
-                    return ex.xml
-                else:
-                    # Safety net.
-                    # I can't think of a situation where this would occur.
-                    raise ex
-        else:
-            return function(*args, **kwargs)
+    def wrapper(self, *args, **kwargs):
+        ignore_warning = kwargs.pop('ignore_warning', False)
+        rsp = None
+        try:
+            rsp = function(self, *args, **kwargs)
+        except RPCError as ex:
+            if hasattr(ex, 'xml'):
+                if ignore_warning:
+                    if hasattr(ex, 'errors'):
+                        for err in ex.errors:
+                            if err.severity == 'warning':
+                                if ((sys.version < '3' and
+                                         isinstance(ignore_warning,
+                                                    (str, unicode))) or
+                                        (sys.version >= '3' and
+                                             isinstance(ignore_warning,
+                                                        str))):
+                                    if not re.search(ignore_warning,
+                                                     err.message,
+                                                     re.I):
+                                        # Message did not match.
+                                        raise ex
+                                elif isinstance(ignore_warning, list):
+                                    for warn_msg in ignore_warning:
+                                        if re.search(warn_msg,
+                                                     err.message,
+                                                     re.I):
+                                            # Warning matches.
+                                            # Break skips else.
+                                            break
+                                    else:
+                                        # Message didn't match any of the
+                                        # ignore_warn pattern values.
+                                        raise ex
+                            else:
+                                # Not a warning (probably an error).
+                                raise ex
+                        # Every err was a warning that matched ignore_warning.
+                        # Prepare the response which will get returned.
+                        # ex.xml contains the raw xml response which was
+                        # received.
+                        rsp = ex.xml
+                        # 1) A normal response has been run through the XSLT
+                        #    transformation, but ex.xml has not. Do that now.
+                        rsp = NCElement(etree.tostring(rsp),
+                                        self.transform())._NCElement__doc
+                        # 2) Now remove all of the <rpc-error> elements from
+                        #    the response. We've already confirmed they are
+                        #    all warnings
+                        rsp = etree.fromstring(
+                                  str(JXML.strip_rpc_error_transform(rsp)))
+                    else:
+                        # Safety net. I can't think of a situation
+                        # where this would occur.
+                        raise ex
+            else:
+                # An RPCError which doesn't have an XML attribute. Raise it
+                # up for the caller to deal with.
+                raise ex
+        return rsp
 
     return wrapper

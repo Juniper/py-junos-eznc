@@ -629,10 +629,9 @@ class _Connection(object):
     # execute
     # ------------------------------------------------------------------------
 
-    @ignoreWarnDecorator
     @normalizeDecorator
     @timeoutDecorator
-    def execute(self, rpc_cmd, **kvargs):
+    def execute(self, rpc_cmd, ignore_warning=False, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
 
@@ -640,6 +639,29 @@ class _Connection(object):
           can either be an XML Element or xml-as-string.  In either case
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
+
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regarldess of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+            dev.rpc.get(ignore_warning=True)
+            dev.rpc.get(ignore_warning='vrrp subsystem not running')
+            dev.rpc.get(ignore_warning=['vrrp subsystem not running',
+                                        'statement not found'])
+            cu.load(cnf, ignore_warning='statement not found')
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :param func to_py:
           Is a caller provided function that takes the response and
@@ -656,7 +678,8 @@ class _Connection(object):
             user-auth class privilege controls on Junos
 
         :raises RpcError:
-            When an ``rpc-error`` element is contained in the RPC-reply
+            When an ``rpc-error`` element is contained in the RPC-reply and the
+            ``rpc-error`` element does not match the **ignore_warning** value.
 
         :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
@@ -682,20 +705,28 @@ class _Connection(object):
         # @@@ need to trap this and re-raise accordingly.
 
         try:
-            rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
+            rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
+                                        ignore_warning=ignore_warning)
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
             raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
-        except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
-            # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
-                'permission denied' \
-                else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
+        except RPCError as ex:
+            if hasattr(ex, 'xml'):
+                rsp = ex.xml
+                message = rsp.findtext('error-message')
+                # see if this is a permission error
+                if message and message == 'permission denied':
+                    raise EzErrors.PermissionError(cmd=rpc_cmd_e,
+                                                   rsp=rsp,
+                                                   errs=ex)
+            else:
+                rsp = None
+            raise EzErrors.RpcError(cmd=rpc_cmd_e,
+                                    rsp=rsp,
+                                    errs=ex)
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.",
@@ -1216,6 +1247,7 @@ class Device(_Connection):
             self._conn.close_session()
             self.connected = False
 
+    @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
