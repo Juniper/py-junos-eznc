@@ -147,7 +147,7 @@ class _RpcMetaExec(object):
     # get
     # -----------------------------------------------------------------------
 
-    def get(self, filter_select=None, **kwargs):
+    def get(self, filter_select=None, ignore_warning=False, **kwargs):
         """
         Retrieve running configuration and device state information using
         <get> rpc
@@ -166,6 +166,29 @@ class _RpcMetaExec(object):
           The select attribute will be treated as an XPath expression and
           used to filter the returned data.
 
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regarldess of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+            dev.rpc.get(ignore_warning=True)
+            dev.rpc.get(ignore_warning='vrrp subsystem not running')
+            dev.rpc.get(ignore_warning=['vrrp subsystem not running',
+                                        'statement not found'])
+            cu.load(cnf, ignore_warning='statement not found')
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
+
         :returns: xml object
         """
         # junos only support filter type to be xpath
@@ -173,7 +196,9 @@ class _RpcMetaExec(object):
         if filter_select is not None:
             filter_params['source'] = filter_select
         rpc = E('get', E('filter', filter_params))
-        return self._junos.execute(rpc, **kwargs)
+        return self._junos.execute(rpc,
+                                   ignore_warning=ignore_warning,
+                                   **kwargs)
 
     # -----------------------------------------------------------------------
     # load_config
@@ -182,6 +207,29 @@ class _RpcMetaExec(object):
     def load_config(self, contents, ignore_warning=False, **options):
         """
         loads :contents: onto the Junos device, does not commit the change.
+
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regarldess of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+            dev.rpc.get(ignore_warning=True)
+            dev.rpc.get(ignore_warning='vrrp subsystem not running')
+            dev.rpc.get(ignore_warning=['vrrp subsystem not running',
+                                        'statement not found'])
+            cu.load(cnf, ignore_warning='statement not found')
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :options: is a dictionary of XML attributes to set within the
                   <load-configuration> RPC.

@@ -63,7 +63,6 @@ class RpcError(Exception):
             if self.errs is None or not isinstance(self.errs, list):
                 self.errs = [self.rpc_error]
 
-
     def __repr__(self):
         """
           pprints the response XML attribute

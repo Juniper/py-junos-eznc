@@ -120,11 +120,10 @@ def ignoreWarnDecorator(function):
                     for err in ex.errors:
                         if err.severity == 'warning':
                             if ((sys.version < '3' and
-                                     isinstance(ignore_warning,
-                                                (str, unicode))) or
-                                    (sys.version >= '3' and
-                                         isinstance(ignore_warning,
-                                                    str))):
+                               isinstance(ignore_warning,
+                                          (str, unicode))) or
+                               (sys.version >= '3' and
+                               isinstance(ignore_warning, str))):
                                 if not re.search(ignore_warning,
                                                  err.message,
                                                  re.I):

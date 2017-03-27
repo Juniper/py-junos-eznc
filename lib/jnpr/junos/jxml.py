@@ -151,6 +151,7 @@ strip_rpc_error_xslt = '''
 strip_rpc_error_root = etree.XML(strip_rpc_error_xslt)
 strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
 
+
 def remove_namespaces(xml):
     for elem in xml.getiterator():
         if elem.tag is etree.Comment:
