@@ -167,7 +167,7 @@ class _RpcMetaExec(object):
           used to filter the returned data.
 
         :param ignore_warning: A boolean, string or list of string.
-          If the value is True, it will ignore all warnings regarldess of the
+          If the value is True, it will ignore all warnings regardless of the
           warning message. If the value is a string, it will ignore
           warning(s) if the message of each warning matches the string. If
           the value is a list of strings, ignore warning(s) if the message of
@@ -178,7 +178,6 @@ class _RpcMetaExec(object):
             dev.rpc.get(ignore_warning='vrrp subsystem not running')
             dev.rpc.get(ignore_warning=['vrrp subsystem not running',
                                         'statement not found'])
-            cu.load(cnf, ignore_warning='statement not found')
 
           .. note::
             When the value of ignore_warning is a string, or list of strings,
@@ -209,18 +208,20 @@ class _RpcMetaExec(object):
         loads :contents: onto the Junos device, does not commit the change.
 
         :param ignore_warning: A boolean, string or list of string.
-          If the value is True, it will ignore all warnings regarldess of the
+          If the value is True, it will ignore all warnings regardless of the
           warning message. If the value is a string, it will ignore
           warning(s) if the message of each warning matches the string. If
           the value is a list of strings, ignore warning(s) if the message of
           each warning matches at least one of the strings in the list.
 
           For example::
-            dev.rpc.get(ignore_warning=True)
-            dev.rpc.get(ignore_warning='vrrp subsystem not running')
-            dev.rpc.get(ignore_warning=['vrrp subsystem not running',
-                                        'statement not found'])
-            cu.load(cnf, ignore_warning='statement not found')
+            dev.rpc.load_config(cnf, ignore_warning=True)
+            dev.rpc.load_config(cnf,
+                                ignore_warning='vrrp subsystem not running')
+            dev.rpc.load_config(cnf,
+                                ignore_warning=['vrrp subsystem not running',
+                                                'statement not found'])
+            dev.rpc.load_config(cnf, ignore_warning='statement not found')
 
           .. note::
             When the value of ignore_warning is a string, or list of strings,
