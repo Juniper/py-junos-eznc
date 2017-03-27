@@ -151,7 +151,8 @@ def ignoreWarnDecorator(function):
                     rsp = ex.xml
                     # 1) A normal response has been run through the XSLT
                     #    transformation, but ex.xml has not. Do that now.
-                    rsp = NCElement(etree.tostring(rsp),
+                    encode = None if sys.version < '3' else 'unicode'
+                    rsp = NCElement(etree.tostring(rsp, encoding=encode),
                                     self.transform())._NCElement__doc
                     # 2) Now remove all of the <rpc-error> elements from
                     #    the response. We've already confirmed they are
