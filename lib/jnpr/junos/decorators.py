@@ -115,58 +115,58 @@ def ignoreWarnDecorator(function):
         try:
             rsp = function(self, *args, **kwargs)
         except RPCError as ex:
-            if hasattr(ex, 'xml'):
-                if ignore_warning:
-                    if hasattr(ex, 'errors'):
-                        for err in ex.errors:
-                            if err.severity == 'warning':
-                                if ((sys.version < '3' and
+            if hasattr(ex, 'xml') and ignore_warning:
+                if hasattr(ex, 'errors'):
+                    for err in ex.errors:
+                        if err.severity == 'warning':
+                            if ((sys.version < '3' and
+                                     isinstance(ignore_warning,
+                                                (str, unicode))) or
+                                    (sys.version >= '3' and
                                          isinstance(ignore_warning,
-                                                    (str, unicode))) or
-                                        (sys.version >= '3' and
-                                             isinstance(ignore_warning,
-                                                        str))):
-                                    if not re.search(ignore_warning,
-                                                     err.message,
-                                                     re.I):
-                                        # Message did not match.
-                                        raise ex
-                                elif isinstance(ignore_warning, list):
-                                    for warn_msg in ignore_warning:
-                                        if re.search(warn_msg,
-                                                     err.message,
-                                                     re.I):
-                                            # Warning matches.
-                                            # Break skips else.
-                                            break
-                                    else:
-                                        # Message didn't match any of the
-                                        # ignore_warn pattern values.
-                                        raise ex
-                            else:
-                                # Not a warning (probably an error).
-                                raise ex
-                        # Every err was a warning that matched ignore_warning.
-                        # Prepare the response which will get returned.
-                        # ex.xml contains the raw xml response which was
-                        # received.
-                        rsp = ex.xml
-                        # 1) A normal response has been run through the XSLT
-                        #    transformation, but ex.xml has not. Do that now.
-                        rsp = NCElement(etree.tostring(rsp),
-                                        self.transform())._NCElement__doc
-                        # 2) Now remove all of the <rpc-error> elements from
-                        #    the response. We've already confirmed they are
-                        #    all warnings
-                        rsp = etree.fromstring(
-                                  str(JXML.strip_rpc_error_transform(rsp)))
-                    else:
-                        # Safety net. I can't think of a situation
-                        # where this would occur.
-                        raise ex
+                                                    str))):
+                                if not re.search(ignore_warning,
+                                                 err.message,
+                                                 re.I):
+                                    # Message did not match.
+                                    raise ex
+                            elif isinstance(ignore_warning, list):
+                                for warn_msg in ignore_warning:
+                                    if re.search(warn_msg,
+                                                 err.message,
+                                                 re.I):
+                                        # Warning matches.
+                                        # Break skips else.
+                                        break
+                                else:
+                                    # Message didn't match any of the
+                                    # ignore_warn pattern values.
+                                    raise ex
+                        else:
+                            # Not a warning (probably an error).
+                            raise ex
+                    # Every err was a warning that matched ignore_warning.
+                    # Prepare the response which will get returned.
+                    # ex.xml contains the raw xml response which was
+                    # received.
+                    rsp = ex.xml
+                    # 1) A normal response has been run through the XSLT
+                    #    transformation, but ex.xml has not. Do that now.
+                    rsp = NCElement(etree.tostring(rsp),
+                                    self.transform())._NCElement__doc
+                    # 2) Now remove all of the <rpc-error> elements from
+                    #    the response. We've already confirmed they are
+                    #    all warnings
+                    rsp = etree.fromstring(
+                              str(JXML.strip_rpc_error_transform(rsp)))
+                else:
+                    # Safety net. ex doesn't have an errors attribute.
+                    # I can't think of a situation where this would
+                    # actually occur.
+                    raise ex
             else:
-                # An RPCError which doesn't have an XML attribute. Raise it
-                # up for the caller to deal with.
+                # ignore_warning was false, or an RPCError which doesn't have
+                #  an XML attribute. Raise it up for the caller to deal with.
                 raise ex
         return rsp
 

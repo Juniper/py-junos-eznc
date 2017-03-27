@@ -9,11 +9,12 @@ from jnpr.junos.exception import RpcError, ConfigLoadError
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 from jnpr.junos.decorators import ignoreWarnDecorator
 
-from mock import patch, PropertyMock, call
+from mock import patch, MagicMock, PropertyMock, call
 
 from ncclient.operations.rpc import RPCError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+from ncclient.xml_ import qualify
 
 __author__ = "Rick Sherman"
 
@@ -169,9 +170,9 @@ class Test_Decorators(unittest.TestCase):
         self.assertEqual('foo', response)
 
     # Test with ignore_warning=True and only warnings.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_true_3snf_warnings(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3snf_warnings
+    def test_ignore_warning_true_3snf_warnings(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3snf_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -181,9 +182,9 @@ class Test_Decorators(unittest.TestCase):
         self.assertTrue(cu.load(config, ignore_warning=True))
 
     # Test with ignore_warning='statement not found' and 3 snf warnings.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_string_3snf_warnings(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3snf_warnings
+    def test_ignore_warning_string_3snf_warnings(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3snf_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -194,9 +195,9 @@ class Test_Decorators(unittest.TestCase):
 
     # Test with ignore_warning='statement not found', 1 snf warning,
     # and 1 error.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_string_1snf_warning_1err(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_1snf_warning_1err
+    def test_ignore_warning_string_1snf_warning_1err(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_1snf_warning_1err)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -211,18 +212,17 @@ class Test_Decorators(unittest.TestCase):
     # test.
     def test_ignore_warning_string_1snf_warning_1err(self):
         def method(self, x):
-            rpc_error = RpcError(cmd=None, rsp=XML('<foo/>'), errs=None)
-            delattr(rpc_error, 'errs')
+            rpc_error = RPCError(XML('<foo/>'), errs=None)
             raise rpc_error
         decorator = ignoreWarnDecorator(method)
-        with self.assertRaises(RpcError):
+        with self.assertRaises(RPCError):
             decorator(self.dev, 'foo', ignore_warning=True)
 
     # Test with ignore_warning=['foo', 'statement not found'] and
     # three statement not found warnings.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_list_3snf_warnings(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3snf_warnings
+    def test_ignore_warning_list_3snf_warnings(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3snf_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -233,9 +233,9 @@ class Test_Decorators(unittest.TestCase):
                                 ignore_warning=['foo', 'statement not found']))
 
     # Test with ignore_warning='foo', and three statement not found warnings.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_string_3snf_no_match(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3snf_warnings
+    def test_ignore_warning_string_3snf_no_match(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3snf_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -247,9 +247,9 @@ class Test_Decorators(unittest.TestCase):
 
     # Test with ignore_warning=['foo', 'bar], and
     # three statement not found warnings.
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_list_3snf_no_match(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3snf_warnings
+    def test_ignore_warning_list_3snf_no_match(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3snf_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -261,9 +261,9 @@ class Test_Decorators(unittest.TestCase):
 
     # Test with ignore_warning=['foo', 'bar], and
     # three warnings which are 'foo boom', 'boom bar', and 'foo bar'
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_list_3warn_match(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3foobar_warnings
+    def test_ignore_warning_list_3warn_match(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3foobar_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -275,9 +275,9 @@ class Test_Decorators(unittest.TestCase):
 
     # Test with ignore_warning=['foo', 'foo bar], and
     # three warnings which are 'foo boom', 'boom bar', and 'foo bar'
-    @patch('jnpr.junos.Device.execute')
-    def test_ignore_warning_list_3warn_no_match(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_3foobar_warnings
+    def test_ignore_warning_list_3warn_no_match(self):
+        self.dev._conn.rpc = MagicMock(side_effect=
+                                       self._mock_manager_3foobar_warnings)
         cu = Config(self.dev)
         config = """
             delete interfaces ge-0/0/0
@@ -305,36 +305,35 @@ class Test_Decorators(unittest.TestCase):
         </load-configuration>
         """
         rsp_string = """
-        <rpc-reply>
-            <load-configuration-results>
-                <rpc-error>
-                    <error-severity>warning</error-severity>
-                    <error-message>
-                        statement not found
-                    </error-message>
-                </rpc-error>
-                <rpc-error>
-                    <error-severity>warning</error-severity>
-                    <error-message>
-                        statement not found
-                    </error-message>
-                </rpc-error>
-                <rpc-error>
-                    <error-severity>warning</error-severity>
-                    <error-message>
-                        statement not found
-                    </error-message>
-                </rpc-error>
-                <ok/>
-            </load-configuration-results>
-        </rpc-reply>
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1R4/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="urn:uuid:1f3dfa00-3434-414a-8aa8-0073590c5812">
+<load-configuration-results>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+statement not found
+</error-message>
+</rpc-error>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+statement not found
+</error-message>
+</rpc-error>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+statement not found
+</error-message>
+</rpc-error>
+<ok/>
+</load-configuration-results>
+</rpc-reply>
         """
         rsp = XML(rsp_string)
         errors = []
-        for err in rsp.findall('.//rpc-error'):
+        for err in rsp.findall('.//'+qualify('rpc-error')):
             errors.append(RPCError(err))
-        rpc_error = RPCError(rsp, errs=errors)
-        raise RpcError(cmd=XML(cmd), rsp=rsp, errs=rpc_error)
+        raise RPCError(rsp, errs=errors)
 
     def _mock_manager_3foobar_warnings(self, *args, **kwargs):
         cmd = """
@@ -347,7 +346,7 @@ class Test_Decorators(unittest.TestCase):
         </load-configuration>
         """
         rsp_string = """
-        <rpc-reply>
+        <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1R4/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="urn:uuid:1f3dfa00-3434-414a-8aa8-0073590c5812">
             <load-configuration-results>
                 <rpc-error>
                     <error-severity>warning</error-severity>
@@ -373,10 +372,9 @@ class Test_Decorators(unittest.TestCase):
         """
         rsp = XML(rsp_string)
         errors = []
-        for err in rsp.findall('.//rpc-error'):
+        for err in rsp.findall('.//'+qualify('rpc-error')):
             errors.append(RPCError(err))
-        rpc_error = RPCError(rsp, errs=errors)
-        raise RpcError(cmd=XML(cmd), rsp=rsp, errs=rpc_error)
+        raise RPCError(rsp, errs=errors)
 
     def _mock_manager_1snf_warning_1err(self, *args, **kwargs):
         cmd = """
@@ -389,7 +387,7 @@ class Test_Decorators(unittest.TestCase):
         </load-configuration>
         """
         rsp_string = """
-        <rpc-reply>
+        <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1R4/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="urn:uuid:1f3dfa00-3434-414a-8aa8-0073590c5812">
             <load-configuration-results>
                 <rpc-error>
                     <error-severity>warning</error-severity>
@@ -412,7 +410,6 @@ class Test_Decorators(unittest.TestCase):
         """
         rsp = XML(rsp_string)
         errors = []
-        for err in rsp.findall('.//rpc-error'):
+        for err in rsp.findall('.//'+qualify('rpc-error')):
             errors.append(RPCError(err))
-        rpc_error = RPCError(rsp, errs=errors)
-        raise RpcError(cmd=XML(cmd), rsp=rsp, errs=rpc_error)
+        raise RPCError(rsp, errs=errors)

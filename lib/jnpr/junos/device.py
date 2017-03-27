@@ -715,7 +715,7 @@ class _Connection(object):
             raise EzErrors.ConnectClosedError(self)
         except RPCError as ex:
             if hasattr(ex, 'xml'):
-                rsp = ex.xml
+                rsp = JXML.remove_namespaces(ex.xml)
                 message = rsp.findtext('error-message')
                 # see if this is a permission error
                 if message and message == 'permission denied':
