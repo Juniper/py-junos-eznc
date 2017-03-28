@@ -774,7 +774,6 @@ class TestDevice(unittest.TestCase):
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
-
         elif args:
             if args[0].tag == 'command':
                 if args[0].text == 'show cli directory':

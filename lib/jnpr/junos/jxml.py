@@ -131,6 +131,26 @@ strip_comments_xslt = '''\
 strip_xslt_root = etree.XML(strip_comments_xslt)
 strip_comments_transform = etree.XSLT(strip_xslt_root)
 
+# XSLT to strip <rpc-error> elements
+strip_rpc_error_xslt = '''
+<xsl:stylesheet version="1.0"
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+  <xsl:strip-space elements="*"/>
+
+    <xsl:template match="node()|@*">
+      <xsl:copy>
+         <xsl:apply-templates select="node()|@*"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="rpc-error"/>
+</xsl:stylesheet>
+'''
+
+strip_rpc_error_root = etree.XML(strip_rpc_error_xslt)
+strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
+
 
 def remove_namespaces(xml):
     for elem in xml.getiterator():

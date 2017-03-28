@@ -14,7 +14,6 @@ import jxmlease
 from jnpr.junos.exception import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
-from jnpr.junos.decorators import ignoreWarnDecorator
 
 """
 Configuration Utilities
@@ -40,7 +39,6 @@ class Config(Util):
     # ------------------------------------------------------------------------
     # commit
     # ------------------------------------------------------------------------
-    @ignoreWarnDecorator
     def commit(self, **kvargs):
         """
         Commit a configuration.
@@ -63,6 +61,30 @@ class Config(Util):
                             evaluate the new configuration.
         :param bool detail: When true return commit detail as XML
 
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+            cu.commit(ignore_warning=True)
+            cu.commit(ignore_warning='Advertisement-interval is '
+                                     'less than four times')
+            cu.commit(ignore_warning=['Advertisement-interval is '
+                                      'less than four times',
+                                      'Chassis configuration for network '
+                                      'services has been changed.'])
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :returns:
             * ``True`` when successful
@@ -114,6 +136,11 @@ class Config(Util):
         if kvargs.get('full'):
             rpc_args['full'] = True
 
+        # Check for ignore_warning
+        ignore_warn = kvargs.get('ignore_warning')
+        if ignore_warn:
+            rpc_args['ignore_warning'] = ignore_warn
+
         rpc_varg = []
         detail = kvargs.get('detail')
         if detail:
@@ -131,7 +158,7 @@ class Config(Util):
                 # this means there are warnings, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.xml, errs=err.errs)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
@@ -170,7 +197,7 @@ class Config(Util):
                 # this means there is a warning, but no errors
                 return True
             else:
-                raise CommitError(cmd=err.cmd, rsp=err.xml, errs=err.errs)
+                raise CommitError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
@@ -229,7 +256,6 @@ class Config(Util):
     # helper on loading configs
     # -------------------------------------------------------------------------
 
-    @ignoreWarnDecorator
     def load(self, *vargs, **kvargs):
         """
         Loads changes into the candidate configuration.  Changes can be
@@ -302,6 +328,28 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
+          
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+            cu.load(cnf, ignore_warning=True)
+            cu.load(cnf, ignore_warning='statement not found')
+            cu.load(cnf, ignore_warning=['statement not found',
+                                         'statement has no contents; ignored')
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :returns:
             RPC-reply as XML object.
@@ -333,6 +381,8 @@ class Config(Util):
             rpc_xattrs['action'] = 'update'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
+
+        ignore_warning = kvargs.get('ignore_warning', False)
 
         # ---------------------------------------------------------------------
         # private helpers ...
@@ -382,13 +432,15 @@ class Config(Util):
             elif re.search(r'^\s*\{', rpc) and re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'json'
 
-        def try_load(rpc_contents, rpc_xattrs):
+        def try_load(rpc_contents, rpc_xattrs, ignore_warning=False):
             try:
-                got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+                got = self.rpc.load_config(rpc_contents,
+                                           ignore_warning=ignore_warning,
+                                           **rpc_xattrs)
             except RpcTimeoutError as err:
                 raise err
             except RpcError as err:
-                raise ConfigLoadError(cmd=err.cmd, rsp=err.xml, errs=err.errs)
+                raise ConfigLoadError(cmd=err.cmd, rsp=err.rsp, errs=err.errs)
             # Something unexpected happened - raise it up
             except Exception as err:
                 raise
@@ -422,14 +474,12 @@ class Config(Util):
                 if kvargs['format'] == 'xml':
                     # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
-            return try_load(rpc_contents, rpc_xattrs)
-            # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
         # if path is provided, use the static-config file
         # ---------------------------------------------------------------------
 
-        if 'path' in kvargs:
+        elif 'path' in kvargs:
             # then this is a static-config file.  load that as our rpc_contents
             rpc_contents = open(kvargs['path'], 'rU').read()
             _lset_fromfile(kvargs['path'])
@@ -437,17 +487,13 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
         # ---------------------------------------------------------------------
         # if template_path is provided, then jinja2 load the template, and
         # render the results.  if template_vars are provided, use those
         # in the render process.
         # ---------------------------------------------------------------------
 
-        if 'template_path' in kvargs:
+        elif 'template_path' in kvargs:
             path = kvargs['template_path']
             template = self.dev.Template(path)
             rpc_contents = template.render(kvargs.get('template_vars', {}))
@@ -456,16 +502,12 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
         # ---------------------------------------------------------------------
         # if template is provided, then this is a pre-loaded jinja2 Template
         # object.  Use the template.filename to determine the format style
         # ---------------------------------------------------------------------
 
-        if 'template' in kvargs:
+        elif 'template' in kvargs:
             template = kvargs['template']
             path = template.filename
             rpc_contents = template.render(kvargs.get('template_vars', {}))
@@ -474,11 +516,12 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
-        raise RuntimeError("Unhandled load request")
+        if rpc_contents is not None:
+            return try_load(rpc_contents,
+                            rpc_xattrs,
+                            ignore_warning=ignore_warning)
+        else:
+            raise RuntimeError("Unhandled load request")
 
     # -------------------------------------------------------------------------
     # config exclusive
