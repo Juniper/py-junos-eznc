@@ -1,4 +1,8 @@
-# Release 2.1.0 - 22 Mar 2017
+## Release 2.1.1 - 28 Mar 2017
+### Bugs Fixed:
+- Fix regressions caused by `ignore_warning`. #691
+
+ Release 2.1.0 - 22 Mar 2017
 ### Features Added:
 - Enhanced fact gathering. Facts are now gathered "on demand." Additional facts are added. 
    The definition of facts and return values are properly documented. #638
