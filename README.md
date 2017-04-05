@@ -1,5 +1,5 @@
 [![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/)
-[![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=latest)](http://junos-pyez.readthedocs.io)
+[![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=stable)](http://junos-pyez.readthedocs.io)
 [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc)
 [![UnitTest Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
 [![](https://images.microbadger.com/badges/image/juniper/pyez.svg)](https://microbadger.com/images/juniper/pyez)
