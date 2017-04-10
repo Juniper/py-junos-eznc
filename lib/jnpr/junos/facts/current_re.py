@@ -16,7 +16,7 @@ def get_facts(device):
     """
     The RPC-equivalent of show interfaces terse on private routing instance.
     """
-    current_re = None
+    current_re = []
 
     rsp = device.rpc.get_interface_information(
               normalize=True,
@@ -33,12 +33,40 @@ def get_facts(device):
                 # Use the _iri_hostname fact to map the IP address to
                 # an internal routing instance hostname.
                 if ip in device.facts['_iri_hostname']:
-                    if current_re is None:
-                        # Make a copy, not a reference
-                        current_re = list(device.facts['_iri_hostname'][ip])
-                    else:
-                        for host in device.facts['_iri_hostname'][ip]:
-                            if host not in current_re:
+                    for host in device.facts['_iri_hostname'][ip]:
+                        if host not in current_re:
+                            current_re.append(host)
+                # An SRX platform in an HA cluster uses a different algorithm
+                # for assigning IRI IP addresses
+                elif device.facts['srx_cluster_id'] is not None:
+                    try:
+                        # Split the IRI IP into a list of 4 octets
+                        octets = ip.split('.', 3)
+                        # The 2nd octet will be cluster-id << 4
+                        cluster_id_octet = str(
+                            int(device.facts['srx_cluster_id']) << 4)
+                        # node0 will have an IP of 129.<cluster_id_octet>.0.1
+                        # node1 will have an IP of 130.<cluster_id_octet>.0.1
+                        # primary will have an IP of 143.<cluster_id_octet>.0.1
+                        if (octets[1] == cluster_id_octet and octets[2] == '0'
+                           and octets[3] == '1'):
+                            host = None
+                            if octets[0] == '129':
+                                host = 'node0'
+                            elif octets[0] == '130':
+                                host = 'node1'
+                            elif octets[0] == '143':
+                                host = 'primary'
+                            if host is not None and host not in current_re:
                                 current_re.append(host)
+                    # Problem splitting IP into octets and indexing them.
+                    # Keep looping to check the other IRI IPs.
+                    except IndexError:
+                        pass
+
+    # An empty list indicates a problem finding any current_re info.
+    # Return None.
+    if len(current_re) == 0:
+        current_re = None
 
     return {'current_re': current_re, }
