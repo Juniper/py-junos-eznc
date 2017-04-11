@@ -7,6 +7,7 @@ from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
+from jnpr.junos.exception import PermissionError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -27,6 +28,30 @@ class TestCurrentRe(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager_current_re
         self.assertEqual(self.dev.facts['current_re'],
                          ['re0', 'master', 'node', 'fwdd', 'member', 'pfem'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_empty(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_empty
+        self.assertEqual(self.dev.facts['current_re'],
+                         None)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_srx_cluster_primary(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_srx_primary
+        self.dev.facts._cache['srx_cluster_id'] = '15'
+        self.assertEqual(self.dev.facts['current_re'], ['node0', 'primary'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_srx_cluster_secondary(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_srx_secondary
+        self.dev.facts._cache['srx_cluster_id'] = '15'
+        self.assertEqual(self.dev.facts['current_re'], ['node1'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_srx_cluster_index_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_srx_index_err
+        self.dev.facts._cache['srx_cluster_id'] = '15'
+        self.assertEqual(self.dev.facts['current_re'], None)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -50,4 +75,24 @@ class TestCurrentRe(unittest.TestCase):
     def _mock_manager_current_re(self, *args, **kwargs):
         if args:
             return self._read_file('current_re_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_current_re_empty(self, *args, **kwargs):
+        if args:
+            return self._read_file('current_re_empty_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_current_re_srx_primary(self, *args, **kwargs):
+        if args:
+            return self._read_file('current_re_srx_primary_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_current_re_srx_secondary(self, *args, **kwargs):
+        if args:
+            return self._read_file('current_re_srx_secondary_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_current_re_srx_index_err(self, *args, **kwargs):
+        if args:
+            return self._read_file('current_re_srx_index_err_' + args[0].tag +
                                    '.xml')

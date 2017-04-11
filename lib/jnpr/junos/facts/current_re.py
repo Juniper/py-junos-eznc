@@ -48,8 +48,8 @@ def get_facts(device):
                         # node0 will have an IP of 129.<cluster_id_octet>.0.1
                         # node1 will have an IP of 130.<cluster_id_octet>.0.1
                         # primary will have an IP of 143.<cluster_id_octet>.0.1
-                        if (octets[1] == cluster_id_octet and octets[2] == '0'
-                           and octets[3] == '1'):
+                        if (octets[1] == cluster_id_octet and
+                           octets[2] == '0' and octets[3] == '1'):
                             host = None
                             if octets[0] == '129':
                                 host = 'node0'
