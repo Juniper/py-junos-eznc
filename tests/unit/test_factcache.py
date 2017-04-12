@@ -107,6 +107,17 @@ class TestFactCache(unittest.TestCase):
         # Now, get the length of the facts
         self.assertEqual(len(self.dev.facts), 2)
 
+    def test_factcache_string_repr(self):
+        # Override the callbacks to only support foo and bar facts.
+        self.dev.facts._callbacks = {'foo': get_foo_fact,
+                                     'bar': get_bar_fact}
+        # Set values for foo and bar facts
+        self.dev.facts._cache['foo'] = 'foo'
+        self.dev.facts._cache['bar'] = {'bar': 'bar'}
+        # Now, get the string (pretty) representation of the facts
+        self.assertEqual(str(self.dev.facts), "{'bar': {'bar': 'bar'}, "
+                                              "'foo': 'foo'}")
+
     def test_factcache_repr_facts(self):
         # Override the callbacks
         self.dev.facts._callbacks = {'foo': get_foo_fact,

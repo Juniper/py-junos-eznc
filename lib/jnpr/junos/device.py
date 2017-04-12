@@ -240,7 +240,7 @@ class _Connection(object):
             # Typical backup case
             elif 'backup' in self.facts['current_re']:
                 master = False
-            # Some single chanssis and single RE platforms don't have
+            # Some single chassis and single RE platforms don't have
             # 'master' in the 'current_re' fact. It's best to check if it's a
             #  single chassis and single RE platform based on the
             # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
@@ -248,6 +248,13 @@ class _Connection(object):
                   self.facts.get('RE_hw_mi') is False and
                   're0' in self.facts['current_re']):
                 master = True
+            # Is it an SRX cluster?
+            # If so, the cluster's "primary" is the "master"
+            elif self.facts.get('srx_cluster') is True:
+                if 'primary' in self.facts['current_re']:
+                    master = True
+                else:
+                    master = False
             else:
                 # Might be a multi-chassis case where this RE is neither the
                 # master or the backup for the entire system. In that case,
