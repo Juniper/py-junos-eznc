@@ -1,0 +1,19 @@
+---
+SubscribersTable:
+  rpc: get-subscribers
+  args:
+    extensive: True
+  args_key: user-name
+  key: user-name
+  item: subscriber
+  view: SubscribersView
+
+SubscribersView:
+  fields:
+    ip: ip-address
+    mask: ip-netmask
+    macaddr: mac-address
+    SVLAN: stacked-vlan-id
+    VLAN: vlan-id
+    Login: login-time
+    Service-session-id: //service-session-id
