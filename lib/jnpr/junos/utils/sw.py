@@ -60,7 +60,7 @@ class SW(Util):
         Util.__init__(self, dev)
         self._dev = dev
         self._RE_list = []
-        if dev.facts['junos_info'] is not None:
+        if 'junos_info' in dev.facts and dev.facts['junos_info'] is not None:
             self._RE_list = list(dev.facts['junos_info'].keys())
         self._multi_RE = bool(dev.facts['2RE'])
         self._multi_VC = bool(
