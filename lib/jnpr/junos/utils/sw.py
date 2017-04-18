@@ -62,7 +62,10 @@ class SW(Util):
         self._RE_list = []
         if 'junos_info' in dev.facts and dev.facts['junos_info'] is not None:
             self._RE_list = list(dev.facts['junos_info'].keys())
-        self._multi_RE = bool(dev.facts['2RE'])
+        else:
+            self._RE_list = [x for x in dev.facts.keys()
+                             if x.startswith('version_RE')]
+        self._multi_RE = bool(dev.facts.get('2RE'))
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
