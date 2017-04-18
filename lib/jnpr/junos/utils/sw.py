@@ -59,9 +59,13 @@ class SW(Util):
     def __init__(self, dev):
         Util.__init__(self, dev)
         self._dev = dev
-        self._RE_list = [
-            x for x in dev.facts.keys() if x.startswith('version_RE')]
-        self._multi_RE = bool(len(self._RE_list) > 1)
+        self._RE_list = []
+        if 'junos_info' in dev.facts and dev.facts['junos_info'] is not None:
+            self._RE_list = list(dev.facts['junos_info'].keys())
+        else:
+            self._RE_list = [x for x in dev.facts.keys()
+                             if x.startswith('version_RE')]
+        self._multi_RE = bool(dev.facts.get('2RE'))
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')

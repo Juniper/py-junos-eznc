@@ -30,6 +30,8 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
          'version_RE0': '16.1-20160925.0',
          'version_RE1': '16.1-20160925.0',
          'model': 'FIREFLY-PERIMETER',
+         'junos_info': {'re0': {'text': '16.1-20160925.0'},
+                        're1': {'text': '16.1-20160925.0'}},
          'RE0': {'status': 'Testing',
                  'last_reboot_reason': 'Router rebooted after a '
                  'normal shutdown.',
