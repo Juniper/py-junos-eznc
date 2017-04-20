@@ -136,7 +136,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 [Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Stacy Smith](https://github.com/stacywsmith)
 
-* v2.0.0: [Ganesh Nalawade](https://github.com/ganeshnalawade), [Jainpriyal](https://github.com/Jainpriyal)
+* v2.0.0: [Ganesh Nalawade](https://github.com/ganeshrn), [Jainpriyal](https://github.com/Jainpriyal)
 
 *Former Contributors:*
 
