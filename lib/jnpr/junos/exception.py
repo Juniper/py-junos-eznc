@@ -312,7 +312,9 @@ class JSONLoadError(Exception):
         obj = re.search('line (\d+)', self.ex_msg)
         if obj:
             line_no = int(obj.group(1))
-            self.offending_line = rpc_content.splitlines()[line_no-1]
+            rpc_lines = rpc_content.splitlines()
+            for line in range(line_no-3, line_no+2):
+                self.offending_line += '%s: %s\n' % (line+1, rpc_lines[line])
 
     def __repr__(self):
         return "{0}(reason: {1}, \nThe offending config appears to be: \n{2}" \
