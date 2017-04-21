@@ -30,6 +30,7 @@ from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
     ignoreWarnDecorator
+from jnpr.junos.exception import JSONLoadError
 
 
 _MODULEPATH = os.path.dirname(__file__)
@@ -747,6 +748,8 @@ class _Connection(object):
                     if str(ex).startswith('Extra data'):
                         return json.loads(
                             re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+                    else:
+                        raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)

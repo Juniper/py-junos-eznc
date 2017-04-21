@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 from nose.plugins.attrib import attr
 
 from jnpr.junos.device import Device
@@ -7,6 +8,7 @@ from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+from jnpr.junos.exception import JSONLoadError
 
 from mock import patch, MagicMock, call
 from lxml import etree
@@ -181,6 +183,16 @@ class Test_RpcMetaExec(unittest.TestCase):
         data = self.dev.rpc.get_config(model=True)
         self.assertEqual(data.tag, 'data')
 
+    def test_get_config_format_json_JSONLoadError_with_line(self):
+        self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
+        self.dev.facts._cache['version_info'] = version_info('15.1X46-D15.3')
+        try:
+            self.dev.rpc.get_config(options={'format': 'json'})
+        except JSONLoadError as ex:
+            self.assertTrue(re.search(
+                "Expecting \'?,\'? delimiter: line 17 column 39 \(char 516\)",
+                ex.ex_msg) is not None)
+
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             if 'normalize' in kwargs and args:
@@ -193,6 +205,9 @@ class Test_RpcMetaExec(unittest.TestCase):
         if args:
             if len(args[0]) > 0 and args[0][0].tag == 'bgp':
                 return self._read_file(args[0].tag + '_bgp_openconfig.xml')
+            elif args[0].attrib.get('format') == 'json' and \
+                            args[0].tag == 'get-configuration':
+                    return self._read_file(args[0].tag + '.json')
             return self._read_file(args[0].tag + '.xml')
 
     def _read_file(self, fname):
@@ -204,4 +219,4 @@ class Test_RpcMetaExec(unittest.TestCase):
             foo = fp.read()
         return NCElement(foo,
                          self.dev._conn._device_handler.transform_reply())
-        return rpc_reply
+
