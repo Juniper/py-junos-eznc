@@ -723,9 +723,18 @@ class Config(Util):
                        format='set')
                print cu.diff()
                cu.commit()
+
+        .. warning:: Ephemeral databases are an advanced Junos feature which
+        if used incorrectly can have serious negative impact on the operation
+        of the Junos device. We recommend you consult JTAC and/or you Juniper
+        account team before deploying the ephemeral database feature in your
+        network.
         """
         self.mode = mode
+        if not kwargs.get('ephemeral_instance') and kwargs:
+            raise ValueError('Unsupported argument provided to Config class')
         self.kwargs = kwargs
+
         Util.__init__(self, dev=dev)
 
     def __enter__(self):
