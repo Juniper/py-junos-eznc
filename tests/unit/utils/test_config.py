@@ -4,8 +4,8 @@ from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import RpcError, LockError,\
-    UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
+from jnpr.junos.exception import RpcError, LockError, UnlockError, \
+    CommitError, RpcTimeoutError, ConfigLoadError, ConnectClosedError
 
 import ncclient
 from ncclient.manager import Manager, make_device_handler
@@ -377,6 +377,12 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.lock_configuration = MagicMock(side_effect=ex)
         self.assertRaises(LockError, self.conf.lock)
 
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_lock_ConnectClosedError(self, mock_jxml):
+        ex = ConnectClosedError(dev=self)
+        self.conf.rpc.lock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(ConnectClosedError, self.conf.lock)
+
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_lock_exception(self, mock_jxml):
         class MyException(Exception):
@@ -393,6 +399,12 @@ class TestConfig(unittest.TestCase):
         ex = RpcError(rsp='ok')
         self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
         self.assertRaises(UnlockError, self.conf.unlock)
+
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_unlock_ConnectClosedError(self, mock_jxml):
+        ex = ConnectClosedError(dev=self)
+        self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(ConnectClosedError, self.conf.unlock)
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_unlock_exception(self, mock_jxml):

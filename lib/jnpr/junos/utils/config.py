@@ -542,6 +542,8 @@ class Config(Util):
         except Exception as err:
             if isinstance(err, RpcError):
                 raise LockError(rsp=err.rsp)
+            elif isinstance(err, ConnectClosedError):
+                raise err
             else:
                 # :err: is from ncclient
                 raise LockError(rsp=JXML.remove_namespaces(err.xml))
@@ -567,6 +569,8 @@ class Config(Util):
         except Exception as err:
             if isinstance(err, RpcError):
                 raise UnlockError(rsp=err.rsp)
+            elif isinstance(err, ConnectClosedError):
+                raise err
             else:
                 # :err: is from ncclient
                 raise UnlockError(rsp=JXML.remove_namespaces(err.xml))
