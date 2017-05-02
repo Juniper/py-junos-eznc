@@ -1,6 +1,10 @@
-## Release 2.1.2.dev0 - 28 Mar 2017
-### Features Added:
+## Release 2.1.2 - 2 May 2017
 ### Bugs Fixed:
+- Doc badge was pointing to older version #694 
+- Fix new-style fact gathering for SRX clusters. #697/#698
+- Properly handle SW upgrades on multi-RE and/or multi-chassis systems when using new-style fact gathering. #700 
+- Raise JSONLoadError if json config is malformed #706 
+- Handle ConnectClosedError exception for lock() and unlock() #708 
 
 ## Release 2.1.1 - 28 Mar 2017
 ### Bugs Fixed:
