@@ -50,7 +50,7 @@ class Terminal(object):
         _re_pat_login,
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
-        '(?P<already_closed>session end at .*\n%)',
+        '(?P<netconf_closed>\<\!\-\- session end at .*\-\-\>\s*)',
         '(?P<shell>%|#\s*$)',
         '(?P<cli>[^\\-"]>\s*$)',
         '(?P<option>Enter your option:\s*$)',
@@ -145,14 +145,14 @@ class Terminal(object):
             self.write('exit')
 
         # Connection closed by foreign host
-        def _ev_already_closed():
+        def _ev_netconf_closed():
             return True
 
         _ev_tbl = {
             'login': _ev_login,
             'shell': _ev_shell,
             'cli': _ev_cli,
-            'already_closed': _ev_already_closed
+            'netconf_closed': _ev_netconf_closed
         }
 
         # hack for now
@@ -164,12 +164,12 @@ class Terminal(object):
         else:
             return True
 
-        if found == 'login' or found == 'already_closed':
+        if found == 'login':
             return True
 
         else:
             sleep(1)
-            self._logout_state_machine(attempt=attempt + 1)
+            return self._logout_state_machine(attempt=attempt + 1)
 
     # -----------------------------------------------------------------------
     # TTY login state-machine
