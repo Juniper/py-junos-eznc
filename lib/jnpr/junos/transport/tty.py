@@ -50,7 +50,7 @@ class Terminal(object):
         _re_pat_login,
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
-        '(?P<netconf_closed>\<\!\-\- session end at .*\-\-\>\s*)',
+        '(?P<netconf_closed><!-- session end at .*-->\s*)',
         '(?P<shell>%|#\s*$)',
         '(?P<cli>[^\\-"]>\s*$)',
         '(?P<option>Enter your option:\s*$)',
