@@ -215,12 +215,14 @@ class TestConsole(unittest.TestCase):
                                           'switch_style': 'NONE',
                                           'personality': 'UNKNOWN'})
 
+    @patch('jnpr.junos.transport.tty.sleep')
     @patch('ncclient.operations.rpc.RPCReply.parse')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.write')
     @patch('jnpr.junos.transport.tty_netconf.select.select')
     @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.read_until')
     def test_load_console(
-            self, mock_read_until, mock_select, mock_write, mock_parse):
+            self, mock_read_until, mock_select, mock_write, mock_parse,
+            mock_sleep):
         mock_select.return_value = ([self.dev._tty._rx], [], [])
         xml = """<policy-options>
                   <policy-statement>
