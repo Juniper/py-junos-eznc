@@ -6,6 +6,8 @@
 
 RouteTable:
   rpc: get-route-information
+  args:
+    destination: '0.0.0.0/0'
   args_key: destination
   item: route-table/rt 
   key: rt-destination
