@@ -39,6 +39,11 @@ class TestGetChassisClusterStatus(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager_true
         self.assertEqual(self.dev.facts['srx_cluster'], True)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_srx_cluster_id_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_true
+        self.assertEqual(self.dev.facts['srx_cluster_id'], '1')
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 

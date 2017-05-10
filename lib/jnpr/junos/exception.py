@@ -1,3 +1,4 @@
+import re
 from jnpr.junos import jxml
 from jnpr.junos import jxml as JXML
 from lxml.etree import _Element
@@ -297,3 +298,32 @@ class ConnectClosedError(ConnectError):
     def __init__(self, dev):
         ConnectError.__init__(self, dev=dev)
         dev.connected = False
+
+
+class JSONLoadError(Exception):
+
+    """
+    Generated if json content of rpc reply fails to load
+    """
+    def __init__(self, exception, rpc_content):
+        self.ex_msg = str(exception)
+        self.rpc_content = rpc_content
+        self.offending_line = ''
+        obj = re.search('line (\d+)', self.ex_msg)
+        if obj:
+            line_no = int(obj.group(1))
+            rpc_lines = rpc_content.splitlines()
+            for line in range(line_no-3, line_no+2):
+                self.offending_line += '%s: %s\n' % (line+1, rpc_lines[line])
+
+    def __repr__(self):
+        if self.offending_line:
+            return "{0}(reason: {1}, \nThe offending config appears to be: \n{2})" \
+                .format(self.__class__.__name__, self.ex_msg,
+                        self.offending_line)
+        else:
+            return "{0}(reason: {1})" \
+                .format(self.__class__.__name__, self.ex_msg)
+
+    __str__ = __repr__
+
