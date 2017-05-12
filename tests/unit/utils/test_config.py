@@ -71,7 +71,8 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.commit(force_sync=True)
         self.conf.rpc.commit_configuration\
-            .assert_called_with(**{'synchronize': True, 'force-synchronize': True})
+            .assert_called_with(**{'synchronize': True,
+                                   'force-synchronize': True})
 
     def test_config_commit_timeout(self):
         self.conf.rpc.commit_configuration = MagicMock()
@@ -103,7 +104,8 @@ class TestConfig(unittest.TestCase):
                 full=True))
         self.conf.rpc.commit_configuration\
             .assert_called_with({'detail': 'detail'},
-                                **{'synchronize': True, 'full': True, 'force-synchronize': True})
+                                **{'synchronize': True, 'full': True,
+                                   'force-synchronize': True})
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_commit_xml_exception(self, mock_jxml):
@@ -559,11 +561,15 @@ class TestConfig(unittest.TestCase):
                 self.assertEqual(ex.message,
                                  "error: interface-range 'axp' is not defined\n"
                                  "error: interface-ranges expansion failed")
-                self.assertEqual(ex.errs, [{'source': None, 'message':
-                                            "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
-                                            'error', 'edit_path': None}, {'source': None, 'message':
-                                                                          'interface-ranges expansion failed', 'bad_element': None,
-                                                                          'severity': 'error', 'edit_path': None}])
+                self.assertEqual(ex.errs, [
+                    {'source': None, 'message':
+                        "interface-range 'axp' is not defined",
+                     'bad_element': None, 'severity': 'error',
+                     'edit_path': None},
+                    {'source': None,
+                     'message': 'interface-ranges expansion failed',
+                     'bad_element': None, 'severity': 'error',
+                     'edit_path': None}])
             else:
                 self.assertEqual(ex.message,
                                  "interface-range 'axp' is not defined")
@@ -598,6 +604,31 @@ class TestConfig(unittest.TestCase):
         self.dev.rpc.open_configuration.assert_called_with(dynamic=True)
 
     @patch('jnpr.junos.Device.execute')
+    def test_config_mode_ephemeral_default(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='ephemeral') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(ephemeral=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_ephemeral_instance(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='ephemeral', ephemeral_instance='xyz') as \
+                conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(
+            ephemeral_instance='xyz')
+
+    def test_config_unsupported_kwargs(self):
+        self.dev.rpc.open_configuration = MagicMock()
+        try:
+            with Config(self.dev, mode='ephemeral', xyz='xyz') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertEqual(str(ex),
+                             'Unsupported argument provided to Config class')
+
+    @patch('jnpr.junos.Device.execute')
     def test_config_mode_close_configuration_ex(self, mock_exec):
         self.dev.rpc.open_configuration = MagicMock()
         ex = RpcError(rsp='ok')
@@ -610,8 +641,7 @@ class TestConfig(unittest.TestCase):
             self.assertTrue(isinstance(ex, RpcError))
         self.assertTrue(self.dev.rpc.close_configuration.called)
 
-    @patch('jnpr.junos.Device.execute')
-    def test_config_mode_undefined(self, mock_exec):
+    def test_config_mode_undefined(self):
         try:
             with Config(self.dev, mode='unknown') as conf:
                 conf.load('conf', format='set')

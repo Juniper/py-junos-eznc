@@ -706,7 +706,7 @@ class Config(Util):
 
         return result
 
-    def __init__(self, dev, mode=None):
+    def __init__(self, dev, mode=None, **kwargs):
         """
         :param str mode: Can be used *only* when creating Config object using
                          context manager
@@ -715,17 +715,30 @@ class Config(Util):
             * "dynamic" - Work in dynamic database
             * "batch" - Work in batch database
             * "exclusive" - Work with Locking the candidate configuration
+            * "ephemeral" - Work in default/specified ephemeral instance
+
+        :param str ephemeral_instance: ephemeral instance name
 
         .. code-block:: python
 
-           # mode can be private/dynamic/exclusive/batch
+           # mode can be private/dynamic/exclusive/batch/ephemeral
            with Config(dev, mode='exclusive') as cu:
                cu.load('set system services netconf traceoptions file xyz',
                        format='set')
                print cu.diff()
                cu.commit()
+
+        .. warning:: Ephemeral databases are an advanced Junos feature which
+        if used incorrectly can have serious negative impact on the operation
+        of the Junos device. We recommend you consult JTAC and/or you Juniper
+        account team before deploying the ephemeral database feature in your
+        network.
         """
         self.mode = mode
+        if not kwargs.get('ephemeral_instance') and kwargs:
+            raise ValueError('Unsupported argument provided to Config class')
+        self.kwargs = kwargs
+
         Util.__init__(self, dev=dev)
 
     def __enter__(self):
@@ -770,15 +783,27 @@ class Config(Util):
         def _open_configuration_exclusive():
             return self.lock()
 
+        def _open_configuration_ephemeral(**kwargs):
+            self.rpc.open_configuration(**kwargs)
+            return True
+
         def _unsupported_option():
             if self.mode is not None:
                 raise ValueError("unsupported action: {0}".format(self.mode))
+
+        if self.kwargs.get('ephemeral_instance'):
+            ephemeral_kwargs = {
+                'ephemeral_instance': self.kwargs['ephemeral_instance']}
+        else:
+            ephemeral_kwargs = {'ephemeral': True}
 
         {
             'private': _open_configuration_private,
             'dynamic': _open_configuration_dynamic,
             'batch': _open_configuration_batch,
-            'exclusive': _open_configuration_exclusive
+            'exclusive': _open_configuration_exclusive,
+            'ephemeral': lambda: _open_configuration_ephemeral(
+                **ephemeral_kwargs)
         }.get(self.mode, _unsupported_option)()
         return self
 
