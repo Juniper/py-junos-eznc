@@ -111,8 +111,6 @@ class Console(_Connection):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
-        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
-        self.transform = self._norm_transform
         # self.timeout needed by PyEZ utils
         # self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
@@ -151,6 +149,23 @@ class Console(_Connection):
         """
         self._timeout = value
 
+    @property
+    def transform(self):
+        """
+        :returns: the current RPC XML Transformation.
+        """
+        return self.junos_dev_handler.transform_reply
+
+    @transform.setter
+    def transform(self, func):
+        """
+        Used to change the RPC XML Transformation.
+
+        :param lambda value:
+            New transform lambda
+        """
+        self.junos_dev_handler.transform_reply = func
+
     def open(self, *vargs, **kvargs):
         """
         Opens a connection to the device using existing login/auth
@@ -186,6 +201,14 @@ class Console(_Connection):
                                                                 str(ex)))
             raise ex
         self.connected = True
+
+        self._nc_transform = self.transform
+        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
+
+        normalize = kvargs.get('normalize', self._normalize)
+        if normalize is True:
+            self.transform = self._norm_transform
+
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
         if gather_facts is True:
             logger.info('facts: retrieving device facts...')
