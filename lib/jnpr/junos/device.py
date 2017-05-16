@@ -1177,6 +1177,10 @@ class Device(_Connection):
             allow_agent = bool((self._auth_password is None) and
                                (self._ssh_private_key_file is None))
 
+            # set connection timeout by Device.timeout                         
+            timeout = (self.__class__.timeout) \
+                    if isinstance(self.__class__.timeout, int) else (None)
+
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -1187,6 +1191,7 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
+                timeout=timeout,
                 device_params={'name': 'junos', 'local': False})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
