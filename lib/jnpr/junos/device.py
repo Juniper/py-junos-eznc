@@ -367,7 +367,8 @@ class _Connection(object):
         """
         try:
             command = command + '| display xml rpc'
-            rsp = self.rpc.cli(command)
+            rsp = self.rpc.cli(command, format="xml")
+            rsp = rsp.getparent().find('.//rpc')
             if format == 'text':
                 encode = None if sys.version < '3' else 'unicode'
                 return etree.tostring(rsp[0], encoding=encode)

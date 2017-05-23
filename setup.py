@@ -11,7 +11,7 @@ if sys.version_info[:2] == (2, 6):
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="2.1.3.dev2",
+    version="2.1.3.dev3",
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
