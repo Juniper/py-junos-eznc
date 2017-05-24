@@ -1054,6 +1054,7 @@ class Device(_Connection):
         hostname = vargs[0] if len(vargs) else kvargs.get('host')
 
         self._port = kvargs.get('port', 830)
+        self._sock_fd = kvargs.get('sock_fd')
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
@@ -1075,10 +1076,9 @@ class Device(_Connection):
             self._ssh_config = None
         else:
             # --------------------------
-            # making a remote connection
+            # making a remote connection 
+            # or wait for incoming 'outbound-ssh' connection if hostname is None
             # --------------------------
-            if hostname is None:
-                raise ValueError("You must provide the 'host' value")
             self._hostname = hostname
             # user will default to $USER
             self._auth_user = os.getenv('USER')
@@ -1183,6 +1183,7 @@ class Device(_Connection):
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
                 port=self._port,
+                sock_fd=self._sock_fd,
                 username=self._auth_user,
                 password=self._auth_password,
                 hostkey_verify=False,
