@@ -1,6 +1,19 @@
-## Release 2.1.3.dev0 - 2 May 2017
+## Release 2.1.4.dev0 30 May 2017
 ### Features Added:
 ### Bugs Fixed:
+
+## Release 2.1.3 - 30 May 2017
+### Features Added:
+- Ephemeral config support #707
+- Add a srx_cluster_redundancy_group fact. #711
+
+### Bugs Fixed:
+- ignore_warning fails when single <rpc-error> that is first child of <rpc-reply>. #712
+- mode='telnet' did not logout non-cli user #713
+- JSONLoadError was thrown when load valid JSON config #717/#718
+- Fix XML normalization feature when using NETCONF over console. #719/#720
+- Handle differences in |display xml rpc #722
+
 
 ## Release 2.1.2 - 2 May 2017
 ### Bugs Fixed:
@@ -9,12 +22,15 @@
 - Properly handle SW upgrades on multi-RE and/or multi-chassis systems when using new-style fact gathering. #700 
 - Raise JSONLoadError if json config is malformed #706 
 - Handle ConnectClosedError exception for lock() and unlock() #708 
+- Return None when the RPC equiv is either str or unicode #721
+
 
 ## Release 2.1.1 - 28 Mar 2017
 ### Bugs Fixed:
 - Fix regressions caused by `ignore_warning`. #691
 
- Release 2.1.0 - 22 Mar 2017
+
+## Release 2.1.0 - 22 Mar 2017
 ### Features Added:
 - Enhanced fact gathering. Facts are now gathered "on demand." Additional facts are added. 
    The definition of facts and return values are properly documented. #638
@@ -53,33 +69,35 @@
 - Modify ignore_warning return value to mimic normal RPC return value. #688
 
 
-# Release 2.0.1
+## Release 2.0.1
+### Bugs Fixed:
+- StartShell to take timeout (30 second by default) as paramter
+- Proper exception handling in case of Console connection #595
+- Fix: Config.lock() return exception when normalize is on
+- Added microbadge badge for the Docker image #593
+- Fix: print dev for Console conn was printing object not Device(....) #591
+- Fix: To take care of special chars with StartShell->run function call #589
+- Fix: ssh private key file to be considered for scp util #586
+- Added Dockerfile to enable automated image builds on project commits #585
 
-  * StartShell to take timeout (30 second by default) as paramter
-  * Proper exception handling in case of Console connection #595
-  * Fix: Config.lock() return exception when normalize is on
-  * Added microbadge badge for the Docker image #593
-  * Fix: print dev for Console conn was printing object not Device(....) #591
-  * Fix: To take care of special chars with StartShell->run function call #589
-  * Fix: ssh private key file to be considered for scp util #586
-  * Added Dockerfile to enable automated image builds on project commits #585
 
+## Release 2.0.0
+### Features Added:
+- Console connection using PyEZ
+- Python >=3.4 support
+- Configuration Tables to Define and Configure Structured Resources
+- JSON Config load
+- FTP Utility
 
-# Release 2.0.0
-
-  * Console connection using PyEZ
-  * Python >=3.4 support
-  * Configuration Tables to Define and Configure Structured Resources
-  * JSON Config load
-  * FTP Utility
-  * Multi RPC error
-  * various bug fixes
+### Bugs Fixed:
+- Multi RPC error
+- various bug fixes
 
 Refer below link for more details:
 https://github.com/Juniper/py-junos-eznc/releases/tag/2.0.0
 
 
-# Release 1.0
+## Release 1.0
 
 # Junos PyEZ Overview
 
