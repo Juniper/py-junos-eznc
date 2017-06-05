@@ -150,7 +150,7 @@ class SW(Util):
 
     def put(self, package, remote_path='/var/tmp', progress=None):
         """
-        SCP or FTP 'put' the package file from the local server to the remote 
+        SCP or FTP 'put' the package file from the local server to the remote
         device.
 
         :param str package:
@@ -453,8 +453,7 @@ class SW(Util):
                                  (algorithm))
             return rsp.findtext('.//checksum')
         except RpcError as e:
-            if (hasattr(e, 'message') and
-               'No such file or directory' in e.message):
+            if 'No such file or directory' in getattr(e, 'message', ''):
                 return None
             else:
                 raise
@@ -496,10 +495,10 @@ class SW(Util):
             The algorithm to use for computing the checksum. Valid values are:
             'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
         :param bool force_copy:
-            When ``True`` perform the copy even if the package is already 
+            When ``True`` perform the copy even if the package is already
             present at the remote_path on the device. When ``False`` (default)
             if the package is already present at the remote_path, and the local
-            checksum matches the remote checksum, then skip the copy to 
+            checksum matches the remote checksum, then skip the copy to
             optimize time.
 
         :returns:
@@ -520,6 +519,7 @@ class SW(Util):
             except IOError:
                 _progress('error computing checksum on local package: %s. '
                           'Ensure the local package exists.' % (package))
+                return False
 
         if checksum is None:
             _progress('Unable to calculate the checksum on local package: %s.'
@@ -583,19 +583,19 @@ class SW(Util):
         2. performs a storage cleanup on the remote Junos device if :cleanfs:
            is ``True``
         3. Attempts to compute the checksum of the :package: filename in the
-           :remote_path: directory of the remote Junos device if the 
+           :remote_path: directory of the remote Junos device if the
            :force_copy: argument is ``False``
-        4. SCP or FTP copies the :package: file from the local host to the 
+        4. SCP or FTP copies the :package: file from the local host to the
            :remote_path: directory on the remote Junos device under any of the
            following conditions:
            a) The :force_copy: argument is ``True``
            b) The :package: filename doesn't already exist in the :remote_path:
               :remote_path: directory of the remote Junos device.
-           c) The checksum computed in step 1 does not match the checksum 
+           c) The checksum computed in step 1 does not match the checksum
               computed in step 3.
-        5. If step 4 was executed, computes the checksum of the :package: 
+        5. If step 4 was executed, computes the checksum of the :package:
            filename in the :remote_path: directory of the remote Junos device
-        6. Validates the checksum computed in step 1 matches the checksum 
+        6. Validates the checksum computed in step 1 matches the checksum
               computed in step 5.
         7. validates the package if :validate: is True
         8. installs the package
@@ -653,7 +653,7 @@ class SW(Util):
           hexdigest of the package file. If this is not provided, then this
           method will perform the calculation. If you are planning on using the
           same image for multiple updates, you should consider using the
-          :meth:`local_checksum` method to pre calculate this value and then 
+          :meth:`local_checksum` method to pre calculate this value and then
           provide to this method.
 
         :param bool cleanfs:
@@ -678,10 +678,10 @@ class SW(Util):
           minimal disruption to network traffic.
 
         :param int timeout:
-          (Optional) The amount of time (seconds) to wait for the 
-          :package: installation to complete before declaring an RPC 
+          (Optional) The amount of time (seconds) to wait for the
+          :package: installation to complete before declaring an RPC
           timeout.  This argument was added since most of the time the
-          "package add" RPC takes a significant amount of time.  The default 
+          "package add" RPC takes a significant amount of time.  The default
           RPC timeout is 30 seconds.  So this :timeout: value will be
           used in the context of the SW installation process.  Defaults to
           30 minutes (30*60=1800)
@@ -698,14 +698,14 @@ class SW(Util):
           Valid values are: 'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
 
         :param bool force_copy:
-          (Optional) When ``True`` perform the copy even if :package: is already 
-          present at the :remote_path: directory on the remote Junos device. 
-          When ``False`` (default) if the :package: is already present at the 
-          :remote_path:, AND the local checksum matches the remote checksum, 
-          then skip the copy to optimize time.
-          
+          (Optional) When ``True`` perform the copy even if :package: is
+          already present at the :remote_path: directory on the remote Junos
+          device. When ``False`` (default) if the :package: is already present
+          at the :remote_path:, AND the local checksum matches the remote
+          checksum, then skip the copy to optimize time.
+
         :param kwargs **kwargs:
-          (Optional) Additional keyword arguments are passed through to the 
+          (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
 
         :returns:
@@ -736,8 +736,8 @@ class SW(Util):
                 'install() takes atleast 1 argument package or pkg_set')
 
         if no_copy is False:
-            if ((sys.version < '3' and isinstance(package, (str, unicode)))
-               or isinstance(package, str)):
+            if ((sys.version < '3' and isinstance(package, (str, unicode))) or
+               isinstance(package, str)):
                 pkg_set = [package]
             if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
                 for pkg in pkg_set:
