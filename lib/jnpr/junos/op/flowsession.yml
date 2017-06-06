@@ -1,0 +1,17 @@
+---
+
+# Taken from https://github.com/barnesry/srx-session-table-clear/blob/master/flowsession.yml
+
+  SessionTable:
+    rpc:  get-flow-session-information
+    item: .//flow-session/flow-information
+    key:  ../session-identifier
+    view: SessionView
+
+  SessionView:
+    fields:
+      source_address: source-address
+      destination_address:  destination-address
+      destination_port: destination-port
+      session_protocol: protocol
+      session_direction:  direction

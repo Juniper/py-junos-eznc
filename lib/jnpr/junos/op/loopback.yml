@@ -1,0 +1,32 @@
+---
+
+# Taken from https://github.com/networktocode/pyntc/blob/master/pyntc/devices/tables/jnpr/loopback.yml
+
+LoopbackTable:
+  rpc: get-interface-information
+  args:
+    media: True
+    interface_name: 'lo*'
+  args_key: interface_name
+  item: physical-interface
+  view: LoopbackView
+
+LoopbackView:
+  groups:
+    mac_stats: ethernet-mac-statistics
+    flags: if-device-flags
+  fields:
+    oper: oper-status
+    admin: admin-status
+    description: description
+    mtu: { mtu : int }
+    link_mode: link-mode
+    macaddr: current-physical-address
+  fields_mac_stats:
+    rx_bytes: input-bytes
+    rx_packets: input-packets
+    tx_bytes: output-bytes
+    tx_packets: output-packets
+  fields_flags:
+    running: { ifdf-running: flag }
+    present: { ifdf-present: flag }

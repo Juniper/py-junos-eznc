@@ -1,0 +1,40 @@
+---
+
+# Taken from https://github.com/gavmckee80/PyEz-Examples/blob/master/pimneighbor.yml
+
+PimNeighborsTable:
+  rpc: get-pim-neighbors-information
+  args:
+    detail: True
+  item: //pim-interface
+  key: pim-interface-name
+  view: PimInterfaceView
+
+PimInterfaceView:
+  fields:
+    interface: pim-interface-name
+    neighbor: _PimNeighborTable
+
+_PimNeighborTable:
+  item: pim-neighbor
+  key: pim-neighbor-address
+  view: _PimNeighborView
+_PimNeighborView:
+  fields:
+    neighbor_address: pim-neighbor-address
+    ip_version: ip-protocol-version
+    pim_version: protocol-version
+    sg_count: pim-neighbor-join-sg-count
+    tsg_count: pim-neighbor-join-tsg-count
+    pim_joins: _PimJoinTable
+
+_PimJoinTable:
+  item: pim-neighbor-join 
+  key: multicast-group-address
+  view: _PimJoinView
+_PimJoinView:
+  fields:
+    group_address: multicast-group-address
+    source_address: multicast-source-address
+
+

@@ -1,0 +1,19 @@
+---
+
+# Taken from https://github.com/Olichous/routeShow/blob/master/allRoutes.yml
+
+allRoutes:
+ rpc: get-route-information
+ args_key: destination
+ args:
+  extensive: True
+  active-path : True
+ item: route-table/rt
+ key: rt-destination
+ view: allView
+
+allView:
+ fields:
+  rt_destination: rt-destination
+  rt_prefix_length: rt-prefix-length
+  nh_via: rt-entry/nh/via

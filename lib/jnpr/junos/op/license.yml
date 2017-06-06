@@ -1,0 +1,17 @@
+---
+### ------------------------------------------------------
+### show system license
+### ------------------------------------------------------
+
+# Taken from https://github.com/dhoutz/netops-tools/blob/master/juniper/juniper_license_audit/license.yml
+
+LicenseTable:
+  rpc: get-license-usage-summary
+  item: feature-summary
+  view: LicenseTableView
+
+LicenseTableView:
+  fields:
+    description: description
+    licensed: licensed
+    needed: needed
