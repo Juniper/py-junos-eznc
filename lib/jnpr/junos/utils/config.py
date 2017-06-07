@@ -2,13 +2,9 @@
 import os
 import re
 import warnings
-import json
 
 # 3rd-party modules
 from lxml import etree
-from lxml.builder import E
-from ncclient.operations import RPCError
-import jxmlease
 
 # package modules
 from jnpr.junos.exception import *
