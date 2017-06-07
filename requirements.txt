@@ -7,4 +7,3 @@ PyYAML>=3.10
 netaddr
 six
 pyserial
-jxmlease
