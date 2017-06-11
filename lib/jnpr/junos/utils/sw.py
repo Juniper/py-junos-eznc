@@ -116,17 +116,42 @@ class SW(Util):
         return _hashfile(open(package, 'rb'), hashlib.sha1())
 
     @classmethod
+    def local_checksum(cls, package, algorithm='md5'):
+        """
+        Computes the checksum value on the local package file.
+
+        :param str package:
+          File-path to the package (\*.tgz) file on the local server
+        :param str algorithm:
+          The algorithm to use for computing the checksum. Valid values are:
+          'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
+
+        :returns: checksum (str)
+        :raises IOError: when **package** file does not exist
+        """
+        if algorithm == 'md5':
+            return cls.local_md5(package)
+        elif algorithm == 'sha1':
+            return cls.local_sha1(package)
+        elif algorithm == 'sha256':
+            return cls.local_sha256(package)
+        else:
+            raise ValueError('Unknown checksum algorithm: %s' %
+                             (algorithm))
+
+    @classmethod
     def progress(cls, dev, report):
         """ simple progress report function """
         print (dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
-    # put - SCP put the image onto the device
+    # put - Copy the image onto the device
     # -------------------------------------------------------------------------
 
     def put(self, package, remote_path='/var/tmp', progress=None):
         """
-        SCP 'put' the package file from the local server to the remote device.
+        SCP or FTP 'put' the package file from the local server to the remote
+        device.
 
         :param str package:
           File path to the package file on the local file system
@@ -392,36 +417,43 @@ class SW(Util):
             return False
         return True
 
-    def remote_checksum(self, remote_package, timeout=300):
+    def remote_checksum(self, remote_package, timeout=300, algorithm='md5'):
         """
-        Computes the MD5 checksum on the remote device.
+        Computes a checksum of the remote_package file on the remote device.
 
         :param str remote_package:
-            The file-path on the remote Junos device
-
+          The file-path on the remote Junos device
         :param int timeout:
           The amount of time (seconds) before declaring an RPC timeout.
           The default RPC timeout is generally around 30 seconds.  So this
           :timeout: value will be used in the context of the checksum process.
           Defaults to 5 minutes (5*60=300)
+        :param str algorithm:
+          The algorithm to use for computing the checksum. Valid values are:
+          'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
 
         :returns:
-            * The MD5 checksum string
-            * ``False`` when the **remote_package** is not found.
+            * The checksum string
+            * ``None`` when the **remote_package** is not found.
 
         :raises RpcError: RPC errors other than **remote_package** not found.
         """
+        kwargs = {'path': remote_package,
+                  'dev_timeout': timeout,
+                  'normalize': True}
         try:
-            rsp = self.rpc.get_checksum_information(
-                path=remote_package,
-                dev_timeout=timeout)
-            return rsp.findtext('.//checksum').strip()
+            if algorithm == 'md5':
+                rsp = self.rpc.get_checksum_information(**kwargs)
+            elif algorithm == 'sha1':
+                rsp = self.rpc.get_sha1_checksum_information(**kwargs)
+            elif algorithm == 'sha256':
+                rsp = self.rpc.get_sha256_checksum_information(**kwargs)
+            else:
+                raise ValueError('Unknown checksum algorithm: %s' %
+                                 (algorithm))
+            return rsp.findtext('.//checksum')
         except RpcError as e:
-
-            # e.errs is list of dictionaries
-            if hasattr(e, 'errs') and \
-                    list(filter(lambda x: 'No such file or directory' in
-                                x['message'], e.errs)):
+            if 'No such file or directory' in getattr(e, 'message', ''):
                 return None
             else:
                 raise
@@ -430,11 +462,14 @@ class SW(Util):
     # safe_copy - copies the package and performs checksum
     # -------------------------------------------------------------------------
 
-    def safe_copy(self, package, **kvargs):
+    def safe_copy(self, package, remote_path='/var/tmp', progress=None,
+                  cleanfs=True, cleanfs_timeout=300, checksum=None,
+                  checksum_timeout=300, checksum_algorithm='md5',
+                  force_copy=False):
         """
         Copy the install package safely to the remote device.  By default
         this means to clean the filesystem to make space, perform the
-        secure-copy, and then verify the MD5 checksum.
+        secure-copy, and then verify the checksum.
 
         :param str package:
             file-path to package on local filesystem
@@ -444,22 +479,32 @@ class SW(Util):
             call-back function for progress updates. If set to ``True`` uses
             :meth:`sw.progress` for basic reporting by default.
         :param bool cleanfs:
-            When ``True`` (default) this method will perform the
-            "storage cleanup" on the device.
+            When ``True`` (default) perform a
+            "request system storage cleanup" on the device.
+        :param int cleanfs_timeout:
+            Number of seconds (default 300) to wait for the
+            "request system storage cleanup" to complete.
         :param str checksum:
             This is the checksum string as computed on the local system.
             This value will be used to compare the checksum on the
             remote Junos device.
+        :param int checksum_timeout:
+            Number of seconds (default 300) to wait for the calculation of the
+            checksum on the remote Junos device.
+        :param str checksum_algorithm:
+            The algorithm to use for computing the checksum. Valid values are:
+            'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
+        :param bool force_copy:
+            When ``True`` perform the copy even if the package is already
+            present at the remote_path on the device. When ``False`` (default)
+            if the package is already present at the remote_path, and the local
+            checksum matches the remote checksum, then skip the copy to
+            optimize time.
 
         :returns:
             * ``True`` when the copy was successful
             * ``False`` otherwise
         """
-        remote_path = kvargs.get('remote_path', '/var/tmp')
-        progress = kvargs.get('progress')
-        checksum = kvargs.get('checksum')
-        cleanfs = kvargs.get('cleanfs', True)
-
         def _progress(report):
             if progress is True:
                 self.progress(self._dev, report)
@@ -467,30 +512,57 @@ class SW(Util):
                 progress(self._dev, report)
 
         if checksum is None:
-            _progress('computing local checksum on: %s' % package)
-            checksum = SW.local_md5(package)
+            _progress('computing checksum on local package: %s' % (package))
+            try:
+                checksum = SW.local_checksum(package,
+                                             algorithm=checksum_algorithm)
+            except IOError:
+                _progress('error computing checksum on local package: %s. '
+                          'Ensure the local package exists.' % (package))
+                return False
+
+        if checksum is None:
+            _progress('Unable to calculate the checksum on local package: %s.'
+                      % (package))
+            return False
 
         if cleanfs is True:
-            dto = self.dev.timeout
-            self.dev.timeout = 5 * 60
             _progress('cleaning filesystem ...')
-            self.rpc.request_system_storage_cleanup()
-            self.dev.timeout = dto
+            try:
+                self.rpc.request_system_storage_cleanup(
+                    dev_timeout=cleanfs_timeout)
+            except RpcError as err:
+                _progress('Problem cleaning filesystem: %s' % (str(err)))
+                return False
 
-        # we want to give the caller an override so we don't always
-        # need to copy the file, but the default is to do this, yo!
-        self.put(package, remote_path, progress)
-
-        # validate checksum:
+        # Calculate the remote package name.
         remote_package = remote_path + '/' + path.basename(package)
-        _progress('computing remote checksum on: %s' % remote_package)
-        remote_checksum = self.remote_checksum(remote_package)
+
+        remote_checksum = None
+        # Check to see if the package file already exists on the remote
+        # device by trying to get the checksum.
+        if force_copy is False:
+            _progress('before copy, computing checksum on remote package: %s' %
+                      remote_package)
+            remote_checksum = self.remote_checksum(
+                                  remote_package,
+                                  timeout=checksum_timeout,
+                                  algorithm=checksum_algorithm)
+
+        if remote_checksum != checksum:
+            # Need to copy the file.
+            self.put(package, remote_path=remote_path, progress=progress)
+
+            # Now validate checksum of the recently copied file.
+            _progress('after copy, computing checksum on remote package: %s' %
+                      remote_package)
+            remote_checksum = self.remote_checksum(remote_package)
 
         if remote_checksum != checksum:
             _progress("checksum check failed.")
             return False
-        _progress("checksum check passed.")
 
+        _progress("checksum check passed.")
         return True
 
     # -------------------------------------------------------------------------
@@ -499,17 +571,34 @@ class SW(Util):
 
     def install(self, package=None, pkg_set=None, remote_path='/var/tmp',
                 progress=None, validate=False, checksum=None, cleanfs=True,
-                no_copy=False, issu=False, nssu=False, timeout=1800, **kwargs):
+                no_copy=False, issu=False, nssu=False, timeout=1800,
+                cleanfs_timeout=300, checksum_timeout=300,
+                checksum_algorithm='md5', force_copy=False, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
 
-        1. computes the local MD5 checksum if not provided in :checksum:
-        2. performs a storage cleanup if :cleanfs: is True
-        3. SCP copies the package to the :remote_path: directory
-        4. computes remote MD5 checksum and matches it to the local value
-        5. validates the package if :validate: is True
-        6. installs the package
+        1. computes the checksum of :package: on the local host
+           if :checksum: was not provided.
+        2. performs a storage cleanup on the remote Junos device if :cleanfs:
+           is ``True``
+        3. Attempts to compute the checksum of the :package: filename in the
+           :remote_path: directory of the remote Junos device if the
+           :force_copy: argument is ``False``
+        4. SCP or FTP copies the :package: file from the local host to the
+           :remote_path: directory on the remote Junos device under any of the
+           following conditions:
+           a) The :force_copy: argument is ``True``
+           b) The :package: filename doesn't already exist in the :remote_path:
+              :remote_path: directory of the remote Junos device.
+           c) The checksum computed in step 1 does not match the checksum
+              computed in step 3.
+        5. If step 4 was executed, computes the checksum of the :package:
+           filename in the :remote_path: directory of the remote Junos device
+        6. Validates the checksum computed in step 1 matches the checksum
+              computed in step 5.
+        7. validates the package if :validate: is True
+        8. installs the package
 
         .. warning:: This process has been validated on the following
                      deployments.
@@ -546,21 +635,6 @@ class SW(Util):
           SCP'd to or where the package is stored on the device; the default is
           ``/var/tmp``.
 
-        :param bool validate:
-          When ``True`` this method will perform a config validation against
-          the new image
-
-        :param str checksum:
-          MD5 hexdigest of the package file. If this is not provided, then this
-          method will perform the calculation. If you are planning on using the
-          same image for multiple updates, you should consider using the
-          :meth:`local_md5` method to pre calculate this value and then provide
-          to this method.
-
-        :param bool cleanfs:
-          When ``True`` will perform a 'storeage cleanup' before SCP'ing the
-          file to the device.  Default is ``True``.
-
         :param func progress:
           If provided, this is a callback function with a function prototype
           given the Device instance and the report string::
@@ -571,21 +645,24 @@ class SW(Util):
           If set to ``True``, it uses :meth:`sw.progress`
           for basic reporting by default.
 
+        :param bool validate:
+          When ``True`` this method will perform a config validation against
+          the new image
+
+        :param str checksum:
+          hexdigest of the package file. If this is not provided, then this
+          method will perform the calculation. If you are planning on using the
+          same image for multiple updates, you should consider using the
+          :meth:`local_checksum` method to pre calculate this value and then
+          provide to this method.
+
+        :param bool cleanfs:
+          When ``True`` will perform a 'storage cleanup' before copying the
+          file to the device.  Default is ``True``.
+
         :param bool no_copy:
-          When ``True`` the software package will not be SCP'd to the device.
+          When ``True`` the software package will not be copied to the device.
           Default is ``False``.
-
-        :param int timeout:
-          The amount of time (seconds) before declaring an RPC timeout.  This
-          argument was added since most of the time the "package add" RPC
-          takes a significant amount of time.  The default RPC timeout is
-          generally around 30 seconds.  So this :timeout: value will be
-          used in the context of the SW installation process.  Defaults to
-          30 minutes (30*60=1800)
-
-        :param bool force_host:
-          (Optional) Force the addition of host software package or bundle
-          (ignore warnings) on the QFX5100 device.
 
         :param bool issu:
           (Optional) When ``True`` allows unified in-service software upgrade
@@ -599,6 +676,37 @@ class SW(Util):
           EX Series Virtual Chassis or a Juniper Networks EX Series Ethernet
           Switch with redundant Routing Engines with a single command and
           minimal disruption to network traffic.
+
+        :param int timeout:
+          (Optional) The amount of time (seconds) to wait for the
+          :package: installation to complete before declaring an RPC
+          timeout.  This argument was added since most of the time the
+          "package add" RPC takes a significant amount of time.  The default
+          RPC timeout is 30 seconds.  So this :timeout: value will be
+          used in the context of the SW installation process.  Defaults to
+          30 minutes (30*60=1800)
+
+        :param int cleanfs_timeout:
+          (Optional) Number of seconds (default 300) to wait for the
+          "request system storage cleanup" to complete.
+
+        :param int checksum_timeout:
+          (Optional) Number of seconds (default 300) to wait for the
+          calculation of the checksum on the remote Junos device.
+        :param str checksum_algorithm:
+          (Optional) The algorithm to use for computing the checksum.
+          Valid values are: 'md5', 'sha1', and 'sha256'. Defaults to 'md5'.
+
+        :param bool force_copy:
+          (Optional) When ``True`` perform the copy even if :package: is
+          already present at the :remote_path: directory on the remote Junos
+          device. When ``False`` (default) if the :package: is already present
+          at the :remote_path:, AND the local checksum matches the remote
+          checksum, then skip the copy to optimize time.
+
+        :param kwargs **kwargs:
+          (Optional) Additional keyword arguments are passed through to the
+          "package add" RPC.
 
         :returns:
             * ``True`` when the installation is successful
@@ -628,28 +736,28 @@ class SW(Util):
                 'install() takes atleast 1 argument package or pkg_set')
 
         if no_copy is False:
-            copy_ok = True
-            if (sys.version < '3' and isinstance(package, (str, unicode))) \
-                    or isinstance(package, str):
-                copy_ok = self.safe_copy(package, remote_path=remote_path,
-                                         progress=progress, cleanfs=cleanfs,
-                                         checksum=checksum)
-                if copy_ok is False:
-                    return False
-
-            elif isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
+            if ((sys.version < '3' and isinstance(package, (str, unicode))) or
+               isinstance(package, str)):
+                pkg_set = [package]
+            if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
                 for pkg in pkg_set:
                     # To disable cleanfs after 1st iteration
                     cleanfs = cleanfs and pkg_set.index(pkg) == 0
-                    copy_ok = self.safe_copy(pkg, remote_path=remote_path,
-                                             progress=progress,
-                                             cleanfs=cleanfs,
-                                             checksum=checksum)
+                    copy_ok = self.safe_copy(
+                                  pkg,
+                                  remote_path=remote_path,
+                                  progress=progress,
+                                  cleanfs=cleanfs,
+                                  checksum=checksum,
+                                  cleanfs_timeout=cleanfs_timeout,
+                                  checksum_timeout=checksum_timeout,
+                                  checksum_algorithm=checksum_algorithm,
+                                  force_copy=force_copy)
                     if copy_ok is False:
                         return False
             else:
                 raise ValueError(
-                    'proper value either package or pkg_set is missing')
+                    'proper value for either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
         # ---------------------------------------------------------------------

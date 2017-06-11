@@ -84,21 +84,24 @@ class TestSW(unittest.TestCase):
     @patch(builtin_string + '.open')
     def test_sw_local_sha256(self, mock_built_open):
         package = 'test.tgz'
-        self.assertEqual(SW.local_sha256(package),
+        self.assertEqual(SW.local_checksum(package, algorithm='sha256'),
                          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934'
                          'ca495991b7852b855')
 
     @patch(builtin_string + '.open')
     def test_sw_local_md5(self, mock_built_open):
         package = 'test.tgz'
-        self.assertEqual(self.sw.local_md5(package),
+        self.assertEqual(self.sw.local_checksum(package, algorithm='md5'),
                          'd41d8cd98f00b204e9800998ecf8427e')
 
     @patch(builtin_string + '.open')
     def test_sw_local_sha1(self, mock_built_open):
         package = 'test.tgz'
-        self.assertEqual(SW.local_sha1(package),
+        self.assertEqual(SW.local_checksum(package, algorithm='sha1'),
                          'da39a3ee5e6b4b0d3255bfef95601890afd80709')
+
+    def test_sw_local_checksum_unknown_alg(self):
+        self.assertRaises(ValueError, SW.local_checksum, 'foo.tgz', algorithm='foo')
 
     def test_sw_progress(self):
         with self.capture(SW.progress, self.dev, 'running') as output:
@@ -393,6 +396,54 @@ class TestSW(unittest.TestCase):
             self.sw.remote_checksum(package)
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_md5(self, mock_execute):
+        xml = '''<rpc-reply>
+                     <checksum-information>
+                         <file-checksum>
+                             <computation-method>MD5</computation-method>
+                             <input-file>/var/tmp/foo.tgz</input-file>
+                             <checksum>8a04cfc475e21507be5145bc0e82ce09</checksum>
+                         </file-checksum>
+                     </checksum-information>
+                 </rpc-reply>'''
+        mock_execute.side_effect = etree.fromstring(xml)
+        package = 'foo.tgz'
+        self.assertEqual(self.sw.remote_checksum(package),
+                         '8a04cfc475e21507be5145bc0e82ce09')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_sha1(self, mock_execute):
+        xml = '''<rpc-reply>
+                     <checksum-information>
+                         <file-checksum>
+                             <computation-method>SHA1</computation-method>
+                             <input-file>/var/tmp/foo.tgz</input-file>
+                             <checksum>33c12913e81599452270ee849511e2e7578db00c</checksum>
+                         </file-checksum>
+                     </checksum-information>
+                 </rpc-reply>'''
+        mock_execute.side_effect = etree.fromstring(xml)
+        package = 'foo.tgz'
+        self.assertEqual(self.sw.remote_checksum(package, algorithm='sha1'),
+                         '33c12913e81599452270ee849511e2e7578db00c')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_remote_checksum_sha256(self, mock_execute):
+        xml = '''<rpc-reply>
+                     <checksum-information>
+                         <file-checksum>
+                             <computation-method>SHA256</computation-method>
+                             <input-file>/var/tmp/foo.tgz</input-file>
+                             <checksum>27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170</checksum>
+                         </file-checksum>
+                     </checksum-information>
+                 </rpc-reply>'''
+        mock_execute.side_effect = etree.fromstring(xml)
+        package = 'foo.tgz'
+        self.assertEqual(self.sw.remote_checksum(package, algorithm='sha256'),
+                         '27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'safecopy.tgz'
@@ -401,6 +452,23 @@ class TestSW(unittest.TestCase):
             self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
                                               cleanfs=True,
                                               checksum='96a35ab371e1ca10408c3caecdbd8a67'))
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.utils.sw.SW.local_checksum')
+    def test_sw_safe_copy_missing_local_file(self, mock_checksum, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        mock_checksum.side_effect = IOError()
+        package = 'foo.tgz'
+        self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
+                                           cleanfs=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_safe_copy_cleanfs_fail(self, mock_execute):
+        mock_execute.side_effect = RpcError()
+        package = 'foo.tgz'
+        self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
+                                           cleanfs=True,
+                                           checksum='96a35ab371e1ca10408c3caecdbd8a67'))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy_return_false(self, mock_execute):

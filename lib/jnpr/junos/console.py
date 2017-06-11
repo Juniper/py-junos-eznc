@@ -22,10 +22,6 @@ from jnpr.junos import jxml as JXML
 from jnpr.junos.ofacts import *
 from jnpr.junos.decorators import ignoreWarnDecorator
 
-QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
-QFX_MODE_NODE = 'NODE'
-QFX_MODE_SWITCH = 'SWITCH'
-
 logger = logging.getLogger("jnpr.junos.console")
 
 
