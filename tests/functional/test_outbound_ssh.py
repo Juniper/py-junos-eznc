@@ -35,7 +35,7 @@ class TestDeviceSsh(unittest.TestCase):
             print('requesting info...')
             self.dev.open()
             self.assertEqual(self.dev.connected, True)
-            print 'Hostname is', self.dev.facts['hostname']
+            print('Hostname is %s' % (self.dev.facts['hostname']))
             assert self.dev.facts['hostname'] == 'highlife'
             break
 
