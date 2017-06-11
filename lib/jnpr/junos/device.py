@@ -990,7 +990,11 @@ class Device(_Connection):
                              alternative for **host**
 
         :param str host:
-            **REQUIRED** host-name or ipaddress of target device
+            **REQUIRED** host-name or ipaddress of target device, unless sock_fd is provided
+
+        :param str sock_fd:
+            **REQUIRED** file descriptor of an existing socket instead of providing a host.
+            Used for outbound ssh. 
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided
@@ -1054,7 +1058,7 @@ class Device(_Connection):
         hostname = vargs[0] if len(vargs) else kvargs.get('host')
 
         self._port = kvargs.get('port', 830)
-        self._sock_fd = kvargs.get('sock_fd')
+        self._sock_fd = kvargs.get('sock_fd', None)
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
@@ -1079,6 +1083,8 @@ class Device(_Connection):
             # making a remote connection 
             # or wait for incoming 'outbound-ssh' connection if hostname is None
             # --------------------------
+            if hostname is None and self._sock_fd is None: 
+                raise ValueError("You must provide either 'host' or 'sock_fd' value")
             self._hostname = hostname
             # user will default to $USER
             self._auth_user = os.getenv('USER')
