@@ -223,7 +223,7 @@ class Console(_Connection):
             except socket.error as err:
                 # if err contains "Connection reset by peer" connection to the
                 # device got closed
-                if "Connection reset by peer" not in err:
+                if "Connection reset by peer" not in str(err):
                     raise err
             except Exception as err:
                 logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
