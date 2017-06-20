@@ -177,10 +177,9 @@ class _Connection(object):
         """
         try:
             self._conn.timeout = int(value)
-        except (ValueError,TypeError):
+        except (ValueError, TypeError):
             raise RuntimeError("could not convert timeout value of %s to an "
                                "integer" % (value))
-
 
     # ------------------------------------------------------------------------
     # property: facts
