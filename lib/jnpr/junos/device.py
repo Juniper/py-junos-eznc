@@ -175,7 +175,11 @@ class _Connection(object):
         :param int value:
             New timeout value in seconds
         """
-        self._conn.timeout = value
+        try:
+            self._conn.timeout = int(value)
+        except (ValueError, TypeError):
+            raise RuntimeError("could not convert timeout value of %s to an "
+                               "integer" % (value))
 
     # ------------------------------------------------------------------------
     # property: facts

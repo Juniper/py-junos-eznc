@@ -414,6 +414,18 @@ class TestDevice(unittest.TestCase):
         self.dev.timeout = 10
         self.assertEqual(self.dev.timeout, 10)
 
+    def test_device_set_timeout_string(self):
+        self.dev.timeout = '10'
+        self.assertEqual(self.dev.timeout, 10)
+
+    def test_device_set_timeout_invalid_string_value(self):
+        with self.assertRaises(RuntimeError):
+            self.dev.timeout = 'foo'
+
+    def test_device_set_timeout_invalid_type(self):
+        with self.assertRaises(RuntimeError):
+            self.dev.timeout = [1,2,3,4]
+
     def test_device_manages(self):
         self.assertEqual(self.dev.manages, [],
                          'By default manages will be empty list')
