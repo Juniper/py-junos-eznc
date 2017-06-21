@@ -225,6 +225,9 @@ class Console(_Connection):
                 # device got closed
                 if "Connection reset by peer" not in str(err):
                     raise err
+            except EOFError as err:
+                if "telnet connection closed" not in str(err):
+                    raise err
             except Exception as err:
                 logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
                 raise err

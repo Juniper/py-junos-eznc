@@ -139,6 +139,12 @@ class TestConsole(unittest.TestCase):
         self.dev.close()
         self.assertFalse(self.dev.connected)
 
+    @patch('jnpr.junos.console.Console._tty_logout')
+    def test_console_close_telnet_conn_closed(self, mock_logout):
+        mock_logout.side_effect = EOFError("telnet connection closed")
+        self.dev.close()
+        self.assertFalse(self.dev.connected)
+
     @patch('jnpr.junos.transport.tty_telnet.Telnet')
     @patch('jnpr.junos.console.Console._tty_login')
     def test_console_tty_open_err(self, mock_login, mock_telnet):
