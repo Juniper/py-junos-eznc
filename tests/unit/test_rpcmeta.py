@@ -90,10 +90,37 @@ class Test_RpcMetaExec(unittest.TestCase):
                          'text')
 
     @patch('jnpr.junos.device.Device.execute')
-    def test_rpcmeta_exec_rpc_kvargs(self, mock_execute_fn):
-        self.rpc.system_users_information(set_data=('test',))
+    def test_rpcmeta_exec_rpc_kvargs_bool_true(self, mock_execute_fn):
+        self.rpc.system_users_information(test=True)
+        self.assertEqual(mock_execute_fn.call_args[0][0][0].tag,
+                         'test')
+        self.assertEqual(mock_execute_fn.call_args[0][0][0].text,
+                         None)
+
+    @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_exec_rpc_kvargs_bool_False(self, mock_execute_fn):
+        self.rpc.system_users_information(test=False)
+        self.assertEqual(mock_execute_fn.call_args[0][0].find('test'),
+                         None)
+
+    @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_exec_rpc_kvargs_tuple(self, mock_execute_fn):
+        self.rpc.system_users_information(set_data=('test', 'foo'))
         self.assertEqual(mock_execute_fn.call_args[0][0][0].text,
                          'test')
+        self.assertEqual(mock_execute_fn.call_args[0][0][1].text,
+                         'foo')
+
+    @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_exec_rpc_kvargs_dict(self, mock_execute_fn):
+        with self.assertRaises(TypeError):
+            self.rpc.system_users_information(dict_data={'test': 'foo'})
+
+    @patch('jnpr.junos.device.Device.execute')
+    def test_rpcmeta_exec_rpc_kvargs_list_with_dict(self, mock_execute_fn):
+        with self.assertRaises(TypeError):
+            self.rpc.system_users_information(
+                list_with_dict_data=[True, {'test': 'foo'}])
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_normalize(self, mock_execute_fn):
@@ -205,9 +232,9 @@ class Test_RpcMetaExec(unittest.TestCase):
         if args:
             if len(args[0]) > 0 and args[0][0].tag == 'bgp':
                 return self._read_file(args[0].tag + '_bgp_openconfig.xml')
-            elif args[0].attrib.get('format') == 'json' and \
-                            args[0].tag == 'get-configuration':
-                    return self._read_file(args[0].tag + '.json')
+            elif (args[0].attrib.get('format') ==
+                  'json' and args[0].tag == 'get-configuration'):
+                return self._read_file(args[0].tag + '.json')
             return self._read_file(args[0].tag + '.xml')
 
     def _read_file(self, fname):
@@ -219,4 +246,3 @@ class Test_RpcMetaExec(unittest.TestCase):
             foo = fp.read()
         return NCElement(foo,
                          self.dev._conn._device_handler.transform_reply())
-
