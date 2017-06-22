@@ -295,14 +295,12 @@ class _RpcMetaExec(object):
             # create the rpc as XML command
             rpc = etree.Element(rpc_cmd)
 
-            # gather any decorator keywords
+            # Gather decorator keywords into dec_args and remove from kvargs
+            dec_arg_keywords = ['dev_timeout', 'normalize', 'ignore_warning']
             dec_args = {}
-            if 'dev_timeout' in kvargs:
-                dec_args['dev_timeout'] = kvargs.pop('dev_timeout')
-            if 'normalize' in kvargs:
-                dec_args['normalize'] = kvargs.pop('normalize')
-            if 'ignore_warning' in kvargs:
-                dec_args['ignore_warning'] = kvargs.pop('ignore_warning')
+            for keyword in dec_arg_keywords:
+                if keyword in kvargs:
+                    dec_args[keyword] = kvargs.pop(keyword)
 
             # kvargs are the command parameter/values
             if kvargs:
