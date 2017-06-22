@@ -70,6 +70,8 @@ class SW(Util):
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
+        self._single_re_issu = bool('current_re' in dev.facts and
+                                    'localre' in dev.facts['current_re'])
         self.log = lambda report: None
 
     # -----------------------------------------------------------------------
@@ -715,7 +717,9 @@ class SW(Util):
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
-        elif (issu is True or nssu is True) and self._multi_RE is not True:
+        elif ((issu is True or nssu is True) and
+              (self._multi_RE is not True and
+               self._single_re_issu is not True)):
             raise TypeError(
                 'ISSU/NSSU requires Multi RE setup')
 
