@@ -243,7 +243,9 @@ class SW(Util):
 
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
-        rc = int(got.findtext('package-result').strip())
+        # If <package-result> is not present, then assume success.
+        # That is, assume <package-result>0</package-result>
+        rc = int(got.findtext('package-result','0').strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
