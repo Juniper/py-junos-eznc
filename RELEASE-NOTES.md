@@ -1,6 +1,14 @@
-## Release 2.1.4.dev0 30 May 2017
+## Release 2.1.4 - 23 June 2017
 ### Features Added:
+- Optimize image copying in SW.safe_copy() #728 
+
 ### Bugs Fixed:
+- unnecessary import cleanup #730
+- Explicitly initialize jnpr.junos.facts sub-modules. #723/#731 
+- socket.error handling for console->close() #734
+- Ensure dev.timeout is an integer value. Addresses #735/#736
+- Socket error fix #737
+
 
 ## Release 2.1.3 - 30 May 2017
 ### Features Added:
