@@ -113,14 +113,15 @@ class Test_RpcMetaExec(unittest.TestCase):
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_kvargs_dict(self, mock_execute_fn):
-        with self.assertRaises(TypeError):
-            self.rpc.system_users_information(dict_data={'test': 'foo'})
+        self.assertRaises(TypeError,
+                          self.rpc.system_users_information,
+                          dict_data={'test': 'foo'})
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_kvargs_list_with_dict(self, mock_execute_fn):
-        with self.assertRaises(TypeError):
-            self.rpc.system_users_information(
-                list_with_dict_data=[True, {'test': 'foo'}])
+        self.assertRaises(TypeError,
+                          self.rpc.system_users_information,
+                          list_with_dict_data=[True, {'test': 'foo'}])
 
     @patch('jnpr.junos.device.Device.execute')
     def test_rpcmeta_exec_rpc_normalize(self, mock_execute_fn):
