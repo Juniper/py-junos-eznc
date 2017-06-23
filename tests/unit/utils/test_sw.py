@@ -37,6 +37,7 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
                  'normal shutdown.',
                  'model': 'FIREFLY-PERIMETER RE',
                  'up_time': '6 hours, 29 minutes, 30 seconds'},
+         'current_re': ['re0', 'master'],
          'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
@@ -131,6 +132,7 @@ class TestSW(unittest.TestCase):
     def test_sw_put_ftp(self, mock_ftp_put):
         dev = Device(host='1.1.1.1', user='rick', password='password123',
                      mode='telnet', port=23, gather_facts=False)
+        dev.facts = facts
         sw = SW(dev)
         sw.put(package='test.tgz')
         self.assertTrue(
