@@ -1,4 +1,5 @@
 import re
+import sys
 from lxml import etree
 from lxml.builder import E
 from jnpr.junos import jxml as JXML
@@ -309,7 +310,9 @@ class _RpcMetaExec(object):
                     if not isinstance(arg_value, (tuple, list)):
                         arg_value = [arg_value]
                     for a in arg_value:
-                        if not isinstance(a, (bool, str, unicode)):
+                        if ((sys.version < '3' and
+                             not isinstance(a, (bool, str, unicode))) or
+                            not isinstance(a, (bool, str))):
                             raise TypeError("The value %s for argument %s"
                                             " is of %s. Argument "
                                             "values must be a string, "
