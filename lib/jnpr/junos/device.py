@@ -1081,7 +1081,8 @@ class Device(_Connection):
         else:
             # --------------------------
             # making a remote connection 
-            # or wait for incoming 'outbound-ssh' connection if hostname is None
+            # if hostname is None, this is an 'outbound-ssh' connection
+            # which uses the established TCP connection from sock_fd
             # --------------------------
             if hostname is None and self._sock_fd is None: 
                 raise ValueError("You must provide either 'host' or 'sock_fd' value")
