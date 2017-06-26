@@ -1056,6 +1056,10 @@ class Device(_Connection):
         # ----------------------------------------
 
         hostname = vargs[0] if len(vargs) else kvargs.get('host')
+        self.rest = kvargs.get('rest', False)
+        self._ssl_verify = kvargs.get('ssl_verify', True)
+        self._schema = kvargs.get('schema', 'https')
+        self._path = kvargs.get('path', '/rpc')
 
         self._port = kvargs.get('port', 830)
         self._gather_facts = kvargs.get('gather_facts', True)
@@ -1184,17 +1188,29 @@ class Device(_Connection):
                                (self._ssh_private_key_file is None))
 
             # open connection using ncclient transport
-            self._conn = netconf_ssh.connect(
-                host=self._hostname,
-                port=self._port,
-                username=self._auth_user,
-                password=self._auth_password,
-                hostkey_verify=False,
-                key_filename=self._ssh_private_key_file,
-                allow_agent=allow_agent,
-                ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local': False})
-            self._conn._session.add_listener(DeviceSessionListener(self))
+            if self.rest:
+                from jnpr.junos.transport.rest import Rest
+                self._conn = Rest(
+                    host=self._hostname,
+                    port=self._port,
+                    path=self._path,
+                    schema=self._schema,
+                    user=self._auth_user,
+                    password=self._auth_password,
+                    dev=self)
+                self.connected = True
+            else:
+                self._conn = netconf_ssh.connect(
+                    host=self._hostname,
+                    port=self._port,
+                    username=self._auth_user,
+                    password=self._auth_password,
+                    hostkey_verify=False,
+                    key_filename=self._ssh_private_key_file,
+                    allow_agent=allow_agent,
+                    ssh_config=self._sshconf_lkup(),
+                    device_params={'name': 'junos', 'local': False})
+                self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
