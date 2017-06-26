@@ -52,7 +52,7 @@ class Rest():
             '')
         self._port = kvargs.get('port', '443')
         self._mode = kvargs.get('mode', 'rest')
-        self._timeout = kvargs.get('timeout', '5')
+        self.timeout = kvargs.get('timeout', '5')
         self._normalize = kvargs.get('normalize', False)
 
         self._attempts = kvargs.get('attempts', 10)
@@ -144,7 +144,7 @@ class Rest():
             data = cmd,
             auth = (self._auth_user, self._auth_password),
             verify = self._ssl_verify,
-            timeout = float(self._timeout),
+            timeout = float(self.timeout),
             headers={'Accept': 'application/xml', 'Content-Type': 'application/xml'})
         reply.raise_for_status()
         boundary = self._parse_headers(reply.headers)
