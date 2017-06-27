@@ -1,7 +1,10 @@
-## Release 2.1.5.dev0 - 23 June 2017
+## Release 2.1.5.dev1 - 27 June 2017
 ### Features Added:
+- Single-RE sw install on multi-RE device using all_re argument to SW.install() #746
+- Support platforms which have single-RE ISSU. #740
 
 ### Bugs Fixed:
+- Refactor _exec_rpc() and handle boolean RPC arguments with a value of False. #739
 
 
 ## Release 2.1.4 - 23 June 2017
