@@ -7,7 +7,7 @@ from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.ofacts.swver import facts_software_version as software_version, version_info
+from jnpr.junos.ofacts.swver import facts_software_version as software_version
 from jnpr.junos.ofacts.swver import _get_swver
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession

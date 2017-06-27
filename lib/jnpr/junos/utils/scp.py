@@ -24,7 +24,7 @@ class SCP(object):
     """
     def __init__(self, junos, **scpargs):
         """
-        Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` related objects.
+        Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` objects.
 
         :param Device junos: the Device object
         :param kvargs scpargs: any additional args to be passed to paramiko SCP
@@ -74,12 +74,12 @@ class SCP(object):
         .. note:: This method uses the same username/password authentication
                    credentials as used by :class:`jnpr.junos.device.Device`.
                    It can also use ``ssh_private_key_file`` option if provided
-                   to the :class:`jnpr.junos.device.Device` 
+                   to the :class:`jnpr.junos.device.Device`
 
         :returns: SCPClient object
         """
-        #@@@ should check for multi-calls to connect to ensure we don't keep
-        #@@@ opening new connections
+        # @@@ should check for multi-calls to connect to ensure we don't keep
+        # @@@ opening new connections
         junos = self._junos
         self._ssh = paramiko.SSHClient()
         self._ssh.load_system_host_keys()
@@ -100,7 +100,7 @@ class SCP(object):
             sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
 
         if self._junos._ssh_private_key_file is not None:
-            kwargs['key_filename']=self._junos._ssh_private_key_file
+            kwargs['key_filename'] = self._junos._ssh_private_key_file
 
         self._ssh.connect(hostname=junos._hostname,
                           port=(

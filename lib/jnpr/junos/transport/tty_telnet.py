@@ -59,7 +59,7 @@ class Telnet(Terminal):
             try:
                 self._tn.open(self.host, self.port, self.timeout)
                 break
-            except Exception as err:
+            except Exception:
                 retry -= 1
                 logger.info(
                     "TTY busy: checking back in {0} ...".format(
@@ -96,7 +96,7 @@ class Telnet(Terminal):
             content = content.decode('utf-8')
         for char in content:
             self._tn.write(six.b(char))
-            wtime = 10/float(self.baud)
+            wtime = 10 / float(self.baud)
             sleep(wtime)                          # do not remove
 
     def read(self):

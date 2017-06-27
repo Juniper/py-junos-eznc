@@ -1,41 +1,117 @@
-# Release 2.0.2-dev 2016-Oct-26
+## Release 2.1.5.dev0 - 23 June 2017
+### Features Added:
 
-  * Enhance the warning message produced by the cli() method to recommend the corresponding rpc() call. #60
-  * Enhance the sw.install() method with basic ISSU and NSSU support using the issu and nssu boolean arguments. #606
-  ** NSSU support has not yet been tested and should currently be considered experimental.
-  * Fix: Updated the interface-name glob pattern to correctly match et-x/y/z interfaces in several tables and views. #609
-  * Fix: To take care of special chars on screen during console connection. #610
-  * Enhance reboot() method to take a bool param all_re to decide if only connected dev to be rebooted or all. #613
-  * Fix: Address issue with fact gathering stopping when it encounters a problem. #615
+### Bugs Fixed:
 
 
-# Release 2.0.1
+## Release 2.1.4 - 23 June 2017
+### Features Added:
+- Optimize image copying in SW.safe_copy() #728 
 
-  * StartShell to take timeout (30 second by default) as paramter
-  * Proper exception handling in case of Console connection #595
-  * Fix: Config.lock() return exception when normalize is on
-  * Added microbadge badge for the Docker image #593
-  * Fix: print dev for Console conn was printing object not Device(....) #591
-  * Fix: To take care of special chars with StartShell->run function call #589
-  * Fix: ssh private key file to be considered for scp util #586
-  * Added Dockerfile to enable automated image builds on project commits #585
+### Bugs Fixed:
+- unnecessary import cleanup #730
+- Explicitly initialize jnpr.junos.facts sub-modules. #723/#731 
+- socket.error handling for console->close() #734
+- Ensure dev.timeout is an integer value. Addresses #735/#736
+- Socket error fix #737
 
 
-# Release 2.0.0
+## Release 2.1.3 - 30 May 2017
+### Features Added:
+- Ephemeral config support #707
+- Add a srx_cluster_redundancy_group fact. #711
 
-  * Console connection using PyEZ
-  * Python >=3.4 support
-  * Configuration Tables to Define and Configure Structured Resources
-  * JSON Config load
-  * FTP Utility
-  * Multi RPC error
-  * various bug fixes
+### Bugs Fixed:
+- ignore_warning fails when single <rpc-error> that is first child of <rpc-reply>. #712
+- mode='telnet' did not logout non-cli user #713
+- JSONLoadError was thrown when load valid JSON config #717/#718
+- Fix XML normalization feature when using NETCONF over console. #719/#720
+- Handle differences in |display xml rpc #722
+
+
+## Release 2.1.2 - 2 May 2017
+### Bugs Fixed:
+- Doc badge was pointing to older version #694 
+- Fix new-style fact gathering for SRX clusters. #697/#698
+- Properly handle SW upgrades on multi-RE and/or multi-chassis systems when using new-style fact gathering. #700 
+- Raise JSONLoadError if json config is malformed #706 
+- Handle ConnectClosedError exception for lock() and unlock() #708 
+- Return None when the RPC equiv is either str or unicode #721
+
+
+## Release 2.1.1 - 28 Mar 2017
+### Bugs Fixed:
+- Fix regressions caused by `ignore_warning`. #691
+
+
+## Release 2.1.0 - 22 Mar 2017
+### Features Added:
+- Enhanced fact gathering. Facts are now gathered "on demand." Additional facts are added. 
+   The definition of facts and return values are properly documented. #638
+- Support for YANG get RPCs. #672 
+- Add an `ignore_warning` argument to suppress `RpcError` exceptions for warnings. #672/#685
+- Enhanced the `sw.install()` method with basic ISSU and NSSU support using the issu and nssu
+   boolean arguments. #606/#630/#632
+   ** NSSU support has not yet been tested and should currently be considered experimental.
+- Provide a master property and a re_name property for Device. #682
+- Enhanced `reboot()` method to take an `all_re` boolean parameter which controls if only the connected
+   Routing Engine, or all Routing Engines, are rebooted. #613
+- Enhanced the warning message produced by the `cli()` method to recommend the corresponding
+   `dev.rpc.<method>()` call. #603
+- Add support for `update` parameter to configuration `load()` method. #681
+- Added `directory_usage` to utils #629/#631/#636
+- Adding support for NFX/JDM fact gathering. #652/#659
+- Connected property. #664 
+
+### Bugs Fixed:
+- Updated the interface-name glob pattern to correctly match `et-<x>/<y>/<z>` interfaces
+   in several tables and views. #609 
+- Take care of special chars on screen during console connection. #610
+- Address issue with fact gathering stopping when it encounters a problem. #615
+- Minor typos fixed in `RuntimeError` exception message and in comments. #621
+- Added `console_has_banner` parameter. #622
+- Add CentOS Support to install instructions #623 
+- Key value is needed in `_IsisAdjacencyLogTable` #627 
+- Improved functionality and documentation of Docker build. #637/#673/#674/#677
+- added remote port ID to lldp.yml (OP) #645
+- Fix documentation for `rollback()` #647
+- Fix for fact gathering pprint. #660/#661
+- update ospf view, add bgp/inventory #665 
+- Updated doc string for close function #686 
+- Add Travis builds for Python 3.5 and 3.6 #687 
+- StartShell.run to take this as None for non returning commands #680
+- Modify ignore_warning return value to mimic normal RPC return value. #688
+
+
+## Release 2.0.1
+### Bugs Fixed:
+- StartShell to take timeout (30 second by default) as paramter
+- Proper exception handling in case of Console connection #595
+- Fix: Config.lock() return exception when normalize is on
+- Added microbadge badge for the Docker image #593
+- Fix: print dev for Console conn was printing object not Device(....) #591
+- Fix: To take care of special chars with StartShell->run function call #589
+- Fix: ssh private key file to be considered for scp util #586
+- Added Dockerfile to enable automated image builds on project commits #585
+
+
+## Release 2.0.0
+### Features Added:
+- Console connection using PyEZ
+- Python >=3.4 support
+- Configuration Tables to Define and Configure Structured Resources
+- JSON Config load
+- FTP Utility
+
+### Bugs Fixed:
+- Multi RPC error
+- various bug fixes
 
 Refer below link for more details:
 https://github.com/Juniper/py-junos-eznc/releases/tag/2.0.0
 
 
-# Release 1.0
+## Release 1.0
 
 # Junos PyEZ Overview
 

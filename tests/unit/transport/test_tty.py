@@ -31,7 +31,8 @@ class TestTTY(unittest.TestCase):
         self.assertRaises(EzErrors.ConnectAuthError,
                           self.terminal._login_state_machine)
 
-    def test_tty_no_login(self):
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_no_login(self, mock_sleep):
         self.terminal._badpasswd = 4
         self.terminal.read_prompt = MagicMock()
         self.terminal.read_prompt.return_value = (None, 'testing')
@@ -66,7 +67,8 @@ class TestTTY(unittest.TestCase):
         self.terminal._login_state_machine()
         self.assertEqual(self.terminal.state, 4)
 
-    def test_ev_option(self):
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_ev_option(self, mock_sleep):
         self.terminal.write = MagicMock()
         self.terminal.read_prompt = MagicMock()
         self.terminal.read_prompt.return_value = (None, 'option')
@@ -74,13 +76,18 @@ class TestTTY(unittest.TestCase):
         self.terminal.write.assert_called_with("1")
         self.assertEqual(self.terminal.state, 7)
 
-    def test_tty_ev_already_closed(self):
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_ev_netconf_closed(self, mock_sleep):
         self.terminal.write = MagicMock()
+        self.terminal._tty_close = MagicMock()
         self.terminal.read_prompt = MagicMock()
-        self.terminal.read_prompt.return_value = (None, 'already_closed')
+        self.terminal.read_prompt.side_effect = iter([(None, 'netconf_closed'),
+                                                      (None, 'shell'),
+                                                      (None, 'login')])
         self.assertTrue(self.terminal._logout_state_machine())
 
-    def test_tty_already_logout(self):
+    @patch('jnpr.junos.transport.tty.sleep')
+    def test_tty_already_logout(self, mock_sleep):
         self.terminal.write = MagicMock()
         self.terminal.read_prompt = MagicMock()
         self.terminal.read_prompt.return_value = (None, None)

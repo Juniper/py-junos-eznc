@@ -1,5 +1,6 @@
 import re
 
+
 class version_info(object):
 
     def __init__(self, verstr):

@@ -79,38 +79,38 @@ conf_xslt = '''\
             <xsl:otherwise/>
         </xsl:choose>
     </xsl:template>
-  </xsl:stylesheet>'''
+</xsl:stylesheet>'''
 
 conf_xslt_root = etree.XML(conf_xslt)
 conf_transform = etree.XSLT(conf_xslt_root)
 
 
 normalize_xslt = '''\
-        <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-            <xsl:output method="xml" indent="no"/>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="no"/>
 
-            <xsl:template match="/|comment()|processing-instruction()">
-                <xsl:copy>
-                    <xsl:apply-templates/>
-                </xsl:copy>
-            </xsl:template>
+    <xsl:template match="/|comment()|processing-instruction()">
+        <xsl:copy>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
 
-            <xsl:template match="*">
-                <xsl:element name="{local-name()}">
-                    <xsl:apply-templates select="@*|node()"/>
-                </xsl:element>
-            </xsl:template>
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}">
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:element>
+    </xsl:template>
 
-            <xsl:template match="@*">
-                <xsl:attribute name="{local-name()}">
-                    <xsl:value-of select="."/>
-                </xsl:attribute>
-            </xsl:template>
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+            <xsl:value-of select="."/>
+        </xsl:attribute>
+    </xsl:template>
 
-            <xsl:template match="text()">
-                <xsl:value-of select="normalize-space(.)"/>
-            </xsl:template>
-        </xsl:stylesheet>'''
+    <xsl:template match="text()">
+        <xsl:value-of select="normalize-space(.)"/>
+    </xsl:template>
+</xsl:stylesheet>'''
 
 
 # XSLT to strip comments
@@ -130,6 +130,26 @@ strip_comments_xslt = '''\
 
 strip_xslt_root = etree.XML(strip_comments_xslt)
 strip_comments_transform = etree.XSLT(strip_xslt_root)
+
+# XSLT to strip <rpc-error> elements
+strip_rpc_error_xslt = '''
+<xsl:stylesheet version="1.0"
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+  <xsl:strip-space elements="*"/>
+
+    <xsl:template match="node()|@*">
+      <xsl:copy>
+         <xsl:apply-templates select="node()|@*"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="rpc-error"/>
+</xsl:stylesheet>
+'''
+
+strip_rpc_error_root = etree.XML(strip_rpc_error_xslt)
+strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
 
 
 def remove_namespaces(xml):
@@ -175,3 +195,27 @@ def cscript_conf(reply):
         return NCElement(reply, transform_reply)._NCElement__doc
     except:
         return None
+
+# xslt to remove prefix like junos:ns
+strip_namespaces_prefix = """<?xml version="1.0" encoding="UTF-8" ?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="xml" indent="no" omit-xml-declaration="no" />
+
+    <xsl:template match="/ |comment() |processing-instruction()">
+        <xsl:copy>
+          <xsl:apply-templates select="/*" />
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}" namespace="{namespace-uri()}">
+          <xsl:apply-templates select="@*|node()" />
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+          <xsl:value-of select="." />
+        </xsl:attribute>
+    </xsl:template>
+</xsl:stylesheet>"""

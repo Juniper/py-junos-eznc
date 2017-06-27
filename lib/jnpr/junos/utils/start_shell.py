@@ -52,7 +52,7 @@ class StartShell(object):
         chan = self._chan
         got = []
         timeout = timeout or self.timeout
-        timeout = datetime.datetime.now()+datetime.timedelta(
+        timeout = datetime.datetime.now() + datetime.timedelta(
             seconds=timeout)
         while timeout > datetime.datetime.now():
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
@@ -61,7 +61,8 @@ class StartShell(object):
                 if isinstance(data, bytes):
                     data = data.decode('utf-8', 'replace')
                 got.append(data)
-                if re.search(r'{0}\s?$'.format(this), data):
+                if this is not None and re.search(r'{0}\s?$'.format(this),
+                                                  data):
                     break
         return got
 
@@ -113,25 +114,38 @@ class StartShell(object):
         item is the output of the command.
 
         :param str command: the shell command to execute
-        :param str this: the exected shell-prompt to wait for
+        :param str this: the expected shell-prompt to wait for. If ``this`` is
+          set to None, function will wait for all the output on the shell till
+          timeout value.
         :param int timeout:
           Timeout value in seconds to wait for expected string/pattern (this).
           If not specified defaults to self.timeout. This timeout is specific
-          to individual run call.
+          to individual run call. If ``this`` is provided with None value,
+          function will wait till timeout value to grab all the content from
+          command output.
 
         :returns: (last_ok, result of the executed shell command (str) )
+
+        .. code-block:: python
+
+           with StartShell(dev) as ss:
+               print ss.run('cprod -A fpc0 -c "show version"', timeout=10)
 
         .. note:: as a *side-effect* this method will set the ``self.last_ok``
                   property.  This property is set to ``True`` if ``$?`` is
                   "0"; indicating the last shell command was successful else
-                  False
+                  False. If ``this`` is set to None, last_ok will be set to
+                  True if there is any content in result of the executed shell
+                  command.
         """
         timeout = timeout or self.timeout
         # run the command and capture the output
         self.send(command)
         got = ''.join(self.wait_for(this, timeout))
         self.last_ok = False
-        if this != _SHELL_PROMPT:
+        if this is None:
+            self.last_ok = got is not ''
+        elif this != _SHELL_PROMPT:
             self.last_ok = re.search(r'{0}\s?$'.format(this), got) is not None
         elif re.search(r'{0}\s?$'.format(_SHELL_PROMPT), got) is not None:
             # use $? to get the exit code of the command
@@ -150,4 +164,3 @@ class StartShell(object):
 
     def __exit__(self, exc_ty, exc_val, exc_tb):
         self.close()
-

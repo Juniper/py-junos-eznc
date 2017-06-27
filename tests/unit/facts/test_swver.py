@@ -4,8 +4,8 @@ __credits__ = "Jeremy Schulman, Nitin Kumar"
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 
-from jnpr.junos.facts.swver import version_info
-import jnpr.junos.facts.swver
+from jnpr.junos.facts.swver import version_info, get_facts
+
 
 @attr('unit')
 class TestVersionInfo(unittest.TestCase):
@@ -71,4 +71,4 @@ class TestVersionInfo(unittest.TestCase):
             [('build', 5), ('major', (15, 4)), ('minor', '7'), ('type', 'F')])
 
     def test_emptyget_facts(self):
-        self.assertEqual(jnpr.junos.facts.swver.get_facts(None),{})
+        self.assertEqual(get_facts(None), {})

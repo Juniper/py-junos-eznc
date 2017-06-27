@@ -53,7 +53,6 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(self.dev.facts['personality'], 'PTX')
         self.assertEqual(self.dev.facts['virtual'], False)
 
-
     @patch('jnpr.junos.Device.execute')
     def test_personality_srx_branch(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_srx_branch
@@ -112,10 +111,10 @@ class TestPersonality(unittest.TestCase):
     def test_personality_virtual_chassis(self):
         self.dev.facts._cache['model'] = 'Virtual Chassis'
         self.dev.facts._cache['re_info'] = {'default':
-                                                {'default':
-                                                    { 'model':'QFX5100'}
-                                                }
-                                           }
+                                            {'default':
+                                             {'model': 'QFX5100'}
+                                             }
+                                            }
         self.assertEqual(self.dev.facts['personality'], 'SWITCH')
         self.assertEqual(self.dev.facts['virtual'], False)
 

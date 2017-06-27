@@ -13,6 +13,9 @@ from jnpr.junos.exception import RpcError
 # file. This avoids accidentally invoking the same RPC multiple times when we
 # could invoke it just once and gather multiple facts from the output.
 
+# An import for each fact file must be present in
+# lib/jnpr/junos/facts/__init__.py
+
 # The file must include a provide_facts() function
 # The provide_facts() function must return a dictionary. The keys of the
 # dictionary are each fact that is handled/returned by this module. The value

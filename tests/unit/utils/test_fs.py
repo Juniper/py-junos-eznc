@@ -1,5 +1,4 @@
 import unittest
-from mock import patch
 from nose.plugins.attrib import attr
 import os
 
@@ -310,12 +309,20 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage_no_directory(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_error1
-        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+        self.assertRaises(
+            RpcError,
+            self.fs.directory_usage,
+            path="/var/tmp",
+            depth="1")
 
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage_no_dir_name(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_error2
-        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+        self.assertRaises(
+            RpcError,
+            self.fs.directory_usage,
+            path="/var/tmp",
+            depth="1")
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
@@ -393,9 +400,11 @@ class TestFS(unittest.TestCase):
     def _mock_manager_error1(self, *args, **kwargs):
         if args:
             if args[0].tag == 'get-directory-usage-information':
-                return self._read_file('get-directory-usage-information_error1.xml')
+                return self._read_file(
+                    'get-directory-usage-information_error1.xml')
 
     def _mock_manager_error2(self, *args, **kwargs):
         if args:
             if args[0].tag == 'get-directory-usage-information':
-                return self._read_file('get-directory-usage-information_error2.xml')
+                return self._read_file(
+                    'get-directory-usage-information_error2.xml')

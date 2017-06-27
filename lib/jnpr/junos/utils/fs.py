@@ -25,7 +25,8 @@ class FS(Util):
     * :meth:`storage_usage`: return storage usage
     * :meth:`directory_usage`: return directory usage
     * :meth:`storage_cleanup`: perform storage storage_cleanup
-    * :meth:`storage_cleanup_check`: returns a list of files to remove at cleanup
+    * :meth:`storage_cleanup_check`: returns a list of files which will be
+                                     removed at cleanup
     * :meth:`symlink`: create a symlink
     * :meth:`tgz`: tar+gzip a directory
 
@@ -277,7 +278,8 @@ class FS(Util):
         """
         Returns the directory usage, similar to the unix "du" command.
 
-        :returns: dict of directory usage, including subdirectories if depth > 0
+        :returns: dict of directory usage, including subdirectories
+                  if depth > 0
         """
         BLOCK_SIZE = 512
 

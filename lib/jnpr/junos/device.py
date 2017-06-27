@@ -1,9 +1,9 @@
 # stdlib
 import os
+import six
 import types
 import platform
 import warnings
-import traceback
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -29,7 +29,9 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.factcache import _FactCache
 from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
+    ignoreWarnDecorator
+from jnpr.junos.exception import JSONLoadError
 
 
 _MODULEPATH = os.path.dirname(__file__)
@@ -173,7 +175,11 @@ class _Connection(object):
         :param int value:
             New timeout value in seconds
         """
-        self._conn.timeout = value
+        try:
+            self._conn.timeout = int(value)
+        except (ValueError, TypeError):
+            raise RuntimeError("could not convert timeout value of %s to an "
+                               "integer" % (value))
 
     # ------------------------------------------------------------------------
     # property: facts
@@ -205,6 +211,126 @@ class _Connection(object):
         :returns: the port (str) to connect to the Junos device
         """
         return self._port
+
+    # ------------------------------------------------------------------------
+    # property: master
+    # ------------------------------------------------------------------------
+
+    @property
+    def master(self):
+        """
+        The mastership state of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering and the
+            value of currently cached facts. If there is a chance the
+            mastership state may have changed since the facts were cached,
+            then dev.facts_refresh() should be invoked prior to checking
+            this property. If old-style fact gathering is in use,
+            this property will return None.
+
+        :returns: True if the current RE is the master Routing Engine. False if
+                  the current RE is not the master Routing Engine. None if
+                  unable to determine the state of the current Routing Engine.
+        """
+        master = None
+
+        # Make sure the 'current_re' fact has a value
+        if self.facts.get('current_re') is not None:
+            # Typical master case
+            if 'master' in self.facts['current_re']:
+                master = True
+            # Typical backup case
+            elif 'backup' in self.facts['current_re']:
+                master = False
+            # Some single chassis and single RE platforms don't have
+            # 'master' in the 'current_re' fact. It's best to check if it's a
+            #  single chassis and single RE platform based on the
+            # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
+            elif (self.facts.get('2RE') is False and
+                  self.facts.get('RE_hw_mi') is False and
+                  're0' in self.facts['current_re']):
+                master = True
+            # Is it an SRX cluster?
+            # If so, the cluster's "primary" is the "master"
+            elif self.facts.get('srx_cluster') is True:
+                if 'primary' in self.facts['current_re']:
+                    master = True
+                else:
+                    master = False
+            else:
+                # Might be a multi-chassis case where this RE is neither the
+                # master or the backup for the entire system. In that case,
+                # it's either a chassis master or a chassis backup.
+                for re_state in self.facts['current_re']:
+                    # Multi-chassis case. A chassis master/backup, but
+                    # not the system master/backup.
+                    if '-backup' in re_state or '-master' in re_state:
+                        master = False
+                        break
+        return master
+
+    @master.setter
+    def master(self, value):
+        """ read-only property """
+        raise RuntimeError("master is read-only!")
+
+    # ------------------------------------------------------------------------
+    # property: re_name
+    # ------------------------------------------------------------------------
+
+    @property
+    def re_name(self):
+        """
+        The name of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering. If
+            old-style fact gathering is in use, this property will return None.
+
+        :returns: A string containing the name of the current Routing Engine or
+                  None if unable to determine the state of the current
+                  Routing Engine.
+        """
+        re_name = None
+
+        # Make sure the 'current_re' and 'hostname_info' facts have values
+        if (self.facts.get('current_re') is not None and
+           self.facts.get('hostname_info') is not None):
+            # re_name should be the intersection of the values in the
+            # 'current_re' fact and the keys in the 'hostname_info' fact.
+            intersect = (set(self.facts['current_re']) &
+                         set(self.facts['hostname_info'].keys()))
+            # intersect should usually contain a single element (the RE's
+            # name) if things worked correctly.
+            if len(intersect) == 1:
+                re_name = list(intersect)[0]
+            # If intersect contains no elements
+            elif len(intersect) == 0:
+                # Look for the first value
+                # in 'current_re' which contains '-re'.
+                for re_state in self.facts['current_re']:
+                    if '-re' in re_state:
+                        re_name = re_state
+                        break
+                if re_name is None:
+                    # Still haven't figured it out, if there's only one key
+                    # in 'hostname_info', assume that.
+                    all_re_names = list(self.facts['hostname_info'].keys())
+                    if len(all_re_names) == 1:
+                        re_name = all_re_names[0]
+        return re_name
+
+    @re_name.setter
+    def re_name(self, value):
+        """ read-only property """
+        raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
         if self._ssh_config:
@@ -245,7 +371,8 @@ class _Connection(object):
         """
         try:
             command = command + '| display xml rpc'
-            rsp = self.rpc.cli(command)
+            rsp = self.rpc.cli(command, format="xml")
+            rsp = rsp.getparent().find('.//rpc')
             if format == 'text':
                 encode = None if sys.version < '3' else 'unicode'
                 return etree.tostring(rsp[0], encoding=encode)
@@ -391,7 +518,6 @@ class _Connection(object):
                 time.sleep(1)
                 pass
         else:
-            elapsed = datetime.datetime.now() - start
             probe_ok = False
 
         return probe_ok
@@ -422,7 +548,7 @@ class _Connection(object):
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        if isinstance(rpc, str):
+        if isinstance(rpc, six.string_types):
             # No RPC is available.
             return None
         rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
@@ -519,7 +645,7 @@ class _Connection(object):
 
     @normalizeDecorator
     @timeoutDecorator
-    def execute(self, rpc_cmd, **kvargs):
+    def execute(self, rpc_cmd, ignore_warning=False, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
 
@@ -527,6 +653,22 @@ class _Connection(object):
           can either be an XML Element or xml-as-string.  In either case
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
+
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :param func to_py:
           Is a caller provided function that takes the response and
@@ -543,7 +685,8 @@ class _Connection(object):
             user-auth class privilege controls on Junos
 
         :raises RpcError:
-            When an ``rpc-error`` element is contained in the RPC-reply
+            When an ``rpc-error`` element is contained in the RPC-reply and the
+            ``rpc-error`` element does not match the **ignore_warning** value.
 
         :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
@@ -569,20 +712,28 @@ class _Connection(object):
         # @@@ need to trap this and re-raise accordingly.
 
         try:
-            rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
+            rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
+                                        ignore_warning=ignore_warning)
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
             raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
-        except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
-            # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
-                'permission denied' \
-                else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
+        except RPCError as ex:
+            if hasattr(ex, 'xml'):
+                rsp = JXML.remove_namespaces(ex.xml)
+                message = rsp.findtext('error-message')
+                # see if this is a permission error
+                if message and message == 'permission denied':
+                    raise EzErrors.PermissionError(cmd=rpc_cmd_e,
+                                                   rsp=rsp,
+                                                   errs=ex)
+            else:
+                rsp = None
+            raise EzErrors.RpcError(cmd=rpc_cmd_e,
+                                    rsp=rsp,
+                                    errs=ex)
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.",
@@ -591,8 +742,11 @@ class _Connection(object):
 
         # From 14.2 onward, junos supports JSON, so now code can be written as
         # dev.rpc.get_route_engine_information({'format': 'json'})
+        # should not convert rpc response to json when loading json config
+        # as response should be rpc-reply xml object.
 
-        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+        if rpc_cmd_e.tag != 'load-configuration' and \
+                        rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
             ver_info = self.facts.get('version_info')
             if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
@@ -603,6 +757,8 @@ class _Connection(object):
                     if str(ex).startswith('Extra data'):
                         return json.loads(
                             re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+                    else:
+                        raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
@@ -1097,12 +1253,13 @@ class Device(_Connection):
 
     def close(self):
         """
-        Closes the connection to the device.
+        Closes the connection to the device only if connected.
         """
         if self.connected is True:
             self._conn.close_session()
             self.connected = False
 
+    @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 

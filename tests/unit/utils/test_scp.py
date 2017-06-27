@@ -9,7 +9,6 @@ from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
 
 from mock import patch
-import sys
 
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"

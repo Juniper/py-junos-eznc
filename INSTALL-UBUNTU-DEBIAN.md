@@ -2,30 +2,37 @@
 
 The following are instructions for setting up a system starting from stock system images.
 
-These instructions were tested on a 64-bit systems from https://github.com/opscode/bento, and using the _Junos PyEZ_ library version 1.3.1.
+These instructions were tested on a 64-bit systems from https://github.com/opscode/bento, and using the _Junos PyEZ_ library version 2.1.0.
 
 Operating Systems
 ---------------
-- Ubuntu 12.04
-- Ubuntu 12.10
-- Ubuntu 13.10
-- Ubuntu 14.04
-- Debian 7.4
-- Debian 8.4
+- Ubuntu 16.10
+- Ubuntu 16.04
+- Ubuntu 15.10
+- Ubuntu 15.04
+- Debian 8.7
+- Debian 8.6
 
 
 #### Step 1: Update package list
 
 	sudo apt-get update
 
-#### Step 2: Install OS packages required by Junos PyEZ and it's pre-requisite Python packages
+#### Step 2: Install Python and PIP
 
-    sudo apt-get install -y --force-yes python-dev libxslt1-dev libssl-dev libffi-dev
+##### For Python 2.x:
+        sudo apt-get install python-dev
+        wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
 
-#### Step 3: Install the pip package manager from source
+##### For Python 3.x:
+        sudo apt-get install python3-dev
+        wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python3
 
-	wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
-	
+#### Step 3: Install OS packages required by Junos PyEZ and it's
+pre-requisite Python packages
+
+    sudo apt-get install libxslt1-dev libssl-dev libffi-dev
+
 #### Step 4: Install Junos PyEZ
 
     sudo pip install junos-eznc
@@ -45,7 +52,7 @@ Development code can be installed directly from GitHub based on any branch, comm
 #### Alternate Step 4: Install Junos PyEZ from GitHub
 
 #### Step 4a: Install Git from OS packages 
-    sudo apt-get install -y git
+    sudo apt-get install git
 
 #### Step 4b: Install Junos PyEZ from GitHub
 	sudo pip install git+https://github.com/Juniper/py-junos-eznc.git
