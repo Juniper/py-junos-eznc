@@ -70,6 +70,13 @@ class SW(Util):
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
+        # The devices which currently support single-RE ISSU, communicate with
+        #  the new Junos VM using internal IP 128.0.0.63.
+        # Therefore, the 'localre' value in the 'current_re' fact can currently
+        # be used to check for this capability.
+        # {master: 0}
+        #  user @ s0 > file show / etc / hosts.junos | match localre
+        #  128.0.0.63               localre
         self._single_re_issu = bool('current_re' in dev.facts and
                                     'localre' in dev.facts['current_re'])
         self.log = lambda report: None
@@ -245,7 +252,12 @@ class SW(Util):
         got = rsp.getparent()
         # If <package-result> is not present, then assume success.
         # That is, assume <package-result>0</package-result>
-        rc = int(got.findtext('package-result', '0').strip())
+        package_result = got.findtext('package-result')
+        if package_result is None:
+            self.log("software pkgadd response is missing package-result "
+                     "element. Assuming success.")
+            package_result = '0'
+        rc = int(package_result.strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
