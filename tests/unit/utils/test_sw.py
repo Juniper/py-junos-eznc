@@ -158,6 +158,12 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_install_single_re_on_multi_re(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.assertTrue(self.sw.install('test.tgz', all_re=False, no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_install_single_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
