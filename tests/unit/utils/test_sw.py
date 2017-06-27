@@ -37,6 +37,7 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
                  'normal shutdown.',
                  'model': 'FIREFLY-PERIMETER RE',
                  'up_time': '6 hours, 29 minutes, 30 seconds'},
+         'current_re': ['re0', 'master'],
          'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
@@ -131,6 +132,7 @@ class TestSW(unittest.TestCase):
     def test_sw_put_ftp(self, mock_ftp_put):
         dev = Device(host='1.1.1.1', user='rick', password='password123',
                      mode='telnet', port=23, gather_facts=False)
+        dev.facts = facts
         sw = SW(dev)
         sw.put(package='test.tgz')
         self.assertTrue(
@@ -168,6 +170,12 @@ class TestSW(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
         self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_no_package_result(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        self.assertTrue(self.sw.install('test_no_result.tgz', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu(self, mock_execute):
@@ -783,7 +791,11 @@ class TestSW(unittest.TestCase):
         if kwargs:
             # Little hack for mocked execute
             if 'dev_timeout' in kwargs:
-                return self._read_file(args[0].tag + '.xml')
+                if (args and args[0].findtext('package-name') ==
+                             '/var/tmp/test_no_result.tgz'):
+                    return self._read_file(args[0].tag + '.no_result.xml')
+                else:
+                    return self._read_file(args[0].tag + '.xml')
             if 'path' in kwargs:
                 if kwargs['path'] == '/packages':
                     return self._read_file('file-list_dir.xml')
@@ -791,7 +803,6 @@ class TestSW(unittest.TestCase):
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
-
         elif args:
             if args[0].find('at') is not None:
                 return self._read_file('request-reboot-at.xml')
