@@ -573,7 +573,8 @@ class SW(Util):
                 progress=None, validate=False, checksum=None, cleanfs=True,
                 no_copy=False, issu=False, nssu=False, timeout=1800,
                 cleanfs_timeout=300, checksum_timeout=300,
-                checksum_algorithm='md5', force_copy=False, **kwargs):
+                checksum_algorithm='md5', force_copy=False, all_re=True,
+                **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -704,6 +705,11 @@ class SW(Util):
           at the :remote_path:, AND the local checksum matches the remote
           checksum, then skip the copy to optimize time.
 
+        :param bool all_re:
+          (Optional) When ``True`` (default) perform the software install on
+          all Routing Engines of the Junos device. When ``False``  if the
+          only preform the software install on the current Routing Engine.
+
         :param kwargs **kwargs:
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
@@ -783,8 +789,8 @@ class SW(Util):
                     "NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
-            elif self._multi_RE is False:
-                # simple case of device with only one RE
+            elif self._multi_RE is False or all_re is False:
+                # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
                     remote_package,
