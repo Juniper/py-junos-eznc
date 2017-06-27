@@ -80,7 +80,7 @@ Your local scripts will be mounted to /scripts in the container
 
 `cd scripts`
 
-See [DOCKER-EXAMPLES.md](DOCKER-EXAMPLES.md) for some example usage.
+See [DOCKER-EXAMPLES.md](https://github.com/Juniper/py-junos-eznc/blob/master/DOCKER-EXAMPLES.md) for some example usage.
 
 ## Upgrade
 
