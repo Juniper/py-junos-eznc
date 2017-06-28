@@ -318,12 +318,11 @@ class JSONLoadError(Exception):
 
     def __repr__(self):
         if self.offending_line:
-            return "{0}(reason: {1}, \nThe offending config appears to be: \n{2})" \
-                .format(self.__class__.__name__, self.ex_msg,
-                        self.offending_line)
+            return "{0}(reason: {1}, \nThe offending config appears " \
+                   "to be: \n{2})".format(self.__class__.__name__, self.ex_msg,
+                                          self.offending_line)
         else:
             return "{0}(reason: {1})" \
                 .format(self.__class__.__name__, self.ex_msg)
 
     __str__ = __repr__
-

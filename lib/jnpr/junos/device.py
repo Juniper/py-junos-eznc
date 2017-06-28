@@ -745,8 +745,8 @@ class _Connection(object):
         # should not convert rpc response to json when loading json config
         # as response should be rpc-reply xml object.
 
-        if rpc_cmd_e.tag != 'load-configuration' and \
-                        rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+        if (rpc_cmd_e.tag != 'load-configuration' and
+           rpc_cmd_e.attrib.get('format') in ['json', 'JSON']):
             ver_info = self.facts.get('version_info')
             if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
