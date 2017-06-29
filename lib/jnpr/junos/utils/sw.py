@@ -590,32 +590,33 @@ class SW(Util):
                 no_copy=False, issu=False, nssu=False, timeout=1800,
                 cleanfs_timeout=300, checksum_timeout=300,
                 checksum_algorithm='md5', force_copy=False, all_re=True,
-                **kwargs):
+                url=None, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
 
-        1. computes the checksum of :package: on the local host
+        1. If :url: is specified, or :no_copy: is True, skip to step 8.
+        2. computes the checksum of :package: or :pgk_set: on the local host
            if :checksum: was not provided.
-        2. performs a storage cleanup on the remote Junos device if :cleanfs:
+        3. performs a storage cleanup on the remote Junos device if :cleanfs:
            is ``True``
-        3. Attempts to compute the checksum of the :package: filename in the
+        4. Attempts to compute the checksum of the :package: filename in the
            :remote_path: directory of the remote Junos device if the
            :force_copy: argument is ``False``
-        4. SCP or FTP copies the :package: file from the local host to the
+        5. SCP or FTP copies the :package: file from the local host to the
            :remote_path: directory on the remote Junos device under any of the
            following conditions:
            a) The :force_copy: argument is ``True``
            b) The :package: filename doesn't already exist in the :remote_path:
               :remote_path: directory of the remote Junos device.
-           c) The checksum computed in step 1 does not match the checksum
-              computed in step 3.
-        5. If step 4 was executed, computes the checksum of the :package:
+           c) The checksum computed in step 2 does not match the checksum
+              computed in step 4.
+        6. If step 5 was executed, computes the checksum of the :package:
            filename in the :remote_path: directory of the remote Junos device
-        6. Validates the checksum computed in step 1 matches the checksum
-              computed in step 5.
-        7. validates the package if :validate: is True
-        8. installs the package
+        7. Validates the checksum computed in step 2 matches the checksum
+              computed in step 6.
+        8. validates the package if :validate: is True
+        9. installs the package
 
         .. warning:: This process has been validated on the following
                      deployments.
@@ -726,6 +727,13 @@ class SW(Util):
           all Routing Engines of the Junos device. When ``False``  if the
           only preform the software install on the current Routing Engine.
 
+        :param str url:
+          (Optional) A URL from which the device retrieves the software to be
+          installed. Mutually exclusive with :package: and :pkg_set:. When
+          this parameter is set, :no_copy: is automatically set to False.
+          The acceptable formats for a URL value may be found at:
+          https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-software-formats-filenames-urls.html
+
         :param kwargs **kwargs:
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
@@ -743,6 +751,12 @@ class SW(Util):
             raise TypeError(
                 'ISSU/NSSU requires Multi RE setup')
 
+        if (url is not None and
+           (package is not None or pkg_set is not None)):
+            raise TypeError(
+                'The url, package, and pkg_set arguments are mutually '
+                'exclusive. Specify only one of url, package, or pkg_set.')
+
         def _progress(report):
             if progress is True:
                 self.progress(self._dev, report)
@@ -755,9 +769,13 @@ class SW(Util):
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
 
-        if package is None and pkg_set is None:
+        if package is None and pkg_set is None and url is None:
             raise TypeError(
-                'install() takes atleast 1 argument package or pkg_set')
+                'install() takes at least 1 argument package, pkg_set, or url')
+
+        # Copying to device doesn't make since when installing from a url.
+        if url is not None:
+            no_copy = True
 
         if no_copy is False:
             if ((sys.version < '3' and isinstance(package, (str, unicode))) or
@@ -784,9 +802,15 @@ class SW(Util):
                     'proper value for either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
+        # or will be loaded directly from a URL.
         # ---------------------------------------------------------------------
-        if package is not None:
+        remote_package = None
+        if url is not None:
+            remote_package = url
+        elif package is not None:
             remote_package = remote_path + '/' + path.basename(package)
+
+        if remote_package is not None:
             if validate is True:  # in case of Mixed VC it cant be used
                 _progress(
                     "validating software against current config,"
