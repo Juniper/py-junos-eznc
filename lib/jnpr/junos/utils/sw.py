@@ -4,6 +4,7 @@ import hashlib
 import re
 from os import path
 import sys
+from urlparse import urlparse
 
 
 # 3rd-party modules
@@ -590,7 +591,7 @@ class SW(Util):
                 no_copy=False, issu=False, nssu=False, timeout=1800,
                 cleanfs_timeout=300, checksum_timeout=300,
                 checksum_algorithm='md5', force_copy=False, all_re=True,
-                url=None, **kwargs):
+                **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -642,16 +643,23 @@ class SW(Util):
                    to reboot the device.
 
         :param str package:
-          The file-path to the install package tarball on the local filesystem
+          Either the full file path to the install package tarball on the local 
+          (PyEZ host's) filesystem OR a URL (from the target device's 
+          perspcective) from which the device retrieves installed. When the 
+          value is a URL, then the :no_copy: and :remote_path: values are
+          unused. The acceptable formats for a URL value may be found at:
+          https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-software-formats-filenames-urls.html
 
         :param list pkg_set:
-          The file-paths as list/tuple of the install package tarballs on the
-          local filesystem which will be installed on mixed VC setup.
+          A list/tuple of :package: values which will be installed on a mixed VC 
+          setup.
 
         :param str remote_path:
-          The directory on the Junos device where the package file will be
-          SCP'd to or where the package is stored on the device; the default is
-          ``/var/tmp``.
+          If the value of :package: or :pkg_set: is a file path on the local
+          (PyEZ host's) filesystem, then the image is copied from the local 
+          filesystem to the :remote_path: directory on the target Junos 
+          device. The default is ``/var/tmp``. If the value of :package: or
+          :pkg_set: is a URL, then the value of :remote_path: is unused.
 
         :param func progress:
           If provided, this is a callback function with a function prototype
@@ -679,8 +687,14 @@ class SW(Util):
           file to the device.  Default is ``True``.
 
         :param bool no_copy:
-          When ``True`` the software package will not be copied to the device.
-          Default is ``False``.
+          When the value of :package: or :pkg_set is not a URL, and the value
+          of :no_copy: is ``True`` the software package will not be copied to
+          the device and is presumed to already exist on the :remote_path:
+          directory of the target Junos device. When the value of :no_copy: is
+          ``False`` (the default), then the package is copied from the local
+          PyEZ host to the :remote_path: directory of the target Junos device.
+          If the value of :package: or :pkg_set: is a URL, then the value of 
+          :no_copy: is unused.
 
         :param bool issu:
           (Optional) When ``True`` allows unified in-service software upgrade
@@ -727,13 +741,6 @@ class SW(Util):
           all Routing Engines of the Junos device. When ``False``  if the
           only preform the software install on the current Routing Engine.
 
-        :param str url:
-          (Optional) A URL from which the device retrieves the software to be
-          installed. Mutually exclusive with :package: and :pkg_set:. When
-          this parameter is set, :no_copy: is automatically set to False.
-          The acceptable formats for a URL value may be found at:
-          https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-software-formats-filenames-urls.html
-
         :param kwargs **kwargs:
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
@@ -751,12 +758,6 @@ class SW(Util):
             raise TypeError(
                 'ISSU/NSSU requires Multi RE setup')
 
-        if (url is not None and
-           (package is not None or pkg_set is not None)):
-            raise TypeError(
-                'The url, package, and pkg_set arguments are mutually '
-                'exclusive. Specify only one of url, package, or pkg_set.')
-
         def _progress(report):
             if progress is True:
                 self.progress(self._dev, report)
@@ -769,53 +770,50 @@ class SW(Util):
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
 
-        if package is None and pkg_set is None and url is None:
+        if package is None and pkg_set is None:
             raise TypeError(
-                'install() takes at least 1 argument package, pkg_set, or url')
+                'install() requires either the package or pkg_set argument.')
 
-        # Copying to device doesn't make since when installing from a url.
-        if url is not None:
-            no_copy = True
-
-        if no_copy is False:
-            if ((sys.version < '3' and isinstance(package, (str, unicode))) or
-               isinstance(package, str)):
-                pkg_set = [package]
-            if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
-                for pkg in pkg_set:
-                    # To disable cleanfs after 1st iteration
-                    cleanfs = cleanfs and pkg_set.index(pkg) == 0
-                    copy_ok = self.safe_copy(
-                                  pkg,
-                                  remote_path=remote_path,
-                                  progress=progress,
-                                  cleanfs=cleanfs,
-                                  checksum=checksum,
-                                  cleanfs_timeout=cleanfs_timeout,
-                                  checksum_timeout=checksum_timeout,
-                                  checksum_algorithm=checksum_algorithm,
-                                  force_copy=force_copy)
-                    if copy_ok is False:
-                        return False
-            else:
-                raise ValueError(
-                    'proper value for either package or pkg_set is missing')
+        remote_pkg_set = []
+        if ((sys.version < '3' and isinstance(package, (str, unicode))) or
+           isinstance(package, str)):
+            pkg_set = [package]
+        if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
+            for pkg in pkg_set:
+                parsed_url = urlparse(pkg)
+                if parsed_url.scheme == '':
+                    if no_copy is False:
+                        # To disable cleanfs after 1st iteration
+                        cleanfs = cleanfs and pkg_set.index(pkg) == 0
+                        copy_ok = self.safe_copy(
+                                      pkg,
+                                      remote_path=remote_path,
+                                      progress=progress,
+                                      cleanfs=cleanfs,
+                                      checksum=checksum,
+                                      cleanfs_timeout=cleanfs_timeout,
+                                      checksum_timeout=checksum_timeout,
+                                      checksum_algorithm=checksum_algorithm,
+                                      force_copy=force_copy)
+                        if copy_ok is False:
+                            return False
+                    pkg = remote_path + '/' + path.basename(pkg)
+                remote_pkg_set.append(pkg)
+        else:
+            raise ValueError(
+                'proper value for either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
         # or will be loaded directly from a URL.
         # ---------------------------------------------------------------------
-        remote_package = None
-        if url is not None:
-            remote_package = url
-        elif package is not None:
-            remote_package = remote_path + '/' + path.basename(package)
 
-        if remote_package is not None:
-            if validate is True:  # in case of Mixed VC it cant be used
+        if len(remote_pkg_set) == 1:
+            # validate can't be used in the case of a Mixed VC
+            if validate is True and self._mixed_VC is False:
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_package, issu, nssu,
+                v_ok = self.validate(remote_pkg_set[0], issu, nssu,
                                      dev_timeout=timeout)
 
                 if v_ok is not True:
@@ -824,18 +822,18 @@ class SW(Util):
             if issu is True:
                 _progress(
                     "ISSU: installing software ... please be patient ...")
-                return self.pkgaddISSU(remote_package,
+                return self.pkgaddISSU(remote_pkg_set[0],
                                        dev_timeout=timeout, **kwargs)
             elif nssu is True:
                 _progress(
                     "NSSU: installing software ... please be patient ...")
-                return self.pkgaddNSSU(remote_package,
+                return self.pkgaddNSSU(remote_pkg_set[0],
                                        dev_timeout=timeout, **kwargs)
             elif self._multi_RE is False or all_re is False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
-                    remote_package,
+                    remote_pkg_set[0],
                     dev_timeout=timeout,
                     **kwargs)
                 return add_ok
@@ -843,7 +841,7 @@ class SW(Util):
                 # we need to update multiple devices
                 if self._multi_VC is True:
                     ok = True
-                    # extract the VC number out of the 'version_RE<n>' string
+                    # extract the VC number out of the _RE_list
                     vc_members = [
                         re.search(
                             '(\d+)',
@@ -853,7 +851,7 @@ class SW(Util):
                             "installing software on VC member: {0} ... please "
                             "be patient ...".format(vc_id))
                         ok &= self.pkgadd(
-                            remote_package,
+                            remote_pkg_set[0],
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs)
@@ -865,26 +863,22 @@ class SW(Util):
                     _progress(
                         "installing software on RE0 ... please be patient ...")
                     ok &= self.pkgadd(
-                        remote_package,
+                        remote_pkg_set[0],
                         re0=True,
                         dev_timeout=timeout,
                         **kwargs)
                     _progress(
                         "installing software on RE1 ... please be patient ...")
                     ok &= self.pkgadd(
-                        remote_package,
+                        remote_pkg_set[0],
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs)
                     return ok
 
-        elif isinstance(pkg_set, (list, tuple)) and self._mixed_VC:
-            pkg_set = [
-                remote_path +
-                '/' +
-                path.basename(pkg) for pkg in pkg_set]
+        elif len(remote_pkg_set) > 1 and self._mixed_VC:
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
+            add_ok = self.pkgadd(remote_pkg_set, dev_timeout=timeout, **kwargs)
             return add_ok
 
     # -------------------------------------------------------------------------

@@ -165,25 +165,20 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
-    def test_sw_install_url_and_package(self, mock_execute):
+    @patch('jnpr.junos.utils.sw.SW.local_md5')
+    def test_sw_install_url_in_pkg_set(self, mock_md5, mock_execute):
+        mock_md5.return_value = '96a35ab371e1ca10408c3caecdbd8a67'
         mock_execute.side_effect = self._mock_manager
-        self.assertRaises(TypeError,
-                          self.sw.install,
-                          package='test.tgz',
-                          url='/var/tmp/test.tgz')
-
-    @patch('jnpr.junos.Device.execute')
-    def test_sw_install_url_and_pkg_set(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager
-        self.assertRaises(TypeError,
-                          self.sw.install,
-                          pkg_set=['foo.tgz', 'bar.tgz'],
-                          url='/var/tmp/test.tgz')
+        self.sw.put = MagicMock()
+        self.sw._mixed_VC=True
+        self.assertTrue(self.sw.install(
+                            pkg_set=['safecopy.tgz', 'safecopy.tgz',
+                                     'ftp://server/path/test.tgz']))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_via_url(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.assertTrue(self.sw.install(url='ftp://server/path/test.tgz'))
+        self.assertTrue(self.sw.install(package='ftp://server/path/test.tgz'))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_single_re_on_multi_re(self, mock_execute):
