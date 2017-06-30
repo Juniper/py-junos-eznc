@@ -18,7 +18,7 @@ Configuration Utilities
 
 class Config(Util):
     """
-    Overivew of Configuration Utilities.
+    Overview of Configuration Utilities.
 
     * :meth:`commit`: commit changes
     * :meth:`commit_check`: perform the commit check operation
@@ -358,6 +358,8 @@ class Config(Util):
           For example::
 
             cu.load(url="/var/home/user/golden.conf")
+            cu.load(url="ftp://username@ftp.hostname.net/filename")
+            cu.load(url="http://username:password@hostname/path/filename")
             cu.load(url="/var/home/user/golden.conf", overwrite=True)
 
         :returns:
