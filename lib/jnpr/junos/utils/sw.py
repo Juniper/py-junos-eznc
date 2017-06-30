@@ -4,7 +4,12 @@ import hashlib
 import re
 from os import path
 import sys
-from urlparse import urlparse
+try:
+    # Python 3.x
+    from urllib.parse import urlparse
+except ImportError:
+    # Python 2.x
+    from urlparse import urlparse
 
 
 # 3rd-party modules
