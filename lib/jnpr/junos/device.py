@@ -290,15 +290,14 @@ class _Connection(object):
         The current Routing Engine is the RE to which the NETCONF session is
         connected.
 
-        :returns: The number of seconds (int) the current Routing Engine has 
-                  been up. If there is a problem gathering information, None is
-                  returned.
+        :returns: The number of seconds (int) since the current Routing Engine
+                  was booted. If there is a problem gathering or parsing the
+                  uptime information, None is returned.
         :raises: May raise a specific jnpr.junos.RpcError or 
                  jnpr.junos.ConnectError subclass if there is a problem
                  communicating with the device.
         """
         uptime = None
-
         rsp = self.rpc.get_system_uptime_information(normalize=True)
         if rsp is not None:
             element = rsp.find('.//system-booted-time/time-length')
@@ -306,7 +305,6 @@ class _Connection(object):
                 uptime_string = element.get('seconds')
                 if uptime_string is not None:
                     uptime = int(uptime_string)
-
         return uptime
 
     @uptime.setter
