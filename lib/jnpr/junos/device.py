@@ -293,7 +293,7 @@ class _Connection(object):
         :returns: The number of seconds (int) since the current Routing Engine
                   was booted. If there is a problem gathering or parsing the
                   uptime information, None is returned.
-        :raises: May raise a specific jnpr.junos.RpcError or 
+        :raises: May raise a specific jnpr.junos.RpcError or
                  jnpr.junos.ConnectError subclass if there is a problem
                  communicating with the device.
         """
