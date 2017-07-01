@@ -124,6 +124,7 @@ class Console(_Connection):
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
                                                     'local': False})
+        self._j2ldr = _Jinja2ldr
         if self._fact_style == 'old':
             self.facts = self.ofacts
         else:
