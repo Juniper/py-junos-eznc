@@ -22,6 +22,7 @@ from jnpr.junos.factcache import _FactCache
 from jnpr.junos import jxml as JXML
 from jnpr.junos.ofacts import *
 from jnpr.junos.decorators import ignoreWarnDecorator
+from jnpr.junos.device import _Jinja2ldr
 
 logger = logging.getLogger("jnpr.junos.console")
 
