@@ -612,8 +612,9 @@ class SW(Util):
         5. SCP or FTP copies the :package: file from the local host to the
            :remote_path: directory on the remote Junos device under any of the
            following conditions:
+
            a) The :force_copy: argument is ``True``
-           b) The :package: filename doesn't already exist in the :remote_path:
+           b) The :package: filename doesn't already exist in the
               :remote_path: directory of the remote Junos device.
            c) The checksum computed in step 2 does not match the checksum
               computed in step 4.

@@ -175,6 +175,7 @@ class _RpcMetaExec(object):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             dev.rpc.get(ignore_warning=True)
             dev.rpc.get(ignore_warning='vrrp subsystem not running')
             dev.rpc.get(ignore_warning=['vrrp subsystem not running',
@@ -216,6 +217,7 @@ class _RpcMetaExec(object):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             dev.rpc.load_config(cnf, ignore_warning=True)
             dev.rpc.load_config(cnf,
                                 ignore_warning='vrrp subsystem not running')
@@ -247,11 +249,15 @@ class _RpcMetaExec(object):
         format='json', then :contents: is a string containing Junos
             configuration in json format
 
+        url='path', then :contents: is a None
+
         <otherwise> :contents: is XML structure
         """
         rpc = E('load-configuration', options)
 
-        if ('action' in options) and (options['action'] == 'set'):
+        if contents is None and 'url' in options:
+            pass
+        elif ('action' in options) and (options['action'] == 'set'):
             rpc.append(E('configuration-set', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))

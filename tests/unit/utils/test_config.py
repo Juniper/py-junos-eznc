@@ -730,6 +730,12 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(RpcError, Config.__enter__,
                           Config(self.dev, mode='batch'))
 
+    def test_config_load_url(self):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.load(url="/var/home/user/golden.conf")
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['url'],
+                         '/var/home/user/golden.conf')
+
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
