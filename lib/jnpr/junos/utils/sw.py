@@ -601,7 +601,7 @@ class SW(Util):
         Performs the complete installation of the **package** that includes the
         following steps:
 
-        1. If :url: is specified, or :no_copy: is True, skip to step 8.
+        1. If :package: is a URL, or :no_copy: is True, skip to step 8.
         2. computes the checksum of :package: or :pgk_set: on the local host
            if :checksum: was not provided.
         3. performs a storage cleanup on the remote Junos device if :cleanfs:
@@ -813,12 +813,13 @@ class SW(Util):
         # ---------------------------------------------------------------------
 
         if len(remote_pkg_set) == 1:
+            remote_package = remote_pkg_set[0]
             # validate can't be used in the case of a Mixed VC
             if validate is True and self._mixed_VC is False:
                 _progress(
                     "validating software against current config,"
                     " please be patient ...")
-                v_ok = self.validate(remote_pkg_set[0], issu, nssu,
+                v_ok = self.validate(remote_package, issu, nssu,
                                      dev_timeout=timeout)
 
                 if v_ok is not True:
@@ -827,18 +828,18 @@ class SW(Util):
             if issu is True:
                 _progress(
                     "ISSU: installing software ... please be patient ...")
-                return self.pkgaddISSU(remote_pkg_set[0],
+                return self.pkgaddISSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
             elif nssu is True:
                 _progress(
                     "NSSU: installing software ... please be patient ...")
-                return self.pkgaddNSSU(remote_pkg_set[0],
+                return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
             elif self._multi_RE is False or all_re is False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
-                    remote_pkg_set[0],
+                    remote_package,
                     dev_timeout=timeout,
                     **kwargs)
                 return add_ok
@@ -856,7 +857,7 @@ class SW(Util):
                             "installing software on VC member: {0} ... please "
                             "be patient ...".format(vc_id))
                         ok &= self.pkgadd(
-                            remote_pkg_set[0],
+                            remote_package,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs)
@@ -868,14 +869,14 @@ class SW(Util):
                     _progress(
                         "installing software on RE0 ... please be patient ...")
                     ok &= self.pkgadd(
-                        remote_pkg_set[0],
+                        remote_package,
                         re0=True,
                         dev_timeout=timeout,
                         **kwargs)
                     _progress(
                         "installing software on RE1 ... please be patient ...")
                     ok &= self.pkgadd(
-                        remote_pkg_set[0],
+                        remote_package,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs)
