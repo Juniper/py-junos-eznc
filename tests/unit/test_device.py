@@ -166,6 +166,13 @@ class TestDevice(unittest.TestCase):
         except Exception as ex:
             self.assertEqual(type(ex), ValueError)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_device_uptime(self, mock_execute):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        mock_execute.side_effect = self._mock_manager
+        self.assertEqual(localdev.uptime, 14234)
+
     def test_device_master_is_master(self):
         localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)

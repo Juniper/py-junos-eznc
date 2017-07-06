@@ -279,6 +279,40 @@ class _Connection(object):
         raise RuntimeError("master is read-only!")
 
     # ------------------------------------------------------------------------
+    # property: uptime
+    # ------------------------------------------------------------------------
+
+    @property
+    def uptime(self):
+        """
+        The uptime of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        :returns: The number of seconds (int) since the current Routing Engine
+                  was booted. If there is a problem gathering or parsing the
+                  uptime information, None is returned.
+        :raises: May raise a specific jnpr.junos.RpcError or
+                 jnpr.junos.ConnectError subclass if there is a problem
+                 communicating with the device.
+        """
+        uptime = None
+        rsp = self.rpc.get_system_uptime_information(normalize=True)
+        if rsp is not None:
+            element = rsp.find('.//system-booted-time/time-length')
+            if element is not None:
+                uptime_string = element.get('seconds')
+                if uptime_string is not None:
+                    uptime = int(uptime_string)
+        return uptime
+
+    @uptime.setter
+    def uptime(self, value):
+        """ read-only property """
+        raise RuntimeError("uptime is read-only!")
+
+    # ------------------------------------------------------------------------
     # property: re_name
     # ------------------------------------------------------------------------
 
