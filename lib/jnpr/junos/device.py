@@ -1275,8 +1275,11 @@ class Device(_Connection):
         self._nc_transform = self.transform
         self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
-        normalize = kvargs.get('normalize', self._normalize)
-        if normalize is True:
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)

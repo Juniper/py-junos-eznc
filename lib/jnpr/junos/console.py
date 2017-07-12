@@ -109,8 +109,6 @@ class Console(_Connection):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
-        # self.timeout needed by PyEZ utils
-        # self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
         self._gather_facts = kvargs.get('gather_facts', False)
         self._fact_style = kvargs.get('fact_style', 'new')
@@ -204,8 +202,11 @@ class Console(_Connection):
         self._nc_transform = self.transform
         self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
-        normalize = kvargs.get('normalize', self._normalize)
-        if normalize is True:
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
