@@ -1278,9 +1278,7 @@ class Device(_Connection):
         # normalize argument to open() overrides normalize argument value
         # to __init__(). Save value to self._normalize where it is used by
         # normalizeDecorator()
-        normalize = kvargs.get('normalize')
-        if normalize is not None:
-            self._normalize = normalize
+        self._normalize = kvargs.get('normalize', self._normalize)
         if self._normalize is True:
             self.transform = self._norm_transform
 
