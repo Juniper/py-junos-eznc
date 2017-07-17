@@ -359,6 +359,14 @@ class _Connection(object):
                     all_re_names = list(self.facts['hostname_info'].keys())
                     if len(all_re_names) == 1:
                         re_name = all_re_names[0]
+                if re_name is None:
+                    # Still haven't figured it out. Is this a bsys?
+                    for re_state in self.facts['current_re']:
+                        match = re.search('^re\d+$',re_state)
+                        if match:
+                            re_string = 'bsys-' + match.group(0)
+                            if re_string in self.facts['hostname_info'].keys():
+                                re_name = re_string
         return re_name
 
     @re_name.setter
