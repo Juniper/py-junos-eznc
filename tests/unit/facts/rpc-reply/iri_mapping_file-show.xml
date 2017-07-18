@@ -1,5 +1,5 @@
-<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F5/junos">
-    <file-content filename="/etc/hosts.junos" junos:seconds="1482433864" filesize="53073" encoding="text">
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/17.4D0/junos">
+    <file-content filename="/etc/hosts.junos" junos:seconds="1500339536" filesize="53098" encoding="text">
         #$Id: hosts.junos,v 1.7.72.1 2009-04-16 05:22:03 kdickman Exp $
         #
         # File mapping AF_INET/AF_INET6 hostnames for REs on Single and Multichassis
@@ -15,13 +15,13 @@
         #
         # The names in this file are effectively reserved for internal use.
         #
-        
+
         # New IP address format (RT_IRS_V3)
-        
+
         #
         # Single Chassis Hostnames
         #
-        
+
         128.0.0.1        master
         128.0.0.1        node
         128.0.0.1        fwdd
@@ -37,7 +37,7 @@
         128.0.0.3        cfeb1
         128.0.0.3        cpp1
         128.0.0.4        re0
-        128.0.0.5        re1            
+        128.0.0.5        re1
         128.0.0.6        backup
         128.0.0.8        sfm0
         128.0.0.9        sfm1
@@ -76,7 +76,7 @@
         128.0.0.41       fpc25
         128.0.0.42       fpc26
         128.0.0.43       fpc27
-        128.0.0.44       fpc28          
+        128.0.0.44       fpc28
         128.0.0.45       fpc29
         128.0.0.46       fpc30
         128.0.0.47       fpc31
@@ -88,7 +88,8 @@
         128.0.0.54       esc1
         128.0.0.55       esc0-ipmi
         128.0.0.56       esc1-ipmi
-        
+        128.0.0.63       localre
+
         128.0.1.16       fpc0.pic0
         128.0.1.17       fpc1.pic0
         128.0.1.18       fpc2.pic0
@@ -115,13 +116,13 @@
         128.0.1.39       fpc23.pic0
         128.0.1.40       fpc24.pic0
         128.0.1.41       fpc25.pic0
-        128.0.1.42       fpc26.pic0     
+        128.0.1.42       fpc26.pic0
         128.0.1.43       fpc27.pic0
         128.0.1.44       fpc28.pic0
         128.0.1.45       fpc29.pic0
         128.0.1.46       fpc30.pic0
         128.0.1.47       fpc31.pic0
-        
+
         128.0.2.16       fpc0.pic1
         128.0.2.17       fpc1.pic1
         128.0.2.18       fpc2.pic1
@@ -154,7 +155,7 @@
         128.0.2.45       fpc29.pic1
         128.0.2.46       fpc30.pic1
         128.0.2.47       fpc31.pic1
-                                        
+
         128.0.3.16       fpc0.pic2
         128.0.3.17       fpc1.pic2
         128.0.3.18       fpc2.pic2
@@ -171,7 +172,7 @@
         128.0.3.29       fpc13.pic2
         128.0.3.30       fpc14.pic2
         128.0.3.31       fpc15.pic2
-        
+
         128.0.4.16       fpc0.pic3
         128.0.4.17       fpc1.pic3
         128.0.4.18       fpc2.pic3
@@ -188,17 +189,17 @@
         128.0.4.29       fpc13.pic3
         128.0.4.30       fpc14.pic3
         128.0.4.31       fpc15.pic3
-        
-        
+
+
         #
         # DCF-Root Hostname
         #
-        128.0.130.2      dcf-root       
-        
+        128.0.130.2      dcf-root
+
         #
         # Multi Chassis Hostnames
         #
-        
+
         #SCC
         144.0.0.1       scc-master
         144.0.0.4       scc-re0
@@ -206,7 +207,7 @@
         144.0.0.6       scc-backup
         144.0.0.48      scc-spmb0
         144.0.0.49      scc-spmb1
-        
+
         #LCC 0 (or MEMBER 0 on Virtual Chassis)
         129.0.0.1        lcc0-master member0-master member0
         129.0.0.4        lcc0-re0 member0-re0
@@ -232,7 +233,7 @@
         129.0.0.33       member0-fpc17
         129.0.0.34       member0-fpc18
         129.0.0.35       member0-fpc19
-        129.0.0.36       member0-fpc20  
+        129.0.0.36       member0-fpc20
         129.0.0.37       member0-fpc21
         129.0.0.38       member0-fpc22
         129.0.0.39       member0-fpc23
@@ -255,7 +256,7 @@
         129.0.0.23       lcc0-fpc7
         129.0.0.48       lcc0-spmb0
         129.0.0.49       lcc0-spmb1
-        
+
         #LCC 1 (or MEMBER 1 on Virtual Chassis)
         130.0.0.1        lcc1-master member1-master member1
         130.0.0.4        lcc1-re0 member1-re0
@@ -271,7 +272,7 @@
         130.0.0.23       member1-fpc7
         130.0.0.24       member1-fpc8
         130.0.0.25       member1-fpc9
-        130.0.0.26       member1-fpc10  
+        130.0.0.26       member1-fpc10
         130.0.0.27       member1-fpc11
         130.0.0.28       member1-fpc12
         130.0.0.29       member1-fpc13
@@ -304,13 +305,13 @@
         130.0.0.23       lcc1-fpc7
         130.0.0.48       lcc1-spmb0
         130.0.0.49       lcc1-spmb1
-        
+
         #LCC 2 (or MEMBER 2 on Virtual Chassis)
         131.0.0.1        lcc2-master member2-master member2
         131.0.0.4        lcc2-re0 member2-re0
         131.0.0.5        lcc2-re1 member2-re1
         131.0.0.6        lcc2-backup member2-backup
-        131.0.0.16       member2-fpc0   
+        131.0.0.16       member2-fpc0
         131.0.0.17       member2-fpc1
         131.0.0.18       member2-fpc2
         131.0.0.19       member2-fpc3
@@ -349,11 +350,11 @@
         131.0.0.19       lcc2-fpc3
         131.0.0.20       lcc2-fpc4
         131.0.0.21       lcc2-fpc5
-        131.0.0.22       lcc2-fpc6      
+        131.0.0.22       lcc2-fpc6
         131.0.0.23       lcc2-fpc7
         131.0.0.48       lcc2-spmb0
         131.0.0.49       lcc20-spmb1
-        
+
         #LCC 3 (or MEMBER 3 on Virtual Chassis)
         132.0.0.1        lcc3-master member3-master member3
         132.0.0.4        lcc3-re0 member3-re0
@@ -388,7 +389,7 @@
         132.0.0.42       member3-fpc26
         132.0.0.43       member3-fpc27
         132.0.0.44       member3-fpc28
-        132.0.0.45       member3-fpc29  
+        132.0.0.45       member3-fpc29
         132.0.0.46       member3-fpc30
         132.0.0.47       member3-fpc31
         132.0.0.6        lcc3-backup
@@ -402,7 +403,7 @@
         132.0.0.23       lcc3-fpc7
         132.0.0.48       lcc3-spmb0
         132.0.0.49       lcc3-spmb1
-        
+
         #LCC 4 (or MEMBER 4 on Virtual Chassis)
         133.0.0.1        lcc4-master member4-master member4
         133.0.0.4        lcc4-re0 member4-re0
@@ -427,7 +428,7 @@
         133.0.0.32       member4-fpc16
         133.0.0.33       member4-fpc17
         133.0.0.34       member4-fpc18
-        133.0.0.35       member4-fpc19  
+        133.0.0.35       member4-fpc19
         133.0.0.36       member4-fpc20
         133.0.0.37       member4-fpc21
         133.0.0.38       member4-fpc22
@@ -451,7 +452,7 @@
         133.0.0.23       lcc4-fpc7
         133.0.0.48       lcc4-spmb0
         133.0.0.49       lcc4-spmb1
-        
+
         #LCC 5 (or MEMBER 5 on Virtual Chassis)
         134.0.0.1        lcc5-master member5-master member5
         134.0.0.4        lcc5-re0 member5-re0
@@ -466,7 +467,7 @@
         134.0.0.22       member5-fpc6
         134.0.0.23       member5-fpc7
         134.0.0.24       member5-fpc8
-        134.0.0.25       member5-fpc9   
+        134.0.0.25       member5-fpc9
         134.0.0.26       member5-fpc10
         134.0.0.27       member5-fpc11
         134.0.0.28       member5-fpc12
@@ -500,7 +501,7 @@
         134.0.0.23       lcc5-fpc7
         134.0.0.48       lcc5-spmb0
         134.0.0.49       lcc5-spmb1
-        
+
         #LCC 6 (or MEMBER 6 on Virtual Chassis)
         135.0.0.1        lcc6-master member6-master member6
         135.0.0.4        lcc6-re0 member6-re0
@@ -544,12 +545,12 @@
         135.0.0.18       lcc6-fpc2
         135.0.0.19       lcc6-fpc3
         135.0.0.20       lcc6-fpc4
-        135.0.0.21       lcc6-fpc5      
+        135.0.0.21       lcc6-fpc5
         135.0.0.22       lcc6-fpc6
         135.0.0.23       lcc6-fpc7
         135.0.0.48       lcc6-spmb0
         135.0.0.49       lcc6-spmb1
-        
+
         #LCC 7 (or MEMBER 7 on Virtual Chassis)
         136.0.0.1        lcc7-master member7-master member7
         136.0.0.4        lcc7-re0 member7-re0
@@ -583,7 +584,7 @@
         136.0.0.41       member7-fpc25
         136.0.0.42       member7-fpc26
         136.0.0.43       member7-fpc27
-        136.0.0.44       member7-fpc28  
+        136.0.0.44       member7-fpc28
         136.0.0.45       member7-fpc29
         136.0.0.46       member7-fpc30
         136.0.0.47       member7-fpc31
@@ -598,7 +599,7 @@
         136.0.0.23       lcc7-fpc7
         136.0.0.48       lcc7-spmb0
         136.0.0.49       lcc7-spmb1
-        
+
         137.0.0.6        lcc8-backup
         137.0.0.16       lcc8-fpc0
         137.0.0.17       lcc8-fpc1
@@ -610,7 +611,7 @@
         137.0.0.23       lcc8-fpc7
         137.0.0.48       lcc8-spmb0
         137.0.0.49       lcc8-spmb1
-        
+
         #LCC 8 (or MEMBER 8 on Virtual Chassis)
         137.0.0.1        lcc8-master member8-master member8
         137.0.0.4        lcc8-re0 member8-re0
@@ -622,7 +623,7 @@
         137.0.0.19       member8-fpc3
         137.0.0.20       member8-fpc4
         137.0.0.21       member8-fpc5
-        137.0.0.22       member8-fpc6   
+        137.0.0.22       member8-fpc6
         137.0.0.23       member8-fpc7
         137.0.0.24       member8-fpc8
         137.0.0.25       member8-fpc9
@@ -659,7 +660,7 @@
         138.0.0.23       lcc9-fpc7
         138.0.0.48       lcc9-spmb0
         138.0.0.49       lcc9-spmb1
-        
+
         #LCC 9 (or MEMBER 9 on Virtual Chassis)
         138.0.0.1        lcc9-master member9-master member9
         138.0.0.4        lcc9-re0 member9-re0
@@ -700,7 +701,7 @@
         139.0.0.6        lcc10-backup
         139.0.0.16       lcc10-fpc0
         139.0.0.17       lcc10-fpc1
-        139.0.0.18       lcc10-fpc2     
+        139.0.0.18       lcc10-fpc2
         139.0.0.19       lcc10-fpc3
         139.0.0.20       lcc10-fpc4
         139.0.0.21       lcc10-fpc5
@@ -708,7 +709,7 @@
         139.0.0.23       lcc10-fpc7
         139.0.0.48       lcc10-spmb0
         139.0.0.49       lcc10-spmb1
-        
+
         #LCC 10 (or MEMBER 10 on Virtual Chassis)
         139.0.0.1        lcc10-master member10-master
         139.0.0.4        lcc10-re0 member10-re0
@@ -739,7 +740,7 @@
         139.0.0.38       member10-fpc22
         139.0.0.39       member10-fpc23
         139.0.0.40       member10-fpc24
-        139.0.0.41       member10-fpc25 
+        139.0.0.41       member10-fpc25
         139.0.0.42       member10-fpc26
         139.0.0.43       member10-fpc27
         139.0.0.44       member10-fpc28
@@ -757,7 +758,7 @@
         140.0.0.23       lcc11-fpc7
         140.0.0.48       lcc11-spmb0
         140.0.0.49       lcc11-spmb1
-        
+
         #LCC 11 (or MEMBER 11 on Virtual Chassis)
         140.0.0.1        lcc11-master member11-master
         140.0.0.4        lcc11-re0 member11-re0
@@ -778,7 +779,7 @@
         140.0.0.28       member11-fpc12
         140.0.0.29       member11-fpc13
         140.0.0.30       member11-fpc14
-        140.0.0.31       member11-fpc15 
+        140.0.0.31       member11-fpc15
         140.0.0.32       member11-fpc16
         140.0.0.33       member11-fpc17
         140.0.0.34       member11-fpc18
@@ -806,7 +807,7 @@
         141.0.0.23       lcc12-fpc7
         141.0.0.48       lcc12-spmb0
         141.0.0.49       lcc12-spmb1
-        
+
         #LCC 12 (or MEMBER 12 on Virtual Chassis)
         141.0.0.1        lcc12-master member12-master
         141.0.0.4        lcc12-re0 member12-re0
@@ -817,7 +818,7 @@
         141.0.0.18       member12-fpc2
         141.0.0.19       member12-fpc3
         141.0.0.20       member12-fpc4
-        141.0.0.21       member12-fpc5  
+        141.0.0.21       member12-fpc5
         141.0.0.22       member12-fpc6
         141.0.0.23       member12-fpc7
         141.0.0.24       member12-fpc8
@@ -855,7 +856,7 @@
         142.0.0.23       lcc13-fpc7
         142.0.0.48       lcc13-spmb0
         142.0.0.49       lcc13-spmb1
-        
+
         #LCC 13 (or MEMBER 13 on Virtual Chassis)
         142.0.0.1        lcc13-master member13-master
         142.0.0.4        lcc13-re0 member13-re0
@@ -895,7 +896,7 @@
         142.0.0.47       member13-fpc31
         143.0.0.6        lcc14-backup
         143.0.0.16       lcc14-fpc0
-        143.0.0.17       lcc14-fpc1     
+        143.0.0.17       lcc14-fpc1
         143.0.0.18       lcc14-fpc2
         143.0.0.19       lcc14-fpc3
         143.0.0.20       lcc14-fpc4
@@ -904,7 +905,7 @@
         143.0.0.23       lcc14-fpc7
         143.0.0.48       lcc14-spmb0
         143.0.0.49       lcc14-spmb1
-        
+
         #LCC 14 (or MEMBER 14 on Virtual Chassis)
         143.0.0.1        lcc14-master member14-master
         143.0.0.4        lcc14-re0 member14-re0
@@ -934,7 +935,7 @@
         143.0.0.37       member14-fpc21
         143.0.0.38       member14-fpc22
         143.0.0.39       member14-fpc23
-        143.0.0.40       member14-fpc24 
+        143.0.0.40       member14-fpc24
         143.0.0.41       member14-fpc25
         143.0.0.42       member14-fpc26
         143.0.0.43       member14-fpc27
@@ -953,7 +954,7 @@
         144.0.0.23      lcc15-fpc7
         144.0.0.48      lcc15-spmb0
         144.0.0.49      lcc15-spmb1
-        
+
         #LCC 15 (or MEMBER 15 on Virtual Chassis)
         144.0.0.1       lcc15-master member15-master
         144.0.0.4       lcc15-re0 member15-re0
@@ -973,7 +974,7 @@
         144.0.0.27      member15-fpc11
         144.0.0.28      member15-fpc12
         144.0.0.29      member15-fpc13
-        144.0.0.30      member15-fpc14  
+        144.0.0.30      member15-fpc14
         144.0.0.31      member15-fpc15
         144.0.0.32      member15-fpc16
         144.0.0.33      member15-fpc17
@@ -991,7 +992,7 @@
         144.0.0.45      member15-fpc29
         144.0.0.46      member15-fpc30
         144.0.0.47      member15-fpc31
-        
+
         #LCC 16 (or MEMBER 16 on Virtual Chassis)
         145.0.0.1       lcc16-master member16-master
         145.0.0.4       lcc16-re0 member16-re0
@@ -1012,7 +1013,7 @@
         145.0.0.28      member16-fpc12
         145.0.0.29      member16-fpc13
         145.0.0.30      member16-fpc14
-        145.0.0.31      member16-fpc15  
+        145.0.0.31      member16-fpc15
         145.0.0.32      member16-fpc16
         145.0.0.33      member16-fpc17
         145.0.0.34      member16-fpc18
@@ -1029,7 +1030,7 @@
         145.0.0.45      member16-fpc29
         145.0.0.46      member16-fpc30
         145.0.0.47      member16-fpc31
-        
+
         #LCC 17 (or MEMBER 17 on Virtual Chassis)
         146.0.0.1       lcc17-master member17-master
         146.0.0.4       lcc17-re0 member17-re0
@@ -1051,7 +1052,7 @@
         146.0.0.29      member17-fpc13
         146.0.0.30      member17-fpc14
         146.0.0.31      member17-fpc15
-        146.0.0.32      member17-fpc16  
+        146.0.0.32      member17-fpc16
         146.0.0.33      member17-fpc17
         146.0.0.34      member17-fpc18
         146.0.0.35      member17-fpc19
@@ -1067,7 +1068,7 @@
         146.0.0.45      member17-fpc29
         146.0.0.46      member17-fpc30
         146.0.0.47      member17-fpc31
-        
+
         #LCC 18 (or MEMBER 18 on Virtual Chassis)
         147.0.0.1       lcc18-master member18-master
         147.0.0.4       lcc18-re0 member18-re0
@@ -1090,7 +1091,7 @@
         147.0.0.30      member18-fpc14
         147.0.0.31      member18-fpc15
         147.0.0.32      member18-fpc16
-        147.0.0.33      member18-fpc17  
+        147.0.0.33      member18-fpc17
         147.0.0.34      member18-fpc18
         147.0.0.35      member18-fpc19
         147.0.0.36      member18-fpc20
@@ -1105,7 +1106,7 @@
         147.0.0.45      member18-fpc29
         147.0.0.46      member18-fpc30
         147.0.0.47      member18-fpc31
-        
+
         #LCC 19 (or MEMBER 19 on Virtual Chassis)
         148.0.0.1       lcc19-master member19-master
         148.0.0.4       lcc19-re0 member19-re0
@@ -1129,7 +1130,7 @@
         148.0.0.31      member19-fpc15
         148.0.0.32      member19-fpc16
         148.0.0.33      member19-fpc17
-        148.0.0.34      member19-fpc18  
+        148.0.0.34      member19-fpc18
         148.0.0.35      member19-fpc19
         148.0.0.36      member19-fpc20
         148.0.0.37      member19-fpc21
@@ -1143,7 +1144,7 @@
         148.0.0.45      member19-fpc29
         148.0.0.46      member19-fpc30
         148.0.0.47      member19-fpc31
-        
+
         #LCC 20 (or MEMBER 20 on Virtual Chassis)
         149.0.0.1       lcc20-master member20-master
         149.0.0.4       lcc20-re0 member20-re0
@@ -1168,7 +1169,7 @@
         149.0.0.32      member20-fpc16
         149.0.0.33      member20-fpc17
         149.0.0.34      member20-fpc18
-        149.0.0.35      member20-fpc19  
+        149.0.0.35      member20-fpc19
         149.0.0.36      member20-fpc20
         149.0.0.37      member20-fpc21
         149.0.0.38      member20-fpc22
@@ -1181,7 +1182,7 @@
         149.0.0.45      member20-fpc29
         149.0.0.46      member20-fpc30
         149.0.0.47      member20-fpc31
-        
+
         #LCC 21 (or MEMBER 21 on Virtual Chassis)
         150.0.0.1       lcc21-master member21-master
         150.0.0.4       lcc21-re0 member21-re0
@@ -1207,7 +1208,7 @@
         150.0.0.33      member21-fpc17
         150.0.0.34      member21-fpc18
         150.0.0.35      member21-fpc19
-        150.0.0.36      member21-fpc20  
+        150.0.0.36      member21-fpc20
         150.0.0.37      member21-fpc21
         150.0.0.38      member21-fpc22
         150.0.0.39      member21-fpc23
@@ -1219,7 +1220,7 @@
         150.0.0.45      member21-fpc29
         150.0.0.46      member21-fpc30
         150.0.0.47      member21-fpc31
-        
+
         #LCC 22 (or MEMBER 22 on Virtual Chassis)
         151.0.0.1       lcc22-master member22-master
         151.0.0.4       lcc22-re0 member22-re0
@@ -1246,7 +1247,7 @@
         151.0.0.34      member22-fpc18
         151.0.0.35      member22-fpc19
         151.0.0.36      member22-fpc20
-        151.0.0.37      member22-fpc21  
+        151.0.0.37      member22-fpc21
         151.0.0.38      member22-fpc22
         151.0.0.39      member22-fpc23
         151.0.0.40      member22-fpc24
@@ -1257,7 +1258,7 @@
         151.0.0.45      member22-fpc29
         151.0.0.46      member22-fpc30
         151.0.0.47      member22-fpc31
-        
+
         #LCC 23 (or MEMBER 23 on Virtual Chassis)
         152.0.0.1       lcc23-master member23-master
         152.0.0.4       lcc23-re0 member23-re0
@@ -1285,7 +1286,7 @@
         152.0.0.35      member23-fpc19
         152.0.0.36      member23-fpc20
         152.0.0.37      member23-fpc21
-        152.0.0.38      member23-fpc22  
+        152.0.0.38      member23-fpc22
         152.0.0.39      member23-fpc23
         152.0.0.40      member23-fpc24
         152.0.0.41      member23-fpc25
@@ -1295,7 +1296,7 @@
         152.0.0.45      member23-fpc29
         152.0.0.46      member23-fpc30
         152.0.0.47      member23-fpc31
-        
+
         #LCC 24 (or MEMBER 24 on Virtual Chassis)
         153.0.0.1       lcc24-master member24-master
         153.0.0.4       lcc24-re0 member24-re0
@@ -1324,7 +1325,7 @@
         153.0.0.36      member24-fpc20
         153.0.0.37      member24-fpc21
         153.0.0.38      member24-fpc22
-        153.0.0.39      member24-fpc23  
+        153.0.0.39      member24-fpc23
         153.0.0.40      member24-fpc24
         153.0.0.41      member24-fpc25
         153.0.0.42      member24-fpc26
@@ -1333,7 +1334,7 @@
         153.0.0.45      member24-fpc29
         153.0.0.46      member24-fpc30
         153.0.0.47      member24-fpc31
-        
+
         #LCC 25 (or MEMBER 25 on Virtual Chassis)
         154.0.0.1       lcc25-master member25-master
         154.0.0.4       lcc25-re0 member25-re0
@@ -1363,7 +1364,7 @@
         154.0.0.37      member25-fpc21
         154.0.0.38      member25-fpc22
         154.0.0.39      member25-fpc23
-        154.0.0.40      member25-fpc24  
+        154.0.0.40      member25-fpc24
         154.0.0.41      member25-fpc25
         154.0.0.42      member25-fpc26
         154.0.0.43      member25-fpc27
@@ -1371,7 +1372,7 @@
         154.0.0.45      member25-fpc29
         154.0.0.46      member25-fpc30
         154.0.0.47      member25-fpc31
-        
+
         #LCC 26 (or MEMBER 26 on Virtual Chassis)
         155.0.0.1       lcc26-master member26-master
         155.0.0.4       lcc26-re0 member26-re0
@@ -1402,14 +1403,14 @@
         155.0.0.38      member26-fpc22
         155.0.0.39      member26-fpc23
         155.0.0.40      member26-fpc24
-        155.0.0.41      member26-fpc25  
+        155.0.0.41      member26-fpc25
         155.0.0.42      member26-fpc26
         155.0.0.43      member26-fpc27
         155.0.0.44      member26-fpc28
         155.0.0.45      member26-fpc29
         155.0.0.46      member26-fpc30
         155.0.0.47      member26-fpc31
-        
+
         #LCC 27 (or MEMBER 27 on Virtual Chassis)
         156.0.0.1       lcc27-master member27-master
         156.0.0.4       lcc27-re0 member27-re0
@@ -1441,13 +1442,13 @@
         156.0.0.39      member27-fpc23
         156.0.0.40      member27-fpc24
         156.0.0.41      member27-fpc25
-        156.0.0.42      member27-fpc26  
+        156.0.0.42      member27-fpc26
         156.0.0.43      member27-fpc27
         156.0.0.44      member27-fpc28
         156.0.0.45      member27-fpc29
         156.0.0.46      member27-fpc30
         156.0.0.47      member27-fpc31
-        
+
         #LCC 28 (or MEMBER 28 on Virtual Chassis)
         157.0.0.1       lcc28-master member28-master
         157.0.0.4       lcc28-re0 member28-re0
@@ -1480,12 +1481,12 @@
         157.0.0.40      member28-fpc24
         157.0.0.41      member28-fpc25
         157.0.0.42      member28-fpc26
-        157.0.0.43      member28-fpc27  
+        157.0.0.43      member28-fpc27
         157.0.0.44      member28-fpc28
         157.0.0.45      member28-fpc29
         157.0.0.46      member28-fpc30
         157.0.0.47      member28-fpc31
-        
+
         #LCC 29 (or MEMBER 29 on Virtual Chassis)
         158.0.0.1       lcc29-master member29-master
         158.0.0.4       lcc29-re0 member29-re0
@@ -1519,11 +1520,11 @@
         158.0.0.41      member29-fpc25
         158.0.0.42      member29-fpc26
         158.0.0.43      member29-fpc27
-        158.0.0.44      member29-fpc28  
+        158.0.0.44      member29-fpc28
         158.0.0.45      member29-fpc29
         158.0.0.46      member29-fpc30
         158.0.0.47      member29-fpc31
-        
+
         #LCC 30 (or MEMBER 30 on Virtual Chassis)
         159.0.0.1       lcc30-master member30-master
         159.0.0.4       lcc30-re0 member30-re0
@@ -1558,10 +1559,10 @@
         159.0.0.42      member30-fpc26
         159.0.0.43      member30-fpc27
         159.0.0.44      member30-fpc28
-        159.0.0.45      member30-fpc29  
+        159.0.0.45      member30-fpc29
         159.0.0.46      member30-fpc30
         159.0.0.47      member30-fpc31
-        
+
         #LCC 31 (or MEMBER 31 on Virtual Chassis)
         160.0.0.1       lcc31-master member31-master
         160.0.0.4       lcc31-re0 member31-re0
@@ -1597,15 +1598,15 @@
         160.0.0.43      member31-fpc27
         160.0.0.44      member31-fpc28
         160.0.0.45      member31-fpc29
-        160.0.0.46      member31-fpc30  
+        160.0.0.46      member31-fpc30
         160.0.0.47      member31-fpc31
-        
+
         #VIRT SC
         161.0.0.1       sc-master
         161.0.0.4       sc-re0
         161.0.0.5       sc-re1
         161.0.0.6       sc-backup
-        
+
         #SFC 0
         162.0.0.1       sfc0-master
         162.0.0.4       sfc0-re0
@@ -1613,7 +1614,7 @@
         162.0.0.6       sfc0-backup
         162.0.0.48      sfc0-spmb0
         162.0.0.49      sfc0-spmb1
-        
+
         #SFC 1
         163.0.0.1       sfc1-master
         163.0.0.4       sfc1-re0
@@ -1621,7 +1622,7 @@
         163.0.0.6       sfc1-backup
         163.0.0.48      sfc1-spmb0
         163.0.0.49      sfc1-spmb1
-        
+
         #SFC 2
         164.0.0.1       sfc2-master
         164.0.0.4       sfc2-re0
@@ -1629,15 +1630,15 @@
         164.0.0.6       sfc2-backup
         164.0.0.48      sfc2-spmb0
         164.0.0.49      sfc2-spmb1
-        
+
         #SFC 3
         165.0.0.1       sfc3-master
         165.0.0.4       sfc3-re0
         165.0.0.5       sfc3-re1
         165.0.0.6       sfc3-backup
         165.0.0.48      sfc3-spmb0
-        165.0.0.49      sfc3-spmb1      
-        
+        165.0.0.49      sfc3-spmb1
+
         #SFC 4
         166.0.0.1       sfc4-master
         166.0.0.4       sfc4-re0
@@ -1645,15 +1646,27 @@
         166.0.0.6       sfc4-backup
         166.0.0.48      sfc4-spmb0
         166.0.0.49      sfc4-spmb1
-        
+
         #JCS
+        190.0.0.1        gnf%d-master
+        190.0.0.4        gnf%d-re0
+        190.0.0.5        gnf%d-re1
+        190.0.0.6        gnf%d-backup
+
+        #JCS
+        190.1.0.1        gnf%d-master
+        190.1.0.4        gnf%d-re0
+        190.1.0.5        gnf%d-re1
+        190.1.0.6        gnf%d-backup
+
+        #PSD
         190.0.0.1        psd%d-master
         190.0.0.4        psd%d-re0
         190.0.0.5        psd%d-re1
         190.0.0.6        psd%d-backup
-        
+
         # Old IP address format (RT_IRS_V2)
-        
+
         #
         # Single Chassis Hostnames
         #
@@ -1675,139 +1688,139 @@
         10.0.0.28       fpc12
         10.0.0.29       fpc13
         10.0.0.30       fpc14
-        10.0.0.31       fpc15           
-        
+        10.0.0.31       fpc15
+
         #
         # Multi Chassis Hostnames
         #
-        
-        
+
+
         #SCC
         10.16.0.1       scc-master
         10.16.0.4       scc-re0
         10.16.0.5       scc-re1
-        
+
         #LCC 0
         10.1.0.1        lcc0-master member0-master
         10.1.0.4        lcc0-re0 member0-re0
         10.1.0.5        lcc0-re1 member0-re1
         10.1.0.6        lcc0-backup member0-backup
-        
+
         #LCC 1
         10.2.0.1        lcc1-master member1-master
         10.2.0.4        lcc1-re0 member1-re0
         10.2.0.5        lcc1-re1 member1-re1
         10.2.0.6        lcc1-backup member1-backup
-        
+
         #LCC 2
         10.3.0.1        lcc2-master member2-master
         10.3.0.4        lcc2-re0 member2-re0
         10.3.0.5        lcc2-re1 member2-re1
         10.3.0.6        lcc2-backup member2-backup
-        
+
         #LCC 3
         10.4.0.1        lcc3-master member3-master
         10.4.0.4        lcc3-re0 member3-re0
         10.4.0.5        lcc3-re1 member3-re1
         10.4.0.6        lcc3-backup member3-backup
-        
+
         #LCC 4
         10.5.0.1        lcc4-master member4-master
         10.5.0.4        lcc4-re0 member4-re0
         10.5.0.5        lcc4-re1 member4-re1
         10.5.0.6        lcc4-backup member4-backup
-        
+
         #LCC 5
         10.6.0.1        lcc5-master member5-master
         10.6.0.4        lcc5-re0 member5-re0
         10.6.0.5        lcc5-re1 member5-re1
         10.6.0.6        lcc5-backup member5-backup
-        
+
         #LCC 6
         10.7.0.1        lcc6-master member6-master
         10.7.0.4        lcc6-re0 member6-re0
         10.7.0.5        lcc6-re1 member6-re1
         10.7.0.6        lcc6-backup member6-backup
-        
+
         #LCC 7
         10.8.0.1        lcc7-master member7-master
         10.8.0.4        lcc7-re0 member7-re0
         10.8.0.5        lcc7-re1 member7-re1
         10.8.0.6        lcc7-backup member7-backup
-        
+
         #LCC 8
         10.9.0.1        lcc8-master member8-master
         10.9.0.4        lcc8-re0 member8-re0
         10.9.0.5        lcc8-re1 member8-re1
         10.9.0.6        lcc8-backup member8-backup
-        
+
         #LCC 9
         10.10.0.1        lcc9-master member9-master
         10.10.0.4        lcc9-re0 member9-re0
         10.10.0.5        lcc9-re1 member9-re1
         10.10.0.6        lcc9-backup member9-backup
-        
+
         #LCC 10
         10.11.0.1        lcc10-master member10-master
         10.11.0.4        lcc10-re0 member10-re0
         10.11.0.5        lcc10-re1 member10-re1
         10.11.0.6        lcc10-backup member10-backup
-        
-        #LCC 11                         
+
+        #LCC 11
         10.12.0.1        lcc11-master member11-master
         10.12.0.4        lcc11-re0 member11-re0
         10.12.0.5        lcc11-re1 member11-re1
         10.12.0.6        lcc11-backup member11-backup
-        
+
         #LCC 12
         10.13.0.1        lcc12-master member12-master
         10.13.0.4        lcc12-re0 member12-re0
         10.13.0.5        lcc12-re1 member12-re1
         10.13.0.6        lcc12-backup member12-backup
-        
+
         #LCC 13
         10.14.0.1        lcc13-master member13-master
         10.14.0.4        lcc13-re0 member13-re0
         10.14.0.5        lcc13-re1 member13-re1
         10.14.0.6        lcc13-backup member13-backup
-        
+
         #LCC 14
         10.15.0.1        lcc14-master member14-master
         10.15.0.4        lcc14-re0 member14-re0
         10.15.0.5        lcc14-re1 member14-re1
         10.15.0.6        lcc14-backup member14-backup
-        
+
         #LCC 15
         10.16.0.1        lcc15-master member15-master
         10.16.0.4        lcc15-re0 member15-re0
         10.16.0.5        lcc15-re1 member15-re1
         10.16.0.6        lcc15-backup member15-backup
-        
+
         #SFC 0
         10.34.0.1       sfc0-master
         10.34.0.4       sfc0-re0
         10.34.0.5       sfc0-re1
-        
+
         #SFC 1
         10.35.0.1       sfc1-master
         10.35.0.4       sfc1-re0
         10.35.0.5       sfc1-re1
-                                        
+
         #SFC 2
         10.36.0.1       sfc2-master
         10.36.0.4       sfc2-re0
         10.36.0.5       sfc2-re1
-        
+
         #SFC 3
         10.37.0.1       sfc3-master
         10.37.0.4       sfc3-re0
         10.37.0.5       sfc3-re1
-        
+
         #SFC 4
         10.38.0.1       sfc4-master
         10.38.0.4       sfc4-re0
         10.38.0.5       sfc4-re1
-        
+
         # End of internal names
     </file-content>
 </rpc-reply>

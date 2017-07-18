@@ -264,8 +264,8 @@ class _Connection(object):
             else:
                 # Might be a GNF case.
                 if (self.re_name is not None and
-                    'gnf' in self.re_name and
-                    '-re' in self.re_name):
+                        'gnf' in self.re_name and
+                        '-re' in self.re_name):
                     # Get the name of the GNF from re_name/
                     # re_name will be in the format gnfX-reY
                     (gnf, _) = self.re_name.split('-re', 1)
@@ -274,9 +274,9 @@ class _Connection(object):
                     elif gnf + '-backup' in self.facts.get('current_re'):
                         master = False
                 else:
-                    # Might be a multi-chassis case where this RE is neither the
-                    # master or the backup for the entire system. In that case,
-                    # it's either a chassis master or a chassis backup.
+                    # Might be a multi-chassis case where this RE is neither
+                    # the master or the backup for the entire system. In that
+                    # case, it's either a chassis master or a chassis backup.
                     for re_state in self.facts['current_re']:
                         # Multi-chassis case. A chassis master/backup, but
                         # not the system master/backup.
@@ -374,7 +374,7 @@ class _Connection(object):
                 if re_name is None:
                     # Still haven't figured it out. Is this a bsys?
                     for re_state in self.facts['current_re']:
-                        match = re.search('^re\d+$',re_state)
+                        match = re.search('^re\d+$', re_state)
                         if match:
                             re_string = 'bsys-' + match.group(0)
                             if re_string in self.facts['hostname_info'].keys():

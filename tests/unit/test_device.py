@@ -180,10 +180,30 @@ class TestDevice(unittest.TestCase):
                                                'fwdd', 'member', 'pfem']
         self.assertEqual(localdev.master, True)
 
+    def test_device_master_gnf_is_master(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['gnf1-re0', 'gnf1-master']
+        localdev.facts._cache['hostname_info'] = {'bsys-re0': 'foo',
+                                                  'bsys-re1': 'foo1',
+                                                  'gnf1-re0': 'bar',
+                                                  'gnf1-re1': 'bar1'}
+        self.assertEqual(localdev.master, True)
+
     def test_device_master_is_backup(self):
         localdev = Device(host='1.1.1.1', user='test', password='password123',
                           gather_facts=False)
         localdev.facts._cache['current_re'] = ['re0', 'backup']
+        self.assertEqual(localdev.master, False)
+
+    def test_device_master_gnf_is_backup(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['gnf1-re1', 'gnf1-backup']
+        localdev.facts._cache['hostname_info'] = {'bsys-re0': 'foo',
+                                                  'bsys-re1': 'foo1',
+                                                  'gnf1-re0': 'bar',
+                                                  'gnf1-re1': 'bar1'}
         self.assertEqual(localdev.master, False)
 
     def test_device_master_is_re0_only(self):
@@ -261,6 +281,13 @@ class TestDevice(unittest.TestCase):
         localdev.facts._cache['current_re'] = ['foo']
         localdev.facts._cache['hostname_info'] = {'re0': 'mj1'}
         self.assertEqual(localdev.re_name, 're0')
+
+    def test_device_re_name_is_bsys_re0(self):
+        localdev = Device(host='1.1.1.1', user='test', password='password123',
+                          gather_facts=False)
+        localdev.facts._cache['current_re'] = ['re0']
+        localdev.facts._cache['hostname_info'] = {'bsys-re0': 'foo'}
+        self.assertEqual(localdev.re_name, 'bsys-re0')
 
     def test_device_re_name_is_none1(self):
         localdev = Device(host='1.1.1.1', user='test', password='password123',

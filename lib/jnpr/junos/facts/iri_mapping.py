@@ -50,10 +50,6 @@ def get_facts(device):
                                 t_ip = (octets[0] + '.' + octets[1] +
                                         '.' + str(count) + '.' + octets[3])
                                 t_host = host.replace('%d', str(count))
-                                if iri_hostname is None:
-                                    iri_hostname = {}
-                                if iri_ip is None:
-                                    iri_ip = {}
                                 if t_ip in iri_hostname:
                                     iri_hostname[t_ip].append(t_host)
                                 else:
