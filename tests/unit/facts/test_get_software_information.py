@@ -145,6 +145,34 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
                          '15.1X53-D45.3')
 
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_info_bsys(self, mock_execute):
+        self.dev.facts._cache['current_re'] = ['master', 'node', 'fwdd',
+                                               'member', 'pfem', 're0']
+        self.dev.facts._cache['vc_capable'] = False
+        mock_execute.side_effect = self._mock_manager_bsys
+        self.assertEqual(self.dev.facts['hostname'], 'bsys')
+        self.assertEqual(self.dev.facts['model'], 'MX2020')
+        self.assertEqual(self.dev.facts['version'],
+                         '17.4-20170706_dev_common.0')
+        self.assertEqual(self.dev.facts['version_RE0'],
+                         '17.4-20170706_dev_common.0')
+        self.assertEqual(self.dev.facts['version_RE1'],
+                         '17.4-20170706_dev_common.0')
+        self.assertEqual(self.dev.facts['model_info'],
+                         {'bsys-re0': 'MX2020',
+                          'bsys-re1': 'MX2020',
+                          'gnf1-re0': 'MX2020',
+                          'gnf1-re1': 'MX2020',
+                          'gnf2-re0': 'MX2020',
+                          'gnf2-re1': 'MX2020',
+                          'gnf3-re0': 'MX2020',
+                          'gnf3-re1': 'MX2020',
+                          'gnf4-re0': 'MX2020',
+                          'gnf4-re1': 'MX2020'})
+        self.assertEqual(self.dev.facts['junos_info']['bsys-re0']['text'],
+                         '17.4-20170706_dev_common.0')
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -220,3 +248,13 @@ class TestGetSoftwareInformation(unittest.TestCase):
                 return True
             else:
                 return self._read_file('sw_info_nfx_' + args[0].tag + '.xml')
+
+    def _mock_manager_bsys(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'command'):
+                raise RpcError()
+            elif (args[0].tag == 'get-software-information' and
+                  args[0].find('./*') is None):
+                return True
+            else:
+                return self._read_file('sw_info_bsys_' + args[0].tag + '.xml')

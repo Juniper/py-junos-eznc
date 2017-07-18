@@ -34,6 +34,24 @@ class TestIriMapping(unittest.TestCase):
         self.assertEqual(self.dev.facts['_iri_hostname']['128.0.0.1'],
                          ['master', 'node', 'fwdd', 'member', 'pfem'])
 
+    @patch('jnpr.junos.Device.execute')
+    def test_iri_template_ip_to_host_mapping_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re
+        self.assertEqual(self.dev.facts['_iri_hostname']['190.0.1.1'],
+                         ['gnf1-master', 'psd1-master'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_iri_template_host_to_ip_mapping_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re
+        self.assertEqual(self.dev.facts['_iri_ip']['gnf1-master'],
+                         ['190.0.1.1', '190.1.1.1'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_iri_template_host_to_ip_mapping_fact(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re2
+        self.assertEqual(self.dev.facts['_iri_ip']['gnf1-master'],
+                         ['190.0.1.1'])
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -56,4 +74,9 @@ class TestIriMapping(unittest.TestCase):
     def _mock_manager_current_re(self, *args, **kwargs):
         if args:
             return self._read_file('iri_mapping_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_current_re2(self, *args, **kwargs):
+        if args:
+            return self._read_file('iri_mapping2_' + args[0].tag +
                                    '.xml')

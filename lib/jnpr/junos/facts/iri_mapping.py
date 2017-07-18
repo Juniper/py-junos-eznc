@@ -1,5 +1,3 @@
-
-
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
@@ -44,6 +42,22 @@ def get_facts(device):
                             iri_ip[host].append(ip)
                         else:
                             iri_ip[host] = [ip]
+                    for host in hosts:
+                        # Handle templates with %d
+                        if '%d' in host:
+                            octets = ip.split('.', 3)
+                            for count in range(255):
+                                t_ip = (octets[0] + '.' + octets[1] +
+                                        '.' + str(count) + '.' + octets[3])
+                                t_host = host.replace('%d', str(count))
+                                if t_ip in iri_hostname:
+                                    iri_hostname[t_ip].append(t_host)
+                                else:
+                                    iri_hostname[t_ip] = [t_host]
+                                if t_host in iri_ip:
+                                    iri_ip[t_host].append(t_ip)
+                                else:
+                                    iri_ip[t_host] = [t_ip]
 
     return {'_iri_hostname': iri_hostname,
             '_iri_ip': iri_ip, }
