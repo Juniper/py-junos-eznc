@@ -1,0 +1,6 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1R1/junos">
+    <xnm:error xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+        <source-daemon>chassis-control</source-daemon>
+        <message>Unrecognized command (chassis-control)</message>
+    </xnm:error>
+</rpc-reply>

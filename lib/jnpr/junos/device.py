@@ -1,9 +1,9 @@
 # stdlib
 import os
+import six
 import types
 import platform
 import warnings
-import traceback
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -17,6 +17,7 @@ import re
 from lxml import etree
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
+from ncclient.transport.session import SessionListener
 import ncclient.operations.errors as NcOpErrors
 from ncclient.operations import RPCError
 import paramiko
@@ -25,9 +26,12 @@ import jinja2
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.facts import *
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
+from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
+    ignoreWarnDecorator
+from jnpr.junos.exception import JSONLoadError
 
 
 _MODULEPATH = os.path.dirname(__file__)
@@ -171,21 +175,29 @@ class _Connection(object):
         :param int value:
             New timeout value in seconds
         """
-        self._conn.timeout = value
+        try:
+            self._conn.timeout = int(value)
+        except (ValueError, TypeError):
+            raise RuntimeError("could not convert timeout value of %s to an "
+                               "integer" % (value))
 
     # ------------------------------------------------------------------------
     # property: facts
     # ------------------------------------------------------------------------
 
     @property
-    def facts(self):
+    def ofacts(self):
         """
         :returns: Device fact dictionary
         """
-        return self._facts
+        if self._fact_style != 'old' and self._fact_style != 'both':
+            raise RuntimeError("Old-style facts gathering is not in use!")
+        if self._ofacts == {} and self.connected:
+            self.facts_refresh()
+        return self._ofacts
 
-    @facts.setter
-    def facts(self, value):
+    @ofacts.setter
+    def ofacts(self, value):
         """ read-only property """
         raise RuntimeError("facts is read-only!")
 
@@ -199,6 +211,180 @@ class _Connection(object):
         :returns: the port (str) to connect to the Junos device
         """
         return self._port
+
+    # ------------------------------------------------------------------------
+    # property: master
+    # ------------------------------------------------------------------------
+
+    @property
+    def master(self):
+        """
+        The mastership state of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering and the
+            value of currently cached facts. If there is a chance the
+            mastership state may have changed since the facts were cached,
+            then dev.facts_refresh() should be invoked prior to checking
+            this property. If old-style fact gathering is in use,
+            this property will return None.
+
+        :returns: True if the current RE is the master Routing Engine. False if
+                  the current RE is not the master Routing Engine. None if
+                  unable to determine the state of the current Routing Engine.
+        """
+        master = None
+
+        # Make sure the 'current_re' fact has a value
+        if self.facts.get('current_re') is not None:
+            # Typical master case
+            if 'master' in self.facts['current_re']:
+                master = True
+            # Typical backup case
+            elif 'backup' in self.facts['current_re']:
+                master = False
+            # Some single chassis and single RE platforms don't have
+            # 'master' in the 'current_re' fact. It's best to check if it's a
+            #  single chassis and single RE platform based on the
+            # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
+            elif (self.facts.get('2RE') is False and
+                  self.facts.get('RE_hw_mi') is False and
+                  're0' in self.facts['current_re']):
+                master = True
+            # Is it an SRX cluster?
+            # If so, the cluster's "primary" is the "master"
+            elif self.facts.get('srx_cluster') is True:
+                if 'primary' in self.facts['current_re']:
+                    master = True
+                else:
+                    master = False
+            else:
+                # Might be a GNF case.
+                if (self.re_name is not None and
+                        'gnf' in self.re_name and
+                        '-re' in self.re_name):
+                    # Get the name of the GNF from re_name/
+                    # re_name will be in the format gnfX-reY
+                    (gnf, _) = self.re_name.split('-re', 1)
+                    if gnf + '-master' in self.facts.get('current_re'):
+                        master = True
+                    elif gnf + '-backup' in self.facts.get('current_re'):
+                        master = False
+                else:
+                    # Might be a multi-chassis case where this RE is neither
+                    # the master or the backup for the entire system. In that
+                    # case, it's either a chassis master or a chassis backup.
+                    for re_state in self.facts['current_re']:
+                        # Multi-chassis case. A chassis master/backup, but
+                        # not the system master/backup.
+                        if '-backup' in re_state or '-master' in re_state:
+                            master = False
+                            break
+        return master
+
+    @master.setter
+    def master(self, value):
+        """ read-only property """
+        raise RuntimeError("master is read-only!")
+
+    # ------------------------------------------------------------------------
+    # property: uptime
+    # ------------------------------------------------------------------------
+
+    @property
+    def uptime(self):
+        """
+        The uptime of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        :returns: The number of seconds (int) since the current Routing Engine
+                  was booted. If there is a problem gathering or parsing the
+                  uptime information, None is returned.
+        :raises: May raise a specific jnpr.junos.RpcError or
+                 jnpr.junos.ConnectError subclass if there is a problem
+                 communicating with the device.
+        """
+        uptime = None
+        rsp = self.rpc.get_system_uptime_information(normalize=True)
+        if rsp is not None:
+            element = rsp.find('.//system-booted-time/time-length')
+            if element is not None:
+                uptime_string = element.get('seconds')
+                if uptime_string is not None:
+                    uptime = int(uptime_string)
+        return uptime
+
+    @uptime.setter
+    def uptime(self, value):
+        """ read-only property """
+        raise RuntimeError("uptime is read-only!")
+
+    # ------------------------------------------------------------------------
+    # property: re_name
+    # ------------------------------------------------------------------------
+
+    @property
+    def re_name(self):
+        """
+        The name of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        .. note::
+            This property is based on new-style fact gathering. If
+            old-style fact gathering is in use, this property will return None.
+
+        :returns: A string containing the name of the current Routing Engine or
+                  None if unable to determine the state of the current
+                  Routing Engine.
+        """
+        re_name = None
+
+        # Make sure the 'current_re' and 'hostname_info' facts have values
+        if (self.facts.get('current_re') is not None and
+           self.facts.get('hostname_info') is not None):
+            # re_name should be the intersection of the values in the
+            # 'current_re' fact and the keys in the 'hostname_info' fact.
+            intersect = (set(self.facts['current_re']) &
+                         set(self.facts['hostname_info'].keys()))
+            # intersect should usually contain a single element (the RE's
+            # name) if things worked correctly.
+            if len(intersect) == 1:
+                re_name = list(intersect)[0]
+            # If intersect contains no elements
+            elif len(intersect) == 0:
+                # Look for the first value
+                # in 'current_re' which contains '-re'.
+                for re_state in self.facts['current_re']:
+                    if '-re' in re_state:
+                        re_name = re_state
+                        break
+                if re_name is None:
+                    # Still haven't figured it out, if there's only one key
+                    # in 'hostname_info', assume that.
+                    all_re_names = list(self.facts['hostname_info'].keys())
+                    if len(all_re_names) == 1:
+                        re_name = all_re_names[0]
+                if re_name is None:
+                    # Still haven't figured it out. Is this a bsys?
+                    for re_state in self.facts['current_re']:
+                        match = re.search('^re\d+$', re_state)
+                        if match:
+                            re_string = 'bsys-' + match.group(0)
+                            if re_string in self.facts['hostname_info'].keys():
+                                re_name = re_string
+        return re_name
+
+    @re_name.setter
+    def re_name(self, value):
+        """ read-only property """
+        raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
         if self._ssh_config:
@@ -239,7 +425,8 @@ class _Connection(object):
         """
         try:
             command = command + '| display xml rpc'
-            rsp = self.rpc.cli(command)
+            rsp = self.rpc.cli(command, format="xml")
+            rsp = rsp.getparent().find('.//rpc')
             if format == 'text':
                 encode = None if sys.version < '3' else 'unicode'
                 return etree.tostring(rsp[0], encoding=encode)
@@ -385,7 +572,6 @@ class _Connection(object):
                 time.sleep(1)
                 pass
         else:
-            elapsed = datetime.datetime.now() - start
             probe_ok = False
 
         return probe_ok
@@ -416,7 +602,7 @@ class _Connection(object):
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        if isinstance(rpc, str):
+        if isinstance(rpc, six.string_types):
             # No RPC is available.
             return None
         rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
@@ -481,7 +667,7 @@ class _Connection(object):
                 warnings.resetwarnings()
 
         try:
-            rsp = self.rpc.cli(command, format)
+            rsp = self.rpc.cli(command=command, format=format)
             if isinstance(rsp, dict) and format.lower() == 'json':
                 return rsp
             # rsp returned True means <rpc-reply> is empty, hence return
@@ -500,6 +686,8 @@ class _Connection(object):
             if rsp.tag == 'rpc':
                 return rsp[0]
             return rsp
+        except EzErrors.ConnectClosedError as ex:
+            raise ex
         except EzErrors.RpcError as ex:
             return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
@@ -511,7 +699,7 @@ class _Connection(object):
 
     @normalizeDecorator
     @timeoutDecorator
-    def execute(self, rpc_cmd, **kvargs):
+    def execute(self, rpc_cmd, ignore_warning=False, **kvargs):
         """
         Executes an XML RPC and returns results as either XML or native python
 
@@ -519,6 +707,22 @@ class _Connection(object):
           can either be an XML Element or xml-as-string.  In either case
           the command starts with the specific command element, i.e., not the
           <rpc> element itself
+
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :param func to_py:
           Is a caller provided function that takes the response and
@@ -535,7 +739,8 @@ class _Connection(object):
             user-auth class privilege controls on Junos
 
         :raises RpcError:
-            When an ``rpc-error`` element is contained in the RPC-reply
+            When an ``rpc-error`` element is contained in the RPC-reply and the
+            ``rpc-error`` element does not match the **ignore_warning** value.
 
         :returns:
             RPC-reply as XML object.  If **to_py** is provided, then
@@ -561,20 +766,28 @@ class _Connection(object):
         # @@@ need to trap this and re-raise accordingly.
 
         try:
-            rpc_rsp_e = self._rpc_reply(rpc_cmd_e)
+            rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
+                                        ignore_warning=ignore_warning)
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
             raise EzErrors.RpcTimeoutError(self, rpc_cmd_e.tag, self.timeout)
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
-        except RPCError as err:
-            rsp = JXML.remove_namespaces(err.xml)
-            # see if this is a permission error
-            e = EzErrors.PermissionError if rsp.findtext('error-message') == \
-                'permission denied' \
-                else EzErrors.RpcError
-            raise e(cmd=rpc_cmd_e, rsp=rsp, errs=err)
+        except RPCError as ex:
+            if hasattr(ex, 'xml'):
+                rsp = JXML.remove_namespaces(ex.xml)
+                message = rsp.findtext('error-message')
+                # see if this is a permission error
+                if message and message == 'permission denied':
+                    raise EzErrors.PermissionError(cmd=rpc_cmd_e,
+                                                   rsp=rsp,
+                                                   errs=ex)
+            else:
+                rsp = None
+            raise EzErrors.RpcError(cmd=rpc_cmd_e,
+                                    rsp=rsp,
+                                    errs=ex)
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn("An unknown exception occured - please report.",
@@ -583,12 +796,13 @@ class _Connection(object):
 
         # From 14.2 onward, junos supports JSON, so now code can be written as
         # dev.rpc.get_route_engine_information({'format': 'json'})
+        # should not convert rpc response to json when loading json config
+        # as response should be rpc-reply xml object.
 
-        if rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
-            if self._facts == {}:
-                self.facts_refresh()
-            ver_info = self._facts['version_info']
-            if ver_info.major[0] >= 15 or \
+        if (rpc_cmd_e.tag != 'load-configuration' and
+           rpc_cmd_e.attrib.get('format') in ['json', 'JSON']):
+            ver_info = self.facts.get('version_info')
+            if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
                 try:
                     return json.loads(rpc_rsp_e.text)
@@ -597,6 +811,8 @@ class _Connection(object):
                     if str(ex).startswith('Extra data'):
                         return json.loads(
                             re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+                    else:
+                        raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
                 warnings.warn("Native JSON support is only from 14.2 onwards",
                               RuntimeWarning)
@@ -638,27 +854,86 @@ class _Connection(object):
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self, exception_on_failure=False):
+    def facts_refresh(self,
+                      exception_on_failure=False,
+                      warnings_on_failure=None,
+                      keys=None):
         """
-        Reload the facts from the Junos device into :attr:`facts` property.
+        Refresh the facts from the Junos device into :attr:`facts` property.
+        See :module:`jnpr.junos.facts` for a complete list of available facts.
+        For old-style facts, this causes all facts to be immediately reloaded.
+        For new-style facts, the current fact value(s) are deleted, and the
+        fact is reloaded on demand.
 
-        :param bool exception_on_failure: To raise exception or warning when
-                             facts gathering errors out.
+        :param bool exception_on_failure: To raise exception when facts
+          gathering errors out. If True when new-style fact gathering is in
+          use, causes all facts to be reloaded rather than being loaded on
+          demand.
+        :param bool warnings_on_failure: To print a warning when fact gathering
+          errors out. The default for old-style facts gathering is
+          warnings_on_failure=True. The default for new-style facts gathering
+          is warnings_on_failure=False. If True when new-style fact gathering
+          is in use, causes all facts to be reloaded rather than being loaded
+          on demand.
+        :param str, set, list, or tuple keys: The set of keys in facts to
+          refresh. Note: Old-style facts gathering does not support
+          gathering individual facts, so this argument can only be
+          specified when new-style fact gathering is in use. In addition,
+          setting exception_on_failure or warnings_on_failure to True causes
+          all facts to be immediately refreshed, rather than being refreshed
+          on demand. For this reason, the keys argument can not be specified if
+          exception_on_failure or warnings_on_failure are True.
 
+        An example of specifying the keys argument as a string:
+        ```
+        dev.facts_refresh(keys='hostname')
+        ```
+
+        An example of specifying the keys argument as a tuple:
+        ```
+        dev.facts_refresh(keys=('hostname', 'hostname_info', 'domain', 'fqdn'))
+        ```
+        or as a list:
+        ```
+        dev.facts_refresh(keys=['hostname', 'hostname_info', 'domain', 'fqdn'])
+        ```
+        or as a set:
+        ```
+        dev.facts_refresh(keys={'hostname', 'hostname_info', 'domain', 'fqdn'})
+        ```
+
+        :raises RuntimeError:
+            If old-style fact gathering is in use and a keys argument is
+            specified.
         """
-        should_warn = False
-        for gather in FACT_LIST:
-            try:
-                gather(self, self._facts)
-            except:
-                if exception_on_failure:
-                    raise
-                should_warn = True
-        if should_warn is True:
-            warnings.warn('Facts gathering is incomplete. '
-                          'To know the reason call '
-                          '"dev.facts_refresh(exception_on_failure=True)"',
-                          RuntimeWarning)
+        if self._fact_style not in ['old', 'new', 'both']:
+            raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
+        if self._fact_style == 'old' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = True
+            if keys is not None:
+                raise RuntimeError("The keys argument can not be specified "
+                                   "when old-style fact gathering is in use!")
+            should_warn = False
+            for gather in FACT_LIST:
+                try:
+                    gather(self, self._ofacts)
+                except:
+                    if exception_on_failure:
+                        raise
+                    should_warn = True
+            if (warnings_on_failure is True and should_warn is True and
+               self._fact_style != 'both'):
+                warnings.warn('Facts gathering is incomplete. '
+                              'To know the reason call '
+                              '"dev.facts_refresh(exception_on_failure=True)"',
+                              RuntimeWarning)
+        if self._fact_style == 'new' or self._fact_style == 'both':
+            if warnings_on_failure is None:
+                warnings_on_failure = False
+            self.facts._refresh(exception_on_failure=exception_on_failure,
+                                warnings_on_failure=warnings_on_failure,
+                                keys=keys)
         return
 
     # -----------------------------------------------------------------------
@@ -667,6 +942,27 @@ class _Connection(object):
 
     def __repr__(self):
         return "Device(%s)" % self.hostname
+
+
+class DeviceSessionListener(SessionListener):
+
+    """
+    Listens to Session class of Netconf Transport
+    and detects errors in the transport.
+    """
+    def __init__(self, device):
+        self._device = device
+
+    def callback(self, root, raw):
+        """Required by implementation but not used here."""
+        pass
+
+    def errback(self, ex):
+        """Called when an error occurs.
+        Set the device's connected status to False.
+        :type ex: :exc:`Exception`
+        """
+        self._device.connected = False
 
 
 class Device(_Connection):
@@ -766,7 +1062,16 @@ class Device(_Connection):
         :param bool gather_facts:
             *OPTIONAL* For ssh mode default is ``True``. In case of console
             connection over telnet/serial it defaults to ``False``.
-            If ``False`` then facts are not gathered on call to :meth:`open`
+            If ``False`` and old-style fact gathering is in use then facts are
+            not gathered on call to :meth:`open`. This argument is a no-op when
+            new-style fact gathering is in use (the default.)
+
+        :param str fact_style:
+            *OPTIONAL*  The style of fact gathering to use. Valid values are:
+            'new', 'old', or 'both'. The default is 'new'. The value 'both' is
+            only present for debugging purposes. It will be removed in a future
+            release. The value 'old' is only present to workaround bugs in
+            new-style fact gathering. It will be removed in a future release.
 
         :param str mode:
             *OPTIONAL*  mode, mode for console connection (telnet/serial)
@@ -810,6 +1115,12 @@ class Device(_Connection):
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
+        self._fact_style = kvargs.get('fact_style', 'new')
+        if self._fact_style != 'new':
+            warnings.warn('fact-style %s will be removed in a future '
+                          'release.' %
+                          (self._fact_style),
+                          RuntimeWarning)
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -849,16 +1160,27 @@ class Device(_Connection):
         self._conn = None
         self._j2ldr = _Jinja2ldr
         self._manages = []
-        self._facts = {}
+        self._ofacts = {}
 
         # public attributes
-
         self.connected = False
         self.rpc = _RpcMetaExec(self)
+        if self._fact_style == 'old':
+            self.facts = self.ofacts
+        else:
+            self.facts = _FactCache(self)
 
     # -----------------------------------------------------------------------
     # Basic device methods
     # -----------------------------------------------------------------------
+    @property
+    def connected(self):
+        return self._connected
+
+    @connected.setter
+    def connected(self, value):
+        if value in [True, False]:
+            self._connected = value
 
     def open(self, *vargs, **kvargs):
         """
@@ -926,7 +1248,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local': False})
-
+            self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
@@ -973,8 +1295,11 @@ class Device(_Connection):
         self._nc_transform = self.transform
         self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
-        normalize = kvargs.get('normalize', self._normalize)
-        if normalize is True:
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
@@ -985,12 +1310,13 @@ class Device(_Connection):
 
     def close(self):
         """
-        Closes the connection to the device.
+        Closes the connection to the device only if connected.
         """
         if self.connected is True:
             self._conn.close_session()
             self.connected = False
 
+    @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
         return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 

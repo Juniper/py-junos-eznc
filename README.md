@@ -1,4 +1,8 @@
-[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/) [![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=2.0.1)](http://junos-pyez.readthedocs.io/en/2.0.1/?badge=2.0.1) [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc) [![Coverage Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc) [![](https://images.microbadger.com/badges/image/juniper/pyez.svg)](https://microbadger.com/images/juniper/pyez)
+[![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/)
+[![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=stable)](http://junos-pyez.readthedocs.io)
+[![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc)
+[![UnitTest Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
+[![](https://images.microbadger.com/badges/image/juniper/pyez.svg)](https://microbadger.com/images/juniper/pyez)
 
 The repo is under active development.  If you take a clone, you are getting the latest, and perhaps not entirely stable code.  
 
@@ -70,11 +74,13 @@ Installing from Git is also supported (OS must have git installed).
 
 Move to the local directory which contains your script(s) and run the container
 
-`docker run -it --rm --name pyez juniper/pyez sh`
+`docker run -it --rm --name -v $PWD:/scripts pyez juniper/pyez sh`
 
 Your local scripts will be mounted to /scripts in the container
 
 `cd scripts`
+
+See [DOCKER-EXAMPLES.md](https://github.com/Juniper/py-junos-eznc/blob/master/DOCKER-EXAMPLES.md) for some example usage.
 
 ## Upgrade
 
@@ -130,7 +136,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 [Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Stacy Smith](https://github.com/stacywsmith)
 
-* v2.0.0: [Ganesh Nalawade](https://github.com/ganeshnalawade), [Jainpriyal](https://github.com/Jainpriyal)
+* v2.0.0: [Ganesh Nalawade](https://github.com/ganeshrn), [Jainpriyal](https://github.com/Jainpriyal)
 
 *Former Contributors:*
 

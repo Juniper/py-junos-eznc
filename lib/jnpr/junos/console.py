@@ -6,28 +6,23 @@ import traceback
 import sys
 import logging
 import warnings
+import socket
 
 # 3rd-party packages
-import ncclient.transport.errors as NcErrors
-import ncclient.operations.errors as NcOpErrors
 from ncclient.devices.junos import JunosDeviceHandler
 from lxml import etree
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
-from ncclient.operations.rpc import RPCReply, RPCError
 from ncclient.xml_ import NCElement
 from jnpr.junos.device import _Connection
 
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos import exception as EzErrors
-from jnpr.junos.facts import *
+from jnpr.junos.factcache import _FactCache
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
-
-QFX_MODEL_LIST = ['QFX3500', 'QFX3600', 'VIRTUAL CHASSIS']
-QFX_MODE_NODE = 'NODE'
-QFX_MODE_SWITCH = 'SWITCH'
+from jnpr.junos.ofacts import *
+from jnpr.junos.decorators import ignoreWarnDecorator
+from jnpr.junos.device import _Jinja2ldr
 
 logger = logging.getLogger("jnpr.junos.console")
 
@@ -72,8 +67,17 @@ class Console(_Connection):
             So its assumed ssh is enabled by the time we use SCP functionality.
 
         :param bool gather_facts:
-            *OPTIONAL* default is ``False``.  If ``False`` then the
-            facts are not gathered on call to :meth:`open`
+            *OPTIONAL* Defaults to ``False``. If ``False`` and old-style fact
+            gathering is in use then facts are not gathered on call to
+            :meth:`open`. This argument is a no-op when new-style fact
+            gathering is in use (the default.)
+
+        :param str fact_style:
+            *OPTIONAL*  The style of fact gathering to use. Valid values are:
+            'new', 'old', or 'both'. The default is 'new'. The value 'both' is
+            only present for debugging purposes. It will be removed in a future
+            release. The value 'old' is only present to workaround bugs in
+            new-style fact gathering. It will be removed in a future release.
 
         :param bool console_has_banner:
             *OPTIONAL* default is ``False``.  If ``False`` then in case of a
@@ -87,7 +91,7 @@ class Console(_Connection):
         # ----------------------------------------
 
         self._tty = None
-        self._facts = {}
+        self._ofacts = {}
         self.connected = False
         self._skip_logout = False
         self.results = dict(changed=False, failed=False, errmsg=None)
@@ -105,19 +109,25 @@ class Console(_Connection):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
-        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
-        self.transform = self._norm_transform
-        # self.timeout needed by PyEZ utils
-        #self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
-        self.gather_facts = kvargs.get('gather_facts', False)
+        self._gather_facts = kvargs.get('gather_facts', False)
+        self._fact_style = kvargs.get('fact_style', 'new')
+        if self._fact_style != 'new':
+            warnings.warn('fact-style %s will be removed in '
+                          'a future release.' %
+                          (self._fact_style), RuntimeWarning)
         self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
         self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
-        self.junos_dev_handler = JunosDeviceHandler(device_params=
-                                                    {'name': 'junos',
-                                                     'local': False})
+        self.junos_dev_handler = JunosDeviceHandler(
+                                     device_params={'name': 'junos',
+                                                    'local': False})
+        self._j2ldr = _Jinja2ldr
+        if self._fact_style == 'old':
+            self.facts = self.ofacts
+        else:
+            self.facts = _FactCache(self)
 
     @property
     def timeout(self):
@@ -136,9 +146,31 @@ class Console(_Connection):
         """
         self._timeout = value
 
-    def open(self):
+    @property
+    def transform(self):
         """
-        open the connection to the device
+        :returns: the current RPC XML Transformation.
+        """
+        return self.junos_dev_handler.transform_reply
+
+    @transform.setter
+    def transform(self, func):
+        """
+        Used to change the RPC XML Transformation.
+
+        :param lambda value:
+            New transform lambda
+        """
+        self.junos_dev_handler.transform_reply = func
+
+    def open(self, *vargs, **kvargs):
+        """
+        Opens a connection to the device using existing login/auth
+        information.
+
+        :param bool gather_facts:
+            If set to ``True``/``False`` will override the device
+            instance value for only this open process
         """
 
         # ---------------------------------------------------------------
@@ -162,13 +194,26 @@ class Console(_Connection):
                     traceback.format_exc()))
             raise err
         except Exception as ex:
-            logger.error("Exception occurred: {0}:{1}\n".format('login', str(ex)))
+            logger.error("Exception occurred: {0}:{1}\n".format('login',
+                                                                str(ex)))
             raise ex
         self.connected = True
-        if self.gather_facts is True:
+
+        self._nc_transform = self.transform
+        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
+
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
+            self.transform = self._norm_transform
+
+        gather_facts = kvargs.get('gather_facts', self._gather_facts)
+        if gather_facts is True:
             logger.info('facts: retrieving device facts...')
             self.facts_refresh()
-            self.results['facts'] = self._facts
+            self.results['facts'] = self.facts
         return self
 
     def close(self, skip_logout=False):
@@ -178,6 +223,14 @@ class Console(_Connection):
         if skip_logout is False and self.connected is True:
             try:
                 self._tty_logout()
+            except socket.error as err:
+                # if err contains "Connection reset by peer" connection to the
+                # device got closed
+                if "Connection reset by peer" not in str(err):
+                    raise err
+            except EOFError as err:
+                if "telnet connection closed" not in str(err):
+                    raise err
             except Exception as err:
                 logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
                 raise err
@@ -193,12 +246,15 @@ class Console(_Connection):
                 raise err
             self.connected = False
 
+    @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
         encode = None if sys.version < '3' else 'unicode'
-        rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) if \
-                isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e
+        rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) \
+            if isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e
         reply = self._tty.nc.rpc(rpc_cmd)
-        rpc_rsp_e = NCElement(reply, self.junos_dev_handler.transform_reply())._NCElement__doc
+        rpc_rsp_e = NCElement(reply,
+                              self.junos_dev_handler.transform_reply()
+                              )._NCElement__doc
         return rpc_rsp_e
 
     # -------------------------------------------------------------------------

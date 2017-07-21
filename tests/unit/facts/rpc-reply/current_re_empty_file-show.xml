@@ -1,0 +1,6 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F5/junos">
+    <file-content filename="/etc/hosts.junos" junos:seconds="1482433864" filesize="53073" encoding="text">
+        
+        # End of internal names
+    </file-content>
+</rpc-reply>

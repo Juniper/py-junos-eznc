@@ -1,7 +1,15 @@
+import re
 from jnpr.junos import jxml
 from jnpr.junos import jxml as JXML
 from lxml.etree import _Element
 from ncclient.operations.rpc import RPCError
+
+
+class FactLoopError(RuntimeError):
+    """
+    Generated when there is a loop in fact gathering.
+    """
+    pass
 
 
 class RpcError(Exception):
@@ -10,8 +18,8 @@ class RpcError(Exception):
     Parent class for all junos-pyez RPC Exceptions
     """
 
-    def __init__(
-            self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
+    def __init__(self, cmd=None, rsp=None, errs=None, dev=None,
+                 timeout=None, re=None):
         """
           :cmd: is the rpc command
           :rsp: is the rpc response (after <rpc-reply>)
@@ -26,6 +34,7 @@ class RpcError(Exception):
         self.timeout = timeout
         self.re = re
         self.rpc_error = None
+        self.xml = rsp
         # To handle errors coming from ncclient, Here errs is list of RPCError
         if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
             self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
@@ -42,10 +51,11 @@ class RpcError(Exception):
             self.message = errs.message
         else:
             self.errs = errs
-            self.message = "\n".join(["%s: %s" %(err['severity'].strip(),
-                                                 err['message'].strip())
-                                      for err in errs if err['message'] is not None
-                                      and err['severity'] is not None]) \
+            self.message = "\n".join(["%s: %s" % (err['severity'].strip(),
+                                                  err['message'].strip())
+                                      for err in errs
+                                      if err['message'] is not None and
+                                      err['severity'] is not None]) \
                 if isinstance(errs, list) else ''
 
         if isinstance(self.rsp, _Element):
@@ -150,7 +160,8 @@ class RpcTimeoutError(RpcError):
 
     def __repr__(self):
         return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
-            .format(self.__class__.__name__, self.dev.hostname, self.cmd, self.timeout)
+            .format(self.__class__.__name__, self.dev.hostname,
+                    self.cmd, self.timeout)
 
     __str__ = __repr__
 
@@ -215,7 +226,8 @@ class ConnectError(Exception):
     def __repr__(self):
         if self._orig:
             return "{0}(host: {1}, msg: {2})".format(self.__class__.__name__,
-                                                     self.dev.hostname, self._orig)
+                                                     self.dev.hostname,
+                                                     self._orig)
         else:
             return "{0}({1})".format(self.__class__.__name__,
                                      self.dev.hostname)
@@ -286,3 +298,31 @@ class ConnectClosedError(ConnectError):
     def __init__(self, dev):
         ConnectError.__init__(self, dev=dev)
         dev.connected = False
+
+
+class JSONLoadError(Exception):
+
+    """
+    Generated if json content of rpc reply fails to load
+    """
+    def __init__(self, exception, rpc_content):
+        self.ex_msg = str(exception)
+        self.rpc_content = rpc_content
+        self.offending_line = ''
+        obj = re.search('line (\d+)', self.ex_msg)
+        if obj:
+            line_no = int(obj.group(1))
+            rpc_lines = rpc_content.splitlines()
+            for line in range(line_no-3, line_no+2):
+                self.offending_line += '%s: %s\n' % (line+1, rpc_lines[line])
+
+    def __repr__(self):
+        if self.offending_line:
+            return "{0}(reason: {1}, \nThe offending config appears " \
+                   "to be: \n{2})".format(self.__class__.__name__, self.ex_msg,
+                                          self.offending_line)
+        else:
+            return "{0}(reason: {1})" \
+                .format(self.__class__.__name__, self.ex_msg)
+
+    __str__ = __repr__

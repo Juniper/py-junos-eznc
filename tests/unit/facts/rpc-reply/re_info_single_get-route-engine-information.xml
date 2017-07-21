@@ -1,0 +1,41 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1R1/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/16.1R1/junos-chassis">
+        <route-engine>
+            <slot>0</slot>
+            <mastership-state>master</mastership-state>
+            <mastership-priority>master (default)</mastership-priority>
+            <status>OK</status>
+            <memory-dram-size>4058 MB</memory-dram-size>
+            <memory-installed-size>(4096 MB installed)</memory-installed-size>
+            <memory-buffer-utilization>15</memory-buffer-utilization>
+            <cpu-user>1</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>1</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>98</cpu-idle>
+            <cpu-user1>1</cpu-user1>
+            <cpu-background1>0</cpu-background1>
+            <cpu-system1>1</cpu-system1>
+            <cpu-interrupt1>1</cpu-interrupt1>
+            <cpu-idle1>97</cpu-idle1>
+            <cpu-user2>1</cpu-user2>
+            <cpu-background2>0</cpu-background2>
+            <cpu-system2>1</cpu-system2>
+            <cpu-interrupt2>1</cpu-interrupt2>
+            <cpu-idle2>97</cpu-idle2>
+            <cpu-user3>1</cpu-user3>
+            <cpu-background3>0</cpu-background3>
+            <cpu-system3>1</cpu-system3>
+            <cpu-interrupt3>1</cpu-interrupt3>
+            <cpu-idle3>97</cpu-idle3>
+            <model>RE-VMX</model>
+            <serial-number>2f15f744-b7</serial-number>
+            <start-time junos:seconds="1480612496">2016-12-01 09:14:56 PST</start-time>
+            <up-time junos:seconds="2587295">29 days, 22 hours, 41 minutes, 35 seconds</up-time>
+            <last-reboot-reason>Router rebooted after a normal shutdown.</last-reboot-reason>
+            <load-average-one>0.49</load-average-one>
+            <load-average-five>0.36</load-average-five>
+            <load-average-fifteen>0.37</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+</rpc-reply>

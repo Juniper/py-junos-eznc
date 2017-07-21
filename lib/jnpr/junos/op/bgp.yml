@@ -1,0 +1,15 @@
+---
+bgpTable:
+ rpc: get-bgp-neighbor-information
+ item: bgp-peer
+ view: bgpView
+ key: peer-id
+
+bgpView:
+ fields:
+  local_as: local-as
+  peer_as: peer-as
+  local_address: local-address
+  peer_id: peer-id
+  local_id: local-id
+  route_received: bgp-rib/received-prefix-count

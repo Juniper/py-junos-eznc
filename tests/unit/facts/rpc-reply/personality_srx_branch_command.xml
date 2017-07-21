@@ -1,0 +1,12 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+    <software-information>
+        <host-name>usability-he2</host-name>
+        <product-model>srx210he2</product-model>
+        <product-name>srx210he2</product-name>
+        <jsr/>
+        <package-information>
+            <name>junos</name>
+            <comment>JUNOS Software Release [12.1X46-D65]</comment>
+        </package-information>
+    </software-information>
+</rpc-reply>

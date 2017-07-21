@@ -1,0 +1,37 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/13.3R2/junos">
+    <multi-routing-engine-results>
+        
+        <multi-routing-engine-item>
+            
+            <re-name>fpc0</re-name>
+            
+            <software-information>
+                <host-name>rppdt-ex4200a</host-name>
+                <product-model>ex4200-48t</product-model>
+                <product-name>ex4200-48t</product-name>
+                <junos-version>13.3R2.2</junos-version>
+                <package-information>
+                    <name>junos</name>
+                    <comment>JUNOS EX  Software Suite [13.3R2.2]</comment>
+                </package-information>
+                <package-information>
+                    <name>fips-mode-powerpc</name>
+                    <comment>JUNOS FIPS mode utilities [13.3R2.2]</comment>
+                </package-information>
+                <package-information>
+                    <name>jdocs-ex</name>
+                    <comment>JUNOS Online Documentation [13.3R2.2]</comment>
+                </package-information>
+                <package-information>
+                    <name>junos-ex-4200</name>
+                    <comment>JUNOS EX 4200 Software Suite [13.3R2.2]</comment>
+                </package-information>
+                <package-information>
+                    <name>jweb-ex</name>
+                    <comment>JUNOS Web Management [13.3R2.2]</comment>
+                </package-information>
+            </software-information>
+        </multi-routing-engine-item>
+        
+    </multi-routing-engine-results>
+</rpc-reply>

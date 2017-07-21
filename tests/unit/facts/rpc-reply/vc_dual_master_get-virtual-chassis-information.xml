@@ -1,0 +1,36 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.1X53/junos">
+    <virtual-chassis-information>
+        <preprovisioned-virtual-chassis-information>
+            <virtual-chassis-id>70b7.3d82.d346</virtual-chassis-id>
+            <virtual-chassis-mode>Enabled</virtual-chassis-mode>
+        </preprovisioned-virtual-chassis-information>
+        <member-list junos:style="single-slot">
+            <member>
+                <member-status>Prsnt</member-status>
+                <member-id>0</member-id>
+                <fpc-slot>(FPC 0)</fpc-slot>
+                <member-serial-number>PD3714050496</member-serial-number>
+                <member-model>ex4300-48p</member-model>
+                <member-priority>129</member-priority>
+                <member-mixed-mode>N</member-mixed-mode>
+                <member-route-mode>VC</member-route-mode>
+                <member-role>Master*</member-role>
+                <neighbor-list>
+                </neighbor-list>
+            </member>
+            <member>
+                <member-status>Prsnt</member-status>
+                <member-id>1</member-id>
+                <fpc-slot>(FPC 1)</fpc-slot>
+                <member-serial-number>PD3714170265</member-serial-number>
+                <member-model>ex4300-48p</member-model>
+                <member-priority>129</member-priority>
+                <member-mixed-mode>N</member-mixed-mode>
+                <member-route-mode>VC</member-route-mode>
+                <member-role>Master</member-role>
+                <neighbor-list>
+                </neighbor-list>
+            </member>
+        </member-list>
+    </virtual-chassis-information>
+</rpc-reply>

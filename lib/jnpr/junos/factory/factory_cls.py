@@ -11,6 +11,7 @@ from jnpr.junos.factory.viewfields import ViewFields
 
 from jnpr.junos.utils.config import Config
 
+
 def FactoryCfgTable(table_name=None, data_dict={}):
     if table_name is None:
         table_name = "CfgTable"

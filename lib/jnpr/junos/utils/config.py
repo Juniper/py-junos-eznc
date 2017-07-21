@@ -5,7 +5,6 @@ import warnings
 
 # 3rd-party modules
 from lxml import etree
-from ncclient.operations import RPCError
 
 # package modules
 from jnpr.junos.exception import *
@@ -18,9 +17,8 @@ Configuration Utilities
 
 
 class Config(Util):
-
     """
-    Overivew of Configuration Utilities:
+    Overview of Configuration Utilities.
 
     * :meth:`commit`: commit changes
     * :meth:`commit_check`: perform the commit check operation
@@ -36,7 +34,6 @@ class Config(Util):
     # ------------------------------------------------------------------------
     # commit
     # ------------------------------------------------------------------------
-
     def commit(self, **kvargs):
         """
         Commit a configuration.
@@ -50,7 +47,8 @@ class Config(Util):
         :param bool sync: On dual control plane systems, requests that
                             the candidate configuration on one control plane be
                             copied to the other control plane, checked for
-                            correct syntax, and committed on both Routing Engines.
+                            correct syntax, and committed on both Routing
+                            Engines.
         :param bool force_sync: On dual control plane systems, forces the
                             candidate configuration on one control plane to
                             be copied to the other control plane.
@@ -58,6 +56,31 @@ class Config(Util):
                             evaluate the new configuration.
         :param bool detail: When true return commit detail as XML
 
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+
+            cu.commit(ignore_warning=True)
+            cu.commit(ignore_warning='Advertisement-interval is '
+                                     'less than four times')
+            cu.commit(ignore_warning=['Advertisement-interval is '
+                                      'less than four times',
+                                      'Chassis configuration for network '
+                                      'services has been changed.'])
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
 
         :returns:
             * ``True`` when successful
@@ -108,6 +131,11 @@ class Config(Util):
         # Check for full
         if kvargs.get('full'):
             rpc_args['full'] = True
+
+        # Check for ignore_warning
+        ignore_warn = kvargs.get('ignore_warning')
+        if ignore_warn:
+            rpc_args['ignore_warning'] = ignore_warn
 
         rpc_varg = []
         detail = kvargs.get('detail')
@@ -192,17 +220,27 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        rsp = self.rpc.get_configuration(dict(
-            compare='rollback', rollback=str(rb_id), format='text'
-        ))
+        try:
+            rsp = self.rpc.get_configuration(dict(
+                compare='rollback', rollback=str(rb_id), format='text'
+            ))
+        except RpcError as err:
+            if (err.rpc_error['severity'] == 'warning' and
+                err.message == "mgd: statement must contain additional "
+                               "statements"):
+                # Fix for Issue #655, JDM 15.1X53-D45 responses with
+                # extraneous warning message
+                return "Unable to parse diff from response!"
+            else:
+                raise
 
         diff_txt = rsp.find('configuration-output').text
         return None if diff_txt == "\n" else diff_txt
 
     def pdiff(self, rb_id=0):
         """
-        Helper method that calls ``print`` on the diff (patch-format) between the
-        current candidate and the provided rollback.
+        Helper method that calls ``print`` on the diff (patch-format) between
+        the current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
 
@@ -257,15 +295,26 @@ class Config(Util):
           If set to ``True`` will set the load-config action to merge.
           the default load-config action is 'replace'
 
+        :param bool update:
+          If set to ``True`` Compare a complete loaded configuration against
+          the candidate configuration. For each hierarchy level or
+          configuration object that is different in the two configurations,
+          the version in the loaded configuration replaces the version in the
+          candidate configuration. When the configuration is later committed,
+          only system processes that are affected by the changed configuration
+          elements parse the new configuration.
+
+          .. note:: This option cannot be used if **format** is "set".
+
         :param str template_path:
           Similar to the **path** parameter, but this indicates that
           the file contents are ``Jinja2`` format and will require
           template-rendering.
 
-          .. note:: This parameter is used in conjunction with **template_vars**.
-                     The template filename extension will be used to determine
-                     the format-style of the contents, or you can override
-                     using **format**.
+          .. note:: This parameter is used in conjunction with
+                    **template_vars**. The template filename extension will
+                    be used to determine the format-style of the contents,
+                    or you can override using **format**.
 
         :param jinja2.Template template:
           A Jinja2 Template object.  Same description as *template_path*,
@@ -275,13 +324,51 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
+          
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
+          For example::
+
+            cu.load(cnf, ignore_warning=True)
+            cu.load(cnf, ignore_warning='statement not found')
+            cu.load(cnf, ignore_warning=['statement not found',
+                                         'statement has no contents; ignored')
+
+          .. note::
+            When the value of ignore_warning is a string, or list of strings,
+            the string is actually used as a case-insensitive regular
+            expression pattern. If the string contains only alpha-numeric
+            characters, as shown in the above examples, this results in a
+            case-insensitive substring match. However, any regular expression
+            pattern supported by the re library may be used for more
+            complicated match conditions.
+
+        :param str url:
+          Specify the full pathname of the file that contains the configuration
+          data to load. The value can be a local file path, an FTP location, or
+          a Hypertext Transfer Protocol (HTTP).
+          Refer `Doc page <https://www.juniper.net/documentation/en_US/junos/topics/reference/tag-summary/junos-xml-protocol-load-configuration.html>`_
+          for more details.
+
+          For example::
+
+            cu.load(url="/var/home/user/golden.conf")
+            cu.load(url="ftp://username@ftp.hostname.net/filename")
+            cu.load(url="http://username:password@hostname/path/filename")
+            cu.load(url="/var/home/user/golden.conf", overwrite=True)
 
         :returns:
             RPC-reply as XML object.
 
-        :raises: ConfigLoadError: When errors detected while loading candidate configuration.
-                             You can use the Exception errs variable
-                             to identify the specific problems
+        :raises: ConfigLoadError: When errors detected while loading candidate
+                                  configuration. You can use the Exception
+                                  errs variable  to identify the specific
+                                  problems.
         """
         rpc_xattrs = {}
         rpc_xattrs['format'] = 'xml'        # default to XML format
@@ -289,14 +376,24 @@ class Config(Util):
 
         rpc_contents = None
 
+        actions = filter(lambda item: kvargs.get(item, False),
+                         ('overwrite', 'merge', 'update'))
+        if len(list(actions)) >= 2:
+            raise ValueError('actions can be only one among %s'
+                             % ', '.join(actions))
+
         # support the ability to completely replace the Junos configuration
         # note: this cannot be used if format='set', per Junos API.
 
         overwrite = kvargs.get('overwrite', False)
         if overwrite is True:
             rpc_xattrs['action'] = 'override'
+        if kvargs.get('update') is True:
+            rpc_xattrs['action'] = 'update'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
+
+        ignore_warning = kvargs.get('ignore_warning', False)
 
         # ---------------------------------------------------------------------
         # private helpers ...
@@ -319,9 +416,10 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs """
             # when format is given, setup the xml attrs appropriately
             if kvargs['format'] == 'set':
-                if overwrite is True:
+                if overwrite is True or kvargs.get('update') is True:
                     raise ValueError(
-                        "conflicting args, cannot use 'set' with 'overwrite'")
+                        "conflicting args, cannot use 'set' with '%s'" %
+                        ('overwrite' if overwrite is True else 'update'))
                 rpc_xattrs['action'] = 'set'
                 kvargs['format'] = 'text'
             rpc_xattrs['format'] = kvargs['format']
@@ -345,9 +443,11 @@ class Config(Util):
             elif re.search(r'^\s*\{', rpc) and re.search(r'.*}\s*$', rpc):
                 kvargs['format'] = 'json'
 
-        def try_load(rpc_contents, rpc_xattrs):
+        def try_load(rpc_contents, rpc_xattrs, ignore_warning=False):
             try:
-                got = self.rpc.load_config(rpc_contents, **rpc_xattrs)
+                got = self.rpc.load_config(rpc_contents,
+                                           ignore_warning=ignore_warning,
+                                           **rpc_xattrs)
             except RpcTimeoutError as err:
                 raise err
             except RpcError as err:
@@ -380,19 +480,17 @@ class Config(Util):
                     else:
                         raise RuntimeError(
                             "Not able to resolve the config format "
-                            "You must define the format of the contents explicitly "
-                            "to the function. Ex: format='set'")
+                            "You must define the format of the contents "
+                            "explicitly to the function. Ex: format='set'")
                 if kvargs['format'] == 'xml':
                     # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
-            return try_load(rpc_contents, rpc_xattrs)
-            # ~! UNREACHABLE !~#
 
         # ---------------------------------------------------------------------
         # if path is provided, use the static-config file
         # ---------------------------------------------------------------------
 
-        if 'path' in kvargs:
+        elif 'path' in kvargs:
             # then this is a static-config file.  load that as our rpc_contents
             rpc_contents = open(kvargs['path'], 'rU').read()
             _lset_fromfile(kvargs['path'])
@@ -400,17 +498,13 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
         # ---------------------------------------------------------------------
         # if template_path is provided, then jinja2 load the template, and
         # render the results.  if template_vars are provided, use those
         # in the render process.
         # ---------------------------------------------------------------------
 
-        if 'template_path' in kvargs:
+        elif 'template_path' in kvargs:
             path = kvargs['template_path']
             template = self.dev.Template(path)
             rpc_contents = template.render(kvargs.get('template_vars', {}))
@@ -419,16 +513,12 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
         # ---------------------------------------------------------------------
         # if template is provided, then this is a pre-loaded jinja2 Template
         # object.  Use the template.filename to determine the format style
         # ---------------------------------------------------------------------
 
-        if 'template' in kvargs:
+        elif 'template' in kvargs:
             template = kvargs['template']
             path = template.filename
             rpc_contents = template.render(kvargs.get('template_vars', {}))
@@ -437,11 +527,19 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-            return try_load(rpc_contents, rpc_xattrs)
-
-            # ~! UNREACHABLE !~#
-
-        raise RuntimeError("Unhandled load request")
+        if rpc_contents is not None:
+            return try_load(rpc_contents,
+                            rpc_xattrs,
+                            ignore_warning=ignore_warning)
+        elif 'url' in kvargs and rpc_contents is None:
+            url = kvargs['url']
+            _lset_fromfile(url)
+            rpc_xattrs['url'] = url
+            return try_load(rpc_contents,
+                            rpc_xattrs,
+                            ignore_warning=ignore_warning)
+        else:
+            raise RuntimeError("Unhandled load request")
 
     # -------------------------------------------------------------------------
     # config exclusive
@@ -462,6 +560,8 @@ class Config(Util):
         except Exception as err:
             if isinstance(err, RpcError):
                 raise LockError(rsp=err.rsp)
+            elif isinstance(err, ConnectClosedError):
+                raise err
             else:
                 # :err: is from ncclient
                 raise LockError(rsp=JXML.remove_namespaces(err.xml))
@@ -487,6 +587,8 @@ class Config(Util):
         except Exception as err:
             if isinstance(err, RpcError):
                 raise UnlockError(rsp=err.rsp)
+            elif isinstance(err, ConnectClosedError):
+                raise err
             else:
                 # :err: is from ncclient
                 raise UnlockError(rsp=JXML.remove_namespaces(err.xml))
@@ -502,7 +604,7 @@ class Config(Util):
         Rollback the candidate config to either the last active or
         a specific rollback number.
 
-        :param str rb_id: The rollback id value [0-49], defaults to ``0``.
+        :param int rb_id: The rollback id value [0-49], defaults to ``0``.
 
         :returns:
             ``True`` always when successful
@@ -534,16 +636,18 @@ class Config(Util):
             * "delete" - removes the rescue configuration
             * "reload" - loads the rescue config as candidate (no-commit)
 
-        :param str format: identifies the return format when **action** is "get":
+        :param str format: identifies the return format when **action** is
+                           "get":
 
             * "text" (default) - ascii-text format
             * "xml" - as XML object
 
         :return:
 
-            * When **action** is 'get', then the contents of the rescue configuration
-              is returned in the specified *format*.  If there is no rescue configuration
-              saved, then the return value is ``None``.
+            * When **action** is 'get', then the contents of the rescue
+              configuration is returned in the specified *format*.  If there
+              is no rescue configuration saved, then the return value is
+              ``None``.
 
             * ``True`` when **action** is "save".
 
@@ -551,8 +655,8 @@ class Config(Util):
 
             .. note:: ``True`` regardless if a rescue configuration exists.
 
-            * When **action** is 'reload', return is ``True`` if a rescue configuration
-              exists, and ``False`` otherwise.
+            * When **action** is 'reload', return is ``True`` if a rescue
+              configuration exists, and ``False`` otherwise.
 
             .. note:: The rescue configuration is only loaded as the candidate,
                       and not committed.  You must commit to make the rescue
@@ -588,8 +692,9 @@ class Config(Util):
             """
             try:
                 got = self.rpc.get_rescue_information(format=format)
-                return got.findtext('configuration-information/configuration-output') \
-                    if 'text' == format else got
+                return got.findtext(
+                    'configuration-information/configuration-output'
+                ) if 'text' == format else got
             except:
                 return None
 
@@ -619,24 +724,40 @@ class Config(Util):
 
         return result
 
-    def __init__(self, dev, mode=None):
+    def __init__(self, dev, mode=None, **kwargs):
         """
-        :param str mode: Can be used *only* when creating Config object using context manager
+        :param str mode: Can be used *only* when creating Config object using
+                         context manager
 
             * "private" - Work in private database
             * "dynamic" - Work in dynamic database
             * "batch" - Work in batch database
             * "exclusive" - Work with Locking the candidate configuration
+            * "ephemeral" - Work in default/specified ephemeral instance
 
-            Example::
+        :param str ephemeral_instance: ephemeral instance name
 
-                # mode can be private/dynamic/exclusive/batch
-                with Config(dev, mode='exclusive') as cu:
-                    cu.load('set system services netconf traceoptions file xyz', format='set')
-                    print cu.diff()
-                    cu.commit()
+        .. code-block:: python
+
+           # mode can be private/dynamic/exclusive/batch/ephemeral
+           with Config(dev, mode='exclusive') as cu:
+               cu.load('set system services netconf traceoptions file xyz',
+                       format='set')
+               print cu.diff()
+               cu.commit()
+
+        .. warning::
+            Ephemeral databases are an advanced Junos feature which
+            if used incorrectly can have serious negative impact on the operation
+            of the Junos device. We recommend you consult JTAC and/or you Juniper
+            account team before deploying the ephemeral database feature in your
+            network.
         """
         self.mode = mode
+        if not kwargs.get('ephemeral_instance') and kwargs:
+            raise ValueError('Unsupported argument provided to Config class')
+        self.kwargs = kwargs
+
         Util.__init__(self, dev=dev)
 
     def __enter__(self):
@@ -650,7 +771,8 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
-                    if err.message != 'uncommitted changes will be discarded on exit':
+                    if (err.message != 'uncommitted changes will be discarded '
+                                       'on exit'):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -670,7 +792,8 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error['severity'] == 'warning':
-                    if err.message != 'uncommitted changes will be discarded on exit':
+                    if (err.message != 'uncommitted changes will be discarded '
+                                       'on exit'):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -679,15 +802,27 @@ class Config(Util):
         def _open_configuration_exclusive():
             return self.lock()
 
+        def _open_configuration_ephemeral(**kwargs):
+            self.rpc.open_configuration(**kwargs)
+            return True
+
         def _unsupported_option():
             if self.mode is not None:
                 raise ValueError("unsupported action: {0}".format(self.mode))
+
+        if self.kwargs.get('ephemeral_instance'):
+            ephemeral_kwargs = {
+                'ephemeral_instance': self.kwargs['ephemeral_instance']}
+        else:
+            ephemeral_kwargs = {'ephemeral': True}
 
         {
             'private': _open_configuration_private,
             'dynamic': _open_configuration_dynamic,
             'batch': _open_configuration_batch,
-            'exclusive': _open_configuration_exclusive
+            'exclusive': _open_configuration_exclusive,
+            'ephemeral': lambda: _open_configuration_ephemeral(
+                **ephemeral_kwargs)
         }.get(self.mode, _unsupported_option)()
         return self
 
