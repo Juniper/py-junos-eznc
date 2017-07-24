@@ -69,8 +69,9 @@ class TestGetSoftwareInformation(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager_simple
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
                          '12.3X48-D40.5')
-        self.assertEqual(self.dev.facts['junos_info']['re0']['object'].as_tuple,
-                         (12, 3, 'X', (48, 'D', 40), 5))
+        self.assertEqual(
+            self.dev.facts['junos_info']['re0']['object'].as_tuple,
+            (12, 3, 'X', (48, 'D', 40), 5))
         self.assertEqual(self.dev.facts['hostname'], 'lsys500')
         self.assertEqual(self.dev.facts['model'], 'SRX3600')
         self.assertEqual(self.dev.facts['model_info'], {'re0': 'SRX3600'})
@@ -173,6 +174,61 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['junos_info']['bsys-re0']['text'],
                          '17.4-20170706_dev_common.0')
 
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_info_jdm(self, mock_execute):
+        self.dev.facts._cache['vc_capable'] = False
+        self.dev.facts._cache['current_re'] = ['server0']
+        mock_execute.side_effect = self._mock_manager_jdm
+        self.assertEqual(self.dev.facts['hostname'], 'jdm')
+        self.assertEqual(self.dev.facts['model'], 'JUNOS_NODE_SLICING')
+        self.assertEqual(self.dev.facts['version'],
+                         '17.4-20170718_dev_common.1-secure')
+        self.assertEqual(self.dev.facts['version_RE0'],
+                         '17.4-20170718_dev_common.1-secure')
+        self.assertEqual(self.dev.facts['version_RE1'],
+                         '17.4-20170718_dev_common.1-secure')
+        self.assertEqual(self.dev.facts['model_info'],
+                         {'server0': 'JUNOS_NODE_SLICING',
+                          'server1': 'JUNOS_NODE_SLICING'})
+        self.assertEqual(self.dev.facts['junos_info']['server0']['text'],
+                         '17.4-20170718_dev_common.1-secure')
+        self.assertEqual(self.dev.facts['junos_info']['server1']['text'],
+                         '17.4-20170718_dev_common.1-secure')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_info_srx_cluster(self, mock_execute):
+        self.dev.facts._cache['vc_capable'] = False
+        self.dev.facts._cache['current_re'] = ['node0']
+        mock_execute.side_effect = self._mock_manager_srx_cluster
+        self.assertEqual(self.dev.facts['hostname'], 'frogbert')
+        self.assertEqual(self.dev.facts['model'], 'SRX5800')
+        self.assertEqual(self.dev.facts['version'],
+                         '17.3-2017-07-02.0_RELEASE_173_THROTTLE')
+        self.assertEqual(self.dev.facts['version_RE0'],
+                         '17.3-2017-07-02.0_RELEASE_173_THROTTLE')
+        self.assertEqual(self.dev.facts['version_RE1'],
+                         '17.3-2017-07-02.0_RELEASE_173_THROTTLE')
+        self.assertEqual(self.dev.facts['model_info'],
+                         {'node0': 'SRX5800',
+                          'node1': 'SRX5800'})
+        self.assertEqual(self.dev.facts['junos_info']['node0']['text'],
+                         '17.3-2017-07-02.0_RELEASE_173_THROTTLE')
+        self.assertEqual(self.dev.facts['junos_info']['node1']['text'],
+                         '17.3-2017-07-02.0_RELEASE_173_THROTTLE')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_info_err(self, mock_execute):
+        self.dev.facts._cache['vc_capable'] = False
+        self.dev.facts._cache['current_re'] = None
+        mock_execute.side_effect = self._mock_manager_err
+        self.assertEqual(self.dev.facts['hostname'], None)
+        self.assertEqual(self.dev.facts['model'], None)
+        self.assertEqual(self.dev.facts['version'], None)
+        self.assertEqual(self.dev.facts['version_RE0'], None)
+        self.assertEqual(self.dev.facts['version_RE1'], None)
+        self.assertEqual(self.dev.facts['model_info'], None)
+        self.assertEqual(self.dev.facts['junos_info'], None)
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -258,3 +314,25 @@ class TestGetSoftwareInformation(unittest.TestCase):
                 return True
             else:
                 return self._read_file('sw_info_bsys_' + args[0].tag + '.xml')
+
+    def _mock_manager_srx_cluster(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'command'):
+                raise RpcError()
+            else:
+                return self._read_file('sw_info_srx_cluster_' + args[0].tag +
+                                       '.xml')
+
+    def _mock_manager_jdm(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'command'):
+                if (args[0].text ==
+                   'show version invoke-on all-routing-engines'):
+                    raise RpcError()
+                else:
+                    return self._read_file('sw_info_jdm_command_' +
+                                           args[0].text + '.xml')
+
+    def _mock_manager_err(self, *args, **kwargs):
+        if args:
+            raise RpcError()

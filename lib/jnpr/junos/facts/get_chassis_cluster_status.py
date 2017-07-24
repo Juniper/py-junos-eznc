@@ -47,8 +47,8 @@ def get_facts(device):
                     for group in groups:
                         group_id = group.findtext('redundancy-group-id')
                         redundancy_group[group_id] = {
-                            'cluster_id' : group.findtext('cluster-id'),
-                            'failover_count' : group.findtext(
+                            'cluster_id': group.findtext('cluster-id'),
+                            'failover_count': group.findtext(
                                 'redundancy-group-failover-count'),
                         }
                         # Iterate over the broken XML in <device-stats>
