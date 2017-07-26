@@ -192,16 +192,26 @@ class SW(Util):
     # pkgadd - used to perform the 'request system software add ...'
     # -------------------------------------------------------------------------
 
-    def pkgadd(self, remote_package, **kvargs):
+    def pkgadd(self, remote_package, vmhost=False, **kvargs):
         """
-        Issue the 'request system software add' command on the package.
-        The "no-validate" options is set by default.  If you want to validate
-        the image, do that using the specific :meth:`validate` method.  Also,
-        if you want to reboot the device, suggest using the :meth:`reboot`
-        method rather ``reboot=True``.
+        Issue the RPC equivalent of the 'request system software add' command
+        or the 'request vmhost software add' command on the package.
+        If vhmhost=False, the <request-package-add> RPC is used and the
+        The "no-validate" options is set.  If you want to validate
+        the image, do that using the specific :meth:`validate` method.
+        If vmhost=True, the <request-vmhost-package-add> RPC is used.
+
+        If you want to reboot the device, invoke the :meth:`reboot` method
+        after installing the software rather than passing the ``reboot=True``
+        parameter.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
+
+
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
 
         :param dict kvargs:
           Any additional parameters to the 'request' command can
@@ -211,18 +221,23 @@ class SW(Util):
         .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
-        if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
-            args = dict(no_validate=True, set=remote_package)
+        if vmhost is False:
+            if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
+                args = dict(no_validate=True, set=remote_package)
+            else:
+                args = dict(no_validate=True, package_name=remote_package)
+            args.update(kvargs)
+            rsp = self.rpc.request_package_add(**args)
         else:
-            args = dict(no_validate=True, package_name=remote_package)
-        args.update(kvargs)
+            rsp = self.rpc.request_vmhost_package_add(
+                      package_name=remote_package,
+                      **kvargs)
 
-        rsp = self.rpc.request_package_add(**args)
         return self._parse_pkgadd_response(rsp)
 
-        # -------------------------------------------------------------------------
-        # pkgaddNSSU - used to perform NSSU upgrade
-        # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # pkgaddNSSU - used to perform NSSU upgrade
+    # -------------------------------------------------------------------------
 
     def pkgaddNSSU(self, remote_package, **kvargs):
         """
@@ -241,17 +256,32 @@ class SW(Util):
     # pkgaddISSU - used to perform ISSU upgrade
     # -------------------------------------------------------------------------
 
-    def pkgaddISSU(self, remote_package, **kvargs):
+    def pkgaddISSU(self, remote_package, vmhost=False, **kvargs):
         """
-        Issue the 'request system software nonstop-upgrade' command on the
-        package.
+        Issue the RPC equivalent of the
+        'request system software in-service-upgrade' command
+        or the 'request vmhost software in-service-upgrade' command on the
+        package. If vhmhost=False, the <request-package-in-service-upgrade>
+        RPC is used. If vmhost=True, the
+        <request-vmhost-package-in-service-upgrade> RPC is used.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
+
+
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
         """
 
-        rsp = self.rpc.request_package_in_service_upgrade(
-            package_name=remote_package, **kvargs)
+        if vmhost is False:
+            rsp = self.rpc.request_package_in_service_upgrade(
+                      package_name=remote_package,
+                      **kvargs)
+        else:
+            rsp = self.rpc.request_vmhost_package_in_service_upgrade(
+                      package_name=remote_package,
+                      **kvargs)
         return self._parse_pkgadd_response(rsp)
 
     def _parse_pkgadd_response(self, rsp):
@@ -596,7 +626,7 @@ class SW(Util):
                 no_copy=False, issu=False, nssu=False, timeout=1800,
                 cleanfs_timeout=300, checksum_timeout=300,
                 checksum_algorithm='md5', force_copy=False, all_re=True,
-                **kwargs):
+                vmhost=False, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
@@ -747,6 +777,10 @@ class SW(Util):
           all Routing Engines of the Junos device. When ``False``  if the
           only preform the software install on the current Routing Engine.
 
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
+
         :param kwargs **kwargs:
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
@@ -816,15 +850,20 @@ class SW(Util):
         if len(remote_pkg_set) == 1:
             remote_package = remote_pkg_set[0]
             # validate can't be used in the case of a Mixed VC
-            if validate is True and self._mixed_VC is False:
-                _progress(
-                    "validating software against current config,"
-                    " please be patient ...")
-                v_ok = self.validate(remote_package, issu, nssu,
-                                     dev_timeout=timeout)
-
-                if v_ok is not True:
-                    return v_ok
+            # With vmhost=True, validate is handled in the package add.
+            if validate is True:
+                if self._mixed_VC is False and vmhost is not True:
+                    _progress(
+                        "validating software against current config,"
+                        " please be patient ...")
+                    v_ok = self.validate(remote_package, issu, nssu,
+                                         dev_timeout=timeout)
+                    if v_ok is not True:
+                        return v_ok
+            else:
+                if vmhost is True:
+                    # Need to pass the no_validate option via kwargs.
+                    kwargs.update({'no_validate': True})
 
             if issu is True:
                 _progress(
