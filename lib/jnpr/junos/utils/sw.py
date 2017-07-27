@@ -869,6 +869,7 @@ class SW(Util):
                 _progress(
                     "ISSU: installing software ... please be patient ...")
                 return self.pkgaddISSU(remote_package,
+                                       vmhost=vmhost,
                                        dev_timeout=timeout, **kwargs)
             elif nssu is True:
                 _progress(
@@ -880,6 +881,7 @@ class SW(Util):
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
                     remote_package,
+                    vmhost = vmhost,
                     dev_timeout=timeout,
                     **kwargs)
                 return add_ok
@@ -898,6 +900,7 @@ class SW(Util):
                             "be patient ...".format(vc_id))
                         ok &= self.pkgadd(
                             remote_package,
+                            vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs)
@@ -910,6 +913,7 @@ class SW(Util):
                         "installing software on RE0 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
+                        vmhost = vmhost,
                         re0=True,
                         dev_timeout=timeout,
                         **kwargs)
@@ -917,6 +921,7 @@ class SW(Util):
                         "installing software on RE1 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
+                        vmhost = vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs)
@@ -924,7 +929,10 @@ class SW(Util):
 
         elif len(remote_pkg_set) > 1 and self._mixed_VC:
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(remote_pkg_set, dev_timeout=timeout, **kwargs)
+            add_ok = self.pkgadd(remote_pkg_set,
+                                 vmhost=vmhost,
+                                 dev_timeout=timeout,
+                                 **kwargs)
             return add_ok
 
     # -------------------------------------------------------------------------
