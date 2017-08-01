@@ -11,7 +11,7 @@
 - Refactor _exec_rpc() and handle boolean RPC arguments with a value of False. #739
 - Add the _j2ldr instance variable to the Console class. #753
 - Properly handle normalize argument to the open() Device method. #758/#757
-- Setting no-resolve to true for faster ARP Table lookups. $762
+- Setting no-resolve to true for faster ARP Table lookups. #762
 
 
 ## Release 2.1.4 - 23 June 2017
