@@ -1,10 +1,17 @@
-## Release 2.1.5.dev1 - 27 June 2017
+## Release 2.1.5 - 31 July 2017
 ### Features Added:
 - Single-RE sw install on multi-RE device using all_re argument to SW.install() #746
 - Support platforms which have single-RE ISSU. #740
+- Support Config.load() loading a configuration from a URL. #749
+- SW.install() enhanced to install from a URL. #751
+- Implement uptime property for Device instances. #752/#750
+- Facts gathering support for Junos Node Slicing. #760
 
 ### Bugs Fixed:
 - Refactor _exec_rpc() and handle boolean RPC arguments with a value of False. #739
+- Add the _j2ldr instance variable to the Console class. #753
+- Properly handle normalize argument to the open() Device method. #758/#757
+- Setting no-resolve to true for faster ARP Table lookups. $762
 
 
 ## Release 2.1.4 - 23 June 2017
