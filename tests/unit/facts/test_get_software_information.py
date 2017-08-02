@@ -332,6 +332,9 @@ class TestGetSoftwareInformation(unittest.TestCase):
                 else:
                     return self._read_file('sw_info_jdm_command_' +
                                            args[0].text + '.xml')
+            else:
+                return self._read_file('sw_info_jdm_' +
+                                       args[0].tag + '.xml')
 
     def _mock_manager_err(self, *args, **kwargs):
         if args:

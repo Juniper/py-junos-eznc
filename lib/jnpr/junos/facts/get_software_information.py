@@ -18,8 +18,9 @@ def _get_software_information(device):
                 pass
         try:
             # JDM for Junos Node Slicing
-            return device.rpc.cli("show version all-servers", format='xml',
-                                  normalize=True)
+            return device.rpc.get_software_information(all_servers=True,
+                                                       format='xml',
+                                                       normalize=True)
         except Exception:
             pass
         try:
