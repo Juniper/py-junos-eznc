@@ -7,7 +7,7 @@ from mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
-from jnpr.junos.exception import PermissionError
+from jnpr.junos.exception import RpcError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -53,6 +53,16 @@ class TestCurrentRe(unittest.TestCase):
         self.dev.facts._cache['srx_cluster_id'] = '15'
         self.assertEqual(self.dev.facts['current_re'], None)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_jdm(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_jdm
+        self.assertEqual(self.dev.facts['current_re'], ['server0'])
+
+    @patch('jnpr.junos.Device.execute')
+    def test_current_re_fact_rpc_error(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_rpc_error
+        self.assertEqual(self.dev.facts['current_re'], None)
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -96,3 +106,15 @@ class TestCurrentRe(unittest.TestCase):
         if args:
             return self._read_file('current_re_srx_index_err_' + args[0].tag +
                                    '.xml')
+
+    def _mock_manager_current_re_jdm(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'get-interface-information'):
+                raise RpcError()
+            else:
+                return self._read_file('current_re_jdm_' + args[0].tag +
+                                       '.xml')
+
+    def _mock_manager_current_re_rpc_error(self, *args, **kwargs):
+        if args:
+            raise RpcError()
