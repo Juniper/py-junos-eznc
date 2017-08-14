@@ -74,7 +74,7 @@ Installing from Git is also supported (OS must have git installed).
 
 Move to the local directory which contains your script(s) and run the container
 
-`docker run -it --rm --name -v $PWD:/scripts pyez juniper/pyez sh`
+`docker run -it --rm --name pyez -v $PWD:/scripts juniper/pyez sh`
 
 Your local scripts will be mounted to /scripts in the container
 
