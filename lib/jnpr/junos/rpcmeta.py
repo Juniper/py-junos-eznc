@@ -47,7 +47,9 @@ class _RpcMetaExec(object):
            # ietf yang example
            dev.rpc.get_config(filter_xml='interfaces', model='ietf')
            # ietf-softwire yang example
-           dev.rpc.get_config(filter_xml='softwire-config', model='ietf', namespace="urn:ietf:params:xml:ns:yang:ietf-softwire", options={'format': 'json'})
+           dev.rpc.get_config(filter_xml='softwire-config', model='ietf',
+                              namespace="urn:ietf:params:xml:ns:yang:ietf-softwire",
+                              options={'format': 'json'})
 
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
