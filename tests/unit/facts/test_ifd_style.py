@@ -34,6 +34,10 @@ class TestIfdStyle(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager_ifd_style_classic
         self.assertEqual(self.dev.facts['ifd_style'], 'CLASSIC')
 
+    def test_ifd_style_None(self):
+        self.dev.facts._cache['personality'] = 'JDM'
+        self.assertEqual(self.dev.facts['ifd_style'], None)
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
