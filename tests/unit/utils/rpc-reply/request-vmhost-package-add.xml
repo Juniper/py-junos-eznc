@@ -1,0 +1,246 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F6/junos">
+    <output>
+        Junos Validation begin. Procedure will take few minutes.
+        Initializing...
+        Verified os-libs-10-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-libs-10-x86-64-20170607.351421_builder_stable_10
+        Verified os-runtime-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-runtime-x86-64-20170607.351421_builder_stable_10
+        Verified os-zoneinfo-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-zoneinfo-x86-64-20170607.351421_builder_stable_10
+        Verified os-libs-compat32-10-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-libs-compat32-10-x86-64-20170607.351421_builder_stable_10
+        Verified os-compat32-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-compat32-x86-64-20170607.351421_builder_stable_10
+        Verified py-base-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting py-base-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified os-vmguest-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-vmguest-x86-64-20170607.351421_builder_stable_10
+        Verified os-crypto-x86-64-20170607 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting os-crypto-x86-64-20170607.351421_builder_stable_10
+        Verified junos-net-prd-x86-64-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-net-prd-x86-64-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-modules-x86-64-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-modules-x86-64-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-libs-compat32-x86-64-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-libs-compat32-x86-64-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-runtime-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-runtime-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-platform-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-platform-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-libs-x86-64-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-libs-x86-64-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-dp-crypto-support-mtx-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-dp-crypto-support-mtx-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified junos-daemons-x86-64-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting junos-daemons-x86-64-20170630.054423_builder_junos_151_f6_s7
+        Verified jservices-voice-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-ssl-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-sfw-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-rpm-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-ptsp-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-nat-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-mss-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-mobile-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-llpdf-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-jflow-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-ipsec-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-idp-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-hcm-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-crypto-base-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-cpcd-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-cos-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-bgf-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-appid-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-alg-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jservices-aacl-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Verified jpfe-common-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting jpfe-common-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified jdocs-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting jdocs-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Verified fips-mode-x86-32-20170630 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Mounting fips-mode-x86-32-20170630.054423_builder_junos_151_f6_s7
+        Hardware Database regeneration succeeded
+        Validating against /config/juniper.conf.gz
+        mgd: commit complete
+        Validation succeeded
+    </output>
+    <pipe>
+        <more-no-more/>
+    </pipe>
+    <cli>
+        <ignore-signals>
+            hup
+        </ignore-signals>
+    </cli>
+    <output>
+        Verified junos-vmhost-install-ptx-x86-64-15.1F6-S7.2 signed by PackageProductionEc_2017 method ECDSA256+SHA256
+        Copied the config and other data to the aux disk.
+        Transfer junos-host-upgrade.sh
+        Transfer Done
+        Transfer /packages/db/pkginst.69723/junos-vmhost-install*.tgz
+        Transfer Done
+        Starting upgrade ...
+        Preparing for upgrade...
+        /tmp/pkg-QWC/unpack/install/
+        tar --directory=/tmp/pkg-QWC/unpack/install/ -xvf /tmp/install.tgz
+        ./
+        ./vm/
+        ./vm/re_fpga-1.0-0.x86_64.rpm
+        ./vm/vsmartd-1.0-0.x86_64.rpm
+        ./vm/grub.cfg.ngre
+        ./vm/resild-1.0-0.x86_64.rpm
+        ./vm/note
+        ./junos/
+        ./junos/junos-mtre-install.sh
+        ./junos/junos-mtre-upgrade.sh
+        ./vmhost/
+        ./vmhost/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img.gz
+        ./vmhost/README
+        ./vmhost-core-x86_64-15.1F6-S7-20170608_0128_builder.tgz
+        ./vmhost-version.sh
+        ./vmhost-pkgs-version
+        ./hostd/
+        ./hostd/jhost_core-1.0-1706080443.x86_64.rpm
+        ./hostd/vehostd-note.txt
+        ./hostd/vehostd-ovp-install.sh
+        ./vmhost-version
+        ./scripts/
+        ./scripts/mount-usb-img.sh
+        ./scripts/target-scripts/
+        ./scripts/target-scripts/mk-mtre-rollback.sh
+        ./scripts/target-scripts/savelog
+        ./scripts/target-scripts/mk-mtre-zeroize.sh
+        ./scripts/target-scripts/vmhost-partition.inc
+        ./scripts/target-scripts/02setmac.sh
+        ./scripts/target-scripts/S05rootunion.sh
+        ./scripts/target-scripts/S05ovprootrwS.sh
+        ./scripts/target-scripts/S05ovprootrw.sh
+        ./scripts/target-scripts/vmhost-kdump.inc
+        ./scripts/target-scripts/mtre-ssd-version.sh
+        ./scripts/target-scripts/mk-mtre-partition.sh
+        ./scripts/target-scripts/vmhost-kdump-configure
+        ./scripts/target-scripts/vmhost-kdump-process.sh
+        ./scripts/target-scripts/mtre-ssd-snapshot.sh
+        ./scripts/target-scripts/01vehostd_setup.sh
+        ./scripts/target-scripts/gt-mtre-version.sh
+        ./scripts/target-scripts/platfom_specific_init
+        ./scripts/target-scripts/mtre-ssd-zeroize.sh
+        ./scripts/target-scripts/S05rootunionS.sh
+        ./scripts/target-scripts/mk-mtre-snapshot.sh
+        ./scripts/target-scripts/03boot_info.sh
+        ./scripts/target-scripts/vmhost-misc.inc
+        ./scripts/target-scripts/01boot_setup.sh
+        ./scripts/target-scripts/vmhost-kdump-input.sh
+        ./scripts/target-scripts/mtre-ssd-rollback.sh
+        ./scripts/target-scripts/S08jhostrpminstall.sh
+        ./scripts/target-scripts/vmhost_version_get_major.sh
+        ./scripts/target-scripts/vmhost-kdump-usb-format.sh
+        ./scripts/target-scripts/00read_only_root.sh
+        ./scripts/target-scripts/S04modutilsPost.sh
+        ./scripts/target-scripts/00junos_setup.sh
+        ./scripts/target-scripts/rc.local
+        ./scripts/mk-mtre-partition.sh
+        ./scripts/ddimage
+        ./scripts/mtre-installer.sh
+        ./scripts/mtre-ssd-installer.sh
+        ./scripts/mk-mtre-upgrade.sh
+        ./scripts/ssd-ovp-installer.sh
+        ./scripts/grub.cfg.ngre
+        ./scripts/mk-part-mtre-install.sh
+        ./scripts/mtre-ssd-upgrade.sh
+        ./bin/
+        ./bin/telnet.netkit
+        junos/
+        junos/junos-install-x86-64-15.1F6-S7.2.img.gz
+        /tmp/pkg-QWC/unpack/install//
+        sh /tmp/pkg-QWC/unpack/install///scripts/mtre-ssd-upgrade.sh /tmp/pkg-QWC/unpack/install//
+        Current root details, Device sda, Label: jrootb_P, Partition: sda4
+        Copying /tmp/pkg-QWC/unpack/install///vmhost/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img.gz to tmp dir: /tmp/install-31a ...
+        Testing /tmp/install-31a/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img.gz for compression ...
+        Uncompressing Linux: /tmp/install-31a/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img.gz ...
+        Image details
+        =============
+            image: '/tmp/install-31a/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img'
+             size: 1998585856 bytes
+         modified: 2017-08-16 16:39:22.462996193 +0200
+             type: x86 boot sector
+        
+        Finding alternate root for upgrade
+        Upgrading software on jrootp_P ...
+        Inputs: jrootp_P p /dev/sda /tmp/install-31a/vmhost-x86_64-15.1F6-S7-20170608_0128_builder.img P /tmp/pkg-QWC/unpack/install//
+        
+        Mounting images and device in preparation for upgrade...
+        USBIMG_BOOT_OFFSET: 1048576, USBIMG_BOOT_SIZELIMIT: 134217728, USBIMG_ROOT_OFFSET: 135266304, USBIMG_ROOT_SIZELIMIT: 1863319552
+        Cleaning target ROOTFS jrootp_P
+        Copying ROOTFS files...
+        Upgrading administrative Junos context ...
+        Testing /tmp/partdisk-cfO/jlvmjunosfs/Current.p/junos-install-x86-64-15.1F6-S7.2.img.gz for compression ...
+        Uncompressing Junos: /tmp/partdisk-cfO/jlvmjunosfs/Current.p/junos-install-x86-64-15.1F6-S7.2.img.gz ...
+        Done with Junos Upgrade
+        Upgrading hostd content ...
+        ./
+        ./rasdaemon_install.sh
+        ./i40e_pkg_install.sh
+        ./resild_install.sh
+        ./jhost_core-1.0-1706080443.x86_64.rpm
+        ./re_fpga-1.0-0.x86_64.rpm
+        ./i40e_pkg-1.0-0.x86_64.rpm
+        ./bios_pkg-1.0-0.x86_64.rpm
+        ./vsmartd-1.0-0.x86_64.rpm
+        ./monit_install.sh
+        ./vmhost-version.sh
+        ./vmhost-version
+        ./vmhost-firmware-x86_64-15.1F6-S7-20170608_0128_builder.tar
+        ./vsmartd_install.sh
+        ./rasdaemon-0.5.6-1.x86_64.rpm
+        ./bios_pkg_install.sh
+        ./vehostd_install.sh
+        ./resild-1.0-0.x86_64.rpm
+        ./monit-5.12.2-1.x86_64.rpm
+        ./re_fpga_install.sh
+        Copying /tmp/partdisk-cfO/unpack/jhost_core-1.0-1706080443.x86_64.rpm to /tmp/partdisk-cfO/jrootfs/hostd ...
+        Installing Hostd image jhost_core-1.0-1706080443.x86_64.rpm ...
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs/ --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs//var/lib/rpm /tmp/partdisk-cfO/unpack/jhost_core-1.0-1706080443.x86_64.rpm
+        Preparing...                ##################################################
+        jhost_core                  ##################################################
+        Please wait while configuration is in progress...
+        Installation successful...
+        Done with hostd Install
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs/var/lib/rpm /tmp/partdisk-cfO/unpack/re_fpga-1.0-0.x86_64.rpm
+        Preparing...                ##################################################
+        preparing install ...
+        re_fpga                     ##################################################
+        adding module to kernel...
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs/var/lib/rpm /tmp/partdisk-cfO/unpack/vsmartd-1.0-0.x86_64.rpm
+        Preparing...                ##################################################
+        preparing install ...
+        vsmartd                     ##################################################
+        adding module to kernel...
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs/var/lib/rpm /tmp/partdisk-cfO/unpack/resild-1.0-0.x86_64.rpm
+        Preparing...                ##################################################
+        preparing install ...
+        resild                      ##################################################
+        adding module to kernel...
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs/var/lib/rpm /tmp/partdisk-cfO/unpack/rasdaemon-0.5.6-1.x86_64.rpm
+        Preparing...                ##################################################
+        rasdaemon                   ##################################################
+        Installing Monit image monit-5.12.2-1.x86_64.rpm ...
+        rpm -ivh --prefix=/tmp/partdisk-cfO/jrootfs/ --nodeps --dbpath=/tmp/partdisk-cfO/jrootfs//var/lib/rpm /tmp/partdisk-cfO/unpack/monit-5.12.2-1.x86_64.rpm
+        Preparing...                ##################################################
+        monit                       ##################################################
+        Installation successful...
+        Done with Monit Install...
+        Target kernel version: 3.10.79-ovp-rt74-WR6.0.0.20_preempt-rt
+        Creating moint points for JUNOSFS and VMFS: /junos, /vm
+        Updating boot partition...
+        Upgrade complete.
+        Cmos Write successfull
+        Cmos Write successfull for Boot_retry
+        Cmos Write successfull for Boot_retry
+        ... upgrade complete.
+        A REBOOT IS REQUIRED TO LOAD THIS SOFTWARE CORRECTLY.
+        Use the 'request vmhost reboot' command to reboot the system.
+    </output>
+    <package-result>0</package-result>
+</rpc-reply>

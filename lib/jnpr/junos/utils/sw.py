@@ -679,21 +679,21 @@ class SW(Util):
                    to reboot the device.
 
         :param str package:
-          Either the full file path to the install package tarball on the local 
-          (PyEZ host's) filesystem OR a URL (from the target device's 
-          perspcective) from which the device retrieves installed. When the 
+          Either the full file path to the install package tarball on the local
+          (PyEZ host's) filesystem OR a URL (from the target device's
+          perspcective) from which the device retrieves installed. When the
           value is a URL, then the :no_copy: and :remote_path: values are
           unused. The acceptable formats for a URL value may be found at:
           https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-software-formats-filenames-urls.html
 
         :param list pkg_set:
-          A list/tuple of :package: values which will be installed on a mixed VC 
-          setup.
+          A list/tuple of :package: values which will be installed on a mixed
+          VC setup.
 
         :param str remote_path:
           If the value of :package: or :pkg_set: is a file path on the local
-          (PyEZ host's) filesystem, then the image is copied from the local 
-          filesystem to the :remote_path: directory on the target Junos 
+          (PyEZ host's) filesystem, then the image is copied from the local
+          filesystem to the :remote_path: directory on the target Junos
           device. The default is ``/var/tmp``. If the value of :package: or
           :pkg_set: is a URL, then the value of :remote_path: is unused.
 
@@ -729,7 +729,7 @@ class SW(Util):
           directory of the target Junos device. When the value of :no_copy: is
           ``False`` (the default), then the package is copied from the local
           PyEZ host to the :remote_path: directory of the target Junos device.
-          If the value of :package: or :pkg_set: is a URL, then the value of 
+          If the value of :package: or :pkg_set: is a URL, then the value of
           :no_copy: is unused.
 
         :param bool issu:
@@ -881,7 +881,7 @@ class SW(Util):
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
                     remote_package,
-                    vmhost = vmhost,
+                    vmhost=vmhost,
                     dev_timeout=timeout,
                     **kwargs)
                 return add_ok
@@ -913,7 +913,7 @@ class SW(Util):
                         "installing software on RE0 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
-                        vmhost = vmhost,
+                        vmhost=vmhost,
                         re0=True,
                         dev_timeout=timeout,
                         **kwargs)
@@ -921,7 +921,7 @@ class SW(Util):
                         "installing software on RE1 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
-                        vmhost = vmhost,
+                        vmhost=vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs)
