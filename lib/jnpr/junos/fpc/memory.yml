@@ -1,0 +1,17 @@
+---
+FPCMemory:
+    slot: 2
+    command: show memory
+    grep: Kernel
+    key: ID
+    view: FPCMemoryView
+
+FPCMemoryView:
+    column:
+        id: ID
+        base: Base
+        total: Total(b)
+        free: Free(b)
+        used: Used(b)
+        perc: "%"threads.yml
+        name: Name

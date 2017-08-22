@@ -1,0 +1,32 @@
+---
+FPCHeapAccount:
+    slot: 1
+    command: show heap 0 accounting pc
+    view: FPCHeapAccountView
+
+FPCHeapAccountView:
+    fields:
+        heapBlocks: _FPCHeapBlockTable
+        heapBlocks: _FPCHeapNodeTable
+
+_FPCHeapBlockTable:
+    title: Heap blocks
+    key: alloc
+    view: FPCHeapAccountView
+
+FPCHeapBlockView:
+    column:
+      alloc: "Alloc PC"
+      blocks: Blocks
+      total: "Total(b)"
+
+_FPCHeapNodeTable:
+    title: Small node blocks
+    key: alloc
+    view: FPCHeapAccountView
+
+FPCHeapBlockView:
+    column:
+      alloc: "Alloc PC"
+      blocks: Blocks
+      total: "Total(b)"

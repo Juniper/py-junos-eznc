@@ -1,0 +1,57 @@
+---
+FPCTTPStatsTable:
+    slot: 1
+    command: show ttp statistics
+    view: FPCHeapAccountView
+
+FPCTTPStatsView:
+    fields:
+        TTPStatistics: _FPCTTPStatistics
+        TTPTransmitStatistics: _FPCTTPTransmitStatisticsTable
+        TTPReceiveStatistics: _FPCTTPReceiveStatisticsTable
+        TTPQueueSizes: _FPCTTPQueueSizesTable
+
+_FPCTTPStatisticsTable:
+    title: TTP Statistics
+    key: name
+    view: FPCTTPStatisticsView
+
+FPCTTPStatisticsView:
+    column:
+      rcvd: Receive
+      tras: Transmit
+
+_FPCTTPTransmitStatisticsTable:
+    title: TTP Transmit Statistics
+    key: name
+    view: FPCTTPTransmitStatisticsView
+
+FPCTTPTransmitStatisticsView:
+    column:
+      queue0: Queue 0
+      queue1: Queue 1
+      queue2: Queue 2
+      queue3: Queue 3
+
+_FPCTTPReceiveStatisticsTable:
+    title: TTP Receive Statistics
+    key: name
+    view: FPCTTPReceiveStatisticsView
+
+FPCTTPReceiveStatisticsView:
+    column:
+      queue0: Queue 0
+      queue1: Queue 1
+      queue2: Queue 2
+      queue3: Queue 3
+
+_FPCTTPQueueSizesTable:
+    title: TTP Receive Queue Sizes
+    delimiter: ":"
+    view: FPCTTPQueueSizesView
+
+FPCTTPQueueSizesView:
+    fields:
+        control_plane: Control Plane
+        high: High
+        medium: Medium

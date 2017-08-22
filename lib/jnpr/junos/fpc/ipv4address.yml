@@ -1,0 +1,12 @@
+---
+FPCIPV4AddressTable:
+    slot: 2
+    command: show ipv4 address
+    key: Index
+    view: FPCThreadView
+
+FPCIPV4AddressView:
+    column:
+        index: Index
+        addr: Address
+        name: Name

@@ -1,0 +1,12 @@
+---
+FPCLinkStatTable:
+    slot: 1
+    command: show link stats
+    delimiter: ":"
+    view: FPCMemoryView
+
+FPCLinkStatView:
+    fields:
+        keep_alive: HDLC keepalives
+        ospf: OSPF Hello
+        arp: ARP
