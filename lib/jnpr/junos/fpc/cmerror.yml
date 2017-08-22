@@ -1,0 +1,13 @@
+---
+CMErrorTable:
+    slot: 2
+    command: show cmerror module brief
+    key: module
+    view: CMErrorView
+
+CMErrorView:
+    column:
+        module: Module
+        name: Name
+        errors: Active Errors
+
