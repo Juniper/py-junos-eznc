@@ -1,7 +1,7 @@
 ---
 FPCIPV4AddressTable:
-    slot: 2
     command: show ipv4 address
+    target: fpc1
     key: Index
     view: FPCThreadView
 

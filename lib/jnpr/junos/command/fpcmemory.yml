@@ -1,7 +1,7 @@
 ---
 FPCMemory:
-    slot: 2
     command: show memory
+    target: fpc1
     grep: Kernel
     key: ID
     view: FPCMemoryView

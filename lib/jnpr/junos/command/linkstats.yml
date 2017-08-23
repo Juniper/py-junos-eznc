@@ -1,7 +1,7 @@
 ---
 FPCLinkStatTable:
-    slot: 1
     command: show link stats
+    target: fpc1
     delimiter: ":"
     view: FPCMemoryView
 

@@ -1,7 +1,7 @@
 ---
 FPCTTPStatsTable:
-    slot: 1
     command: show ttp statistics
+    target: fpc1
     view: FPCHeapAccountView
 
 FPCTTPStatsView:

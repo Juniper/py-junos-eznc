@@ -1,7 +1,7 @@
 ---
 FPCThread:
-    slot: 2
     command: show thread
+    target: fpc1
     key: PID
     view: FPCThreadView
 

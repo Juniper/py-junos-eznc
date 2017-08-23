@@ -1,7 +1,7 @@
 ---
 FPCHeapAccount:
-    slot: 1
     command: show heap 0 accounting pc
+    target: fpc1
     view: FPCHeapAccountView
 
 FPCHeapAccountView:
