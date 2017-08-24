@@ -40,17 +40,19 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
     return new_cls
 
 def FactoryCMDTable(cmd, args=None, args_key=None, item=None, target=None,
-                    key=CMDTable.ITEM_NAME_FILTER, view=None, table_name=None):
+                    key='name', view=None, table_name=None, title=None):
     if table_name is None:
         table_name = "CMDTable." + cmd
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
+    new_cls.TARGET = target
     new_cls.GET_ARGS = args or {}
     if args_key is not None:
         new_cls.GET_KEY = args_key
     new_cls.ITEM_FILTER = item
     new_cls.ITEM_NAME_FILTER = key
     new_cls.VIEW = view
+    new_cls.TITLE = title
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
     return new_cls
 
@@ -90,6 +92,44 @@ def FactoryView(fields, **kvargs):
 
     if 'extends' in kvargs:
         base_cls = kvargs['extends']
+        new_cls.FIELDS = deepcopy(base_cls.FIELDS)
+        new_cls.FIELDS.update(fields)
+        if 'groups' in kvargs:
+            new_cls.GROUPS = deepcopy(base_cls.GROUPS)
+            new_cls.GROUPS.update(kvargs['groups'])
+    else:
+        new_cls.FIELDS = fields
+        new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None
+
+    new_cls.__module__ = __name__.replace('factory_cls', 'View')
+    return new_cls
+
+
+def CMDView(fields, **kvargs):
+    """
+    :fields:
+      dictionary of fields, structure of which is ~internal~ and should
+      not be defined explicitly. use the RunstatMaker.Fields() mechanism to
+      create theserather than hardcoding the dictionary structures;
+      since they might change over time.
+
+    :kvargs:
+      'view_name' to name the class.  this could be useful for debug
+      or eventual callback mechanisms.
+
+      'groups' is a dict of name/xpath assocaited to fields
+      this technique would be used to extract fields from
+      node-set elements like port <if-device-flags>.
+
+      'extends' names the base View class to extend.  using this
+      technique you can add to existing defined Views.
+    """
+
+    view_name = kvargs.get('view_name', 'RunstatView')
+    new_cls = type(view_name, (View,), {})
+
+    if 'column' in kvargs:
+        base_cls = kvargs['column']
         new_cls.FIELDS = deepcopy(base_cls.FIELDS)
         new_cls.FIELDS.update(fields)
         if 'groups' in kvargs:

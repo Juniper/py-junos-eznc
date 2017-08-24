@@ -23,9 +23,7 @@ _TSFMT = "%Y%m%d%H%M%S"
 
 
 class CMDTable(object):
-    ITEM_FILTER = None
-    ITEM_NAME_FILTER = 'name'
-    VIEW = None
+    # ITEM_FILTER = 'name'
 
     def __init__(self, dev=None, output=None, path=None):
         """
@@ -36,6 +34,7 @@ class CMDTable(object):
         self._dev = dev
         self.xml = output
         self.view = self.VIEW
+        self.ITEM_FILTER = 'name'
         self._key_list = []
         self._path = path
 
@@ -83,10 +82,15 @@ class CMDTable(object):
                                       self.data).group(1)
             return self
 
-        argkey = vargs[0] if len(vargs) else None
-
         # execute the Junos RPC to retrieve the table
-        self.xml = getattr(self.CMD, self.GET_CMD)(**rpc_args)
+        if hasattr(self, 'TARGET'):
+            rpc_args = {'target': self.TARGET,
+                         'command': self.GET_CMD}
+            self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
+            self.data = self.xml.text
+        else:
+            self.data = self.CLI(self.GET_CMD)
+        print self.data
 
         # returning self for call-chaining purposes, yo!
         return self
@@ -101,9 +105,14 @@ class CMDTable(object):
         return self._dev
 
     @property
-    def CMD(self):
+    def CLI(self):
+        """ the Device.cli instance """
+        return self.D.cli
+
+    @property
+    def RPC(self):
         """ the Device.rpc instance """
-        return self.D.cmd
+        return self.D.rpc
 
     @property
     def view(self):
@@ -144,7 +153,7 @@ class CMDTable(object):
     # -------------------------------------------------------------------------
 
     def _assert_data(self):
-        if self.xml is None:
+        if self.data is None:
             raise RuntimeError("Table is empty, use get()")
 
     def _tkey(self, this, key_list):
@@ -166,7 +175,7 @@ class CMDTable(object):
 
     def _keyspec(self):
         """ returns tuple (keyname-xpath, item-xpath) """
-        return (self.ITEM_NAME_XPATH, self.ITEM_XPATH)
+        return (self.ITEM_NAME_FILTER, self.ITEM_FILTER)
 
     def _clearkeys(self):
         self._key_list = []
@@ -180,7 +189,7 @@ class CMDTable(object):
     # ------------------------------------------------------------------------
 
     def _keys(self):
-        """ return a list of data item keys from the Table XML """
+        """ return a list of data item keys from the data string """
 
         self._assert_data()
         key_value, xpath = self._keyspec()

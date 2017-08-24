@@ -17,6 +17,7 @@ __all__ = ['FactoryLoader']
 # internally used shortcuts
 
 _VIEW = FactoryView
+_CMDVIEW = CMDView
 _FIELDS = ViewFields
 _GET = FactoryOpTable
 _TABLE = FactoryTable
@@ -188,6 +189,28 @@ class FactoryLoader(object):
         self.catalog[view_name] = cls
         return cls
 
+    # -------------------------------------------------------------------------
+
+    def _build_cmdview(self, view_name):
+        """ build a new View definition """
+        if view_name in self.catalog:
+            return self.catalog[view_name]
+
+        view_dict = self._catalog_dict[view_name]
+        kvargs = {'view_name': view_name}
+
+        # if there are field groups, then get that now.
+        if 'column' in view_dict:
+            kvargs['column'] = view_dict['column']
+
+        fields = _FIELDS()
+        fg_list = [name for name in view_dict if name.startswith('fields')]
+        for fg_name in fg_list:
+            self._add_view_fields(view_dict, fg_name, fields)
+
+        cls = _VIEW(fields.end, **kvargs)
+        self.catalog[view_name] = cls
+        return cls
     # -----------------------------------------------------------------------
     # Create a Get-Table from YAML definition
     # -----------------------------------------------------------------------
