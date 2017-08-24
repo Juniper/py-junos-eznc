@@ -39,16 +39,15 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
     new_cls.__module__ = __name__.replace('factory_cls', 'OpTable')
     return new_cls
 
-def FactoryCMDTable(cmd, args=None, args_key=None, item=None, target=None,
+def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
                     key='name', view=None, table_name=None, title=None):
     if table_name is None:
         table_name = "CMDTable." + cmd
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
     new_cls.TARGET = target
+    new_cls.KEY_ITEMS = key_items
     new_cls.GET_ARGS = args or {}
-    if args_key is not None:
-        new_cls.GET_KEY = args_key
     new_cls.ITEM_FILTER = item
     new_cls.ITEM_NAME_FILTER = key
     new_cls.VIEW = view

@@ -2,8 +2,10 @@
 FPCMemory:
     command: show memory
     target: fpc1
-    grep: Kernel
     key: ID
+    key_items:
+      - 0
+      - 1
     view: FPCMemoryView
 
 FPCMemoryView:
@@ -13,5 +15,5 @@ FPCMemoryView:
         total: Total(b)
         free: Free(b)
         used: Used(b)
-        perc: "%"threads.yml
+        perc: "%"
         name: Name
