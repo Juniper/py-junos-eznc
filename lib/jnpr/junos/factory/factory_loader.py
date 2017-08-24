@@ -21,6 +21,7 @@ _FIELDS = ViewFields
 _GET = FactoryOpTable
 _TABLE = FactoryTable
 _CFGTBL = FactoryCfgTable
+_CMDTBL = FactoryCMDTable
 
 
 class FactoryLoader(object):
@@ -53,6 +54,7 @@ class FactoryLoader(object):
 
         self._item_optables = []    # list of the get/op-tables
         self._item_cfgtables = []   # list of get/cfg-tables
+        self._item_cmdtables = []   # list of commands with unstructured data o/p
         self._item_views = []        # list of views to build
         self._item_tables = []       # list of tables to build
 
@@ -211,6 +213,30 @@ class FactoryLoader(object):
         return cls
 
     # -----------------------------------------------------------------------
+    # Create a Get-Table from YAML definition
+    # -----------------------------------------------------------------------
+
+    def _build_cmdtable(self, table_name):
+        """ build a new command-Table definition """
+        if table_name in self.catalog:
+            return self.catalog[table_name]
+
+        tbl_dict = self._catalog_dict[table_name]
+        kvargs = deepcopy(tbl_dict)
+
+        cmd = kvargs.pop('command')
+        kvargs['table_name'] = table_name
+
+        if 'view' in tbl_dict:
+            view_name = tbl_dict['view']
+            cls_view = self.catalog.get(view_name, self._build_view(view_name))
+            kvargs['view'] = cls_view
+
+        cls = _CMDTBL(cmd, **kvargs)
+        self.catalog[table_name] = cls
+        return cls
+
+    # -----------------------------------------------------------------------
     # Create a Table class from YAML definition
     # -----------------------------------------------------------------------
 
@@ -263,6 +289,8 @@ class FactoryLoader(object):
                 self._item_cfgtables.append(k)
             elif 'set' in v:
                 self._item_cfgtables.append(k)
+            elif 'command' in v:
+                self._item_cmdtables.append(k)
             elif 'view' in v:
                 self._item_tables.append(k)
             else:
@@ -278,6 +306,7 @@ class FactoryLoader(object):
 
         list(map(self._build_optable, self._item_optables))
         list(map(self._build_cfgtable, self._item_cfgtables))
+        list(map(self._build_cmdtable, self._item_cmdtables))
         list(map(self._build_table, self._item_tables))
         list(map(self._build_view, self._item_views))
 

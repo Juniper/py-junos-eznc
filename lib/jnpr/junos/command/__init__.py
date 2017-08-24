@@ -11,7 +11,8 @@ __all__ = []
 class MetaPathFinder(object):
     def find_module(self, fullname, path=None):
         mod = fullname.split('.')[-1]
-        if mod in [os.path.splitext(i)[0] for i in os.listdir(path[0])]:
+        if mod in [os.path.splitext(i)[0] for i in os.listdir(
+                os.path.dirname(__file__))]:
             return MetaPathLoader()
 
 
@@ -20,7 +21,6 @@ class MetaPathLoader(object):
         # print('load_module {}'.format(fullname))
         if fullname in sys.modules:
             return sys.modules[fullname]
-
         mod = fullname.split('.')[-1]
         modObj = types.ModuleType(mod,
                                   'Module created to provide a context for %s'

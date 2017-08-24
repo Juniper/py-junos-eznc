@@ -4,6 +4,7 @@ from copy import deepcopy
 # local
 from jnpr.junos.factory.cfgtable import CfgTable
 from jnpr.junos.factory.optable import OpTable
+from jnpr.junos.factory.cmdtable import CMDTable
 from jnpr.junos.factory.table import Table
 
 from jnpr.junos.factory.view import View
@@ -23,7 +24,6 @@ def FactoryCfgTable(table_name=None, data_dict={}):
     new_cls.__module__ = __name__.replace('factory_cls', 'CfgTable')
     return new_cls
 
-
 def FactoryOpTable(cmd, args=None, args_key=None, item=None,
                    key=OpTable.ITEM_NAME_XPATH, view=None, table_name=None):
     if table_name is None:
@@ -39,6 +39,20 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
     new_cls.__module__ = __name__.replace('factory_cls', 'OpTable')
     return new_cls
 
+def FactoryCMDTable(cmd, args=None, args_key=None, item=None, target=None,
+                    key=CMDTable.ITEM_NAME_FILTER, view=None, table_name=None):
+    if table_name is None:
+        table_name = "CMDTable." + cmd
+    new_cls = type(table_name, (CMDTable,), {})
+    new_cls.GET_CMD = cmd
+    new_cls.GET_ARGS = args or {}
+    if args_key is not None:
+        new_cls.GET_KEY = args_key
+    new_cls.ITEM_FILTER = item
+    new_cls.ITEM_NAME_FILTER = key
+    new_cls.VIEW = view
+    new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
+    return new_cls
 
 def FactoryTable(item, key=Table.ITEM_NAME_XPATH, view=None, table_name=None):
     if table_name is None:
