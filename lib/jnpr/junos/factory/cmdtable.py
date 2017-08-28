@@ -1,29 +1,65 @@
 import re
-
-# 3rd-party
-from lxml import etree
+import copy
+# https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
 
 # local
-from jnpr.junos.factory.table import Table
-from jnpr.junos.jxml import remove_namespaces
+from jnpr.junos.exception import RpcError
+from jnpr.junos.utils.start_shell import StartShell
 
 # stdlib
 from inspect import isclass
-from time import time
-from datetime import datetime
-import os
-
-# 3rd-party
-from lxml import etree
+from collections import OrderedDict
 
 import json
 from jnpr.junos.factory.to_json import TableJSONEncoder
+import pyparsing as pp
 
 _TSFMT = "%Y%m%d%H%M%S"
 
 
+class Parser(object):
+    def __init__(self, data, key, key_items, title, view):
+        self._data = data
+        self._key = key
+        self._key_items = key_items
+        self._title = title
+        self._view = view
+
+    def parse(self):
+        print self._data
+        lines = self._data.splitlines()
+        for line in lines:
+            columns = self._view.COLUMN.values()
+            d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
+            if d.pop():
+                col_offsets = {}
+                col_order = OrderedDict()
+                hyp_offsets = []
+                for column in columns:
+                    for result, start, end in pp.Literal(column).scanString(line):
+                        col_offsets[(start, end)] = result[0]
+                for key in sorted(col_offsets.iterkeys()):
+                    col_order[key] = col_offsets[key]
+                next_line = lines[lines.index(line)+1]
+                exp = pp.Word('-')
+                for result, start, end in exp.scanString(next_line):
+                    hyp_offsets.append((start, end))
+                if len(hyp_offsets) != 0:
+                    datas = lines[lines.index(line)+2:]
+                else:
+                    datas = lines[lines.index(line) + 2:]
+                output = {}
+                for data in datas:
+                    tmp_dict = {}
+                    for key, val in col_order.items():
+                        tmp_dict[val] = (data[key[0]: key[1]]).strip()
+                    if tmp_dict[self._key] == '':
+                        break
+                    output[tmp_dict[self._key]] = tmp_dict
+                return output
+
+
 class CMDTable(object):
-    # ITEM_FILTER = 'name'
 
     def __init__(self, dev=None, output=None, path=None):
         """
@@ -33,10 +69,13 @@ class CMDTable(object):
         """
         self._dev = dev
         self.xml = output
-        self.view = self.VIEW
+        self.view = None
         self.ITEM_FILTER = 'name'
         self._key_list = []
         self._path = path
+        self._parser = None
+        self.output = None
+
 
     # -------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -86,11 +125,23 @@ class CMDTable(object):
         if hasattr(self, 'TARGET'):
             rpc_args = {'target': self.TARGET,
                          'command': self.GET_CMD}
-            self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
-            self.data = self.xml.text
+            try:
+                self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
+                self.data = self.xml.text
+            except RpcError:
+                with StartShell(self.D) as ss:
+                    ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
+                                                          self.GET_CMD))
+                    if ret[0]:
+                        self.data = ret[1]
         else:
             self.data = self.CLI(self.GET_CMD)
-        print self.data
+        # print self.data
+
+        # placeholder for parsing code
+        self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
+                              self.VIEW)
+        self.output = self._parser.parse()
 
         # returning self for call-chaining purposes, yo!
         return self
@@ -136,14 +187,6 @@ class CMDTable(object):
         return self.D.hostname
 
     @property
-    def is_container(self):
-        """
-        True if this table does not have records, but is a container of fields
-        False otherwise
-        """
-        return self.ITEM_XPATH is None
-
-    @property
     def key_list(self):
         """ the list of keys, as property for caching """
         return self._key_list
@@ -158,24 +201,21 @@ class CMDTable(object):
 
     def _tkey(self, this, key_list):
         """ keys with missing XPATH nodes are set to None """
-        keys = []
-        for k in key_list:
-            try:
-                keys.append(this.xpath(k)[0].text)
-            except BaseException:
-                keys.append(None)
-        return tuple(keys)
+        # placeholder
+        pass
 
-    def _keys_composite(self, xpath, key_list):
+    def _keys_composite(self, data, key_list):
         """ composite keys return a tuple of key-items """
-        return [self._tkey(item, key_list) for item in self.xml.xpath(xpath)]
+        # placeholder
+        pass
 
-    def _keys_simple(self, xpath):
-        return [x.text.strip() for x in self.xml.xpath(xpath)]
+    def _keys_simple(self, data):
+        # placeholder
+        pass
 
     def _keyspec(self):
         """ returns tuple (keyname-xpath, item-xpath) """
-        return (self.ITEM_NAME_FILTER, self.ITEM_FILTER)
+        return (self.KEY, self.ITEM_FILTER)
 
     def _clearkeys(self):
         self._key_list = []
@@ -191,24 +231,7 @@ class CMDTable(object):
     def _keys(self):
         """ return a list of data item keys from the data string """
 
-        self._assert_data()
-        key_value, xpath = self._keyspec()
-
-        if isinstance(key_value, str):
-            # Check if pipe is in the key_value, if so append xpath
-            # to each value
-            if ' | ' in key_value:
-                return self._keys_simple(' | '.join([xpath + '/' + x for x in
-                                                     key_value.split(' | ')]))
-            return self._keys_simple(xpath + '/' + key_value)
-
-        if not isinstance(key_value, list):
-            raise RuntimeError(
-                "What to do with key, table:'%s'" %
-                self.__class__.__name__)
-
-        # ok, so it's a list, which means we need to extract tuple values
-        return self._keys_composite(xpath, key_value)
+        return self.output.keys()
 
     def keys(self):
         # if the key_list has been cached, then use it
@@ -258,7 +281,7 @@ class CMDTable(object):
         cls_name = self.__class__.__name__
         source = self.D.hostname if self.D is not None else self._path
 
-        if self.xml is None:
+        if self.data is None:
             return "%s:%s - Table empty" % (cls_name, source)
         else:
             n_items = len(self.keys())

@@ -8,7 +8,7 @@ from jnpr.junos.factory.cmdtable import CMDTable
 from jnpr.junos.factory.table import Table
 
 from jnpr.junos.factory.view import View
-from jnpr.junos.factory.viewfields import ViewFields
+from jnpr.junos.factory.cmdview import CMDView
 
 from jnpr.junos.utils.config import Config
 
@@ -49,7 +49,7 @@ def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
     new_cls.KEY_ITEMS = key_items
     new_cls.GET_ARGS = args or {}
     new_cls.ITEM_FILTER = item
-    new_cls.ITEM_NAME_FILTER = key
+    new_cls.KEY = key
     new_cls.VIEW = view
     new_cls.TITLE = title
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
@@ -104,7 +104,7 @@ def FactoryView(fields, **kvargs):
     return new_cls
 
 
-def CMDView(fields, **kvargs):
+def FactoryCMDView(fields, **kvargs):
     """
     :fields:
       dictionary of fields, structure of which is ~internal~ and should
@@ -125,18 +125,14 @@ def CMDView(fields, **kvargs):
     """
 
     view_name = kvargs.get('view_name', 'RunstatView')
-    new_cls = type(view_name, (View,), {})
+    new_cls = type(view_name, (CMDView,), {})
 
     if 'column' in kvargs:
-        base_cls = kvargs['column']
-        new_cls.FIELDS = deepcopy(base_cls.FIELDS)
-        new_cls.FIELDS.update(fields)
-        if 'groups' in kvargs:
-            new_cls.GROUPS = deepcopy(base_cls.GROUPS)
-            new_cls.GROUPS.update(kvargs['groups'])
+        new_cls.COLUMN = deepcopy(kvargs['column'])
+        new_cls.COLUMN.update(fields)
     else:
         new_cls.FIELDS = fields
         new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None
 
-    new_cls.__module__ = __name__.replace('factory_cls', 'View')
+    new_cls.__module__ = __name__.replace('factory_cls', 'CMDView')
     return new_cls

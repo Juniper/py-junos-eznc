@@ -17,7 +17,7 @@ __all__ = ['FactoryLoader']
 # internally used shortcuts
 
 _VIEW = FactoryView
-_CMDVIEW = CMDView
+_CMDVIEW = FactoryCMDView
 _FIELDS = ViewFields
 _GET = FactoryOpTable
 _TABLE = FactoryTable
@@ -208,7 +208,7 @@ class FactoryLoader(object):
         for fg_name in fg_list:
             self._add_view_fields(view_dict, fg_name, fields)
 
-        cls = _VIEW(fields.end, **kvargs)
+        cls = _CMDVIEW(fields.end, **kvargs)
         self.catalog[view_name] = cls
         return cls
     # -----------------------------------------------------------------------
@@ -252,7 +252,7 @@ class FactoryLoader(object):
 
         if 'view' in tbl_dict:
             view_name = tbl_dict['view']
-            cls_view = self.catalog.get(view_name, self._build_view(view_name))
+            cls_view = self.catalog.get(view_name, self._build_cmdview(view_name))
             kvargs['view'] = cls_view
 
         cls = _CMDTBL(cmd, **kvargs)
