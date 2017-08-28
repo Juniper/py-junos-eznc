@@ -320,9 +320,8 @@ class _RpcMetaExec(object):
                     if not isinstance(arg_value, (tuple, list)):
                         arg_value = [arg_value]
                     for a in arg_value:
-                        if ((sys.version < '3' and
-                           not isinstance(a, (bool, str, unicode))) or
-                           not isinstance(a, (bool, str))):
+                        if not isinstance(a, (bool, str, unicode)
+                                          if sys.version < '3' else (bool, str)):
                             raise TypeError("The value %s for argument %s"
                                             " is of %s. Argument "
                                             "values must be a string, "
