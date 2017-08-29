@@ -16,6 +16,10 @@ import pyparsing as pp
 
 _TSFMT = "%Y%m%d%H%M%S"
 
+class DataRegEx:
+    id = '%d+'
+    base = '\w+'
+    name = '\w+\s?'
 
 class Parser(object):
     def __init__(self, data, key, key_items, title, view):
@@ -50,12 +54,30 @@ class Parser(object):
                     datas = lines[lines.index(line) + 2:]
                 output = {}
                 for data in datas:
-                    tmp_dict = {}
-                    for key, val in col_order.items():
-                        tmp_dict[val] = (data[key[0]: key[1]]).strip()
-                    if tmp_dict[self._key] == '':
+                    if data.strip() == '':
                         break
-                    output[tmp_dict[self._key]] = tmp_dict
+                    tmp_dict = {}
+                    col_keys = col_order.keys()
+                    for i, key in enumerate(col_order):
+                        try:
+                            if i==0:
+                                start_index, end_index = key[0], col_keys[i + 1][0]
+                            else:
+                                start_index, end_index = col_keys[i-1][1], col_keys[i + 1][0]
+                            val = data[start_index: end_index].split()
+                        except IndexError:
+                            start_index, end_index = col_keys[i-1][1], -1
+                            val = data[start_index:].split()
+                        # print start_index, end_index, val
+                        if len(val) >= 1:
+                            tmp_dict[col_order[key]] = val[0].strip()
+                            if len(val) > 1 and end_index == -1:
+                                tmp_dict[col_order[key]] = ' '.join(val).strip()
+                    if self._key_items is None:
+                        output[tmp_dict[self._key]] = tmp_dict
+                    elif len(self._key_items) > 0 and tmp_dict[self._key] in self._key_items:
+                        output[tmp_dict[self._key]] = tmp_dict
+
                 return output
 
 
@@ -250,12 +272,7 @@ class CMDTable(object):
         """ returns list of table entry items() """
 
         self._assert_data()
-        if self.view is None:
-            # no View, so provide XML for each item
-            return [this for this in self]
-        else:
-            # view object for each item
-            return [list(this.items()) for this in self]
+        return self.output.values()
 
     # ------------------------------------------------------------------------
     # items
@@ -263,7 +280,7 @@ class CMDTable(object):
 
     def items(self):
         """ returns list of tuple(name,values) for each table entry """
-        return list(zip(self.keys(), self.values()))
+        return self.output.iteritems()
 
     def to_json(self):
         """
@@ -295,11 +312,8 @@ class CMDTable(object):
         """ iterate over each time in the table """
         self._assert_data()
 
-        def as_xml(table, view_xml): return view_xml
-        view_as = self.view or as_xml
-
-        for this in self.xml.xpath(self.ITEM_XPATH):
-            yield view_as(self, this)
+        for key, value in self.output.iteritems():
+            yield key, value
 
     def __getitem__(self, value):
         """
@@ -316,48 +330,7 @@ class CMDTable(object):
           when it is a <slice> then this will return a <list> of View widgets
         """
         self._assert_data()
-        keys = self.keys()
-
-        if isinstance(value, int):
-            # if selection by index, then grab the key at this index and
-            # recursively call this method using that key, yo!
-            return self.__getitem__(keys[value])
-
-        if isinstance(value, slice):
-            # implements the 'slice' mechanism
-            return [self.__getitem__(key) for key in keys[value]]
-
-        # ---[ get_xpath ] ----------------------------------------------------
-
-        def get_xpath(find_value):
-            namekey_xpath, item_xpath = self._keyspec()
-            xnkv = '[{0}="{1}"]'
-
-            if isinstance(find_value, str):
-                # find by name, simple key
-                return item_xpath + xnkv.format(namekey_xpath, find_value)
-
-            if isinstance(find_value, tuple):
-                # composite key (value1, value2, ...) will create an
-                # iterative xpath of the fmt statement for each key/value pair
-                # skip over missing keys
-                kv = []
-                for k, v in zip(namekey_xpath, find_value):
-                    if v is not None:
-                        kv.append(xnkv.format(k.replace('_', '-'), v))
-                xpf = ''.join(kv)
-                return item_xpath + xpf
-
-        # ---[END: get_xpath ] ------------------------------------------------
-
-        found = self.xml.xpath(get_xpath(value))
-        if not len(found):
-            return None
-
-        def as_xml(table, view_xml): return view_xml
-        use_view = self.view or as_xml
-
-        return use_view(table=self, view_xml=found[0])
+        return self.output[value]
 
     def __contains__(self, key):
         """ membership for use with 'in' """
