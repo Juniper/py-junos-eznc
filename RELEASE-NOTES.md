@@ -1,7 +1,14 @@
-## Release 2.1.6.dev0 - 31 July 2017
+## Release 2.1.6 - 31 August 2017
 ### Features Added:
+- PyEZ fact gathering support for JDM of Junos Node Slicing. #761
+- Enhanced support for GNFs in Junos Node Slicing. #761
+- Add vmhost parameter to SW.install() to support upgrading the VM Host. #773
 
 ### Bugs Fixed:
+- Fix typo in docker run example. #771
+- Aadding ietf-softwire get_config() example. #772
+- Fix for python3 remove_ns issue. #767
+- Fix python2/3 compatibility. #776
 
 
 ## Release 2.1.5 - 31 July 2017
