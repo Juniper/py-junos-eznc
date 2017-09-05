@@ -146,7 +146,8 @@ class CMDTable(object):
         # execute the Junos RPC to retrieve the table
         if hasattr(self, 'TARGET'):
             rpc_args = {'target': self.TARGET,
-                         'command': self.GET_CMD}
+                         'command': self.GET_CMD,
+                        'timeout':'0'}
             try:
                 self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
                 self.data = self.xml.text
