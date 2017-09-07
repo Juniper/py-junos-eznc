@@ -2,7 +2,7 @@
 SystemQueuesTable:
   command: show system queues
   key: output interface
-  view: CMErrorView
+  view: SystemQueuesView
 
 SystemQueuesView:
   column:

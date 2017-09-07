@@ -30,23 +30,10 @@ class CMDView(object):
         :table:
           instance of the RunstatTable
 
-        :view_xml:
-          this should be an lxml etree Elemenet object.  This
-          constructor also accepts a list with a single item/XML
+        :data:
+          this should data
         """
         pass
-
-
-    def _init_xml(self, given_xml):
-        self._xml = given_xml
-        if self.GROUPS is not None:
-            self._groups = {}
-            for xg_name, xg_xpath in self.GROUPS.items():
-                xg_xml = self._xml.xpath(xg_xpath)
-                # @@@ this is technically an error; need to trap it
-                if not len(xg_xml):
-                    continue
-                self._groups[xg_name] = xg_xml[0]
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -166,26 +153,6 @@ class CMDView(object):
     def asview(self, view_cls):
         """ create a new View object for this item """
         return view_cls(self._table, self._xml)
-
-    def refresh(self):
-        """
-        ~~~ EXPERIMENTAL ~~~
-        refresh the data from the Junos device.  this only works if the table
-        provides an "args_key", does not update the original table, just this
-        specific view/item
-        """
-        warnings.warn("Experimental method: refresh")
-
-        if self._table.can_refresh is not True:
-            raise RuntimeError("table does not support this feature")
-
-        # create a new table instance that gets only the specific named
-        # value of this view
-
-        tbl_xml = self._table._rpc_get(self.name)
-        new_xml = tbl_xml.xpath(self._table.ITEM_XPATH)[0]
-        self._init_xml(new_xml)
-        return self
 
     def to_json(self):
         """

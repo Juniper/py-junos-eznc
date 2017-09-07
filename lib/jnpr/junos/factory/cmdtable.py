@@ -30,7 +30,7 @@ class Parser(object):
         self._view = view
 
     def parse(self):
-        print self._data
+        # print self._data
         lines = self._data.splitlines()
         for line in lines:
             columns = self._view.COLUMN.values()
@@ -144,7 +144,7 @@ class CMDTable(object):
             return self
 
         # execute the Junos RPC to retrieve the table
-        if hasattr(self, 'TARGET'):
+        if self.TARGET is not None:
             rpc_args = {'target': self.TARGET,
                          'command': self.GET_CMD,
                         'timeout':'0'}
@@ -159,7 +159,7 @@ class CMDTable(object):
                         self.data = ret[1]
         else:
             self.data = self.CLI(self.GET_CMD)
-        # print self.data
+        print self.data
 
         # placeholder for parsing code
         self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
