@@ -1,12 +1,12 @@
 ---
 FPCIPV4AddressTable:
-    command: show ipv4 address
-    target: fpc1
-    key: Index
-    view: FPCThreadView
+  command: show ipv4 address
+  target: fpc1
+  key: Index
+  view: FPCThreadView
 
 FPCIPV4AddressView:
-    column:
-        index: Index
-        addr: Address
-        name: Name
+  column:
+    index: Index
+    addr: Address
+    name: Name
