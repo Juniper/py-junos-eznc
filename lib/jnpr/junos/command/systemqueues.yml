@@ -1,0 +1,14 @@
+---
+SystemQueuesTable:
+  command: show system queues
+  key: output interface
+  view: CMErrorView
+
+SystemQueuesView:
+  column:
+    interface: output interface
+    bytes: bytes
+    max_bytes: max
+    packets: packets
+    max_packets: max
+    drops: drops

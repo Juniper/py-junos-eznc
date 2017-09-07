@@ -1,4 +1,3 @@
-import importlib
 import sys
 import os
 import yaml
@@ -7,6 +6,7 @@ import types
 from jnpr.junos.factory.factory_loader import FactoryLoader
 
 __all__ = []
+
 
 class MetaPathFinder(object):
     def find_module(self, fullname, path=None):
