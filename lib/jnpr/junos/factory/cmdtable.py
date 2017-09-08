@@ -5,6 +5,7 @@ import copy
 # local
 from jnpr.junos.exception import RpcError
 from jnpr.junos.utils.start_shell import StartShell
+from jnpr.junos.factory.state_machine import StateMachine
 
 # stdlib
 from inspect import isclass
@@ -14,71 +15,65 @@ import json
 from jnpr.junos.factory.to_json import TableJSONEncoder
 import pyparsing as pp
 
-_TSFMT = "%Y%m%d%H%M%S"
 
-class DataRegEx:
-    id = '%d+'
-    base = '\w+'
-    name = '\w+\s?'
-
-class Parser(object):
-    def __init__(self, data, key, key_items, title, view):
-        self._data = data
-        self._key = key
-        self._key_items = key_items
-        self._title = title
-        self._view = view
-
-    def parse(self):
-        # print self._data
-        lines = self._data.splitlines()
-        for line in lines:
-            columns = self._view.COLUMN.values()
-            d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
-            if d.pop():
-                col_offsets = {}
-                col_order = OrderedDict()
-                hyp_offsets = []
-                for column in columns:
-                    for result, start, end in pp.Literal(column).scanString(line):
-                        col_offsets[(start, end)] = result[0]
-                for key in sorted(col_offsets.iterkeys()):
-                    col_order[key] = col_offsets[key]
-                next_line = lines[lines.index(line)+1]
-                exp = pp.Word('-')
-                for result, start, end in exp.scanString(next_line):
-                    hyp_offsets.append((start, end))
-                if len(hyp_offsets) != 0:
-                    datas = lines[lines.index(line)+2:]
-                else:
-                    datas = lines[lines.index(line) + 2:]
-                output = {}
-                for data in datas:
-                    if data.strip() == '':
-                        break
-                    tmp_dict = {}
-                    col_keys = col_order.keys()
-                    for i, key in enumerate(col_order):
-                        try:
-                            if i==0:
-                                start_index, end_index = key[0], col_keys[i + 1][0]
-                            else:
-                                start_index, end_index = col_keys[i-1][1], col_keys[i + 1][0]
-                            val = data[start_index: end_index].split()
-                        except IndexError:
-                            start_index, end_index = col_keys[i-1][1], -1
-                            val = data[start_index:].split()
-                        # print start_index, end_index, val
-                        if len(val) >= 1:
-                            tmp_dict[col_order[key]] = val[0].strip()
-                            if len(val) > 1 and end_index == -1:
-                                tmp_dict[col_order[key]] = ' '.join(val).strip()
-                    if self._key_items is None:
-                        output[tmp_dict[self._key]] = tmp_dict
-                    elif len(self._key_items) > 0 and tmp_dict[self._key] in self._key_items:
-                        output[tmp_dict[self._key]] = tmp_dict
-
-                return output
+# class Parser(object):
+#     def __init__(self, data, key, key_items, title, view):
+#         self._data = data
+#         self._key = key
+#         self._key_items = key_items
+#         self._title = title
+#         self._view = view
+#
+#     def parse(self):
+#         # print self._data
+#         lines = self._data.splitlines()
+#         for line in lines:
+#             columns = self._view.COLUMN.values()
+#             d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
+#             if d.pop():
+#                 col_offsets = {}
+#                 col_order = OrderedDict()
+#                 hyp_offsets = []
+#                 for column in columns:
+#                     for result, start, end in pp.Literal(column).scanString(line):
+#                         col_offsets[(start, end)] = result[0]
+#                 for key in sorted(col_offsets.iterkeys()):
+#                     col_order[key] = col_offsets[key]
+#                 next_line = lines[lines.index(line)+1]
+#                 exp = pp.Word('-')
+#                 for result, start, end in exp.scanString(next_line):
+#                     hyp_offsets.append((start, end))
+#                 if len(hyp_offsets) != 0:
+#                     datas = lines[lines.index(line)+2:]
+#                 else:
+#                     datas = lines[lines.index(line) + 2:]
+#                 output = {}
+#                 for data in datas:
+#                     if data.strip() == '':
+#                         break
+#                     tmp_dict = {}
+#                     col_keys = col_order.keys()
+#                     for i, key in enumerate(col_order):
+#                         try:
+#                             if i==0:
+#                                 start_index, end_index = key[0], col_keys[i + 1][0]
+#                             else:
+#                                 start_index, end_index = col_keys[i-1][1], col_keys[i + 1][0]
+#                             val = data[start_index: end_index].split()
+#                         except IndexError:
+#                             start_index, end_index = col_keys[i-1][1], -1
+#                             val = data[start_index:].split()
+#                         # print start_index, end_index, val
+#                         if len(val) >= 1:
+#                             tmp_dict[col_order[key]] = val[0].strip()
+#                             if len(val) > 1 and end_index == -1:
+#                                 tmp_dict[col_order[key]] = ' '.join(val).strip()
+#                     if self._key_items is None:
+#                         output[tmp_dict[self._key]] = tmp_dict
+#                     elif len(self._key_items) > 0 and tmp_dict[self._key] in self._key_items:
+#                         output[tmp_dict[self._key]] = tmp_dict
+#
+#                 return output
 
 
 class CMDTable(object):
@@ -97,6 +92,7 @@ class CMDTable(object):
         self._path = path
         self._parser = None
         self.output = None
+        self._sm = StateMachine(self)
 
 
     # -------------------------------------------------------------------------
@@ -159,12 +155,17 @@ class CMDTable(object):
                         self.data = ret[1]
         else:
             self.data = self.CLI(self.GET_CMD)
+
+        # state machine
+
         print self.data
+        self.output = self._sm.parse(self.data)
+        print self.output
 
         # placeholder for parsing code
-        self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
-                              self.VIEW)
-        self.output = self._parser.parse()
+        # self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
+        #                       self.VIEW)
+        # self.output = self._parser.parse()
 
         # returning self for call-chaining purposes, yo!
         return self
