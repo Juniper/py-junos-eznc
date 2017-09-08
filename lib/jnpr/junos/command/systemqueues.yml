@@ -1,10 +1,10 @@
 ---
-SystemQueuesTable:
+SystemQueuesOPTable:
   command: show system queues
   key: output interface
-  view: SystemQueuesView
+  view: SystemQueuesOPView
 
-SystemQueuesView:
+SystemQueuesOPView:
   column:
     interface: output interface
     bytes: bytes
@@ -12,3 +12,18 @@ SystemQueuesView:
     packets: packets
     max_packets: max
     drops: drops
+
+SystemQueuesINTable:
+  command: show system queues
+  key: input protocol
+  view: SystemQueuesINView
+
+SystemQueuesINView:
+  column:
+    interface: input protocol
+    bytes: bytes
+    max_bytes: max
+    packets: packets
+    max_packets: max
+    drops: drops
+

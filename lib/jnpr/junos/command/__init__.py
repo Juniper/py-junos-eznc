@@ -5,6 +5,8 @@ import types
 
 from jnpr.junos.factory.factory_loader import FactoryLoader
 
+import yamlordereddictloader
+
 __all__ = []
 
 
@@ -28,7 +30,8 @@ class MetaPathLoader(object):
         with open(os.path.join(os.path.dirname(__file__), mod + '.yml'), 'r')\
                 as stream:
             try:
-                modules = FactoryLoader().load(yaml.load(stream))
+                modules = FactoryLoader().load(yaml.load(stream,
+                                                         Loader=yamlordereddictloader.Loader))
             except yaml.YAMLError as exc:
                 raise ImportError("%s is not loaded" % mod)
         for k, v in modules.items():

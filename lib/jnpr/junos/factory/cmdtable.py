@@ -157,11 +157,9 @@ class CMDTable(object):
             self.data = self.CLI(self.GET_CMD)
 
         # state machine
-
         print self.data
         self.output = self._sm.parse(self.data)
-        print self.output
-
+        # print self.output
         # placeholder for parsing code
         # self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
         #                       self.VIEW)
