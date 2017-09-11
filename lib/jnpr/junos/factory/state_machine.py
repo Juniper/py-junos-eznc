@@ -10,6 +10,7 @@ class Identifiers:
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
     words = pp.OneOrMore(word)
     percentage = pp.Word(pp.nums) + pp.Literal('%')
+    header_bar = pp.OneOrMore(pp.Word('-')) + pp.StringEnd()
 
 
 def is_integer(item):
@@ -18,6 +19,7 @@ def is_integer(item):
     except pp.ParseException as ex:
         return False
     return True
+
 
 class StateMachine(Machine):
 
@@ -31,7 +33,8 @@ class StateMachine(Machine):
         self.states = ['row_column']
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
-             'conditions': 'match_columns', 'after': 'parse_raw_column'}, ]
+             'conditions': 'match_columns', 'before': 'check_header_bar',
+             'after': 'parse_raw_column'}, ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
 
@@ -44,13 +47,31 @@ class StateMachine(Machine):
 
     def match_columns(self, event):
         columns = self._view.COLUMN.values()
+        col_parser = reduce(lambda x, y: x & y, [pp.Literal(i) for i in columns])
         for line in self._lines:
-            d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
-            if d.pop():
-                current_index = self._lines.index(line)
-                self._lines = self._lines[current_index:]
-                return True
+            if self._parse_literal(line, col_parser):
+                d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
+                if d.pop():
+                    current_index = self._lines.index(line)
+                    self._lines = self._lines[current_index:]
+                    return True
         return False
+
+    def _parse_literal(self, line, col_parser):
+        try:
+            if col_parser.searchString(line):
+                return True
+        except pp.ParseException as ex:
+            return False
+
+    def check_header_bar(self, event):
+        line = self._lines[1]
+        try:
+            Identifiers.header_bar.parseString(line, parseAll=True)
+            self._lines.pop(1)
+        except pp.ParseException as ex:
+            return False
+        return True
 
     def parse_raw_column(self, event):
         col_offsets = {}
@@ -66,17 +87,17 @@ class StateMachine(Machine):
                     col_order[key] = x
                     user_defined_columns.pop(x)
                     break
-        print col_order
+        # print col_order
         key = self._table.KEY
         if key not in self._view.COLUMN and key in self._view.COLUMN.values():
             for user_provided, from_table in self._view.COLUMN.items():
                 if key == from_table:
                     key = user_provided
-        items = re.split('\s\s+', self._lines[1])
+        items = re.split('\s\s+', self._lines[1].strip())
 
         post_integer_data_types = map(is_integer, items)
         for line in self._lines[1:]:
-            items = re.split('\s\s+', line)
+            items = re.split('\s\s+', line.strip())
             if len(items) == len(col_order):
                 post_integer_data_types, pre_integer_data_types = \
                     map(is_integer, items), post_integer_data_types
