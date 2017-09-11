@@ -1,14 +1,14 @@
 ---
 LUChipStatusTable:
-    command: show lkup-asic wedge-client
-    target: fpc1
-    key: Client ID
-    view: LUChipStatusView
+  command: show lkup-asic wedge-client
+  target: fpc1
+  key: Client ID
+  view: LUChipStatusView
 
 LUChipStatusView:
-    column:
-        client_id: Client ID
-        curr_state: Curr State
-        prev_state: Prev State
-        last_read: Last read
+  column:
+    client_id: Client ID
+    curr_state: Curr State
+    prev_state: Prev State
+    last_read: Last read
 

@@ -1,13 +1,13 @@
 ---
 CMErrorTable:
-    command: show cmerror module brief
-    target: fpc1
-    key: module
-    view: CMErrorView
+  command: show cmerror module brief
+  target: fpc1
+  key: module
+  view: CMErrorView
 
 CMErrorView:
-    column:
-        module: Module
-        name: Name
-        errors: Active Errors
+  column:
+    module: Module
+    name: Name
+    errors: Active Errors
 

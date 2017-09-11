@@ -1,17 +1,17 @@
 ---
 PreClStatsTable:
-    command: show precl-eng 2 statistics
-    target: fpc1
-    key:
-     - id
-     - port
-    view: PreClStatsView
+  command: show precl-eng 2 statistics
+  target: fpc1
+  key:
+    - port
+    - id
+  view: PreClStatsView
 
 PreClStatsView:
-    column:
-        port: port
-        id: ID
-        class: Class
-        tx_pack: TX pkts
-        rx_pack: RX pkts
-        dr_pack: Dropped pkts
+  column:
+    port: port
+    id: ID
+    class: Class
+    tx_pack: TX pkts
+    rx_pack: RX pkts
+    dr_pack: Dropped pkts
