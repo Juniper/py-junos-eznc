@@ -108,7 +108,6 @@ class StateMachine(Machine):
                         col_order[key] = x
                         user_defined_columns.pop(x)
                         break
-        # print col_order
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
         items = re.split('\s\s+', self._lines[1].strip())
 
@@ -127,7 +126,10 @@ class StateMachine(Machine):
                     if isinstance(key, tuple):
                         self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
                     else:
-                        self._data[tmp_dict[key]] = tmp_dict
+                        if self._table.KEY_ITEMS is None:
+                            self._data[tmp_dict[key]] = tmp_dict
+                        elif tmp_dict[key] in self._table.KEY_ITEMS:
+                            self._data[tmp_dict[key]] = tmp_dict
                 else:
                     break
             elif line.strip() == '':

@@ -4,8 +4,8 @@ FPCMemory:
     target: fpc1
     key: ID
     key_items:
-      - "1"
-      - "2"
+      - 1
+      - 2
     view: FPCMemoryView
 
 FPCMemoryView:
