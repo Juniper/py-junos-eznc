@@ -20,6 +20,7 @@ class CMDView(object):
     COLUMN = {}
     FIELDS = {}
     GROUPS = None
+    TITLE = None
 
     # -------------------------------------------------------------------------
     # CONSTRUCTOR
@@ -101,6 +102,10 @@ class CMDView(object):
             self.COLUMN = deepcopy(self.__class__.COLUMN)
             self.COLUMN.update(more.column.end)
 
+        if hasattr(more, 'title'):
+            self.TITLE = deepcopy(self.__class__.TITLE)
+            self.TITLE.update(more.title.end)
+
         if hasattr(more, 'fields'):
             self.FIELDS = deepcopy(self.__class__.FIELDS)
             self.FIELDS.update(more.fields.end)
@@ -112,7 +117,10 @@ class CMDView(object):
     def _updater_class(self, more):
         """ called from extend """
         if hasattr(more, 'column'):
-            self.FIELDS.update(more.column.end)
+            self.COLUMN.update(more.column.end)
+
+        if hasattr(more, 'title'):
+            self.TITLE.update(more.title.end)
 
         if hasattr(more, 'fields'):
             self.FIELDS.update(more.fields.end)

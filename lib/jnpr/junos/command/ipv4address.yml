@@ -2,8 +2,8 @@
 FPCIPV4AddressTable:
   command: show ipv4 address
   target: fpc1
-  key: Index
-  view: FPCThreadView
+  key: name
+  view: FPCIPV4AddressView
 
 FPCIPV4AddressView:
   column:

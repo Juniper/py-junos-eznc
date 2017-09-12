@@ -32,7 +32,7 @@ class StateMachine(Machine):
                              # Identifiers.__dict__.items() if callable(val)]
         # self._identifiers = [pp.OneOrMore(word)]
         self._lines = []
-        self.states = ['row_column']
+        self.states = ['row_column', 'title_data']
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
@@ -40,6 +40,9 @@ class StateMachine(Machine):
             {'trigger': 'check_next_row', 'source': 'row_column', 'dest': 'row_column',
              'conditions': 'prev_next_row_same_type',
              'after': 'parse_raw_column'},
+            {'trigger': 'title_provided', 'source': 'start', 'dest': 'title_data',
+             'conditions': 'match_title',
+             'after': 'parse_title_data'}
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
@@ -49,6 +52,8 @@ class StateMachine(Machine):
         self._lines = raw_data.splitlines()
         if len(self._view.COLUMN) > 0:
             self.column_provided()
+        if self._view.TITLE is not None:
+            self.title_provided()
         return self._data
 
     def match_columns(self, event):
@@ -61,6 +66,15 @@ class StateMachine(Machine):
                     current_index = self._lines.index(line)
                     self._lines = self._lines[current_index:]
                     return True
+        return False
+
+    def match_title(self, event):
+        title = self._view.TITLE
+        for line in self._lines:
+            if title in line:
+                current_index = self._lines.index(line)
+                self._lines = self._lines[current_index:]
+                return True
         return False
 
     def _parse_literal(self, line, col_parser):
@@ -150,3 +164,31 @@ class StateMachine(Machine):
         post_integer_data_types, pre_integer_data_types = \
             map(data_type, items), post_integer_data_types
         return post_integer_data_types == pre_integer_data_types
+
+    def parse_title_data(self, event):
+        pre_space_delimit = ''
+        obj = re.search('(\s+).*', self._lines[1])
+        if obj:
+            pre_space_delimit = obj.group(1)
+        for line in self._lines[1:]:
+            if re.match(pre_space_delimit + '\s+', line):
+                break
+            if line.startswith(pre_space_delimit):
+                try:
+                    items = (re.split('\s\s+', line.strip()))
+                    item_types = map(data_type, items)
+                    key, value = map(lambda x, y: int(x) if y is int else x.strip(),
+                                items, item_types)
+                    self._data[key] = value
+                except ValueError:
+                    regex = '(\d+)\s(.*)' if item_types[0]==int else '(.*)\s(\d+)'
+                    obj = re.search(regex, line)
+                    if obj:
+                        items = obj.groups()
+                        item_types = map(data_type, items)
+                        key, value = map(lambda x, y: int(x) if y is int else x.strip(),
+                                         items, item_types)
+                        self._data[key] = value
+            elif line.strip() == '':
+                break
+        return self._data

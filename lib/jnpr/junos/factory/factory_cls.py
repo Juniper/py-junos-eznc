@@ -130,6 +130,8 @@ def FactoryCMDView(fields, **kvargs):
     if 'column' in kvargs:
         new_cls.COLUMN = deepcopy(kvargs['column'])
         new_cls.COLUMN.update(fields)
+    elif 'title' in kvargs:
+        new_cls.TITLE = deepcopy(kvargs['title'])
     else:
         new_cls.FIELDS = fields
         new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None

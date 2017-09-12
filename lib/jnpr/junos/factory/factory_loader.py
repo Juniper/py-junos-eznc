@@ -199,9 +199,10 @@ class FactoryLoader(object):
         view_dict = self._catalog_dict[view_name]
         kvargs = {'view_name': view_name}
 
-        # if there are field groups, then get that now.
         if 'column' in view_dict:
             kvargs['column'] = view_dict['column']
+        elif 'title' in view_dict:
+            kvargs['title'] = view_dict['title']
 
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]

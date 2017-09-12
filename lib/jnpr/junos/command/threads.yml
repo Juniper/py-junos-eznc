@@ -1,16 +1,15 @@
 ---
 FPCThread:
-    command: show thread
-    target: fpc1
-    key: PID
-    view: FPCThreadView
+  command: show thread
+  target: fpc1
+  key: Name
+  view: FPCThreadView
 
-FPCMemoryView:
-    column:
-        pid: PID
-        pr: PR
-        state: State
-        name: Name
-        stack: {"Stack Use", "\d+/\d+"}
-        time: {"Time (Last/Max/Total)", "\d+(/\d+){2} ms"}
-        cpu: {"cpu": "\d{1,2}%"}
+FPCThreadView:
+  column:
+    pid_pr: PID PR
+    state: State
+    name: Name
+    stack: Stack Use
+    time: Time (Last/Max/Total)
+    cpu: cpu
