@@ -6,7 +6,7 @@ SystemQueuesOPTable:
 
 SystemQueuesOPView:
   column:
-    interface: output interface
+    w: output interface
     bytes: bytes
     max_bytes: max
     packets: packets

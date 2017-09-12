@@ -158,7 +158,7 @@ class CMDTable(object):
 
         # state machine
         print self.data
-        self.output = self._sm.parse(self.data)
+        self.output = self._sm.parse(self.data.splitlines())
         # print self.output
         # placeholder for parsing code
         # self._parser = Parser(self.data, self.KEY, self.KEY_ITEMS, self.TITLE,
@@ -280,7 +280,7 @@ class CMDTable(object):
 
     def items(self):
         """ returns list of tuple(name,values) for each table entry """
-        return self.output.iteritems()
+        return self.output.items()
 
     def to_json(self):
         """

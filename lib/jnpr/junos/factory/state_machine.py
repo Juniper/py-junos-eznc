@@ -26,11 +26,9 @@ def data_type(item):
 class StateMachine(Machine):
 
     def __init__(self, table_view):
+        self._data = {}
         self._table = table_view
         self._view = self._table.VIEW
-        # self._identifiers = [Identifiers.__dict__[key] for key, val in
-                             # Identifiers.__dict__.items() if callable(val)]
-        # self._identifiers = [pp.OneOrMore(word)]
         self._lines = []
         self.states = ['row_column', 'title_data']
         self.transitions = [
@@ -47,13 +45,20 @@ class StateMachine(Machine):
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
 
-    def parse(self, raw_data):
-        self._data = {}
-        self._lines = raw_data.splitlines()
+    def parse(self, lines):
+        self._lines = copy.deepcopy(lines)
         if len(self._view.COLUMN) > 0:
             self.column_provided()
         if self._view.TITLE is not None:
             self.title_provided()
+        if len(self._view.FIELDS) > 0:
+            for key, value in self._view.FIELDS.items():
+                tbl = value['table']
+                tbl._view = tbl.VIEW
+                if len(tbl._view.COLUMN) > 0:
+                    self._data[key] = StateMachine(tbl).parse(lines)
+                if tbl._view.TITLE is not None:
+                    self._data[key] = StateMachine(tbl).parse(lines)
         return self._data
 
     def match_columns(self, event):
@@ -113,16 +118,20 @@ class StateMachine(Machine):
 
         post_integer_data_types = event.kwargs.get('check', map(data_type, items))
         index = event.kwargs.get('index', 1)
-        col_len = len(col_order)
+        # col_len = len(col_order)
+        columns_list = col_order.values()
         for index, line in enumerate(self._lines[index:], start=index):
             items = re.split('\s\s+', line.strip())
-            if len(items) == col_len:
+            if len(items) >= len(columns_list):
+                if len(items) > len(columns_list) and col_offsets.keys()[0][0] > 10 and \
+                                self._table.KEY == 'name':
+                    columns_list.insert(0, self._table.KEY)
                 post_integer_data_types, pre_integer_data_types = \
                     map(data_type, items), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
                     items = map(lambda x, y: int(x) if y is int else x,
                                 items, post_integer_data_types)
-                    tmp_dict = dict(zip(col_order.values(), items))
+                    tmp_dict = dict(zip(columns_list, items))
                     if isinstance(key, tuple):
                         self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
                     else:

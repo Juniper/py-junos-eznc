@@ -1,57 +1,58 @@
 ---
 FPCTTPStatsTable:
-    command: show ttp statistics
-    target: fpc1
-    view: FPCHeapAccountView
+  command: show ttp statistics
+  target: fpc1
+  view: FPCTTPStatsView
 
 FPCTTPStatsView:
-    fields:
-        TTPStatistics: _FPCTTPStatistics
-        TTPTransmitStatistics: _FPCTTPTransmitStatisticsTable
-        TTPReceiveStatistics: _FPCTTPReceiveStatisticsTable
-        TTPQueueSizes: _FPCTTPQueueSizesTable
+  fields:
+    TTPStatistics: _FPCTTPStatisticsTable
+    TTPTransmitStatistics: _FPCTTPTransmitStatisticsTable
+    TTPReceiveStatistics: _FPCTTPReceiveStatisticsTable
+    TTPQueueSizes: _FPCTTPQueueSizesTable
 
 _FPCTTPStatisticsTable:
-    title: TTP Statistics
-    key: name
-    view: FPCTTPStatisticsView
+  title: TTP Statistics
+  key: name
+  view: _FPCTTPStatisticsView
 
-FPCTTPStatisticsView:
-    column:
-      rcvd: Receive
-      tras: Transmit
+_FPCTTPStatisticsView:
+  column:
+    rcvd: Receive
+    tras: Transmit
 
 _FPCTTPTransmitStatisticsTable:
-    title: TTP Transmit Statistics
-    key: name
-    view: FPCTTPTransmitStatisticsView
+  title: TTP Transmit Statistics
+  key: name
+  view: _FPCTTPTransmitStatisticsView
 
-FPCTTPTransmitStatisticsView:
-    column:
-      queue0: Queue 0
-      queue1: Queue 1
-      queue2: Queue 2
-      queue3: Queue 3
+_FPCTTPTransmitStatisticsView:
+  column:
+    queue0: Queue 0
+    queue1: Queue 1
+    queue2: Queue 2
+    queue3: Queue 3
 
 _FPCTTPReceiveStatisticsTable:
-    title: TTP Receive Statistics
-    key: name
-    view: FPCTTPReceiveStatisticsView
+  title: TTP Receive Statistics
+  key: name
+  view: _FPCTTPReceiveStatisticsView
 
-FPCTTPReceiveStatisticsView:
-    column:
-      queue0: Queue 0
-      queue1: Queue 1
-      queue2: Queue 2
-      queue3: Queue 3
+_FPCTTPReceiveStatisticsView:
+  column:
+    control: Control
+    high: High
+    medium: Medium
+    low: Low
+    discard: Discard
 
 _FPCTTPQueueSizesTable:
-    title: TTP Receive Queue Sizes
-    delimiter: ":"
-    view: FPCTTPQueueSizesView
+  title: TTP Receive Queue Sizes
+  delimiter: ":"
+  view: _FPCTTPQueueSizesView
 
-FPCTTPQueueSizesView:
-    fields:
-        control_plane: Control Plane
-        high: High
-        medium: Medium
+_FPCTTPQueueSizesView:
+  fields:
+    control_plane: Control Plane
+    high: High
+    medium: Medium

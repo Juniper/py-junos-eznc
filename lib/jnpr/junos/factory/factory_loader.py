@@ -23,6 +23,7 @@ _GET = FactoryOpTable
 _TABLE = FactoryTable
 _CFGTBL = FactoryCfgTable
 _CMDTBL = FactoryCMDTable
+_CMDCHILDTBL = FactoryCMDChildTable
 
 
 class FactoryLoader(object):
@@ -160,6 +161,34 @@ class FactoryLoader(object):
             xpath = f_name if f_data is True else f_data
             fields.str(f_name, xpath, **kvargs)
 
+    def _add_cmd_view_fields(self, view_dict, fields_name, fields):
+        """ add a group of fields to the view """
+        fields_dict = view_dict[fields_name]
+        try:
+            # see if this is a 'fields_<group>' collection, and if so
+            # then we automatically setup using the group mechanism
+            mark = fields_name.index('_')
+            group = {'group': fields_name[mark + 1:]}
+        except:
+            # otherwise, no group, just standard 'fields'
+            group = {}
+
+        for f_name, f_data in fields_dict.items():
+            # each field could have its own unique set of properties
+            # so create a kvargs <dict> each time.  but copy in the
+            # groups <dict> (single item) generically.
+            kvargs = {}
+            kvargs.update(group)
+
+            if isinstance(f_data, dict):
+                self._add_dictfield(fields, f_name, f_data, kvargs)
+                continue
+
+            if f_data in self._catalog_dict:
+                # f_data is the table name
+                cls_tbl = self.catalog.get(f_data, self._build_cmdtable(f_data))
+                fields.table(f_name, cls_tbl)
+                continue
     # -------------------------------------------------------------------------
 
     def _build_view(self, view_name):
@@ -183,7 +212,7 @@ class FactoryLoader(object):
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]
         for fg_name in fg_list:
-            self._add_view_fields(view_dict, fg_name, fields)
+            self._add_cmd_view_fields(view_dict, fg_name, fields)
 
         cls = _VIEW(fields.end, **kvargs)
         self.catalog[view_name] = cls
@@ -207,7 +236,7 @@ class FactoryLoader(object):
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]
         for fg_name in fg_list:
-            self._add_view_fields(view_dict, fg_name, fields)
+            self._add_cmd_view_fields(view_dict, fg_name, fields)
 
         cls = _CMDVIEW(fields.end, **kvargs)
         self.catalog[view_name] = cls
@@ -248,17 +277,30 @@ class FactoryLoader(object):
         tbl_dict = self._catalog_dict[table_name]
         kvargs = deepcopy(tbl_dict)
 
-        cmd = kvargs.pop('command')
-        kvargs['table_name'] = table_name
+        if 'command' in kvargs:
+            cmd = kvargs.pop('command')
+            kvargs['table_name'] = table_name
 
-        if 'view' in tbl_dict:
-            view_name = tbl_dict['view']
-            cls_view = self.catalog.get(view_name, self._build_cmdview(view_name))
-            kvargs['view'] = cls_view
+            if 'view' in tbl_dict:
+                view_name = tbl_dict['view']
+                cls_view = self.catalog.get(view_name, self._build_cmdview(view_name))
+                kvargs['view'] = cls_view
 
-        cls = _CMDTBL(cmd, **kvargs)
-        self.catalog[table_name] = cls
-        return cls
+            cls = _CMDTBL(cmd, **kvargs)
+            self.catalog[table_name] = cls
+            return cls
+        elif 'title' in kvargs:
+            cmd = kvargs.pop('title')
+            kvargs['table_name'] = table_name
+
+            if 'view' in tbl_dict:
+                view_name = tbl_dict['view']
+                cls_view = self.catalog.get(view_name, self._build_cmdview(view_name))
+                kvargs['view'] = cls_view
+
+            cls = _CMDCHILDTBL(cmd, **kvargs)
+            self.catalog[table_name] = cls
+            return cls
 
     # -----------------------------------------------------------------------
     # Create a Table class from YAML definition
@@ -313,7 +355,7 @@ class FactoryLoader(object):
                 self._item_cfgtables.append(k)
             elif 'set' in v:
                 self._item_cfgtables.append(k)
-            elif 'command' in v:
+            elif 'command' in v or 'title' in v:
                 self._item_cmdtables.append(k)
             elif 'view' in v:
                 self._item_tables.append(k)
