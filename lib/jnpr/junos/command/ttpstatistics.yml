@@ -13,21 +13,19 @@ FPCTTPStatsView:
 
 _FPCTTPStatisticsTable:
   title: TTP Statistics
-  key: name
   view: _FPCTTPStatisticsView
 
 _FPCTTPStatisticsView:
-  column:
+  columns:
     rcvd: Receive
     tras: Transmit
 
 _FPCTTPTransmitStatisticsTable:
   title: TTP Transmit Statistics
-  key: name
   view: _FPCTTPTransmitStatisticsView
 
 _FPCTTPTransmitStatisticsView:
-  column:
+  columns:
     queue0: Queue 0
     queue1: Queue 1
     queue2: Queue 2
@@ -35,11 +33,10 @@ _FPCTTPTransmitStatisticsView:
 
 _FPCTTPReceiveStatisticsTable:
   title: TTP Receive Statistics
-  key: name
   view: _FPCTTPReceiveStatisticsView
 
 _FPCTTPReceiveStatisticsView:
-  column:
+  columns:
     control: Control
     high: High
     medium: Medium

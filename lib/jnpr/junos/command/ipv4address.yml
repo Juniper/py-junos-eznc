@@ -6,7 +6,7 @@ FPCIPV4AddressTable:
   view: FPCIPV4AddressView
 
 FPCIPV4AddressView:
-  column:
+  columns:
     index: Index
     addr: Address
     name: Name

@@ -6,7 +6,7 @@ CMErrorTable:
   view: CMErrorView
 
 CMErrorView:
-  column:
+  columns:
     module: Module
     name: Name
     errors: Active Errors

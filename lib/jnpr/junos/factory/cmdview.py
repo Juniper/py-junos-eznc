@@ -17,7 +17,7 @@ class CMDView(object):
 
     KEY = 'name'
     KEY_ITEMS = []
-    COLUMN = {}
+    COLUMNS = {}
     FIELDS = {}
     GROUPS = None
     TITLE = None
@@ -98,9 +98,9 @@ class CMDView(object):
 
     def _updater_instance(self, more):
         """ called from extend """
-        if hasattr(more, 'column'):
-            self.COLUMN = deepcopy(self.__class__.COLUMN)
-            self.COLUMN.update(more.column.end)
+        if hasattr(more, 'columns'):
+            self.COLUMNS = deepcopy(self.__class__.COLUMNS)
+            self.COLUMNS.update(more.columns.end)
 
         if hasattr(more, 'title'):
             self.TITLE = deepcopy(self.__class__.TITLE)
@@ -116,8 +116,8 @@ class CMDView(object):
 
     def _updater_class(self, more):
         """ called from extend """
-        if hasattr(more, 'column'):
-            self.COLUMN.update(more.column.end)
+        if hasattr(more, 'columns'):
+            self.COLUMNS.update(more.columns.end)
 
         if hasattr(more, 'title'):
             self.TITLE.update(more.title.end)

@@ -6,7 +6,7 @@ FPCThread:
   view: FPCThreadView
 
 FPCThreadView:
-  column:
+  columns:
     pid_pr: PID PR
     state: State
     name: Name

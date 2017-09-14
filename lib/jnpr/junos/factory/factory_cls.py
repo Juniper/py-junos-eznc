@@ -42,7 +42,7 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
 
 
 def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
-                    key='name', view=None, table_name=None, title=None):
+                    key='name', view=None, table_name=None, title=None, delimiter=None):
     if table_name is None:
         table_name = "CMDTable." + cmd
     new_cls = type(table_name, (CMDTable,), {})
@@ -54,6 +54,7 @@ def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
     new_cls.KEY = key
     new_cls.VIEW = view
     new_cls.TITLE = title
+    new_cls.DELIMITER = delimiter
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
     return new_cls
 
@@ -145,14 +146,12 @@ def FactoryCMDView(fields, **kvargs):
     view_name = kvargs.get('view_name', 'RunstatView')
     new_cls = type(view_name, (CMDView,), {})
 
-    if 'column' in kvargs:
-        new_cls.COLUMN = deepcopy(kvargs['column'])
-        new_cls.COLUMN.update(fields)
+    if 'columns' in kvargs:
+        new_cls.COLUMNS = deepcopy(kvargs['columns'])
     elif 'title' in kvargs:
         new_cls.TITLE = deepcopy(kvargs['title'])
-    else:
+    if fields is not None:
         new_cls.FIELDS = fields
-        new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None
 
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDView')
     return new_cls

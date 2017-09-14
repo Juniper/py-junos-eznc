@@ -228,8 +228,8 @@ class FactoryLoader(object):
         view_dict = self._catalog_dict[view_name]
         kvargs = {'view_name': view_name}
 
-        if 'column' in view_dict:
-            kvargs['column'] = view_dict['column']
+        if 'columns' in view_dict:
+            kvargs['columns'] = view_dict['columns']
         elif 'title' in view_dict:
             kvargs['title'] = view_dict['title']
 

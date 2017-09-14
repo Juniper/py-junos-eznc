@@ -5,7 +5,7 @@ SystemQueuesOPTable:
   view: SystemQueuesOPView
 
 SystemQueuesOPView:
-  column:
+  columns:
     w: output interface
     bytes: bytes
     max_bytes: max
@@ -19,7 +19,7 @@ SystemQueuesINTable:
   view: SystemQueuesINView
 
 SystemQueuesINView:
-  column:
+  columns:
     interface: input protocol
     bytes: bytes
     max_bytes: max

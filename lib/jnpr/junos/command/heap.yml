@@ -15,7 +15,7 @@ _FPCHeapBlockTable:
     view: FPCHeapAccountView
 
 FPCHeapBlockView:
-    column:
+    columns:
       alloc: "Alloc PC"
       blocks: Blocks
       total: "Total(b)"
@@ -26,7 +26,7 @@ _FPCHeapNodeTable:
     view: FPCHeapAccountView
 
 FPCHeapBlockView:
-    column:
+    columns:
       alloc: "Alloc PC"
       blocks: Blocks
       total: "Total(b)"

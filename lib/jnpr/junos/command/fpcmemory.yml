@@ -9,7 +9,7 @@ FPCMemory:
     view: FPCMemoryView
 
 FPCMemoryView:
-    column:
+    columns:
         id: ID
         base: Base
         total: Total(b)

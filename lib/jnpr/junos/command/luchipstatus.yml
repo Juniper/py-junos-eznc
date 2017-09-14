@@ -6,7 +6,7 @@ LUChipStatusTable:
   view: LUChipStatusView
 
 LUChipStatusView:
-  column:
+  columns:
     client_id: Client ID
     curr_state: Curr State
     prev_state: Prev State

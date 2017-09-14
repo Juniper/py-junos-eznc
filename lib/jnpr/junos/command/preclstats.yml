@@ -8,7 +8,7 @@ PreClStatsTable:
   view: PreClStatsView
 
 PreClStatsView:
-  column:
+  columns:
     port: port
     id: ID
     class: Class

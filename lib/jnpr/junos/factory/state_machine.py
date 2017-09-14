@@ -34,12 +34,12 @@ class StateMachine(Machine):
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
-             'after': 'parse_raw_column'},
+             'after': 'parse_raw_columns'},
             {'trigger': 'check_next_row', 'source': 'row_column', 'dest': 'row_column',
              'conditions': 'prev_next_row_same_type',
-             'after': 'parse_raw_column'},
+             'after': 'parse_raw_columns'},
             {'trigger': 'title_provided', 'source': 'start', 'dest': 'title_data',
-             'conditions': 'match_title',
+             'conditions': ['match_title', 'title_not_followed_by_columns'],
              'after': 'parse_title_data'}
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
@@ -47,22 +47,24 @@ class StateMachine(Machine):
 
     def parse(self, lines):
         self._lines = copy.deepcopy(lines)
-        if len(self._view.COLUMN) > 0:
-            self.column_provided()
-        if self._view.TITLE is not None:
+        if self._view.TITLE is not None or self._table.TITLE:
             self.title_provided()
+        if len(self._view.COLUMNS) > 0:
+            self.column_provided()
         if len(self._view.FIELDS) > 0:
             for key, value in self._view.FIELDS.items():
                 tbl = value['table']
                 tbl._view = tbl.VIEW
-                if len(tbl._view.COLUMN) > 0:
+                if len(tbl._view.COLUMNS) > 0:
                     self._data[key] = StateMachine(tbl).parse(lines)
-                if tbl._view.TITLE is not None:
+                if tbl._view.TITLE is not None or tbl.TITLE is not None:
                     self._data[key] = StateMachine(tbl).parse(lines)
         return self._data
 
     def match_columns(self, event):
-        columns = self._view.COLUMN.values()
+        columns = self._view.COLUMNS.values()
+        if len(columns) == 0:
+            return False
         col_parser = reduce(lambda x, y: x & y, [pp.Literal(i) for i in columns])
         for line in self._lines:
             if self._parse_literal(line, col_parser):
@@ -74,13 +76,16 @@ class StateMachine(Machine):
         return False
 
     def match_title(self, event):
-        title = self._view.TITLE
+        title = self._view.TITLE or self._table.TITLE
         for line in self._lines:
             if title in line:
                 current_index = self._lines.index(line)
                 self._lines = self._lines[current_index:]
                 return True
         return False
+
+    def title_not_followed_by_columns(self, event):
+        return not self.match_columns(event)
 
     def _parse_literal(self, line, col_parser):
         try:
@@ -98,17 +103,17 @@ class StateMachine(Machine):
             return False
         return True
 
-    def parse_raw_column(self, event):
+    def parse_raw_columns(self, event):
         col_offsets = {}
         col_order = event.kwargs.get('col_order', OrderedDict())
         line = self._lines[0]
         if len(col_order) == 0:
-            for key, column in self._view.COLUMN.items():
+            for key, column in self._view.COLUMNS.items():
                 for result, start, end in pp.Literal(column).scanString(line):
                     col_offsets[(start, end)] = result[0]
-            user_defined_columns = copy.deepcopy(self._view.COLUMN)
+            user_defined_columns = copy.deepcopy(self._view.COLUMNS)
             for key in sorted(col_offsets.iterkeys()):
-                for x, y in self._view.COLUMN.items():
+                for x, y in self._view.COLUMNS.items():
                     if col_offsets[key] == user_defined_columns.get(x):
                         col_order[key] = x
                         user_defined_columns.pop(x)
@@ -149,11 +154,11 @@ class StateMachine(Machine):
 
     def _get_key(self, key):
         if isinstance(key, list):
-            if set([i in self._view.COLUMN or i in self._view.COLUMN.values() for i in key]):
+            if set([i in self._view.COLUMNS or i in self._view.COLUMNS.values() for i in key]):
                 key_temp = []
                 for i in key:
-                    if i not in self._view.COLUMN and i in self._view.COLUMN.values():
-                        for user_provided, from_table in self._view.COLUMN.items():
+                    if i not in self._view.COLUMNS and i in self._view.COLUMNS.values():
+                        for user_provided, from_table in self._view.COLUMNS.items():
                             if i == from_table:
                                 key_temp.append(user_provided)
                             else:
@@ -161,8 +166,8 @@ class StateMachine(Machine):
                     else:
                         key_temp.append(i)
                 key = tuple(key_temp)
-        elif key not in self._view.COLUMN and key in self._view.COLUMN.values():
-            for user_provided, from_table in self._view.COLUMN.items():
+        elif key not in self._view.COLUMNS and key in self._view.COLUMNS.values():
+            for user_provided, from_table in self._view.COLUMNS.items():
                 if key == from_table:
                     key = user_provided
         return key
@@ -178,6 +183,7 @@ class StateMachine(Machine):
 
     def parse_title_data(self, event):
         pre_space_delimit = ''
+        delimiter = self._table.DELIMITER or '\s\s+'
         obj = re.search('(\s+).*', self._lines[1])
         if obj:
             pre_space_delimit = obj.group(1)
@@ -186,7 +192,7 @@ class StateMachine(Machine):
                 break
             if line.startswith(pre_space_delimit):
                 try:
-                    items = (re.split('\s\s+', line.strip()))
+                    items = (re.split(delimiter, line.strip()))
                     item_types = map(data_type, items)
                     key, value = map(lambda x, y: int(x) if y is int else x.strip(),
                                 items, item_types)

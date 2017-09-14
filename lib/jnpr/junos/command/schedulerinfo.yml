@@ -1,0 +1,25 @@
+---
+SchedulerTable:
+  command: show sched
+  target: fpc1
+  view: SchedulerView
+
+SchedulerView:
+  fields:
+    thread: _TopThreadTable
+  columns:
+    cpu: CPU
+    name: Name
+    time: Time(ms)
+
+_TopThreadTable:
+  title: Top Thread
+  delimiter: "="
+  view: _TopThreadView
+
+_TopThreadView:
+  fields:
+    pid: pid
+    name: name
+    time: time
+    queue3: cpu
