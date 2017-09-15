@@ -212,7 +212,7 @@ class FactoryLoader(object):
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]
         for fg_name in fg_list:
-            self._add_cmd_view_fields(view_dict, fg_name, fields)
+            self._add_view_fields(view_dict, fg_name, fields)
 
         cls = _VIEW(fields.end, **kvargs)
         self.catalog[view_name] = cls

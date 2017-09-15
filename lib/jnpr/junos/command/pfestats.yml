@@ -1,0 +1,32 @@
+---
+PFEStatsTable:
+  command: show pfe statistics notification
+  target: fpc1
+  view: PFEStatsView
+
+PFEStatsView:
+  fields:
+    notification_stat: _PFENotificationStatsTable
+    notification_type: _PFENotificationTypeStatsTable
+
+_PFENotificationStatsTable:
+  title: PFE Notification statistics
+  key: name
+  view: _PFENotificationStatsView
+
+_PFENotificationStatsView:
+  regex:
+    value: numbers
+    name: words
+
+_PFENotificationTypeStatsTable:
+  title: PFE Notification Type statistics
+  key: name
+  view: _PFENotificationTypeStatsView
+
+_PFENotificationTypeStatsView:
+  columns:
+    parsed: Parsed
+    input: Input
+    failed: Failed
+    ignored: Ignored
