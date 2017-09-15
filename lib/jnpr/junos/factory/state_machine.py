@@ -4,11 +4,12 @@ from collections import OrderedDict
 import re
 import copy
 
+
 class Identifiers:
     printables = pp.OneOrMore(pp.printables)
     numbers = pp.Word(pp.nums)
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
-    words = pp.OneOrMore(word)
+    words = (pp.OneOrMore(word)).setParseAction(lambda i: ' '.join(i))
     percentage = pp.Word(pp.nums) + pp.Literal('%')
     header_bar = pp.OneOrMore(pp.Word('-')) + pp.StringEnd()
 
@@ -23,6 +24,13 @@ def data_type(item):
     return str
 
 
+def convert_to_data_type(items):
+    item_types = map(data_type, items)
+    key, value = map(lambda x, y: int(x) if y is int else x.strip(),
+                     items, item_types)
+    return key, value
+
+
 class StateMachine(Machine):
 
     def __init__(self, table_view):
@@ -30,7 +38,7 @@ class StateMachine(Machine):
         self._table = table_view
         self._view = self._table.VIEW
         self._lines = []
-        self.states = ['row_column', 'title_data']
+        self.states = ['row_column', 'title_data', 'regex_data']
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
@@ -40,7 +48,10 @@ class StateMachine(Machine):
              'after': 'parse_raw_columns'},
             {'trigger': 'title_provided', 'source': 'start', 'dest': 'title_data',
              'conditions': ['match_title', 'title_not_followed_by_columns'],
-             'after': 'parse_title_data'}
+             'after': 'parse_title_data'},
+            {'trigger': 'regex_provided', 'source': 'title_data', 'dest': 'regex_data',
+             'conditions': ['match_title'],
+             'after': 'parse_using_regex'}
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
@@ -182,6 +193,8 @@ class StateMachine(Machine):
         return post_integer_data_types == pre_integer_data_types
 
     def parse_title_data(self, event):
+        if self._view.REGEX != {}:
+            return self.regex_provided()
         pre_space_delimit = ''
         delimiter = self._table.DELIMITER or '\s\s+'
         obj = re.search('(\s+).*', self._lines[1])
@@ -196,7 +209,7 @@ class StateMachine(Machine):
                     item_types = map(data_type, items)
                     key, value = map(lambda x, y: int(x) if y is int else x.strip(),
                                 items, item_types)
-                    self._data[key] = value
+                    self._data[self._view.FIELDS.get(key)] = value
                 except ValueError:
                     regex = '(\d+)\s(.*)' if item_types[0]==int else '(.*)\s(\d+)'
                     obj = re.search(regex, line)
@@ -209,3 +222,20 @@ class StateMachine(Machine):
             elif line.strip() == '':
                 break
         return self._data
+
+    def parse_using_regex(self, event):
+        _regex = copy.deepcopy(self._view.REGEX)
+        for key, val in _regex.items():
+            if val in Identifiers.__dict__:
+                _regex[key] = Identifiers.__dict__[val]
+            else:
+                _regex[key] = pp.Regex(val)
+
+        _regex = reduce(lambda x, y: x+y, _regex.values())
+        for line in self._lines[1:]:
+            tmp_dict = {}
+            if line.strip() == '':
+                break
+            for result, start, end in _regex.scanString(line):
+                tmp_dict = dict(zip(self._view.REGEX.keys(), convert_to_data_type(result)))
+            self._data[tmp_dict.get(self._table.KEY)] = tmp_dict

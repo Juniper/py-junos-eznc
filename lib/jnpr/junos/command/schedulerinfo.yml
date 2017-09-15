@@ -11,6 +11,8 @@ SchedulerView:
     cpu: CPU
     name: Name
     time: Time(ms)
+  regex:
+    interrupt_time: 'Total interrupt time (\d+)'
 
 _TopThreadTable:
   title: Top Thread

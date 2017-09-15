@@ -22,6 +22,7 @@ setup(
     packages=find_packages('lib'),
     package_data={
         'jnpr.junos.op': ['*.yml'],
+        'jnpr.junos.command': ['*.yml'],
         'jnpr.junos.cfgro': ['*.yml'],
         'jnpr.junos.resources': ['*.yml']
     },

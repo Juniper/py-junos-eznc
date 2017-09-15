@@ -19,6 +19,7 @@ class CMDView(object):
     KEY_ITEMS = []
     COLUMNS = {}
     FIELDS = {}
+    REGEX = {}
     GROUPS = None
     TITLE = None
 
@@ -110,6 +111,10 @@ class CMDView(object):
             self.FIELDS = deepcopy(self.__class__.FIELDS)
             self.FIELDS.update(more.fields.end)
 
+        if hasattr(more, 'regex'):
+            self.FIELDS = deepcopy(self.__class__.REGEX)
+            self.FIELDS.update(more.regex.end)
+
         if hasattr(more, 'groups'):
             self.GROUPS = deepcopy(self.__class__.GROUPS)
             self.GROUPS.update(more.groups)
@@ -124,6 +129,9 @@ class CMDView(object):
 
         if hasattr(more, 'fields'):
             self.FIELDS.update(more.fields.end)
+
+        if hasattr(more, 'regex'):
+            self.REGEX.update(more.regex.end)
 
         if hasattr(more, 'groups'):
             self.GROUPS.update(more.groups)
