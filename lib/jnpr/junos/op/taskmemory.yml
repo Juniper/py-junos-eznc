@@ -1,0 +1,17 @@
+---
+TaskMemoryTable:
+  rpc: get-task-memory-information
+  args:
+     level: detail
+  item: task-memory-overall-report/task-size-block-list/task-size-block
+  key: tsb-size
+  view: TaskMemoryView
+
+TaskMemoryView:
+  fields:
+    size: tsb-size
+    alloc_bytes: tsb-alloc-bytes
+    allocs: tsb-allocs
+    max_allocs: tsb-max-allocs
+    max_bytes: tsb-max-bytes
+    free_bytes: tsb-free-bytes

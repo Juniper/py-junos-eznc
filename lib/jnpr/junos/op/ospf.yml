@@ -56,3 +56,27 @@ OspfRoutesView:
  fields:
   prefix: ospf-route-entry/address-prefix
   interface: ospf-route-entry/ospf-next-hop/next-hop-name/interface-name
+
+OSPFStatsTable:
+  rpc: get-ospf-statistics-information
+  item: ospf-statistics/packet-statistics
+  key: ospf-packet-type
+  view: OSPFStatsView
+
+OSPFStatsView:
+  fields:
+    packets_sent: packets-sent
+    packets_received: packets-received
+    packets_sent_5seconds: packets-sent-5seconds
+
+OSPFIOStatsTable:
+  rpc: get-ospf-io-statistics-information
+  item: ospf-io-statistics
+  key: packets-read
+  view: OSPFIOStatsView
+
+OSPFIOStatsView:
+  fields:
+    packets_read: packets-read
+    average_per_run: average-per-run
+    max_run: max-run

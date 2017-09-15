@@ -139,9 +139,11 @@ class StateMachine(Machine):
         for index, line in enumerate(self._lines[index:], start=index):
             items = re.split('\s\s+', line.strip())
             if len(items) >= len(columns_list):
-                if len(items) > len(columns_list) and col_offsets.keys()[0][0] > 10 and \
-                                self._table.KEY == 'name':
-                    columns_list.insert(0, self._table.KEY)
+                if len(items) > len(columns_list):
+                    if col_offsets.keys()[0][0] > 10 and self._table.KEY == 'name':
+                        columns_list.insert(0, self._table.KEY)
+                    else:
+                        items = items[:len(columns_list)]
                 post_integer_data_types, pre_integer_data_types = \
                     map(data_type, items), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
