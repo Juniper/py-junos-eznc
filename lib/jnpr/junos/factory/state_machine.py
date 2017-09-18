@@ -38,7 +38,7 @@ class StateMachine(Machine):
         self._table = table_view
         self._view = self._table.VIEW
         self._lines = []
-        self.states = ['row_column', 'title_data', 'regex_data']
+        self.states = ['row_column', 'title_data', 'regex_data', 'delimiter_data']
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
@@ -51,25 +51,39 @@ class StateMachine(Machine):
              'after': 'parse_title_data'},
             {'trigger': 'regex_provided', 'source': 'title_data', 'dest': 'regex_data',
              'conditions': ['match_title'],
-             'after': 'parse_using_regex'}
+             'after': 'parse_using_regex'},
+            {'trigger': 'delimiter_without_title', 'source': 'start', 'dest': 'delimiter_data',
+             'after': 'parse_using_delimiter'},
+            {'trigger': 'delimiter_with_title', 'source': 'start', 'dest': 'delimiter_data',
+             'conditions': ['match_title'],
+             'after': 'parse_using_delimiter'}
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
 
     def parse(self, lines):
         self._lines = copy.deepcopy(lines)
-        if self._view.TITLE is not None or self._table.TITLE:
-            self.title_provided()
-        if len(self._view.COLUMNS) > 0:
-            self.column_provided()
-        if len(self._view.FIELDS) > 0:
-            for key, value in self._view.FIELDS.items():
-                tbl = value['table']
-                tbl._view = tbl.VIEW
-                if len(tbl._view.COLUMNS) > 0:
-                    self._data[key] = StateMachine(tbl).parse(lines)
-                if tbl._view.TITLE is not None or tbl.TITLE is not None:
-                    self._data[key] = StateMachine(tbl).parse(lines)
+        if self._table.DELIMITER is not None and self._view is None:
+            if self._table.TITLE is not None:
+                self.delimiter_with_title()
+            else:
+                self.delimiter_without_title()
+        else:
+            if self._view.TITLE is not None or self._table.TITLE:
+                self.title_provided()
+            if len(self._view.COLUMNS) > 0:
+                self.column_provided()
+            if len(self._view.FIELDS) > 0:
+                for key, value in self._view.FIELDS.items():
+                    tbl = value['table']
+                    tbl._view = tbl.VIEW
+                    if tbl._view is None:
+                        self._data[key] = StateMachine(tbl).parse(lines)
+                        continue
+                    if len(tbl._view.COLUMNS) > 0:
+                        self._data[key] = StateMachine(tbl).parse(lines)
+                    if tbl._view.TITLE is not None or tbl.TITLE is not None:
+                        self._data[key] = StateMachine(tbl).parse(lines)
         return self._data
 
     def match_columns(self, event):
@@ -87,7 +101,7 @@ class StateMachine(Machine):
         return False
 
     def match_title(self, event):
-        title = self._view.TITLE or self._table.TITLE
+        title = self._table.TITLE or self._view.TITLE
         for line in self._lines:
             if title in line:
                 current_index = self._lines.index(line)
@@ -241,3 +255,30 @@ class StateMachine(Machine):
             for result, start, end in _regex.scanString(line):
                 tmp_dict = dict(zip(self._view.REGEX.keys(), convert_to_data_type(result)))
             self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+
+    def parse_using_delimiter(self, event):
+        delimiter = self._table.DELIMITER
+        pre_space_delimit = ''
+        if self._table.TITLE is None:
+            for line in self._lines[1:]:
+                if line.strip() == 'SENT: Ukern command: %s'%self._table.GET_CMD:
+                    self._lines = self._lines[self._lines.index(line)+1:]
+                    break
+        else:
+            obj = re.search('(\s+).*', self._lines[1])
+            if obj:
+                pre_space_delimit = obj.group(1)
+        for line in self._lines[1:]:
+            if line.strip() == '':
+                break
+            if line.startswith(pre_space_delimit):
+                try:
+                    items = (re.split(delimiter, line.strip()))
+                    key, value = convert_to_data_type(items)
+                    self._data[key] = value
+                except ValueError:
+                    # create a class named ParseError
+                    raise Exception('Not able to parse line: %s'%line)
+            else:
+                break
+        return self._data

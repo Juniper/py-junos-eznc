@@ -30,3 +30,61 @@ _PFENotificationTypeStatsView:
     input: Input
     failed: Failed
     ignored: Ignored
+
+
+PFEStatsErrorTable:
+  command: show pfe statistics error
+  target: fpc1
+  view: PFEStatsErrorView
+
+PFEStatsErrorView:
+  fields:
+    WI_Error_counters: _WIErrorCountersTable
+    FI_Error_stream_counters: _FIErrorstreamCountersTable
+    IXCHIP_0_ingress_err: _IXCHIP0IngressTable
+    IXCHIP_2_ingress_err: _IXCHIP2IngressTable
+    IXCHIP_2_egress_err: _IXCHIP2EgressTable
+
+_WIErrorCountersTable:
+  title: WI Error Counters
+  delimiter: ":"
+
+_FIErrorstreamCountersTable:
+  title: stream counters(mask 0 match 0)
+  delimiter: ":"
+
+_IXCHIP0IngressTable:
+  title: IXCHIP 0 Ingress Buffer Mgr Errors
+  key: name
+  view: _IXCHIP0IngressView
+
+_IXCHIP0IngressView:
+  columns:
+    name: Counter Name
+    total: Total
+    rate: Rate
+    peak_rate: Peak Rate
+
+_IXCHIP2IngressTable:
+  title: IXCHIP 0 Ingress Buffer Mgr Errors
+  key: name
+  view: _IXCHIP2IngressView
+
+_IXCHIP2IngressView:
+  columns:
+    name: Counter Name
+    total: Total
+    rate: Rate
+    peak_rate: Peak Rate
+
+_IXCHIP2EgressTable:
+  title: IXCHIP 0 Ingress Buffer Mgr Errors
+  key: name
+  view: _IXCHIP2EgressView
+
+_IXCHIP2EgressView:
+  columns:
+    name: Counter Name
+    total: Total
+    rate: Rate
+    peak_rate: Peak Rate

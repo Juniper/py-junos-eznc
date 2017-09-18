@@ -3,10 +3,3 @@ FPCLinkStatTable:
     command: show link stats
     target: fpc1
     delimiter: ":"
-    view: FPCMemoryView
-
-FPCLinkStatView:
-    fields:
-        keep_alive: HDLC keepalives
-        ospf: OSPF Hello
-        arp: ARP
