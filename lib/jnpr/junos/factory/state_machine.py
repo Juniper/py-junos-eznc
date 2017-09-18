@@ -6,7 +6,7 @@ import copy
 
 
 class Identifiers:
-    printables = pp.OneOrMore(pp.printables)
+    printables = pp.OneOrMore(pp.Word(pp.printables))
     numbers = pp.Word(pp.nums)
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
     words = (pp.OneOrMore(word)).setParseAction(lambda i: ' '.join(i))
@@ -26,9 +26,9 @@ def data_type(item):
 
 def convert_to_data_type(items):
     item_types = map(data_type, items)
-    key, value = map(lambda x, y: int(x) if y is int else x.strip(),
+    return map(lambda x, y: int(x) if y is int else x.strip(),
                      items, item_types)
-    return key, value
+    # return key, value
 
 
 class StateMachine(Machine):

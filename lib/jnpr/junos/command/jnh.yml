@@ -1,0 +1,35 @@
+---
+JNHExceptionTable:
+  command: show jnh 0 exceptions
+  target: fpc1
+  view: JNHExceptionView
+
+JNHExceptionView:
+  fields:
+    ucode_internal: _UcodeInternalTable
+    bridging: _BridgingTable
+
+_UcodeInternalTable:
+  title: Ucode Internal
+  key: reason
+  view: _UcodeInternalView
+
+_UcodeInternalView:
+  regex:
+    reason: '\w+(\s\w+)+'
+    type: '(DISC|PUNT)\(\s*\d+\)'
+    packets: numbers
+    bytes: numbers
+
+
+_BridgingTable:
+  title: Bridging
+  key: reason
+  view: _BridgingView
+
+_BridgingView:
+  regex:
+    reason: '\w+(\s\w+)+'
+    type: '(DISC|PUNT)\(\s*\d+\)'
+    packets: numbers
+    bytes: numbers

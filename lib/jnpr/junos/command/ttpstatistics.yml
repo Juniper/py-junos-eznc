@@ -46,10 +46,3 @@ _FPCTTPReceiveStatisticsView:
 _FPCTTPQueueSizesTable:
   title: TTP Receive Queue Sizes
   delimiter: ":"
-  view: _FPCTTPQueueSizesView
-
-_FPCTTPQueueSizesView:
-  fields:
-    control_plane: Control Plane
-    high: High
-    medium: Medium

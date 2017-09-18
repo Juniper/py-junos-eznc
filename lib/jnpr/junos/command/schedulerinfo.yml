@@ -17,11 +17,3 @@ SchedulerView:
 _TopThreadTable:
   title: Top Thread
   delimiter: "="
-  view: _TopThreadView
-
-_TopThreadView:
-  fields:
-    pid: pid
-    name: name
-    time: time
-    queue3: cpu
