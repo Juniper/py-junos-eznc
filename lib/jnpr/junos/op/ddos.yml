@@ -9,5 +9,5 @@ DDOSView:
   fields:
     policing_on_re: ddos-policing-re-enabled
     policing_on_fpc: ddos-policing-fpc-enabled
-    flow_detectio: ddos-flow-detection-enabled
+    flow_detection: ddos-flow-detection-enabled
     logging: ddos-logging-enabled
