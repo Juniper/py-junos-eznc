@@ -876,7 +876,9 @@ class SW(Util):
                     "NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
-            elif self._multi_RE is False or all_re is False:
+            elif (self._multi_RE is False or all_re is False or
+                  (self._dev.facts.get('personality','') == 'SRX_BRANCH' and
+                   self._dev.facts.get('srx_cluster') is True)):
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
