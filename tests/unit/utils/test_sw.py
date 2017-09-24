@@ -198,7 +198,7 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_srx_branch_cluster(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.sw._multi_RE = True
+        self.sw._multi_RE = False
         self.sw._dev.facts['personality'] = 'SRX_BRANCH'
         self.sw._dev.facts['srx_cluster'] = True
         self.assertTrue(self.sw.install('test.tgz', no_copy=True))

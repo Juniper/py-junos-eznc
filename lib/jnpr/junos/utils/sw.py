@@ -72,6 +72,11 @@ class SW(Util):
             self._RE_list = [x for x in dev.facts.keys()
                              if x.startswith('version_RE')]
         self._multi_RE = bool(dev.facts.get('2RE'))
+        # Branch SRX in an SRX cluster doesn't really support multi_RE
+        # functionality for SW.
+        if (dev.facts.get('personality', '') == 'SRX_BRANCH' and
+            dev.facts.get('srx_cluster') is True):
+            self._multi_RE = False
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
@@ -876,9 +881,7 @@ class SW(Util):
                     "NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
-            elif (self._multi_RE is False or all_re is False or
-                  (self._dev.facts.get('personality','') == 'SRX_BRANCH' and
-                   self._dev.facts.get('srx_cluster') is True)):
+            elif self._multi_RE is False or all_re is False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
@@ -969,7 +972,7 @@ class SW(Util):
         else:
             cmd = E('request-reboot', E('at', str(at)))
 
-        if all_re is True:
+        if all_re is True :
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
             elif self._mixed_VC is True:
