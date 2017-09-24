@@ -12,7 +12,7 @@ Official Documentation with examples, [here](http://www.juniper.net/techpubs/en_
 
 API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
 
-_Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+_Junos PyEZ_ wiki page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
 
 # ABOUT
