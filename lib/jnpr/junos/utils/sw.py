@@ -972,7 +972,7 @@ class SW(Util):
         else:
             cmd = E('request-reboot', E('at', str(at)))
 
-        if all_re is True :
+        if all_re is True:
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
             elif self._mixed_VC is True:
