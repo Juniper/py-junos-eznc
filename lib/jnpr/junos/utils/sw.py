@@ -72,6 +72,11 @@ class SW(Util):
             self._RE_list = [x for x in dev.facts.keys()
                              if x.startswith('version_RE')]
         self._multi_RE = bool(dev.facts.get('2RE'))
+        # Branch SRX in an SRX cluster doesn't really support multi_RE
+        # functionality for SW.
+        if (dev.facts.get('personality', '') == 'SRX_BRANCH' and
+            dev.facts.get('srx_cluster') is True):
+            self._multi_RE = False
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
