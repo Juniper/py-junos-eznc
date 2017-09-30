@@ -1,7 +1,10 @@
-## Release 2.1.7.dev0 - 31 August 2017
+## Release 2.1.7 - 30 September 2017
 ### Features Added:
+- None
 
 ### Bugs Fixed:
+- Correct PyEZ TechWiki link. #781/#783
+- SRX Branch cluster fails SW.install(). #782
 
 
 ## Release 2.1.6 - 31 August 2017
