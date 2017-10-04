@@ -223,17 +223,14 @@ class StateMachine(Machine):
                 try:
                     items = (re.split(delimiter, line.strip()))
                     item_types = map(data_type, items)
-                    key, value = map(lambda x, y: int(x) if y is int else x.strip(),
-                                items, item_types)
+                    key, value = convert_to_data_type(items)
                     self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
                     regex = '(\d+)\s(.*)' if item_types[0]==int else '(.*)\s(\d+)'
                     obj = re.search(regex, line)
                     if obj:
                         items = obj.groups()
-                        item_types = map(data_type, items)
-                        key, value = map(lambda x, y: int(x) if y is int else x.strip(),
-                                         items, item_types)
+                        key, value = convert_to_data_type(items)
                         self._data[key] = value
             elif line.strip() == '':
                 break
