@@ -2,7 +2,8 @@
 CMErrorTable:
   command: show cmerror module brief
   target: fpc1
-  key: module
+  key:
+    - module
   view: CMErrorView
 
 CMErrorView:

@@ -82,6 +82,9 @@ class CMDTable(object):
         if 'target' in kvargs:
             self.TARGET = kvargs['target']
 
+        if 'key' in kvargs:
+            self.KEY = kvargs['key']
+
         if 'key_items' in kvargs:
             self.KEY_ITEMS = kvargs['key_items']
 
