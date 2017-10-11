@@ -79,6 +79,8 @@ class CMDTable(object):
                                       self.data).group(1)
             return self
 
+        if 'target' in kvargs:
+            self.TARGET = kvargs['target']
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:
             rpc_args = {'target': self.TARGET,

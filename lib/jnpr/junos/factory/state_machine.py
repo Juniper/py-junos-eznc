@@ -144,6 +144,7 @@ class StateMachine(Machine):
                         user_defined_columns.pop(x)
                         break
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
+        key = key[0] if len(key) == 1 and isinstance(key, tuple) else key
         items = re.split('\s\s+', self._lines[1].strip())
 
         post_integer_data_types = event.kwargs.get('check', map(data_type, items))
