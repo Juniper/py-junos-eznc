@@ -225,7 +225,10 @@ class StateMachine(Machine):
                     items = (re.split(delimiter, line.strip()))
                     item_types = map(data_type, items)
                     key, value = convert_to_data_type(items)
-                    self._data[self._view.FIELDS.get(key, key)] = value
+                    if self._table.KEY_ITEMS is None:
+                        self._data[self._view.FIELDS.get(key, key)] = value
+                    elif key in self._table.KEY_ITEMS:
+                        self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
                     regex = '(\d+)\s(.*)' if item_types[0]==int else '(.*)\s(\d+)'
                     obj = re.search(regex, line)
