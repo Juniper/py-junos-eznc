@@ -187,10 +187,10 @@ class StateMachine(Machine):
                 for i in key:
                     if i not in self._view.COLUMNS and i in self._view.COLUMNS.values():
                         for user_provided, from_table in self._view.COLUMNS.items():
-                            if i == from_table:
+                            # as dict will be created with user_provided key
+                            if i == from_table or i == user_provided:
                                 key_temp.append(user_provided)
-                            else:
-                                key_temp.append(from_table)
+                                break
                     else:
                         key_temp.append(i)
                 key = tuple(key_temp)

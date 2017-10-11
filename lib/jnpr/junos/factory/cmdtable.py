@@ -81,6 +81,10 @@ class CMDTable(object):
 
         if 'target' in kvargs:
             self.TARGET = kvargs['target']
+
+        if 'key_items' in kvargs:
+            self.KEY_ITEMS = kvargs['key_items']
+
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:
             rpc_args = {'target': self.TARGET,
@@ -99,7 +103,7 @@ class CMDTable(object):
             self.data = self.CLI(self.GET_CMD)
 
         # state machine
-        print self.data
+        # print self.data
         self.output = self._sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
