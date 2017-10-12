@@ -13,3 +13,6 @@ FPCThreadView:
     stack: Stack Use
     time: Time (Last/Max/Total)
     cpu: cpu
+  select:
+    - cpu
+    - state

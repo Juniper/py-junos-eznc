@@ -168,10 +168,21 @@ class StateMachine(Machine):
                     if isinstance(key, tuple):
                         self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
                     else:
-                        if self._table.KEY_ITEMS is None:
-                            self._data[tmp_dict[key]] = tmp_dict
-                        elif tmp_dict[key] in self._table.KEY_ITEMS:
-                            self._data[tmp_dict[key]] = tmp_dict
+                        if self._view.SELECT is not None:
+                            selected_dict = {}
+                            for select in self._view.SELECT:
+                                if select in columns_list:
+                                    selected_dict[select] = items[columns_list.index(
+                                        select)]
+                            if self._table.KEY_ITEMS is None:
+                                self._data[tmp_dict[key]] = selected_dict
+                            elif tmp_dict[key] in self._table.KEY_ITEMS:
+                                self._data[tmp_dict[key]] = selected_dict
+                        else:
+                            if self._table.KEY_ITEMS is None:
+                                self._data[tmp_dict[key]] = tmp_dict
+                            elif tmp_dict[key] in self._table.KEY_ITEMS:
+                                self._data[tmp_dict[key]] = tmp_dict
                 else:
                     break
             elif line.strip() == '':
