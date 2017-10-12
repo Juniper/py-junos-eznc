@@ -2,7 +2,9 @@
 FPCIPV4AddressTable:
   command: show ipv4 address
   target: fpc1
-  key: name
+  key:
+    - name
+    - addr
   view: FPCIPV4AddressView
 
 FPCIPV4AddressView:

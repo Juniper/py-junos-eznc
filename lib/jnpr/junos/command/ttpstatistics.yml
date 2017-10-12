@@ -30,9 +30,14 @@ _FPCTTPTransmitStatisticsView:
     queue1: Queue 1
     queue2: Queue 2
     queue3: Queue 3
+  filter:
+    - queue2
 
 _FPCTTPReceiveStatisticsTable:
   title: TTP Receive Statistics
+  key: name
+  key_items:
+    - Coalesce
   view: _FPCTTPReceiveStatisticsView
 
 _FPCTTPReceiveStatisticsView:
@@ -46,3 +51,11 @@ _FPCTTPReceiveStatisticsView:
 _FPCTTPQueueSizesTable:
   title: TTP Receive Queue Sizes
   delimiter: ":"
+  key_items:
+    - High
+    - Low
+  view: _FPCTTPQueueSizesView
+
+_FPCTTPQueueSizesView:
+  fields:
+    high: High

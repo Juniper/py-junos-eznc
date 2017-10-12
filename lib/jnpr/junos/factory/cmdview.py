@@ -18,7 +18,7 @@ class CMDView(object):
     KEY = 'name'
     KEY_ITEMS = []
     COLUMNS = {}
-    SELECT = None
+    FILTER = None
     FIELDS = {}
     REGEX = {}
     GROUPS = None
@@ -104,9 +104,9 @@ class CMDView(object):
             self.COLUMNS = deepcopy(self.__class__.COLUMNS)
             self.COLUMNS.update(more.columns.end)
 
-        if hasattr(more, 'select'):
-            self.SELECT = deepcopy(self.__class__.SELECT)
-            self.SELECT.update(more.select.end)
+        if hasattr(more, 'filter'):
+            self.FILTER = deepcopy(self.__class__.FILTER)
+            self.FILTER.update(more.filter.end)
 
         if hasattr(more, 'title'):
             self.TITLE = deepcopy(self.__class__.TITLE)
@@ -129,8 +129,8 @@ class CMDView(object):
         if hasattr(more, 'columns'):
             self.COLUMNS.update(more.columns.end)
 
-        if hasattr(more, 'select'):
-            self.SELECT.update(more.select.end)
+        if hasattr(more, 'filter'):
+            self.FILTER.update(more.filter.end)
 
         if hasattr(more, 'title'):
             self.TITLE.update(more.title.end)
