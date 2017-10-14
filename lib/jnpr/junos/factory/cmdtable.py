@@ -88,6 +88,11 @@ class CMDTable(object):
         if 'key_items' in kvargs:
             self.KEY_ITEMS = kvargs['key_items']
 
+        if 'filter' in kvargs:
+            self.VIEW.FILTER = [kvargs['filter']] if isinstance(kvargs[
+                                                                   'filter'],
+                                                                str) else kvargs['filter']
+
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:
             rpc_args = {'target': self.TARGET,
