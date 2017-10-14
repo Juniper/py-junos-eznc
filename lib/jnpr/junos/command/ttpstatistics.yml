@@ -30,7 +30,7 @@ _FPCTTPTransmitStatisticsView:
     queue1: Queue 1
     queue2: Queue 2
     queue3: Queue 3
-  filter:
+  filters:
     - queue2
 
 _FPCTTPReceiveStatisticsTable:

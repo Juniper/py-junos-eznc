@@ -11,7 +11,7 @@ CMErrorView:
     module: Module
     name: Name
     errors: Active Errors
-  filter:
-    - name
+  filters:
     - errors
+    - name
 

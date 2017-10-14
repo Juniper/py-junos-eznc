@@ -168,9 +168,9 @@ class StateMachine(Machine):
                     if isinstance(key, tuple):
                         self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
                     else:
-                        if self._view.FILTER is not None:
+                        if self._view.FILTERS is not None:
                             selected_dict = {}
-                            for select in self._view.FILTER:
+                            for select in self._view.FILTERS:
                                 if select in columns_list:
                                     selected_dict[select] = items[columns_list.index(
                                         select)]

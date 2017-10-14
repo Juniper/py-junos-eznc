@@ -234,8 +234,8 @@ class FactoryLoader(object):
             kvargs['title'] = view_dict['title']
         if 'regex' in view_dict:
             kvargs['regex'] = view_dict['regex']
-        if 'filter' in view_dict:
-            kvargs['filter'] = view_dict['filter']
+        if 'filters' in view_dict:
+            kvargs['filters'] = view_dict['filters']
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]
         for fg_name in fg_list:
