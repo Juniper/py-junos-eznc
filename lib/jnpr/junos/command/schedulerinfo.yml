@@ -10,7 +10,7 @@ SchedulerView:
   columns:
     cpu: CPU
     name: Name
-    time: Time(ms)
+    time_ms: Time(ms)
   regex:
     interrupt_time: 'Total interrupt time (\d+)'
 
