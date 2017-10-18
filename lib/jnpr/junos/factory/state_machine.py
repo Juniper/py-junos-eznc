@@ -166,13 +166,29 @@ class StateMachine(Machine):
                                 items, post_integer_data_types)
                     tmp_dict = dict(zip(columns_list, items))
                     if isinstance(key, tuple):
-                        self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
+                        if self._view.FILTERS is not None:
+                            selected_dict = {}
+                            for select in self._view.FILTERS:
+                                if select in columns_list:
+                                    selected_dict[select] = items[
+                                        columns_list.index(
+                                            select)]
+                            if self._table.KEY_ITEMS is None:
+                                self._data[tuple(tmp_dict[i] for i in key)] =\
+                                 selected_dict
+                            elif tmp_dict[key] in self._table.KEY_ITEMS:
+                                self._data[tuple(tmp_dict[i] for i in key)] =\
+                                 selected_dict
+                        else:
+                            self._data[tuple(tmp_dict[i] for i in key)] = \
+                                tmp_dict
                     else:
                         if self._view.FILTERS is not None:
                             selected_dict = {}
                             for select in self._view.FILTERS:
                                 if select in columns_list:
-                                    selected_dict[select] = items[columns_list.index(
+                                    selected_dict[select] = items[
+                                        columns_list.index(
                                         select)]
                             if self._table.KEY_ITEMS is None:
                                 self._data[tmp_dict[key]] = selected_dict
@@ -193,10 +209,12 @@ class StateMachine(Machine):
 
     def _get_key(self, key):
         if isinstance(key, list):
-            if set([i in self._view.COLUMNS or i in self._view.COLUMNS.values() for i in key]):
+            if set([i in self._view.COLUMNS or i in
+                    self._view.COLUMNS.values() for i in key]):
                 key_temp = []
                 for i in key:
-                    if i not in self._view.COLUMNS and i in self._view.COLUMNS.values():
+                    if i not in self._view.COLUMNS and i in \
+                            self._view.COLUMNS.values():
                         for user_provided, from_table in self._view.COLUMNS.items():
                             # as dict will be created with user_provided key
                             if i == from_table or i == user_provided:
@@ -205,7 +223,8 @@ class StateMachine(Machine):
                     else:
                         key_temp.append(i)
                 key = tuple(key_temp)
-        elif key not in self._view.COLUMNS and key in self._view.COLUMNS.values():
+        elif key not in self._view.COLUMNS and key in \
+                self._view.COLUMNS.values():
             for user_provided, from_table in self._view.COLUMNS.items():
                 if key == from_table:
                     key = user_provided
