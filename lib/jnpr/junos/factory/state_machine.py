@@ -11,7 +11,8 @@ class Identifiers:
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
     words = (pp.OneOrMore(word)).setParseAction(lambda i: ' '.join(i))
     percentage = pp.Word(pp.nums) + pp.Literal('%')
-    header_bar = pp.OneOrMore(pp.Word('-')) + pp.StringEnd()
+    header_bar = (pp.OneOrMore(pp.Word('-')) | pp.OneOrMore(pp.Word('='))) + \
+                                              pp.StringEnd()
 
 
 def data_type(item):
@@ -55,7 +56,7 @@ class StateMachine(Machine):
             {'trigger': 'delimiter_without_title', 'source': 'start', 'dest': 'delimiter_data',
              'after': 'parse_using_delimiter'},
             {'trigger': 'delimiter_with_title', 'source': 'start', 'dest': 'delimiter_data',
-             'conditions': ['match_title'],
+             'conditions': ['match_title'], 'before': 'check_header_bar',
              'after': 'parse_using_delimiter'}
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
@@ -296,7 +297,7 @@ class StateMachine(Machine):
                     self._lines = self._lines[self._lines.index(line)+1:]
                     break
         else:
-            obj = re.search('(\s+).*', self._lines[1])
+            obj = re.search('^(\s+).*', self._lines[1])
             if obj:
                 pre_space_delimit = obj.group(1)
         for line in self._lines[1:]:
