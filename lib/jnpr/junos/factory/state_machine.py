@@ -57,7 +57,9 @@ class StateMachine(Machine):
              'after': 'parse_using_delimiter'},
             {'trigger': 'delimiter_with_title', 'source': 'start', 'dest': 'delimiter_data',
              'conditions': ['match_title'], 'before': 'check_header_bar',
-             'after': 'parse_using_delimiter'}
+             'after': 'parse_using_delimiter'},
+            {'trigger': 'regex_with_item', 'source': 'start',
+             'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
@@ -85,6 +87,8 @@ class StateMachine(Machine):
                         self._data[key] = StateMachine(tbl).parse(lines)
                     if tbl._view.TITLE is not None or tbl.TITLE is not None:
                         self._data[key] = StateMachine(tbl).parse(lines)
+            if self._table.ITEM is not None and len(self._view.REGEX) > 0:
+                self.regex_with_item()
         return self._data
 
     def match_columns(self, event):
@@ -145,7 +149,6 @@ class StateMachine(Machine):
                         user_defined_columns.pop(x)
                         break
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
-        key = key[0] if len(key) == 1 and isinstance(key, tuple) else key
         items = re.split('\s\s+', self._lines[1].strip())
 
         post_integer_data_types = event.kwargs.get('check', map(data_type, items))
@@ -229,6 +232,7 @@ class StateMachine(Machine):
             for user_provided, from_table in self._view.COLUMNS.items():
                 if key == from_table:
                     key = user_provided
+        key = key[0] if len(key) == 1 and isinstance(key, tuple) else key
         return key
 
     def prev_next_row_same_type(self, event):
@@ -287,6 +291,19 @@ class StateMachine(Machine):
             for result, start, end in _regex.scanString(line):
                 tmp_dict = dict(zip(self._view.REGEX.keys(), convert_to_data_type(result)))
             self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+
+    def parse_using_item_and_regex(self, event):
+        key = self._get_key(event.kwargs.get('key', self._table.KEY))
+        for line in re.finditer("%s .*" % self._table.ITEM, '\n'.join(
+                self._lines)):
+            tmp_dict = {}
+            for k, exp in self._view.REGEX.items():
+                obj = re.search(exp, line.group())
+                if obj:
+                    val = obj.group(1)
+                    tmp_dict[k] = int(val) if data_type(val) == int else val
+            if key in tmp_dict:
+                self._data[tmp_dict[key]] = tmp_dict
 
     def parse_using_delimiter(self, event):
         delimiter = self._table.DELIMITER

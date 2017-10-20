@@ -50,7 +50,7 @@ def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
     new_cls.TARGET = target
     new_cls.KEY_ITEMS = key_items
     new_cls.GET_ARGS = args or {}
-    new_cls.ITEM_FILTER = item
+    new_cls.ITEM = item
     new_cls.KEY = key
     new_cls.VIEW = view
     new_cls.TITLE = title
