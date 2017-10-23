@@ -33,3 +33,23 @@ _BridgingView:
     type: '(DISC|PUNT)\(\s*\d+\)'
     packets: numbers
     bytes: numbers
+
+JNHHostPathStatsTable:
+  command: show jnh host-path-stats
+  target: fpc1
+  view: JNHHostPathStatsView
+
+JNHHostPathStatsView:
+  fields:
+    rcv_error: _HostPathRcvErrorsTable
+
+_HostPathRcvErrorsTable:
+  title: Receive Errors
+  key: stats
+  view: _HostPathRcvErrorsView
+
+_HostPathRcvErrorsView:
+  regex:
+    stats: '(.*)\:'
+    packets: numbers
+    rate: numbers
