@@ -7,7 +7,11 @@ import copy
 
 class Identifiers:
     printables = pp.OneOrMore(pp.Word(pp.printables))
-    numbers = pp.Word(pp.nums)
+    # numbers = pp.Word(pp.nums)
+    numbers = (pp.Word(pp.nums)+pp.Optional(pp.Literal('.') + pp.Word(
+        pp.nums))).setParseAction(lambda i: ''.join(i))
+    hex_numbers = pp.OneOrMore(pp.Word(pp.nums, min=1)) & pp.OneOrMore(
+        pp.Word('abcdefABCDEF', min=1))
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
     words = (pp.OneOrMore(word)).setParseAction(lambda i: ' '.join(i))
     percentage = pp.Word(pp.nums) + pp.Literal('%')
@@ -18,8 +22,16 @@ class Identifiers:
 def data_type(item):
     # should use identifiers class attribute
     try:
-        Identifiers.numbers.parseString(item, parseAll=True)
-        return int
+        obj = Identifiers.numbers.parseString(item, parseAll=True)
+        if '.' in obj[0]:
+            return float
+        else:
+            return int
+    except pp.ParseException as ex:
+        pass
+    try:
+        Identifiers.hex_numbers.parseString(item, parseAll=True)
+        return int   # special case
     except pp.ParseException as ex:
         pass
     return str
@@ -166,8 +178,19 @@ class StateMachine(Machine):
                 post_integer_data_types, pre_integer_data_types = \
                     map(data_type, items), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
-                    items = map(lambda x, y: int(x) if y is int else x,
-                                items, post_integer_data_types)
+                    try:
+                        items = map(lambda data, typ: typ(data),
+                                    items, post_integer_data_types)
+                    # special case for hex values
+                    except ValueError as ex:
+                        if "invalid literal for int() with base 10" in \
+                                ex.message:
+                            def fn(data, typ):
+                                try:
+                                    return typ(data)
+                                except ValueError:
+                                    return data
+                            items = map(fn, items, post_integer_data_types)
                     tmp_dict = dict(zip(columns_list, items))
                     if isinstance(key, tuple):
                         if self._view.FILTERS is not None:
@@ -265,7 +288,8 @@ class StateMachine(Machine):
                     elif key in self._table.KEY_ITEMS:
                         self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
-                    regex = '(\d+)\s(.*)' if item_types[0]==int else '(.*)\s(\d+)'
+                    regex = '(\d+)\s(.*)' if item_types[0] == int else '(' \
+                                                                      '.*)\s(\d+)'
                     obj = re.search(regex, line)
                     if obj:
                         items = obj.groups()
@@ -281,7 +305,7 @@ class StateMachine(Machine):
             if val in Identifiers.__dict__:
                 _regex[key] = Identifiers.__dict__[val]
             else:
-                _regex[key] = pp.Regex(val)
+                _regex[key] = pp.Regex(val, flags=re.IGNORECASE)
 
         _regex = reduce(lambda x, y: x+y, _regex.values())
         for line in self._lines[1:]:
@@ -289,7 +313,18 @@ class StateMachine(Machine):
             if line.strip() == '':
                 break
             for result, start, end in _regex.scanString(line):
-                tmp_dict = dict(zip(self._view.REGEX.keys(), convert_to_data_type(result)))
+                # write a different function for this
+                for key, val in self._view.REGEX.items():
+                    if val not in Identifiers.__dict__:
+                        obj = re.search(val, result[self._view.REGEX.keys(
+
+                        ).index(
+                            key)], re.I)
+                        if obj and len(obj.groups()) >= 1:
+                            result[self._view.REGEX.keys().index(key)] = \
+                                obj.groups()[0]
+                tmp_dict = dict(zip(self._view.REGEX.keys(),
+                                    convert_to_data_type(result)))
             self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
 
     def parse_using_item_and_regex(self, event):
@@ -300,8 +335,9 @@ class StateMachine(Machine):
             for k, exp in self._view.REGEX.items():
                 obj = re.search(exp, line.group())
                 if obj:
-                    val = obj.group(1)
-                    tmp_dict[k] = int(val) if data_type(val) == int else val
+                    val = obj.groups()[0] if len(obj.groups()) >= 1 else \
+                        obj.group()
+                    tmp_dict[k] = data_type(val)(val)
             if key in tmp_dict:
                 self._data[tmp_dict[key]] = tmp_dict
 
@@ -325,7 +361,7 @@ class StateMachine(Machine):
                     items = (re.split(delimiter, line.strip()))
                     key, value = convert_to_data_type(items)
                     self._data[key] = value
-                except ValueError:
+                except ValueError as ex:
                     # create a class named ParseError
                     raise Exception('Not able to parse line: %s'%line)
             else:
