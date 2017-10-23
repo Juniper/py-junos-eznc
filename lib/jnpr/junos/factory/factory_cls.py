@@ -60,7 +60,8 @@ def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
 
 
 def FactoryCMDChildTable(title=None, regex=None,
-                    key='name', delimiter=None, table_name=None, view=None, key_items=None):
+                    key='name', delimiter=None, table_name=None, view=None,
+                         key_items=None, item=None):
     if table_name is None:
         table_name = "CMDTable." + title
     new_cls = type(table_name, (CMDTable,), {})
@@ -70,6 +71,7 @@ def FactoryCMDChildTable(title=None, regex=None,
     new_cls.TITLE = title
     new_cls.VIEW = view
     new_cls.KEY_ITEMS = key_items
+    new_cls.ITEM = item
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
     return new_cls
 
