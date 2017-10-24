@@ -4,6 +4,7 @@ import six
 import types
 import platform
 import warnings
+from collections import OrderedDict
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -805,12 +806,15 @@ class _Connection(object):
             if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
                 try:
-                    return json.loads(rpc_rsp_e.text)
+                    return json.loads(rpc_rsp_e.text,
+                                      object_pairs_hook=OrderedDict)
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith('Extra data'):
-                        return json.loads(
-                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+                        return json.loads(re.sub('\s?{\s?}\s?',
+                                                 '',
+                                                 rpc_rsp_e.text),
+                                          object_pairs_hook=OrderedDict)
                     else:
                         raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
