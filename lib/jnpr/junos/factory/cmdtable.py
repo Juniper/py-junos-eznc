@@ -32,8 +32,6 @@ class CMDTable(object):
         self._path = path
         self._parser = None
         self.output = None
-        self._sm = StateMachine(self)
-
 
     # -------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -112,8 +110,8 @@ class CMDTable(object):
             self.data = self.CLI(self.GET_CMD)
 
         # state machine
-        # print self.data
-        self.output = self._sm.parse(self.data.splitlines())
+        sm = StateMachine(self)
+        self.output = sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
         return self
