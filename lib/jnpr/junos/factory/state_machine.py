@@ -63,7 +63,7 @@ class StateMachine(Machine):
              'conditions': ['match_title', 'title_not_followed_by_columns'],
              'after': 'parse_title_data'},
             {'trigger': 'regex_provided', 'source': 'title_data', 'dest': 'regex_data',
-             'conditions': ['match_title'],
+             'conditions': ['match_title'], 'before': 'check_header_bar',
              'after': 'parse_using_regex'},
             {'trigger': 'delimiter_without_title', 'source': 'start', 'dest': 'delimiter_data',
              'after': 'parse_using_delimiter'},

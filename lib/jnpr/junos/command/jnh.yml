@@ -53,3 +53,24 @@ _HostPathRcvErrorsView:
     stats: '(.*)\:'
     packets: numbers
     rate: numbers
+
+JNHExceptionTerseTable:
+  command: show jnh 0 exceptions terse
+  target: fpc1
+  view: JNHExceptionTerseView
+
+JNHExceptionTerseView:
+  fields:
+    routing: _RoutingTable
+
+_RoutingTable:
+  title: Routing
+  key: reason
+  view: _RoutingView
+
+_RoutingView:
+  regex:
+    reason: '(\w+(\s\w+)+)'
+    type: '((DISC|PUNT)\(\s*\d+\))'
+    packets: numbers
+    bytes: numbers
