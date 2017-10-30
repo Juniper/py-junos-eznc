@@ -1,0 +1,18 @@
+---
+XMChipStatsTable:
+  command: show xmchip 0 pt stats
+  target: fpc1
+  view: XMChipStatsView
+
+XMChipStatsView:
+  fields:
+    wan_pt_stats: _WANPTStatTable
+    fabric_pt_stats: _FabricPTStatTable
+
+_WANPTStatTable:
+  title: WAN PT statistics (Index 0)
+  delimiter: ":"
+
+_FabricPTStatTable:
+  title: Fabric PT statistics (Index 1)
+  delimiter: ":"

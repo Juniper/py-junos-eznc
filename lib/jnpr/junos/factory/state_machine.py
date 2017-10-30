@@ -31,7 +31,7 @@ def data_type(item):
         pass
     try:
         Identifiers.hex_numbers.parseString(item, parseAll=True)
-        return int   # special case
+        return str   # special case
     except pp.ParseException as ex:
         pass
     return str
@@ -72,6 +72,8 @@ class StateMachine(Machine):
              'after': 'parse_using_delimiter'},
             {'trigger': 'regex_with_item', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
+            {'trigger': 'regex_columns', 'source': 'start',
+             'dest': 'regex_data', 'after': 'parse_using_regex'},
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
@@ -99,8 +101,11 @@ class StateMachine(Machine):
                         self._data[key] = StateMachine(tbl).parse(lines)
                     if tbl._view.TITLE is not None or tbl.TITLE is not None:
                         self._data[key] = StateMachine(tbl).parse(lines)
-            if self._table.ITEM is not None and len(self._view.REGEX) > 0:
-                self.regex_with_item()
+            if len(self._view.REGEX) > 0:
+                if self._table.ITEM is not None:
+                    self.regex_with_item()
+                else:
+                    self.regex_columns()
         return self._data
 
     def match_columns(self, event):
@@ -178,19 +183,21 @@ class StateMachine(Machine):
                 post_integer_data_types, pre_integer_data_types = \
                     map(data_type, items), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
-                    try:
-                        items = map(lambda data, typ: typ(data),
-                                    items, post_integer_data_types)
+                    items = map(lambda data, typ: typ(data),
+                                items, post_integer_data_types)
+                    # try:
+                    #     items = map(lambda data, typ: typ(data),
+                    #                 items, post_integer_data_types)
                     # special case for hex values
-                    except ValueError as ex:
-                        if "invalid literal for int() with base 10" in \
-                                ex.message:
-                            def fn(data, typ):
-                                try:
-                                    return typ(data)
-                                except ValueError:
-                                    return data
-                            items = map(fn, items, post_integer_data_types)
+                    # except ValueError as ex:
+                    #     if "invalid literal for int() with base 10" in \
+                    #             ex.message:
+                    #         def fn(data, typ):
+                    #             try:
+                    #                 return typ(data)
+                    #             except ValueError:
+                    #                 return data
+                    #         items = map(fn, items, post_integer_data_types)
                     tmp_dict = dict(zip(columns_list, items))
                     if isinstance(key, tuple):
                         if self._view.FILTERS is not None:
@@ -308,10 +315,14 @@ class StateMachine(Machine):
                 _regex[key] = pp.Regex(val, flags=re.IGNORECASE)
 
         _regex = reduce(lambda x, y: x+y, _regex.values())
-        for line in self._lines[1:]:
+        for index, line in enumerate(self._lines[1:]):
             tmp_dict = {}
+            # checking index as there can be blank line at position 0 and 2
             if line.strip() == '':
-                break
+                if index > 2:
+                    break
+                else:
+                    continue
             for result, start, end in _regex.scanString(line):
                 # write a different function for this
                 for key, val in self._view.REGEX.items():
@@ -325,7 +336,8 @@ class StateMachine(Machine):
                                 obj.groups()[0]
                 tmp_dict = dict(zip(self._view.REGEX.keys(),
                                     convert_to_data_type(result)))
-            self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+            if len(tmp_dict) > 0:
+                self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
 
     def parse_using_item_and_regex(self, event):
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
@@ -353,9 +365,12 @@ class StateMachine(Machine):
             obj = re.search('^(\s+).*', self._lines[1])
             if obj:
                 pre_space_delimit = obj.group(1)
-        for line in self._lines[1:]:
+        for index, line in enumerate(self._lines[1:]):
             if line.strip() == '':
-                break
+                if index > 2:
+                    break
+                else:
+                    continue
             if line.startswith(pre_space_delimit):
                 try:
                     items = (re.split(delimiter, line.strip()))

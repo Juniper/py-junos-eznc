@@ -88,3 +88,33 @@ _IXCHIP2EgressView:
     total: Total
     rate: Rate
     peak_rate: Peak Rate
+
+PFEStatsTrafficTable:
+  command: show pfe statistics traffic
+  target: fpc1
+  view: PFEStatsTrafficView
+
+PFEStatsTrafficView:
+  fields:
+    local_traffic_stats: _PFELocalTrafficStatsTable
+    local_proto_stats: _PFELocalProtoStatsTable
+
+_PFELocalTrafficStatsTable:
+  title: PFE Local Traffic statistics
+  key: name
+  view: _PFELocalTrafficStatsView
+
+_PFELocalTrafficStatsView:
+  regex:
+    value: numbers
+    name: words
+
+_PFELocalProtoStatsTable:
+  title: PFE Local Traffic statistics
+  key: name
+  view: _PFELocalProtoStatsView
+
+_PFELocalProtoStatsView:
+  regex:
+    value: numbers
+    name: words

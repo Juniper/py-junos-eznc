@@ -1,0 +1,17 @@
+---
+IthrottleTable:
+  command: show ithrottle
+  target: fpc1
+  key:
+    - Name
+  view: IthrottleView
+
+IthrottleView:
+  columns:
+    id: ID
+    usage: "Usage %"
+    cfg_state: "Cfg State"
+    oper_state: "Oper State"
+    oper_state: "Oper State"
+    name: Name
+

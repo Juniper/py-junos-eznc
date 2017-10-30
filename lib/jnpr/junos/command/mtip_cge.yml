@@ -1,0 +1,15 @@
+---
+MtipCgeSummaryTable:
+  command: show mtip-cge summary
+  target: fpc1
+  key: id
+  view: MtipCgeSummaryView
+
+MtipCgeSummaryView:
+  regex:
+    id: numbers
+    name: "[a-z0-9_.]+"
+    fpc: numbers
+    pic: numbers
+    ifd: '(\w+-\d(/\d){2})'
+    ptr: "[a-f0-9]+"
