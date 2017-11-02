@@ -55,7 +55,7 @@ class StateMachine(Machine):
         self.states = ['row_column', 'title_data', 'regex_data',
                        'delimiter_data', 'exists_bool_data']
         self.transitions = [
-            {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
+            {'trigger': 'column_provided', 'source': '*', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
              'after': 'parse_raw_columns'},
             {'trigger': 'check_next_row', 'source': 'row_column', 'dest': 'row_column',
@@ -74,9 +74,11 @@ class StateMachine(Machine):
              'after': 'parse_using_delimiter'},
             {'trigger': 'regex_with_item', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
-            {'trigger': 'regex_columns', 'source': 'start',
+            {'trigger': 'regex_parser', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_regex'},
-            {'trigger': 'regex_columns', 'source': 'regex_data',
+            {'trigger': 'regex_parser', 'source': 'regex_data',
+             'dest': 'regex_data', 'after': 'parse_using_regex'},
+            {'trigger': 'regex_parser', 'source': 'row_column',
              'dest': 'regex_data', 'after': 'parse_using_regex'},
             {'trigger': 'exists_check', 'source': 'start',
              'dest': 'exists_bool_data', 'after': 'parse_exists'},
@@ -95,8 +97,15 @@ class StateMachine(Machine):
         else:
             if self._view.TITLE is not None or self._table.TITLE:
                 self.title_provided()
+            if len(self._view.REGEX) > 0:
+                if self._table.ITEM is not None:
+                    self.regex_with_item()
+                else:
+                    self.regex_parser()
             if len(self._view.COLUMNS) > 0:
                 self.column_provided()
+            if len(self._view.EXISTS) > 0:
+                self.exists_check()
             if len(self._view.FIELDS) > 0:
                 for key, value in self._view.FIELDS.items():
                     tbl = value['table']
@@ -108,13 +117,6 @@ class StateMachine(Machine):
                         self._data[key] = StateMachine(tbl).parse(lines)
                     if tbl._view.TITLE is not None or tbl.TITLE is not None:
                         self._data[key] = StateMachine(tbl).parse(lines)
-            if len(self._view.REGEX) > 0:
-                if self._table.ITEM is not None:
-                    self.regex_with_item()
-                else:
-                    self.regex_columns()
-            if len(self._view.EXISTS) > 0:
-                self.exists_check()
         return self._data
 
     def match_columns(self, event):
@@ -346,7 +348,10 @@ class StateMachine(Machine):
                 tmp_dict = dict(zip(self._view.REGEX.keys(),
                                     convert_to_data_type(result)))
             if len(tmp_dict) > 0:
-                self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+                if tmp_dict.get(self._table.KEY) is None:
+                    self._data.update(tmp_dict)
+                else:
+                    self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
 
     def parse_using_item_and_regex(self, event):
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
