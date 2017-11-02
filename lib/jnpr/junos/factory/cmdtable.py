@@ -6,15 +6,16 @@ import copy
 from jnpr.junos.exception import RpcError
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.factory.state_machine import StateMachine
+from jnpr.junos.factory.to_json import TableJSONEncoder
 
 # stdlib
 from inspect import isclass
 from collections import OrderedDict
 
 import json
-from jnpr.junos.factory.to_json import TableJSONEncoder
-import pyparsing as pp
 
+import pyparsing as pp
+from jinja2 import Template
 
 class CMDTable(object):
 
@@ -91,6 +92,12 @@ class CMDTable(object):
                                                                    'filters'],
                                                                 str) else \
                 kvargs['filters']
+
+        if 'args' in kvargs:
+            self.CMD_ARGS = kvargs['args']
+
+        if len(self.CMD_ARGS)>0:
+            self.GET_CMD = Template(self.GET_CMD).render(**self.CMD_ARGS)
 
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:

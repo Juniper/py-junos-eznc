@@ -16,3 +16,23 @@ _WANPTStatTable:
 _FabricPTStatTable:
   title: Fabric PT statistics (Index 1)
   delimiter: ":"
+
+XMChipIfdListTable:
+  command: show xmchip {{ XM_instance }} ifd list {{ direction }}
+  target: fpc1
+  args:
+    XM_instance: 0
+    direction: 0
+  key: phy_stream
+  view: XMChipIfdListView
+
+XMChipIfdListView:
+  columns:
+    ifd_name: IFD name
+    ifd_index: IFD index
+    phy_stream: PHY stream
+    lu_sid: LU SID
+    traffic_class: Traffic Class
+  filters:
+    - ifd_name
+    - ifd_index
