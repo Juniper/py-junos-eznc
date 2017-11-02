@@ -21,6 +21,7 @@ class CMDView(object):
     FILTERS = None
     FIELDS = {}
     REGEX = {}
+    EXISTS = {}
     GROUPS = None
     TITLE = None
 
@@ -117,8 +118,12 @@ class CMDView(object):
             self.FIELDS.update(more.fields.end)
 
         if hasattr(more, 'regex'):
-            self.FIELDS = deepcopy(self.__class__.REGEX)
-            self.FIELDS.update(more.regex.end)
+            self.REGEX = deepcopy(self.__class__.REGEX)
+            self.REGEX.update(more.regex.end)
+
+        if hasattr(more, 'exists'):
+            self.EXISTS = deepcopy(self.__class__.EXISTS)
+            self.EXISTS.update(more.exists.end)
 
         if hasattr(more, 'groups'):
             self.GROUPS = deepcopy(self.__class__.GROUPS)
@@ -140,6 +145,9 @@ class CMDView(object):
 
         if hasattr(more, 'regex'):
             self.REGEX.update(more.regex.end)
+
+        if hasattr(more, 'exists'):
+            self.EXISTS.update(more.exists.end)
 
         if hasattr(more, 'groups'):
             self.GROUPS.update(more.groups)

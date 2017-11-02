@@ -50,8 +50,10 @@ class StateMachine(Machine):
         self._data = {}
         self._table = table_view
         self._view = self._table.VIEW
+        self._raw = ''
         self._lines = []
-        self.states = ['row_column', 'title_data', 'regex_data', 'delimiter_data']
+        self.states = ['row_column', 'title_data', 'regex_data',
+                       'delimiter_data', 'exists_bool_data']
         self.transitions = [
             {'trigger': 'column_provided', 'source': 'start', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
@@ -74,12 +76,15 @@ class StateMachine(Machine):
              'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
             {'trigger': 'regex_columns', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_regex'},
+            {'trigger': 'exists_check', 'source': 'start',
+             'dest': 'exists_bool_data', 'after': 'parse_exists'},
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
 
-    def parse(self, lines):
-        self._lines = copy.deepcopy(lines)
+    def parse(self, raw):
+        self._raw = raw
+        self._lines = copy.deepcopy(raw.splitlines())
         if self._table.DELIMITER is not None and self._view is None:
             if self._table.TITLE is not None:
                 self.delimiter_with_title()
@@ -106,6 +111,8 @@ class StateMachine(Machine):
                     self.regex_with_item()
                 else:
                     self.regex_columns()
+            if len(self._view.EXISTS) > 0:
+                self.exists_check()
         return self._data
 
     def match_columns(self, event):
@@ -382,3 +389,8 @@ class StateMachine(Machine):
             else:
                 break
         return self._data
+
+    def parse_exists(self, event):
+        for key, search in self._view.EXISTS.items():
+            self._data[key] = re.search(search, self._raw, re.I|re.M) is not \
+                              None

@@ -154,6 +154,8 @@ def FactoryCMDView(fields, **kvargs):
         new_cls.TITLE = deepcopy(kvargs['title'])
     if 'regex' in kvargs:
         new_cls.REGEX = deepcopy(kvargs['regex'])
+    if 'exists' in kvargs:
+        new_cls.EXISTS = deepcopy(kvargs['exists'])
     if 'filters' in kvargs:
         new_cls.FILTERS = deepcopy(kvargs['filters'])
     if fields is not None:
