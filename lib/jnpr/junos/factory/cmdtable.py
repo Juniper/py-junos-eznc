@@ -118,7 +118,7 @@ class CMDTable(object):
 
         # state machine
         sm = StateMachine(self)
-        self.output = sm.parse(self.data)
+        self.output = sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
         return self

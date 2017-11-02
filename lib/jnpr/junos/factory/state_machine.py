@@ -76,15 +76,17 @@ class StateMachine(Machine):
              'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
             {'trigger': 'regex_columns', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_regex'},
+            {'trigger': 'regex_columns', 'source': 'regex_data',
+             'dest': 'regex_data', 'after': 'parse_using_regex'},
             {'trigger': 'exists_check', 'source': 'start',
              'dest': 'exists_bool_data', 'after': 'parse_exists'},
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
 
-    def parse(self, raw):
-        self._raw = raw
-        self._lines = copy.deepcopy(raw.splitlines())
+    def parse(self, lines):
+        self._raw = '\n'.join(lines)
+        self._lines = copy.deepcopy(lines)
         if self._table.DELIMITER is not None and self._view is None:
             if self._table.TITLE is not None:
                 self.delimiter_with_title()
