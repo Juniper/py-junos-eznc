@@ -328,6 +328,17 @@ class StateMachine(Machine):
         _regex = reduce(lambda x, y: x+y, _regex.values())
         for index, line in enumerate(self._lines[1:]):
             tmp_dict = {}
+            # checking index as there can be blank line at position 0 and 2
+            if line.strip() == '':
+                if self.is_row_column() and index > 2:
+                    try:
+                        if len(_regex.scanString(self._lines[self._lines.index(
+                                line)+1])[0]) == 0:
+                            break
+                    except IndexError:
+                        break
+                else:
+                    continue
             for result, start, end in _regex.scanString(line):
                 # write a different function for this
                 for key, val in self._view.REGEX.items():
@@ -348,18 +359,26 @@ class StateMachine(Machine):
                     self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
 
     def parse_using_item_and_regex(self, event):
-        key = self._get_key(event.kwargs.get('key', self._table.KEY))
-        for line in re.finditer("%s .*" % self._table.ITEM, '\n'.join(
-                self._lines)):
-            tmp_dict = {}
-            for k, exp in self._view.REGEX.items():
-                obj = re.search(exp, line.group())
+        if self._table.ITEM=='*':
+            for key, regex in self._view.REGEX.items():
+                obj = re.search(regex, self._raw)
                 if obj:
                     val = obj.groups()[0] if len(obj.groups()) >= 1 else \
                         obj.group()
-                    tmp_dict[k] = data_type(val)(val)
-            if key in tmp_dict:
-                self._data[tmp_dict[key]] = tmp_dict
+                    self._data[key] = data_type(val)(val)
+        else:
+            key = self._get_key(event.kwargs.get('key', self._table.KEY))
+            for line in re.finditer("%s .*" % self._table.ITEM, '\n'.join(
+                    self._lines)):
+                tmp_dict = {}
+                for k, exp in self._view.REGEX.items():
+                    obj = re.search(exp, line.group())
+                    if obj:
+                        val = obj.groups()[0] if len(obj.groups()) >= 1 else \
+                            obj.group()
+                        tmp_dict[k] = data_type(val)(val)
+                if key in tmp_dict:
+                    self._data[tmp_dict[key]] = tmp_dict
 
     def parse_using_delimiter(self, event):
         delimiter = self._table.DELIMITER

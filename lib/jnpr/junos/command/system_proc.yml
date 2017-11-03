@@ -1,0 +1,12 @@
+---
+SystemProcExtTable:
+  command: show system processes extensive
+  key: cmd
+  view: SystemProcExtView
+
+SystemProcExtView:
+  regex:
+    pid: '\d+'
+    wcpu: '.*(\d+\.\d+)%'
+    cmd: '\w+$'
+
