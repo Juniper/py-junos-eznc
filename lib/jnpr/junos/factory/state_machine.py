@@ -328,12 +328,6 @@ class StateMachine(Machine):
         _regex = reduce(lambda x, y: x+y, _regex.values())
         for index, line in enumerate(self._lines[1:]):
             tmp_dict = {}
-            # checking index as there can be blank line at position 0 and 2
-            if line.strip() == '':
-                if index > 2:
-                    break
-                else:
-                    continue
             for result, start, end in _regex.scanString(line):
                 # write a different function for this
                 for key, val in self._view.REGEX.items():
