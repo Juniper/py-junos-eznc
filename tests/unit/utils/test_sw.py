@@ -170,7 +170,7 @@ class TestSW(unittest.TestCase):
         mock_md5.return_value = '96a35ab371e1ca10408c3caecdbd8a67'
         mock_execute.side_effect = self._mock_manager
         self.sw.put = MagicMock()
-        self.sw._mixed_VC=True
+        self.sw._mixed_VC = True
         self.assertTrue(self.sw.install(
                             pkg_set=['safecopy.tgz', 'safecopy.tgz',
                                      'ftp://server/path/test.tgz']))
@@ -192,6 +192,15 @@ class TestSW(unittest.TestCase):
     def test_sw_install_single_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
+        self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_srx_branch_cluster(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        self.sw._dev.facts['personality'] = 'SRX_BRANCH'
+        self.sw._dev.facts['srx_cluster'] = True
         self.assertTrue(self.sw.install('test.tgz', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
@@ -485,6 +494,12 @@ class TestSW(unittest.TestCase):
             self.sw.remote_checksum(package, algorithm='sha256'),
             '27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170')
 
+    def test_sw_remote_checksum_unknown_alg(self):
+        self.assertRaises(ValueError,
+                          self.sw.remote_checksum,
+                          'foo.tgz',
+                          algorithm='foo')
+
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -615,8 +630,14 @@ class TestSW(unittest.TestCase):
         sw = self.get_sw()
         sw.install(package='abc.tgz', no_copy=True)
         self.assertFalse(sw._multi_VC)
-        calls = [call('/var/tmp/abc.tgz', dev_timeout=1800, re0=True),
-                 call('/var/tmp/abc.tgz', dev_timeout=1800, re1=True)]
+        calls = [call('/var/tmp/abc.tgz',
+                      dev_timeout=1800,
+                      vmhost=False,
+                      re0=True),
+                 call('/var/tmp/abc.tgz',
+                      dev_timeout=1800,
+                      re1=True,
+                      vmhost=False)]
         mock_pkgadd.assert_has_calls(calls)
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
@@ -671,6 +692,12 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_mixed_vc_TypeError(self, mock_pkgadd):
         self.assertRaises(TypeError, self.sw.install, cleanfs=False)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_vmhost(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, no_copy=True, vmhost=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
@@ -863,3 +890,7 @@ class TestSW(unittest.TestCase):
                 return self._read_file('request-reboot-at.xml')
             else:
                 return self._read_file(args[0].tag + '.xml')
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSW)
+    unittest.TextTestRunner(verbosity=2).run(suite)

@@ -102,6 +102,19 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(self.dev.facts['personality'], 'NFX')
         self.assertEqual(self.dev.facts['virtual'], False)
 
+    def test_personality_jdm(self):
+        self.dev.facts._cache['model'] = 'JUNOS_NODE_SLICING'
+        self.assertEqual(self.dev.facts['personality'], 'JDM')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
+    def test_personality_gnf(self):
+        self.dev.facts._cache['model'] = 'MX2020'
+        self.dev.facts._cache['re_info'] = {'default':
+                                            {'default':
+                                                {'model': 'RE-GNF-2400x4'}}}
+        self.assertEqual(self.dev.facts['personality'], 'MX-GNF')
+        self.assertEqual(self.dev.facts['virtual'], True)
+
     @patch('jnpr.junos.Device.execute')
     def test_personality_vptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_vptx

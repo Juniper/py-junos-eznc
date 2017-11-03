@@ -12,7 +12,7 @@ Official Documentation with examples, [here](http://www.juniper.net/techpubs/en_
 
 API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
 
-_Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+_Junos PyEZ_ wiki page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
 
 # ABOUT
@@ -74,7 +74,7 @@ Installing from Git is also supported (OS must have git installed).
 
 Move to the local directory which contains your script(s) and run the container
 
-`docker run -it --rm --name -v $PWD:/scripts pyez juniper/pyez sh`
+`docker run -it --rm --name pyez -v $PWD:/scripts juniper/pyez sh`
 
 Your local scripts will be mounted to /scripts in the container
 

@@ -1,0 +1,27 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/17.4I0/junos">
+    <software-information>
+        <host-name>jdm</host-name>
+        <product-model>junos_node_slicing</product-model>
+        <product-name>pvi-model</product-name>
+        <package-information>
+            <name>Server slot</name>
+            <comment>Server slot : 0</comment>
+        </package-information>
+         <package-information>
+            <name>JDM package version</name>
+            <comment>JDM package version : 1.0</comment>
+        </package-information>
+        <package-information>
+            <name>JUNOS version</name>
+            <comment>JUNOS version : 17.4-20170718_dev_common.1-secure</comment>
+        </package-information>
+        <package-information>
+            <name>Host Software</name>
+            <comment>Host Software [Red Hat Enterprise Linux]</comment>
+        </package-information>
+        <package-information>
+            <name>JDM container Software</name>
+            <comment>JDM container Software [Ubuntu 14.04.1 LTS]</comment>
+        </package-information>
+    </software-information>
+</rpc-reply>

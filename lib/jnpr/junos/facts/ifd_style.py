@@ -15,5 +15,7 @@ def get_facts(device):
 
     if device.facts['personality'] == 'SWITCH':
         ifd_style = 'SWITCH'
+    elif device.facts['personality'] == 'JDM':
+        ifd_style = None
 
     return {'ifd_style': ifd_style, }
