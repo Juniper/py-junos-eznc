@@ -435,7 +435,8 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs using string regular expression """
             if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
                 kvargs['format'] = 'xml'
-            elif re.search(r'^\s*(set|delete|replace|rename|insert)\s', rpc):
+            elif re.search(r'^\s*(set|delete|rename|insert|activate|deactivate'
+                           '|annotate|copy|protect|unprotect)\s', rpc):
                 kvargs['format'] = 'set'
             elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
                     re.search(r'.*}\s*$', rpc):
