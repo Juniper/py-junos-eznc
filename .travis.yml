@@ -2,7 +2,6 @@ language: python
 sudo: false
 
 python:
-  - "2.6"
   - "2.7"
   - "3.4"
   - "3.5"
@@ -16,7 +15,6 @@ addons:
     - libxslt1-dev
 
 install:
-  - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip install importlib; fi
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
 
