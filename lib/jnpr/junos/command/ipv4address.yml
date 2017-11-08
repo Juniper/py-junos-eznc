@@ -1,0 +1,14 @@
+---
+FPCIPV4AddressTable:
+  command: show ipv4 address
+  target: fpc1
+  key:
+    - name
+    - addr
+  view: FPCIPV4AddressView
+
+FPCIPV4AddressView:
+  columns:
+    index: Index
+    addr: Address
+    name: Name

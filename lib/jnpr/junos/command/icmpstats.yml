@@ -1,0 +1,41 @@
+---
+ICMPStatsTable:
+  command: show icmp statistics
+  target: fpc1
+  view: ICMPStatsView
+
+ICMPStatsView:
+  fields:
+    discards: _ICMPDiscardsTable
+    errors: _ICMPErrorsTable
+    rate: _ICMPRateTable
+
+_ICMPDiscardsTable:
+  title: ICMP Discards
+  key: name
+  view: _ICMPDiscardsView
+
+_ICMPDiscardsView:
+  regex:
+    value: numbers
+    name: words
+
+_ICMPErrorsTable:
+  title: ICMP Errors
+  key: name
+  view: _ICMPErrorsView
+
+_ICMPErrorsView:
+  regex:
+    error: numbers
+    name: words
+
+_ICMPRateTable:
+  title: ICMP Rate Limit Settings
+  key: name
+  view: _ICMPRateView
+
+_ICMPRateView:
+  regex:
+    rate: numbers
+    name: words

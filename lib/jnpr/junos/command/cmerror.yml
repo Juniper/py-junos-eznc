@@ -1,0 +1,17 @@
+---
+CMErrorTable:
+  command: show cmerror module brief
+  target: fpc1
+  key:
+    - module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+    errors: Active Errors
+  filters:
+    - errors
+    - name
+

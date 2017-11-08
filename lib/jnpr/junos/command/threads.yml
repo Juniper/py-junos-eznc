@@ -1,0 +1,18 @@
+---
+FPCThread:
+  command: show thread
+  target: fpc1
+  key: Name
+  view: FPCThreadView
+
+FPCThreadView:
+  columns:
+    pid_pr: PID PR
+    state: State
+    name: Name
+    stack: Stack Use
+    time: Time (Last/Max/Total)
+    cpu: cpu
+  filters:
+    - cpu
+    - state

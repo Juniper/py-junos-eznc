@@ -1,0 +1,14 @@
+---
+TaskIOTable:
+  command: show task io
+  key: task_name
+  view: TaskIOView
+
+TaskIOView:
+  columns:
+    task_name: Task Name
+    reads: Reads
+    writes: Writes
+    rcvd: Rcvd
+    sent: Sent
+    dropped: Dropped

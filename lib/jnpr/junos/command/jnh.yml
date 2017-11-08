@@ -1,0 +1,87 @@
+---
+JNHExceptionTable:
+  command: show jnh 0 exceptions
+  target: fpc1
+  view: JNHExceptionView
+
+JNHExceptionView:
+  fields:
+    ucode_internal: _UcodeInternalTable
+    bridging: _BridgingTable
+
+_UcodeInternalTable:
+  title: Ucode Internal
+  key: reason
+  view: _UcodeInternalView
+
+_UcodeInternalView:
+  regex:
+    reason: '\w+(\s\w+)+'
+    type: '(DISC|PUNT)\(\s*\d+\)'
+    packets: numbers
+    bytes: numbers
+
+
+_BridgingTable:
+  title: Bridging
+  key: reason
+  view: _BridgingView
+
+_BridgingView:
+  regex:
+    reason: '\w+(\s\w+)+'
+    type: '(DISC|PUNT)\(\s*\d+\)'
+    packets: numbers
+    bytes: numbers
+
+JNHHostPathStatsTable:
+  command: show jnh host-path-stats
+  target: fpc1
+  view: JNHHostPathStatsView
+
+JNHHostPathStatsView:
+  fields:
+    rcv_error: _HostPathRcvErrorsTable
+
+_HostPathRcvErrorsTable:
+  title: Receive Errors
+  key: stats
+  view: _HostPathRcvErrorsView
+
+_HostPathRcvErrorsView:
+  regex:
+    stats: '(.*)\:'
+    packets: numbers
+    rate: numbers
+
+JNHExceptionTerseTable:
+  command: show jnh 0 exceptions terse
+  target: fpc1
+  view: JNHExceptionTerseView
+
+JNHExceptionTerseView:
+  fields:
+    routing: _RoutingTable
+
+_RoutingTable:
+  title: Routing
+  key: reason
+  view: _RoutingView
+
+_RoutingView:
+  regex:
+    reason: '(\w+(\s\w+)+)'
+    type: '((DISC|PUNT)\(\s*\d+\))'
+    packets: numbers
+    bytes: numbers
+
+JNHIFDStreamTable:
+  command: show jnh ifd 0 stream
+  target: fpc1
+  view: JNHIFDStreamView
+
+JNHIFDStreamView:
+  regex:
+    ifd: ifd = (\d+),
+    stream: Stream = (\d+),
+    pfe_num: PFE-num = (\d+)

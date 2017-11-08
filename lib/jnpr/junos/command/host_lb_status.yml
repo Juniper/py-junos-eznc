@@ -1,0 +1,11 @@
+---
+HostlbStatusSummaryTable:
+  command: show host_loopback status-summary
+  target: fpc1
+  view: HostlbStatusSummaryView
+
+HostlbStatusSummaryView:
+  exists:
+    no_detected_wedges: No detected wedges
+    no_toolkit_errors: No toolkit errors
+

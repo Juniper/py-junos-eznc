@@ -1,0 +1,5 @@
+---
+FPCLinkStatTable:
+    command: show link stats
+    target: fpc1
+    delimiter: ":"

@@ -1,0 +1,15 @@
+---
+PQ3PCITable:
+  command: show pq3 pci
+  target: fpc1
+  item: PCI
+  key:
+    - pci
+  view: PQ3PCI
+
+PQ3PCI:
+  regex:
+    pci: 'PCI (\d+(:\d+){3})'
+    rto: 'rto (\d+)'
+    rxe: 'rxe (\d+)'
+    bdllp: 'bdllp (\d+)'
