@@ -1,7 +1,0 @@
----
-LUChipConfigTable:
-    command: show chassis ethernet-switch statistics
-    view: LUChipConfigView
-
-LUChipConfigView:
-    title: Statistics for port 1 connected to device FPC1

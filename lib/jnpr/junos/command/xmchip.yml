@@ -36,3 +36,50 @@ XMChipIfdListView:
   filters:
     - ifd_name
     - ifd_index
+
+XMChipQNodeStatsTable:
+  command: show xmchip {{ XM_instance }} q-node stats {{ sched_number }} {{ q_node }}
+  target: fpc2
+  args:
+    XM_instance: 0
+    sched_number: 0
+    q_node: 0
+  key:
+    - index
+    - name
+  view: XMChipQNodeStatsView
+
+XMChipQNodeStatsView:
+  columns:
+    color: Color
+    outcome: Outcome
+    index: Index
+    name: Name
+    total: Total
+    rate: Rate
+
+XMChipDrdErrorTable:
+  command: show xmchip {{ XM_instance }} drd error-stats
+  target: fpc2
+  args:
+    XM_instance: 0
+  key: intr_name
+  view: XMChipDrdErrorView
+
+XMChipDrdErrorView:
+  columns:
+    intr_name: Interrupt Name
+    intr_count: Number of Interrupts
+
+XMChipStatsIngressErrorTable:
+  command: show xmchip {{ XM_instance }} stats ingress-error
+  target: fpc2
+  args:
+    XM_instance: 0
+  key: error_id
+  view: XMChipStatsIngressErrorView
+
+XMChipStatsIngressErrorView:
+  regex:
+    error_id: '([0-9a-zA-Z_]+)\s+:'
+    error_count: numbers

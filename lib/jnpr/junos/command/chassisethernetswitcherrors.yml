@@ -1,0 +1,10 @@
+---
+EthernetSwitchErrTable:
+  command: show chassis ethernet-switch errors
+  key: fpc
+  view: EthernetSwitchErrView
+
+EthernetSwitchErrView:
+  exists:
+    no_err_port_0: "Error count not available for port 0 connected to device FPC0"
+

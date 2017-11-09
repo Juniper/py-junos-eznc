@@ -1,0 +1,13 @@
+---
+ShowJnhExceptions:
+  command: show jnh 0 exceptions
+  target: fpc2
+  key: reason
+  view: ShowJnhExceptionsView
+
+ShowJnhExceptionsView:
+  regex:
+    reason: '(\w+(\s\w+)*)'
+    type: '((DISC|PUNT)\(\s*\d+\)|M2L ERROR|TRAP\(\))'
+    packets: '\d+'
+    bytes: '\d*'
