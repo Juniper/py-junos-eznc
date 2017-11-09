@@ -1,0 +1,11 @@
+---
+ShowPacketStatistics:
+  command: show packet statistics
+  target: fpc2
+  key: counter_name
+  view: ShowPacketStatisticsView
+
+ShowPacketStatisticsView:
+  regex:
+    value: numbers
+    counter_name: '(\w+(\s+\w+)*)'

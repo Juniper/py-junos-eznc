@@ -75,13 +75,3 @@ _RoutingView:
     packets: numbers
     bytes: numbers
 
-JNHIFDStreamTable:
-  command: show jnh ifd 0 stream
-  target: fpc1
-  view: JNHIFDStreamView
-
-JNHIFDStreamView:
-  regex:
-    ifd: ifd = (\d+),
-    stream: Stream = (\d+),
-    pfe_num: PFE-num = (\d+)

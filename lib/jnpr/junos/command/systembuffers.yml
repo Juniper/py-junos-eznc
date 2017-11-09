@@ -1,0 +1,13 @@
+---
+SystemBuffers:
+  command: show system buffers
+  key: description
+  view: SystemBuffersView
+
+SystemBuffersView:
+  regex:
+    current: '^(\d+)\/'
+    cache: '(\d+)\/'
+    total: '(\d+)\/?'
+    max: '(\d*)'
+    description: '(.*)$'
