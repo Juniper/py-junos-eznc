@@ -50,13 +50,16 @@ XMChipQNodeStatsTable:
   view: XMChipQNodeStatsView
 
 XMChipQNodeStatsView:
-  columns:
-    color: Color
-    outcome: Outcome
-    index: Index
-    name: Name
-    total: Total
-    rate: Rate
+  regex:
+    color: (\d|All)
+    outcome: '(\w+\s\w+)'
+    index: '\d+'
+    name: word
+    total: numbers
+    rate: (\d)\s(p|b)ps
+  filters:
+    - rate
+    - color
 
 XMChipDrdErrorTable:
   command: show xmchip {{ XM_instance }} drd error-stats

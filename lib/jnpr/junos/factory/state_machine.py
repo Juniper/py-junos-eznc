@@ -17,6 +17,7 @@ class Identifiers:
     percentage = pp.Word(pp.nums) + pp.Literal('%')
     header_bar = (pp.OneOrMore(pp.Word('-')) | pp.OneOrMore(pp.Word('='))) + \
                                               pp.StringEnd()
+    # alphanums = pp.alphanums
 
 
 def data_type(item):
@@ -252,6 +253,43 @@ class StateMachine(Machine):
                                     key=key)
         return self._data
 
+    def _insert_data(self, key, tmp_dict, columns_list):
+        items = tmp_dict.values()
+        if isinstance(key, (tuple, list)):
+            if self._view.FILTERS is not None:
+                selected_dict = {}
+                for select in self._view.FILTERS:
+                    if select in columns_list:
+                        selected_dict[select] = items[
+                            columns_list.index(
+                                select)]
+                if self._table.KEY_ITEMS is None:
+                    self._data[tuple(tmp_dict[i] for i in key)] = \
+                        selected_dict
+                elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    self._data[tuple(tmp_dict[i] for i in key)] = \
+                        selected_dict
+            else:
+                self._data[tuple(tmp_dict[i] for i in key)] = \
+                    tmp_dict
+        else:
+            if self._view.FILTERS is not None:
+                selected_dict = {}
+                for select in self._view.FILTERS:
+                    if select in columns_list:
+                        selected_dict[select] = items[
+                            columns_list.index(
+                                select)]
+                if self._table.KEY_ITEMS is None:
+                    self._data[tmp_dict[key]] = selected_dict
+                elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    self._data[tmp_dict[key]] = selected_dict
+            else:
+                if self._table.KEY_ITEMS is None:
+                    self._data[tmp_dict[key]] = tmp_dict
+                elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    self._data[tmp_dict[key]] = tmp_dict
+
     def _get_key(self, key):
         if isinstance(key, list):
             if set([i in self._view.COLUMNS or i in
@@ -353,10 +391,12 @@ class StateMachine(Machine):
                 tmp_dict = dict(zip(self._view.REGEX.keys(),
                                     convert_to_data_type(result)))
             if len(tmp_dict) > 0:
-                if tmp_dict.get(self._table.KEY) is None:
-                    self._data.update(tmp_dict)
-                else:
-                    self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+                self._insert_data(self._table.KEY, tmp_dict,
+                                  self._view.REGEX.keys())
+                # if tmp_dict.get(self._table.KEY) is None:
+                #     self._data.update(tmp_dict)
+                # else:
+                #     self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':
