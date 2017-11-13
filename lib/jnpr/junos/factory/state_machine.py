@@ -442,7 +442,10 @@ class StateMachine(Machine):
                 try:
                     items = (re.split(delimiter, line.strip()))
                     key, value = convert_to_data_type(items)
-                    self._data[key] = value
+                    if self._table.KEY_ITEMS is None:
+                        self._data[key] = value
+                    elif key in self._table.KEY_ITEMS:
+                        self._data[key] = value
                 except ValueError as ex:
                     # create a class named ParseError
                     raise Exception('Not able to parse line: %s'%line)
