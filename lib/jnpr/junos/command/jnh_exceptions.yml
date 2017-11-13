@@ -1,6 +1,8 @@
 ---
 ShowJnhExceptions:
-  command: show jnh 0 exceptions
+  command: show jnh {{ jnh_instance }} exceptions
+  args:
+    jnh_instance: 0
   target: fpc2
   key: reason
   view: ShowJnhExceptionsView

@@ -1,7 +1,7 @@
 ---
 MtipCgeSummaryTable:
   command: show mtip-cge summary
-  target: fpc1
+  target: fpc2
   key: id
   view: MtipCgeSummaryView
 
@@ -13,3 +13,20 @@ MtipCgeSummaryView:
     pic: numbers
     ifd: '(\w+-\d(/\d){2})'
     ptr: "[a-f0-9]+"
+
+MtipCgeStatisticsTable:
+  command: show mtip-cge {{ mtip_id }} statistics
+  args:
+    mtip_id: 11
+  target: fpc2
+  delimiter: ":"
+  view: MtipCgeStatisticsView
+
+MtipCgeStatisticsView:
+  key_items:
+    - aFrameCheckSequenceErrors
+    - aAlignmentErrors
+    - aPAUSEMACCtrlFramesTransmitted
+    - aPAUSEMACCtrlFramesReceived
+    - aFrameTooLongErrors
+    - aInRangeLengthErrors
