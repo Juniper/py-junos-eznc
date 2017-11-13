@@ -20,9 +20,7 @@ MtipCgeStatisticsTable:
     mtip_id: 11
   target: fpc2
   delimiter: ":"
-  view: MtipCgeStatisticsView
-
-MtipCgeStatisticsView:
+  title: Statistics
   key_items:
     - aFrameCheckSequenceErrors
     - aAlignmentErrors
