@@ -138,7 +138,7 @@ class TestFactoryTable(unittest.TestCase):
         self.ppt.xml = etree.XML('<root><a>test</a></root>')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, append='test')
         mock_file.assert_called_once_with('/vasr/tmssp/foo_1.1.1.1_test.xml',
-                                          'w')
+                                          'wb')
         self.ppt.savexml('/vasr/tmssp/foo.xml', hostname=True, timestamp=True)
         self.assertEqual(mock_file.call_count, 2)
 

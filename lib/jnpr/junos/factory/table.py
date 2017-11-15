@@ -229,7 +229,7 @@ class Table(object):
             fname += "_%s" % append
 
         path = fname + fext
-        return etree.ElementTree(self.xml).write(open(path, 'w'))
+        return etree.ElementTree(self.xml).write(open(path, 'wb'))
 
     def to_json(self):
         """
