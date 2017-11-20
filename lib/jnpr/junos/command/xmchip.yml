@@ -88,3 +88,74 @@ XMChipStatsIngressErrorView:
   regex:
     error_id: '([0-9a-zA-Z_]+)\s+:'
     error_count: numbers
+
+XMChipWIStatsTable:
+  command: show xmchip {{ XM_instance }} wi stats {{ wan_block }}
+  target: fpc2
+  args:
+    XM_instance: 0
+    wan_block: 0
+  view: XMChipWIStatsView
+
+XMChipWIStatsView:
+  fields:
+    wi_stall: _XMChipWIStallTable
+    wi_misc_stall: _XMChipWIMiscStallTable
+    wi_oversubscription: _XMChipWIOversubscriptionTable
+
+_XMChipWIStallTable:
+  title: WI statistics (WAN block 0)
+  key: stall_type
+  view: _XMChipWIStallView
+
+_XMChipWIStallView:
+  regex:
+    stall_type: '([A-Z]+) STALL'
+    stall_val_1: '0x([0-9a-f]+)_'
+    stall_val_0: '([0-9a-f]+)'
+
+_XMChipWIOversubscriptionTable:
+  title: Oversubscription statistics
+  key: mac_port
+  view: _XMChipWIOversubscriptionView
+
+_XMChipWIOversubscriptionView:
+  regex:
+    mac_port: '^\d+'
+    total_dropped_packets: numbers
+    dropped_packet_rate: numbers
+    total_dropped_bytes: numbers
+    total_precl_discards: numbers
+    precl_discard_rate: numbers
+
+_XMChipWIMiscStallTable:
+  key: wicpq_drop_hi
+  title: WI statistics (WAN block 0)
+  view: _XMChipWIMiscStallView
+
+_XMChipWIMiscStallView:
+  regex:
+    wicpq_drop_hi: 'MISC STALL    WICPQ DROP HI/LO ([0-9]+)/'
+    wicpq_drop_lo: numbers
+    pause: 'Pause ([0-9]+),'
+    wsch_stall_hi: 'WSCH STALL HI/LO ([0-9]+)/'
+    wsch_stall_lo: numbers
+
+XMChipLOStatsTable:
+  command: show xmchip {{ XM_instance }} lo stats {{ lo_block }}
+  target: fpc2
+  args:
+    XM_instance: 0
+    lo_block: 0
+  key:
+    - lu_id
+    - counter_name
+  view: XMChipLOStatsView
+
+XMChipLOStatsView:
+  regex:
+    lu_id: '^([0-9])'
+    counter_name: '(Error parcels sent to LU|Parcel drops)'
+    total: '[0-9]+'
+    rate: '([0-9]+)\s+pps'
+
