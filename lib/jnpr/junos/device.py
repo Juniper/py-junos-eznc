@@ -1146,10 +1146,14 @@ class Device(_Connection):
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
-                self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
-                or self._conf_ssh_private_key_file
+            if 'user' in kvargs:
+                self._auth_user = kvargs.get('user')
+            else:
+                self._auth_user = self._conf_auth_user or self._auth_user
+            if 'ssh_private_key_file' in kvargs:
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            else:
+                self._ssh_private_key_file = self._conf_ssh_private_key_file
             self._auth_password = kvargs.get(
                 'password') or kvargs.get('passwd')
 
