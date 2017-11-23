@@ -23,7 +23,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.dev.open()
 
     @patch('jnpr.junos.Device.execute')
-    def test_unstructured_data(self, mock_execute):
+    def test_unstructured_cmerror(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.cmerror import CMErrorTable
         stats = CMErrorTable(self.dev)
@@ -37,6 +37,58 @@ class TestFactoryCfgTable(unittest.TestCase):
                           6: {'errors': 0, 'name': 'TOE-LU-0:0:0'}})
         self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 6 items')
         self.assertEqual(len(stats), 6)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_unstructured_linkstats(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.linkstats import FPCLinkStatTable
+        stats = FPCLinkStatTable(self.dev)
+        stats = stats.get()
+        self.assertEqual(dict(stats),
+                         {'PPP LCP/NCP': 0, 'ISIS': 0, 'BFD': 15, 'OAM': 0,
+                          'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
+                          'HDLC keepalives': 0, 'OSPF Hello': 539156, 'RSVP':
+                              0})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_unstructured_ttpstatistics(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.ttpstatistics import FPCTTPStatsTable
+        stats = FPCTTPStatsTable(self.dev)
+        stats = stats.get()
+        self.assertEqual(dict(stats),
+                         {'TTPQueueSizes': {'High': '0 (max is 4473)',
+                                            'Low': '0 (max is 2236)'},
+                          'TTPReceiveStatistics': {'Coalesce': {'control': 0,
+                                                                'discard': 0,
+                                                                'high': 0,
+                                                                'low': 0,
+                                                                'medium': 0,
+                                                                'name':
+                                                                'Coalesce'}},
+                          'TTPStatistics': {
+                              'Coalesce': {'name': 'Coalesce', 'rcvd': 0,
+                                           'tras': 0},
+                              'Coalesce Fail': {'name': 'Coalesce Fail',
+                                                'rcvd': 0,
+                                                'tras': 0},
+                              'Drops': {'name': 'Drops', 'rcvd': 0, 'tras': 0},
+                              'L2 Packets': {'name': 'L2 Packets',
+                                             'rcvd': 4292,
+                                             'tras': 1093544},
+                              'L3 Packets': {'name': 'L3 Packets',
+                                             'rcvd': 542638,
+                                             'tras': 0},
+                              'Netwk Fail': {'name': 'Netwk Fail', 'rcvd': 0,
+                                             'tras': 0},
+                              'Queue Drops': {'name': 'Queue Drops',
+                                              'rcvd': 0,
+                                              'tras': 0},
+                              'Unknown': {'name': 'Unknown', 'rcvd': 0,
+                                          'tras': 0}},
+                          'TTPTransmitStatistics': {'L2 Packets': {'queue2': 0},
+                                                    'L3 Packets': {
+                                                        'queue2': 0}}})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
