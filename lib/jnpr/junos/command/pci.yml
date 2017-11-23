@@ -1,0 +1,17 @@
+---
+ShowPciErrorsTable:
+  command: show pci errors {{ pci_controller_number }}
+  target: fpc2
+  args:
+    pci_controller_number: 2
+  key:
+    - pci_addr
+    - status_type
+  view: ShowPciErrorsView
+
+ShowPciErrorsView:
+  regex:
+    pci_addr: 'PCI ERROR: (\d+:\d+:\d+:\d+) \(0x[a-z0-9]+\)'
+    status_type: '(Slot|Link) status :'
+    status: '0x[a-z0-9]+'
+
