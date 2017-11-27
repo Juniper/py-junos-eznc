@@ -197,54 +197,42 @@ class StateMachine(Machine):
                 if post_integer_data_types == pre_integer_data_types:
                     items = map(lambda data, typ: typ(data),
                                 items, post_integer_data_types)
-                    # try:
-                    #     items = map(lambda data, typ: typ(data),
-                    #                 items, post_integer_data_types)
-                    # special case for hex values
-                    # except ValueError as ex:
-                    #     if "invalid literal for int() with base 10" in \
-                    #             ex.message:
-                    #         def fn(data, typ):
-                    #             try:
-                    #                 return typ(data)
-                    #             except ValueError:
-                    #                 return data
-                    #         items = map(fn, items, post_integer_data_types)
                     tmp_dict = dict(zip(columns_list, items))
-                    if isinstance(key, tuple):
-                        if self._view.FILTERS is not None:
-                            selected_dict = {}
-                            for select in self._view.FILTERS:
-                                if select in columns_list:
-                                    selected_dict[select] = items[
-                                        columns_list.index(
-                                            select)]
-                            if self._table.KEY_ITEMS is None:
-                                self._data[tuple(tmp_dict[i] for i in key)] =\
-                                 selected_dict
-                            elif tmp_dict[key] in self._table.KEY_ITEMS:
-                                self._data[tuple(tmp_dict[i] for i in key)] =\
-                                 selected_dict
-                        else:
-                            self._data[tuple(tmp_dict[i] for i in key)] = \
-                                tmp_dict
-                    else:
-                        if self._view.FILTERS is not None:
-                            selected_dict = {}
-                            for select in self._view.FILTERS:
-                                if select in columns_list:
-                                    selected_dict[select] = items[
-                                        columns_list.index(
-                                        select)]
-                            if self._table.KEY_ITEMS is None:
-                                self._data[tmp_dict[key]] = selected_dict
-                            elif tmp_dict[key] in self._table.KEY_ITEMS:
-                                self._data[tmp_dict[key]] = selected_dict
-                        else:
-                            if self._table.KEY_ITEMS is None:
-                                self._data[tmp_dict[key]] = tmp_dict
-                            elif tmp_dict[key] in self._table.KEY_ITEMS:
-                                self._data[tmp_dict[key]] = tmp_dict
+                    self._insert_data(key, tmp_dict, columns_list, items)
+                    # if isinstance(key, tuple):
+                    #     if self._view.FILTERS is not None:
+                    #         selected_dict = {}
+                    #         for select in self._view.FILTERS:
+                    #             if select in columns_list:
+                    #                 selected_dict[select] = items[
+                    #                     columns_list.index(
+                    #                         select)]
+                    #         if self._table.KEY_ITEMS is None:
+                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
+                    #              selected_dict
+                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
+                    #              selected_dict
+                    #     else:
+                    #         self._data[tuple(tmp_dict[i] for i in key)] = \
+                    #             tmp_dict
+                    # else:
+                    #     if self._view.FILTERS is not None:
+                    #         selected_dict = {}
+                    #         for select in self._view.FILTERS:
+                    #             if select in columns_list:
+                    #                 selected_dict[select] = items[
+                    #                     columns_list.index(
+                    #                     select)]
+                    #         if self._table.KEY_ITEMS is None:
+                    #             self._data[tmp_dict[key]] = selected_dict
+                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    #             self._data[tmp_dict[key]] = selected_dict
+                    #     else:
+                    #         if self._table.KEY_ITEMS is None:
+                    #             self._data[tmp_dict[key]] = tmp_dict
+                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
+                    #             self._data[tmp_dict[key]] = tmp_dict
                 else:
                     break
             elif line.strip() == '':
@@ -253,8 +241,8 @@ class StateMachine(Machine):
                                     key=key)
         return self._data
 
-    def _insert_data(self, key, tmp_dict, columns_list):
-        items = tmp_dict.values()
+    def _insert_data(self, key, tmp_dict, columns_list, items=None):
+        items = tmp_dict.values() if items is None else items
         if isinstance(key, (tuple, list)):
             if self._view.FILTERS is not None:
                 selected_dict = {}
@@ -388,15 +376,11 @@ class StateMachine(Machine):
                         if obj and len(obj.groups()) >= 1:
                             result[self._view.REGEX.keys().index(key)] = \
                                 obj.groups()[0]
-                tmp_dict = dict(zip(self._view.REGEX.keys(),
-                                    convert_to_data_type(result)))
-            if len(tmp_dict) > 0:
-                self._insert_data(self._table.KEY, tmp_dict,
-                                  self._view.REGEX.keys())
-                # if tmp_dict.get(self._table.KEY) is None:
-                #     self._data.update(tmp_dict)
-                # else:
-                #     self._data[tmp_dict.get(self._table.KEY)] = tmp_dict
+                items = convert_to_data_type(result)
+                tmp_dict = dict(zip(self._view.REGEX.keys(), items))
+                if len(tmp_dict) > 0:
+                    self._insert_data(self._table.KEY, tmp_dict,
+                                      self._view.REGEX.keys(), items)
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':
