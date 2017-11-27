@@ -376,11 +376,11 @@ class StateMachine(Machine):
                         if obj and len(obj.groups()) >= 1:
                             result[self._view.REGEX.keys().index(key)] = \
                                 obj.groups()[0]
-                tmp_dict = dict(zip(self._view.REGEX.keys(),
-                                    convert_to_data_type(result)))
-            if len(tmp_dict) > 0:
-                self._insert_data(self._table.KEY, tmp_dict,
-                                  self._view.REGEX.keys())
+                items = convert_to_data_type(result)
+                tmp_dict = dict(zip(self._view.REGEX.keys(), items))
+                if len(tmp_dict) > 0:
+                    self._insert_data(self._table.KEY, tmp_dict,
+                                      self._view.REGEX.keys(), items)
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':

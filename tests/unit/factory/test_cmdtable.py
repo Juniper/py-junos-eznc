@@ -211,13 +211,13 @@ ShowPciErrorsView:
                                         Loader=yamlordereddictloader.Loader)))
         stats = ShowPciErrorsTable(self.dev).get()
         self.assertEqual(dict(stats), {('2:2:9:0', 'Link'): {'status':
-                                                                 '2:2:9:0',
+                                                                 '0x00000001',
                                                              'pci_addr':
-                                                                 '0x00000001'},
+                                                                 '2:2:9:0'},
                                        ('2:2:9:0', 'Slot'): {'status':
-                                                                 '2:2:9:0',
+                                                                 '0x0000004c',
                                                              'pci_addr':
-                                                                 '0x0000004c'}})
+                                                                 '2:2:9:0'}})
 
     @patch('jnpr.junos.Device.execute')
     def test_fpcmemory_multi_key_columns(self, mock_execute):
