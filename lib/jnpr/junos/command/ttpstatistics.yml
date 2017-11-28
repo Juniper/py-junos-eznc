@@ -59,3 +59,18 @@ _FPCTTPQueueSizesTable:
 _FPCTTPQueueSizesView:
   fields:
     high: High
+
+TTPReceiveStatsTable:
+  command: show ttp statistics
+  target: fpc1
+  title: TTP Receive Statistics
+  key: name
+  view: FPCTTPReceiveStatsView
+
+FPCTTPReceiveStatsView:
+  columns:
+    control: Control
+    high: High
+    medium: Medium
+    low: Low
+    discard: Discard
