@@ -264,7 +264,6 @@ FPCMemoryView:
         from jnpr.junos.command.pq3pci import PQ3PCITable
         stats = PQ3PCITable(self.dev)
         stats = stats.get()
-        print dict(stats)
         self.assertEqual(dict(stats),
                          {'0:0:0:0': {'bdllp': 0, 'pci': '0:0:0:0', 'rto': 0,
                                       'rxe': 0},
