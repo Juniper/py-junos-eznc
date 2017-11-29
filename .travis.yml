@@ -16,7 +16,7 @@ addons:
     - libxslt1-dev
 
 install:
-  - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip install importlib; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "2.6" ]; then pip install importlib 'paramiko>=1.15.2,<2.0'; fi
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
 
