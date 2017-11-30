@@ -289,6 +289,18 @@ FPCMemoryView:
                                       'rxe': 0}}
                          )
 
+    @patch('jnpr.junos.Device.execute')
+    def test_iregex_with_fields(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.schedulerinfo import SchedulerTable
+        stats = SchedulerTable(self.dev)
+        stats = stats.get()
+        self.assertEqual(dict(stats), {'interrupt_time': 16786614, 'Idle': {
+            'time_ms': 7397672498, 'cpu': '85%', 'name': 'Idle'}, 'Level 3':
+            {'time_ms': 1, 'cpu': '0%', 'name': 'Level 3'}, 'thread': {'cpu':
+                        '4%', 'pid': 99,'name': 'LU Background Service',
+                                                    'time': '410844018 ms'}})
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
