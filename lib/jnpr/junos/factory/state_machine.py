@@ -274,7 +274,10 @@ class StateMachine(Machine):
                     self._data[tmp_dict[key]] = selected_dict
             else:
                 if self._table.KEY_ITEMS is None:
-                    self._data[tmp_dict[key]] = tmp_dict
+                    if key not in tmp_dict:
+                        self._data.update(tmp_dict)
+                    else:
+                        self._data[tmp_dict[key]] = tmp_dict
                 elif tmp_dict[key] in self._table.KEY_ITEMS:
                     self._data[tmp_dict[key]] = tmp_dict
 
