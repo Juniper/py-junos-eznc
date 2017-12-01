@@ -2,6 +2,7 @@
 SchedulerTable:
   command: show sched
   target: fpc1
+  key: name
   view: SchedulerView
 
 SchedulerView:
