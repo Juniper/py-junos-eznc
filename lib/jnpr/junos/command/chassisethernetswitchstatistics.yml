@@ -3,5 +3,5 @@ EthernetSwitchStatistics:
     command: show chassis ethernet-switch statistics
     view: EthernetSwitchStatisticsView
 
-EthernetSwitchStatistics:
+EthernetSwitchStatisticsView:
     title: Statistics for port 1 connected to device FPC1
