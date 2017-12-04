@@ -1,6 +1,7 @@
 ---
 EthernetSwitchStatistics:
     command: show chassis ethernet-switch statistics
+    key: fpc
     view: EthernetSwitchStatisticsView
 
 EthernetSwitchStatistics:
