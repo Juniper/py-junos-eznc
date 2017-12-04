@@ -114,7 +114,8 @@ class CMDTable(object):
                     if ret[0]:
                         self.data = ret[1]
         else:
-            self.data = self.CLI(self.GET_CMD)
+            self.xml = self.RPC.cli(self.GET_CMD)
+            self.data = self.xml.text
 
         # state machine
         sm = StateMachine(self)
