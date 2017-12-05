@@ -1,8 +1,10 @@
-from transitions import Machine
-import pyparsing as pp
 from collections import OrderedDict
+from functools import reduce
 import re
 import copy
+
+from transitions import Machine
+import pyparsing as pp
 
 
 class Identifiers:
@@ -40,9 +42,8 @@ def data_type(item):
 
 def convert_to_data_type(items):
     item_types = map(data_type, items)
-    return map(lambda x, y: int(x) if y is int else x.strip(),
-                     items, item_types)
-    # return key, value
+    return list(map(lambda x, y: int(x) if y is int else x.strip(),
+                     items, item_types))
 
 
 class StateMachine(Machine):
@@ -171,7 +172,7 @@ class StateMachine(Machine):
                 for result, start, end in pp.Literal(column).scanString(line):
                     col_offsets[(start, end)] = result[0]
             user_defined_columns = copy.deepcopy(self._view.COLUMNS)
-            for key in sorted(col_offsets.iterkeys()):
+            for key in sorted(col_offsets.keys()):
                 for x, y in self._view.COLUMNS.items():
                     if col_offsets[key] == user_defined_columns.get(x):
                         col_order[key] = x
@@ -180,59 +181,27 @@ class StateMachine(Machine):
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
         items = re.split('\s\s+', self._lines[1].strip())
 
-        post_integer_data_types = event.kwargs.get('check', map(data_type, items))
+        post_integer_data_types = event.kwargs.get('check', list(map(data_type,
+                                                                 items)))
         index = event.kwargs.get('index', 1)
         # col_len = len(col_order)
-        columns_list = col_order.values()
+        columns_list = list(col_order.values())
         for index, line in enumerate(self._lines[index:], start=index):
             items = re.split('\s\s+', line.strip())
             if len(items) >= len(columns_list):
                 if len(items) > len(columns_list):
-                    if col_offsets.keys()[0][0] > 10 and self._table.KEY == 'name':
+                    if list(col_offsets.keys())[0][0] > 10 and self._table.KEY \
+                            == 'name':
                         columns_list.insert(0, self._table.KEY)
                     else:
                         items = items[:len(columns_list)]
                 post_integer_data_types, pre_integer_data_types = \
-                    map(data_type, items), post_integer_data_types
+                    list(map(data_type, items)), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
-                    items = map(lambda data, typ: typ(data),
-                                items, post_integer_data_types)
+                    items = list(map(lambda data, typ: typ(data),
+                                items, post_integer_data_types))
                     tmp_dict = dict(zip(columns_list, items))
                     self._insert_data(key, tmp_dict, columns_list, items)
-                    # if isinstance(key, tuple):
-                    #     if self._view.FILTERS is not None:
-                    #         selected_dict = {}
-                    #         for select in self._view.FILTERS:
-                    #             if select in columns_list:
-                    #                 selected_dict[select] = items[
-                    #                     columns_list.index(
-                    #                         select)]
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
-                    #              selected_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
-                    #              selected_dict
-                    #     else:
-                    #         self._data[tuple(tmp_dict[i] for i in key)] = \
-                    #             tmp_dict
-                    # else:
-                    #     if self._view.FILTERS is not None:
-                    #         selected_dict = {}
-                    #         for select in self._view.FILTERS:
-                    #             if select in columns_list:
-                    #                 selected_dict[select] = items[
-                    #                     columns_list.index(
-                    #                     select)]
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tmp_dict[key]] = selected_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tmp_dict[key]] = selected_dict
-                    #     else:
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tmp_dict[key]] = tmp_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tmp_dict[key]] = tmp_dict
                 else:
                     break
             elif line.strip() == '':
@@ -311,7 +280,7 @@ class StateMachine(Machine):
         line = self._lines[index]
         items = re.split('\s\s+', line.strip())
         post_integer_data_types, pre_integer_data_types = \
-            map(data_type, items), post_integer_data_types
+            list(map(data_type, items)), post_integer_data_types
         return post_integer_data_types == pre_integer_data_types
 
     def parse_title_data(self, event):
@@ -328,7 +297,7 @@ class StateMachine(Machine):
             if line.startswith(pre_space_delimit):
                 try:
                     items = (re.split(delimiter, line.strip()))
-                    item_types = map(data_type, items)
+                    item_types = list(map(data_type, items))
                     key, value = convert_to_data_type(items)
                     if self._table.KEY_ITEMS is None:
                         self._data[self._view.FIELDS.get(key, key)] = value
@@ -372,18 +341,18 @@ class StateMachine(Machine):
                 # write a different function for this
                 for key, val in self._view.REGEX.items():
                     if val not in Identifiers.__dict__:
-                        obj = re.search(val, result[self._view.REGEX.keys(
+                        obj = re.search(val, result[list(self._view.REGEX.keys(
 
-                        ).index(
+                        )).index(
                             key)], re.I)
                         if obj and len(obj.groups()) >= 1:
-                            result[self._view.REGEX.keys().index(key)] = \
+                            result[list(self._view.REGEX.keys()).index(key)] = \
                                 obj.groups()[0]
                 items = convert_to_data_type(result)
                 tmp_dict = dict(zip(self._view.REGEX.keys(), items))
                 if len(tmp_dict) > 0:
                     self._insert_data(self._table.KEY, tmp_dict,
-                                      self._view.REGEX.keys(), items)
+                                      list(self._view.REGEX.keys()), items)
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':
