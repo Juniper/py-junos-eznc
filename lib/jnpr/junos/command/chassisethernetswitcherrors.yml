@@ -6,5 +6,9 @@ EthernetSwitchErrTable:
 
 EthernetSwitchErrView:
   exists:
-    no_err_port_0: "Error count not available for port 0 connected to device FPC0"
+    no_error_fpc0: "Error count not available for port 0 connected to device FPC0"
+    no_error_fpc1: "Error count not available for port 1 connected to device FPC1"
+    no_error_fpc2: "Error count not available for port 2 connected to device FPC2"
+    no_error_fpc3: "Error count not available for port 3 connected to device FPC3"
+    no_error_fpc4: "Error count not available for port 4 connected to device FPC4"
 
