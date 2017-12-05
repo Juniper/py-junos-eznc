@@ -42,9 +42,8 @@ def data_type(item):
 
 def convert_to_data_type(items):
     item_types = map(data_type, items)
-    return map(lambda x, y: int(x) if y is int else x.strip(),
-                     items, item_types)
-    # return key, value
+    return list(map(lambda x, y: int(x) if y is int else x.strip(),
+                     items, item_types))
 
 
 class StateMachine(Machine):
@@ -182,7 +181,8 @@ class StateMachine(Machine):
         key = self._get_key(event.kwargs.get('key', self._table.KEY))
         items = re.split('\s\s+', self._lines[1].strip())
 
-        post_integer_data_types = event.kwargs.get('check', map(data_type, items))
+        post_integer_data_types = event.kwargs.get('check', list(map(data_type,
+                                                                 items)))
         index = event.kwargs.get('index', 1)
         # col_len = len(col_order)
         columns_list = list(col_order.values())
@@ -196,10 +196,10 @@ class StateMachine(Machine):
                     else:
                         items = items[:len(columns_list)]
                 post_integer_data_types, pre_integer_data_types = \
-                    map(data_type, items), post_integer_data_types
+                    list(map(data_type, items)), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
-                    items = map(lambda data, typ: typ(data),
-                                items, post_integer_data_types)
+                    items = list(map(lambda data, typ: typ(data),
+                                items, post_integer_data_types))
                     tmp_dict = dict(zip(columns_list, items))
                     self._insert_data(key, tmp_dict, columns_list, items)
                 else:
@@ -280,7 +280,7 @@ class StateMachine(Machine):
         line = self._lines[index]
         items = re.split('\s\s+', line.strip())
         post_integer_data_types, pre_integer_data_types = \
-            map(data_type, items), post_integer_data_types
+            list(map(data_type, items)), post_integer_data_types
         return post_integer_data_types == pre_integer_data_types
 
     def parse_title_data(self, event):
@@ -297,7 +297,7 @@ class StateMachine(Machine):
             if line.startswith(pre_space_delimit):
                 try:
                     items = (re.split(delimiter, line.strip()))
-                    item_types = map(data_type, items)
+                    item_types = list(map(data_type, items))
                     key, value = convert_to_data_type(items)
                     if self._table.KEY_ITEMS is None:
                         self._data[self._view.FIELDS.get(key, key)] = value
