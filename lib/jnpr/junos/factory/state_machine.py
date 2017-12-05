@@ -173,7 +173,7 @@ class StateMachine(Machine):
                 for result, start, end in pp.Literal(column).scanString(line):
                     col_offsets[(start, end)] = result[0]
             user_defined_columns = copy.deepcopy(self._view.COLUMNS)
-            for key in sorted(col_offsets.iterkeys()):
+            for key in sorted(col_offsets.keys()):
                 for x, y in self._view.COLUMNS.items():
                     if col_offsets[key] == user_defined_columns.get(x):
                         col_order[key] = x
@@ -374,12 +374,12 @@ class StateMachine(Machine):
                 # write a different function for this
                 for key, val in self._view.REGEX.items():
                     if val not in Identifiers.__dict__:
-                        obj = re.search(val, result[self._view.REGEX.keys(
+                        obj = re.search(val, result[list(self._view.REGEX.keys(
 
-                        ).index(
+                        )).index(
                             key)], re.I)
                         if obj and len(obj.groups()) >= 1:
-                            result[self._view.REGEX.keys().index(key)] = \
+                            result[list(self._view.REGEX.keys()).index(key)] = \
                                 obj.groups()[0]
                 items = convert_to_data_type(result)
                 tmp_dict = dict(zip(self._view.REGEX.keys(), items))
