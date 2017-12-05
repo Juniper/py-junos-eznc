@@ -185,12 +185,13 @@ class StateMachine(Machine):
         post_integer_data_types = event.kwargs.get('check', map(data_type, items))
         index = event.kwargs.get('index', 1)
         # col_len = len(col_order)
-        columns_list = col_order.values()
+        columns_list = list(col_order.values())
         for index, line in enumerate(self._lines[index:], start=index):
             items = re.split('\s\s+', line.strip())
             if len(items) >= len(columns_list):
                 if len(items) > len(columns_list):
-                    if col_offsets.keys()[0][0] > 10 and self._table.KEY == 'name':
+                    if list(col_offsets.keys())[0][0] > 10 and self._table.KEY \
+                            == 'name':
                         columns_list.insert(0, self._table.KEY)
                     else:
                         items = items[:len(columns_list)]
@@ -201,40 +202,6 @@ class StateMachine(Machine):
                                 items, post_integer_data_types)
                     tmp_dict = dict(zip(columns_list, items))
                     self._insert_data(key, tmp_dict, columns_list, items)
-                    # if isinstance(key, tuple):
-                    #     if self._view.FILTERS is not None:
-                    #         selected_dict = {}
-                    #         for select in self._view.FILTERS:
-                    #             if select in columns_list:
-                    #                 selected_dict[select] = items[
-                    #                     columns_list.index(
-                    #                         select)]
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
-                    #              selected_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tuple(tmp_dict[i] for i in key)] =\
-                    #              selected_dict
-                    #     else:
-                    #         self._data[tuple(tmp_dict[i] for i in key)] = \
-                    #             tmp_dict
-                    # else:
-                    #     if self._view.FILTERS is not None:
-                    #         selected_dict = {}
-                    #         for select in self._view.FILTERS:
-                    #             if select in columns_list:
-                    #                 selected_dict[select] = items[
-                    #                     columns_list.index(
-                    #                     select)]
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tmp_dict[key]] = selected_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tmp_dict[key]] = selected_dict
-                    #     else:
-                    #         if self._table.KEY_ITEMS is None:
-                    #             self._data[tmp_dict[key]] = tmp_dict
-                    #         elif tmp_dict[key] in self._table.KEY_ITEMS:
-                    #             self._data[tmp_dict[key]] = tmp_dict
                 else:
                     break
             elif line.strip() == '':
@@ -385,7 +352,7 @@ class StateMachine(Machine):
                 tmp_dict = dict(zip(self._view.REGEX.keys(), items))
                 if len(tmp_dict) > 0:
                     self._insert_data(self._table.KEY, tmp_dict,
-                                      self._view.REGEX.keys(), items)
+                                      list(self._view.REGEX.keys()), items)
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':
