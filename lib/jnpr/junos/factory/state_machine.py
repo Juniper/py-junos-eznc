@@ -1,8 +1,10 @@
-from transitions import Machine
-import pyparsing as pp
 from collections import OrderedDict
+from functools import reduce
 import re
 import copy
+
+from transitions import Machine
+import pyparsing as pp
 
 
 class Identifiers:
