@@ -36,6 +36,7 @@ class MetaPathLoader(object):
                 raise ImportError("%s is not loaded" % mod)
         for k, v in modules.items():
             setattr(modObj, k, v)
+        sys.modules[fullname] = modObj
         return modObj
 
 
