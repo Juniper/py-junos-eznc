@@ -10,11 +10,10 @@ from jnpr.junos.factory.to_json import TableJSONEncoder
 
 # stdlib
 from inspect import isclass
-from collections import OrderedDict
+from lxml import etree
 
 import json
 
-import pyparsing as pp
 from jinja2 import Template
 
 class CMDTable(object):
@@ -73,9 +72,11 @@ class CMDTable(object):
             # for loading from local file-path
             with open(self._path, 'r') as fp:
                 self.data = fp.read().strip()
-            if self.data.startswith('<output>'):
-                self.data = re.search(r'^<output>(.*)</outout>$',
-                                      self.data).group(1)
+            if self.data.startswith('<output>') and self.data.endswith(
+                    '</output>'):
+                self.data = etree.fromstring(self.data).text
+            sm = StateMachine(self)
+            self.output = sm.parse(self.data.splitlines())
             return self
 
         if 'target' in kvargs:

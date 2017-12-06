@@ -290,7 +290,7 @@ FPCMemoryView:
                          )
 
     @patch('jnpr.junos.Device.execute')
-    def test_iregex_with_fields(self, mock_execute):
+    def test_regex_with_fields(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.schedulerinfo import SchedulerTable
         stats = SchedulerTable(self.dev)
@@ -300,6 +300,25 @@ FPCMemoryView:
             {'time_ms': 1, 'cpu': '0%', 'name': 'Level 3'}, 'thread': {'cpu':
                         '4%', 'pid': 99,'name': 'LU Background Service',
                                                     'time': '410844018 ms'}})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_exists(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.host_lb_status import HostlbStatusSummaryTable
+        stats = HostlbStatusSummaryTable(self.dev)
+        stats = stats.get()
+        self.assertEqual(dict(stats), {'no_detected_wedges': True,
+                                       'no_toolkit_errors': True})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_table_path_option(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.host_lb_status import HostlbStatusSummaryTable
+        stats = HostlbStatusSummaryTable(path=os.path.join(os.path.dirname(
+            __file__), 'rpc-reply', 'show_host_loopback_status-summary.xml'))
+        stats = stats.get()
+        self.assertEqual(dict(stats), {'no_detected_wedges': True,
+                                       'no_toolkit_errors': True})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
