@@ -10,3 +10,18 @@ SystemProcExtView:
     wcpu: '.*(\d+\.\d+)%'
     cmd: '\w+$'
 
+SystemProcExtMemTable:
+  command: show system processes extensive
+  item: '*'
+  view: SystemProcExtMemView
+
+SystemProcExtMemView:
+  regex:
+    active: 'Mem:\s+([0-9MG]+)\s+Active,'
+    inactive: '\s+([0-9MG]+)\s+Inact,'
+    wired: '\s+([0-9MG]+)\s+Wired,'
+    buffered: '\s+([0-9MG]+)\s+Buf,'
+    free: '\s+([0-9MG]+)\s+Free'
+    swap_total: 'Swap:\s+([0-9MG]+)\s+Total,'
+    swap_free: '\s+([0-9MG]+)\s+Free'
+
