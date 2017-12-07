@@ -328,7 +328,6 @@ FPCMemoryView:
             EthernetSwitchStatistics
         stats = EthernetSwitchStatistics(self.dev)
         stats = stats.get()
-        print dict(stats)
         self.assertEqual(dict(stats),
                          {'fpc2': {'TX Packets 128-255 Octets': 11245893,
                                    'TX Packets 65-127 Octets': 105545277,
