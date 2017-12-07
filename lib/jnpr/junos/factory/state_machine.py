@@ -91,11 +91,14 @@ class StateMachine(Machine):
     def parse(self, lines):
         self._raw = '\n'.join(lines)
         self._lines = copy.deepcopy(lines)
-        if self._table.DELIMITER is not None and self._view is None:
-            if self._table.TITLE is not None:
-                self.delimiter_with_title()
-            else:
-                self.delimiter_without_title()
+        if self._view is None:
+            if self._table.DELIMITER is not None:
+                if self._table.TITLE is not None:
+                    self.delimiter_with_title()
+                else:
+                    self.delimiter_without_title()
+            elif self._table.TITLE is not None:
+                self.title_provided()
         else:
             if self._view.TITLE is not None or self._table.TITLE:
                 self.title_provided()
@@ -122,6 +125,8 @@ class StateMachine(Machine):
         return self._data
 
     def match_columns(self, event):
+        if self._view is None:
+            return False
         columns = self._view.COLUMNS.values()
         if len(columns) == 0:
             return False
@@ -284,7 +289,7 @@ class StateMachine(Machine):
         return post_integer_data_types == pre_integer_data_types
 
     def parse_title_data(self, event):
-        if self._view.REGEX != {}:
+        if self._view is not None and self._view.REGEX != {}:
             return self.regex_provided()
         pre_space_delimit = ''
         delimiter = self._table.DELIMITER or '\s\s+'
@@ -299,7 +304,9 @@ class StateMachine(Machine):
                     items = (re.split(delimiter, line.strip()))
                     item_types = list(map(data_type, items))
                     key, value = convert_to_data_type(items)
-                    if self._table.KEY_ITEMS is None:
+                    if self._view is None:
+                        self._data[key] = value
+                    elif self._table.KEY_ITEMS is None:
                         self._data[self._view.FIELDS.get(key, key)] = value
                     elif key in self._table.KEY_ITEMS:
                         self._data[self._view.FIELDS.get(key, key)] = value
@@ -311,7 +318,10 @@ class StateMachine(Machine):
                         items = obj.groups()
                         key, value = convert_to_data_type(items)
                         self._data[key] = value
-            elif line.strip() == '':
+            # check if next line is blank or new title (delimiter test to fail)
+            elif line.strip() == '' or len(re.split(delimiter, line.strip(
+
+            ))) <= 1:
                 break
         return self._data
 

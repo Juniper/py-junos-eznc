@@ -1,0 +1,157 @@
+<output>
+Displaying port statistics for switch 0
+
+Link is down on GE port 0 connected to device: FPC0
+Statistics for port 1 connected to device FPC1:
+  TX Packets 64 Octets        142545489
+  TX Packets 65-127 Octets    83498558
+  TX Packets 128-255 Octets   6738243
+  RX Packets 512-1023 Octets  4428661
+  RX Packets 1024-1518 Octets  3200039
+  RX Broadcast Packets        9206817
+  RX Byte Counter             3209254683
+Statistics for port 2 connected to device FPC2:
+  TX Packets 64 Octets        140666613
+  TX Packets 65-127 Octets    105545277
+  TX Packets 128-255 Octets   11245893
+  TX Packets 256-511 Octets   55746
+  TX Packets 512-1023 Octets  3669
+  TX Broadcast Packets        46011330
+  TX Byte Counter             1209916850
+  RX Packets 64 Octets        69281885
+  RX Packets 65-127 Octets    98793558
+  RX Packets 128-255 Octets   5848046
+  RX Packets 256-511 Octets   14518495
+  RX Packets 512-1023 Octets  33598800
+  RX Packets 1024-1518 Octets  7994417
+  RX Byte Counter             133138157
+Statistics for port 4 connected to device FPC4:
+  TX Packets 64 Octets        139077543
+  TX Packets 65-127 Octets    91616401
+  TX Packets 128-255 Octets   15940774
+  TX Packets 256-511 Octets   6737
+  TX Packets 512-1023 Octets  2934
+  TX Packets 1024-1518 Octets  72615
+  TX Packets 1519-2047 Octets  0
+  TX Packets 2048-4095 Octets  0
+  TX Packets 4096-9216 Octets  0
+  TX 1519-1522 Good Vlan frms  0
+  TX Octets                   246717004
+  TX Multicast Packets        6
+  TX Broadcast Packets        45997099
+  TX Single Collision frames  0
+  TX Mult. Collision frames   0
+  TX Late Collisions          0
+  TX Excessive Collisions     0
+  TX Collision frames         0
+  TX PAUSEMAC Ctrl Frames     0
+  TX MAC ctrl frames          0
+  TX Frame deferred Xmns      0
+  TX Frame excessive deferl   0
+  TX Oversize Packets         0
+  TX Jabbers                  0
+  TX FCS Error Counter        0
+  TX Fragment Counter         0
+  TX Byte Counter             725771059
+  RX Packets 64 Octets        69309261
+  RX Packets 65-127 Octets    104339320
+  RX Packets 128-255 Octets   7153230
+  RX Packets 256-511 Octets   2130213
+  RX Packets 512-1023 Octets  24031621
+  RX Packets 1024-1518 Octets  5524595
+  RX Packets 1519-2047 Octets  0
+  RX Packets 2048-4095 Octets  0
+  RX Packets 4096-9216 Octets  0
+  RX Octets                   212488240
+  RX Multicast Packets        0
+  RX Broadcast Packets        9216795
+  RX FCS Errors               0
+  RX Align Errors             0
+  RX Fragments                0
+  RX Symbol errors            0
+  RX Unsupported opcodes      0
+  RX Out of Range Length      0
+  RX False Carrier Errors     0
+  RX Undersize Packets        0
+  RX Oversize Packets         0
+  RX Jabbers                  0
+  RX 1519-1522 Good Vlan frms 0
+  RX MTU Exceed Counter       0
+  RX Control Frame Counter    0
+  RX Pause Frame Counter      0
+  RX Byte Counter             3613262476
+
+Link is down on GE port 6 connected to device: FPC6
+
+Link is down on GE port 16 connected to device: Nothing
+Statistics for port 17 connected to device Debug-GigE:
+  TX Packets 64 Octets        0
+  TX Packets 65-127 Octets    0
+  TX Packets 128-255 Octets   0
+  TX Packets 256-511 Octets   0
+  TX Packets 512-1023 Octets  0
+  TX Packets 1024-1518 Octets  0
+  TX Packets 1519-2047 Octets  0
+  TX Packets 2048-4095 Octets  0
+  TX Packets 4096-9216 Octets  0
+  TX 1519-1522 Good Vlan frms  0
+  TX Octets                   0
+  TX Multicast Packets        0
+  TX Broadcast Packets        0
+  TX Single Collision frames  0
+  TX Mult. Collision frames   0
+  TX Late Collisions          0
+  TX Excessive Collisions     0
+  TX Collision frames         0
+  TX PAUSEMAC Ctrl Frames     0
+  TX MAC ctrl frames          0
+  TX Frame deferred Xmns      0
+  TX Frame excessive deferl   0
+  TX Oversize Packets         0
+  TX Jabbers                  0
+  TX FCS Error Counter        0
+  TX Fragment Counter         0
+  TX Byte Counter             0
+  RX Packets 64 Octets        0
+  RX Packets 65-127 Octets    0
+  RX Packets 128-255 Octets   0
+  RX Packets 256-511 Octets   0
+  RX Packets 512-1023 Octets  0
+  RX Packets 1024-1518 Octets  0
+  RX Packets 1519-2047 Octets  0
+  RX Packets 2048-4095 Octets  0
+  RX Packets 4096-9216 Octets  0
+  RX Octets                   0
+  RX Multicast Packets        0
+  RX Broadcast Packets        0
+  RX FCS Errors               0
+  RX Align Errors             0
+  RX Fragments                0
+  RX Symbol errors            0
+  RX Unsupported opcodes      0
+  RX Out of Range Length      0
+  RX False Carrier Errors     0
+  RX Undersize Packets        0
+  RX Oversize Packets         0
+  RX Jabbers                  0
+  RX 1519-1522 Good Vlan frms 0
+  RX MTU Exceed Counter       0
+  RX Control Frame Counter    0
+  RX Pause Frame Counter      0
+  RX Byte Counter             0
+
+Link is down on GE port 18 connected to device: Nothing
+
+Link is down on GE port 19 connected to device: Nothing
+
+Link is down on GE port 20 connected to device: Nothing
+
+Link is down on GE port 21 connected to device: Nothing
+
+Link is down on GE port 22 connected to device: Nothing
+
+Link is down on GE port 23 connected to device: Nothing
+
+Link is down on XE port 24 connected to device: External-Ethernet
+
+</output>

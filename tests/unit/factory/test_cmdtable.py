@@ -100,23 +100,23 @@ class TestFactoryCfgTable(unittest.TestCase):
         stats = MtipCgeSummaryTable(self.dev)
         stats = stats.get()
         self.assertEqual(dict(stats), {2: {'fpc': 1,
-                                             'id': 2,
-                                             'ifd': 'et-1/0/0',
-                                             'name': 'mtip_cge.1.0.0',
-                                             'pic': 0,
-                                             'ptr': '4f119fb8'},
-                                         4: {'fpc': 1,
-                                             'id': 4,
-                                             'ifd': 'et-1/2/0',
-                                             'name': 'mtip_cge.1.2.0',
-                                             'pic': 2,
-                                             'ptr': '4f119c98'},
-                                         5: {'fpc': 1,
-                                             'id': 5,
-                                             'ifd': 'et-1/2/1',
-                                             'name': 'mtip_cge.1.2.1',
-                                             'pic': 2,
-                                             'ptr': '4f119bf8'}})
+                                           'id': 2,
+                                           'ifd': 'et-1/0/0',
+                                           'name': 'mtip_cge.1.0.0',
+                                           'pic': 0,
+                                           'ptr': '4f119fb8'},
+                                       4: {'fpc': 1,
+                                           'id': 4,
+                                           'ifd': 'et-1/2/0',
+                                           'name': 'mtip_cge.1.2.0',
+                                           'pic': 2,
+                                           'ptr': '4f119c98'},
+                                       5: {'fpc': 1,
+                                           'id': 5,
+                                           'ifd': 'et-1/2/1',
+                                           'name': 'mtip_cge.1.2.1',
+                                           'pic': 2,
+                                           'ptr': '4f119bf8'}})
 
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_icmpstats_nested(self, mock_execute):
@@ -125,48 +125,49 @@ class TestFactoryCfgTable(unittest.TestCase):
         stats = ICMPStatsTable(self.dev)
         stats = stats.get()
         self.assertEqual(dict(stats), {'discards': {'ICMP errors':
-                                        {'name': 'ICMP errors', 'value': 0},
-              'IP fragments': {'name': 'IP fragments', 'value': 0},
-              'bad dest addresses': {'name': 'bad dest addresses',
-                                     'value': 0},
-              'bad source addresses': {'name': 'bad source addresses',
-                                       'value': 0},
-              'multicasts': {'name': 'multicasts', 'value': 0},
-              'pps per iff': {'name': 'pps per iff', 'value': 500},
-              'pps total': {'name': 'pps total', 'value': 1000},
-              'throttled': {'name': 'throttled', 'value': 0},
-              'unknown originators': {'name': 'unknown originators',
-                                      'value': 0}}, 'errors': {'ICMP errors':
-                                            {'error': 0, 'name': 'ICMP errors'},
-            'IP fragments': {'error': 0, 'name': 'IP fragments'},
-            'bad cf mtu': {'error': 0, 'name': 'bad cf mtu'},
-            'bad dest addresses': {'error': 0, 'name': 'bad dest addresses'},
-            'bad input interface': {'error': 0,
-                                    'name': 'bad input interface'},
-            'bad nh lookup': {'error': 0, 'name': 'bad nh lookup'},
-            'bad route lookup': {'error': 0, 'name': 'bad route lookup'},
-            'bad source addresses': {'error': 0,
-                                     'name': 'bad source addresses'},
-            'invalid ICMP type': {'error': 0, 'name': 'invalid ICMP type'},
-            'invalid protocol': {'error': 0, 'name': 'invalid protocol'},
-            'multicasts': {'error': 0, 'name': 'multicasts'},
-            'pps per iff': {'error': 500, 'name': 'pps per iff'},
-            'pps total': {'error': 1000, 'name': 'pps total'},
-            'runts': {'error': 0, 'name': 'runts'},
-            'throttled': {'error': 0, 'name': 'throttled'},
-            'unknown originators': {'error': 0,
-                                    'name': 'unknown originators'},
-            'unknown unreachables': {'error': 0,
-                                     'name': 'unknown unreachables'},
-            'unprocessed redirects': {'error': 0,
-                                      'name': 'unprocessed redirects'},
-            'unsupported ICMP type': {'error': 0,
-                                      'name': 'unsupported ICMP type'}},
+                                                    {'name': 'ICMP errors',
+                                                        'value': 0},
+                                                    'IP fragments': {'name': 'IP fragments', 'value': 0},
+                                                    'bad dest addresses': {'name': 'bad dest addresses',
+                                                                           'value': 0},
+                                                    'bad source addresses': {'name': 'bad source addresses',
+                                                                             'value': 0},
+                                                    'multicasts': {'name': 'multicasts', 'value': 0},
+                                                    'pps per iff': {'name': 'pps per iff', 'value': 500},
+                                                    'pps total': {'name': 'pps total', 'value': 1000},
+                                                    'throttled': {'name': 'throttled', 'value': 0},
+                                                    'unknown originators': {'name': 'unknown originators',
+                                                                            'value': 0}}, 'errors': {'ICMP errors':
+                                                                                                     {'error': 0, 'name': 'ICMP errors'},
+                                                                                                     'IP fragments': {'error': 0, 'name': 'IP fragments'},
+                                                                                                     'bad cf mtu': {'error': 0, 'name': 'bad cf mtu'},
+                                                                                                     'bad dest addresses': {'error': 0, 'name': 'bad dest addresses'},
+                                                                                                     'bad input interface': {'error': 0,
+                                                                                                                             'name': 'bad input interface'},
+                                                                                                     'bad nh lookup': {'error': 0, 'name': 'bad nh lookup'},
+                                                                                                     'bad route lookup': {'error': 0, 'name': 'bad route lookup'},
+                                                                                                     'bad source addresses': {'error': 0,
+                                                                                                                              'name': 'bad source addresses'},
+                                                                                                     'invalid ICMP type': {'error': 0, 'name': 'invalid ICMP type'},
+                                                                                                     'invalid protocol': {'error': 0, 'name': 'invalid protocol'},
+                                                                                                     'multicasts': {'error': 0, 'name': 'multicasts'},
+                                                                                                     'pps per iff': {'error': 500, 'name': 'pps per iff'},
+                                                                                                     'pps total': {'error': 1000, 'name': 'pps total'},
+                                                                                                     'runts': {'error': 0, 'name': 'runts'},
+                                                                                                     'throttled': {'error': 0, 'name': 'throttled'},
+                                                                                                     'unknown originators': {'error': 0,
+                                                                                                                             'name': 'unknown originators'},
+                                                                                                     'unknown unreachables': {'error': 0,
+                                                                                                                              'name': 'unknown unreachables'},
+                                                                                                     'unprocessed redirects': {'error': 0,
+                                                                                                                               'name': 'unprocessed redirects'},
+                                                                                                     'unsupported ICMP type': {'error': 0,
+                                                                                                                               'name': 'unsupported ICMP type'}},
                                        'rate': {'pps per iff':
                                                 {'name': 'pps per iff',
                                                  'rate': 500},
                                                 'pps total': {'name': 'pps '
-                                                                      'total',
+                                                              'total',
                                                               'rate': 1000}}})
 
     @patch('jnpr.junos.Device.execute')
@@ -176,10 +177,10 @@ class TestFactoryCfgTable(unittest.TestCase):
         stats = IthrottleIDTable(self.dev).get()
         self.assertEqual(dict(stats), {'usg_enable': 1, 'min_usage': 25.0,
                                        'throttle_stats': {'Disables': 0,
-                                                'Starts': 65708652,
-                                                'AdjUp': 6, 'Stops': 65708652,
-                                                'AdjDown': 4, 'Enables': 0,
-                                                'Checks': 124149442},
+                                                          'Starts': 65708652,
+                                                          'AdjUp': 6, 'Stops': 65708652,
+                                                          'AdjDown': 4, 'Enables': 0,
+                                                          'Checks': 124149442},
                                        'max_usage': 50.0})
 
     @patch('jnpr.junos.Device.execute')
@@ -195,7 +196,7 @@ ShowPciErrorsTable:
   key:
     - pci_addr
     - status_type
-  
+
   view: ShowPciErrorsView
 
 ShowPciErrorsView:
@@ -208,10 +209,10 @@ ShowPciErrorsView:
     - status
     """
         globals().update(FactoryLoader().load(yaml.load(yaml_data,
-                                        Loader=yamlordereddictloader.Loader)))
+                                                        Loader=yamlordereddictloader.Loader)))
         stats = ShowPciErrorsTable(self.dev).get()
         self.assertEqual(dict(stats), {('2:2:9:0', 'Link'): {'status':
-                                                                 '0x00000001',
+                                                             '0x00000001',
                                                              'pci_addr':
                                                                  '2:2:9:0'},
                                        ('2:2:9:0', 'Slot'): {'status':
@@ -248,15 +249,15 @@ FPCMemoryView:
       - base
         """
         globals().update(FactoryLoader().load(yaml.load(yaml_data,
-                                        Loader=yamlordereddictloader.Loader)))
+                                                        Loader=yamlordereddictloader.Loader)))
         stats = FPCMemory(self.dev).get()
         self.assertEqual(dict(stats), {(2, 'bcdfffe0'):
-                        {'base': 'bcdfffe0', 'total': 52428784, 'id': 2,
-                         'free': 52428784}, (0, '4d9ad8e8'): {
-            'base':'4d9ad8e8', 'total': 1726292636, 'id': 0, 'free':
+                                       {'base': 'bcdfffe0', 'total': 52428784, 'id': 2,
+                                        'free': 52428784}, (0, '4d9ad8e8'): {
+            'base': '4d9ad8e8', 'total': 1726292636, 'id': 0, 'free':
                 1514622708}, (1, 'b47ffb88'): {'base': 'b47ffb88', 'total':
-            67108860, 'id': 1, 'free': 53057404}, (3, 'b87ffb88'): {'base':
-                'b87ffb88', 'total': 73400316, 'id': 3, 'free': 73400316}})
+                                               67108860, 'id': 1, 'free': 53057404}, (3, 'b87ffb88'): {'base':
+                                                                                                       'b87ffb88', 'total': 73400316, 'id': 3, 'free': 73400316}})
 
     @patch('jnpr.junos.Device.execute')
     def test_item_regex_pq3_pci(self, mock_execute):
@@ -298,8 +299,8 @@ FPCMemoryView:
         self.assertEqual(dict(stats), {'interrupt_time': 16786614, 'Idle': {
             'time_ms': 7397672498, 'cpu': '85%', 'name': 'Idle'}, 'Level 3':
             {'time_ms': 1, 'cpu': '0%', 'name': 'Level 3'}, 'thread': {'cpu':
-                        '4%', 'pid': 99,'name': 'LU Background Service',
-                                                    'time': '410844018 ms'}})
+                                                                       '4%', 'pid': 99, 'name': 'LU Background Service',
+                                                                       'time': '410844018 ms'}})
 
     @patch('jnpr.junos.Device.execute')
     def test_exists(self, mock_execute):
@@ -320,6 +321,38 @@ FPCMemoryView:
         self.assertEqual(dict(stats), {'no_detected_wedges': True,
                                        'no_toolkit_errors': True})
 
+    @patch('jnpr.junos.Device.execute')
+    def test_title_without_view(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.chassisethernetswitchstatistics import \
+            EthernetSwitchStatistics
+        stats = EthernetSwitchStatistics(self.dev)
+        stats = stats.get()
+        print dict(stats)
+        self.assertEqual(dict(stats),
+                         {'fpc2': {'TX Packets 128-255 Octets': 11245893,
+                                   'TX Packets 65-127 Octets': 105545277,
+                                   'TX Byte Counter': 1209916850,
+                                   'TX Packets 512-1023 Octets': 3669,
+                                   'RX Packets 65-127 Octets': 98793558,
+                                   'RX Byte Counter':133138157,
+                                   'TX Packets 64 Octets': 140666613,
+                                   'RX Packets 256-511 Octets': 14518495,
+                                   'TX Packets 256-511 Octets': 55746,
+                                   'RX Packets 128-255 Octets': 5848046,
+                                   'RX Packets 512-1023 Octets': 33598800,
+                                   'RX Packets 1024-1518 Octets': 7994417,
+                                   'TX Broadcast Packets': 46011330,
+                                   'RX Packets 64 Octets': 69281885},
+                            'fpc1': {'TX Packets 128-255 Octets': 6738243,
+                                     'TX Packets 65-127 Octets': 83498558,
+                                     'RX Byte Counter': 3209254683,
+                                     'TX Packets 64 Octets': 142545489,
+                                     'RX Broadcast Packets': 9206817,
+                                     'RX Packets 512-1023 Octets': 4428661,
+                                     'RX Packets 1024-1518 Octets': 3200039}})
+
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 
@@ -332,7 +365,7 @@ FPCMemoryView:
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
-        if kwargs:
+        if kwargs and 'normalize' not in kwargs:
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
@@ -341,4 +374,7 @@ FPCMemoryView:
         if args:
             if args[0].tag == 'request-pfe-execute':
                 file_name = (args[0].findtext('command')).replace(' ', '_')
+                return self._read_file(file_name + '.xml')
+            elif args[0].tag == 'command':
+                file_name = (args[0].text).replace(' ', '_')
                 return self._read_file(file_name + '.xml')
