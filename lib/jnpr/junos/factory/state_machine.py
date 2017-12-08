@@ -84,6 +84,8 @@ class StateMachine(Machine):
              'dest': 'regex_data', 'after': 'parse_using_regex'},
             {'trigger': 'exists_check', 'source': 'start',
              'dest': 'exists_bool_data', 'after': 'parse_exists'},
+            {'trigger': 'exists_check', 'source': 'title_data',
+             'dest': 'exists_bool_data', 'after': 'parse_exists'},
         ]
         Machine.__init__(self, states=self.states, transitions=self.transitions,
                          initial='start', send_event=True)
