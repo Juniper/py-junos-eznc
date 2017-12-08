@@ -16,7 +16,7 @@ import yaml
 
 
 @attr('unit')
-class TestFactoryCfgTable(unittest.TestCase):
+class TestFactoryCMDTable(unittest.TestCase):
 
     @patch('ncclient.manager.connect')
     def setUp(self, mock_connect):

@@ -9,7 +9,7 @@ Statistics for port 1 connected to device FPC1:
   RX Packets 512-1023 Octets  4428661
   RX Packets 1024-1518 Octets  3200039
   RX Broadcast Packets        9206817
-  RX Byte Counter             3209254683
+  RX Byte Counter             320925468
 Statistics for port 2 connected to device FPC2:
   TX Packets 64 Octets        140666613
   TX Packets 65-127 Octets    105545277
@@ -17,7 +17,7 @@ Statistics for port 2 connected to device FPC2:
   TX Packets 256-511 Octets   55746
   TX Packets 512-1023 Octets  3669
   TX Broadcast Packets        46011330
-  TX Byte Counter             1209916850
+  TX Byte Counter             12099160
   RX Packets 64 Octets        69281885
   RX Packets 65-127 Octets    98793558
   RX Packets 128-255 Octets   5848046
@@ -26,7 +26,7 @@ Statistics for port 2 connected to device FPC2:
   RX Packets 1024-1518 Octets  7994417
   RX Byte Counter             133138157
 Statistics for port 4 connected to device FPC4:
-  TX Packets 64 Octets        139077543
+  TX Packets 64 Octets        1397543
   TX Packets 65-127 Octets    91616401
   TX Packets 128-255 Octets   15940774
   TX Packets 256-511 Octets   6737
@@ -79,7 +79,7 @@ Statistics for port 4 connected to device FPC4:
   RX MTU Exceed Counter       0
   RX Control Frame Counter    0
   RX Pause Frame Counter      0
-  RX Byte Counter             3613262476
+  RX Byte Counter             361322476
 
 Link is down on GE port 6 connected to device: FPC6
 
