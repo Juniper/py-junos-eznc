@@ -17,6 +17,3 @@ PreClStatsView:
     tx_pack: TX pkts
     rx_pack: RX pkts
     dr_pack: Dropped pkts
-  filters:
-    - port
-    - id
