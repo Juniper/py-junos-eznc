@@ -17,3 +17,21 @@ PreClStatsView:
     tx_pack: TX pkts
     rx_pack: RX pkts
     dr_pack: Dropped pkts
+
+PreclSummTable:
+  command: show precl-eng summary
+  target: fpc2
+  key: id
+  view: PreclSummView
+
+PreclSummView:
+  regex:
+    id: "[0-9]+"
+    engine_name: "[A-Za-z_.0-9]+"
+    fpc: "[0-9]+"
+    pic: "[0-9]+"
+    ptr: "[0-9a-f]+"
+  filters:
+    - id
+    - fpc
+    - pic
