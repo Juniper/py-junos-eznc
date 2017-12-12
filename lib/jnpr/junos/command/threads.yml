@@ -1,6 +1,6 @@
 ---
 FPCThread:
-  command: show thread
+  command: show threads
   target: fpc1
   key: Name
   view: FPCThreadView
