@@ -118,3 +118,18 @@ _PFELocalProtoStatsView:
   regex:
     value: numbers
     name: words
+
+PFEStatsErrorMpcType4Table:
+  command: show pfe statistics error
+  target: fpc2
+  view: PFEStatsErrorMpcType4View
+
+PFEStatsErrorMpcType4View:
+  fields:
+    FI_Error_stream_counters: _FIErrorstreamCountersTable
+  exists:
+    no_hsl2_errors: 'No errors on this PFE'
+
+_FIErrorstreamCountersTable:
+  title: "Stream number match      : 0x0"
+  delimiter: ":"
