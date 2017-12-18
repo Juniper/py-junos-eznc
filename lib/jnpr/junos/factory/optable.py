@@ -55,7 +55,11 @@ class OpTable(Table):
 
         rpc_args = {'normalize': True}    # create default <dict>
         rpc_args.update(self.GET_ARGS)    # copy default args
+        # saltstack get_table pass args as named keyword
+        if 'args' in kvargs and isinstance(kvargs['args'], dict):
+            rpc_args.update(kvargs.pop('args'))
         rpc_args.update(kvargs)           # copy caller provided args
+
 
         if hasattr(self, 'GET_KEY') and argkey is not None:
             rpc_args.update({self.GET_KEY: argkey})
