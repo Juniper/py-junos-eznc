@@ -94,17 +94,16 @@ class CMDTable(object):
                                                                 str) else \
                 kvargs['filters']
 
-        if 'args' in kvargs:
-            self.CMD_ARGS = kvargs['args']
+        if 'args' in kvargs and isinstance(kvargs['args'], dict):
+            self.CMD_ARGS.update(kvargs['args'])
 
-        if len(self.CMD_ARGS)>0:
+        if len(self.CMD_ARGS) > 0:
             self.GET_CMD = Template(self.GET_CMD).render(**self.CMD_ARGS)
 
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:
-            rpc_args = {'target': self.TARGET,
-                         'command': self.GET_CMD,
-                        'timeout':'0'}
+            rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
+                        'timeout': '0'}
             try:
                 self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
                 self.data = self.xml.text
