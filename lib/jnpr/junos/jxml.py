@@ -90,10 +90,6 @@ normalize_xslt = '''\
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="no"/>
 
-    <xsl:template match="/*[local-name()='rpc-reply']/*[local-name()='output']">
-        <xsl:copy-of select="."/>
-    </xsl:template>
-
     <xsl:template match="/|comment()|processing-instruction()">
         <xsl:copy>
             <xsl:apply-templates/>
