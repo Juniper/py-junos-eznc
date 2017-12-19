@@ -322,6 +322,37 @@ FPCMemoryView:
                                        'no_toolkit_errors': True})
 
     @patch('jnpr.junos.Device.execute')
+    def test_table_with_item_regex(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.devices import DevicesLocalTable
+        stats = DevicesLocalTable(self.dev)
+        stats = stats.get()
+        self.assertEqual(dict(stats), {'.le1': {'TSEC_status_counters': {
+            'kernel_dropped': 0, 'rx_large': 0},
+          'receive_counters': {'FCS_errors': 0,
+                               'broadcast_packets': 107271,
+                               'bytes': 185584608,
+                               'packets': 2250212},
+          'transmit_per_queue': {'0': {'queue': {'bytes': 10300254,
+                                                 'packets': 72537}},
+                                 '1': {'queue': {'bytes': 4474302,
+                                                 'packets': 106531}},
+                                 '2': {'queue': {'bytes': 260203538,
+                                                 'packets': 1857137}},
+                                 '3': {'queue': {'bytes': 199334,
+                                                 'packets': 2179}}}},
+ '.le3': {'TSEC_status_counters': {'kernel_dropped': 0, 'rx_large': 0},
+          'receive_counters': {'FCS_errors': 0,
+                               'broadcast_packets': 0,
+                               'bytes': 0,
+                               'packets': 0},
+          'transmit_per_queue': {'0': {'queue': {'bytes': 0, 'packets': 0}},
+                                 '1': {'queue': {'bytes': 4474302,
+                                                 'packets': 106531}},
+                                 '2': {'queue': {'bytes': 0, 'packets': 0}},
+                                 '3': {'queue': {'bytes': 0, 'packets': 0}}}}})
+
+    @patch('jnpr.junos.Device.execute')
     def test_title_without_view(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.chassisethernetswitchstatistics import \

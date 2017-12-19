@@ -2,6 +2,7 @@ from collections import OrderedDict
 from functools import reduce
 import re
 import copy
+from itertools import tee, izip
 
 from transitions import Machine
 import pyparsing as pp
@@ -74,7 +75,7 @@ class StateMachine(Machine):
             {'trigger': 'delimiter_with_title', 'source': 'start', 'dest': 'delimiter_data',
              'conditions': ['match_title'], 'before': 'check_header_bar',
              'after': 'parse_using_delimiter'},
-            {'trigger': 'regex_with_item', 'source': 'start',
+            {'trigger': 'regex_with_item', 'source': ['start', 'regex_data'],
              'dest': 'regex_data', 'after': 'parse_using_item_and_regex'},
             {'trigger': 'regex_parser', 'source': 'start',
              'dest': 'regex_data', 'after': 'parse_using_regex'},
@@ -91,8 +92,8 @@ class StateMachine(Machine):
                          initial='start', send_event=True)
 
     def parse(self, lines):
-        self._raw = '\n'.join(lines)
         self._lines = copy.deepcopy(lines)
+        self._raw = '\n'.join(lines)
         if self._view is None:
             if self._table.DELIMITER is not None:
                 if self._table.TITLE is not None:
@@ -114,6 +115,32 @@ class StateMachine(Machine):
             if len(self._view.EXISTS) > 0:
                 self.exists_check()
             if len(self._view.FIELDS) > 0:
+                if self._table.ITEM is not None and self._table.ITEM != '*':
+                    self._raw = '\n'.join(lines)
+                    pat = pp.Regex(self._table.ITEM)
+                    x = []
+                    for result, start, end in pat.scanString(self._raw):
+                        x.append((start, end))
+                    for i in range(len(x)):
+                        try:
+                            raw = self._raw[x[i][0]: x[i+1][0]]
+                        except IndexError:
+                            raw = self._raw[x[i][0]:]
+                        lines = raw.splitlines()
+                        obj = re.search(self._table.ITEM, lines[0])
+                        groups = obj.groups()
+                        if len(groups) >= 1:
+                            master_key = groups[0]
+                            self._data[master_key] = {}
+                            for key, value in self._view.FIELDS.items():
+                                tbl = value['table']
+                                tbl._view = tbl.VIEW
+                                # lines = self._raw[start:].splitlines()
+                                if len(tbl._view.COLUMNS) > 0:
+                                    self._data[master_key][key] = StateMachine(tbl).parse(lines)
+                                if tbl._view.TITLE is not None or tbl.TITLE is not None:
+                                    self._data[master_key][key] = StateMachine(tbl).parse(lines)
+                    return self._data
                 for key, value in self._view.FIELDS.items():
                     tbl = value['table']
                     tbl._view = tbl.VIEW
@@ -290,14 +317,22 @@ class StateMachine(Machine):
             list(map(data_type, items)), post_integer_data_types
         return post_integer_data_types == pre_integer_data_types
 
+    def _get_pre_space_delimiter(self, line):
+        pre_space_delimit = ''
+        obj = re.search('(\s+).*', line)
+        if obj:
+            pre_space_delimit = obj.group(1)
+        return pre_space_delimit
+
     def parse_title_data(self, event):
         if self._view is not None and self._view.REGEX != {}:
             return self.regex_provided()
-        pre_space_delimit = ''
+        # view have only fields, so contains only nested table
+        if self._view is not None and self._view.FIELDS and not \
+                self._view.COLUMNS and not self._view.REGEX:
+            return
         delimiter = self._table.DELIMITER or '\s\s+'
-        obj = re.search('(\s+).*', self._lines[1])
-        if obj:
-            pre_space_delimit = obj.group(1)
+        pre_space_delimit = self._get_pre_space_delimiter(self._lines[1])
         for line in self._lines[1:]:
             if re.match(pre_space_delimit + '\s+', line):
                 break
@@ -368,6 +403,7 @@ class StateMachine(Machine):
 
     def parse_using_item_and_regex(self, event):
         if self._table.ITEM=='*':
+            self._raw = '\n'.join(self._lines)
             for key, regex in self._view.REGEX.items():
                 obj = re.search(regex, self._raw)
                 if obj:
