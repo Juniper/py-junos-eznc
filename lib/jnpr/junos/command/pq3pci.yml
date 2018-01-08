@@ -11,5 +11,7 @@ PQ3PCI:
   regex:
     pci: 'PCI (\d+(:\d+){3})'
     rto: 'rto (\d+)'
+    rnr: 'rnr (\d+)'
     rxe: 'rxe (\d+)'
     bdllp: 'bdllp (\d+)'
+    btlp: 'btlp (\d+)'
