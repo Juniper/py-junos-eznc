@@ -291,16 +291,25 @@ class SW(Util):
 
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
-        # If <package-result> is not present, then assume success.
-        # That is, assume <package-result>0</package-result>
-        package_result = got.findtext('package-result')
-        if package_result is None:
-            self.log("software pkgadd response is missing package-result "
-                     "element. Assuming success.")
-            package_result = '0'
-        rc = int(package_result.strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
+        package_result = got.findtext('package-result')
+        if package_result is None:
+            # <package-result> is not present
+            if ('ERROR: package:' in output_msg and
+               'is not found or empty' in output_msg):
+                # MX80 output with non-existent package looks like:
+                # <output>
+                # ERROR: package: /var/tmp/nonexistent.tgz is not found or empty
+                # </output>
+                package_result = '1'
+            else:
+                # Not a known specific error in the output. Assume success.
+                # That is, assume <package-result>0</package-result>
+                self.log("software pkgadd response is missing package-result "
+                         "element. Assuming success.")
+                package_result = '0'
+        rc = int(package_result.strip())
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
             rc, output_msg))
         return rc == 0
