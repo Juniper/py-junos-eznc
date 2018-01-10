@@ -58,10 +58,11 @@ XMChipQNodeStatsView:
     index: '\d+'
     name: word
     total: numbers
-    rate: (\d)\s(p|b)ps
+    rate: (\d+)\s(p|b)ps
   filters:
     - rate
     - color
+    - outcome
 
 XMChipDrdErrorTable:
   command: show xmchip {{ XM_instance }} drd error-stats
