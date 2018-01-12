@@ -16,12 +16,13 @@ import json
 
 from jinja2 import Template
 
+
 class CMDTable(object):
 
     def __init__(self, dev=None, output=None, path=None):
         """
         :dev: Device instance
-        :xml: lxml Element instance
+        :output: string blob of the command output
         :path: file path to XML, to be used rather than :dev:
         """
         self._dev = dev
@@ -39,11 +40,12 @@ class CMDTable(object):
 
     def get(self, *vargs, **kvargs):
         """
-        Retrieve the XML table data from the Device instance and
-        returns back the Table instance - for call-chaining purposes.
+        Retrieve the XML (string blob under <output> tag of table data from the
+        Device instance and returns back the Table instance - for call-chaining
+        purposes.
 
         If the Table was created with a :path: rather than a Device,
-        then this method will load the XML from that file.  In this
+        then this method will load the string blob from that file.  In this
         case, the \*vargs, and \**kvargs are not used.
 
         ALIAS: __call__

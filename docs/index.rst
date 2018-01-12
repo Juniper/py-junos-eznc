@@ -6,12 +6,15 @@
 Welcome to Junos PyEZ's documentation!
 ======================================
 
+*Junos PyEZ* is a Python library to remotely manage/automate Junos devices
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
    jnpr.junos
+   Table & View
 
 
 Indices and tables
