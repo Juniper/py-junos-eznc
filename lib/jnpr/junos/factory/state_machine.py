@@ -70,9 +70,11 @@ class StateMachine(Machine):
             {'trigger': 'regex_provided', 'source': 'title_data', 'dest': 'regex_data',
              'conditions': ['match_title'], 'before': 'check_header_bar',
              'after': 'parse_using_regex'},
-            {'trigger': 'delimiter_without_title', 'source': 'start', 'dest': 'delimiter_data',
-             'after': 'parse_using_delimiter'},
-            {'trigger': 'delimiter_with_title', 'source': 'start', 'dest': 'delimiter_data',
+            {'trigger': 'delimiter_without_title', 'source': 'start', 'dest':
+                'delimiter_data', 'after': 'parse_using_delimiter'},
+            {'trigger': 'delimiter_with_title', 'source': ['start',
+                                                           'delimiter_data'],
+             'dest': 'delimiter_data',
              'conditions': ['match_title'], 'before': 'check_header_bar',
              'after': 'parse_using_delimiter'},
             {'trigger': 'regex_with_item', 'source': ['start', 'regex_data'],
@@ -102,6 +104,8 @@ class StateMachine(Machine):
                     self.delimiter_without_title()
             elif self._table.TITLE is not None:
                 self.title_provided()
+            elif self._table.ITEM is not None and self._table.ITEM != '*':
+                self._parse_item_iter(lines)
         else:
             if self._view.TITLE is not None or self._table.TITLE:
                 self.title_provided()
@@ -116,31 +120,7 @@ class StateMachine(Machine):
                 self.exists_check()
             if len(self._view.FIELDS) > 0:
                 if self._table.ITEM is not None and self._table.ITEM != '*':
-                    self._raw = '\n'.join(lines)
-                    pat = pp.Regex(self._table.ITEM)
-                    x = []
-                    for result, start, end in pat.scanString(self._raw):
-                        x.append((start, end))
-                    for i in range(len(x)):
-                        try:
-                            raw = self._raw[x[i][0]: x[i+1][0]]
-                        except IndexError:
-                            raw = self._raw[x[i][0]:]
-                        lines = raw.splitlines()
-                        obj = re.search(self._table.ITEM, lines[0])
-                        groups = obj.groups()
-                        if len(groups) >= 1:
-                            master_key = groups[0]
-                            self._data[master_key] = {}
-                            for key, value in self._view.FIELDS.items():
-                                tbl = value['table']
-                                tbl._view = tbl.VIEW
-                                # lines = self._raw[start:].splitlines()
-                                if len(tbl._view.COLUMNS) > 0:
-                                    self._data[master_key][key] = StateMachine(tbl).parse(lines)
-                                if tbl._view.TITLE is not None or tbl.TITLE is not None:
-                                    self._data[master_key][key] = StateMachine(tbl).parse(lines)
-                    return self._data
+                    return self._parse_item_iter(lines)
                 for key, value in self._view.FIELDS.items():
                     tbl = value['table']
                     tbl._view = tbl.VIEW
@@ -151,6 +131,68 @@ class StateMachine(Machine):
                         self._data[key] = StateMachine(tbl).parse(lines)
                     if tbl._view.TITLE is not None or tbl.TITLE is not None:
                         self._data[key] = StateMachine(tbl).parse(lines)
+        return self._data
+
+    def _parse_item_iter(self, lines):
+        self._raw = '\n'.join(lines)
+        pat = pp.Regex(self._table.ITEM)
+        x = []
+        for result, start, end in pat.scanString(self._raw):
+            x.append((start, end))
+        for i in range(len(x)):
+            try:
+                raw = self._raw[x[i][0]: x[i + 1][0]]
+            except IndexError:
+                raw = self._raw[x[i][0]:]
+            lines = raw.splitlines()
+            obj = re.search(self._table.ITEM, lines[0])
+            groups = obj.groups()
+            groups = [data_type(val)(val) for val in groups]
+            if len(groups) >= 1:
+                master_key = groups[0] if len(groups) == 1 else tuple(groups)
+                self._data[master_key] = {}
+                if self._view is not None:
+                    for key, value in self._view.FIELDS.items():
+                        tbl = value['table']
+                        tbl._view = tbl.VIEW
+                        # lines = self._raw[start:].splitlines()
+                        if tbl._view is not None and len(tbl._view.COLUMNS) > 0:
+                            self._data[master_key][key] = StateMachine(tbl).parse(
+                                lines)
+                        if tbl.TITLE is not None or tbl._view.TITLE is not None:
+                            self._data[master_key][key] = StateMachine(tbl).parse(
+                                lines)
+                else:
+                    self._table.TITLE = lines[0]
+                    delimiter = self._table.DELIMITER or '\s\s+'
+                    temp_dict = {}
+                    pre_space_delimit = self._get_pre_space_delimiter(
+                        lines[1])
+                    for line in lines[1:]:
+                        if re.match(pre_space_delimit + '\s+', line):
+                            break
+                        if line.startswith(pre_space_delimit):
+                            try:
+                                items = (re.split(delimiter, line.strip()))
+                                item_types = list(map(data_type, items))
+                                key, value = convert_to_data_type(items)
+                                temp_dict[key] = value
+                            except ValueError:
+                                regex = '(\d+)\s(.*)' if item_types[
+                                                             0] == int else '(' \
+                                                                            '.*)\s(\d+)'
+                                obj = re.search(regex, line)
+                                if obj:
+                                    items = obj.groups()
+                                    key, value = convert_to_data_type(items)
+                                    temp_dict[key] = value
+                        # check if next line is blank or new title (delimiter test to fail)
+                        elif line.strip() == '' or len(
+                                re.split(delimiter, line.strip(
+
+                                ))) <= 1:
+                            break
+                    self._data[master_key] = temp_dict
         return self._data
 
     def match_columns(self, event):
@@ -423,9 +465,10 @@ class StateMachine(Machine):
                         tmp_dict[k] = data_type(val)(val)
                 if key in tmp_dict:
                     self._data[tmp_dict[key]] = tmp_dict
+        return self._data
 
     def parse_using_delimiter(self, event):
-        delimiter = self._table.DELIMITER
+        delimiter = self._table.DELIMITER or '\s\s+'
         pre_space_delimit = ''
         if self._table.TITLE is None:
             for line in self._lines[1:]:

@@ -29,3 +29,12 @@ _EthSwitchStatsFpc4Table:
 
 _EthSwitchStatsFpc5Table:
   title: Statistics for port 5 connected to device FPC5
+
+
+EthernetSwitchStatisticsIterTable:
+  command: show chassis ethernet-switch statistics
+  item: Statistics for port (\d) connected to device (FPC\d)
+  key:
+    - port
+    - fpc
+
