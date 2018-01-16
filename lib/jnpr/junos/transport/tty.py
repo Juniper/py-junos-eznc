@@ -102,7 +102,7 @@ class Terminal(object):
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
-        logger.info('TTY: connecting to TTY:{0} ...'.format(self.tty_name))
+        logger.info('TTY: connecting to TTY:{} ...'.format(self.tty_name))
         self._tty_open()
 
         logger.info('TTY: logging in......')
