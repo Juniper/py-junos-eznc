@@ -2,40 +2,48 @@ import re
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos.exception import RpcError
 
-
 def _get_software_information(device):
-    # See if device understands "invoke-on all-routing-engines"
-    try:
-        return device.rpc.cli("show version invoke-on all-routing-engines",
-                              format='xml', normalize=True)
-    except RpcError:
-        # See if device is VC Capable
-        if device.facts['vc_capable'] is True:
+    if device.facts['is_evo'] is True:
+        try:
+            sw_info_all = device.rpc.get_software_information(normalize=True,
+                                                              node='all')
+        except RpcError:
+            sw_info_all = device.rpc.show_version(normalize=True,
+                                                  node='all')
+        return sw_info_all
+    else:
+        # See if device understands "invoke-on all-routing-engines"
+        try:
+            return device.rpc.cli("show version invoke-on all-routing-engines",
+                                  format='xml', normalize=True)
+        except RpcError:
+            # See if device is VC Capable
+            if device.facts['vc_capable'] is True:
+                try:
+                    return device.rpc.cli("show version all-members", format='xml',
+                                          normalize=True)
+                except Exception:
+                    pass
             try:
-                return device.rpc.cli("show version all-members", format='xml',
-                                      normalize=True)
+                # JDM for Junos Node Slicing
+                return device.rpc.get_software_information(all_servers=True,
+                                                           format='xml',
+                                                           normalize=True)
             except Exception:
                 pass
-        try:
-            # JDM for Junos Node Slicing
-            return device.rpc.get_software_information(all_servers=True,
-                                                       format='xml',
-                                                       normalize=True)
-        except Exception:
-            pass
-        try:
-            sw_info = device.rpc.get_software_information(normalize=True)
-        except Exception:
-            sw_info = True
-        try:
-            if sw_info is True:
-                # Possibly an NFX which requires 'local' and 'detail' args.
-                sw_info = device.rpc.get_software_information(local=True,
-                                                              detail=True,
-                                                              normalize=True)
-            return sw_info
-        except Exception:
-            pass
+            try:
+                sw_info = device.rpc.get_software_information(normalize=True)
+            except Exception:
+                sw_info = True
+            try:
+                if sw_info is True:
+                    # Possibly an NFX which requires 'local' and 'detail' args.
+                    sw_info = device.rpc.get_software_information(local=True,
+                                                                  detail=True,
+                                                                  normalize=True)
+                return sw_info
+            except Exception:
+                pass
 
 
 def provides_facts():

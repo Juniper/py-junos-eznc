@@ -18,7 +18,12 @@ def get_facts(device):
     iri_hostname = None
     iri_ip = None
 
-    rsp = device.rpc.file_show(filename='/etc/hosts.junos', normalize=False)
+    if device.facts['is_evo'] is True:
+        hosts_file = '/etc/hosts'
+    else:
+        hosts_file = '/etc/hosts.junos'
+
+    rsp = device.rpc.file_show(filename=hosts_file, normalize=False)
 
     if rsp is not None:
         hosts_file_content = rsp.findtext('.', default='')

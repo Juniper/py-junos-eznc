@@ -238,6 +238,10 @@ class _Connection(object):
         """
         master = None
 
+        # Evo has no concept of a "master" RE.
+        if self.facts.get('is_evo') is True:
+            return None
+
         # Make sure the 'current_re' fact has a value
         if self.facts.get('current_re') is not None:
             # Typical master case
