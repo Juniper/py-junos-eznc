@@ -44,7 +44,7 @@ class Serial(Terminal):
         try:
             self._ser.open()
         except OSError as err:
-            raise RuntimeError("open_failed:{0}".format(err.strerror))
+            raise RuntimeError("open_failed:{}".format(err.strerror))
         self.write('\n\n\n')      # hit <ENTER> a few times, yo!
 
     def _tty_close(self):

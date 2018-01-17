@@ -58,7 +58,7 @@ As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/py
 
 ## PIP
 
-Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
+Installation requires Python 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
 

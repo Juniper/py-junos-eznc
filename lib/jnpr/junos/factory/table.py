@@ -297,7 +297,7 @@ class Table(object):
 
         def get_xpath(find_value):
             namekey_xpath, item_xpath = self._keyspec()
-            xnkv = '[{0}="{1}"]'
+            xnkv = '[{}="{}"]'
 
             if isinstance(find_value, str):
                 # find by name, simple key

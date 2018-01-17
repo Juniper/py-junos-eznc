@@ -714,7 +714,7 @@ class Config(Util):
                 return False
 
         def _unsupported_action():
-            raise ValueError("unsupported action: {0}".format(action))
+            raise ValueError("unsupported action: {}".format(action))
 
         result = {
             'get': _rescue_get,
@@ -809,7 +809,7 @@ class Config(Util):
 
         def _unsupported_option():
             if self.mode is not None:
-                raise ValueError("unsupported action: {0}".format(self.mode))
+                raise ValueError("unsupported action: {}".format(self.mode))
 
         if self.kwargs.get('ephemeral_instance'):
             ephemeral_kwargs = {
