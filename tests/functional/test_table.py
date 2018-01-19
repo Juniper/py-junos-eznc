@@ -13,8 +13,8 @@ class TestTable(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         from jnpr.junos import Device
-        self.dev = Device(host='highlife.englab.juniper.net',
-                          user='jenkins', password='password123')
+        self.dev = Device(host='xxxx',
+                          user='jenkins', password='password')
         self.dev.open()
 
     @classmethod
