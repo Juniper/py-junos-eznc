@@ -31,6 +31,18 @@ _PFENotificationTypeStatsView:
     failed: Failed
     ignored: Ignored
 
+PFEStatsErrorIterTable:
+  command: show pfe statistics error
+  target: fpc1
+  item: 'MQ Chip (\d)'
+  key: mq_chip
+  view: PFEStatsErrorIterView
+
+PFEStatsErrorIterView:
+  fields:
+    WI_Error_counters: _WIErrorCountersTable
+    FI_Error_stream_counters: _FIErrorstreamCountersTable
+    misc_counter: _MiscCountersTable
 
 PFEStatsErrorTable:
   command: show pfe statistics error
@@ -51,6 +63,10 @@ _WIErrorCountersTable:
 
 _FIErrorstreamCountersTable:
   title: stream counters(mask 0 match 0)
+  delimiter: ":"
+
+_MiscCountersTable:
+  title: misc counters
   delimiter: ":"
 
 _IXCHIP0IngressTable:
@@ -126,10 +142,10 @@ PFEStatsErrorMpcType4Table:
 
 PFEStatsErrorMpcType4View:
   fields:
-    FI_Error_stream_counters: _FIErrorstreamCountersTable
+    FI_Error_stream_counters: _FIErrorstreamNumberMatchTable
   exists:
     no_hsl2_errors: 'No errors on this PFE'
 
-_FIErrorstreamCountersTable:
+_FIErrorstreamNumberMatchTable:
   title: "Stream number match      : 0x0"
   delimiter: ":"
