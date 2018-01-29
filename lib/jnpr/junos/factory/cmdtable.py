@@ -194,7 +194,6 @@ class CMDTable(object):
         pass
 
     def _keyspec(self):
-        """ returns tuple (keyname-xpath, item-xpath) """
         return (self.KEY, self.ITEM_FILTER)
 
     def _clearkeys(self):

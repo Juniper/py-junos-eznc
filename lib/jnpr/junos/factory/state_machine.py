@@ -149,6 +149,11 @@ class StateMachine(Machine):
             groups = obj.groups()
             groups = [data_type(val)(val) for val in groups]
             if len(groups) >= 1:
+                if len(groups) != len(self._table.KEY if
+                                      isinstance(self._table.KEY, list) else
+                                      [self._table.KEY]):
+                    raise KeyError('Table with grouped item must contain '
+                                   'corresponding key(s)')
                 master_key = groups[0] if len(groups) == 1 else tuple(groups)
                 self._data[master_key] = {}
                 if self._view is not None:
