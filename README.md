@@ -17,6 +17,8 @@ _Junos PyEZ_ wiki page, [here](http://forums.juniper.net/t5/Automation/Where-can
 
 # ABOUT
 
+![PyEZ logo](static/PyEZ.png?raw=true "PyEZ logo")
+
 _Junos PyEZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
 
 This library was built for two types of users:
@@ -58,7 +60,7 @@ As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/py
 
 ## PIP
 
-Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
+Installation requires Python 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
 

@@ -45,7 +45,7 @@ class Telnet(Terminal):
         self.port = port
         self.timeout = kvargs.get('timeout', self.TIMEOUT)
         self.baud = kvargs.get('baud', 9600)
-        self._tty_name = "{0}:{1}".format(host, port)
+        self._tty_name = "{}:{}".format(host, port)
 
         Terminal.__init__(self, **kvargs)
 
@@ -62,7 +62,7 @@ class Telnet(Terminal):
             except Exception:
                 retry -= 1
                 logger.info(
-                    "TTY busy: checking back in {0} ...".format(
+                    "TTY busy: checking back in {} ...".format(
                         self.RETRY_BACKOFF))
                 sleep(self.RETRY_BACKOFF)
         else:

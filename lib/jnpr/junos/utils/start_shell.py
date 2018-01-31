@@ -61,7 +61,7 @@ class StartShell(object):
                 if isinstance(data, bytes):
                     data = data.decode('utf-8', 'replace')
                 got.append(data)
-                if this is not None and re.search(r'{0}\s?$'.format(this),
+                if this is not None and re.search(r'{}\s?$'.format(this),
                                                   data):
                     break
         return got
@@ -146,8 +146,8 @@ class StartShell(object):
         if this is None:
             self.last_ok = got is not ''
         elif this != _SHELL_PROMPT:
-            self.last_ok = re.search(r'{0}\s?$'.format(this), got) is not None
-        elif re.search(r'{0}\s?$'.format(_SHELL_PROMPT), got) is not None:
+            self.last_ok = re.search(r'{}\s?$'.format(this), got) is not None
+        elif re.search(r'{}\s?$'.format(_SHELL_PROMPT), got) is not None:
             # use $? to get the exit code of the command
             self.send('echo $?')
             rc = ''.join(self.wait_for(_SHELL_PROMPT))

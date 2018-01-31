@@ -25,6 +25,9 @@ def _get_software_information(device):
             pass
         try:
             sw_info = device.rpc.get_software_information(normalize=True)
+        except Exception:
+            sw_info = True
+        try:
             if sw_info is True:
                 # Possibly an NFX which requires 'local' and 'detail' args.
                 sw_info = device.rpc.get_software_information(local=True,

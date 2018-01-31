@@ -69,7 +69,7 @@ class RpcError(Exception):
           pprints the response XML attribute
         """
         if self.rpc_error is not None:
-            return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
+            return "{}(severity: {}, bad_element: {}, message: {})"\
                 .format(self.__class__.__name__, self.rpc_error['severity'],
                         self.rpc_error['bad_element'], self.message)
         else:
@@ -88,7 +88,7 @@ class CommitError(RpcError):
         RpcError.__init__(self, cmd, rsp, errs)
 
     def __repr__(self):
-        return "{0}(edit_path: {1}, bad_element: {2}, message: {3})"\
+        return "{}(edit_path: {}, bad_element: {}, message: {})"\
             .format(self.__class__.__name__, self.rpc_error['edit_path'],
                     self.rpc_error['bad_element'], self.message)
 
@@ -105,7 +105,7 @@ class ConfigLoadError(RpcError):
         RpcError.__init__(self, cmd, rsp, errs)
 
     def __repr__(self):
-        return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
+        return "{}(severity: {}, bad_element: {}, message: {})"\
             .format(self.__class__.__name__, self.rpc_error['severity'],
                     self.rpc_error['bad_element'], self.message)
 
@@ -159,7 +159,7 @@ class RpcTimeoutError(RpcError):
         RpcError.__init__(self, dev=dev, cmd=cmd, timeout=timeout)
 
     def __repr__(self):
-        return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
+        return "{}(host: {}, cmd: {}, timeout: {})"\
             .format(self.__class__.__name__, self.dev.hostname,
                     self.cmd, self.timeout)
 
@@ -177,10 +177,10 @@ class SwRollbackError(RpcError):
 
     def __repr__(self):
         if self.re:
-            return "{0}(re: {1}, output: {2})"\
+            return "{}(re: {}, output: {})"\
                 .format(self.__class__.__name__, self.re, self.rsp)
         else:
-            return "{0}(output: {1})".format(self.__class__.__name__,
+            return "{}(output: {})".format(self.__class__.__name__,
                                              self.rsp)
 
     __str__ = __repr__
@@ -225,11 +225,11 @@ class ConnectError(Exception):
 
     def __repr__(self):
         if self._orig:
-            return "{0}(host: {1}, msg: {2})".format(self.__class__.__name__,
+            return "{}(host: {}, msg: {})".format(self.__class__.__name__,
                                                      self.dev.hostname,
                                                      self._orig)
         else:
-            return "{0}({1})".format(self.__class__.__name__,
+            return "{}({})".format(self.__class__.__name__,
                                      self.dev.hostname)
 
     __str__ = __repr__
@@ -318,11 +318,11 @@ class JSONLoadError(Exception):
 
     def __repr__(self):
         if self.offending_line:
-            return "{0}(reason: {1}, \nThe offending config appears " \
-                   "to be: \n{2})".format(self.__class__.__name__, self.ex_msg,
+            return "{}(reason: {}, \nThe offending config appears " \
+                   "to be: \n{})".format(self.__class__.__name__, self.ex_msg,
                                           self.offending_line)
         else:
-            return "{0}(reason: {1})" \
+            return "{}(reason: {})" \
                 .format(self.__class__.__name__, self.ex_msg)
 
     __str__ = __repr__
