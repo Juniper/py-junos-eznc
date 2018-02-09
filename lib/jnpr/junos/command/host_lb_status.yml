@@ -1,7 +1,7 @@
 ---
 HostlbStatusSummaryTable:
   command: show host_loopback status-summary
-  target: fpc1
+  target: None
   view: HostlbStatusSummaryView
 
 HostlbStatusSummaryView:

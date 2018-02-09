@@ -1,7 +1,7 @@
 ---
 IthrottleTable:
   command: show ithrottle
-  target: fpc1
+  target: None
   key:
     - Name
   view: IthrottleView
@@ -20,7 +20,7 @@ IthrottleIDTable:
   args:
     id: 0
   item: '*'
-  target: fpc1
+  target: None
   view: IthrottleIDView
 
 IthrottleIDView:

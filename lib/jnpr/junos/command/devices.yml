@@ -1,7 +1,7 @@
 ---
 DevicesLocalTable:
   command: show devices local
-  target: fpc1
+  target: None
   item: 'TSEC Ethernet Device Driver: (\.?\w+),'
   key: name
   view: DevicesLocalView

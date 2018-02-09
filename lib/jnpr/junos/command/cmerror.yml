@@ -1,7 +1,7 @@
 ---
 CMErrorTable:
   command: show cmerror module brief
-  target: fpc1
+  target: None
   key:
     - module
   view: CMErrorView

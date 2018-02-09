@@ -6,7 +6,7 @@ ShowToePfePacketStatsTable:
     asic_type: xm
     asic_instance: 0
     toe_instance: 0
-  target: fpc2
+  target: None
   item: 'Stream (\d): halt flag is NOT set'
   key: stream
   view: ShowToePfePacketStatsView

@@ -3,7 +3,7 @@ DdosPolicerStatsTable:
   command: show ddos policer stats {{ protocol }}
   args:
     protocol: ospf
-  target: fpc2
+  target: None
   key: location
   view: DdosPolicerStatsView
 

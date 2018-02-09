@@ -1,7 +1,7 @@
 ---
 VRRPStatsTable:
   command: show vrrp stats
-  target: fpc1
+  target: None
   view: VRRPStatsView
 
 VRRPStatsView:

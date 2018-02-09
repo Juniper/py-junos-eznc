@@ -1,7 +1,7 @@
 ---
 PreClStatsTable:
   command: show precl-eng {{ precl_index }} statistics
-  target: fpc2
+  target: None
   args:
     precl_index: 2
   key:
@@ -20,7 +20,7 @@ PreClStatsView:
 
 PreclSummTable:
   command: show precl-eng summary
-  target: fpc2
+  target: None
   key: id
   view: PreclSummView
 

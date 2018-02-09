@@ -1,7 +1,7 @@
 ---
 ShowPacketStatistics:
   command: show packet statistics
-  target: fpc2
+  target: None
   key: counter_name
   view: ShowPacketStatisticsView
 

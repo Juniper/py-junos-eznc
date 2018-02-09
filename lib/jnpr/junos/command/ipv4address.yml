@@ -1,7 +1,7 @@
 ---
 FPCIPV4AddressTable:
   command: show ipv4 address
-  target: fpc1
+  target: None
   key:
     - name
     - addr

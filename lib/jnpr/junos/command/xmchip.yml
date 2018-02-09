@@ -1,9 +1,9 @@
 ---
 XMChipStatsTable:
-  command: show xmchip {{ XM_instance }} pt stats
+  command: show xmchip {{ instance }} pt stats
   args:
-    XM_instance: 0
-  target: fpc1
+    instance: 0
+  target: None
   view: XMChipStatsView
 
 XMChipStatsView:

@@ -1,7 +1,7 @@
 ---
 MtipCgeSummaryTable:
   command: show mtip-cge summary
-  target: fpc2
+  target: None
   key: id
   view: MtipCgeSummaryView
 
@@ -18,7 +18,7 @@ MtipCgeStatisticsTable:
   command: show mtip-cge {{ mtip_id }} statistics
   args:
     mtip_id: 11
-  target: fpc2
+  target: None
   delimiter: ":"
   title: Statistics
   key_items:

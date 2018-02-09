@@ -1,7 +1,7 @@
 ---
 ICMPStatsTable:
   command: show icmp statistics
-  target: fpc1
+  target: None
   view: ICMPStatsView
 
 ICMPStatsView:

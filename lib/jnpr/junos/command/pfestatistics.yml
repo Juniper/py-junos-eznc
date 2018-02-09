@@ -1,7 +1,7 @@
 ---
 PFEStatsTable:
   command: show pfe statistics notification
-  target: fpc1
+  target: None
   view: PFEStatsView
 
 PFEStatsView:
@@ -33,7 +33,7 @@ _PFENotificationTypeStatsView:
 
 PFEStatsErrorIterTable:
   command: show pfe statistics error
-  target: fpc1
+  target: None
   item: 'MQ Chip (\d)'
   key: mq_chip
   view: PFEStatsErrorIterView
@@ -46,7 +46,7 @@ PFEStatsErrorIterView:
 
 PFEStatsErrorTable:
   command: show pfe statistics error
-  target: fpc1
+  target: None
   view: PFEStatsErrorView
 
 PFEStatsErrorView:
@@ -107,7 +107,7 @@ _IXCHIP2EgressView:
 
 PFEStatsTrafficTable:
   command: show pfe statistics traffic
-  target: fpc1
+  target: None
   view: PFEStatsTrafficView
 
 PFEStatsTrafficView:
@@ -137,7 +137,7 @@ _PFELocalProtoStatsView:
 
 PFEStatsErrorMpcType4Table:
   command: show pfe statistics error
-  target: fpc2
+  target: None
   view: PFEStatsErrorMpcType4View
 
 PFEStatsErrorMpcType4View:

@@ -104,6 +104,9 @@ class CMDTable(object):
 
         # execute the Junos RPC to retrieve the table
         if self.TARGET is not None:
+            # dummy/default value in YAML file is string "None"
+            if self.TARGET == "None":
+                raise ValueError('"target" value not provided')
             rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
                         'timeout': '0'}
             try:

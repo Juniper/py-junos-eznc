@@ -1,7 +1,7 @@
 ---
 TOEIthrottleTable:
   command: show toe ithrottle
-  target: fpc1
+  target: None
   view: TOEIthrottleView
 
 TOEIthrottleView:

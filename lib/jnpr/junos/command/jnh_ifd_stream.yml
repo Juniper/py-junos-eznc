@@ -3,7 +3,7 @@ ShowJnhIfdStream:
   command: show jnh ifd {{ ifd }}  stream
   args:
     ifd: 170
-  target: fpc2
+  target: None
   title: Detail Statistics
   key: counter
   view: ShowJnhIfdStreamView

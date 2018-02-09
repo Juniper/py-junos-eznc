@@ -1,7 +1,7 @@
 ---
 JNHExceptionTable:
   command: show jnh 0 exceptions
-  target: fpc1
+  target: None
   view: JNHExceptionView
 
 JNHExceptionView:
@@ -36,7 +36,7 @@ _BridgingView:
 
 JNHHostPathStatsTable:
   command: show jnh host-path-stats
-  target: fpc1
+  target: None
   view: JNHHostPathStatsView
 
 JNHHostPathStatsView:
@@ -56,7 +56,7 @@ _HostPathRcvErrorsView:
 
 JNHExceptionTerseTable:
   command: show jnh 0 exceptions terse
-  target: fpc1
+  target: None
   view: JNHExceptionTerseView
 
 JNHExceptionTerseView:

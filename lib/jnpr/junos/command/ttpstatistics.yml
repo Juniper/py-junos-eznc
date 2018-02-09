@@ -1,7 +1,7 @@
 ---
 FPCTTPStatsTable:
   command: show ttp statistics
-  target: fpc1
+  target: None
   view: FPCTTPStatsView
 
 FPCTTPStatsView:
@@ -62,7 +62,7 @@ _FPCTTPQueueSizesView:
 
 TTPReceiveStatsTable:
   command: show ttp statistics
-  target: fpc1
+  target: None
   title: TTP Receive Statistics
   key: name
   view: FPCTTPReceiveStatsView
