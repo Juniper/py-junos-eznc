@@ -1259,7 +1259,7 @@ class Device(_Connection):
             # not open a connection due to reachability.  so using
             # a timestamp to differentiate the two conditions for now
             # if the diff is < 3 sec, then assume the host is
-            # reachable, but NETCONF connection is refushed.
+            # reachable, but NETCONF connection is refused.
 
             ts_err = datetime.datetime.now()
             diff_ts = ts_err - ts_start
@@ -1267,7 +1267,7 @@ class Device(_Connection):
                 raise EzErrors.ConnectRefusedError(self)
 
             # at this point, we assume that the connection
-            # has timeed out due to ip-reachability issues
+            # has timed out due to ip-reachability issues
 
             if str(err).find('not open') > 0:
                 raise EzErrors.ConnectTimeoutError(self)
