@@ -111,6 +111,25 @@ class CMDTable(object):
             try:
                 self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
                 self.data = self.xml.text
+                ver_info = self._dev.facts.get('version_info')
+                if ver_info and ver_info.major[0] <= 15:
+                    # Junos <=15.x output has output something like below
+                    #
+                    # <rpc-reply>
+                    # <output>
+                    # SENT: Ukern command: show memory
+                    # GOT:
+                    # GOT: ID      Base      Total(b)       Free(b)     Used(b)
+                    # GOT: --  --------     ---------     ---------   ---------
+                    # GOT:  0  44e72078    1882774284    1689527364   193246920
+                    # GOT:  1  b51ffb88      67108860      57651900     9456960
+                    # GOT:  2  bcdfffe0      52428784      52428784           0
+                    # GOT:  3  b91ffb88      62914556      62914556           0
+                    # LOCAL: End of file
+                    # </output>
+                    # </rpc-reply>
+                    # hence need to do cleanup
+                    self.data = self.data.replace("GOT: ", "")
             except RpcError:
                 with StartShell(self.D) as ss:
                     ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
@@ -123,6 +142,7 @@ class CMDTable(object):
 
         # state machine
         sm = StateMachine(self)
+
         self.output = sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
