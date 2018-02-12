@@ -6,7 +6,7 @@ ShowToePfeTable:
     asic_instance: 0
     toe_instance: 0
     stream_id: 0
-  target: None
+  target: Null
   view: ShowToePfeView
 
 ShowToePfeView:

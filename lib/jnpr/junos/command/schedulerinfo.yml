@@ -1,7 +1,7 @@
 ---
 SchedulerTable:
   command: show sched
-  target: None
+  target: Null
   key: name
   view: SchedulerView
 
@@ -21,7 +21,7 @@ _TopThreadTable:
 
 SchedulerCpuTable:
   command: show sched
-  target: None
+  target: Null
   item: '*'
   view: SchedulerCpuView
 

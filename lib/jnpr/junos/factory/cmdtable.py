@@ -103,9 +103,8 @@ class CMDTable(object):
             self.GET_CMD = Template(self.GET_CMD).render(**self.CMD_ARGS)
 
         # execute the Junos RPC to retrieve the table
-        if self.TARGET is not None:
-            # dummy/default value in YAML file is string "None"
-            if self.TARGET == "None":
+        if hasattr(self, 'TARGET'):
+            if self.TARGET is None:
                 raise ValueError('"target" value not provided')
             rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
                         'timeout': '0'}

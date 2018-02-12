@@ -3,7 +3,7 @@ XMChipStatsTable:
   command: show xmchip {{ instance }} pt stats
   args:
     instance: 0
-  target: None
+  target: Null
   view: XMChipStatsView
 
 XMChipStatsView:
@@ -21,7 +21,7 @@ _FabricPTStatTable:
 
 XMChipIfdListTable:
   command: show xmchip {{ XM_instance }} ifd list {{ direction }}
-  target: fpc1
+  target: Null
   args:
     XM_instance: 0
     direction: 0
@@ -41,7 +41,7 @@ XMChipIfdListView:
 
 XMChipQNodeStatsTable:
   command: show xmchip {{ XM_instance }} q-node stats {{ sched_number }} {{ q_node }}
-  target: fpc2
+  target: Null
   args:
     XM_instance: 0
     sched_number: 0
@@ -66,7 +66,7 @@ XMChipQNodeStatsView:
 
 XMChipDrdErrorTable:
   command: show xmchip {{ XM_instance }} drd error-stats
-  target: fpc2
+  target: Null
   args:
     XM_instance: 0
   key: intr_name
@@ -79,7 +79,7 @@ XMChipDrdErrorView:
 
 XMChipStatsIngressErrorTable:
   command: show xmchip {{ XM_instance }} stats ingress-error
-  target: fpc2
+  target: Null
   args:
     XM_instance: 0
   key: error_id
@@ -92,7 +92,7 @@ XMChipStatsIngressErrorView:
 
 XMChipWIStatsTable:
   command: show xmchip {{ XM_instance }} wi stats {{ wan_block }}
-  target: fpc2
+  target: Null
   args:
     XM_instance: 0
     wan_block: 0
@@ -144,7 +144,7 @@ _XMChipWIMiscStallView:
 
 XMChipLOStatsTable:
   command: show xmchip {{ XM_instance }} lo stats {{ lo_block }}
-  target: fpc2
+  target: Null
   args:
     XM_instance: 0
     lo_block: 0

@@ -1,7 +1,7 @@
 ---
 TOEIthrottleTable:
   command: show toe ithrottle
-  target: None
+  target: Null
   view: TOEIthrottleView
 
 TOEIthrottleView:

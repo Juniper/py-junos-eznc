@@ -1,7 +1,7 @@
 ---
 HostlbStatusSummaryTable:
   command: show host_loopback status-summary
-  target: None
+  target: Null
   view: HostlbStatusSummaryView
 
 HostlbStatusSummaryView:

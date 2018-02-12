@@ -1,7 +1,7 @@
 ---
 FPCHeapAccount:
     command: show heap 0 accounting pc
-    target: None
+    target: Null
     view: FPCHeapAccountView
 
 FPCHeapAccountView:

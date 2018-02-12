@@ -3,7 +3,7 @@ ShowJnhExceptions:
   command: show jnh {{ jnh_instance }} exceptions
   args:
     jnh_instance: 0
-  target: None
+  target: Null
   key: reason
   view: ShowJnhExceptionsView
 

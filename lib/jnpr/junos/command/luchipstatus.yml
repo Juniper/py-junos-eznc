@@ -1,7 +1,7 @@
 ---
 LUChipStatusTable:
   command: show lkup-asic wedge-client
-  target: None
+  target: Null
   key: Client ID
   view: LUChipStatusView
 

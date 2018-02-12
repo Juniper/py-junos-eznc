@@ -1,7 +1,7 @@
 ---
 ShowLuchipTable:
   command: show luchip {{ lu_instance }}
-  target: None
+  target: Null
   args:
     lu_instance: 0
   key: ppe
@@ -16,7 +16,7 @@ ShowLuchipView:
 
 ShowLuchipDispRateTable:
   command: show luchip {{ lu_instance }} disp rate
-  target: None
+  target: Null
   args:
     lu_instance: 0
   key: disp

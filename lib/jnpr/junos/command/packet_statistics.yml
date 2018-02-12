@@ -1,7 +1,7 @@
 ---
 ShowPacketStatistics:
   command: show packet statistics
-  target: None
+  target: Null
   key: counter_name
   view: ShowPacketStatisticsView
 

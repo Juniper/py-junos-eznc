@@ -1,7 +1,7 @@
 ---
 FPCThread:
   command: show threads
-  target: None
+  target: Null
   key: Name
   view: FPCThreadView
 

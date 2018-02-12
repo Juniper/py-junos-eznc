@@ -41,13 +41,15 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
     return new_cls
 
 
-def FactoryCMDTable(cmd, args=None, item=None, target=None, key_items=None,
-                    key='name', view=None, table_name=None, title=None, delimiter=None):
+def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
+                    key='name', view=None, table_name=None, title=None,
+                    delimiter=None, **kwargs):
     if table_name is None:
         table_name = "CMDTable." + cmd
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
-    new_cls.TARGET = target
+    if 'target' in kwargs:
+        new_cls.TARGET = kwargs['target']
     new_cls.KEY_ITEMS = key_items
     new_cls.CMD_ARGS = args or {}
     new_cls.ITEM = item

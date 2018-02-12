@@ -30,7 +30,7 @@ class TestFactoryCMDTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.cmerror import CMErrorTable
         stats = CMErrorTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats),
                          {1: {'errors': 0, 'name': 'PQ3 Chip'},
                           2: {'errors': 0, 'name': 'Host Loopback'},
@@ -46,7 +46,7 @@ class TestFactoryCMDTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.linkstats import FPCLinkStatTable
         stats = FPCLinkStatTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats),
                          {'PPP LCP/NCP': 0, 'ISIS': 0, 'BFD': 15, 'OAM': 0,
                           'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
@@ -58,7 +58,7 @@ class TestFactoryCMDTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.ttpstatistics import FPCTTPStatsTable
         stats = FPCTTPStatsTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc2')
         self.assertEqual(dict(stats),
                          {'TTPQueueSizes': {'High': '0 (max is 4473)',
                                             'Low': '0 (max is 2236)'},
@@ -98,7 +98,7 @@ class TestFactoryCMDTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.mtip_cge import MtipCgeSummaryTable
         stats = MtipCgeSummaryTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc2')
         self.assertEqual(dict(stats), {2: {'fpc': 1,
                                            'id': 2,
                                            'ifd': 'et-1/0/0',
@@ -123,7 +123,7 @@ class TestFactoryCMDTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.icmpstats import ICMPStatsTable
         stats = ICMPStatsTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc2')
         self.assertEqual(dict(stats), {'discards': {'ICMP errors':
                                                     {'name': 'ICMP errors',
                                                         'value': 0},
@@ -174,7 +174,7 @@ class TestFactoryCMDTable(unittest.TestCase):
     def test_unstructured_ithrottle_key_args(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.ithrottle import IthrottleIDTable
-        stats = IthrottleIDTable(self.dev).get()
+        stats = IthrottleIDTable(self.dev).get(target='fpc2')
         self.assertEqual(dict(stats), {'usg_enable': 1, 'min_usage': 25.0,
                                        'throttle_stats': {'Disables': 0,
                                                           'Starts': 65708652,
@@ -264,7 +264,7 @@ FPCMemoryView:
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.pq3pci import PQ3PCITable
         stats = PQ3PCITable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc2')
         self.assertEqual(dict(stats),
                          {'0:0:0:0': {'bdllp': 0,
                                       'btlp': 0,
@@ -338,7 +338,7 @@ FPCMemoryView:
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.schedulerinfo import SchedulerTable
         stats = SchedulerTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats), {'interrupt_time': 16786614, 'Idle': {
             'time_ms': 7397672498, 'cpu': '85%', 'name': 'Idle'}, 'Level 3':
             {'time_ms': 1, 'cpu': '0%', 'name': 'Level 3'}, 'thread': {'cpu':
@@ -350,7 +350,7 @@ FPCMemoryView:
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.host_lb_status import HostlbStatusSummaryTable
         stats = HostlbStatusSummaryTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc3')
         self.assertEqual(dict(stats), {'no_detected_wedges': True,
                                        'no_toolkit_errors': True})
 
@@ -369,7 +369,7 @@ FPCMemoryView:
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.devices import DevicesLocalTable
         stats = DevicesLocalTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats), {'.le1': {'TSEC_status_counters': {'kernel_dropped': 0, 'rx_large': 0},
           'receive_counters': {'FCS_errors': 0,
                                'broadcast_packets': 107271,
@@ -565,12 +565,20 @@ FPCMemoryView:
                           'fpc5': {}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_valueerror_with_no_target(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        from jnpr.junos.command.toepfepacketstats import \
+            ShowToePfePacketStatsTable
+        stats = ShowToePfePacketStatsTable(self.dev)
+        self.assertRaises(ValueError, stats.get)
+
+    @patch('jnpr.junos.Device.execute')
     def test_item_with_fields_delimiter(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         from jnpr.junos.command.toepfepacketstats import \
             ShowToePfePacketStatsTable
         stats = ShowToePfePacketStatsTable(self.dev)
-        stats = stats.get()
+        stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats), {0: {'rx_descriptors': {'completed': 12665827,
                         'recycle fails': 0,
                         'recycled': 12665827},

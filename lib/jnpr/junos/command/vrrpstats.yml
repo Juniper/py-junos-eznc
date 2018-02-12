@@ -1,7 +1,7 @@
 ---
 VRRPStatsTable:
   command: show vrrp stats
-  target: None
+  target: Null
   view: VRRPStatsView
 
 VRRPStatsView:

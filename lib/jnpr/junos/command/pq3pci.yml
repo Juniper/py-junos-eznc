@@ -1,7 +1,7 @@
 ---
 PQ3PCITable:
   command: show pq3 pci
-  target: None
+  target: Null
   item: PCI
   key:
     - pci

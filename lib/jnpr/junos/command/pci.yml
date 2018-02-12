@@ -1,7 +1,7 @@
 ---
 ShowPciErrorsTable:
   command: show pci errors {{ pci_controller_number }}
-  target: None
+  target: Null
   args:
     pci_controller_number: 2
   key:
