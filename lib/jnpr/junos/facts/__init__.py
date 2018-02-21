@@ -31,43 +31,21 @@ NOTE: The dictionary key for each available fact is guaranteed to exist. If
 The following dictionary keys represent the available facts and their meaning:
 
 """
-import importlib
-import os
+import sys
 
-
-def _get_list_of_fact_module_names():
-    """
-    Get a list of fact module names.
-
-    Gets a list of the module names that reside in the facts directory (the
-    directory where this jnpr.junos.facts.__init__.py file lives). Any module
-    names that begin with an underscore (_) are ommitted.
-
-    :returns:
-      A list of fact module names.
-    """
-    module_names = []
-    facts_dir = os.path.dirname(__file__)
-    for file in os.listdir(facts_dir):
-        if (os.path.isfile(os.path.join(facts_dir, file)) and
-           not os.path.islink(os.path.join(facts_dir, file))):
-            if file.endswith('.py') and not file.startswith('_'):
-                (module_name, _) = file.rsplit('.py', 1)
-                module_names.append('%s.%s' % (__name__, module_name))
-    return module_names
-
-
-def _import_fact_modules():
-    """
-    Import each of the modules returned by _get_list_of_fact_module_names().
-
-    :returns:
-      A list of the imported module objects.
-    """
-    modules = []
-    for name in _get_list_of_fact_module_names():
-        modules.append(importlib.import_module(name))
-    return modules
+import jnpr.junos.facts.current_re
+import jnpr.junos.facts.domain
+import jnpr.junos.facts.ethernet_mac_table
+import jnpr.junos.facts.file_list
+import jnpr.junos.facts.get_chassis_cluster_status
+import jnpr.junos.facts.get_chassis_inventory
+import jnpr.junos.facts.get_route_engine_information
+import jnpr.junos.facts.get_software_information
+import jnpr.junos.facts.get_virtual_chassis_information
+import jnpr.junos.facts.ifd_style
+import jnpr.junos.facts.iri_mapping
+import jnpr.junos.facts.personality
+import jnpr.junos.facts.swver
 
 
 def _build_fact_callbacks_and_doc_strings():
@@ -87,19 +65,20 @@ def _build_fact_callbacks_and_doc_strings():
     """
     callbacks = {}
     doc_strings = {}
-    for module in _import_fact_modules():
-        new_doc_strings = module.provides_facts()
-        for key in new_doc_strings:
-            if key not in callbacks:
-                callbacks[key] = module.get_facts
-                doc_strings[key] = new_doc_strings[key]
-            else:
-                raise RuntimeError('Both the %s module and the %s module '
-                                   'claim to provide the %s fact. Please '
-                                   'report this error.' %
-                                   (callbacks[key].__module__,
-                                    module.__name__,
-                                    key))
+    for (name, module) in sys.modules.items():
+        if name.startswith('jnpr.junos.facts.') and module is not None:
+            new_doc_strings = module.provides_facts()
+            for key in new_doc_strings:
+                if key not in callbacks:
+                    callbacks[key] = module.get_facts
+                    doc_strings[key] = new_doc_strings[key]
+                else:
+                    raise RuntimeError('Both the %s module and the %s module '
+                                       'claim to provide the %s fact. Please '
+                                       'report this error.' %
+                                       (callbacks[key].__module__,
+                                        module.__name__,
+                                        key))
     return (callbacks, doc_strings)
 
 

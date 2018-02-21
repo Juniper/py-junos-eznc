@@ -4,6 +4,12 @@ import hashlib
 import re
 from os import path
 import sys
+try:
+    # Python 3.x
+    from urllib.parse import urlparse
+except ImportError:
+    # Python 2.x
+    from urlparse import urlparse
 
 
 # 3rd-party modules
@@ -66,10 +72,24 @@ class SW(Util):
             self._RE_list = [x for x in dev.facts.keys()
                              if x.startswith('version_RE')]
         self._multi_RE = bool(dev.facts.get('2RE'))
+        # Branch SRX in an SRX cluster doesn't really support multi_RE
+        # functionality for SW.
+        if (dev.facts.get('personality', '') == 'SRX_BRANCH' and
+            dev.facts.get('srx_cluster') is True):
+            self._multi_RE = False
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
             dev.facts.get('vc_mode') != 'Disabled')
         self._mixed_VC = bool(dev.facts.get('vc_mode') == 'Mixed')
+        # The devices which currently support single-RE ISSU, communicate with
+        #  the new Junos VM using internal IP 128.0.0.63.
+        # Therefore, the 'localre' value in the 'current_re' fact can currently
+        # be used to check for this capability.
+        # {master: 0}
+        #  user @ s0 > file show / etc / hosts.junos | match localre
+        #  128.0.0.63               localre
+        self._single_re_issu = bool('current_re' in dev.facts and
+                                    'localre' in dev.facts['current_re'])
         self.log = lambda report: None
 
     # -----------------------------------------------------------------------
@@ -177,16 +197,26 @@ class SW(Util):
     # pkgadd - used to perform the 'request system software add ...'
     # -------------------------------------------------------------------------
 
-    def pkgadd(self, remote_package, **kvargs):
+    def pkgadd(self, remote_package, vmhost=False, **kvargs):
         """
-        Issue the 'request system software add' command on the package.
-        The "no-validate" options is set by default.  If you want to validate
-        the image, do that using the specific :meth:`validate` method.  Also,
-        if you want to reboot the device, suggest using the :meth:`reboot`
-        method rather ``reboot=True``.
+        Issue the RPC equivalent of the 'request system software add' command
+        or the 'request vmhost software add' command on the package.
+        If vhmhost=False, the <request-package-add> RPC is used and the
+        The "no-validate" options is set.  If you want to validate
+        the image, do that using the specific :meth:`validate` method.
+        If vmhost=True, the <request-vmhost-package-add> RPC is used.
+
+        If you want to reboot the device, invoke the :meth:`reboot` method
+        after installing the software rather than passing the ``reboot=True``
+        parameter.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
+
+
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
 
         :param dict kvargs:
           Any additional parameters to the 'request' command can
@@ -196,18 +226,23 @@ class SW(Util):
         .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
-        if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
-            args = dict(no_validate=True, set=remote_package)
+        if vmhost is False:
+            if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
+                args = dict(no_validate=True, set=remote_package)
+            else:
+                args = dict(no_validate=True, package_name=remote_package)
+            args.update(kvargs)
+            rsp = self.rpc.request_package_add(**args)
         else:
-            args = dict(no_validate=True, package_name=remote_package)
-        args.update(kvargs)
+            rsp = self.rpc.request_vmhost_package_add(
+                      package_name=remote_package,
+                      **kvargs)
 
-        rsp = self.rpc.request_package_add(**args)
         return self._parse_pkgadd_response(rsp)
 
-        # -------------------------------------------------------------------------
-        # pkgaddNSSU - used to perform NSSU upgrade
-        # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # pkgaddNSSU - used to perform NSSU upgrade
+    # -------------------------------------------------------------------------
 
     def pkgaddNSSU(self, remote_package, **kvargs):
         """
@@ -226,22 +261,44 @@ class SW(Util):
     # pkgaddISSU - used to perform ISSU upgrade
     # -------------------------------------------------------------------------
 
-    def pkgaddISSU(self, remote_package, **kvargs):
+    def pkgaddISSU(self, remote_package, vmhost=False, **kvargs):
         """
-        Issue the 'request system software nonstop-upgrade' command on the
-        package.
+        Issue the RPC equivalent of the
+        'request system software in-service-upgrade' command
+        or the 'request vmhost software in-service-upgrade' command on the
+        package. If vhmhost=False, the <request-package-in-service-upgrade>
+        RPC is used. If vmhost=True, the
+        <request-vmhost-package-in-service-upgrade> RPC is used.
 
         :param str remote_package:
           The file-path to the install package on the remote (Junos) device.
+
+
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
         """
 
-        rsp = self.rpc.request_package_in_service_upgrade(
-            package_name=remote_package, **kvargs)
+        if vmhost is False:
+            rsp = self.rpc.request_package_in_service_upgrade(
+                      package_name=remote_package,
+                      **kvargs)
+        else:
+            rsp = self.rpc.request_vmhost_package_in_service_upgrade(
+                      package_name=remote_package,
+                      **kvargs)
         return self._parse_pkgadd_response(rsp)
 
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
-        rc = int(got.findtext('package-result').strip())
+        # If <package-result> is not present, then assume success.
+        # That is, assume <package-result>0</package-result>
+        package_result = got.findtext('package-result')
+        if package_result is None:
+            self.log("software pkgadd response is missing package-result "
+                     "element. Assuming success.")
+            package_result = '0'
+        rc = int(package_result.strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
@@ -573,32 +630,35 @@ class SW(Util):
                 progress=None, validate=False, checksum=None, cleanfs=True,
                 no_copy=False, issu=False, nssu=False, timeout=1800,
                 cleanfs_timeout=300, checksum_timeout=300,
-                checksum_algorithm='md5', force_copy=False, **kwargs):
+                checksum_algorithm='md5', force_copy=False, all_re=True,
+                vmhost=False, **kwargs):
         """
         Performs the complete installation of the **package** that includes the
         following steps:
 
-        1. computes the checksum of :package: on the local host
+        1. If :package: is a URL, or :no_copy: is True, skip to step 8.
+        2. computes the checksum of :package: or :pgk_set: on the local host
            if :checksum: was not provided.
-        2. performs a storage cleanup on the remote Junos device if :cleanfs:
+        3. performs a storage cleanup on the remote Junos device if :cleanfs:
            is ``True``
-        3. Attempts to compute the checksum of the :package: filename in the
+        4. Attempts to compute the checksum of the :package: filename in the
            :remote_path: directory of the remote Junos device if the
            :force_copy: argument is ``False``
-        4. SCP or FTP copies the :package: file from the local host to the
+        5. SCP or FTP copies the :package: file from the local host to the
            :remote_path: directory on the remote Junos device under any of the
            following conditions:
+
            a) The :force_copy: argument is ``True``
-           b) The :package: filename doesn't already exist in the :remote_path:
+           b) The :package: filename doesn't already exist in the
               :remote_path: directory of the remote Junos device.
-           c) The checksum computed in step 1 does not match the checksum
-              computed in step 3.
-        5. If step 4 was executed, computes the checksum of the :package:
+           c) The checksum computed in step 2 does not match the checksum
+              computed in step 4.
+        6. If step 5 was executed, computes the checksum of the :package:
            filename in the :remote_path: directory of the remote Junos device
-        6. Validates the checksum computed in step 1 matches the checksum
-              computed in step 5.
-        7. validates the package if :validate: is True
-        8. installs the package
+        7. Validates the checksum computed in step 2 matches the checksum
+              computed in step 6.
+        8. validates the package if :validate: is True
+        9. installs the package
 
         .. warning:: This process has been validated on the following
                      deployments.
@@ -624,16 +684,23 @@ class SW(Util):
                    to reboot the device.
 
         :param str package:
-          The file-path to the install package tarball on the local filesystem
+          Either the full file path to the install package tarball on the local
+          (PyEZ host's) filesystem OR a URL (from the target device's
+          perspcective) from which the device retrieves installed. When the
+          value is a URL, then the :no_copy: and :remote_path: values are
+          unused. The acceptable formats for a URL value may be found at:
+          https://www.juniper.net/documentation/en_US/junos/topics/concept/junos-software-formats-filenames-urls.html
 
         :param list pkg_set:
-          The file-paths as list/tuple of the install package tarballs on the
-          local filesystem which will be installed on mixed VC setup.
+          A list/tuple of :package: values which will be installed on a mixed
+          VC setup.
 
         :param str remote_path:
-          The directory on the Junos device where the package file will be
-          SCP'd to or where the package is stored on the device; the default is
-          ``/var/tmp``.
+          If the value of :package: or :pkg_set: is a file path on the local
+          (PyEZ host's) filesystem, then the image is copied from the local
+          filesystem to the :remote_path: directory on the target Junos
+          device. The default is ``/var/tmp``. If the value of :package: or
+          :pkg_set: is a URL, then the value of :remote_path: is unused.
 
         :param func progress:
           If provided, this is a callback function with a function prototype
@@ -661,8 +728,14 @@ class SW(Util):
           file to the device.  Default is ``True``.
 
         :param bool no_copy:
-          When ``True`` the software package will not be copied to the device.
-          Default is ``False``.
+          When the value of :package: or :pkg_set is not a URL, and the value
+          of :no_copy: is ``True`` the software package will not be copied to
+          the device and is presumed to already exist on the :remote_path:
+          directory of the target Junos device. When the value of :no_copy: is
+          ``False`` (the default), then the package is copied from the local
+          PyEZ host to the :remote_path: directory of the target Junos device.
+          If the value of :package: or :pkg_set: is a URL, then the value of
+          :no_copy: is unused.
 
         :param bool issu:
           (Optional) When ``True`` allows unified in-service software upgrade
@@ -704,6 +777,15 @@ class SW(Util):
           at the :remote_path:, AND the local checksum matches the remote
           checksum, then skip the copy to optimize time.
 
+        :param bool all_re:
+          (Optional) When ``True`` (default) perform the software install on
+          all Routing Engines of the Junos device. When ``False``  if the
+          only preform the software install on the current Routing Engine.
+
+        :param bool vhmhost:
+          (Optional) A boolean indicating if this is a software update of the
+          vhmhost. The default is ``vmhost=False``.
+
         :param kwargs **kwargs:
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
@@ -715,7 +797,9 @@ class SW(Util):
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
-        elif (issu is True or nssu is True) and self._multi_RE is not True:
+        elif ((issu is True or nssu is True) and
+              (self._multi_RE is not True and
+               self._single_re_issu is not True)):
             raise TypeError(
                 'ISSU/NSSU requires Multi RE setup')
 
@@ -733,61 +817,76 @@ class SW(Util):
 
         if package is None and pkg_set is None:
             raise TypeError(
-                'install() takes atleast 1 argument package or pkg_set')
+                'install() requires either the package or pkg_set argument.')
 
-        if no_copy is False:
-            if ((sys.version < '3' and isinstance(package, (str, unicode))) or
-               isinstance(package, str)):
-                pkg_set = [package]
-            if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
-                for pkg in pkg_set:
-                    # To disable cleanfs after 1st iteration
-                    cleanfs = cleanfs and pkg_set.index(pkg) == 0
-                    copy_ok = self.safe_copy(
-                                  pkg,
-                                  remote_path=remote_path,
-                                  progress=progress,
-                                  cleanfs=cleanfs,
-                                  checksum=checksum,
-                                  cleanfs_timeout=cleanfs_timeout,
-                                  checksum_timeout=checksum_timeout,
-                                  checksum_algorithm=checksum_algorithm,
-                                  force_copy=force_copy)
-                    if copy_ok is False:
-                        return False
-            else:
-                raise ValueError(
-                    'proper value for either package or pkg_set is missing')
+        remote_pkg_set = []
+        if ((sys.version < '3' and isinstance(package, (str, unicode))) or
+           isinstance(package, str)):
+            pkg_set = [package]
+        if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
+            for pkg in pkg_set:
+                parsed_url = urlparse(pkg)
+                if parsed_url.scheme == '':
+                    if no_copy is False:
+                        # To disable cleanfs after 1st iteration
+                        cleanfs = cleanfs and pkg_set.index(pkg) == 0
+                        copy_ok = self.safe_copy(
+                                      pkg,
+                                      remote_path=remote_path,
+                                      progress=progress,
+                                      cleanfs=cleanfs,
+                                      checksum=checksum,
+                                      cleanfs_timeout=cleanfs_timeout,
+                                      checksum_timeout=checksum_timeout,
+                                      checksum_algorithm=checksum_algorithm,
+                                      force_copy=force_copy)
+                        if copy_ok is False:
+                            return False
+                    pkg = remote_path + '/' + path.basename(pkg)
+                remote_pkg_set.append(pkg)
+        else:
+            raise ValueError(
+                'proper value for either package or pkg_set is missing')
         # ---------------------------------------------------------------------
         # at this point, the file exists on the remote device
+        # or will be loaded directly from a URL.
         # ---------------------------------------------------------------------
-        if package is not None:
-            remote_package = remote_path + '/' + path.basename(package)
-            if validate is True:  # in case of Mixed VC it cant be used
-                _progress(
-                    "validating software against current config,"
-                    " please be patient ...")
-                v_ok = self.validate(remote_package, issu, nssu,
-                                     dev_timeout=timeout)
 
-                if v_ok is not True:
-                    return v_ok
+        if len(remote_pkg_set) == 1:
+            remote_package = remote_pkg_set[0]
+            # validate can't be used in the case of a Mixed VC
+            # With vmhost=True, validate is handled in the package add.
+            if validate is True:
+                if self._mixed_VC is False and vmhost is not True:
+                    _progress(
+                        "validating software against current config,"
+                        " please be patient ...")
+                    v_ok = self.validate(remote_package, issu, nssu,
+                                         dev_timeout=timeout)
+                    if v_ok is not True:
+                        return v_ok
+            else:
+                if vmhost is True:
+                    # Need to pass the no_validate option via kwargs.
+                    kwargs.update({'no_validate': True})
 
             if issu is True:
                 _progress(
                     "ISSU: installing software ... please be patient ...")
                 return self.pkgaddISSU(remote_package,
+                                       vmhost=vmhost,
                                        dev_timeout=timeout, **kwargs)
             elif nssu is True:
                 _progress(
                     "NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package,
                                        dev_timeout=timeout, **kwargs)
-            elif self._multi_RE is False:
-                # simple case of device with only one RE
+            elif self._multi_RE is False or all_re is False:
+                # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
                     remote_package,
+                    vmhost=vmhost,
                     dev_timeout=timeout,
                     **kwargs)
                 return add_ok
@@ -795,17 +894,18 @@ class SW(Util):
                 # we need to update multiple devices
                 if self._multi_VC is True:
                     ok = True
-                    # extract the VC number out of the 'version_RE<n>' string
+                    # extract the VC number out of the _RE_list
                     vc_members = [
                         re.search(
                             '(\d+)',
                             x).group(1) for x in self._RE_list]
                     for vc_id in vc_members:
                         _progress(
-                            "installing software on VC member: {0} ... please "
+                            "installing software on VC member: {} ... please "
                             "be patient ...".format(vc_id))
                         ok &= self.pkgadd(
                             remote_package,
+                            vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs)
@@ -818,6 +918,7 @@ class SW(Util):
                         "installing software on RE0 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
+                        vmhost=vmhost,
                         re0=True,
                         dev_timeout=timeout,
                         **kwargs)
@@ -825,18 +926,18 @@ class SW(Util):
                         "installing software on RE1 ... please be patient ...")
                     ok &= self.pkgadd(
                         remote_package,
+                        vmhost=vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs)
                     return ok
 
-        elif isinstance(pkg_set, (list, tuple)) and self._mixed_VC:
-            pkg_set = [
-                remote_path +
-                '/' +
-                path.basename(pkg) for pkg in pkg_set]
+        elif len(remote_pkg_set) > 1 and self._mixed_VC:
             _progress("installing software ... please be patient ...")
-            add_ok = self.pkgadd(pkg_set, dev_timeout=timeout, **kwargs)
+            add_ok = self.pkgadd(remote_pkg_set,
+                                 vmhost=vmhost,
+                                 dev_timeout=timeout,
+                                 **kwargs)
             return add_ok
 
     # -------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 import re
+import sys
 from lxml import etree
 from lxml.builder import E
 from jnpr.junos import jxml as JXML
@@ -46,6 +47,10 @@ class _RpcMetaExec(object):
                         namespace="http://yang.juniper.net/customyang/l2vpn")
            # ietf yang example
            dev.rpc.get_config(filter_xml='interfaces', model='ietf')
+           # ietf-softwire yang example
+           dev.rpc.get_config(filter_xml='softwire-config', model='ietf',
+                              namespace="urn:ietf:params:xml:ns:yang:ietf-softwire",
+                              options={'format': 'json'})
 
 
         :filter_xml: fully XML formatted tag which defines what to retrieve,
@@ -174,6 +179,7 @@ class _RpcMetaExec(object):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             dev.rpc.get(ignore_warning=True)
             dev.rpc.get(ignore_warning='vrrp subsystem not running')
             dev.rpc.get(ignore_warning=['vrrp subsystem not running',
@@ -215,6 +221,7 @@ class _RpcMetaExec(object):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             dev.rpc.load_config(cnf, ignore_warning=True)
             dev.rpc.load_config(cnf,
                                 ignore_warning='vrrp subsystem not running')
@@ -246,11 +253,15 @@ class _RpcMetaExec(object):
         format='json', then :contents: is a string containing Junos
             configuration in json format
 
+        url='path', then :contents: is a None
+
         <otherwise> :contents: is XML structure
         """
         rpc = E('load-configuration', options)
 
-        if ('action' in options) and (options['action'] == 'set'):
+        if contents is None and 'url' in options:
+            pass
+        elif ('action' in options) and (options['action'] == 'set'):
             rpc.append(E('configuration-set', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))
@@ -295,21 +306,32 @@ class _RpcMetaExec(object):
             # create the rpc as XML command
             rpc = etree.Element(rpc_cmd)
 
+            # Gather decorator keywords into dec_args and remove from kvargs
+            dec_arg_keywords = ['dev_timeout', 'normalize', 'ignore_warning']
+            dec_args = {}
+            for keyword in dec_arg_keywords:
+                if keyword in kvargs:
+                    dec_args[keyword] = kvargs.pop(keyword)
+
             # kvargs are the command parameter/values
             if kvargs:
                 for arg_name, arg_value in kvargs.items():
-                    if arg_name not in ['dev_timeout', 'normalize',
-                                        'ignore_warning']:
-                        arg_name = re.sub('_', '-', arg_name)
-                        if isinstance(arg_value, (tuple, list)):
-                            for a in arg_value:
-                                arg = etree.SubElement(rpc, arg_name)
-                                if a is not True:
-                                    arg.text = a
-                        else:
+                    arg_name = re.sub('_', '-', arg_name)
+                    if not isinstance(arg_value, (tuple, list)):
+                        arg_value = [arg_value]
+                    for a in arg_value:
+                        if not isinstance(a, (bool, str, unicode)
+                                          if sys.version < '3' else (bool, str)):
+                            raise TypeError("The value %s for argument %s"
+                                            " is of %s. Argument "
+                                            "values must be a string, "
+                                            "boolean, or list/tuple of "
+                                            "strings and booleans." %
+                                            (a, arg_name, str(type(a))))
+                        if a is not False:
                             arg = etree.SubElement(rpc, arg_name)
-                            if arg_value is not True:
-                                arg.text = arg_value
+                        if not isinstance(a, bool):
+                            arg.text = a
 
             # vargs[0] is a dict, command options like format='text'
             if vargs:
@@ -317,19 +339,6 @@ class _RpcMetaExec(object):
                     if v is not True:
                         rpc.attrib[k] = v
 
-            # gather any decorator keywords
-            timeout = kvargs.get('dev_timeout')
-            normalize = kvargs.get('normalize')
-            ignore_warn = kvargs.get('ignore_warning')
-
-            dec_args = {}
-
-            if timeout is not None:
-                dec_args['dev_timeout'] = timeout
-            if normalize is not None:
-                dec_args['normalize'] = normalize
-            if ignore_warn is not None:
-                dec_args['ignore_warning'] = ignore_warn
             # now invoke the command against the
             # associated :junos: device and return
             # the results per :junos:execute()

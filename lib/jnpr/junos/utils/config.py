@@ -17,9 +17,8 @@ Configuration Utilities
 
 
 class Config(Util):
-
     """
-    Overivew of Configuration Utilities:
+    Overview of Configuration Utilities.
 
     * :meth:`commit`: commit changes
     * :meth:`commit_check`: perform the commit check operation
@@ -65,6 +64,7 @@ class Config(Util):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             cu.commit(ignore_warning=True)
             cu.commit(ignore_warning='Advertisement-interval is '
                                      'less than four times')
@@ -333,6 +333,7 @@ class Config(Util):
           each warning matches at least one of the strings in the list.
 
           For example::
+
             cu.load(cnf, ignore_warning=True)
             cu.load(cnf, ignore_warning='statement not found')
             cu.load(cnf, ignore_warning=['statement not found',
@@ -346,6 +347,20 @@ class Config(Util):
             case-insensitive substring match. However, any regular expression
             pattern supported by the re library may be used for more
             complicated match conditions.
+
+        :param str url:
+          Specify the full pathname of the file that contains the configuration
+          data to load. The value can be a local file path, an FTP location, or
+          a Hypertext Transfer Protocol (HTTP).
+          Refer `Doc page <https://www.juniper.net/documentation/en_US/junos/topics/reference/tag-summary/junos-xml-protocol-load-configuration.html>`_
+          for more details.
+
+          For example::
+
+            cu.load(url="/var/home/user/golden.conf")
+            cu.load(url="ftp://username@ftp.hostname.net/filename")
+            cu.load(url="http://username:password@hostname/path/filename")
+            cu.load(url="/var/home/user/golden.conf", overwrite=True)
 
         :returns:
             RPC-reply as XML object.
@@ -420,7 +435,8 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs using string regular expression """
             if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
                 kvargs['format'] = 'xml'
-            elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
+            elif re.search(r'^\s*(set|delete|rename|insert|activate|deactivate'
+                           '|annotate|copy|protect|unprotect)\s', rpc):
                 kvargs['format'] = 'set'
             elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
                     re.search(r'.*}\s*$', rpc):
@@ -513,6 +529,13 @@ class Config(Util):
                 rpc_contents = etree.XML(rpc_contents)
 
         if rpc_contents is not None:
+            return try_load(rpc_contents,
+                            rpc_xattrs,
+                            ignore_warning=ignore_warning)
+        elif 'url' in kvargs and rpc_contents is None:
+            url = kvargs['url']
+            _lset_fromfile(url)
+            rpc_xattrs['url'] = url
             return try_load(rpc_contents,
                             rpc_xattrs,
                             ignore_warning=ignore_warning)
@@ -691,7 +714,7 @@ class Config(Util):
                 return False
 
         def _unsupported_action():
-            raise ValueError("unsupported action: {0}".format(action))
+            raise ValueError("unsupported action: {}".format(action))
 
         result = {
             'get': _rescue_get,
@@ -724,11 +747,12 @@ class Config(Util):
                print cu.diff()
                cu.commit()
 
-        .. warning:: Ephemeral databases are an advanced Junos feature which
-        if used incorrectly can have serious negative impact on the operation
-        of the Junos device. We recommend you consult JTAC and/or you Juniper
-        account team before deploying the ephemeral database feature in your
-        network.
+        .. warning::
+            Ephemeral databases are an advanced Junos feature which
+            if used incorrectly can have serious negative impact on the operation
+            of the Junos device. We recommend you consult JTAC and/or you Juniper
+            account team before deploying the ephemeral database feature in your
+            network.
         """
         self.mode = mode
         if not kwargs.get('ephemeral_instance') and kwargs:
@@ -785,7 +809,7 @@ class Config(Util):
 
         def _unsupported_option():
             if self.mode is not None:
-                raise ValueError("unsupported action: {0}".format(self.mode))
+                raise ValueError("unsupported action: {}".format(self.mode))
 
         if self.kwargs.get('ephemeral_instance'):
             ephemeral_kwargs = {

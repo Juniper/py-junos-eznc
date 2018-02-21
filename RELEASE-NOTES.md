@@ -1,6 +1,58 @@
-## Release 2.1.4.dev0 30 May 2017
+## Release 2.1.8dev0 - 30 September 2017
 ### Features Added:
+
 ### Bugs Fixed:
+
+
+## Release 2.1.7 - 30 September 2017
+### Features Added:
+- None
+
+### Bugs Fixed:
+- Correct PyEZ TechWiki link. #781/#783
+- SRX Branch cluster fails SW.install(). #782
+
+
+## Release 2.1.6 - 31 August 2017
+### Features Added:
+- PyEZ fact gathering support for JDM of Junos Node Slicing. #761
+- Enhanced support for GNFs in Junos Node Slicing. #761
+- Add vmhost parameter to SW.install() to support upgrading the VM Host. #773
+
+### Bugs Fixed:
+- Fix typo in docker run example. #771
+- Aadding ietf-softwire get_config() example. #772
+- Fix for python3 remove_ns issue. #767
+- Fix python2/3 compatibility. #776
+
+
+## Release 2.1.5 - 31 July 2017
+### Features Added:
+- Single-RE sw install on multi-RE device using all_re argument to SW.install() #746
+- Support platforms which have single-RE ISSU. #740
+- Support Config.load() loading a configuration from a URL. #749
+- SW.install() enhanced to install from a URL. #751
+- Implement uptime property for Device instances. #752/#750
+- Facts gathering support for Junos Node Slicing. #760
+
+### Bugs Fixed:
+- Refactor _exec_rpc() and handle boolean RPC arguments with a value of False. #739
+- Add the _j2ldr instance variable to the Console class. #753
+- Properly handle normalize argument to the open() Device method. #758/#757
+- Setting no-resolve to true for faster ARP Table lookups. #762
+
+
+## Release 2.1.4 - 23 June 2017
+### Features Added:
+- Optimize image copying in SW.safe_copy() #728 
+
+### Bugs Fixed:
+- unnecessary import cleanup #730
+- Explicitly initialize jnpr.junos.facts sub-modules. #723/#731 
+- socket.error handling for console->close() #734
+- Ensure dev.timeout is an integer value. Addresses #735/#736
+- Socket error fix #737
+
 
 ## Release 2.1.3 - 30 May 2017
 ### Features Added:

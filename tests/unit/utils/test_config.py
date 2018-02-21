@@ -496,6 +496,62 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
+    def test_config_load_lset_from_rexp_set_rename(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """rename firewall family inet filter f1 to filter f2"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_insert(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """insert policy-options policy-statement hop term 10 after 9"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_activate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """activate system services ftp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_deactivate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """deactivate system services ftp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_annotate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """annotate system \"Annotation test\""""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_copy(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """copy firewall family inet filter f1 to filter f2"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_protect(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """protect system services"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_unprotect(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """unprotect system services"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
     def test_config_load_lset_from_rexp_conf(self):
         self.conf.rpc.load_config = MagicMock()
         conf = """
@@ -729,6 +785,12 @@ class TestConfig(unittest.TestCase):
             MagicMock(side_effect=RpcError(rsp=rsp))
         self.assertRaises(RpcError, Config.__enter__,
                           Config(self.dev, mode='batch'))
+
+    def test_config_load_url(self):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.load(url="/var/home/user/golden.conf")
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['url'],
+                         '/var/home/user/golden.conf')
 
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),

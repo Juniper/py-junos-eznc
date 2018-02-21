@@ -37,6 +37,7 @@ facts = {'domain': None, 'hostname': 'firefly', 'ifd_style': 'CLASSIC',
                  'normal shutdown.',
                  'model': 'FIREFLY-PERIMETER RE',
                  'up_time': '6 hours, 29 minutes, 30 seconds'},
+         'current_re': ['re0', 'master'],
          'vc_capable': False, 'personality': 'SRX_BRANCH'}
 
 
@@ -101,7 +102,10 @@ class TestSW(unittest.TestCase):
                          'da39a3ee5e6b4b0d3255bfef95601890afd80709')
 
     def test_sw_local_checksum_unknown_alg(self):
-        self.assertRaises(ValueError, SW.local_checksum, 'foo.tgz', algorithm='foo')
+        self.assertRaises(ValueError,
+                          SW.local_checksum,
+                          'foo.tgz',
+                          algorithm='foo')
 
     def test_sw_progress(self):
         with self.capture(SW.progress, self.dev, 'running') as output:
@@ -131,6 +135,7 @@ class TestSW(unittest.TestCase):
     def test_sw_put_ftp(self, mock_ftp_put):
         dev = Device(host='1.1.1.1', user='rick', password='password123',
                      mode='telnet', port=23, gather_facts=False)
+        dev.facts = facts
         sw = SW(dev)
         sw.put(package='test.tgz')
         self.assertTrue(
@@ -144,7 +149,9 @@ class TestSW(unittest.TestCase):
     def test_sw_put_progress(self, mock_enter, mock_scp, mock_exit):
         package = 'test.tgz'
         mock_scp.side_effect = self._fake_scp
-        with self.capture(self.sw.put, package, progress=self._my_scp_progress) as output:
+        with self.capture(self.sw.put,
+                          package,
+                          progress=self._my_scp_progress) as output:
             self.assertEqual('test.tgz 100 50\n', output)
 
     def _fake_scp(self, *args, **kwargs):
@@ -158,10 +165,49 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.pkgadd(package))
 
     @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.utils.sw.SW.local_md5')
+    def test_sw_install_url_in_pkg_set(self, mock_md5, mock_execute):
+        mock_md5.return_value = '96a35ab371e1ca10408c3caecdbd8a67'
+        mock_execute.side_effect = self._mock_manager
+        self.sw.put = MagicMock()
+        self.sw._mixed_VC = True
+        self.assertTrue(self.sw.install(
+                            pkg_set=['safecopy.tgz', 'safecopy.tgz',
+                                     'ftp://server/path/test.tgz']))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_via_url(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertTrue(self.sw.install(package='ftp://server/path/test.tgz'))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_single_re_on_multi_re(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.assertTrue(self.sw.install('test.tgz',
+                                        all_re=False,
+                                        no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_install_single_re(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
         self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_srx_branch_cluster(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        self.sw._dev.facts['personality'] = 'SRX_BRANCH'
+        self.sw._dev.facts['srx_cluster'] = True
+        self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_install_no_package_result(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        self.assertTrue(self.sw.install('test_no_result.tgz', no_copy=True))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_install_issu(self, mock_execute):
@@ -312,7 +358,8 @@ class TestSW(unittest.TestCase):
         self.sw.log = MagicMock()
         self.assertFalse(self.sw.validate('package.tgz', issu=True))
         self.sw.log.assert_called_with(
-            'Requirement FAILED: Either Stateful Replication is not Enabled or RE mode\nis not Master')
+            'Requirement FAILED: Either Stateful Replication is not Enabled '
+            'or RE mode\nis not Master')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_commit_sync_off(self, mock_execute):
@@ -330,7 +377,8 @@ class TestSW(unittest.TestCase):
         self.sw.log = MagicMock()
         self.assertFalse(self.sw.validate('package.tgz', issu=True))
         self.sw.log.assert_called_with(
-            'Requirement FAILED: commit synchronize is not Enabled in configuration')
+            'Requirement FAILED: commit synchronize is not Enabled '
+            'in configuration')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_validate_issu_nonstop_routing_off(self, mock_execute):
@@ -413,15 +461,16 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_remote_checksum_sha1(self, mock_execute):
-        xml = '''<rpc-reply>
-                     <checksum-information>
-                         <file-checksum>
-                             <computation-method>SHA1</computation-method>
-                             <input-file>/var/tmp/foo.tgz</input-file>
-                             <checksum>33c12913e81599452270ee849511e2e7578db00c</checksum>
-                         </file-checksum>
-                     </checksum-information>
-                 </rpc-reply>'''
+        xml = '''
+ <rpc-reply>
+     <checksum-information>
+         <file-checksum>
+             <computation-method>SHA1</computation-method>
+             <input-file>/var/tmp/foo.tgz</input-file>
+             <checksum>33c12913e81599452270ee849511e2e7578db00c</checksum>
+         </file-checksum>
+     </checksum-information>
+ </rpc-reply>'''
         mock_execute.side_effect = etree.fromstring(xml)
         package = 'foo.tgz'
         self.assertEqual(self.sw.remote_checksum(package, algorithm='sha1'),
@@ -429,19 +478,27 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_remote_checksum_sha256(self, mock_execute):
-        xml = '''<rpc-reply>
-                     <checksum-information>
-                         <file-checksum>
-                             <computation-method>SHA256</computation-method>
-                             <input-file>/var/tmp/foo.tgz</input-file>
-                             <checksum>27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170</checksum>
-                         </file-checksum>
-                     </checksum-information>
-                 </rpc-reply>'''
+        xml = '''
+ <rpc-reply>
+     <checksum-information>
+         <file-checksum>
+             <computation-method>SHA256</computation-method>
+             <input-file>/var/tmp/foo.tgz</input-file>
+             <checksum>27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170</checksum>
+         </file-checksum>
+     </checksum-information>
+ </rpc-reply>'''
         mock_execute.side_effect = etree.fromstring(xml)
         package = 'foo.tgz'
-        self.assertEqual(self.sw.remote_checksum(package, algorithm='sha256'),
-                         '27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170')
+        self.assertEqual(
+            self.sw.remote_checksum(package, algorithm='sha256'),
+            '27bccf64babe4ea6687d3461e6d724d165aa140933e77b582af615dad4f02170')
+
+    def test_sw_remote_checksum_unknown_alg(self):
+        self.assertRaises(ValueError,
+                          self.sw.remote_checksum,
+                          'foo.tgz',
+                          algorithm='foo')
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy(self, mock_execute):
@@ -449,13 +506,17 @@ class TestSW(unittest.TestCase):
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
         with patch('jnpr.junos.utils.sw.SW.local_md5'):
-            self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
-                                              cleanfs=True,
-                                              checksum='96a35ab371e1ca10408c3caecdbd8a67'))
+            self.assertTrue(
+                self.sw.safe_copy(package,
+                                  progress=self._myprogress,
+                                  cleanfs=True,
+                                  checksum='96a35ab371e1ca10408c3caecdbd8a67'))
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.utils.sw.SW.local_checksum')
-    def test_sw_safe_copy_missing_local_file(self, mock_checksum, mock_execute):
+    def test_sw_safe_copy_missing_local_file(self,
+                                             mock_checksum,
+                                             mock_execute):
         mock_execute.side_effect = self._mock_manager
         mock_checksum.side_effect = IOError()
         package = 'foo.tgz'
@@ -466,9 +527,11 @@ class TestSW(unittest.TestCase):
     def test_sw_safe_copy_cleanfs_fail(self, mock_execute):
         mock_execute.side_effect = RpcError()
         package = 'foo.tgz'
-        self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
-                                           cleanfs=True,
-                                           checksum='96a35ab371e1ca10408c3caecdbd8a67'))
+        self.assertFalse(self.sw.safe_copy(
+                             package,
+                             progress=self._myprogress,
+                             cleanfs=True,
+                             checksum='96a35ab371e1ca10408c3caecdbd8a67'))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_safe_copy_return_false(self, mock_execute):
@@ -477,7 +540,8 @@ class TestSW(unittest.TestCase):
         package = 'safecopy.tgz'
         self.sw.put = MagicMock()
         with patch('jnpr.junos.utils.sw.SW.local_md5'):
-            self.assertFalse(self.sw.safe_copy(package, progress=self._myprogress,
+            self.assertFalse(self.sw.safe_copy(package,
+                                               progress=self._myprogress,
                                                cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
@@ -487,7 +551,8 @@ class TestSW(unittest.TestCase):
         self.sw.put = MagicMock()
         with patch('jnpr.junos.utils.sw.SW.local_md5',
                    MagicMock(return_value='96a35ab371e1ca10408c3caecdbd8a67')):
-            self.assertTrue(self.sw.safe_copy(package, progress=self._myprogress,
+            self.assertTrue(self.sw.safe_copy(package,
+                                              progress=self._myprogress,
                                               cleanfs=True))
 
     @patch('jnpr.junos.Device.execute')
@@ -541,21 +606,38 @@ class TestSW(unittest.TestCase):
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
         mock_pkgadd.return_value = True
         self.dev._facts = {'2RE': True,
-                           'domain': None, 'RE1': {
-                               'status': 'OK', 'model': 'RE-EX8208',
-                               'mastership_state': 'backup'}, 'ifd_style': 'SWITCH',
-                           'version_RE1': '12.3R7.7', 'version_RE0': '12.3',
-                           'serialnumber': 'XXXXXX', 'fqdn': 'XXXXXX',
-                           'RE0': {'status': 'OK', 'model': 'RE-EX8208',
-                                   'mastership_state': 'master'}, 'switch_style': 'VLAN',
-                           'version': '12.3R5-S3.1', 'master': 'RE0', 'hostname': 'XXXXXX',
-                           'HOME': '/var/home/sn', 'vc_mode': 'Disabled', 'model': 'EX8208',
-                           'vc_capable': True, 'personality': 'SWITCH'}
+                           'domain': None,
+                           'RE1': {
+                               'status': 'OK',
+                               'model': 'RE-EX8208',
+                               'mastership_state': 'backup'},
+                           'ifd_style': 'SWITCH',
+                           'version_RE1': '12.3R7.7',
+                           'version_RE0': '12.3',
+                           'serialnumber': 'XXXXXX',
+                           'fqdn': 'XXXXXX',
+                           'RE0': {'status': 'OK',
+                                   'model': 'RE-EX8208',
+                                   'mastership_state': 'master'},
+                           'switch_style': 'VLAN',
+                           'version': '12.3R5-S3.1',
+                           'master': 'RE0', 'hostname': 'XXXXXX',
+                           'HOME': '/var/home/sn',
+                           'vc_mode': 'Disabled',
+                           'model': 'EX8208',
+                           'vc_capable': True,
+                           'personality': 'SWITCH'}
         sw = self.get_sw()
         sw.install(package='abc.tgz', no_copy=True)
         self.assertFalse(sw._multi_VC)
-        calls = [call('/var/tmp/abc.tgz', dev_timeout=1800, re0=True),
-                 call('/var/tmp/abc.tgz', dev_timeout=1800, re1=True)]
+        calls = [call('/var/tmp/abc.tgz',
+                      dev_timeout=1800,
+                      vmhost=False,
+                      re0=True),
+                 call('/var/tmp/abc.tgz',
+                      dev_timeout=1800,
+                      re1=True,
+                      vmhost=False)]
         mock_pkgadd.assert_has_calls(calls)
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
@@ -612,6 +694,12 @@ class TestSW(unittest.TestCase):
         self.assertRaises(TypeError, self.sw.install, cleanfs=False)
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_install_vmhost(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertTrue(self.sw.install(package, no_copy=True, vmhost=True))
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_install_kwargs_force_host(self, mock_execute):
         self.sw.install('file', no_copy=True, force_host=True)
         rpc = [
@@ -650,16 +738,20 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback(self, mock_execute):
-        rsp = '<rpc-reply><output>junos-vsrx-12.1X46-D30.2-domestic will become active at next reboot</output></rpc-reply>'
+        rsp = '<rpc-reply><output>junos-vsrx-12.1X46-D30.2-domestic will ' \
+              'become active at next reboot</output></rpc-reply>'
         mock_execute.side_effect = etree.XML(rsp)
-        msg = 'junos-vsrx-12.1X46-D30.2-domestic will become active at next reboot'
+        msg = 'junos-vsrx-12.1X46-D30.2-domestic will become active ' \
+              'at next reboot'
         self.assertEqual(self.sw.rollback(), msg)
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_multi(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        msg = {'fpc1': "Junos version 'D10.2' will become active at next reboot",
-               'fpc0': 'JUNOS version "D10.2" will become active at next reboot'}
+        msg = {'fpc1':
+               "Junos version 'D10.2' will become active at next reboot",
+               'fpc0':
+               'JUNOS version "D10.2" will become active at next reboot'}
         self.assertEqual(eval(self.sw.rollback()), msg)
 
     @patch('jnpr.junos.Device.execute')
@@ -670,7 +762,8 @@ class TestSW(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_rollback_exception(self, mock_execute):
-        rsp = '<rpc-reply><output>WARNING: Cannot rollback, /packages/junos.old is not valid</output></rpc-reply>'
+        rsp = '<rpc-reply><output>WARNING: Cannot rollback, ' \
+              '/packages/junos.old is not valid</output></rpc-reply>'
         mock_execute.side_effect = etree.XML(rsp)
         self.assertRaises(SwRollbackError, self.sw.rollback)
 
@@ -706,7 +799,8 @@ class TestSW(unittest.TestCase):
         self.sw._multi_VC = True
         self.sw.reboot()
         self.assertTrue('all-members' in
-                        (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
+                        (etree.tostring(
+                            mock_execute.call_args[0][0]).decode('utf-8')))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_mixed_vc_all_re_false(self, mock_execute):
@@ -715,7 +809,8 @@ class TestSW(unittest.TestCase):
         self.sw._multi_VC = True
         self.sw.reboot(all_re=False)
         self.assertTrue('all-members' not in
-                        (etree.tostring(mock_execute.call_args[0][0]).decode('utf-8')))
+                        (etree.tostring(
+                            mock_execute.call_args[0][0]).decode('utf-8')))
 
     @patch('jnpr.junos.Device.execute')
     def test_sw_reboot_exception(self, mock_execute):
@@ -770,14 +865,19 @@ class TestSW(unittest.TestCase):
         foo = open(fpath).read()
         rpc_reply = NCElement(
             foo,
-            self.dev._conn._device_handler.transform_reply())._NCElement__doc[0]
+            self.dev._conn._device_handler.transform_reply()
+        )._NCElement__doc[0]
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
             # Little hack for mocked execute
             if 'dev_timeout' in kwargs:
-                return self._read_file(args[0].tag + '.xml')
+                if (args and args[0].findtext('package-name') ==
+                   '/var/tmp/test_no_result.tgz'):
+                    return self._read_file(args[0].tag + '.no_result.xml')
+                else:
+                    return self._read_file(args[0].tag + '.xml')
             if 'path' in kwargs:
                 if kwargs['path'] == '/packages':
                     return self._read_file('file-list_dir.xml')
@@ -785,9 +885,12 @@ class TestSW(unittest.TestCase):
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
-
         elif args:
             if args[0].find('at') is not None:
                 return self._read_file('request-reboot-at.xml')
             else:
                 return self._read_file(args[0].tag + '.xml')
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSW)
+    unittest.TextTestRunner(verbosity=2).run(suite)

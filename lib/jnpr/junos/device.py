@@ -175,7 +175,11 @@ class _Connection(object):
         :param int value:
             New timeout value in seconds
         """
-        self._conn.timeout = value
+        try:
+            self._conn.timeout = int(value)
+        except (ValueError, TypeError):
+            raise RuntimeError("could not convert timeout value of %s to an "
+                               "integer" % (value))
 
     # ------------------------------------------------------------------------
     # property: facts
@@ -258,21 +262,67 @@ class _Connection(object):
                 else:
                     master = False
             else:
-                # Might be a multi-chassis case where this RE is neither the
-                # master or the backup for the entire system. In that case,
-                # it's either a chassis master or a chassis backup.
-                for re_state in self.facts['current_re']:
-                    # Multi-chassis case. A chassis master/backup, but
-                    # not the system master/backup.
-                    if '-backup' in re_state or '-master' in re_state:
+                # Might be a GNF case.
+                if (self.re_name is not None and
+                        'gnf' in self.re_name and
+                        '-re' in self.re_name):
+                    # Get the name of the GNF from re_name/
+                    # re_name will be in the format gnfX-reY
+                    (gnf, _) = self.re_name.split('-re', 1)
+                    if gnf + '-master' in self.facts.get('current_re'):
+                        master = True
+                    elif gnf + '-backup' in self.facts.get('current_re'):
                         master = False
-                        break
+                else:
+                    # Might be a multi-chassis case where this RE is neither
+                    # the master or the backup for the entire system. In that
+                    # case, it's either a chassis master or a chassis backup.
+                    for re_state in self.facts['current_re']:
+                        # Multi-chassis case. A chassis master/backup, but
+                        # not the system master/backup.
+                        if '-backup' in re_state or '-master' in re_state:
+                            master = False
+                            break
         return master
 
     @master.setter
     def master(self, value):
         """ read-only property """
         raise RuntimeError("master is read-only!")
+
+    # ------------------------------------------------------------------------
+    # property: uptime
+    # ------------------------------------------------------------------------
+
+    @property
+    def uptime(self):
+        """
+        The uptime of the current Routing Engine.
+
+        The current Routing Engine is the RE to which the NETCONF session is
+        connected.
+
+        :returns: The number of seconds (int) since the current Routing Engine
+                  was booted. If there is a problem gathering or parsing the
+                  uptime information, None is returned.
+        :raises: May raise a specific jnpr.junos.RpcError or
+                 jnpr.junos.ConnectError subclass if there is a problem
+                 communicating with the device.
+        """
+        uptime = None
+        rsp = self.rpc.get_system_uptime_information(normalize=True)
+        if rsp is not None:
+            element = rsp.find('.//system-booted-time/time-length')
+            if element is not None:
+                uptime_string = element.get('seconds')
+                if uptime_string is not None:
+                    uptime = int(uptime_string)
+        return uptime
+
+    @uptime.setter
+    def uptime(self, value):
+        """ read-only property """
+        raise RuntimeError("uptime is read-only!")
 
     # ------------------------------------------------------------------------
     # property: re_name
@@ -321,6 +371,14 @@ class _Connection(object):
                     all_re_names = list(self.facts['hostname_info'].keys())
                     if len(all_re_names) == 1:
                         re_name = all_re_names[0]
+                if re_name is None:
+                    # Still haven't figured it out. Is this a bsys?
+                    for re_state in self.facts['current_re']:
+                        match = re.search('^re\d+$', re_state)
+                        if match:
+                            re_string = 'bsys-' + match.group(0)
+                            if re_string in self.facts['hostname_info'].keys():
+                                re_name = re_string
         return re_name
 
     @re_name.setter
@@ -741,8 +799,8 @@ class _Connection(object):
         # should not convert rpc response to json when loading json config
         # as response should be rpc-reply xml object.
 
-        if rpc_cmd_e.tag != 'load-configuration' and \
-                        rpc_cmd_e.attrib.get('format') in ['json', 'JSON']:
+        if (rpc_cmd_e.tag != 'load-configuration' and
+           rpc_cmd_e.attrib.get('format') in ['json', 'JSON']):
             ver_info = self.facts.get('version_info')
             if ver_info and ver_info.major[0] >= 15 or \
                     (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
@@ -1209,7 +1267,7 @@ class Device(_Connection):
             # not open a connection due to reachability.  so using
             # a timestamp to differentiate the two conditions for now
             # if the diff is < 3 sec, then assume the host is
-            # reachable, but NETCONF connection is refushed.
+            # reachable, but NETCONF connection is refused.
 
             ts_err = datetime.datetime.now()
             diff_ts = ts_err - ts_start
@@ -1217,7 +1275,7 @@ class Device(_Connection):
                 raise EzErrors.ConnectRefusedError(self)
 
             # at this point, we assume that the connection
-            # has timeed out due to ip-reachability issues
+            # has timed out due to ip-reachability issues
 
             if str(err).find('not open') > 0:
                 raise EzErrors.ConnectTimeoutError(self)
@@ -1245,8 +1303,11 @@ class Device(_Connection):
         self._nc_transform = self.transform
         self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
-        normalize = kvargs.get('normalize', self._normalize)
-        if normalize is True:
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)

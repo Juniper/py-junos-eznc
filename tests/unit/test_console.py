@@ -7,6 +7,7 @@ import sys
 import os
 from lxml import etree
 import six
+import socket
 
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
@@ -42,21 +43,6 @@ class TestConsole(unittest.TestCase):
             password='lab123',
             mode='Telnet')
         self.dev.open()
-
-    # @patch('jnpr.junos.transport.tty.tty_netconf.close')
-    # @patch('jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect')
-    # @patch('jnpr.junos.transport.tty_telnet.Telnet.write')
-    # def tearDown(self, mock_write, mock_expect, mock_nc_close):
-    #     mock_expect.side_effect = [(1, re.search('(?P<cli>[^\\-"]>\s*$)',
-    #                                              "cli>"),
-    #                                 six.b('\r\r\nroot@device>')),
-    #                                (2, re.search('(?P<shell>%|#\s*$)',
-    #                                              "junos %"),
-    #                                 six.b('\r\r\nroot@device:~ # ')),
-    #                                (3, re.search('(?P<login>ogin:\s*$)',
-    #                                              "login: "),
-    #                                 six.b('\r\r\nlogin'))]
-    #     self.dev.close()
 
     @patch('jnpr.junos.console.Console._tty_logout')
     def tearDown(self, mock_tty_logout):
@@ -141,6 +127,23 @@ class TestConsole(unittest.TestCase):
     def test_console_close_error(self, mock_logout):
         mock_logout.side_effect = RuntimeError
         self.assertRaises(RuntimeError, self.dev.close)
+
+    @patch('jnpr.junos.console.Console._tty_logout')
+    def test_console_close_socket_error(self, mock_logout):
+        mock_logout.side_effect = socket.error
+        self.assertRaises(socket.error, self.dev.close)
+
+    @patch('jnpr.junos.console.Console._tty_logout')
+    def test_console_close_socket_conn_reset(self, mock_logout):
+        mock_logout.side_effect = socket.error("Connection reset by peer")
+        self.dev.close()
+        self.assertFalse(self.dev.connected)
+
+    @patch('jnpr.junos.console.Console._tty_logout')
+    def test_console_close_telnet_conn_closed(self, mock_logout):
+        mock_logout.side_effect = EOFError("telnet connection closed")
+        self.dev.close()
+        self.assertFalse(self.dev.connected)
 
     @patch('jnpr.junos.transport.tty_telnet.Telnet')
     @patch('jnpr.junos.console.Console._tty_login')

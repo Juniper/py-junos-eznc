@@ -12,10 +12,12 @@ Official Documentation with examples, [here](http://www.juniper.net/techpubs/en_
 
 API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
 
-_Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+_Junos PyEZ_ wiki page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
 
 # ABOUT
+
+![PyEZ logo](static/PyEZ.png?raw=true "PyEZ logo")
 
 _Junos PyEZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
 
@@ -58,7 +60,7 @@ As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/py
 
 ## PIP
 
-Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
+Installation requires Python 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
 
@@ -74,13 +76,13 @@ Installing from Git is also supported (OS must have git installed).
 
 Move to the local directory which contains your script(s) and run the container
 
-`docker run -it --rm --name -v $PWD:/scripts pyez juniper/pyez sh`
+`docker run -it --rm --name pyez -v $PWD:/scripts juniper/pyez sh`
 
 Your local scripts will be mounted to /scripts in the container
 
 `cd scripts`
 
-See [DOCKER-EXAMPLES.md](DOCKER-EXAMPLES.md) for some example usage.
+See [DOCKER-EXAMPLES.md](https://github.com/Juniper/py-junos-eznc/blob/master/DOCKER-EXAMPLES.md) for some example usage.
 
 ## Upgrade
 

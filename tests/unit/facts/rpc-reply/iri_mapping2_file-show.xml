@@ -1,0 +1,9 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/17.4D0/junos">
+    <file-content filename="/etc/hosts.junos" junos:seconds="1500339536" filesize="53098" encoding="text">
+        #JCS
+        190.0.0.1        gnf%d-master
+        190.0.0.4        gnf%d-re0
+        190.0.0.5        gnf%d-re1
+        190.0.0.6        gnf%d-backup
+    </file-content>
+</rpc-reply>

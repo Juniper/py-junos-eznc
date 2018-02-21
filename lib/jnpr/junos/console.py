@@ -6,6 +6,7 @@ import traceback
 import sys
 import logging
 import warnings
+import socket
 
 # 3rd-party packages
 from ncclient.devices.junos import JunosDeviceHandler
@@ -21,6 +22,7 @@ from jnpr.junos.factcache import _FactCache
 from jnpr.junos import jxml as JXML
 from jnpr.junos.ofacts import *
 from jnpr.junos.decorators import ignoreWarnDecorator
+from jnpr.junos.device import _Jinja2ldr
 
 logger = logging.getLogger("jnpr.junos.console")
 
@@ -107,8 +109,6 @@ class Console(_Connection):
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
-        # self.timeout needed by PyEZ utils
-        # self.timeout = self._timeout
         self._attempts = kvargs.get('attempts', 10)
         self._gather_facts = kvargs.get('gather_facts', False)
         self._fact_style = kvargs.get('fact_style', 'new')
@@ -123,6 +123,7 @@ class Console(_Connection):
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
                                                     'local': False})
+        self._j2ldr = _Jinja2ldr
         if self._fact_style == 'old':
             self.facts = self.ofacts
         else:
@@ -187,13 +188,13 @@ class Console(_Connection):
         try:
             self._tty_login()
         except RuntimeError as err:
-            logger.error("ERROR:  {0}:{1}\n".format('login', str(err)))
+            logger.error("ERROR:  {}:{}\n".format('login', str(err)))
             logger.error(
-                "\nComplete traceback message: {0}".format(
+                "\nComplete traceback message: {}".format(
                     traceback.format_exc()))
             raise err
         except Exception as ex:
-            logger.error("Exception occurred: {0}:{1}\n".format('login',
+            logger.error("Exception occurred: {}:{}\n".format('login',
                                                                 str(ex)))
             raise ex
         self.connected = True
@@ -201,8 +202,11 @@ class Console(_Connection):
         self._nc_transform = self.transform
         self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
 
-        normalize = kvargs.get('normalize', self._normalize)
-        if normalize is True:
+        # normalize argument to open() overrides normalize argument value
+        # to __init__(). Save value to self._normalize where it is used by
+        # normalizeDecorator()
+        self._normalize = kvargs.get('normalize', self._normalize)
+        if self._normalize is True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get('gather_facts', self._gather_facts)
@@ -219,17 +223,25 @@ class Console(_Connection):
         if skip_logout is False and self.connected is True:
             try:
                 self._tty_logout()
+            except socket.error as err:
+                # if err contains "Connection reset by peer" connection to the
+                # device got closed
+                if "Connection reset by peer" not in str(err):
+                    raise err
+            except EOFError as err:
+                if "telnet connection closed" not in str(err):
+                    raise err
             except Exception as err:
-                logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
+                logger.error("ERROR {}:{}\n".format('logout', str(err)))
                 raise err
             self.connected = False
         elif self.connected is True:
             try:
                 self._tty._tty_close()
             except Exception as err:
-                logger.error("ERROR {0}:{1}\n".format('close', str(err)))
+                logger.error("ERROR {}:{}\n".format('close', str(err)))
                 logger.error(
-                    "\nComplete traceback message: {0}".format(
+                    "\nComplete traceback message: {}".format(
                         traceback.format_exc()))
                 raise err
             self.connected = False

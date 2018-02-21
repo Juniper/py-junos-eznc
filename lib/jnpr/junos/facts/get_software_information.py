@@ -17,7 +17,17 @@ def _get_software_information(device):
             except Exception:
                 pass
         try:
+            # JDM for Junos Node Slicing
+            return device.rpc.get_software_information(all_servers=True,
+                                                       format='xml',
+                                                       normalize=True)
+        except Exception:
+            pass
+        try:
             sw_info = device.rpc.get_software_information(normalize=True)
+        except Exception:
+            sw_info = True
+        try:
             if sw_info is True:
                 # Possibly an NFX which requires 'local' and 'detail' args.
                 sw_info = device.rpc.get_software_information(local=True,
@@ -99,11 +109,21 @@ def get_facts(device):
                 if re_pkg_info is not None:
                     re_version = re.findall(r'\[(.*)\]', re_pkg_info)[0]
                 else:
-                    # NFX JDM case
+                    # Junos Node Slicing JDM case
                     re_pkg_info = re_sw_info.findtext(
-                        './version-information[component="MGD"]/release'
+                        './package-information[name="JUNOS version"]/comment'
                     )
-                    re_version = re.findall(r'(.*\d+)', re_pkg_info)[0]
+                    if re_pkg_info is not None:
+                        # In this case, re_pkg_info might look like this:
+                        # JUNOS version : 17.4-20170703_dev_common.0-secure
+                        # Match everything from last space until the end.
+                        re_version = re.findall(r'.*\s+(.*)', re_pkg_info)[0]
+                    else:
+                        # NFX JDM case
+                        re_pkg_info = re_sw_info.findtext(
+                            './version-information[component="MGD"]/release'
+                        )
+                        re_version = re.findall(r'(.*\d+)', re_pkg_info)[0]
             except Exception:
                 re_version = None
         if model_info is None and re_model is not None:
@@ -121,7 +141,7 @@ def get_facts(device):
                                    'object': version_info(re_version), }
 
         # Check to see if re_name is the RE we are currently connected to.
-        # There are at least four cases to handle.
+        # There are at least five cases to handle.
         this_re = False
         # 1) this device doesn't support the current_re fact and there's only
         #    one RE.
@@ -138,14 +158,21 @@ def get_facts(device):
             this_re = True
         # 4) For an lcc in a TX(P) re_name is 're0' or 're1', but the
         # current_re fact is ['lcc1-re0', 'member1-re0', ...]. Check to see
-        # if any iri_name endswith the name of the
-        elif this_re is False:
+        # if any iri_name endswith the re_name.
+        if this_re is False:
             for iri_name in device.facts['current_re']:
                 if iri_name.endswith('-' + re_name):
                     this_re = True
                     break
-        # Set hostname, model, and version facts if the RE we are currently
-        # connected to.
+        # 5) For an MX configured with Node Virtualization then, re_name is
+        #    bsys-reX, but the iri_name is still just reX.
+        if this_re is False:
+            for iri_name in device.facts['current_re']:
+                if re_name == 'bsys-' + iri_name:
+                    this_re = True
+                    break
+        # Set hostname, model, and version facts if we've found the RE to
+        # which we are currently connected.
         if this_re is True:
             if hostname is None:
                 hostname = re_hostname
@@ -162,10 +189,18 @@ def get_facts(device):
             version_RE0 = junos_info['re0']['text']
         elif 'node0' in junos_info:
             version_RE0 = junos_info['node0']['text']
+        elif 'bsys-re0' in junos_info:
+            version_RE0 = junos_info['bsys-re0']['text']
+        elif 'server0' in junos_info:
+            version_RE0 = junos_info['server0']['text']
         if 're1' in junos_info:
             version_RE1 = junos_info['re1']['text']
         elif 'node1' in junos_info:
             version_RE1 = junos_info['node1']['text']
+        elif 'bsys-re1' in junos_info:
+            version_RE1 = junos_info['bsys-re1']['text']
+        elif 'server1' in junos_info:
+            version_RE1 = junos_info['server1']['text']
 
     return {'junos_info': junos_info,
             'hostname': hostname,
