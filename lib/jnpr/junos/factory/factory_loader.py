@@ -8,6 +8,8 @@ refer to the .yml files in this jnpr.junos.op directory.
 from copy import deepcopy
 import re
 
+from jinja2 import Environment
+
 # locally
 from jnpr.junos.factory.factory_cls import *
 from jnpr.junos.factory.viewfields import *
@@ -203,6 +205,13 @@ class FactoryLoader(object):
         if 'groups' in view_dict:
             kvargs['groups'] = view_dict['groups']
 
+        # if there are eval, then get that now.
+        if 'eval' in view_dict:
+            kvargs['eval'] = {}
+            for key, exp in view_dict['eval'].items():
+                env = Environment()
+                kvargs['eval'][key] = env.parse(exp)
+
         # if this view extends another ...
         if 'extends' in view_dict:
             base_cls = self.catalog.get(view_dict['extends'])
@@ -238,6 +247,11 @@ class FactoryLoader(object):
             kvargs['exists'] = view_dict['exists']
         if 'filters' in view_dict:
             kvargs['filters'] = view_dict['filters']
+        if 'eval' in view_dict:
+            kvargs['eval'] = {}
+            for key, exp in view_dict['eval'].items():
+                env = Environment()
+                kvargs['eval'][key] = env.parse(exp)
         fields = _FIELDS()
         fg_list = [name for name in view_dict if name.startswith('fields')]
         for fg_name in fg_list:

@@ -2,7 +2,7 @@ from collections import OrderedDict
 from functools import reduce
 import re
 import copy
-from itertools import tee, izip
+from jinja2 import Template, meta
 
 from transitions import Machine
 import pyparsing as pp
@@ -197,6 +197,7 @@ class StateMachine(Machine):
 
                                 ))) <= 1:
                             break
+                    self._insert_eval_data(temp_dict)
                     self._data[master_key] = temp_dict
         return self._data
 
@@ -293,6 +294,7 @@ class StateMachine(Machine):
 
     def _insert_data(self, key, tmp_dict, columns_list, items=None):
         items = tmp_dict.values() if items is None else items
+        self._insert_eval_data(tmp_dict)
         if isinstance(key, (tuple, list)):
             if self._view.FILTERS is not None:
                 selected_dict = {}
@@ -457,6 +459,7 @@ class StateMachine(Machine):
                     val = obj.groups()[0] if len(obj.groups()) >= 1 else \
                         obj.group()
                     self._data[key] = data_type(val)(val)
+            self._insert_eval_data(self._data)
         else:
             key = self._get_key(event.kwargs.get('key', self._table.KEY))
             for line in re.finditer("%s .*" % self._table.ITEM, '\n'.join(
@@ -468,6 +471,7 @@ class StateMachine(Machine):
                         val = obj.groups()[0] if len(obj.groups()) >= 1 else \
                             obj.group()
                         tmp_dict[k] = data_type(val)(val)
+                self._insert_eval_data(tmp_dict)
                 if key in tmp_dict:
                     self._data[tmp_dict[key]] = tmp_dict
         return self._data
@@ -509,3 +513,14 @@ class StateMachine(Machine):
         for key, search in self._view.EXISTS.items():
             self._data[key] = re.search(search, self._raw, re.I|re.M) is not \
                               None
+
+    def _insert_eval_data(self, tmp_dict):
+        if len(self._view.EVAL) > 0:
+            for name, expression in self._view.EVAL.items():
+                variables = meta.find_undeclared_variables(expression)
+                t = Template(expression)
+                expression = t.render(
+                    {k: tmp_dict.get(k) for k in variables})
+                val = eval(expression)
+                tmp_dict[name] = val
+

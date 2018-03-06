@@ -123,6 +123,10 @@ def FactoryView(fields, **kvargs):
         new_cls.FIELDS = fields
         new_cls.GROUPS = kvargs['groups'] if 'groups' in kvargs else None
 
+    if 'eval' in kvargs:
+        new_cls.EVAL = kvargs['eval']
+        new_cls.FIELDS.update(kvargs['eval'])
+
     new_cls.__module__ = __name__.replace('factory_cls', 'View')
     return new_cls
 
@@ -162,6 +166,9 @@ def FactoryCMDView(fields, **kvargs):
         new_cls.FILTERS = deepcopy(kvargs['filters'])
     if fields is not None:
         new_cls.FIELDS = fields
+    if 'eval' in kvargs:
+        new_cls.EVAL = kvargs['eval']
+        # new_cls.FIELDS.update(kvargs['eval'])
 
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDView')
     return new_cls

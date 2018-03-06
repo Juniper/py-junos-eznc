@@ -16,6 +16,7 @@ class CMDView(object):
     EXISTS = {}
     GROUPS = None
     TITLE = None
+    EVAL = {}
 
     # -------------------------------------------------------------------------
     # PROPERTIES
