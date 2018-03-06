@@ -19,6 +19,7 @@ class View(object):
 
     ITEM_NAME_XPATH = 'name'
     FIELDS = {}
+    EVAL = {}
     GROUPS = None
 
     # -------------------------------------------------------------------------
