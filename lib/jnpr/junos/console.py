@@ -188,13 +188,13 @@ class Console(_Connection):
         try:
             self._tty_login()
         except RuntimeError as err:
-            logger.error("ERROR:  {0}:{1}\n".format('login', str(err)))
+            logger.error("ERROR:  {}:{}\n".format('login', str(err)))
             logger.error(
-                "\nComplete traceback message: {0}".format(
+                "\nComplete traceback message: {}".format(
                     traceback.format_exc()))
             raise err
         except Exception as ex:
-            logger.error("Exception occurred: {0}:{1}\n".format('login',
+            logger.error("Exception occurred: {}:{}\n".format('login',
                                                                 str(ex)))
             raise ex
         self.connected = True
@@ -232,16 +232,16 @@ class Console(_Connection):
                 if "telnet connection closed" not in str(err):
                     raise err
             except Exception as err:
-                logger.error("ERROR {0}:{1}\n".format('logout', str(err)))
+                logger.error("ERROR {}:{}\n".format('logout', str(err)))
                 raise err
             self.connected = False
         elif self.connected is True:
             try:
                 self._tty._tty_close()
             except Exception as err:
-                logger.error("ERROR {0}:{1}\n".format('close', str(err)))
+                logger.error("ERROR {}:{}\n".format('close', str(err)))
                 logger.error(
-                    "\nComplete traceback message: {0}".format(
+                    "\nComplete traceback message: {}".format(
                         traceback.format_exc()))
                 raise err
             self.connected = False
