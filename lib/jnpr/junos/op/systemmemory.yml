@@ -17,7 +17,7 @@ SystemMemory:
     - system-memory-cache-percent
     - system-memory-free
     - system-memory-free-percent
-  view: MemoryView
+  view: SystemMemoryView
 
 SystemMemoryView:
   fields:
