@@ -4,35 +4,21 @@ SystemMemory:
   item: system-memory-summary-information
   key: 
     - system-memory-total
-    - system-memory-total-percent
-    - system-memory-reserved
-    - system-memory-reserved-percent
-    - system-memory-wired
-    - system-memory-wired-percent
-    - system-memory-active
-    - system-memory-active-percent
-    - system-memory-inactive
-    - system-memory-inactive-percent
-    - system-memory-cache
-    - system-memory-cache-percent
-    - system-memory-free
-    - system-memory-free-percent
   view: SystemMemoryView
 
 SystemMemoryView:
   fields:
     system_memory_total: system-memory-total
-    system_memory_total-percent: system-memory-total-percent
+    system_memory_total_percent: system-memory-total-percent
     system_memory_reserved: system-memory-reserved
-    system_memory_reserved-percent: system-memory-reserved-percent
+    system_memory_reserved_percent: system-memory-reserved-percent
     system_memory_wired: system-memory-wired
-    system_memory_wired-percent: system-memory-wired-percent
+    system_memory_wired_percent: system-memory-wired-percent
     system_memory_active: system-memory-active
-    system_memory_active-percent: system-memory-active-percent
+    system_memory_active_percent: system-memory-active-percent
     system_memory_inactive: system-memory-inactive
-    system_memory_inactive-percent: system-memory-inactive-percent
+    system_memory_inactive_percent: system-memory-inactive-percent
     system_memory_cache: system-memory-cache
-    system_memory_cache-percent: system-memory-cache-percent
+    system_memory_cache_percent: system-memory-cache-percent
     system_memory_free: system-memory-free
-    system_memory_free-percent: system-memory-free-percent
-
+    system_memory_free_percent: system-memory-free-percent

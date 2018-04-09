@@ -4,16 +4,6 @@ DnsProxyInformation:
   item: dns-proxy
   key: 
     - status
-    - ipv4-queries-received
-    - ipv6-queries-received
-    - responses-sent
-    - queries-forwarded
-    - negative-responses
-    - positive-responses
-    - retries
-    - pending-requests
-    - server-failures
-    - interfaces
   view: DnsProxyInformationView
 
 DnsProxyInformationView:
