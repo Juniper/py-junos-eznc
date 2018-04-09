@@ -1,9 +1,7 @@
 ---
 SystemMemory:
   rpc: get-system-memory-information
-  item: system-memory-summary-information
-  key: 
-    - system-memory-total
+  item: //*/system-memory-summary-information
   view: SystemMemoryView
 
 SystemMemoryView:

@@ -1,9 +1,9 @@
 ---
 DnsProxyInformation:
   rpc: get-dns-proxy-information
-  item: dns-proxy
+  item: //*/dns-proxy
   key: 
-    - status
+    - re-name
   view: DnsProxyInformationView
 
 DnsProxyInformationView:
@@ -29,3 +29,4 @@ _DnsProxyInterfacesTable:
 _DnsProxyInterfacesView:
     fields:
         interface: interface
+
