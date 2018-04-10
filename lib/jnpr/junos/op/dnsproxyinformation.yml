@@ -3,7 +3,8 @@ DnsProxyInformation:
   rpc: get-dns-proxy-information
   item: //*/dns-proxy
   key: 
-    - re-name
+    - ancestor::multi-routing-engine-item/re-name
+    - status
   view: DnsProxyInformationView
 
 DnsProxyInformationView:
