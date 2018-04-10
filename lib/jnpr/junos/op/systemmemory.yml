@@ -3,6 +3,8 @@ SystemMemory:
   rpc: get-system-memory-information
   item: //*/system-memory-summary-information
   view: SystemMemoryView
+  key: 
+    - re-name
 
 SystemMemoryView:
   fields:
