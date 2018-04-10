@@ -4,7 +4,8 @@ SystemMemory:
   item: //*/system-memory-summary-information
   view: SystemMemoryView
   key: 
-    - re-name
+    - ancestor::multi-routing-engine-item/re-name
+    - system-memory-total
 
 SystemMemoryView:
   fields:
