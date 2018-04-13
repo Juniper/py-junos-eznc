@@ -515,7 +515,7 @@ class StateMachine(Machine):
                               None
 
     def _insert_eval_data(self, tmp_dict):
-        if len(self._view.EVAL) > 0:
+        if self._view and len(self._view.EVAL) > 0:
             for name, expression in self._view.EVAL.items():
                 variables = meta.find_undeclared_variables(expression)
                 t = Template(expression)
