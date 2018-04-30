@@ -201,23 +201,6 @@ class CMDTable(object):
         if self.data is None:
             raise RuntimeError("Table is empty, use get()")
 
-    def _tkey(self, this, key_list):
-        """ keys with missing XPATH nodes are set to None """
-        # placeholder
-        pass
-
-    def _keys_composite(self, data, key_list):
-        """ composite keys return a tuple of key-items """
-        # placeholder
-        pass
-
-    def _keys_simple(self, data):
-        # placeholder
-        pass
-
-    def _keyspec(self):
-        return (self.KEY, self.ITEM_FILTER)
-
     def _clearkeys(self):
         self._key_list = []
 

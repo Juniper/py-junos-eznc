@@ -60,6 +60,49 @@ CMErrorView:
         self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 6 items')
         self.assertEqual(len(stats), 6)
 
+    def test_view_variable(self):
+        yaml_data = """
+---
+CMErrorTable:
+  command: show cmerror module brief
+  target: Null
+  key: module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+    errors: Active Errors
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev)
+        stats.view = globals()['CMErrorView']
+        self.assertEqual(stats.view, globals()['CMErrorView'])
+
+    def test_view_raise_exception(self):
+        yaml_data = """
+---
+CMErrorTable:
+  command: show cmerror module brief
+  target: Null
+  key: module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+    errors: Active Errors
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev)
+
+        with self.assertRaises(ValueError):
+            stats.view = 'dummy'
+
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_linkstats(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
@@ -79,6 +122,22 @@ FPCLinkStatTable:
                           'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
                           'HDLC keepalives': 0, 'OSPF Hello': 539156, 'RSVP':
                               0})
+
+    @patch('jnpr.junos.Device.execute')
+    def test__contains__(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+FPCLinkStatTable:
+    command: show link stats
+    target: Null
+    delimiter: ":"
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = FPCLinkStatTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertTrue('OSPF Hello' in stats)
 
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_ttpstatistics(self, mock_execute):
