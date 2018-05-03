@@ -124,6 +124,33 @@ FPCLinkStatTable:
                               0})
 
     @patch('jnpr.junos.Device.execute')
+    def test_field_eval(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+XMChipStatsTable:
+  command: show xmchip {{ instance }} pt stats
+  args:
+    instance: 0
+  target: fpc2
+  item: '*'
+  view: XMChipStatsView
+
+XMChipStatsView:
+  regex:
+    pct_wi_1: 'PCT entries used by all WI-1 streams\s+:\s?(\d+)'
+    pct_wi_0: 'PCT entries used by all WI-0 streams\s+:\s?(\d+)'
+  eval:
+    total_pct: '{{ pct_wi_1 }} + {{ pct_wi_0 }}'
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = XMChipStatsTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual(dict(stats), {'pct_wi_1': 0, 'pct_wi_0': 0,
+                                       'total_pct': 0})
+
+    @patch('jnpr.junos.Device.execute')
     def test__contains__(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         yaml_data = """
