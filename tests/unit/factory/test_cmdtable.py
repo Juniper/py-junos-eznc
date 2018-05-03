@@ -1380,6 +1380,66 @@ _ShowToePfePacketStatsStream_rx_errors:
                                                         'descriptors per second': 0,
                                                         'packets per second': 0}}})
 
+    @patch('jnpr.junos.Device.execute')
+    def test_table_eval_expression(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+XMChipInterruptStatsTable:
+  command: show xmchip {{ chip_instance }} li interrupt-stats
+  target: Null
+  args:
+    chip_instance: 0
+  key:
+    - li_block
+    - name
+  view: XMChipInterruptStatsView
+  eval:
+    total_interrupt: "reduce(lambda x,y: x+y, [v['interrupts'] for k,v in {{ data }}.items() if 'cookie_sz_err' in v.get('name')])"
+
+XMChipInterruptStatsView:
+  columns:
+    li_block: LI Block
+    name: Interrupt Name
+    interrupts: Number of Interrupts
+    last_occurance: Last Occurrence
+    """
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = XMChipInterruptStatsTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual(stats['total_interrupt'], 34)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_table_eval_expression_exception(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+XMChipInterruptStatsTable:
+  command: show xmchip {{ chip_instance }} li interrupt-stats
+  target: Null
+  args:
+    chip_instance: 0
+  key:
+    - li_block
+    - name
+  view: XMChipInterruptStatsView
+  eval:
+    total_interrupt: "xxxx"
+
+XMChipInterruptStatsView:
+  columns:
+    li_block: LI Block
+    name: Interrupt Name
+    interrupts: Number of Interrupts
+    last_occurance: Last Occurrence
+        """
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = XMChipInterruptStatsTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual(stats['total_interrupt'], None)
+
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
 

@@ -2,16 +2,32 @@ from collections import OrderedDict
 from functools import reduce
 import re
 import copy
-from jinja2 import Template, meta
+import logging
 
+from jinja2 import Template, meta
 from transitions import Machine
 import pyparsing as pp
 
+logging.basicConfig()
+logger = logging.getLogger("jnpr.junos.factory.state_machine")
+
 
 class Identifiers:
+    """
+    This class static variables can be used when defining regex view. For ex:
+    _PFENotificationStatsTable:
+      title: PFE Notification statistics
+      key: name
+      view: _PFENotificationStatsView
+
+    _PFENotificationStatsView:
+      regex:
+        value: numbers
+        name: words
+    """
     printables = pp.OneOrMore(pp.Word(pp.printables))
     # numbers = pp.Word(pp.nums)
-    numbers = (pp.Word(pp.nums)+pp.Optional(pp.Literal('.') + pp.Word(
+    numbers = (pp.Word(pp.nums) + pp.Optional(pp.Literal('.') + pp.Word(
         pp.nums))).setParseAction(lambda i: ''.join(i))
     hex_numbers = pp.OneOrMore(pp.Word(pp.nums, min=1)) & pp.OneOrMore(
         pp.Word('abcdefABCDEF', min=1))
@@ -19,7 +35,7 @@ class Identifiers:
     words = (pp.OneOrMore(word)).setParseAction(lambda i: ' '.join(i))
     percentage = pp.Word(pp.nums) + pp.Literal('%')
     header_bar = (pp.OneOrMore(pp.Word('-')) | pp.OneOrMore(pp.Word('='))) + \
-                                              pp.StringEnd()
+        pp.StringEnd()
     # alphanums = pp.alphanums
 
 
@@ -44,7 +60,7 @@ def data_type(item):
 def convert_to_data_type(items):
     item_types = map(data_type, items)
     return list(map(lambda x, y: int(x) if y is int else x.strip(),
-                     items, item_types))
+                    items, item_types))
 
 
 class StateMachine(Machine):
@@ -131,7 +147,27 @@ class StateMachine(Machine):
                         self._data[key] = StateMachine(tbl).parse(lines)
                     if tbl._view.TITLE is not None or tbl.TITLE is not None:
                         self._data[key] = StateMachine(tbl).parse(lines)
+        if self._table.EVAL:
+            self._eval_in_full_data()
         return self._data
+
+    def _eval_in_full_data(self):
+        """
+        To eval expression from full set of data (self._data). Sets key in
+        self._data itself.
+        Returns: None
+        """
+        for name, expression in self._table.EVAL.items():
+            t = Template(expression)
+            expression = t.render(data=self._data)
+            try:
+                val = eval(expression)
+            except Exception as ex:
+                logger.error("eval expression for '%s' failed due to %s" % (
+                    name, ex))
+                self._data[name] = None
+            else:
+                self._data[name] = val
 
     def _parse_item_iter(self, lines):
         self._raw = '\n'.join(lines)
@@ -161,7 +197,8 @@ class StateMachine(Machine):
                         tbl = value['table']
                         tbl._view = tbl.VIEW
                         # lines = self._raw[start:].splitlines()
-                        if tbl._view is not None and len(tbl._view.COLUMNS) > 0:
+                        if tbl._view is not None and len(
+                                tbl._view.COLUMNS) > 0:
                             self._data[master_key][key] = StateMachine(tbl).parse(
                                 lines)
                         if tbl.TITLE is not None or tbl._view.TITLE is not None:
@@ -184,14 +221,15 @@ class StateMachine(Machine):
                                 temp_dict[key] = value
                             except ValueError:
                                 regex = '(\d+)\s(.*)' if item_types[
-                                                             0] == int else '(' \
-                                                                            '.*)\s(\d+)'
+                                    0] == int else '(' \
+                                    '.*)\s(\d+)'
                                 obj = re.search(regex, line)
                                 if obj:
                                     items = obj.groups()
                                     key, value = convert_to_data_type(items)
                                     temp_dict[key] = value
-                        # check if next line is blank or new title (delimiter test to fail)
+                        # check if next line is blank or new title (delimiter
+                        # test to fail)
                         elif line.strip() == '' or len(
                                 re.split(delimiter, line.strip(
 
@@ -207,10 +245,13 @@ class StateMachine(Machine):
         columns = self._view.COLUMNS.values()
         if len(columns) == 0:
             return False
-        col_parser = reduce(lambda x, y: x & y, [pp.Literal(i) for i in columns])
+        col_parser = reduce(
+            lambda x, y: x & y, [
+                pp.Literal(i) for i in columns])
         for line in self._lines:
             if self._parse_literal(line, col_parser):
-                d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
+                d = set(map(lambda x, y: x in y,
+                            columns, [line] * len(columns)))
                 if d.pop():
                     current_index = self._lines.index(line)
                     self._lines = self._lines[current_index:]
@@ -264,7 +305,7 @@ class StateMachine(Machine):
         items = re.split('\s\s+', self._lines[1].strip())
 
         post_integer_data_types = event.kwargs.get('check', list(map(data_type,
-                                                                 items)))
+                                                                     items)))
         index = event.kwargs.get('index', 1)
         # col_len = len(col_order)
         columns_list = list(col_order.values())
@@ -281,7 +322,7 @@ class StateMachine(Machine):
                     list(map(data_type, items)), post_integer_data_types
                 if post_integer_data_types == pre_integer_data_types:
                     items = list(map(lambda data, typ: typ(data),
-                                items, post_integer_data_types))
+                                     items, post_integer_data_types))
                     tmp_dict = dict(zip(columns_list, items))
                     self._insert_data(key, tmp_dict, columns_list, items)
                 else:
@@ -398,7 +439,7 @@ class StateMachine(Machine):
                         self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
                     regex = '(\d+)\s(.*)' if item_types[0] == int else '(' \
-                                                                      '.*)\s(\d+)'
+                        '.*)\s(\d+)'
                     obj = re.search(regex, line)
                     if obj:
                         items = obj.groups()
@@ -419,7 +460,7 @@ class StateMachine(Machine):
             else:
                 _regex[key] = pp.Regex(val, flags=re.IGNORECASE)
 
-        _regex = reduce(lambda x, y: x+y, _regex.values())
+        _regex = reduce(lambda x, y: x + y, _regex.values())
         for index, line in enumerate(self._lines[1:]):
             tmp_dict = {}
             # checking index as there can be blank line at position 0 and 2
@@ -427,7 +468,7 @@ class StateMachine(Machine):
                 if self.is_row_column() and index > 2:
                     try:
                         if len(_regex.scanString(self._lines[self._lines.index(
-                                line)+1])[0]) == 0:
+                                line) + 1])[0]) == 0:
                             break
                     except IndexError:
                         break
@@ -451,7 +492,7 @@ class StateMachine(Machine):
                                       list(self._view.REGEX.keys()), items)
 
     def parse_using_item_and_regex(self, event):
-        if self._table.ITEM=='*':
+        if self._table.ITEM == '*':
             self._raw = '\n'.join(self._lines)
             for key, regex in self._view.REGEX.items():
                 obj = re.search(regex, self._raw)
@@ -481,8 +522,8 @@ class StateMachine(Machine):
         pre_space_delimit = ''
         if self._table.TITLE is None:
             for line in self._lines[1:]:
-                if line.strip() == 'SENT: Ukern command: %s'%self._table.GET_CMD:
-                    self._lines = self._lines[self._lines.index(line)+1:]
+                if line.strip() == 'SENT: Ukern command: %s' % self._table.GET_CMD:
+                    self._lines = self._lines[self._lines.index(line) + 1:]
                     break
         else:
             obj = re.search('^(\s+).*', self._lines[1])
@@ -504,15 +545,15 @@ class StateMachine(Machine):
                         self._data[key] = value
                 except ValueError as ex:
                     # create a class named ParseError
-                    raise Exception('Not able to parse line: %s'%line)
+                    raise Exception('Not able to parse line: %s' % line)
             else:
                 break
         return self._data
 
     def parse_exists(self, event):
         for key, search in self._view.EXISTS.items():
-            self._data[key] = re.search(search, self._raw, re.I|re.M) is not \
-                              None
+            self._data[key] = re.search(search, self._raw, re.I | re.M) is not \
+                None
 
     def _insert_eval_data(self, tmp_dict):
         if self._view and len(self._view.EVAL) > 0:
@@ -523,4 +564,3 @@ class StateMachine(Machine):
                     {k: tmp_dict.get(k) for k in variables})
                 val = eval(expression)
                 tmp_dict[name] = val
-
