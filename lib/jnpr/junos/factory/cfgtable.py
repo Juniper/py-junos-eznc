@@ -246,7 +246,7 @@ class CfgTable(Table):
                         'to field %s.\n' % (value, field_name)
                     )
 
-        if isinstance(value, dict) and 'operation' in value:
+        if isinstance(value, dict):
             # in case user want to pass operation attr for ex:
             # <unit operation="delete"/>
             pass
@@ -287,7 +287,7 @@ class CfgTable(Table):
                 lst.append(E(xpath.replace('_', '-')))
             elif value is False:
                 lst.append(E(xpath.replace('_', '-'), {'operation': 'delete'}))
-        elif isinstance(value, dict) and 'operation' in value:
+        elif isinstance(value, dict):
             lst.append(E(xpath.replace('_', '-'), value))
         else:
             lst.append(E(xpath.replace('_', '-'), str(value)))
