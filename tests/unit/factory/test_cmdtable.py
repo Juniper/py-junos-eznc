@@ -60,6 +60,50 @@ CMErrorView:
         self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 6 items')
         self.assertEqual(len(stats), 6)
 
+    @patch('jnpr.junos.Device.execute')
+    def test_unstructured_cmerror_multiline_header(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+CMErrorTable:
+  command: show cmerror module brief dummy multiline
+  target: Null
+  key: module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+    errors: Active Errors
+    pfe:
+      - PFE
+      - Specific
+    callback:
+      - Callback
+      - Function
+    data: ModuleData
+    """
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual(dict(stats),
+                         {1: {'errors': 0, 'pfe': 'Yes', 'name': 'PQ3 Chip',
+                              'module': 1, 'callback': '0x00000000',
+                              'data': '0x00000000'},
+                          2: {'errors': 0, 'pfe': 'No', 'name': 'Host Loopback',
+                              'module': 2, 'callback': '0x00000000',
+                              'data': '0x464295b0'},
+                          3: {'errors': 0, 'pfe': 'No', 'name': 'CM[0]',
+                              'module': 3, 'callback': '0x41f550f0',
+                              'data': '0x462f767c'},
+                          4: {'errors': 0, 'pfe': 'No', 'name': 'LUCHIP(0)',
+                              'module': 4, 'callback': '0x00000000',
+                              'data': '0x481b84d8'}})
+        self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 4 items')
+        self.assertEqual(len(stats), 4)
+
     def test_view_variable(self):
         yaml_data = """
 ---

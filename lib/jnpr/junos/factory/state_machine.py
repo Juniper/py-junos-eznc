@@ -196,7 +196,6 @@ class StateMachine(Machine):
                     for key, value in self._view.FIELDS.items():
                         tbl = value['table']
                         tbl._view = tbl.VIEW
-                        # lines = self._raw[start:].splitlines()
                         if tbl._view is not None and len(
                                 tbl._view.COLUMNS) > 0:
                             self._data[master_key][key] = StateMachine(tbl).parse(
@@ -232,7 +231,6 @@ class StateMachine(Machine):
                         # test to fail)
                         elif line.strip() == '' or len(
                                 re.split(delimiter, line.strip(
-
                                 ))) <= 1:
                             break
                     self._insert_eval_data(temp_dict)
@@ -245,18 +243,47 @@ class StateMachine(Machine):
         columns = self._view.COLUMNS.values()
         if len(columns) == 0:
             return False
-        col_parser = reduce(
-            lambda x, y: x & y, [
-                pp.Literal(i) for i in columns])
-        for line in self._lines:
-            if self._parse_literal(line, col_parser):
-                d = set(map(lambda x, y: x in y,
-                            columns, [line] * len(columns)))
-                if d.pop():
+        if True in [isinstance(i, list) for i in columns]:
+            # we have multi line column header
+            columns = [[i] if isinstance(i, str) else i for i in columns]
+            max_title_len = reduce(lambda x, y: x if x > y else y, map(
+                lambda x: len(x), columns))
+            for index, item in enumerate(columns):
+                columns[index] = item + [None] * (max_title_len - len(item))
+            col_parser = reduce(lambda x, y: x & y, [pp.Literal(i[0])
+                                                     for i in columns])
+            for line in self._lines:
+                if self._parse_literal(line, col_parser):
+                    for index in range(1, max_title_len):
+                        col_parser = reduce(lambda x, y: x & y,
+                                            [pp.Literal(i[index])
+                                             for i in columns if i[index] is
+                                             not None])
+                        if self._parse_literal(self._lines[self._lines.index(
+                                line) + 1], col_parser):
+                            # removing next lines in header title, dont see any
+                            # use of these lines
+                            self._lines.pop(self._lines.index(line) + 1)
+                        else:
+                            return False
                     current_index = self._lines.index(line)
                     self._lines = self._lines[current_index:]
                     return True
-        return False
+                else:
+                    continue
+        else:
+            col_parser = reduce(
+                lambda x, y: x & y, [
+                    pp.Literal(i) for i in columns])
+            for line in self._lines:
+                if self._parse_literal(line, col_parser):
+                    d = set(map(lambda x, y: x in y,
+                                columns, [line] * len(columns)))
+                    if d.pop():
+                        current_index = self._lines.index(line)
+                        self._lines = self._lines[current_index:]
+                        return True
+            return False
 
     def match_title(self, event):
         title = self._table.TITLE or self._view.TITLE
@@ -290,9 +317,15 @@ class StateMachine(Machine):
         col_offsets = {}
         col_order = event.kwargs.get('col_order', OrderedDict())
         line = self._lines[0]
+        column = self._view.COLUMNS
+        if True in [isinstance(i, list) for i in column.values()]:
+            # just take first line of column title
+            for k, v in column.items():
+                if isinstance(v, list):
+                    column[k] = v[0]
         if len(col_order) == 0:
-            for key, column in self._view.COLUMNS.items():
-                for result, start, end in pp.Literal(column).scanString(line):
+            for key, val in column.items():
+                for result, start, end in pp.Literal(val).scanString(line):
                     col_offsets[(start, end)] = result[0]
             user_defined_columns = copy.deepcopy(self._view.COLUMNS)
             for key in sorted(col_offsets.keys()):
