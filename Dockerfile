@@ -1,7 +1,5 @@
 FROM alpine:3.6
 
-LABEL MAINTAINER="Stephen Steiner <ssteiner@juniper.net>"
-
 LABEL net.juniper.description="Junos PyEZ library for Python in a lightweight container." \
       net.juniper.maintainer="Stephen Steiner <ssteiner@juniper.net>"
 
@@ -16,15 +14,12 @@ ADD requirements.txt requirements.txt
 ADD lib lib
 
 ## Install dependancies and Pyez
-RUN apk update \
-    && apk upgrade \
-    && apk add build-base python-dev py-pip py-lxml \
+RUN apk add --no-cache build-base python3-dev py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    ca-certificates openssl wget \
-    && update-ca-certificates \
-    && pip install --upgrade pip setuptools \
-    && pip install -r requirements.txt \
-    && apk del -r --purge gcc make g++ \
+    ca-certificates openssl wget 
+RUN pip3 install -r requirements.txt
+RUN apk del -r --purge gcc make g++ \
+    && ln -s /usr/bin/python3 /usr/bin/python \
     && python setup.py install \
     && rm -rf /source/* \
     && rm -rf /var/cache/apk/*
