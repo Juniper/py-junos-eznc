@@ -26,7 +26,6 @@ class Identifiers:
         name: words
     """
     printables = pp.OneOrMore(pp.Word(pp.printables))
-    # numbers = pp.Word(pp.nums)
     numbers = (pp.Word(pp.nums) + pp.Optional(pp.Literal('.') + pp.Word(
         pp.nums))).setParseAction(lambda i: ''.join(i))
     hex_numbers = pp.OneOrMore(pp.Word(pp.nums, min=1)) & pp.OneOrMore(
@@ -36,11 +35,17 @@ class Identifiers:
     percentage = pp.Word(pp.nums) + pp.Literal('%')
     header_bar = (pp.OneOrMore(pp.Word('-')) | pp.OneOrMore(pp.Word('='))) + \
         pp.StringEnd()
-    # alphanums = pp.alphanums
 
 
 def data_type(item):
-    # should use identifiers class attribute
+    """
+
+    Args:
+        item: string element parsed from the blob.
+
+    Returns: item converted to data type it should represent
+
+    """
     try:
         obj = Identifiers.numbers.parseString(item, parseAll=True)
         if '.' in obj[0]:
@@ -58,6 +63,14 @@ def data_type(item):
 
 
 def convert_to_data_type(items):
+    """
+
+    Args:
+        items: list of string objects
+
+    Returns: list of converted data type objects
+
+    """
     item_types = map(data_type, items)
     return list(map(lambda x, y: int(x) if y is int else x.strip(),
                     items, item_types))
@@ -77,15 +90,16 @@ class StateMachine(Machine):
             {'trigger': 'column_provided', 'source': '*', 'dest': 'row_column',
              'conditions': 'match_columns', 'before': 'check_header_bar',
              'after': 'parse_raw_columns'},
-            {'trigger': 'check_next_row', 'source': 'row_column', 'dest': 'row_column',
-             'conditions': 'prev_next_row_same_type',
+            {'trigger': 'check_next_row', 'source': 'row_column',
+             'dest': 'row_column', 'conditions': 'prev_next_row_same_type',
              'after': 'parse_raw_columns'},
-            {'trigger': 'title_provided', 'source': 'start', 'dest': 'title_data',
-             'conditions': ['match_title', 'title_not_followed_by_columns'],
+            {'trigger': 'title_provided', 'source': 'start',
+             'dest': 'title_data', 'conditions':
+                 ['match_title', 'title_not_followed_by_columns'],
              'after': 'parse_title_data'},
-            {'trigger': 'regex_provided', 'source': 'title_data', 'dest': 'regex_data',
-             'conditions': ['match_title'], 'before': 'check_header_bar',
-             'after': 'parse_using_regex'},
+            {'trigger': 'regex_provided', 'source': 'title_data',
+             'dest': 'regex_data', 'conditions': ['match_title'],
+             'before': 'check_header_bar', 'after': 'parse_using_regex'},
             {'trigger': 'delimiter_without_title', 'source': 'start', 'dest':
                 'delimiter_data', 'after': 'parse_using_delimiter'},
             {'trigger': 'delimiter_with_title', 'source': ['start',
@@ -155,6 +169,7 @@ class StateMachine(Machine):
         """
         To eval expression from full set of data (self._data). Sets key in
         self._data itself.
+
         Returns: None
         """
         for name, expression in self._table.EVAL.items():
@@ -448,6 +463,75 @@ class StateMachine(Machine):
         return pre_space_delimit
 
     def parse_title_data(self, event):
+        """
+        title description in Table helps to get the starting point for starting
+        search
+
+        Args:
+            event: In case trigger want to pass some data
+
+        Returns: None, Just add corresponding key, value to existing dict
+
+        Let say we have CLI "show xmchip 0 pt stats" output as:
+
+        WAN PT statistics (Index 0)
+        ---------------------------
+
+        PCT entries used by all WI-1 streams         : 0
+        PCT entries used by all WI-0 streams         : 0
+        PCT entries used by all LI streams           : 0
+        CPT entries used by all multicast packets    : 0
+        CPT entries used by all WI-1 streams         : 0
+        CPT entries used by all WI-0 streams         : 0
+        CPT entries used by all LI streams           : 0
+
+        Fabric PT statistics (Index 1)
+        ------------------------------
+
+        PCT entries used by all FI streams           : 0
+        PCT entries used by all WI (Unused) streams  : 0
+        PCT entries used by all LI streams           : 0
+        CPT entries used by all multicast packets    : 0
+        CPT entries used by all FI streams           : 0
+        CPT entries used by all WI (Unused) streams  : 0
+        CPT entries used by all LI streams           : 0
+
+        With below table/view to parse the data
+        ---
+        XMChipStatsTable:
+          command: show xmchip 0 pt stats
+          target: fpc1
+          view: XMChipStatsView
+
+        XMChipStatsView:
+          fields:
+            wan_pt_stats: _WANPTStatTable
+            fabric_pt_stats: _FabricPTStatTable
+
+        _WANPTStatTable:
+          title: WAN PT statistics (Index 0)
+          delimiter: ":"
+
+        _FabricPTStatTable:
+          title: Fabric PT statistics (Index 1)
+          delimiter: ":"
+
+        which returns:
+        {'fabric_pt_stats': {'CPT entries used by all FI streams': 0,
+                     'CPT entries used by all LI streams': 0,
+                     'CPT entries used by all WI (Unused) streams': 0,
+                     'CPT entries used by all multicast packets': 0,
+                     'PCT entries used by all FI streams': 0,
+                     'PCT entries used by all LI streams': 0,
+                     'PCT entries used by all WI (Unused) streams': 0},
+        'wan_pt_stats': {'CPT entries used by all LI streams': 0,
+                     'CPT entries used by all WI-0 streams': 0,
+                     'CPT entries used by all WI-1 streams': 0,
+                     'CPT entries used by all multicast packets': 0,
+                     'PCT entries used by all LI streams': 0,
+                     'PCT entries used by all WI-0 streams': 0,
+                     'PCT entries used by all WI-1 streams': 0}}
+        """
         if self._view is not None and self._view.REGEX != {}:
             return self.regex_provided()
         # view have only fields, so contains only nested table
@@ -486,6 +570,42 @@ class StateMachine(Machine):
         return self._data
 
     def parse_using_regex(self, event):
+        """
+        All the regex should add up to match a line
+
+        Args:
+            event: In case trigger want to pass some data
+
+        Returns: None, Just add corresponding key, value to existing dict
+
+        Let say we have CLI "show system processes extensive" output as:
+
+        PID USERNAME  HR PRI NICE   SIZE    RES STATE   C   TIME    WCPU COMMAND
+           11 root       2 155 ki31     0K    32K RUN     0 3214.6 191.31% idle
+        19542 root       2  22    0   808M 49872K select  1  90.9H   3.86% chas
+        19679 root       1  33    0   723M 1208K select  0 839:37   0.49% python
+        19451 root       1  20    0   720M 1052K select  1  60:37   0.20% eventd
+           12 root       26 -60    -     0K   416K WAIT    1 635:29   0.00% intr
+
+        With a regex table as below
+        ---
+        SystemProcExtTable:
+          command: show system processes extensive
+          key: cmd
+          view: SystemProcExtView
+
+        SystemProcExtView:
+          regex:
+            pid: '\d+'
+            wcpu: '.*(\d+\.\d+)%'
+            cmd: '\w+'
+
+        which returns something like (data for representation only):
+        {'alarm': {'cmd': 'alarm', 'pid': 20483, 'wcpu': '0.00'},
+         'alarmd': {'cmd': 'alarmd', 'pid': 20473, 'wcpu': '0.00'},
+         'appidd': {'cmd': 'appidd', 'pid': 19686, 'wcpu': '0.00'},
+         'apsd': {'cmd': 'apsd', 'pid': 20435, 'wcpu': '0.00'},
+        """
         _regex = copy.deepcopy(self._view.REGEX)
         for key, val in _regex.items():
             if val in Identifiers.__dict__:
@@ -525,6 +645,43 @@ class StateMachine(Machine):
                                       list(self._view.REGEX.keys()), items)
 
     def parse_using_item_and_regex(self, event):
+        """
+        when multiple map is provided for regex, they gets added to search each
+        line. But when item is '*' each regex item is used to search given value
+        regular expression in whole string blob.
+
+        Args:
+            event: In case trigger want to pass some data
+
+        Returns: None, Just add corresponding key, value to existing dict
+
+        Let say we have CLI "show xmchip 0 pt stats" output as:
+
+        PCT entries used by all WI-1 streams         : 21
+        PCT entries used by all WI-0 streams         : 34
+        PCT entries used by all LI streams           : 0
+        CPT entries used by all multicast packets    : 0
+        CPT entries used by all WI-1 streams         : 0
+        CPT entries used by all WI-0 streams         : 0
+        CPT entries used by all LI streams           : 0
+
+        ---
+        XMChipStatsTable:
+          command: show xmchip {{ instance }} pt stats
+          args:
+            instance: 0
+          target: fpc2
+          item: '*'
+          view: XMChipStatsView
+
+        XMChipStatsView:
+          regex:
+            pct_wi_1: 'PCT entries used by all WI-1 streams\s+:\s?(\d+)'
+            pct_wi_0: 'PCT entries used by all WI-0 streams\s+:\s?(\d+)'
+
+        which returns:
+        {'pct_wi_1': 0, 'pct_wi_0': 0}
+        """
         if self._table.ITEM == '*':
             self._raw = '\n'.join(self._lines)
             for key, regex in self._view.REGEX.items():
@@ -551,6 +708,49 @@ class StateMachine(Machine):
         return self._data
 
     def parse_using_delimiter(self, event):
+        """
+
+        Args:
+            event: In case trigger want to pass some data
+
+        Returns: None, Just add corresponding key, value to existing dict
+
+        For a given cli "show link stats" output:
+        PPP LCP/NCP: 0
+        HDLC keepalives: 0
+        RSVP: 0
+        ISIS: 0
+        OSPF Hello: 541025
+        OAM:  0
+        BFD:  15
+        UBFD:  0
+        LMI:  0
+        LACP: 0
+        ETHOAM: 0
+        SYNCE:  0
+        PTP:  0
+        L2TP:  0
+        LNS-PPP:  0
+        ARP:  4307
+        ELMI:  0
+        VXLAN MRESOLVE: 0
+        Unknown protocol: 42
+
+        Lets say we can have table as
+        ---
+        FPCLinkStatTable:
+            command: show link stats
+            target: fpc1
+            delimiter: ":"
+
+        which given return value as
+        {'ARP': 4307, 'ELMI': 0, 'SYNCE': 0, 'ISIS': 0, 'BFD': 15,
+        'PPP LCP/NCP': 0, 'OAM': 0, 'ETHOAM': 0, 'LACP': 0, 'LMI': 0,
+        'Unknown protocol': 42, 'UBFD': 0, 'L2TP': 0, 'HDLC keepalives': 0,
+        'LNS-PPP': 0, 'OSPF Hello': 541025, 'RSVP': 0, 'VXLAN MRESOLVE': 0,
+        'PTP': 0}
+
+        """
         delimiter = self._table.DELIMITER or '\s\s+'
         pre_space_delimit = ''
         if self._table.TITLE is None:
@@ -584,11 +784,60 @@ class StateMachine(Machine):
         return self._data
 
     def parse_exists(self, event):
+        """
+
+        Args:
+            event: In case trigger want to pass some data
+
+        Returns: None, Just add corresponding key, value to existing dict. Value
+         here is a boolean
+
+        ---
+        HostlbStatusSummaryTable:
+          command: show host_loopback status-summary
+          target: Null
+          view: HostlbStatusSummaryView
+
+        HostlbStatusSummaryView:
+          exists:
+            no_detected_wedges: No detected wedges
+            no_toolkit_errors: No toolkit errors
+
+        should give something like
+        {'no_detected_wedges': True, 'no_toolkit_errors': True}
+        """
         for key, search in self._view.EXISTS.items():
             self._data[key] = re.search(search, self._raw, re.I | re.M) is not \
                 None
 
     def _insert_eval_data(self, tmp_dict):
+        """
+
+        Args:
+            tmp_dict: dictionary of key value from a iteration of view
+
+        Returns: if there is any eval expression in view, does the eval using
+        tmp_dictionary. For example:
+
+        ---
+        XMChipStatsTable:
+          command: show xmchip {{ instance }} pt stats
+          args:
+            instance: 0
+          target: fpc2
+          item: '*'
+          view: XMChipStatsView
+
+        XMChipStatsView:
+          regex:
+            pct_wi_1: 'PCT entries used by all WI-1 streams\s+:\s?(\d+)'
+            pct_wi_0: 'PCT entries used by all WI-0 streams\s+:\s?(\d+)'
+          eval:
+            total_pct: '{{ pct_wi_1 }} + {{ pct_wi_0 }}'
+
+        which returns
+        {'pct_wi_1': 0, 'pct_wi_0': 0, 'total_pct': 0}
+        """
         if self._view and len(self._view.EVAL) > 0:
             for name, expression in self._view.EVAL.items():
                 variables = meta.find_undeclared_variables(expression)
