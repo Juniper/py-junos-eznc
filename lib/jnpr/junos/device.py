@@ -72,6 +72,10 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 class _Connection(object):
 
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
+        platform.release().startswith('JNPR')
+    auto_probe = 0          # default is no auto-probe
+
     # ------------------------------------------------------------------------
     # property: hostname
     # ------------------------------------------------------------------------
@@ -990,9 +994,6 @@ class Device(_Connection):
             dev.open()   # this will probe before attempting NETCONF connect
 
     """
-    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
-        platform.release().startswith('JNPR')
-    auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
