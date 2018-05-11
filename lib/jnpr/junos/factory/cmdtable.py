@@ -273,7 +273,7 @@ class CMDTable(object):
         """ iterate over each time in the table """
         self._assert_data()
 
-        for key, value in self.output.iteritems():
+        for key, value in self.output.items():
             yield key, value
 
     def __getitem__(self, value):
