@@ -57,11 +57,10 @@ class CMDTable(object):
 
         :kvargs:
           these are the name/value pairs relating to the specific Junos
-          XML command attached to the table.  For example, if the RPC
-          is 'get-route-information', there are parameters such as
-          'table' and 'destination'.  Any valid RPC argument can be
-          passed to :kvargs: to further filter the results of the :get():
-          operation.  neato!
+          command attached to the table.  For example, if the command
+          is 'show ithrottle id {{ id }}', there is a parameter 'id'.
+          Any valid command argument can be passed to :kvargs: to further filter
+          the results of the :get(): operation.  neato!
 
         NOTES:
           If you need to create a 'stub' for unit-testing

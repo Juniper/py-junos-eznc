@@ -6,6 +6,7 @@ import os
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
+from jnpr.junos.exception import RpcError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
@@ -125,7 +126,7 @@ CMErrorView:
         stats.view = globals()['CMErrorView']
         self.assertEqual(stats.view, globals()['CMErrorView'])
 
-    def test_view_raise_exception(self):
+    def test_view_setter_raise_exception(self):
         yaml_data = """
 ---
 CMErrorTable:
@@ -146,6 +147,52 @@ CMErrorView:
 
         with self.assertRaises(ValueError):
             stats.view = 'dummy'
+
+    @patch('paramiko.SSHClient')
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    @patch('jnpr.junos.Device.execute')
+    def test_request_pfe_rpc_not_avialable(self, mock_execute, mock_ss,
+                                           mock_ssh_conn):
+        mock_execute.side_effect = RpcError(rsp='ok')
+        yaml_data = """
+---
+CMErrorTable:
+  command: show cmerror module brief
+  target: fpc1
+  key: module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev)
+        with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss_run:
+            stats.get()
+        ss_run.assert_called_with('cprod -A fpc1 -c "show cmerror module brief"')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cmdtable_iter(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+FPCLinkStatTable:
+  command: show link stats
+  target: Null
+  delimiter: ":"
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = FPCLinkStatTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual({k: v for k,v in stats},
+                         {'PPP LCP/NCP': 0, 'ISIS': 0, 'BFD': 15, 'OAM': 0,
+                          'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
+                          'HDLC keepalives': 0, 'OSPF Hello': 539156, 'RSVP':
+                              0})
 
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_linkstats(self, mock_execute):
