@@ -182,7 +182,7 @@ CMErrorView:
 CMErrorTable:
     command: show cmerror module brief
     target: fpc1
-    key: module
+    key: name
     view: CMErrorView
 
 CMErrorView:
@@ -194,7 +194,7 @@ CMErrorView:
         globals().update(FactoryLoader().load(yaml.load(
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = CMErrorTable(self.dev)
-        stats.get(key_items=[1], filters=['errors'])
+        stats.get(key="module", key_items=[1], filters=['errors'])
         self.assertEqual(dict(stats), {1: {'errors': 0}})
 
     @patch('jnpr.junos.Device.execute')
@@ -579,6 +579,7 @@ _ICMPRateView:
                       'pps total': {'name': 'pps '
                                     'total',
                                     'rate': 1000}}})
+        self.assertTrue(stats.D.__class__.__name__ == "Device")
 
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_ithrottle_key_args(self, mock_execute):
