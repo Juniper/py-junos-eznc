@@ -175,6 +175,29 @@ CMErrorView:
         ss_run.assert_called_with('cprod -A fpc1 -c "show cmerror module brief"')
 
     @patch('jnpr.junos.Device.execute')
+    def test_get_api_params(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+CMErrorTable:
+    command: show cmerror module brief
+    target: fpc1
+    key: module
+    view: CMErrorView
+
+CMErrorView:
+    columns:
+        module: Module
+        name: Name
+        errors: Active Errors
+    """
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev)
+        stats.get(key_items=[1], filters=['errors'])
+        self.assertEqual(dict(stats), {1: {'errors': 0}})
+
+    @patch('jnpr.junos.Device.execute')
     def test_cmdtable_iter(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         yaml_data = """
@@ -222,7 +245,7 @@ FPCLinkStatTable:
 XMChipStatsTable:
   command: show xmchip {{ instance }} pt stats
   args:
-    instance: 0
+    instance: -1
   target: fpc2
   item: '*'
   view: XMChipStatsView
@@ -237,7 +260,7 @@ XMChipStatsView:
         globals().update(FactoryLoader().load(yaml.load(
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = XMChipStatsTable(self.dev)
-        stats = stats.get(target='fpc1')
+        stats = stats.get(target='fpc1', args = {'instance': 0})
         self.assertEqual(dict(stats), {'pct_wi_1': 0, 'pct_wi_0': 0,
                                        'total_pct': 0})
 
