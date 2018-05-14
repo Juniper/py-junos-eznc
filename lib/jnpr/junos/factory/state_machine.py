@@ -124,6 +124,16 @@ class StateMachine(Machine):
                          initial='start', send_event=True)
 
     def parse(self, lines):
+        """
+        Starting point to parse string blob section. In case of nested table
+        this API will get called in recursive call.
+
+        Args:
+            lines: list of lines which was received from rpc reply <output>.
+
+        Returns: dictionary (self._data) with parsed data.
+
+        """
         self._lines = copy.deepcopy(lines)
         self._raw = '\n'.join(lines)
         if self._view is None:
@@ -185,6 +195,15 @@ class StateMachine(Machine):
                 self._data[name] = val
 
     def _parse_item_iter(self, lines):
+        """
+        There are cases when similar data set repeats. With item its easier to
+        split string blob into different sections.
+        Args:
+            lines: list of lines
+
+        Returns: dictionary (self._data) with parsed data.
+
+        """
         self._raw = '\n'.join(lines)
         pat = pp.Regex(self._table.ITEM)
         x = []
@@ -301,6 +320,15 @@ class StateMachine(Machine):
             return False
 
     def match_title(self, event):
+        """
+        To check whether given title exists in string blob.
+
+        Args:
+            event: In case any data is supposed to be passed.
+
+        Returns: Boolean value depending on matching of title
+
+        """
         title = self._table.TITLE or self._view.TITLE
         for line in self._lines:
             if title in line:
@@ -320,6 +348,21 @@ class StateMachine(Machine):
             return False
 
     def check_header_bar(self, event):
+        """
+        Remove redundant title bar line from lines.
+        Args:
+            event:
+
+        Returns: Boolean depending on if the next line is a title bar or not.
+
+        For example, here if we provide columns, we need to get rid of next line
+        ---------------------------------------
+        Module  Name              Active Errors
+        ---------------------------------------
+        1       PQ3 Chip          0
+        2       Host Loopback     0
+
+        """
         line = self._lines[1]
         try:
             Identifiers.header_bar.parseString(line, parseAll=True)
@@ -382,6 +425,19 @@ class StateMachine(Machine):
         return self._data
 
     def _insert_data(self, key, tmp_dict, columns_list, items=None):
+        """
+        Insert data per row into main dictionary self._data
+
+        Args:
+            key: To be used as key to dictionary
+            tmp_dict: Temporary dictionary to be populated
+            columns_list: Columns defined by the users
+            items: Data fetched using parsing, which will be populated in temp
+            dict.
+
+        Returns: None, function just populates self._data
+
+        """
         items = tmp_dict.values() if items is None else items
         self._insert_eval_data(tmp_dict)
         if isinstance(key, (tuple, list)):
@@ -423,6 +479,14 @@ class StateMachine(Machine):
                     self._data[tmp_dict[key]] = tmp_dict
 
     def _get_key(self, key):
+        """
+        Fetch the key from columns which will be used to define dictionary
+        Args:
+            key: user defined key input
+
+        Returns: key to be used in dictionary.
+
+        """
         if isinstance(key, list):
             if set([i in self._view.COLUMNS or i in
                     self._view.COLUMNS.values() for i in key]):
@@ -447,6 +511,15 @@ class StateMachine(Machine):
         return key
 
     def prev_next_row_same_type(self, event):
+        """
+        Checks if the consecutive two lines of similar types.
+
+        Args:
+            event: takes parameter from the API call
+
+        Returns: Boolean, depending if two lines are of similar types.
+
+        """
         index = event.kwargs.get('index')
         post_integer_data_types = event.kwargs.get('check')
         line = self._lines[index]
@@ -456,6 +529,30 @@ class StateMachine(Machine):
         return post_integer_data_types == pre_integer_data_types
 
     def _get_pre_space_delimiter(self, line):
+        """
+        Sometime all the data lines under a table is withing some space limit
+        which gives a easy way to stop looking for lines if the delimiter is not
+        followed.
+        Args:
+            line: should be first line after title
+
+        Returns: decide how much space to be considered as delimiter
+
+        For example, in below output, all data for FPCx has 2 space delimiter
+
+        Statistics for port 1 connected to device FPC1:
+          TX Packets 64 Octets        96106518
+          TX Packets 65-127 Octets    56224217
+          TX Packets 128-255 Octets   4550198
+          TX Packets 256-511 Octets   1841
+          TX Packets 512-1023 Octets  1354
+        Statistics for port 1 connected to device FPC2:
+          TX Packets 64 Octets        345354435
+          TX Packets 65-127 Octets    34531
+          TX Packets 128-255 Octets   4351451
+          TX Packets 256-511 Octets   1345
+          TX Packets 512-1023 Octets  526513
+        """
         pre_space_delimit = ''
         obj = re.search('(\s+).*', line)
         if obj:
