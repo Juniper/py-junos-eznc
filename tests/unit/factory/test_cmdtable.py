@@ -219,33 +219,15 @@ CMErrorView:
         stats = CMErrorTable(self.dev).get()
         self.assertEqual(stats.VIEW.T.__class__.__name__, 'property')
         self.assertEqual(stats.VIEW.xml.__class__.__name__, 'property')
-        self.assertEqual(list(stats.keys()), ['Host Loopback', 'CM[1]', 'CM[0]',
-                                        'LUCHIP(0)', 'TOE-LU-0:0:0', 'PQ3 Chip']
-                         )
-        self.assertEqual(list(stats.values()), [{'errors': 0, 'module': 2,
-                                           'name': 'Host Loopback'},
-                                          {'errors': 0, 'module': 4,
-                                           'name': 'CM[1]'},
-                                          {'errors': 0, 'module': 3, 'name':
-                                              'CM[0]'}, {'errors': 0,
-                                                         'module': 5,
-                                                         'name': 'LUCHIP(0)'},
-                                          {'errors': 0, 'module': 6,
-                                           'name': 'TOE-LU-0:0:0'},
-                                          {'errors': 0, 'module': 1,
-                                           'name': 'PQ3 Chip'}]
-                         )
-        self.assertEqual(list(stats.items()), [
-            ('Host Loopback', {'errors': 0, 'name': 'Host Loopback', 'module': 2
-                               }), ('CM[1]', {'errors': 0, 'name': 'CM[1]',
-                                              'module': 4}), ('CM[0]',
-                                                              {'errors': 0,
-                                                               'name': 'CM[0]',
-                                                               'module': 3}),
-            ('LUCHIP(0)', {'errors': 0, 'name': 'LUCHIP(0)', 'module': 5}),
-            ('TOE-LU-0:0:0', {'errors': 0, 'name': 'TOE-LU-0:0:0', 'module': 6}
-             ),
-            ('PQ3 Chip', {'errors': 0, 'name': 'PQ3 Chip', 'module': 1})])
+        expected = ['Host Loopback', 'CM[1]', 'CM[0]', 'LUCHIP(0)',
+                                                   'TOE-LU-0:0:0',
+                                  'PQ3 Chip']
+        expected.sort()
+        got_keys = list(stats.keys())
+        got_keys.sort()
+        self.assertListEqual(got_keys, expected)
+        got_values = list(stats.values())
+        got_items = list(stats.items())
         self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 6 items')
 
     @patch('jnpr.junos.Device.execute')
