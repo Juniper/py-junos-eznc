@@ -604,16 +604,18 @@ IthrottleIDView:
 _ThrottleStatsTable:
     title: Throttle Stats
     delimiter: ":"
+    key_items:
+      - Disables
+      - AdjDown
+      - Enables
 """
         globals().update(FactoryLoader().load(yaml.load(
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = IthrottleIDTable(self.dev).get(target='fpc2')
         self.assertEqual(dict(stats), {'usg_enable': 1, 'min_usage': 25.0,
                                        'throttle_stats': {'Disables': 0,
-                                                          'Starts': 65708652,
-                                                          'AdjUp': 6, 'Stops': 65708652,
-                                                          'AdjDown': 4, 'Enables': 0,
-                                                          'Checks': 124149442},
+                                                          'AdjDown': 4,
+                                                          'Enables': 0},
                                        'max_usage': 50.0})
 
     @patch('jnpr.junos.Device.execute')
@@ -879,8 +881,10 @@ HostlbStatusSummaryView:
 DevicesLocalTable:
   command: show devices local
   target: Null
-  item: 'TSEC Ethernet Device Driver: (\.?\w+),'
-  key: name
+  item: '(TSEC) Ethernet Device Driver: (\.?\w+),'
+  key: 
+    - dummy
+    - name
   view: DevicesLocalView
 
 DevicesLocalView:
@@ -963,6 +967,39 @@ _TransmitPerQueueView:
                                                            'packets': 0}},
                                              3: {'queue': {'bytes': 0,
                                                            'packets': 0}}}}})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_table_item_group_key_mismatch(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+DevicesLocalTable:
+  command: show devices local
+  target: fpc1
+  item: '(TSEC) Ethernet Device Driver: (\.?\w+),'
+  key: name
+  view: DevicesLocalView
+
+DevicesLocalView:
+  fields:
+    receive_counters: _ReceiveTable
+
+_ReceiveTable:
+  item: '*'
+  title: 'Receive:'
+  view: _ReceiveView
+
+_ReceiveView:
+  regex:
+    bytes: '(\d+) bytes'
+    packets: '(\d+) packets'
+    FCS_errors: '(\d+) FCS errors'
+    broadcast_packets: '(\d+) broadcast packets'
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = DevicesLocalTable(self.dev)
+        self.assertRaises(KeyError, stats.get)
 
     @patch('jnpr.junos.Device.execute')
     def test_table_with_item_without_view(self, mock_execute):
