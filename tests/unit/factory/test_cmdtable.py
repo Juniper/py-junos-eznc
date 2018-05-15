@@ -881,10 +881,8 @@ HostlbStatusSummaryView:
 DevicesLocalTable:
   command: show devices local
   target: Null
-  item: '(TSEC) Ethernet Device Driver: (\.?\w+),'
-  key: 
-    - dummy
-    - name
+  item: 'TSEC Ethernet Device Driver: (\.?\w+),'
+  key: name
   view: DevicesLocalView
 
 DevicesLocalView:
