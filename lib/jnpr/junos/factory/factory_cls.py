@@ -44,8 +44,8 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
 def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
                     key='name', view=None, table_name=None, title=None,
                     delimiter=None, eval=None, **kwargs):
-    if table_name is None:
-        table_name = "CMDTable." + cmd
+    # if table_name is None:
+    #     table_name = "CMDTable." + cmd
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
     if 'target' in kwargs:
@@ -65,8 +65,8 @@ def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
 def FactoryCMDChildTable(title=None, regex=None,
                          key='name', delimiter=None, table_name=None, view=None,
                          key_items=None, item=None, eval=None):
-    if table_name is None:
-        table_name = "CMDTable." + title
+    # if table_name is None:
+    #     table_name = "CMDTable." + title
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.DELIMITER = delimiter
     new_cls.KEY = key

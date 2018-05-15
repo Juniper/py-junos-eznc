@@ -166,25 +166,25 @@ class FactoryLoader(object):
     def _add_cmd_view_fields(self, view_dict, fields_name, fields):
         """ add a group of fields to the view """
         fields_dict = view_dict[fields_name]
-        try:
-            # see if this is a 'fields_<group>' collection, and if so
-            # then we automatically setup using the group mechanism
-            mark = fields_name.index('_')
-            group = {'group': fields_name[mark + 1:]}
-        except:
-            # otherwise, no group, just standard 'fields'
-            group = {}
+        # try:
+        #     # see if this is a 'fields_<group>' collection, and if so
+        #     # then we automatically setup using the group mechanism
+        #     mark = fields_name.index('_')
+        #     group = {'group': fields_name[mark + 1:]}
+        # except:
+        #     # otherwise, no group, just standard 'fields'
+        #     group = {}
 
         for f_name, f_data in fields_dict.items():
             # each field could have its own unique set of properties
             # so create a kvargs <dict> each time.  but copy in the
             # groups <dict> (single item) generically.
-            kvargs = {}
-            kvargs.update(group)
+            # kvargs = {}
+            # kvargs.update(group)
 
-            if isinstance(f_data, dict):
-                self._add_dictfield(fields, f_name, f_data, kvargs)
-                continue
+            # if isinstance(f_data, dict):
+            #     self._add_dictfield(fields, f_name, f_data, kvargs)
+            #     continue
 
             if f_data in self._catalog_dict:
                 # f_data is the table name

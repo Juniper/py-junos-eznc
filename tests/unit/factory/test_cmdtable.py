@@ -198,6 +198,57 @@ CMErrorView:
         self.assertEqual(dict(stats), {1: {'errors': 0}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_cmdview_properties(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+CMErrorTable:
+    command: show cmerror module brief
+    target: fpc1
+    key: name
+    view: CMErrorView
+
+CMErrorView:
+    columns:
+        module: Module
+        name: Name
+        errors: Active Errors
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CMErrorTable(self.dev).get()
+        self.assertEqual(stats.VIEW.T.__class__.__name__, 'property')
+        self.assertEqual(stats.VIEW.xml.__class__.__name__, 'property')
+        self.assertEqual(stats.keys(), ['Host Loopback', 'CM[1]', 'CM[0]',
+                                        'LUCHIP(0)', 'TOE-LU-0:0:0', 'PQ3 Chip']
+                         )
+        self.assertEqual(stats.values(), [{'errors': 0, 'module': 2,
+                                           'name': 'Host Loopback'},
+                                          {'errors': 0, 'module': 4,
+                                           'name': 'CM[1]'},
+                                          {'errors': 0, 'module': 3, 'name':
+                                              'CM[0]'}, {'errors': 0,
+                                                         'module': 5,
+                                                         'name': 'LUCHIP(0)'},
+                                          {'errors': 0, 'module': 6,
+                                           'name': 'TOE-LU-0:0:0'},
+                                          {'errors': 0, 'module': 1,
+                                           'name': 'PQ3 Chip'}]
+                         )
+        self.assertEqual(stats.items(), [
+            ('Host Loopback', {'errors': 0, 'name': 'Host Loopback', 'module': 2
+                               }), ('CM[1]', {'errors': 0, 'name': 'CM[1]',
+                                              'module': 4}), ('CM[0]',
+                                                              {'errors': 0,
+                                                               'name': 'CM[0]',
+                                                               'module': 3}),
+            ('LUCHIP(0)', {'errors': 0, 'name': 'LUCHIP(0)', 'module': 5}),
+            ('TOE-LU-0:0:0', {'errors': 0, 'name': 'TOE-LU-0:0:0', 'module': 6}
+             ),
+            ('PQ3 Chip', {'errors': 0, 'name': 'PQ3 Chip', 'module': 1})])
+        self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 6 items')
+
+    @patch('jnpr.junos.Device.execute')
     def test_cmdtable_iter(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         yaml_data = """
@@ -216,6 +267,64 @@ FPCLinkStatTable:
                           'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
                           'HDLC keepalives': 0, 'OSPF Hello': 539156, 'RSVP':
                               0})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_title_in_view(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+ShowLuchipTable:
+  command: show luchip {{ lu_instance }}
+  target: Null
+  args:
+    lu_instance: 0
+  key: ppe
+  view: ShowLuchipView
+
+ShowLuchipView:
+  title: PPE Zone Enable masks and (active)
+  regex:
+    ppe: 'PPE\[(\d+)\]'
+    zone_enable_mask: 'Zone Enable Mask (0x[a-z0-9]+)'
+    active_zones: '\((0x[a-z0-9]+)\)'
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+                yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = ShowLuchipTable(self.dev)
+        stats = stats.get(target='fpc1')
+        self.assertEqual(dict(stats),
+                         {0: {'active_zones': '0x00000000', 'ppe': 0,
+                              'zone_enable_mask': '0xfcff0ffe'},
+                          1: {'active_zones': '0x00000000', 'ppe': 1,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          2: {'active_zones': '0x00000000', 'ppe': 2,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          3: {'active_zones': '0x00000000', 'ppe': 3,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          4: {'active_zones': '0x00000000', 'ppe': 4,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          5: {'active_zones': '0x00000000', 'ppe': 5,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          6: {'active_zones': '0x00000000', 'ppe': 6,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          7: {'active_zones': '0x00000000', 'ppe': 7,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          8: {'active_zones': '0x00000000', 'ppe': 8,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          9: {'active_zones': '0x00000000', 'ppe': 9,
+                              'zone_enable_mask': '0xfcff0fff'},
+                          10: {'active_zones': '0x00000100', 'ppe': 10,
+                               'zone_enable_mask': '0xfcff0fff'},
+                          11: {'active_zones': '0x00000000', 'ppe': 11,
+                               'zone_enable_mask': '0xfcff0fff'},
+                          12: {'active_zones': '0x00000000', 'ppe': 12,
+                               'zone_enable_mask': '0xfcff0fff'},
+                          13: {'active_zones': '0x00000000', 'ppe': 13,
+                               'zone_enable_mask': '0xfcff0fff'},
+                          14: {'active_zones': '0x00000000', 'ppe': 14,
+                               'zone_enable_mask': '0xfcff0fff'},
+                          15: {'active_zones': '0x00000000', 'ppe': 15,
+                               'zone_enable_mask': '0xfcff0fff'}})
 
     @patch('jnpr.junos.Device.execute')
     def test_unstructured_linkstats(self, mock_execute):
@@ -296,6 +405,7 @@ FPCTTPStatsView:
     TTPTransmitStatistics: _FPCTTPTransmitStatisticsTable
     TTPReceiveStatistics: _FPCTTPReceiveStatisticsTable
     TTPQueueSizes: _FPCTTPQueueSizesTable
+    TTPQueueSizes2: _FPCTTPQueueSizesTable2
 
 _FPCTTPStatisticsTable:
   title: TTP Statistics
@@ -342,6 +452,14 @@ _FPCTTPQueueSizesTable:
     - Low
   view: _FPCTTPQueueSizesView
 
+_FPCTTPQueueSizesTable2:
+  title: TTP Receive Queue Sizes
+  delimiter: ":"
+  key_items:
+    - High
+    - Low
+  view: _FPCTTPQueueSizesView
+  
 _FPCTTPQueueSizesView:
   fields:
     high: High
@@ -367,6 +485,8 @@ FPCTTPReceiveStatsView:
         stats = stats.get(target='fpc2')
         self.assertEqual(dict(stats),
                          {'TTPQueueSizes': {'High': '0 (max is 4473)',
+                                            'Low': '0 (max is 2236)'},
+                          'TTPQueueSizes2': {'High': '0 (max is 4473)',
                                             'Low': '0 (max is 2236)'},
                           'TTPReceiveStatistics': {'Coalesce': {'control': 0,
                                                                 'discard': 0,
