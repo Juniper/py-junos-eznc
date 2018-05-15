@@ -219,10 +219,10 @@ CMErrorView:
         stats = CMErrorTable(self.dev).get()
         self.assertEqual(stats.VIEW.T.__class__.__name__, 'property')
         self.assertEqual(stats.VIEW.xml.__class__.__name__, 'property')
-        self.assertEqual(stats.keys(), ['Host Loopback', 'CM[1]', 'CM[0]',
+        self.assertEqual(list(stats.keys()), ['Host Loopback', 'CM[1]', 'CM[0]',
                                         'LUCHIP(0)', 'TOE-LU-0:0:0', 'PQ3 Chip']
                          )
-        self.assertEqual(stats.values(), [{'errors': 0, 'module': 2,
+        self.assertEqual(list(stats.values()), [{'errors': 0, 'module': 2,
                                            'name': 'Host Loopback'},
                                           {'errors': 0, 'module': 4,
                                            'name': 'CM[1]'},
@@ -235,7 +235,7 @@ CMErrorView:
                                           {'errors': 0, 'module': 1,
                                            'name': 'PQ3 Chip'}]
                          )
-        self.assertEqual(stats.items(), [
+        self.assertEqual(list(stats.items()), [
             ('Host Loopback', {'errors': 0, 'name': 'Host Loopback', 'module': 2
                                }), ('CM[1]', {'errors': 0, 'name': 'CM[1]',
                                               'module': 4}), ('CM[0]',
