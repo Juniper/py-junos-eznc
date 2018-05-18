@@ -1,7 +1,7 @@
 import unittest
 from nose.plugins.attrib import attr
 from jnpr.junos.exception import RpcError, CommitError, \
-    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError
+    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError, JSONLoadError
 from jnpr.junos import Device
 from lxml import etree
 
@@ -63,22 +63,15 @@ statement not found
 </rpc-reply>
 '''
 
-config_json = """{
+config_json = '''{
     "configuration" : {
-        "system" : {
-            "scripts" : {
-                "op" : {
-                    "file" : [
-                    {
-                        "name" : "test.slax"
-                    }
-                    ]
-                }
-            }
+      "system" : {
+            "services" : {
+                "telnet" : [nul] 
+             }
         }
     }
-}"""
-
+}'''
 
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
@@ -160,5 +153,7 @@ class Test_RpcError(unittest.TestCase):
         self.assertEqual(obj.rpc_error['severity'], 'warning')
 
     def test_json_error(self):
-        obj = RpcError(rsp=config_json)
-        self.assertEqual(obj.__repr__(), err)
+        err = "ValueError: No JSON object could be decoded"
+        obj = JSONLoadError(err, config_json)
+        errs = "JSONLoadError(reason: ValueError: No JSON object could be decoded)"
+        self.assertEqual(obj.__repr__(), errs)
