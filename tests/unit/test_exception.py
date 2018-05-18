@@ -63,6 +63,22 @@ statement not found
 </rpc-reply>
 '''
 
+config_json = """{
+    "configuration" : {
+        "system" : {
+            "scripts" : {
+                "op" : {
+                    "file" : [
+                    {
+                        "name" : "test.slax"
+                    }
+                    ]
+                }
+            }
+        }
+    }
+}"""
+
 
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
@@ -142,3 +158,7 @@ class Test_RpcError(unittest.TestCase):
         errs.errors = [errs, errs]
         obj = RpcError(rsp=rsp, errs=errs)
         self.assertEqual(obj.rpc_error['severity'], 'warning')
+
+    def test_json_error(self):
+        obj = RpcError(rsp=config_json)
+        self.assertEqual(obj.__repr__(), err)
