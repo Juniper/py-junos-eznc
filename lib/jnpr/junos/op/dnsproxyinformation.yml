@@ -1,0 +1,33 @@
+---
+DnsProxyInformation:
+  rpc: get-dns-proxy-information
+  item: //*/dns-proxy
+  key: 
+    - ancestor::multi-routing-engine-item/re-name
+    - status
+  view: DnsProxyInformationView
+
+DnsProxyInformationView:
+  fields:
+    status : status
+    ipv4_queries_received : ipv4-queries-received
+    ipv6_queries_received : ipv6-queries-received
+    responses_sent : responses-sent
+    queries_forwarded : queries-forwarded
+    negative_responses : negative-responses
+    positive_responses : positive-responses
+    retries : retries
+    pending_requests : pending-requests
+    server_failures : server-failures
+    interfaces : _DnsProxyInterfacesTable
+
+_DnsProxyInterfacesTable:
+    item: interfaces
+    key:
+        - interface
+    view: _DnsProxyInterfacesView
+
+_DnsProxyInterfacesView:
+    fields:
+        interface: interface
+
