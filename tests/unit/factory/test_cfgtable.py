@@ -188,6 +188,39 @@ class TestFactoryCfgTable(unittest.TestCase):
         )
 
     @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_inactive(self, mock_execute):
+        yaml_auto_data = \
+            """---
+           UserConfigTable1:
+             set: system/login
+             key-field:
+               - username
+             view: UserConfigView1
+
+           UserConfigView1:
+              groups:  
+                auth: authentication
+              fields:
+                user: user
+                username: user/name
+                classname: { user/class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+                uid: { user/uid : { 'type' : 'int', 'minValue' : 100, 'maxValue' : 64000 } }
+              fields_auth:
+                password: user/encrypted-password
+           """
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        at = UserConfigTable1(self.dev)
+        at.rpc.lock_configuration = MagicMock()
+        at.username = 'user1'
+        at.user = {"inactive" : "inactive"}
+        at.append()
+        at.set()
+        xml = at.get_table_xml()
+        self.assertEqual(
+            xml.xpath('system/login/user[@inactive="inactive"]/name')[0].text, 'user1'
+        ) 
+
+    @patch('jnpr.junos.Device.execute')
     def test_cfgtable_load(self, mock_execute):
         self.bgp.rpc.lock_configuration = MagicMock()
         self.bgp.bgp_name = 'external_1'
