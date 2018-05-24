@@ -320,6 +320,17 @@ class FactoryLoader(object):
             cls = _CMDCHILDTBL(cmd, **kvargs)
             self.catalog[table_name] = cls
             return cls
+        else:
+            kvargs['table_name'] = table_name
+
+            if 'view' in tbl_dict:
+                view_name = tbl_dict['view']
+                cls_view = self.catalog.get(view_name, self._build_cmdview(view_name))
+                kvargs['view'] = cls_view
+
+            cls = _CMDCHILDTBL(**kvargs)
+            self.catalog[table_name] = cls
+            return cls
 
     # -----------------------------------------------------------------------
     # Create a Table class from YAML definition
@@ -375,6 +386,8 @@ class FactoryLoader(object):
             elif 'set' in v:
                 self._item_cfgtables.append(k)
             elif 'command' in v or 'title' in v:
+                self._item_cmdtables.append(k)
+            elif 'view' in v and 'item' in v and v['item'] == '*':
                 self._item_cmdtables.append(k)
             elif 'view' in v:
                 self._item_tables.append(k)
