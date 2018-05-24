@@ -157,3 +157,12 @@ class Test_RpcError(unittest.TestCase):
         obj = JSONLoadError(err, config_json)
         errs = "JSONLoadError(reason: ValueError: No JSON object could be decoded)"
         self.assertEqual(obj.__repr__(), errs)
+
+    def test_json_error_offending_line(self):
+        err = "ValueError: No"
+        obj = JSONLoadError(err, config_json)
+        obj.offending_line = "Value"
+        errs = "JSONLoadError(reason: ValueError: No, " \
+               "\nThe offending config appears to be: " \
+               "\nValue)"
+        self.assertEqual(obj.__repr__(), errs)
