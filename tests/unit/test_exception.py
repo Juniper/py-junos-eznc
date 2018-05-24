@@ -166,3 +166,4 @@ class Test_RpcError(unittest.TestCase):
                "\nThe offending config appears to be: " \
                "\nValue)"
         self.assertEqual(obj.__repr__(), errs)
+
