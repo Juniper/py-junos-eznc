@@ -119,7 +119,7 @@ class TestFactoryCfgTable(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.jxml.conf_transform')
-    def test_cfgtable_junos1(self, mock_jxml, mock_execute):#, mock_config):
+    def test_cfgtable_junos1(self, mock_jxml, mock_execute):
         mock_execute.side_effect = self._mock_manager
         mock_jxml.result_value = None
         with patch.dict('sys.modules', junos=MagicMock()):
@@ -130,7 +130,7 @@ class TestFactoryCfgTable(unittest.TestCase):
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.jxml.conf_transform')
-    def test_cfgtable_junos2(self, mock_jxml, mock_execute):#, mock_config):
+    def test_cfgtable_junos2(self, mock_jxml, mock_execute):
         mock_execute.side_effect = self._mock_manager
         mock_jxml.result_value = None
         with patch.dict('sys.modules', junos= MagicMock()):
