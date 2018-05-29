@@ -71,7 +71,7 @@ class FTP(ftplib.FTP):
 
                 self.storbinary(cmd='STOR ' + remote_file,
                                 fp=open(local_file, 'rb'),
-                                callback=self._ftpargs['callback'])
+                                callback=self._ftpargs.get('callback'))
         except Exception as ex:
             logger.error(ex)
             return False
