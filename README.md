@@ -136,10 +136,12 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
-[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
+[Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
 
+* v2.1.8: [Dinesh Babu](https://github.com/dineshbaburam91), [Stephen Steiner](https://github.com/ntwrkguru)
+* v2.1.7: [Stacy Smith](https://github.com/stacywsmith)
 * v2.0.0: [Ganesh Nalawade](https://github.com/ganeshrn), [Jainpriyal](https://github.com/Jainpriyal)
 
 *Former Contributors:*
 
-[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog)
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog), [Edward Arcuri](https://github.com/sdndude)
