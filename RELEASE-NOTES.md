@@ -1,7 +1,15 @@
-## Release 2.1.8dev0 - 30 September 2017
+## Release 2.1.8 - 31 May 2018
 ### Features Added:
+-None
 
 ### Bugs Fixed:
+- Correct PyEZ TechWiki link #813
+- Support active and inactive configuration options in config table/view #826
+- Upgraded alpine 3.6 to support docker in PyEZ   #789 #828 #827
+- Support configuration table/view in telnet mode #829
+- Added new unit test cases in PyEZ #831
+- Detect set config format with all keywords like insert, activate, copy etc  #791 #792
+
 
 
 ## Release 2.1.7 - 30 September 2017
