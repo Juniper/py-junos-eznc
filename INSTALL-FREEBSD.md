@@ -20,10 +20,10 @@ sudo pkg install py36-junos-eznc
 ## Installing from ports collection
 
 #### For Python 2.7
-sudo make -C /usr/port/net-mgmt/py-junos-eznc install clean FLAVOR=py27
+sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py27
 
 #### For Python 3.6
-sudo make -C /usr/port/net-mgmt/py-junos-eznc install clean FLAVOR=py36
+sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py36
 
 ## Verify
 
