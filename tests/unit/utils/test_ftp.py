@@ -99,7 +99,7 @@ class TestFtp(unittest.TestCase):
     def test_ftp_upload_file_rem_path(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="/var/tmp/conf.txt",
                                           remote_path="/var/tmp"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
+        self.assertEqual(list(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR /var/tmp/conf.txt')
 
     @patch('ftplib.FTP.storbinary')
@@ -107,13 +107,13 @@ class TestFtp(unittest.TestCase):
     def test_ftp_upload_file_rem_full_path(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="/var/tmp/conf.txt",
                                           remote_path="/var/tmp/test.txt"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
-                         'STOR /var/tmp/test.txt')
+        self.assertEqual(list(mock_ftpstore.call_args)[1]['cmd'],
+                         'STOR /var/tmp/test.txt', None)
 
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_path_create(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="conf.txt",
                                           remote_path="/var/tmp"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
-                         'STOR /var/tmp/conf.txt')
+        self.assertEqual(list(mock_ftpstore.call_args)[1]['cmd'],
+                         'STOR /var/tmp/conf.txt', None)
