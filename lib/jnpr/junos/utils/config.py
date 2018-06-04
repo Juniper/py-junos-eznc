@@ -435,7 +435,8 @@ class Config(Util):
             """ setup the kvargs/rpc_xattrs using string regular expression """
             if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
                 kvargs['format'] = 'xml'
-            elif re.search(r'^\s*(set|delete|replace|rename)\s', rpc):
+            elif re.search(r'^\s*(set|delete|rename|insert|activate|deactivate'
+                           '|annotate|copy|protect|unprotect)\s', rpc):
                 kvargs['format'] = 'set'
             elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
                     re.search(r'.*}\s*$', rpc):
@@ -713,7 +714,7 @@ class Config(Util):
                 return False
 
         def _unsupported_action():
-            raise ValueError("unsupported action: {0}".format(action))
+            raise ValueError("unsupported action: {}".format(action))
 
         result = {
             'get': _rescue_get,
@@ -808,7 +809,7 @@ class Config(Util):
 
         def _unsupported_option():
             if self.mode is not None:
-                raise ValueError("unsupported action: {0}".format(self.mode))
+                raise ValueError("unsupported action: {}".format(self.mode))
 
         if self.kwargs.get('ephemeral_instance'):
             ephemeral_kwargs = {

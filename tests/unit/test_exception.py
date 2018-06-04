@@ -1,7 +1,7 @@
 import unittest
 from nose.plugins.attrib import attr
 from jnpr.junos.exception import RpcError, CommitError, \
-    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError
+    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError, JSONLoadError
 from jnpr.junos import Device
 from lxml import etree
 
@@ -63,6 +63,15 @@ statement not found
 </rpc-reply>
 '''
 
+config_json = '''{
+    "configuration" : {
+      "system" : {
+            "services" : {
+                "telnet" : [nul] 
+             }
+        }
+    }
+}'''
 
 @attr('unit')
 class Test_RpcError(unittest.TestCase):
@@ -142,3 +151,19 @@ class Test_RpcError(unittest.TestCase):
         errs.errors = [errs, errs]
         obj = RpcError(rsp=rsp, errs=errs)
         self.assertEqual(obj.rpc_error['severity'], 'warning')
+
+    def test_json_error(self):
+        err = "ValueError: No JSON object could be decoded"
+        obj = JSONLoadError(err, config_json)
+        errs = "JSONLoadError(reason: ValueError: No JSON object could be decoded)"
+        self.assertEqual(obj.__repr__(), errs)
+
+    def test_json_error_offending_line(self):
+        err = "ValueError: No"
+        obj = JSONLoadError(err, config_json)
+        obj.offending_line = "Value"
+        errs = "JSONLoadError(reason: ValueError: No, " \
+               "\nThe offending config appears to be: " \
+               "\nValue)"
+        self.assertEqual(obj.__repr__(), errs)
+

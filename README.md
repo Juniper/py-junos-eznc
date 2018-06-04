@@ -12,10 +12,12 @@ Official Documentation with examples, [here](http://www.juniper.net/techpubs/en_
 
 API Documentation hosted by [readthedocs](http://junos-pyez.readthedocs.org)
 
-_Junos PyEZ_ wiki page, [here](https://techwiki.juniper.net/Projects/Junos_PyEZ).
+_Junos PyEZ_ wiki page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
 
 
 # ABOUT
+
+![PyEZ logo](static/PyEZ.png?raw=true "PyEZ logo")
 
 _Junos PyEZ_ is a Python library to remotely manage/automate Junos devices.  The user is ***NOT*** required: (a) to be a "Software Programmer™", (b) have sophisticated knowledge of Junos, or (b) have a complex understanding of the Junos XML API.  
 
@@ -58,7 +60,7 @@ As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/py
 
 ## PIP
 
-Installation requires Python 2.6 or 2.7 or >=3.4 and associated `pip` tool
+Installation requires Python 2.7 or >=3.4 and associated `pip` tool
 
     pip install junos-eznc
 
@@ -134,10 +136,12 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
-[Nitin Kumar](https://github.com/vnitinv), [Edward Arcuri](https://github.com/sdndude), [Stacy Smith](https://github.com/stacywsmith)
+[Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
 
+* v2.1.8: [Dinesh Babu](https://github.com/dineshbaburam91), [Stephen Steiner](https://github.com/ntwrkguru)
+* v2.1.7: [Stacy Smith](https://github.com/stacywsmith)
 * v2.0.0: [Ganesh Nalawade](https://github.com/ganeshrn), [Jainpriyal](https://github.com/Jainpriyal)
 
 *Former Contributors:*
 
-[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog)
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog), [Edward Arcuri](https://github.com/sdndude)

@@ -118,6 +118,29 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.assertEqual(self.ut[0]['uidgroup'], 'global')
 
     @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.jxml.conf_transform')
+    def test_cfgtable_junos1(self, mock_jxml, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        mock_jxml.result_value = None
+        with patch.dict('sys.modules', junos=MagicMock()):
+            import junos
+            self.dev.ON_JUNOS = True
+            self.bgp.get()
+            self.assertEqual(self.bgp.bgp_type, 'external')
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.jxml.conf_transform')
+    def test_cfgtable_junos2(self, mock_jxml, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        mock_jxml.result_value = None
+        with patch.dict('sys.modules', junos= MagicMock()):
+            import junos
+            junos.Junos_Configuration = None
+            self.dev.ON_JUNOS = True
+            self.bgp.get()
+            self.assertEqual(self.bgp.bgp_type, 'external')
+
+    @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.zit.get(security_zone='untrust')
@@ -185,6 +208,72 @@ class TestFactoryCfgTable(unittest.TestCase):
         xml = self.bgp.get_table_xml()
         self.assertEqual(
             xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
+        )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_inactive(self, mock_execute):
+        yaml_auto_data = \
+            """---
+           UserConfigTable1:
+             set: system/login
+             key-field:
+               - username
+             view: UserConfigView1
+
+           UserConfigView1:
+              groups:  
+                auth: authentication
+              fields:
+                user: user
+                username: user/name
+                classname: { user/class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+                uid: { user/uid : { 'type' : 'int', 'minValue' : 100, 'maxValue' : 64000 } }
+              fields_auth:
+                password: user/encrypted-password
+           """
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        at = UserConfigTable1(self.dev)
+        at.rpc.lock_configuration = MagicMock()
+        at.username = 'user1'
+        at.user = {"inactive" : "inactive"}
+        at.append()
+        at.set()
+        xml = at.get_table_xml()
+        self.assertEqual(
+            xml.xpath('system/login/user[@inactive="inactive"]/name')[0].text, 'user1'
+        )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_bool(self, mock_execute):
+        yaml_auto_data = \
+            """---
+           UserConfigTable1:
+             set: system/login
+             key-field:
+               - username
+             view: UserConfigView1
+
+           UserConfigView1:
+              groups:
+                auth: authentication
+              fields:
+                user: user
+                username: user/name
+                classname: { user/class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+                uid: { user/uid : { 'type' : bool , 'default' :False} }
+              fields_auth:
+                password: user/encrypted-password
+           """
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        at = UserConfigTable1(self.dev)
+        at.rpc.lock_configuration = MagicMock()
+        at.username = True
+        at.user = {'inactive': 'inactive'}
+        at.append()
+        at.set()
+        xml = at.get_table_xml()
+        self.assertNotEqual(
+            xml.xpath('system/login/user/name')[0].text, 'user1'
         )
 
     @patch('jnpr.junos.Device.execute')
