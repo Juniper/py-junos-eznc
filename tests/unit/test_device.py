@@ -472,6 +472,11 @@ class TestDevice(unittest.TestCase):
         self.dev2.open(gather_facts=False, normalize=True)
         self.assertEqual(self.dev2.transform, self.dev2._norm_transform)
 
+    def test_device_conn_None_transform(self):
+        self.dev = Device(host='2.2.2.2', user='test', password='password123')
+        with self.assertRaises(EzErrors.ConnectError):
+            self.dev.transform
+
     def test_device_set_facts_exception(self):
         try:
             self.dev.facts = 'test'

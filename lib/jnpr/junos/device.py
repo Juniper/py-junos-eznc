@@ -31,7 +31,7 @@ from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
     ignoreWarnDecorator
-from jnpr.junos.exception import JSONLoadError
+from jnpr.junos.exception import JSONLoadError, ConnectError
 
 
 _MODULEPATH = os.path.dirname(__file__)
@@ -1007,7 +1007,12 @@ class Device(_Connection):
         """
         :returns: the current RPC XML Transformation.
         """
-        return self._conn._device_handler.transform_reply
+        try:
+            return self._conn._device_handler.transform_reply
+        except AttributeError:
+            if self._conn is None:
+                raise ConnectError(self, "Not connected to the Device")
+
 
     @transform.setter
     def transform(self, func):
