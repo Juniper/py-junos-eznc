@@ -14,7 +14,7 @@ Contents:
    :maxdepth: 2
 
    jnpr.junos
-   Table & View
+   TableView
 
 
 Indices and tables
