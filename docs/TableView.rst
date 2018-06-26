@@ -669,6 +669,106 @@ Output received will be::
 .. note:: In columns we need to provide all column title to help parse the data.
 
 
+There are situation when column title are spread across multiple line. In such 
+cases columns keys element should be list of words corresponding to their columns.
+
+For command ``show cmerror module brief`` with cli output::
+
+  -------------------------------------------------------------------------
+  Module  Name              Active Errors  PFE       Callback    ModuleData
+                                          Specific  Function              
+  -------------------------------------------------------------------------
+  1       PQ3 Chip          0              Yes       0x00000000  0x00000000
+  2       Host Loopback     0              No        0x00000000  0x464295b0
+  3       CM[0]             0              No        0x41f550f0  0x462f767c
+
+
+Table/View to parse above output::
+
+  ---
+  CMErrorTable:
+    command: show cmerror module brief dummy multiline
+    target: Null
+    key: module
+    view: CMErrorView
+
+  CMErrorView:
+    columns:
+      module: Module
+      name: Name
+      errors: Active Errors
+      pfe:
+        - PFE
+        - Specific
+      callback:
+        - Callback
+        - Function
+      data: ModuleData
+
+Similarly for command ``show mqss 0 fi interrupt-stats`` with cli output::
+
+  FI interrupt statistics
+  -----------------------
+
+  --------------------------------------------------------------------------------------
+  Stream  Total RLIM  Total       Cell timeout  Total Reorder  Total cell   Total number
+          request     PT/MALLOC   Ignored       cell timeout   drops in     of times
+          counter     Usemeter                  errors         secure mode  entered into
+          saturation  Drops                                                 secure mode
+  --------------------------------------------------------------------------------------
+  36      0           0           1             1              0            0
+  128     0           0           1             49             0            0
+  142     0           0           1             53             0            0
+  --------------------------------------------------------------------------------------
+  --------------------------------------------------------------------------
+  Stream  Stream reconfiguration  Total Error  Total Late  Total CRC Errored
+          count due to pointers   Cells        Cells       Packets
+          stalled in secure mode
+  --------------------------------------------------------------------------
+  36      0                       0            1           0
+  --------------------------------------------------------------------------
+
+Table/View to parse above output::
+
+  CChipFiStatsTable:
+    command: show mqss {{ chip_instance }} fi interrupt-stats
+    target: fpc8
+    args:
+      chip_instance: 0
+    key: Stream
+    view: CChipFiStatsView
+
+  CChipFiStatsView:
+    columns:
+      stream: Stream
+      req_sat:
+        - Total RLIM
+        - request
+        - counter
+        - saturation
+      cchip_fi_malloc_drops:
+        - Total
+        - PT/MALLOC
+        - Usemeter
+        - Drops
+      cell_timeout_ignored:
+        - Cell timeout
+        - Ignored
+      cchip_fi_cell_timeout:
+        - Total Reorder
+        - cell timeout
+        - errors
+      drops_in_secure:
+        - Total cell
+        - drops in
+        - secure mode
+      times_in_secure:
+        - Total number
+        - of times
+        - entered into
+        - secure mode
+
+
 .. _view-regex:
 
 regex
@@ -1109,6 +1209,11 @@ Output::
 
 filters
 ^^^^^^^
+
+When we are interested in only few keys from the parsed output, we can filter
+filter out the desired key/value using filters. Filters takes a list of keys
+from columns items. Final output dictionary should only consist of items listed
+in filters per iteration of view output.
 
 Consider below table/view::
 
