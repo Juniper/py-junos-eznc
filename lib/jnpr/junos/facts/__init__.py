@@ -37,6 +37,7 @@ import jnpr.junos.facts.current_re
 import jnpr.junos.facts.domain
 import jnpr.junos.facts.ethernet_mac_table
 import jnpr.junos.facts.file_list
+import jnpr.junos.facts.file_show_cevo
 import jnpr.junos.facts.get_chassis_cluster_status
 import jnpr.junos.facts.get_chassis_inventory
 import jnpr.junos.facts.get_route_engine_information
