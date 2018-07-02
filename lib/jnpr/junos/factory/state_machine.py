@@ -8,7 +8,6 @@ from jinja2 import Template, meta
 from transitions import Machine
 import pyparsing as pp
 
-logging.basicConfig()
 logger = logging.getLogger("jnpr.junos.factory.state_machine")
 
 
