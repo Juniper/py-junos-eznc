@@ -415,7 +415,7 @@ class StateMachine(Machine):
                     items = list(map(lambda data, typ: typ(data),
                                      items, post_integer_data_types))
                     tmp_dict = dict(zip(columns_list, items))
-                    self._insert_data(key, tmp_dict, columns_list, items)
+                    self._insert_data(key, tmp_dict, columns_list)
                 else:
                     break
             elif line.strip() == '':
@@ -424,7 +424,7 @@ class StateMachine(Machine):
                                     key=key)
         return self._data
 
-    def _insert_data(self, key, tmp_dict, columns_list, items=None):
+    def _insert_data(self, key, tmp_dict, columns_list):
         """
         Insert data per row into main dictionary self._data
 
@@ -432,22 +432,17 @@ class StateMachine(Machine):
             key: To be used as key to dictionary
             tmp_dict: Temporary dictionary to be populated
             columns_list: Columns defined by the users
-            items: Data fetched using parsing, which will be populated in temp
-            dict.
 
         Returns: None, function just populates self._data
 
         """
-        items = tmp_dict.values() if items is None else items
         self._insert_eval_data(tmp_dict)
         if isinstance(key, (tuple, list)):
             if self._view.FILTERS is not None:
                 selected_dict = {}
                 for select in self._view.FILTERS:
                     if select in columns_list:
-                        selected_dict[select] = items[
-                            columns_list.index(
-                                select)]
+                        selected_dict[select] = tmp_dict[select]
                 if self._table.KEY_ITEMS is None:
                     self._data[tuple(tmp_dict[i] for i in key)] = \
                         selected_dict
@@ -462,9 +457,7 @@ class StateMachine(Machine):
                 selected_dict = {}
                 for select in self._view.FILTERS:
                     if select in columns_list:
-                        selected_dict[select] = items[
-                            columns_list.index(
-                                select)]
+                        selected_dict[select] = tmp_dict[select]
                 if self._table.KEY_ITEMS is None:
                     self._data[tmp_dict[key]] = selected_dict
                 elif tmp_dict[key] in self._table.KEY_ITEMS:
@@ -739,7 +732,7 @@ class StateMachine(Machine):
                 tmp_dict = dict(zip(self._view.REGEX.keys(), items))
                 if len(tmp_dict) > 0:
                     self._insert_data(self._table.KEY, tmp_dict,
-                                      list(self._view.REGEX.keys()), items)
+                                      list(self._view.REGEX.keys()))
 
     def parse_using_item_and_regex(self, event):
         """
