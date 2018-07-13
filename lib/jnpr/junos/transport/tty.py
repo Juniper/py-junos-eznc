@@ -52,7 +52,7 @@ class Terminal(object):
         '(?P<badpasswd>ogin incorrect)',
         '(?P<netconf_closed><!-- session end at .*-->\s*)',
         '(?P<shell>%|#\s*$)',
-        '(?P<cli>[^\\-"]>\s*$)',
+        '(?P<cli>[^/\-"]>\s*$)',
         '(?P<option>Enter your option:\s*$)',
         '(?P<hotkey>connection: <CTRL>Z)',
     ]
@@ -271,3 +271,5 @@ class Terminal(object):
         else:
             # if we are here, then loop the event again
             self._login_state_machine(attempt + 1)
+
+        _ev_tbl.get()
