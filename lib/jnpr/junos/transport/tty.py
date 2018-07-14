@@ -271,5 +271,3 @@ class Terminal(object):
         else:
             # if we are here, then loop the event again
             self._login_state_machine(attempt + 1)
-
-        _ev_tbl.get()
