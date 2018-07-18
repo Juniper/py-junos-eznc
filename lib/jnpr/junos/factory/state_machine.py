@@ -419,9 +419,11 @@ class StateMachine(Machine):
                 else:
                     break
             elif line.strip() == '':
-                self.check_next_row(check=post_integer_data_types, data=self._data,
-                                    index=index, col_order=col_order,
-                                    key=key)
+                # first check if loop already reached at the end of command o/p
+                if not index+1 >= len(self._lines):
+                    self.check_next_row(check=post_integer_data_types,
+                                        data=self._data, index=index,
+                                        col_order=col_order, key=key)
         return self._data
 
     def _insert_data(self, key, tmp_dict, columns_list):
