@@ -710,13 +710,21 @@ class StateMachine(Machine):
             tmp_dict = {}
             # checking index as there can be blank line at position 0 and 2
             if line.strip() == '':
-                if self.is_row_column() and index > 2:
-                    try:
-                        if len(_regex.scanString(self._lines[self._lines.index(
-                                line) + 1])[0]) == 0:
+                if index > 2:
+                    if self.is_row_column():
+                        try:
+                            if len(_regex.scanString(self._lines[self._lines.index(
+                                    line) + 1])[0]) == 0:
+                                break
+                        except IndexError:
                             break
-                    except IndexError:
-                        break
+                    elif self.is_regex_data():
+                        for result, start, end in _regex.scanString(
+                                self._lines[self._lines.index(
+                                    line) + 1]):
+                            continue
+                        else:
+                            break
                 else:
                     continue
             for result, start, end in _regex.scanString(line):

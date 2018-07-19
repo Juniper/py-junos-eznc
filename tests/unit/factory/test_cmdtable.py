@@ -571,10 +571,21 @@ ICMPStatsTable:
 
 ICMPStatsView:
   fields:
+    statistics: _ICMPStatisticsTable
     discards: _ICMPDiscardsTable
     errors: _ICMPErrorsTable
     rate: _ICMPRateTable
+    
+_ICMPStatisticsTable:
+  title: ICMP Statistics
+  key: name
+  view: _ICMPStatisticsView
 
+_ICMPStatisticsView:
+  regex:
+    value: numbers
+    name: words
+    
 _ICMPDiscardsTable:
   title: ICMP Discards
   key: name
@@ -611,76 +622,60 @@ _ICMPRateView:
         stats = stats.get(target='fpc2')
         self.assertEqual(
             dict(stats),
-            {'discards': {'ICMP errors':
-                          {'name': 'ICMP errors', 'value': 0},
-                          'IP fragments': {'name': 'IP fragments',
-                                           'value': 0},
-                          'bad dest addresses': {'name':
-                                                 'bad dest addresses',
-                                                 'value': 0},
-                          'bad source addresses': {'name':
-                                                   'bad source addresses',
-                                                   'value': 0},
-                          'multicasts': {'name': 'multicasts',
+            {'discards': {
+                'bad source addresses': {'name': 'bad source addresses',
                                          'value': 0},
-                          'pps per iff': {'name': 'pps per iff',
-                                          'value': 500},
-                          'pps total': {'name': 'pps total',
-                                        'value': 1000},
-                          'throttled': {'name': 'throttled',
+                'unknown originators': {'name': 'unknown originators',
                                         'value': 0},
-                          'unknown originators': {'name':
-                                                  'unknown originators',
-                                                  'value': 0}},
-             'errors': {'ICMP errors':
-                        {'error': 0, 'name': 'ICMP errors'},
-                        'IP fragments': {'error': 0, 'name':
-                                         'IP fragments'},
-                        'bad cf mtu': {'error': 0, 'name':
-                                       'bad cf mtu'},
-                        'bad dest addresses': {'error': 0, 'name':
-                                               'bad dest addresses'},
-                        'bad input interface': {'error': 0,
-                                                'name':
-                                                'bad input interface'},
-                        'bad nh lookup': {'error': 0, 'name':
-                                          'bad nh lookup'},
-                        'bad route lookup': {'error': 0, 'name':
-                                             'bad route lookup'},
-                        'bad source addresses': {'error': 0,
-                                                 'name':
-                                                 'bad source addresses'},
-                        'invalid ICMP type': {'error': 0, 'name':
-                                              'invalid ICMP type'},
-                        'invalid protocol': {'error': 0, 'name':
-                                             'invalid protocol'},
-                        'multicasts': {'error': 0, 'name':
-                                                    'multicasts'},
-                        'pps per iff': {'error': 500, 'name':
-                                                     'pps per iff'},
-                        'pps total': {'error': 1000, 'name':
-                                      'pps total'},
-                        'runts': {'error': 0, 'name': 'runts'},
-                        'throttled': {'error': 0, 'name':
-                                      'throttled'},
-                        'unknown originators': {'error': 0,
-                                                'name':
-                                                'unknown originators'},
-                        'unknown unreachables': {'error': 0,
-                                                 'name':
-                                                 'unknown unreachables'},
-                        'unprocessed redirects': {'error': 0,
-                                                  'name':
-                                                  'unprocessed redirects'},
-                        'unsupported ICMP type': {'error': 0,
-                                                  'name':
-                                                  'unsupported ICMP type'}},
-             'rate': {'pps per iff':
-                      {'name': 'pps per iff',
-                       'rate': 500},
-                      'pps total': {'name': 'pps '
-                                    'total',
-                                    'rate': 1000}}})
+                'bad dest addresses': {'name': 'bad dest addresses',
+                                       'value': 0},
+                'multicasts': {'name': 'multicasts', 'value': 0},
+                'IP fragments': {'name': 'IP fragments', 'value': 0},
+                'ICMP errors': {'name': 'ICMP errors', 'value': 0}},
+             'rate': {'pps total': {'rate': 1000, 'name': 'pps total'},
+                      'pps per iff': {'rate': 500, 'name': 'pps per iff'}},
+             'statistics': {'other unreachables': {'name': 'other unreachables',
+                                                   'value': 0},
+                            'redirects': {'name': 'redirects', 'value': 0},
+                            'igmp v1 handoffs': {'name': 'igmp v1 handoffs',
+                                                 'value': 0},
+                            'parameter problems': {'name': 'parameter problems',
+                                                   'value': 0},
+                            'throttled': {'name': 'throttled', 'value': 0},
+                            'tag te requests': {'name': 'tag te requests',
+                                                'value': 0},
+                            'network unreachables': {
+                                'name': 'network unreachables', 'value': 0},
+                            'source route denials': {
+                                'name': 'source route denials', 'value': 0},
+                            'filter prohibited': {'name': 'filter prohibited',
+                                                  'value': 0},
+                            'ttl captured': {'name': 'ttl captured',
+                                             'value': 0},
+                            'mtu exceeded': {'name': 'mtu exceeded',
+                                             'value': 0},
+                            'requests': {'name': 'requests', 'value': 0},
+                            'icmp': {'name': 'icmp', 'value': 0},
+                            'ttl expired': {'name': 'ttl expired', 'value': 0},
+                            'tag te to RE': {'name': 'tag te to RE',
+                                             'value': 0}},
+             'errors': {'bad nh lookup': {'name': 'bad nh lookup', 'error': 0},
+                        'invalid ICMP type': {'name': 'invalid ICMP type',
+                                              'error': 0},
+                        'unprocessed redirects': {
+                            'name': 'unprocessed redirects', 'error': 0},
+                        'bad cf mtu': {'name': 'bad cf mtu', 'error': 0},
+                        'bad route lookup': {'name': 'bad route lookup',
+                                             'error': 0},
+                        'invalid protocol': {'name': 'invalid protocol',
+                                             'error': 0},
+                        'runts': {'name': 'runts', 'error': 0},
+                        'bad input interface': {'name': 'bad input interface',
+                                                'error': 0},
+                        'unsupported ICMP type': {
+                            'name': 'unsupported ICMP type', 'error': 0},
+                        'unknown unreachables': {'name': 'unknown unreachables',
+                                                 'error': 0}}})
         self.assertTrue(stats.D.__class__.__name__ == "Device")
 
     @patch('jnpr.junos.Device.execute')
