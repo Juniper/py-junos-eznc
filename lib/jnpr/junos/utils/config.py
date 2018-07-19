@@ -227,6 +227,8 @@ class Config(Util):
             rsp = self.rpc.get_configuration(dict(
                 compare='rollback', rollback=str(rb_id), format='text'
             ))
+        except RpcTimeoutError:
+            raise 
         except RpcError as err:
             if (err.rpc_error['severity'] == 'warning' and
                 err.message == "mgd: statement must contain additional "
