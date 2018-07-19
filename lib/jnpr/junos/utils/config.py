@@ -197,7 +197,7 @@ class Config(Util):
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
-            if 'xml' in err.__dict__:
+            if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
 	            return JXML.rpc_error(err.xml)
             else:
 	            raise
