@@ -141,13 +141,28 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.assertTrue(self.conf.commit_check())
 
-    @patch('jnpr.junos.utils.config.JXML.rpc_error')
-    def test_commit_check_exception(self, mock_jxml):
+    # @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_commit_check_exception(self):
         class MyException(Exception):
-            xml = 'test'
+            xml = etree.fromstring("""
+            <rpc-reply>
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>permission denied</error-message>
+<error-info>
+<bad-element>system</bad-element>
+</error-info>
+</rpc-error>
+</rpc-reply>
+            """)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
         # with self.assertRaises(AttributeError):
-        self.conf.commit_check()
+        self.assertDictEqual(self.conf.commit_check(),
+                             {'source': None, 'message': 'permission denied',
+                              'bad_element': 'system', 'severity': 'error',
+                              'edit_path': None})
 
     def test_config_commit_check_exception_RpcError(self):
         ex = RpcError(rsp='ok')
