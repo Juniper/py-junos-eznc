@@ -1,0 +1,281 @@
+<rpc-reply>
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>
+Could not connect to re0 : No route to host
+</error-message>
+</rpc-error>
+<multi-routing-engine-results>
+
+<multi-routing-engine-item>
+
+<re-name>re1</re-name>
+
+<software-information>
+<host-name>R1_re01</host-name>
+<product-model>mx960</product-model>
+<product-name>mx960</product-name>
+<junos-version>18.3I20180716_1639</junos-version>
+<package-information>
+<name>os-kernel</name>
+<comment>JUNOS OS Kernel 32-bit (WITNESS) [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>os-libs</name>
+<comment>JUNOS OS libs [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>os-runtime</name>
+<comment>JUNOS OS runtime [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>zoneinfo</name>
+<comment>JUNOS OS time zone information [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>netstack</name>
+<comment>JUNOS network stack and utilities [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-libs</name>
+<comment>JUNOS libs [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-runtime</name>
+<comment>JUNOS runtime [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>vmguest</name>
+<comment>JUNOS Packet Forwarding Engine Simulation Package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>sflow-platform</name>
+<comment>JUNOS sflow mx [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>py-extensions</name>
+<comment>JUNOS py extensions [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>py-base</name>
+<comment>JUNOS py base [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>os-vmguest</name>
+<comment>JUNOS OS vmguest [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>os-support</name>
+<comment>JUNOS OS support utilities [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>os-crypto</name>
+<comment>JUNOS OS crypto [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+<package-information>
+<name>na-telemetry</name>
+<comment>JUNOS na telemetry [18.3I20180716_1639]</comment>
+</package-information>
+<package-information>
+<name>junos-libs-platform</name>
+<comment>JUNOS mx libs [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-runtime-platform</name>
+<comment>JUNOS mx runtime [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-platform</name>
+<comment>JUNOS common platform support [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-openconfig</name>
+<comment>JUNOS Openconfig [18.3I20180716_1639]</comment>
+</package-information>
+<package-information>
+<name>junos-net-platform</name>
+<comment>JUNOS mtx network modules [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-modules</name>
+<comment>JUNOS modules [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-modules-platform</name>
+<comment>JUNOS mx modules [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-dp-crypto-support-platform</name>
+<comment>JUNOS mtx Data Plane Crypto Support [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-daemons</name>
+<comment>JUNOS daemons [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>junos-daemons-platform</name>
+<comment>JUNOS mx daemons [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jsim-wrlinux</name>
+<comment>JUNOS Simulation Linux Package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jsim-pfe-vmx</name>
+<comment>JUNOS Simulation Package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jsim-pfe-internal</name>
+<comment>JUNOS Simulation Package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-urlf</name>
+<comment>JUNOS Services URL Filter package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-traffic-dird</name>
+<comment>JUNOS Services TLB Service PIC package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-telemetry</name>
+<comment>JUNOS Services Telemetry [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-ssl</name>
+<comment>JUNOS Services SSL [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-softwire</name>
+<comment>JUNOS Services SOFTWIRE [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-sfw</name>
+<comment>JUNOS Services Stateful Firewall [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-rpm</name>
+<comment>JUNOS Services RPM [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-pcef</name>
+<comment>JUNOS Services PCEF package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-nat</name>
+<comment>JUNOS Services NAT [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-mss</name>
+<comment>JUNOS Services Mobile Subscriber Service Container package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-mobile</name>
+<comment>JUNOS Services MobileNext Software package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-lrf</name>
+<comment>JUNOS Services Logging Report Framework package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-llpdf</name>
+<comment>JUNOS Services LL-PDF Container package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-jflow</name>
+<comment>JUNOS Services Jflow Container package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-jdpi</name>
+<comment>JUNOS Services Deep Packet Inspection package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-ipsec</name>
+<comment>JUNOS Services IPSec [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-ids</name>
+<comment>JUNOS Services IDS [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-idp</name>
+<comment>JUNOS IDP Services [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-hcm</name>
+<comment>JUNOS Services HTTP Content Management package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-fwdd</name>
+<comment>JUNOS Services Flowd MS-MPC Software package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-crypto-base</name>
+<comment>JUNOS Services Crypto [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-cpcd</name>
+<comment>JUNOS Services Captive Portal and Content Delivery Container package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-cos</name>
+<comment>JUNOS Services COS [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-appid</name>
+<comment>JUNOS AppId Services [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-alg</name>
+<comment>JUNOS Services Application Level Gateways [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jservices-aacl</name>
+<comment>JUNOS Services AACL Container package [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jsdn</name>
+<comment>JUNOS SDN Software Suite [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jsd-jet-1</name>
+<comment>JUNOS Extension Toolkit [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jpfe-wrlinux</name>
+<comment>JUNOS Packet Forwarding Engine Support (wrlinux) [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jpfe-platform</name>
+<comment>JUNOS Packet Forwarding Engine Support (MX/EX92XX Common) [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jpfe-common</name>
+<comment>JUNOS Packet Forwarding Engine Support (M/T Common) [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jpfe-X</name>
+<comment>JUNOS Packet Forwarding Engine Support (MX Common) [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jinsight</name>
+<comment>JUNOS J-Insight [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jfirmware</name>
+<comment>JUNOS jfirmware [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jdocs</name>
+<comment>JUNOS Online Documentation [20180716.163910]</comment>
+</package-information>
+<package-information>
+<name>jail-runtime</name>
+<comment>JUNOS jail runtime [20180515.183843_fbsd-builder_stable_11]</comment>
+</package-information>
+</software-information>
+</multi-routing-engine-item>
+
+</multi-routing-engine-results>
+</rpc-reply>

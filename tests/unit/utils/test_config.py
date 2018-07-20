@@ -203,6 +203,12 @@ class TestConfig(unittest.TestCase):
         self.conf.pdiff()
         self.conf.diff.assert_called_once_with(0)
 
+    def test_config_diff_rpc_timeout(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.diff)
+
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
 
