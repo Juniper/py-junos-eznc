@@ -51,7 +51,7 @@ class Terminal(object):
         '(?P<passwd>assword:\s*$)',
         '(?P<badpasswd>ogin incorrect)',
         '(?P<netconf_closed><!-- session end at .*-->\s*)',
-        '(?P<shell>%|#\s*$)',
+        '(?P<shell>%|#|/$\s*$)',
         '(?P<cli>[^\\-"]>\s*$)',
         '(?P<option>Enter your option:\s*$)',
         '(?P<hotkey>connection: <CTRL>Z)',

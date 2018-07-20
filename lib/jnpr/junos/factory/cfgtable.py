@@ -524,7 +524,7 @@ class CfgTable(Table):
 
         # retrieve the XML configuration
         # Check to see if running on box
-        if self._dev.ON_JUNOS:
+        if self._dev.ON_BOX:
             try:
                 from junos import Junos_Configuration
 

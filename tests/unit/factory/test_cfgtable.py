@@ -113,7 +113,7 @@ class TestFactoryCfgTable(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_junos(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        self.dev.ON_JUNOS = True
+        self.dev.ON_BOX = True
         self.ut.get(user='test')
         self.assertEqual(self.ut[0]['uidgroup'], 'global')
 
@@ -124,7 +124,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_jxml.result_value = None
         with patch.dict('sys.modules', junos=MagicMock()):
             import junos
-            self.dev.ON_JUNOS = True
+            self.dev.ON_BOX = True
             self.bgp.get()
             self.assertEqual(self.bgp.bgp_type, 'external')
 
@@ -136,7 +136,7 @@ class TestFactoryCfgTable(unittest.TestCase):
         with patch.dict('sys.modules', junos= MagicMock()):
             import junos
             junos.Junos_Configuration = None
-            self.dev.ON_JUNOS = True
+            self.dev.ON_BOX = True
             self.bgp.get()
             self.assertEqual(self.bgp.bgp_type, 'external')
 
