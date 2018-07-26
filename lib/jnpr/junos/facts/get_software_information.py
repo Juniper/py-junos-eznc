@@ -208,7 +208,7 @@ def get_facts(device):
             else:
                 for key in junos_info.keys():
                     if key.startswith('gnf') and key.endswith('re1'):
-                        version_RE0 = junos_info[key]['text']
+                        version_RE1 = junos_info[key]['text']
         elif 'server1' in junos_info:
             version_RE1 = junos_info['server1']['text']
 
