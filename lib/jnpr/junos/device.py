@@ -71,7 +71,7 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class _Connection(object):
-    ON_BOX = platform.system().upper() == 'JUNOS' or \
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
         platform.release().startswith('JNPR') or \
                os.path.isfile('/usr/share/cevo/cevo_version')
     auto_probe = 0          # default is no auto-probe
@@ -974,7 +974,7 @@ class Device(_Connection):
     """
     Junos Device class.
 
-    :attr:`ON_BOX`:
+    :attr:`ON_JUNOS`:
         **READ-ONLY** -
         Auto-set to ``True`` when this code is running on a Junos device,
         vs. running on a local-server remotely connecting to a device.
@@ -1123,7 +1123,7 @@ class Device(_Connection):
                           (self._fact_style),
                           RuntimeWarning)
 
-        if self.__class__.ON_BOX is True and hostname is None:
+        if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
             # running on a Junos device locally
             # ---------------------------------
@@ -1249,7 +1249,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local':
-                    self.__class__.ON_BOX})
+                    self.__class__.ON_JUNOS})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials

@@ -324,7 +324,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(repr(localdev), 'Device(1.1.1.1)')
 
     def test_device_local(self):
-        Device.ON_BOX = True
+        Device.ON_JUNOS = True
         localdev = Device()
         self.assertEqual(localdev._hostname, 'localhost')
 
