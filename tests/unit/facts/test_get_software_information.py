@@ -108,6 +108,18 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['version_RE1'], '15.1F5.15')
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_info_dual_other_re_off(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_dual_other_re_off
+        print (self.dev.facts)
+        self.assertEqual(self.dev.facts['junos_info']['re1']['text'],
+                         '18.3I20180716_1639')
+        self.assertEqual(self.dev.facts['hostname'], 'R1_re01')
+        self.assertEqual(self.dev.facts['model'], 'MX960')
+        self.assertEqual(self.dev.facts['model_info'], {'re1': 'MX960'})
+        self.assertEqual(self.dev.facts['version'], '18.3I20180716_1639')
+        self.assertEqual(self.dev.facts['version_RE1'], '18.3I20180716_1639')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_info_txp(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_txp
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
@@ -303,6 +315,10 @@ class TestGetSoftwareInformation(unittest.TestCase):
     def _mock_manager_dual(self, *args, **kwargs):
         if args:
             return self._read_file('sw_info_dual_' + args[0].tag + '.xml')
+
+    def _mock_manager_dual_other_re_off(self, *args, **kwargs):
+        if args:
+            return self._read_file('sw_info_dual_other_re_off.xml').getparent()
 
     def _mock_manager_txp(self, *args, **kwargs):
         if args:
