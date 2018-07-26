@@ -1,14 +1,18 @@
 import re
+import logging
+
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos.exception import RpcError
+from jnpr.junos import jxml as JXML
 
+logger = logging.getLogger('jnpr.junos.facts.get_software_information')
 
 def _get_software_information(device):
     # See if device understands "invoke-on all-routing-engines"
     try:
         return device.rpc.cli("show version invoke-on all-routing-engines",
                               format='xml', normalize=True)
-    except RpcError:
+    except RpcError as err:
         # See if device is VC Capable
         if device.facts['vc_capable'] is True:
             try:
@@ -16,6 +20,17 @@ def _get_software_information(device):
                                       normalize=True)
             except Exception:
                 pass
+        # check if rpc-reply got 2 child element, one rpc-error and another
+        # software information
+        elif hasattr(err, 'rpc_error') and err.rpc_error is not None and \
+                        'Could not connect to ' in err.rpc_error.get('message'):
+            logger.debug(err.rpc_error.get('message'))
+            # getparent as rpc-reply got software-information in 2nd element
+            # and dev.cli return just 1st element.
+            rsp = err.xml.getparent()
+            rsp = JXML.remove_namespaces(rsp)
+            if rsp.xpath(".//software-information"):
+                return rsp
         try:
             # JDM for Junos Node Slicing
             return device.rpc.get_software_information(all_servers=True,
@@ -88,7 +103,6 @@ def get_facts(device):
 
     rsp = _get_software_information(device)
 
-    si_rsp = None
     if rsp.tag == 'software-information':
         si_rsp = [rsp]
     else:
