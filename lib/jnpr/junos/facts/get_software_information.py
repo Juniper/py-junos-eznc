@@ -204,7 +204,12 @@ def get_facts(device):
         elif 'node0' in junos_info:
             version_RE0 = junos_info['node0']['text']
         elif 'bsys-re0' in junos_info:
-            version_RE0 = junos_info['bsys-re0']['text']
+            if len(junos_info) > 4:
+                version_RE0 = junos_info['bsys-re0']['text']
+            else:
+                for key in junos_info.keys():
+                    if key.startswith('gnf') and key.endswith('re0'):
+                        version_RE0 = junos_info[key]['text']
         elif 'server0' in junos_info:
             version_RE0 = junos_info['server0']['text']
         if 're1' in junos_info:
@@ -212,7 +217,12 @@ def get_facts(device):
         elif 'node1' in junos_info:
             version_RE1 = junos_info['node1']['text']
         elif 'bsys-re1' in junos_info:
-            version_RE1 = junos_info['bsys-re1']['text']
+            if len(junos_info) > 4:
+                version_RE1 = junos_info['bsys-re1']['text']
+            else:
+                for key in junos_info.keys():
+                    if key.startswith('gnf') and key.endswith('re1'):
+                        version_RE1 = junos_info[key]['text']
         elif 'server1' in junos_info:
             version_RE1 = junos_info['server1']['text']
 
