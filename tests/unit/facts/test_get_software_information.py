@@ -108,6 +108,18 @@ class TestGetSoftwareInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['version_RE1'], '15.1F5.15')
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_info_dual_other_re_off(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_dual_other_re_off
+        print (self.dev.facts)
+        self.assertEqual(self.dev.facts['junos_info']['re1']['text'],
+                         '18.3I20180716_1639')
+        self.assertEqual(self.dev.facts['hostname'], 'R1_re01')
+        self.assertEqual(self.dev.facts['model'], 'MX960')
+        self.assertEqual(self.dev.facts['model_info'], {'re1': 'MX960'})
+        self.assertEqual(self.dev.facts['version'], '18.3I20180716_1639')
+        self.assertEqual(self.dev.facts['version_RE1'], '18.3I20180716_1639')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_info_txp(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_txp
         self.assertEqual(self.dev.facts['junos_info']['re0']['text'],
@@ -196,6 +208,29 @@ class TestGetSoftwareInformation(unittest.TestCase):
                          '17.4-20170718_dev_common.1-secure')
 
     @patch('jnpr.junos.Device.execute')
+    def test_sw_info_gnf(self, mock_execute):
+        self.dev.facts._cache['vc_capable'] = False
+        self.dev.facts._cache['current_re'] = ['gnf7-master', 'gnf7-re0']
+        mock_execute.side_effect = self._mock_manager_gnf
+        self.assertEqual(self.dev.facts['hostname'], 'mgb-gnf-a')
+        self.assertEqual(self.dev.facts['model'], 'MX960')
+        self.assertEqual(self.dev.facts['version'],
+                         '18.4-20180707_dev_common.0')
+        self.assertEqual(self.dev.facts['version_RE0'],
+                         '18.4-20180707_dev_common.0')
+        self.assertEqual(self.dev.facts['version_RE1'],
+                         '18.4-20180707_dev_common.0')
+        self.assertEqual(self.dev.facts['model_info'],
+                         {'bsys-re0': 'MX960',
+                          'bsys-re1': 'MX960',
+                          'gnf7-re0': 'MX960',
+                          'gnf7-re1': 'MX960'})
+        self.assertEqual(self.dev.facts['junos_info']['gnf7-re0']['text'],
+                         '18.4-20180707_dev_common.0')
+        self.assertEqual(self.dev.facts['junos_info']['gnf7-re1']['text'],
+                         '18.4-20180707_dev_common.0')
+
+    @patch('jnpr.junos.Device.execute')
     def test_sw_info_srx_cluster(self, mock_execute):
         self.dev.facts._cache['vc_capable'] = False
         self.dev.facts._cache['current_re'] = ['node0']
@@ -281,6 +316,10 @@ class TestGetSoftwareInformation(unittest.TestCase):
         if args:
             return self._read_file('sw_info_dual_' + args[0].tag + '.xml')
 
+    def _mock_manager_dual_other_re_off(self, *args, **kwargs):
+        if args:
+            return self._read_file('sw_info_dual_other_re_off.xml').getparent()
+
     def _mock_manager_txp(self, *args, **kwargs):
         if args:
             if (args[0].tag == 'command'):
@@ -335,6 +374,17 @@ class TestGetSoftwareInformation(unittest.TestCase):
             else:
                 return self._read_file('sw_info_jdm_' +
                                        args[0].tag + '.xml')
+
+    def _mock_manager_gnf(self, *args, **kwargs):
+        if args:
+            if (args[0].tag == 'command'):
+                raise RpcError()
+            elif (args[0].tag == 'get-software-information' and
+                  args[0].find('./*') is None):
+                return True
+            else:
+                return self._read_file('sw_info_gnf_' + args[0].tag + '.xml')
+
 
     def _mock_manager_err(self, *args, **kwargs):
         if args:
