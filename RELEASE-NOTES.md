@@ -1,4 +1,4 @@
-## Release 2.1.9 - 8 Aug 2018
+## Release 2.1.9 - 8 August 2018
 ### Features Added:
 - None
 
