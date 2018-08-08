@@ -138,6 +138,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 [Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
 
+* v2.1.9: [Dinesh Babu](https://github.com/dineshbaburam91), [Nitin Kumar](https://github.com/vnitinv), [Jacob Neil Taylor](https://github.com/jacobneiltaylor), [Raja Shekar Mekala](https://github.com/rsmekala)
 * v2.1.8: [Dinesh Babu](https://github.com/dineshbaburam91), [Stephen Steiner](https://github.com/ntwrkguru)
 * v2.1.7: [Stacy Smith](https://github.com/stacywsmith)
 * v2.0.0: [Ganesh Nalawade](https://github.com/ganeshrn), [Jainpriyal](https://github.com/Jainpriyal)
