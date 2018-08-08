@@ -3,10 +3,22 @@
 
 ### Bugs Fixed:
 
+## Release 2.1.9 - 08 Aug 2018
+### Features Added:
+- None
+
+### Bugs Fixed:
+- Added op tables and views for SRX security zones #855
+- Changed facts for DVATIA platform #856
+- Fixed issue in gathering facts when other RE is rebooting/off #852
+- Added and fixed existing unit test cases in PyEZ #838 #854 #840
+- Fixed RpcTimeoutError for pdiff() #839
+-  Handled newer junos device #853
+
 
 ## Release 2.1.8 - 31 May 2018
 ### Features Added:
--None
+- None
 
 ### Bugs Fixed:
 - Correct PyEZ TechWiki link #813
