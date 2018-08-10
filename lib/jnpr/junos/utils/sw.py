@@ -91,6 +91,7 @@ class SW(Util):
         self._single_re_issu = bool('current_re' in dev.facts and
                                     'localre' in dev.facts['current_re'])
         self.log = lambda report: None
+        self._is_linux = bool('_is_linux' in dev.facts and dev.facts['_is_linux'])
 
     # -----------------------------------------------------------------------
     # CLASS METHODS
@@ -967,11 +968,14 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if in_min >= 0 and at is None:
-            cmd = E('request-reboot', E('in', str(in_min)))
+        if self._is_linux:
+            cmd = E('request-shutdown-reboot')
         else:
-            cmd = E('request-reboot', E('at', str(at)))
-
+            cmd = E('request-reboot')
+        if in_min >= 0 and at is None:
+            cmd.append(E('in', str(in_min)))
+        else:
+            cmd.append(E('at', str(at)))
         if all_re is True:
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
@@ -1007,8 +1011,11 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        cmd = E('request-power-off', E('in', str(in_min)))
-
+        if self._is_linux:
+            cmd = E('request-shutdown-power-off')
+        else:
+            cmd = E('request-power-off')
+        cmd.append(E('in', str(in_min)))
         if self._multi_RE is True and self._multi_VC is False:
             cmd.append(E('both-routing-engines'))
         try:
