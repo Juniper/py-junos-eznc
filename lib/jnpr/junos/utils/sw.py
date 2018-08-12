@@ -91,7 +91,6 @@ class SW(Util):
         self._single_re_issu = bool('current_re' in dev.facts and
                                     'localre' in dev.facts['current_re'])
         self.log = lambda report: None
-        self._is_linux = bool('_is_linux' in dev.facts and dev.facts['_is_linux'])
 
     # -----------------------------------------------------------------------
     # CLASS METHODS
@@ -968,7 +967,7 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if self._is_linux:
+        if hasattr(self._dev, '_is_linux') and self.dev.facts['_is_linux']:
             cmd = E('request-shutdown-reboot')
         else:
             cmd = E('request-reboot')
@@ -1011,7 +1010,7 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if self._is_linux:
+        if hasattr(self._dev, '_is_linux') and self.dev.facts['_is_linux']:
             cmd = E('request-shutdown-power-off')
         else:
             cmd = E('request-power-off')

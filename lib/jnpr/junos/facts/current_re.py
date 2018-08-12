@@ -1,7 +1,5 @@
 from jnpr.junos.exception import RpcError
 import re
-from lxml import etree
-from pprint import pprint
 
 
 def provides_facts():
