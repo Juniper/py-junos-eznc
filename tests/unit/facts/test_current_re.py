@@ -5,6 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import os
+from lxml import etree
 
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
@@ -84,32 +85,49 @@ class TestCurrentRe(unittest.TestCase):
 
     def _mock_manager_current_re(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('current_re_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_current_re_empty(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_empty_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('current_re_empty_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_current_re_srx_primary(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_srx_primary_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('current_re_srx_primary_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_current_re_srx_secondary(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_srx_secondary_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('current_re_srx_secondary_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_current_re_srx_index_err(self, *args, **kwargs):
         if args:
-            return self._read_file('current_re_srx_index_err_' + args[0].tag +
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('current_re_srx_index_err_' + args[0].tag +
                                    '.xml')
 
     def _mock_manager_current_re_jdm(self, *args, **kwargs):
         if args:
-            if (args[0].tag == 'get-interface-information'):
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            elif (args[0].tag == 'get-interface-information'):
                 raise RpcError()
             else:
                 return self._read_file('current_re_jdm_' + args[0].tag +
