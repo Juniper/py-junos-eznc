@@ -71,6 +71,10 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class _Connection(object):
+    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
+        platform.release().startswith('JNPR') or \
+               os.path.isfile('/usr/share/cevo/cevo_version')
+    auto_probe = 0          # default is no auto-probe
 
     # ------------------------------------------------------------------------
     # property: hostname
@@ -990,9 +994,6 @@ class Device(_Connection):
             dev.open()   # this will probe before attempting NETCONF connect
 
     """
-    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
-        platform.release().startswith('JNPR')
-    auto_probe = 0          # default is no auto-probe
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -1255,7 +1256,8 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local': False})
+                device_params={'name': 'junos', 'local':
+                    self.__class__.ON_JUNOS})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1321,8 +1323,12 @@ class Device(_Connection):
         Closes the connection to the device only if connected.
         """
         if self.connected is True:
-            self._conn.close_session()
-            self.connected = False
+            try:
+                self._conn.close_session()
+            except NcErrors.SessionCloseError:
+                pass
+            finally:
+                self.connected = False
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):

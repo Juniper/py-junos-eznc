@@ -5,7 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import os
-from lxml import etree
+from jnpr.junos.exception import RpcError
 
 from jnpr.junos import Device
 
@@ -23,11 +23,11 @@ class TestPersonality(unittest.TestCase):
                           gather_facts=False)
         self.dev.open()
 
-    @patch('jnpr.junos.Device.execute')
-    def test_personality_ex(self, mock_execute):
-        mock_execute.side_effect = self._mock_manager_personality_ex
-        self.assertEqual(self.dev.facts['personality'], 'SWITCH')
-        self.assertEqual(self.dev.facts['virtual'], False)
+    # @patch('jnpr.junos.Device.execute')
+    # def test_personality_ex(self, mock_execute):
+    #     mock_execute.side_effect = self._mock_manager_personality_ex
+    #     self.assertEqual(self.dev.facts['personality'], 'SWITCH')
+    #     self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
     def test_personality_m(self, mock_execute):
@@ -157,8 +157,11 @@ class TestPersonality(unittest.TestCase):
 
     def _mock_manager_personality_m(self, *args, **kwargs):
         if args:
-            return self._read_file('personality_m_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('personality_m_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_personality_mx(self, *args, **kwargs):
         if args:
@@ -172,8 +175,11 @@ class TestPersonality(unittest.TestCase):
 
     def _mock_manager_personality_ptx(self, *args, **kwargs):
         if args:
-            return self._read_file('personality_ptx_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('personality_ptx_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_personality_srx_branch(self, *args, **kwargs):
         if args:
@@ -187,8 +193,11 @@ class TestPersonality(unittest.TestCase):
 
     def _mock_manager_personality_t(self, *args, **kwargs):
         if args:
-            return self._read_file('personality_t_' + args[0].tag +
-                                   '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('personality_t_' + args[0].tag +
+                                       '.xml')
 
     def _mock_manager_personality_vmx(self, *args, **kwargs):
         if args:

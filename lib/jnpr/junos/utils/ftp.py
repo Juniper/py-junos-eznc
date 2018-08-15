@@ -68,7 +68,10 @@ class FTP(ftplib.FTP):
                     remote_file = os.path.join('/tmp/', local_file)
                 else:
                     remote_file = os.path.join(remote_path, local_file)
-            self.storbinary('STOR ' + remote_file, open(local_file, 'rb'))
+
+            self.storbinary(cmd='STOR ' + remote_file,
+                                fp=open(local_file, 'rb'),
+                                callback=self._ftpargs.get('callback'))
         except Exception as ex:
             logger.error(ex)
             return False

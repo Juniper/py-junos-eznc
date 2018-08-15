@@ -1,14 +1,37 @@
 import re
+import logging
+
 from jnpr.junos.facts.swver import version_info
 from jnpr.junos.exception import RpcError
+from jnpr.junos import jxml as JXML
 
+logger = logging.getLogger('jnpr.junos.facts.get_software_information')
 
 def _get_software_information(device):
     # See if device understands "invoke-on all-routing-engines"
     try:
         return device.rpc.cli("show version invoke-on all-routing-engines",
                               format='xml', normalize=True)
-    except RpcError:
+    except RpcError as err:
+        # See if device runs on a linux kernel
+        if device.facts['_is_linux']:
+            sw_info_all = device.rpc.get_software_information(normalize=True,
+                                                              node='all')
+            sw_info_re0 = device.rpc.get_software_information(normalize=True,
+                                                              node='re0')
+            sw_info_re1 = device.rpc.get_software_information(normalize=True,
+                                                              node='re1')
+            re0_hostname = sw_info_re0.findtext('./host-name')
+            re1_hostname = sw_info_re1.findtext('./host-name')
+            for current_hostname in sw_info_all.findall(
+                './multi-routing-engine-result/software-information/host-name'):
+                if current_hostname.text == re0_hostname:
+                    current_hostname.getparent().getparent().append(
+                        JXML('<re-name>re0</re-name>'))
+                elif current_hostname.text == re1_hostname:
+                    current_hostname.getparent().getparent().append(
+                        JXML('<re-name>re1</re-name>'))
+            return sw_info_all
         # See if device is VC Capable
         if device.facts['vc_capable'] is True:
             try:
@@ -16,6 +39,17 @@ def _get_software_information(device):
                                       normalize=True)
             except Exception:
                 pass
+        # check if rpc-reply got 2 child element, one rpc-error and another
+        # software information
+        elif hasattr(err, 'rpc_error') and err.rpc_error is not None and \
+                        'Could not connect to ' in err.rpc_error.get('message'):
+            logger.debug(err.rpc_error.get('message'))
+            # getparent as rpc-reply got software-information in 2nd element
+            # and dev.cli return just 1st element.
+            rsp = err.xml.getparent()
+            rsp = JXML.remove_namespaces(rsp)
+            if rsp.xpath(".//software-information"):
+                return rsp
         try:
             # JDM for Junos Node Slicing
             return device.rpc.get_software_information(all_servers=True,
@@ -88,7 +122,6 @@ def get_facts(device):
 
     rsp = _get_software_information(device)
 
-    si_rsp = None
     if rsp.tag == 'software-information':
         si_rsp = [rsp]
     else:
@@ -190,7 +223,12 @@ def get_facts(device):
         elif 'node0' in junos_info:
             version_RE0 = junos_info['node0']['text']
         elif 'bsys-re0' in junos_info:
-            version_RE0 = junos_info['bsys-re0']['text']
+            if len(junos_info) > 4:
+                version_RE0 = junos_info['bsys-re0']['text']
+            else:
+                for key in junos_info.keys():
+                    if key.startswith('gnf') and key.endswith('re0'):
+                        version_RE0 = junos_info[key]['text']
         elif 'server0' in junos_info:
             version_RE0 = junos_info['server0']['text']
         if 're1' in junos_info:
@@ -198,7 +236,12 @@ def get_facts(device):
         elif 'node1' in junos_info:
             version_RE1 = junos_info['node1']['text']
         elif 'bsys-re1' in junos_info:
-            version_RE1 = junos_info['bsys-re1']['text']
+            if len(junos_info) > 4:
+                version_RE1 = junos_info['bsys-re1']['text']
+            else:
+                for key in junos_info.keys():
+                    if key.startswith('gnf') and key.endswith('re1'):
+                        version_RE1 = junos_info[key]['text']
         elif 'server1' in junos_info:
             version_RE1 = junos_info['server1']['text']
 
