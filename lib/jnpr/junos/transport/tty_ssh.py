@@ -136,19 +136,17 @@ class SSH(Terminal):
 
     def read(self):
         """ read a single line """
-        gotr = []
+        rxb = six.b('')
         while True:
             data = self._ssh.recv(1)
             if data is None or len(data) <= 0:
                 raise ValueError('Unable to detect device prompt')
-            elif '\n' in data:
+            elif PY6.NEW_LINE in data:
                 break
             else:
-                gotr.append(data)
+                rxb += data
 
-        self._rt = ''.join(str(s) for s in gotr)
-
-        return self._rt
+        return rxb
 
     def read_prompt(self):
         """
@@ -167,7 +165,7 @@ class SSH(Terminal):
             rd, _, _ = select.select([self._ssh], [], [], 0.1)
             sleep(0.05)
             if rd:
-                rxb += self._ssh.recv(self.MAX_BUFFER)
+                rxb += self._ssh.recv(1)
                 found = _PROMPT.search(rxb)
                 if found is not None:
                     break
