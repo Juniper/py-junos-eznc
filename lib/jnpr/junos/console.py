@@ -108,15 +108,16 @@ class Console(_Connection):
             'passwd',
             '')
         self._port = kvargs.get('port', '23')
-        self._ssh_config = kvargs.get('ssh_config')
-        self._sshconf_lkup()
+        self._mode = kvargs.get('mode', 'telnet')
+        self._baud = kvargs.get('baud', '9600')
+        if self._mode.upper() == 'CS_SSH':
+            self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_lkup()
         self.cs_user = kvargs.get(
             'cs_user') or self._conf_auth_user or self._auth_user
         self.cs_passwd = kvargs.get('cs_passwd', self._auth_password)
         self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
                                      or self._conf_ssh_private_key_file
-        self._baud = kvargs.get('baud', '9600')
-        self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
         self._attempts = kvargs.get('attempts', 10)
