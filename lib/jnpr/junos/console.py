@@ -52,7 +52,7 @@ class Console(_Connection):
             *OPTIONAL*  baud, default baud rate is 9600
 
         :param str mode:
-            *OPTIONAL*  mode, mode of connection (telnet/serial)
+            *OPTIONAL*  mode, mode of connection (telnet/serial/cs_ssh)
             default is telnet
 
         :param int timeout:
@@ -105,8 +105,8 @@ class Console(_Connection):
             '') or kvargs.get(
             'passwd',
             '')
-        self.s_user = kvargs.get('s_user', self._auth_user)
-        self.s_passwd = kvargs.get('s_passwd', self._auth_password)
+        self.cs_user = kvargs.get('cs_user', self._auth_user)
+        self.cs_passwd = kvargs.get('cs_passwd', self._auth_password)
         self._port = kvargs.get('port', '23')
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
@@ -179,7 +179,7 @@ class Console(_Connection):
         # ---------------------------------------------------------------
         # validate device hostname or IP address
         # ---------------------------------------------------------------
-        if (self._mode.upper() == 'TELNET' or self._mode.upper() == 'SSH') and self._hostname is None:
+        if (self._mode.upper() == 'TELNET' or self._mode.upper() == 'CS_SSH') and self._hostname is None:
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
@@ -277,9 +277,9 @@ class Console(_Connection):
             tty_args['console_has_banner'] = self.console_has_banner
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
-        elif self._mode.upper() == 'SSH':
-            tty_args['s_user'] = self.s_user
-            tty_args['s_passwd'] = self.s_passwd
+        elif self._mode.upper() == 'CS_SSH':
+            tty_args['cs_user'] = self.cs_user
+            tty_args['cs_passwd'] = self.cs_passwd
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
             tty_args['console_has_banner'] = self.console_has_banner
@@ -291,7 +291,7 @@ class Console(_Connection):
             self._tty = Serial(**tty_args)
         else:
             logger.error('Mode should be one of: telnet, serial, ssh')
-            raise AttributeError('Mode to be telnet/serial/ssh')
+            raise AttributeError('Mode to be telnet/serial/cs_ssh')
 
         self._tty.login()
 

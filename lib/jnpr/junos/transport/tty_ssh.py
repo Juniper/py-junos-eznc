@@ -72,8 +72,8 @@ class SSH(Terminal):
         while retry > 0:
             try:
                 self._ssh_pre.connect(hostname=self.host, port=int(self.port),
-                                      username=self.c_user,
-                                      password=self.c_passwd,
+                                      username=self.cs_user,
+                                      password=self.cs_passwd,
                                       timeout=self.timeout, allow_agent=False,
                                       look_for_keys=False)
                 break
