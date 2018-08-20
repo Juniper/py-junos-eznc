@@ -49,6 +49,7 @@ class SSH(Terminal):
         self._ssh_pre = self._ssh_client_pre()
         self.host = host
         self.port = port
+        self.ssh_private_key_file = kvargs.get('ssh_private_key_file')
         self.timeout = kvargs.get('timeout', self.TIMEOUT)
         self.baud = kvargs.get('baud', 9600)
         self._tty_name = "{}:{}".format(host, port)
@@ -69,13 +70,25 @@ class SSH(Terminal):
 
     def _tty_open(self):
         retry = self.RETRY_OPEN
+
+        # we want to enable the ssh-agent if-and-only-if we are
+        # not given a password or an ssh key file.
+        # in this condition it means we want to query the agent
+        # for available ssh keys
+        allow_agent = bool((self.cs_passwd is None) and
+                           (self.ssh_private_key_file is None))
+
         while retry > 0:
             try:
-                self._ssh_pre.connect(hostname=self.host, port=int(self.port),
+                self._ssh_pre.connect(hostname=self.host,
+                                      port=int(self.port),
                                       username=self.cs_user,
                                       password=self.cs_passwd,
-                                      timeout=self.timeout, allow_agent=False,
-                                      look_for_keys=False)
+                                      timeout=self.timeout,
+                                      allow_agent=allow_agent,
+                                      look_for_keys=False,
+                                      key_filename=self.ssh_private_key_file,
+                                      )
                 break
             except socket.error as err:
                 retry -= 1

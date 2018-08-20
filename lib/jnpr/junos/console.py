@@ -100,14 +100,21 @@ class Console(_Connection):
         # hostname is not required in serial mode connection
         self._hostname = kvargs.get('host')
         self._auth_user = kvargs.get('user', 'root')
+        self._conf_auth_user = None
+        self._conf_ssh_private_key_file = None
         self._auth_password = kvargs.get(
             'password',
             '') or kvargs.get(
             'passwd',
             '')
-        self.cs_user = kvargs.get('cs_user', self._auth_user)
-        self.cs_passwd = kvargs.get('cs_passwd', self._auth_password)
         self._port = kvargs.get('port', '23')
+        self._ssh_config = kvargs.get('ssh_config')
+        self._sshconf_lkup()
+        self.cs_user = kvargs.get(
+            'cs_user') or self._conf_auth_user or self._auth_user
+        self.cs_passwd = kvargs.get('cs_passwd', self._auth_password)
+        self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                                     or self._conf_ssh_private_key_file
         self._baud = kvargs.get('baud', '9600')
         self._mode = kvargs.get('mode', 'telnet')
         self._timeout = kvargs.get('timeout', '0.5')
@@ -121,7 +128,6 @@ class Console(_Connection):
                           (self._fact_style), RuntimeWarning)
         self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
-        self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
@@ -283,6 +289,7 @@ class Console(_Connection):
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
             tty_args['console_has_banner'] = self.console_has_banner
+            tty_args['ssh_private_key_file'] = self._ssh_private_key_file
             self.console = ('ssh', self._hostname, self.port)
             self._tty = SSH(**tty_args)
         elif self._mode.upper() == 'SERIAL':
