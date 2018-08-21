@@ -52,7 +52,7 @@ class Console(_Connection):
             *OPTIONAL*  baud, default baud rate is 9600
 
         :param str mode:
-            *OPTIONAL*  mode, mode of connection (telnet/serial/cs_ssh)
+            *OPTIONAL*  mode, mode of connection (telnet/serial)
             default is telnet
 
         :param int timeout:
@@ -110,12 +110,11 @@ class Console(_Connection):
         self._port = kvargs.get('port', '23')
         self._mode = kvargs.get('mode', 'telnet')
         self._baud = kvargs.get('baud', '9600')
-        if self._mode.upper() == 'CS_SSH':
+        if self._hostname:
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
-        self.cs_user = kvargs.get(
-            'cs_user') or self._conf_auth_user or self._auth_user
-        self.cs_passwd = kvargs.get('cs_passwd', self._auth_password)
+        self.cs_user = kvargs.get('cs_user') or self._conf_auth_user
+        self.cs_passwd = kvargs.get('cs_passwd')
         self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
                                      or self._conf_ssh_private_key_file
         self._timeout = kvargs.get('timeout', '0.5')
@@ -186,7 +185,7 @@ class Console(_Connection):
         # ---------------------------------------------------------------
         # validate device hostname or IP address
         # ---------------------------------------------------------------
-        if (self._mode.upper() == 'TELNET' or self._mode.upper() == 'CS_SSH') and self._hostname is None:
+        if (self._mode.upper() == 'TELNET' or self.cs_user is not None) and self._hostname is None:
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
@@ -284,7 +283,7 @@ class Console(_Connection):
             tty_args['console_has_banner'] = self.console_has_banner
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
-        elif self._mode.upper() == 'CS_SSH':
+        elif self.cs_user is not None:
             tty_args['cs_user'] = self.cs_user
             tty_args['cs_passwd'] = self.cs_passwd
             tty_args['host'] = self._hostname
@@ -298,8 +297,8 @@ class Console(_Connection):
             self.console = ('serial', self._port)
             self._tty = Serial(**tty_args)
         else:
-            logger.error('Mode should be one of: telnet, serial, ssh')
-            raise AttributeError('Mode to be telnet/serial/cs_ssh')
+            logger.error('Mode should be either telnet or serial')
+            raise AttributeError('Mode to be telnet/serial')
 
         self._tty.login()
 
