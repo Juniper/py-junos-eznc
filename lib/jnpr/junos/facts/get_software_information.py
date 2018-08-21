@@ -13,6 +13,25 @@ def _get_software_information(device):
         return device.rpc.cli("show version invoke-on all-routing-engines",
                               format='xml', normalize=True)
     except RpcError as err:
+        # See if device runs on a linux kernel
+        if device.facts['_is_linux']:
+            sw_info_all = device.rpc.get_software_information(normalize=True,
+                                                              node='all')
+            sw_info_re0 = device.rpc.get_software_information(normalize=True,
+                                                              node='re0')
+            sw_info_re1 = device.rpc.get_software_information(normalize=True,
+                                                              node='re1')
+            re0_hostname = sw_info_re0.findtext('./host-name')
+            re1_hostname = sw_info_re1.findtext('./host-name')
+            for current_hostname in sw_info_all.findall(
+                './multi-routing-engine-result/software-information/host-name'):
+                if current_hostname.text == re0_hostname:
+                    current_hostname.getparent().getparent().append(
+                        JXML('<re-name>re0</re-name>'))
+                elif current_hostname.text == re1_hostname:
+                    current_hostname.getparent().getparent().append(
+                        JXML('<re-name>re1</re-name>'))
+            return sw_info_all
         # See if device is VC Capable
         if device.facts['vc_capable'] is True:
             try:

@@ -293,6 +293,8 @@ class TestGetSoftwareInformation(unittest.TestCase):
             if (args[0].tag == 'command' and
                args[0].text == 'show version invoke-on all-routing-engines'):
                 raise RpcError()
+            elif args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
             else:
                 return self._read_file('sw_info_vc_' + args[0].tag + '.xml')
 
@@ -314,7 +316,10 @@ class TestGetSoftwareInformation(unittest.TestCase):
 
     def _mock_manager_dual(self, *args, **kwargs):
         if args:
-            return self._read_file('sw_info_dual_' + args[0].tag + '.xml')
+            if args[0].tag == 'file-show' and args[0].xpath('filename')[0].text == '/usr/share/cevo/cevo_version':
+                raise RpcError
+            else:
+                return self._read_file('sw_info_dual_' + args[0].tag + '.xml')
 
     def _mock_manager_dual_other_re_off(self, *args, **kwargs):
         if args:
