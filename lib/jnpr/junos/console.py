@@ -113,7 +113,7 @@ class Console(_Connection):
         if self._hostname:
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
-        self.cs_user = kvargs.get('cs_user') or self._conf_auth_user
+        self.cs_user = kvargs.get('cs_user')
         self.cs_passwd = kvargs.get('cs_passwd')
         self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
                                      or self._conf_ssh_private_key_file
