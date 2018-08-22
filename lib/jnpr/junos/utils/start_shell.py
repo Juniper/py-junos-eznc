@@ -4,7 +4,7 @@ import re
 import datetime
 
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#|$)\s'
+_SHELL_PROMPT = '(%|#|\$)\s'
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -97,7 +97,7 @@ class StartShell(object):
         self._client = client
         self._chan = chan
 
-        got = self.wait_for(r'(%|>|#|$)')
+        got = self.wait_for(r'(%|>|#|\$)')
         if got[-1].endswith(_JUNOS_PROMPT):
             self.send('start shell')
             self.wait_for(_SHELL_PROMPT)
