@@ -34,7 +34,7 @@ class StartShell(object):
         self._nc = nc
         self.timeout = timeout
 
-    def wait_for(self, this=_SHELL_PROMPT, timeout=0):
+    def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Wait for the result of the command, expecting **this** prompt.
 
@@ -43,6 +43,11 @@ class StartShell(object):
         :param int timeout:
           Timeout value in seconds to wait for expected string/pattern.
           If not specified defaults to self.timeout.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: resulting string of data in a list
         :rtype: list
@@ -58,6 +63,8 @@ class StartShell(object):
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
                 data = chan.recv(_RECVSZ)
+                if sleep:
+                    time.sleep(sleep)
                 if isinstance(data, bytes):
                     data = data.decode('utf-8', 'replace')
                 got.append(data)
@@ -107,7 +114,7 @@ class StartShell(object):
         self._chan.close()
         self._client.close()
 
-    def run(self, command, this=_SHELL_PROMPT, timeout=0):
+    def run(self, command, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Run a shell command and wait for the response.  The return is a
         tuple. The first item is True/False if exit-code is 0.  The second
@@ -123,6 +130,11 @@ class StartShell(object):
           to individual run call. If ``this`` is provided with None value,
           function will wait till timeout value to grab all the content from
           command output.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: (last_ok, result of the executed shell command (str) )
 
@@ -141,7 +153,7 @@ class StartShell(object):
         timeout = timeout or self.timeout
         # run the command and capture the output
         self.send(command)
-        got = ''.join(self.wait_for(this, timeout))
+        got = ''.join(self.wait_for(this, timeout, sleep=sleep))
         self.last_ok = False
         if this is None:
             self.last_ok = got is not ''
