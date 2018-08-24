@@ -3,7 +3,7 @@ from lxml import etree
 
 # local
 from jnpr.junos.factory.table import Table
-from jnpr.junos.jxml import remove_namespaces
+from jnpr.junos.jxml import remove_namespaces, remove_namespaces_and_spaces
 
 
 class OpTable(Table):
@@ -53,7 +53,9 @@ class OpTable(Table):
 
         argkey = vargs[0] if len(vargs) else None
 
-        rpc_args = {'normalize': True}    # create default <dict>
+        # rpc_args = {'normalize': True}    # create default <dict>
+        rpc_args = {}
+        self.D.transform = lambda: remove_namespaces_and_spaces
         rpc_args.update(self.GET_ARGS)    # copy default args
         # saltstack get_table pass args as named keyword
         if 'args' in kvargs and isinstance(kvargs['args'], dict):
