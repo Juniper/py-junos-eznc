@@ -1,6 +1,6 @@
 from ncclient import manager
 from ncclient.xml_ import NCElement
-from lxml import etree, objectify
+from lxml import etree
 import six
 
 """
