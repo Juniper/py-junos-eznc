@@ -109,7 +109,7 @@ class Console(_Connection):
             '')
         self.cs_user = kvargs.get('cs_user')
         self.cs_passwd = kvargs.get('cs_passwd')
-        self._port = kvargs.get('port', 22 if self.cs_user else 23)
+        self._port = kvargs.get('port', '22' if self.cs_user else '23')
         self._mode = kvargs.get('mode', None if self.cs_user else 'telnet')
         self._baud = kvargs.get('baud', '9600')
         if self._hostname:
