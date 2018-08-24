@@ -277,7 +277,7 @@ class Console(_Connection):
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
         tty_args['baud'] = self._baud
-        if self._mode.upper() == 'TELNET':
+        if self._mode and self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
             tty_args['console_has_banner'] = self.console_has_banner
