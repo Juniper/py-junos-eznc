@@ -53,7 +53,6 @@ class OpTable(Table):
 
         argkey = vargs[0] if len(vargs) else None
 
-        # rpc_args = {'normalize': True}    # create default <dict>
         rpc_args = {}
         self.D.transform = lambda: remove_namespaces_and_spaces
         rpc_args.update(self.GET_ARGS)    # copy default args
