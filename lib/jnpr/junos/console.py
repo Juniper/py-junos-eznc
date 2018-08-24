@@ -185,7 +185,7 @@ class Console(_Connection):
         # ---------------------------------------------------------------
         # validate device hostname or IP address
         # ---------------------------------------------------------------
-        if (self._mode.upper() == 'TELNET' or self.cs_user is not None) and self._hostname is None:
+        if ((self._mode and self._mode.upper() == 'TELNET') or self.cs_user is not None) and self._hostname is None:
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
