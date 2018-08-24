@@ -107,8 +107,8 @@ class Console(_Connection):
             '') or kvargs.get(
             'passwd',
             '')
-        self._port = kvargs.get('port', '23')
-        self._mode = kvargs.get('mode', 'telnet')
+        self._port = kvargs.get('port', 22 if self.cs_user else 23)
+        self._mode = kvargs.get('mode', None if self.cs_user else 'telnet')
         self._baud = kvargs.get('baud', '9600')
         if self._hostname:
             self._ssh_config = kvargs.get('ssh_config')
@@ -277,7 +277,7 @@ class Console(_Connection):
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
         tty_args['baud'] = self._baud
-        if self._mode.upper() == 'TELNET':
+        if self._mode and self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
             tty_args['console_has_banner'] = self.console_has_banner
