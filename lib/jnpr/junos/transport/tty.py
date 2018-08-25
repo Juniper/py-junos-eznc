@@ -78,8 +78,8 @@ class Terminal(object):
         self.hostname = self.__dict__.get('host')
         self.user = kvargs.get('user', 'root')
         self.passwd = kvargs.get('passwd', '')
-        self.c_user = kvargs.get('s_user', self.user)
-        self.c_passwd = kvargs.get('s_passwd', self.passwd)
+        self.cs_user = kvargs.get('cs_user')
+        self.cs_passwd = kvargs.get('cs_passwd')
         self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
         self.console_has_banner = kvargs.get('console_has_banner') or False
 
