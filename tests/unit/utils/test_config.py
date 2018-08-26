@@ -634,22 +634,18 @@ class TestConfig(unittest.TestCase):
             self.dev.rpc.commit_configuration()
         except Exception as ex:
             self.assertTrue(isinstance(ex, RpcError))
-            if ncclient.__version__ > (0, 4, 5):
-                self.assertEqual(ex.message,
-                                 "error: interface-range 'axp' is not defined\n"
-                                 "error: interface-ranges expansion failed")
-                self.assertEqual(ex.errs, [
-                    {'source': None, 'message':
-                        "interface-range 'axp' is not defined",
-                     'bad_element': None, 'severity': 'error',
-                     'edit_path': None},
-                    {'source': None,
-                     'message': 'interface-ranges expansion failed',
-                     'bad_element': None, 'severity': 'error',
-                     'edit_path': None}])
-            else:
-                self.assertEqual(ex.message,
-                                 "interface-range 'axp' is not defined")
+            self.assertEqual(ex.message,
+                             "error: interface-range 'axp' is not defined\n"
+                             "error: interface-ranges expansion failed")
+            self.assertEqual(ex.errs, [
+                {'source': None, 'message':
+                    "interface-range 'axp' is not defined",
+                 'bad_element': None, 'severity': 'error',
+                 'edit_path': None},
+                {'source': None,
+                 'message': 'interface-ranges expansion failed',
+                 'bad_element': None, 'severity': 'error',
+                 'edit_path': None}])
 
     @patch('jnpr.junos.utils.config.Config.lock')
     @patch('jnpr.junos.utils.config.Config.unlock')
@@ -823,10 +819,7 @@ class TestConfig(unittest.TestCase):
             raw = etree.XML(foo)
             obj = RPCReply(raw)
             obj.parse()
-            if ncclient.__version__ > (0, 4, 5):
-                raise RPCError(etree.XML(foo), errs=obj._errors)
-            else:
-                raise RPCError(etree.XML(foo))
+            raise RPCError(etree.XML(foo), errs=obj._errors)
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
