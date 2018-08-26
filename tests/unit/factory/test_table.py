@@ -14,6 +14,7 @@ from jnpr.junos.op.phyport import PhyPortTable
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+from ncclient.devices.junos import JunosDeviceHandler
 import sys
 
 if sys.version < '3':
@@ -30,6 +31,8 @@ class TestFactoryTable(unittest.TestCase):
         mock_connect.side_effect = self._mock_manager
         self.dev = Device(host='1.1.1.1', user='rick', password='password123',
                           gather_facts=False)
+        self.device_handler = JunosDeviceHandler(device_params={'name': 'junos',
+                                                                'local': False})
         self.dev.open()
         self.table = Table(dev=self.dev)
         self.ppt = PhyPortTable(self.dev)
@@ -149,8 +152,7 @@ class TestFactoryTable(unittest.TestCase):
                              'rpc-reply', fname)
         foo = open(fpath).read()
 
-        rpc_reply = NCElement(foo, self.dev._conn.
-                              _device_handler.transform_reply())\
+        rpc_reply = NCElement(foo, self.device_handler.transform_reply())\
             ._NCElement__doc[0]
         return rpc_reply
 

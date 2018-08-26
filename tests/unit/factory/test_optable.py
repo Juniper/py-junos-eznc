@@ -11,6 +11,7 @@ from jnpr.junos.op.ethport import EthPortTable
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
+from ncclient.operations.rpc import RPCReply
 
 from mock import patch
 
@@ -94,8 +95,9 @@ class TestFactoryOpTable(unittest.TestCase):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
         foo = open(fpath).read()
-
-        rpc_reply = NCElement(foo, self.dev._conn.
+        reply = RPCReply(foo)
+        reply.parse()
+        rpc_reply = NCElement(reply, self.dev._conn.
                               _device_handler.transform_reply())\
             ._NCElement__doc[0]
         return rpc_reply
