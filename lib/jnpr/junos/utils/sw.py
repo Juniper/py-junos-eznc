@@ -944,7 +944,7 @@ class SW(Util):
     # reboot - system reboot
     # -------------------------------------------------------------------------
 
-    def reboot(self, in_min=0, at=None, all_re=True):
+    def reboot(self, in_min=0, at=None, all_re=True, on_node=None):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -960,6 +960,10 @@ class SW(Util):
         :param bool all_re: In case of dual re or VC setup, function by default
             will reboot all. If all is False will only reboot connected device
 
+        :param str on_node: In case of linux based device, function will by default
+            reboot the whole device. If any specific node is mentioned,
+            reboot will be performed on mentioned node
+
         :returns:
             * reboot message (string) if command successful
 
@@ -967,19 +971,29 @@ class SW(Util):
 
         .. todo:: need to better handle the exception event.
         """
-        if in_min >= 0 and at is None:
-            cmd = E('request-reboot', E('in', str(in_min)))
+        if self._dev.facts['_is_linux']:
+            if on_node is None:
+                cmd = E('request-shutdown-reboot')
+            else:
+                cmd = E('request-node-reboot')
+                cmd.append(E('node', on_node))
         else:
-            cmd = E('request-reboot', E('at', str(at)))
-
-        if all_re is True:
-            if self._multi_RE is True and self._multi_VC is False:
-                cmd.append(E('both-routing-engines'))
-            elif self._mixed_VC is True:
-                cmd.append(E('all-members'))
+            cmd = E('request-reboot')
+            if all_re is True:
+                if self._multi_RE is True and self._multi_VC is False:
+                    cmd.append(E('both-routing-engines'))
+                elif self._mixed_VC is True:
+                    cmd.append(E('all-members'))
+        if in_min >= 0 and at is None:
+            cmd.append(E('in', str(in_min)))
+        else:
+            cmd.append(E('at', str(at)))
         try:
             rsp = self.rpc(cmd)
-            got = rsp.getparent().findtext('.//request-reboot-status').strip()
+            if self._dev.facts['_is_linux']:
+                got = rsp.text
+            else:
+                got = rsp.getparent().findtext('.//request-reboot-status').strip()
             return got
         except RpcTimeoutError as err:
             raise err
@@ -991,29 +1005,44 @@ class SW(Util):
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
 
-    def poweroff(self, in_min=0):
+    def poweroff(self, in_min=0, on_node=None):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
         rebooted.  This code also handles EX/QFX VC.
 
-        :param int in_min: time (minutes) before rebooting the device.
+        :param int in_min: time (minutes) before shutting down the device.
+
+        :param str on_node: In case of linux based device, function will by default
+            shutdown the whole device. If any specific node is mentioned,
+            shutdown will be performed on mentioned node
 
         :returns:
-            * reboot message (string) if command successful
+            * power-off message (string) if command successful
 
         :raises RpcError: when command is not successful.
 
         .. todo:: need to better handle the exception event.
         """
-        cmd = E('request-power-off', E('in', str(in_min)))
-
-        if self._multi_RE is True and self._multi_VC is False:
-            cmd.append(E('both-routing-engines'))
+        if self._dev.facts['_is_linux']:
+            if on_node is None:
+                cmd = E('request-shutdown-power-off')
+            else:
+                cmd = E('request-node-power-off')
+                cmd.append(E('node', on_node))
+        else:
+            cmd = E('request-power-off')
+            if self._multi_RE is True and self._multi_VC is False:
+                cmd.append(E('both-routing-engines'))
+        cmd.append(E('in', str(in_min)))
         try:
             rsp = self.rpc(cmd)
-            return rsp.getparent().findtext('.//request-reboot-status').strip()
+            if self._dev.facts['_is_linux']:
+                got = rsp.text
+            else:
+                got = rsp.getparent().findtext('.//request-reboot-status').strip()
+            return got
         except Exception as err:
             if err.rsp.findtext('.//error-severity') != 'warning':
                 raise err

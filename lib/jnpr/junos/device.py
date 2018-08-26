@@ -71,9 +71,9 @@ _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class _Connection(object):
-
     ON_JUNOS = platform.system().upper() == 'JUNOS' or \
-        platform.release().startswith('JNPR')
+        platform.release().startswith('JNPR') or \
+               os.path.isfile('/usr/share/cevo/cevo_version')
     auto_probe = 0          # default is no auto-probe
 
     # ------------------------------------------------------------------------
@@ -1054,7 +1054,11 @@ class Device(_Connection):
                              alternative for **host**
 
         :param str host:
-            **REQUIRED** host-name or ipaddress of target device
+            **REQUIRED** host-name or ipaddress of target device, unless sock_fd is provided
+
+        :param str sock_fd:
+            **REQUIRED** file descriptor of an existing socket instead of providing a host.
+            Used for outbound ssh. 
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided
@@ -1118,6 +1122,7 @@ class Device(_Connection):
         hostname = vargs[0] if len(vargs) else kvargs.get('host')
 
         self._port = kvargs.get('port', 830)
+        self._sock_fd = kvargs.get('sock_fd', None)
         self._gather_facts = kvargs.get('gather_facts', True)
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
@@ -1139,10 +1144,12 @@ class Device(_Connection):
             self._ssh_config = None
         else:
             # --------------------------
-            # making a remote connection
+            # making a remote connection 
+            # if hostname is None, this is an 'outbound-ssh' connection
+            # which uses the established TCP connection from sock_fd
             # --------------------------
-            if hostname is None:
-                raise ValueError("You must provide the 'host' value")
+            if hostname is None and self._sock_fd is None: 
+                raise ValueError("You must provide either 'host' or 'sock_fd' value")
             self._hostname = hostname
             # user will default to $USER
             self._auth_user = os.getenv('USER')
@@ -1247,13 +1254,15 @@ class Device(_Connection):
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
                 port=self._port,
+                sock_fd=self._sock_fd,
                 username=self._auth_user,
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local': False})
+                device_params={'name': 'junos', 'local':
+                    self.__class__.ON_JUNOS})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1319,8 +1328,12 @@ class Device(_Connection):
         Closes the connection to the device only if connected.
         """
         if self.connected is True:
-            self._conn.close_session()
-            self.connected = False
+            try:
+                self._conn.close_session()
+            except NcErrors.SessionCloseError:
+                pass
+            finally:
+                self.connected = False
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e):
