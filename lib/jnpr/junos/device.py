@@ -1025,7 +1025,8 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
 
     def __new__(cls, *args, **kwargs):
-        if kwargs.get('port') in [23, '23'] or kwargs.get('mode'):
+        if kwargs.get('port') in [23, '23'] or kwargs.get('mode') or \
+                        kwargs.get('cs_user') is not None:
             from jnpr.junos.console import Console
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
