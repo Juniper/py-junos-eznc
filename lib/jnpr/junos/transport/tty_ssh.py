@@ -186,7 +186,7 @@ class SSH(Terminal):
                 timeout = time() + self.READ_PROMPT_DELAY
         else:
             return None, None
-
+        logger.debug('Got: %s' % rxb)
         return rxb, found.lastgroup
 
     def _read_until(self, match, timeout=None):
