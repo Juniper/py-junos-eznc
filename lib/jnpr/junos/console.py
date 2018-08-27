@@ -201,6 +201,7 @@ class Console(_Connection):
             self.results[
                 'errmsg'] = 'ERROR: Console SSH, Password-less connection is ' \
                             'not supported !!!'
+            logger.error(self.results['errmsg'])
             return self.results
 
         # --------------------
