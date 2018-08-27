@@ -30,6 +30,7 @@ class SSH(Terminal):
     RETRY_BACKOFF = 2  # seconds to wait between retries
     MAX_BUFFER = 65535
     READ_PROMPT_DELAY = 10.0
+    RECVSZ = 1024
 
     def __init__(self, host, port, **kvargs):
         """
@@ -151,7 +152,7 @@ class SSH(Terminal):
         """ read a single line """
         rxb = six.b('')
         while True:
-            data = self._ssh.recv(1)
+            data = self._ssh.recv(self.RECVSZ)
             if data is None or len(data) <= 0:
                 raise ValueError('Unable to detect device prompt')
             elif PY6.NEW_LINE in data:
@@ -178,14 +179,14 @@ class SSH(Terminal):
             rd, _, _ = select.select([self._ssh], [], [], 0.1)
             sleep(0.05)
             if rd:
-                rxb += self._ssh.recv(1)
+                rxb += self._ssh.recv(self.RECVSZ)
                 found = _PROMPT.search(rxb)
                 if found is not None:
                     break
                 timeout = time() + self.READ_PROMPT_DELAY
         else:
             return None, None
-
+        logger.debug('Got: %s' % rxb)
         return rxb, found.lastgroup
 
     def _read_until(self, match, timeout=None):

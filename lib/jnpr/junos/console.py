@@ -185,10 +185,23 @@ class Console(_Connection):
         # ---------------------------------------------------------------
         # validate device hostname or IP address
         # ---------------------------------------------------------------
-        if ((self._mode and self._mode.upper() == 'TELNET') or self.cs_user is not None) and self._hostname is None:
+        if ((self._mode and self._mode.upper() == 'TELNET') or
+                    self.cs_user is not None) and self._hostname is None:
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
+            return self.results
+
+        # ---------------------------------------------------------------
+        # validate console server and password. Password-less connection
+        # is not supported
+        # ---------------------------------------------------------------
+        if self.cs_user is not None and self.cs_passwd is None:
+            self.results['failed'] = True
+            self.results[
+                'errmsg'] = 'ERROR: Console SSH, Password-less connection is ' \
+                            'not supported !!!'
+            logger.error(self.results['errmsg'])
             return self.results
 
         # --------------------
