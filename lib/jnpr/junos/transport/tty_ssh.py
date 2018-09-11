@@ -30,7 +30,7 @@ class SSH(Terminal):
     RETRY_BACKOFF = 2  # seconds to wait between retries
     MAX_BUFFER = 65535
     READ_PROMPT_DELAY = 10.0
-    RECVSZ = 1024
+    RECVSZ = 1
 
     def __init__(self, host, port, **kvargs):
         """
