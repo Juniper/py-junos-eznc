@@ -4,7 +4,7 @@ import re
 import datetime
 
 _JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#)\s'
+_SHELL_PROMPT = '(%|#|\$)\s'
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
