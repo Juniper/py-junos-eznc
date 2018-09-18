@@ -62,6 +62,31 @@ CMErrorView:
         self.assertEqual(len(stats), 6)
 
     @patch('jnpr.junos.Device.execute')
+    def test_unstructured_sysctl_oneline_op(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+sysctlVeriexecTable:
+    command: request routing-engine execute command sysctl dummy
+    view: sysctlView
+
+sysctlView:
+   regex:
+        veriexec-name: '(.*):'
+        veriexec-state: '(.*)'
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = sysctlVeriexecTable(self.dev)
+        stats = stats.get()
+        print (dict(stats))
+        self.assertEqual(dict(stats),
+                         {'veriexec-name': 'security.mac.veriexec.state',
+                          'veriexec-state': 'loaded active enforce'})
+        self.assertEqual(repr(stats), 'sysctlVeriexecTable:1.1.1.1: 2 items')
+        self.assertEqual(len(stats), 2)
+
+    @patch('jnpr.junos.Device.execute')
     def test_unstructured_cmerror_multiline_header(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         yaml_data = """

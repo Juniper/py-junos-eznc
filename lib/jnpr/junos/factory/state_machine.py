@@ -706,7 +706,7 @@ class StateMachine(Machine):
                 _regex[key] = pp.Regex(val, flags=re.IGNORECASE)
 
         _regex = reduce(lambda x, y: x + y, _regex.values())
-        for index, line in enumerate(self._lines[1:]):
+        for index, line in enumerate(self._lines):
             tmp_dict = {}
             # checking index as there can be blank line at position 0 and 2
             if line.strip() == '':
@@ -719,11 +719,14 @@ class StateMachine(Machine):
                         except IndexError:
                             break
                     elif self.is_regex_data():
-                        for result, start, end in _regex.scanString(
-                                self._lines[self._lines.index(
-                                    line) + 1]):
-                            continue
-                        else:
+                        try:
+                            for result, start, end in _regex.scanString(
+                                    self._lines[self._lines.index(
+                                        line) + 1]):
+                                continue
+                            else:
+                                break
+                        except IndexError:
                             break
                 else:
                     continue
