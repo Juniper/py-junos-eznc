@@ -1,0 +1,21 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/18.4I0/junos">
+    <multi-routing-engine-results>
+        <multi-routing-engine-item>
+            <re-name>re0</re-name>
+            <system-storage-information junos:style="brief">
+                <filesystem>
+                    <filesystem-name>/dev/sda6</filesystem-name>
+                    <total-blocks junos:format="984M">2015024</total-blocks>
+                    <used-blocks junos:format="1.4M">2688</used-blocks>
+                    <available-blocks junos:format="916M">1874712</available-blocks>
+                    <used-percent> 1</used-percent>
+                    <mounted-on>/data/config</mounted-on>
+                </filesystem>
+            </system-storage-information>
+        </multi-routing-engine-item>
+    </multi-routing-engine-results>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
+
