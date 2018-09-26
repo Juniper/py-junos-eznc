@@ -77,6 +77,12 @@ class FactoryLoader(object):
                                                x)) else True
             return x != value_rhs
         return false_test
+    
+    def _fieldfunc_Search(self, pattern):
+        def search_text(text):
+            ''' Searches for first occurrence of pattern within text.'''
+            return  re.search(pattern,text, re.M|re.I).groups(1)[0]
+        return search_text
 
     def _add_dictfield(self, fields, f_name, f_dict, kvargs):
         """ add a field based on its associated dictionary """
