@@ -90,7 +90,9 @@ class SCP(object):
         # through a jumphost.
 
         config = {}
-        kwargs = {}
+        sshargs = ('look_for_keys', 'allow_agent')
+        kwargs = {arg: scpargs.pop(arg) for arg in sshargs if scpargs.get(arg) is not None}
+
         ssh_config = getattr(junos, '_sshconf_path')
         if ssh_config:
             config = paramiko.SSHConfig()
