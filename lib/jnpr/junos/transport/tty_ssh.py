@@ -156,6 +156,7 @@ class SSH(Terminal):
             if data is None or len(data) <= 0:
                 raise ValueError('Unable to detect device prompt')
             elif PY6.NEW_LINE in data:
+                rxb += data.split(PY6.NEW_LINE)[0]
                 break
             else:
                 rxb += data
