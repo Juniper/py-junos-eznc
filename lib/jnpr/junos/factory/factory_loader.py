@@ -360,7 +360,7 @@ class FactoryLoader(object):
         """ build a new Config-Table definition """
         if table_name in self.catalog:
             return self.catalog[table_name]
-        tbl_dict = self._catalog_dict[table_name]
+        tbl_dict = deepcopy(self._catalog_dict[table_name])
 
         if 'view' in tbl_dict:
             # transpose name to class
