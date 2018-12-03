@@ -170,3 +170,26 @@ def ignoreWarnDecorator(function):
         return rsp
 
     return wrapper
+
+
+def checkSAXParserDecorator(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        use_sax_parser = kwargs.pop('use_sax_parser', False)
+        if use_sax_parser:
+            # args[0] is self
+            restore_value = args[0]._use_sax_parser
+            args[0]._use_sax_parser = True
+            try:
+                result = function(*args, **kwargs)
+                args[0]._use_sax_parser = restore_value
+                return result
+            except Exception:
+                args[0]._use_sax_parser = restore_value
+                raise
+        else:
+            try:
+                return function(*args, **kwargs)
+            except Exception:
+                raise
+    return wrapper
