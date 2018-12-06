@@ -18,12 +18,12 @@ class Table(object):
     ITEM_NAME_XPATH = 'name'
     VIEW = None
 
-    def __init__(self, dev=None, xml=None, path=None, use_sax_parser=False):
+    def __init__(self, dev=None, xml=None, path=None, use_filter=False):
         """
         :dev: Device instance
         :xml: lxml Element instance
         :path: file path to XML, to be used rather than :dev:
-        :use_sax_parser: Default usage is DOM parsing, enable this variable to use SAX
+        :use_filter: Default usage is DOM parsing, enable this variable to use SAX
         """
         self._dev = dev
         self.xml = xml
@@ -31,7 +31,7 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
-        self._use_sax_parser = use_sax_parser
+        self._use_filter = use_filter
 
     # -------------------------------------------------------------------------
     # PROPERTIES

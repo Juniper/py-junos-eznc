@@ -772,8 +772,8 @@ class _Connection(object):
         try:
             rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
                                         ignore_warning=ignore_warning,
-                                        sax_parser_ingest=kvargs.get(
-                                            'sax_parser_ingest'))
+                                        filter_xml=kvargs.get(
+                                            'filter_xml'))
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
@@ -1338,8 +1338,8 @@ class Device(_Connection):
                 self.connected = False
 
     @ignoreWarnDecorator
-    def _rpc_reply(self, rpc_cmd_e, sax_parser_ingest=None):
-        return self._conn.rpc(rpc_cmd_e, sax_parser_ingest)._NCElement__doc
+    def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
+        return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager

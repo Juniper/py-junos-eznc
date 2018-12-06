@@ -308,7 +308,7 @@ class _RpcMetaExec(object):
 
             # Gather decorator keywords into dec_args and remove from kvargs
             dec_arg_keywords = ['dev_timeout', 'normalize', 'ignore_warning',
-                                'sax_parser_ingest']
+                                'filter_xml']
             dec_args = {}
             for keyword in dec_arg_keywords:
                 if keyword in kvargs:
