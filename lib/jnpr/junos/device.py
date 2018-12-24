@@ -1115,6 +1115,11 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool use_filter:
+            *OPTIONAL* To choose between SAX and DOM parsing.
+            default is ``True`` to use SAX.  Select ``False`` to use DOM.
+
         """
 
         # ----------------------------------------
@@ -1129,6 +1134,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._use_filter = kvargs.get('use_filter', True)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1263,8 +1269,9 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local':
-                    self.__class__.ON_JUNOS})
+                device_params={'name': 'junos',
+                               'local': self.__class__.ON_JUNOS,
+                               'use_filter': self._use_filter})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
