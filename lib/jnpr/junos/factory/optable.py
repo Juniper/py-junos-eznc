@@ -85,28 +85,31 @@ def generate_sax_parser_input(obj):
     """
     Used to generate xml object from Table/view to be used in SAX parsing
     Args:
-        obj: self object which cantains table/view details
+        obj: self object which contains table/view details
 
     Returns: lxml etree object to be used as sax parser input
 
     """
     parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
+    local_field_dict = deepcopy(obj.VIEW.FIELDS)
     # first make element out of group fields
-    for group, group_xpath in obj.VIEW.GROUPS.items():
-        local_field_dict = deepcopy(obj.VIEW.FIELDS)
-        # need to pop out group items so that it wont be reused
-        # with fields
-        group_field_dict = ({k: obj.VIEW.FIELDS.pop(k)
-                             for k, v in local_field_dict.items()
-                             if v.get('group') == group})
-        group_ele = E(group_xpath)
-        for key, val in group_field_dict.items():
-            group_ele.append(E(val.get('xpath')))
-        # print (etree.tostring(group_ele))
-        parser_ingest.append(group_ele)
-    for i, item in enumerate(obj._view.FIELDS.items()):
+    if obj.VIEW.GROUPS:
+        for group, group_xpath in obj.VIEW.GROUPS.items():
+            # need to pop out group items so that it wont be reused with fields
+            group_field_dict = ({k: local_field_dict.pop(k)
+                                 for k, v in obj.VIEW.FIELDS.items()
+                                 if v.get('group') == group})
+            group_ele = E(group_xpath)
+            for key, val in group_field_dict.items():
+                group_ele.append(E(val.get('xpath')))
+            parser_ingest.append(group_ele)
+    for i, item in enumerate(local_field_dict.items()):
         # i is the index and item will be taple of field key and value
         field_dict = item[1]
-        parser_ingest.insert(i+1, E(field_dict.get('xpath')))
-    # print (etree.tostring(parser_ingest))
+        if 'table' in field_dict:
+            # handle nested table/view
+            child_table = field_dict.get('table')
+            parser_ingest.insert(i + 1, generate_sax_parser_input(child_table))
+        else:
+            parser_ingest.insert(i + 1, E(field_dict.get('xpath')))
     return parser_ingest

@@ -1118,7 +1118,8 @@ class Device(_Connection):
 
         :param bool use_filter:
             *OPTIONAL* To choose between SAX and DOM parsing.
-            default is ``True`` to use SAX.  Select ``False`` to use DOM.
+            default is ``True`` to use SAX (if SAX input is provided).
+            Select ``False`` to use DOM.
 
         """
 
