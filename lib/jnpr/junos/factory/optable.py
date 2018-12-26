@@ -92,14 +92,14 @@ def generate_sax_parser_input(obj):
     """
     parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
     # first make element out of group fields
-    for group in obj.VIEW.GROUPS:
+    for group, group_xpath in obj.VIEW.GROUPS.items():
         local_field_dict = deepcopy(obj.VIEW.FIELDS)
         # need to pop out group items so that it wont be reused
         # with fields
         group_field_dict = ({k: obj.VIEW.FIELDS.pop(k)
                              for k, v in local_field_dict.items()
                              if v.get('group') == group})
-        group_ele = E(group)
+        group_ele = E(group_xpath)
         for key, val in group_field_dict.items():
             group_ele.append(E(val.get('xpath')))
         # print (etree.tostring(group_ele))

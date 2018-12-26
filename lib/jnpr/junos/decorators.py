@@ -175,21 +175,15 @@ def ignoreWarnDecorator(function):
 def checkSAXParserDecorator(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
-        use_filter = kwargs.pop('use_filter', False)
-        if use_filter:
-            # args[0] is self
-            restore_value = args[0]._use_filter
-            args[0]._filter_xml = True
-            try:
-                result = function(*args, **kwargs)
-                args[0]._use_filter = restore_value
-                return result
-            except Exception:
-                args[0]._use_filter = restore_value
-                raise
-        else:
-            try:
-                return function(*args, **kwargs)
-            except Exception:
-                raise
+        # args[0] is self
+        use_filter = kwargs.pop('use_filter', args[0]._use_filter)
+        restore_value = args[0]._use_filter
+        args[0]._use_filter = use_filter
+        try:
+            result = function(*args, **kwargs)
+            args[0]._use_filter = restore_value
+            return result
+        except Exception:
+            args[0]._use_filter = restore_value
+            raise
     return wrapper
