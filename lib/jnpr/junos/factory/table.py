@@ -18,7 +18,7 @@ class Table(object):
     ITEM_NAME_XPATH = 'name'
     VIEW = None
 
-    def __init__(self, dev=None, xml=None, path=None, use_filter=False):
+    def __init__(self, dev=None, xml=None, path=None, use_filter=True):
         """
         :dev: Device instance
         :xml: lxml Element instance
@@ -31,7 +31,7 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
-        self._use_filter = use_filter
+        self._use_filter = self._dev._use_filter and use_filter
 
     # -------------------------------------------------------------------------
     # PROPERTIES
