@@ -119,5 +119,14 @@ def generate_sax_parser_input(obj):
             child_table = field_dict.get('table')
             parser_ingest.insert(i + 1, generate_sax_parser_input(child_table))
         else:
-            parser_ingest.insert(i + 1, E(field_dict.get('xpath')))
+            xpath = field_dict.get('xpath')
+            # xpath can be multi level, for ex traffic-statistics/input-pps
+            if '/' in xpath:
+                tags = xpath.split('/')
+                obj = E(tags[0])
+                for tag in tags[1:]:
+                    obj.append(E(tag))
+                parser_ingest.insert(i + 1, obj)
+            else:
+                parser_ingest.insert(i + 1, E(xpath))
     return parser_ingest
