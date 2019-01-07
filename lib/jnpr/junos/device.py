@@ -1060,7 +1060,7 @@ class Device(_Connection):
 
         :param str sock_fd:
             **REQUIRED** file descriptor of an existing socket instead of providing a host.
-            Used for outbound ssh. 
+            Used for outbound ssh.
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided
@@ -1116,11 +1116,6 @@ class Device(_Connection):
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
 
-        :param bool use_filter:
-            *OPTIONAL* To choose between SAX and DOM parsing.
-            default is ``True`` to use SAX (if SAX input is provided).
-            Select ``False`` to use DOM.
-
         """
 
         # ----------------------------------------
@@ -1135,7 +1130,6 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
-        self._use_filter = kvargs.get('use_filter', True)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1153,11 +1147,11 @@ class Device(_Connection):
             self._ssh_config = None
         else:
             # --------------------------
-            # making a remote connection 
+            # making a remote connection
             # if hostname is None, this is an 'outbound-ssh' connection
             # which uses the established TCP connection from sock_fd
             # --------------------------
-            if hostname is None and self._sock_fd is None: 
+            if hostname is None and self._sock_fd is None:
                 raise ValueError("You must provide either 'host' or 'sock_fd' value")
             self._hostname = hostname
             # user will default to $USER
@@ -1271,8 +1265,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos',
-                               'local': self.__class__.ON_JUNOS,
-                               'use_filter': self._use_filter})
+                               'local': self.__class__.ON_JUNOS})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
