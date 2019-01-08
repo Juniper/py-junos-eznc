@@ -98,7 +98,13 @@ def generate_sax_parser_input(obj):
     Returns: lxml etree object to be used as sax parser input
 
     """
-    parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
+    if '/' in obj.ITEM_XPATH:
+        tags = obj.ITEM_XPATH.split('/')
+        parser_ingest = E(tags.pop(-1), E(obj.ITEM_NAME_XPATH))
+        for tag in tags[::-1]:
+            parser_ingest = E(tag, parser_ingest)
+    else:
+        parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
     local_field_dict = deepcopy(obj.VIEW.FIELDS)
     # first make element out of group fields
     if obj.VIEW.GROUPS:
