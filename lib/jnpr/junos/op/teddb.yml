@@ -36,6 +36,10 @@ _linkView:
   localADD: ted-link-local-address
   metric: { ted-link-metric : int }
   color: admin-groups/color
+  SR_Adj_SID_label: {ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-label : int}
+  SR_Adj_SID_weight: {ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-weight : int}
+  SR_Adj_SID_AFI: ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-af
+  SR_Adj_SID_Flags: ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-flags
 
 
 TedSummaryTable:
