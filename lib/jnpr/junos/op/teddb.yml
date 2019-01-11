@@ -17,6 +17,9 @@ TedView:
   link-in: { ted-database-link-in : int }
   link-out: { ted-database-link-out : int }
   protocol: ted-database-protocol
+  srgb_base: { ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-start : int }
+  srgb_range: { ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-range : int }
+  srgb_flag: ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-flags
   link: _linkTable
 
 _linkTable:
