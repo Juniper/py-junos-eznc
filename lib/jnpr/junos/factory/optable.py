@@ -69,7 +69,7 @@ class OpTable(Table):
                 rpc_args['filter_xml'] = filter_xml
             except ValueError as ex:
                 logger.warning("Not able to create SAX parser input due to "
-                               "'%s', hence using DOM" % ex)
+                               "'%s'" % ex)
 
         self.D.transform = lambda: remove_namespaces_and_spaces
         rpc_args.update(self.GET_ARGS)    # copy default args
