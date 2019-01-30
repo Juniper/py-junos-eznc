@@ -26,7 +26,8 @@ def FactoryCfgTable(table_name=None, data_dict={}):
 
 
 def FactoryOpTable(cmd, args=None, args_key=None, item=None,
-                   key=OpTable.ITEM_NAME_XPATH, view=None, table_name=None):
+                   key=OpTable.ITEM_NAME_XPATH, view=None, table_name=None,
+                   use_filter=True):
     if table_name is None:
         table_name = "OpTable." + cmd
     new_cls = type(table_name, (OpTable,), {})
@@ -37,6 +38,7 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
     new_cls.ITEM_XPATH = item
     new_cls.ITEM_NAME_XPATH = key
     new_cls.VIEW = view
+    new_cls.USE_FILTER = use_filter
     new_cls.__module__ = __name__.replace('factory_cls', 'OpTable')
     return new_cls
 

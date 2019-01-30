@@ -23,7 +23,7 @@ class Table(object):
         :dev: Device instance
         :xml: lxml Element instance
         :path: file path to XML, to be used rather than :dev:
-        :use_filter: Default usage is DOM parsing, disable this variable to use SAX
+        :use_filter: Default usage is SAX parsing, disable this variable to use DOM
         """
         self._dev = dev
         self.xml = xml
@@ -31,7 +31,7 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
-        self._use_filter = self._dev._use_filter and use_filter
+        self._use_filter = self.USE_FILTER and self._dev._use_filter and use_filter
 
     # -------------------------------------------------------------------------
     # PROPERTIES
