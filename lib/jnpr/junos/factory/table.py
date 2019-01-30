@@ -31,9 +31,11 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
-        self._use_filter = self.USE_FILTER and self._dev._use_filter and use_filter
+        self._use_filter = self.USE_FILTER and use_filter
+        if self._dev is not None:
+            self._use_filter = self._use_filter and self._dev._use_filter
 
-    # -------------------------------------------------------------------------
+            # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
