@@ -78,7 +78,8 @@ class View(object):
     def name(self):
         """ return the name of view item """
         if self.ITEM_NAME_XPATH is None:
-            return self._table.D.hostname
+            return []
+            # return self._table.D.hostname
         if isinstance(self.ITEM_NAME_XPATH, str):
             # xpath union key
             if ' | ' in self.ITEM_NAME_XPATH:
