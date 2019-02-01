@@ -1,5 +1,9 @@
-## Release 2.2.0.dev0 - 8 August 2018
+## Release 2.2.0 - 27 August 2018
 ### Features Added:
+- Support for Node virt based platforms #856
+- Support Linux based Junos devices #862 
+- Connection through console server (having login credentials) using SSH #861 #870 
+- outbound ssh #732
 
 ### Bugs Fixed:
 

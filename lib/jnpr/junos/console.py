@@ -13,6 +13,7 @@ from ncclient.devices.junos import JunosDeviceHandler
 from lxml import etree
 from jnpr.junos.transport.tty_telnet import Telnet
 from jnpr.junos.transport.tty_serial import Serial
+from jnpr.junos.transport.tty_ssh import SSH
 from ncclient.xml_ import NCElement
 from jnpr.junos.device import _Connection
 
@@ -99,14 +100,23 @@ class Console(_Connection):
         # hostname is not required in serial mode connection
         self._hostname = kvargs.get('host')
         self._auth_user = kvargs.get('user', 'root')
+        self._conf_auth_user = None
+        self._conf_ssh_private_key_file = None
         self._auth_password = kvargs.get(
             'password',
             '') or kvargs.get(
             'passwd',
             '')
-        self._port = kvargs.get('port', '23')
+        self.cs_user = kvargs.get('cs_user')
+        self.cs_passwd = kvargs.get('cs_passwd')
+        self._port = kvargs.get('port', '22' if self.cs_user else '23')
+        self._mode = kvargs.get('mode', None if self.cs_user else 'telnet')
         self._baud = kvargs.get('baud', '9600')
-        self._mode = kvargs.get('mode', 'telnet')
+        if self._hostname:
+            self._ssh_config = kvargs.get('ssh_config')
+            self._sshconf_lkup()
+        self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                                     or self._conf_ssh_private_key_file
         self._timeout = kvargs.get('timeout', '0.5')
         self._normalize = kvargs.get('normalize', False)
         self._attempts = kvargs.get('attempts', 10)
@@ -118,7 +128,6 @@ class Console(_Connection):
                           (self._fact_style), RuntimeWarning)
         self.console_has_banner = kvargs.get('console_has_banner', False)
         self.rpc = _RpcMetaExec(self)
-        self._ssh_config = kvargs.get('ssh_config')
         self._manages = []
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
@@ -176,10 +185,23 @@ class Console(_Connection):
         # ---------------------------------------------------------------
         # validate device hostname or IP address
         # ---------------------------------------------------------------
-        if self._mode.upper() == 'TELNET' and self._hostname is None:
+        if ((self._mode and self._mode.upper() == 'TELNET') or
+                    self.cs_user is not None) and self._hostname is None:
             self.results['failed'] = True
             self.results[
                 'errmsg'] = 'ERROR: Device hostname/IP not specified !!!'
+            return self.results
+
+        # ---------------------------------------------------------------
+        # validate console server and password. Password-less connection
+        # is not supported
+        # ---------------------------------------------------------------
+        if self.cs_user is not None and self.cs_passwd is None:
+            self.results['failed'] = True
+            self.results[
+                'errmsg'] = 'ERROR: Console SSH, Password-less connection is ' \
+                            'not supported !!!'
+            logger.error(self.results['errmsg'])
             return self.results
 
         # --------------------
@@ -268,12 +290,21 @@ class Console(_Connection):
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
         tty_args['baud'] = self._baud
-        if self._mode.upper() == 'TELNET':
+        if self._mode and self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
             tty_args['console_has_banner'] = self.console_has_banner
             self.console = ('telnet', self._hostname, self.port)
             self._tty = Telnet(**tty_args)
+        elif self.cs_user is not None:
+            tty_args['cs_user'] = self.cs_user
+            tty_args['cs_passwd'] = self.cs_passwd
+            tty_args['host'] = self._hostname
+            tty_args['port'] = self._port
+            tty_args['console_has_banner'] = self.console_has_banner
+            tty_args['ssh_private_key_file'] = self._ssh_private_key_file
+            self.console = ('ssh', self._hostname, self.port)
+            self._tty = SSH(**tty_args)
         elif self._mode.upper() == 'SERIAL':
             tty_args['port'] = self._port
             self.console = ('serial', self._port)

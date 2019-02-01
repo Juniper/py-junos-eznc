@@ -251,7 +251,7 @@ class FS(Util):
         """
         rsp = self._dev.rpc.get_system_storage()
 
-        _name = lambda fs: fs.findtext('filesystem-name').strip()
+        def _name(fs): return fs.findtext('filesystem-name').strip()
 
         def _decode(fs):
             r = {}
@@ -267,6 +267,16 @@ class FS(Util):
             r['avail'] = ab.get('format')
             r['avail_block'] = int(ab.text)
             return r
+
+        re_list = rsp.xpath('multi-routing-engine-item')
+        if re_list:
+            fs_dict = {}
+            for re in re_list:
+                re_name = re.findtext('re-name').strip()
+                re_fs_dict = dict((_name(fs), _decode(fs)) for fs in re.xpath(
+                    'system-storage-information/filesystem'))
+                fs_dict[re_name] = re_fs_dict
+            return fs_dict
 
         return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
 
@@ -321,7 +331,7 @@ class FS(Util):
 
     @classmethod
     def _decode_storage_cleanup(cls, files):
-        _name = lambda f: f.findtext('file-name').strip()
+        def _name(f): return f.findtext('file-name').strip()
 
         def _decode(f):
             return {
