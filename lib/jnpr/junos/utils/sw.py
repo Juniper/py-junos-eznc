@@ -293,12 +293,14 @@ class SW(Util):
         got = rsp.getparent()
         # If <package-result> is not present, then assume success.
         # That is, assume <package-result>0</package-result>
+        rc = 0
         package_result = got.findtext('package-result')
         if package_result is None:
             self.log("software pkgadd response is missing package-result "
                      "element. Assuming success.")
-            package_result = '0'
-        rc = int(package_result.strip())
+        else:
+            for result in got.findall('package-result'):
+                rc += int(result.text.strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
