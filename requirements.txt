@@ -3,7 +3,7 @@ ncclient>=0.5.4
 paramiko>=1.15.2
 scp>=0.7.0
 jinja2>=2.7.1
-PyYAML==3.13
+PyYAML<=3.13
 netaddr
 six
 pyserial
