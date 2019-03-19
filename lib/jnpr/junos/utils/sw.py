@@ -986,7 +986,7 @@ class SW(Util):
                     cmd.append(E('both-routing-engines'))
                 elif self._mixed_VC is True:
                     cmd.append(E('all-members'))
-        if in_min >= 0 and at is None:
+        if in_min >= 0:
             cmd.append(E('in', str(in_min)))
         else:
             cmd.append(E('at', str(at)))
@@ -1007,7 +1007,7 @@ class SW(Util):
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
 
-    def poweroff(self, in_min=0, on_node=None):
+    def poweroff(self, in_min=0, at=None, on_node=None):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1015,6 +1015,9 @@ class SW(Util):
         rebooted.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before shutting down the device.
+
+        :param str at: date and time the poweroff should take place. The
+            string must match the junos cli poweroff syntax
 
         :param str on_node: In case of linux based device, function will by default
             shutdown the whole device. If any specific node is mentioned,
@@ -1037,7 +1040,10 @@ class SW(Util):
             cmd = E('request-power-off')
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
-        cmd.append(E('in', str(in_min)))
+        if in_min >= 0:
+            cmd.append(E('in', str(in_min)))
+        else:
+            cmd.append(E('at', str(at)))
         try:
             rsp = self.rpc(cmd)
             if self._dev.facts['_is_linux']:
