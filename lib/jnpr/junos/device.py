@@ -1109,6 +1109,10 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool allow_agent:
+            *OPTIONAL* default is ``False``.  If ``True`` then the
+            SSH config file is not parsed by Pyez and passed down to ncclient
         """
 
         # ----------------------------------------
@@ -1123,6 +1127,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self.allow_agent = kvargs.get('allow_agent', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1155,10 +1160,14 @@ class Device(_Connection):
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
-                self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
-                or self._conf_ssh_private_key_file
+            if self.allow_agent is True:
+                self._auth_user = kvargs.get('user')
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            else:
+                self._auth_user = kvargs.get('user') or self._conf_auth_user or \
+                                  self._auth_user
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                                             or self._conf_ssh_private_key_file
             self._auth_password = kvargs.get(
                 'password') or kvargs.get('passwd')
 
