@@ -992,7 +992,7 @@ class SW(Util):
         elif at is not None:
             # in_min not given but at given
             cmd.append(E('at', str(at)))
-        else
+        else:
             # default case (in_min=0)
             cmd.append(E('in', str(in_min)))
         try:
@@ -1051,7 +1051,7 @@ class SW(Util):
         elif at is not None:
             # in_min not given but at given
             cmd.append(E('at', str(at)))
-        else
+        else:
             # default case (in_min=0)
             cmd.append(E('in', str(in_min)))
         try:
