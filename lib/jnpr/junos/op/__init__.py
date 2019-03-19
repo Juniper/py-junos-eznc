@@ -28,7 +28,8 @@ class MetaPathLoader(object):
         with open(os.path.join(os.path.dirname(__file__), mod + '.yml'), 'r')\
                 as stream:
             try:
-                modules = FactoryLoader().load(yaml.load(stream))
+                modules = FactoryLoader().load(yaml.load(stream,
+                                                         Loader=yaml.FullLoader))
             except yaml.YAMLError as exc:
                 raise ImportError("%s is not loaded" % mod)
         for k, v in modules.items():
