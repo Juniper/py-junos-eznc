@@ -986,10 +986,15 @@ class SW(Util):
                     cmd.append(E('both-routing-engines'))
                 elif self._mixed_VC is True:
                     cmd.append(E('all-members'))
-        if in_min >= 0:
+        if in_min > 0:
+            # in_min given
             cmd.append(E('in', str(in_min)))
-        else:
+        elif at is not None:
+            # in_min not given but at given
             cmd.append(E('at', str(at)))
+        else
+            # default case (in_min=0)
+            cmd.append(E('in', str(in_min)))
         try:
             rsp = self.rpc(cmd)
             if self._dev.facts['_is_linux']:
@@ -1040,10 +1045,15 @@ class SW(Util):
             cmd = E('request-power-off')
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
-        if in_min >= 0:
+        if in_min > 0:
+            # in_min given
             cmd.append(E('in', str(in_min)))
-        else:
+        elif at is not None:
+            # in_min not given but at given
             cmd.append(E('at', str(at)))
+        else
+            # default case (in_min=0)
+            cmd.append(E('in', str(in_min)))
         try:
             rsp = self.rpc(cmd)
             if self._dev.facts['_is_linux']:
