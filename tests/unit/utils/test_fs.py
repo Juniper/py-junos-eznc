@@ -271,6 +271,19 @@ class TestFS(unittest.TestCase):
                            'total': '4F'}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_storage_usage_linux(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_linux
+        self.assertEqual(self.fs.storage_usage(),
+                         {'re0': {'/dev/sda6': {'avail': '916M',
+                                                'avail_block': 1874712,
+                                                'mount': '/data/config',
+                                                'total': '984M',
+                                                'total_blocks': 2015024,
+                                                'used': '1.4M',
+                                                'used_blocks': 2688,
+                                                'used_pct': '1'}}})
+
+    @patch('jnpr.junos.Device.execute')
     def test_directory_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1),
@@ -408,3 +421,9 @@ class TestFS(unittest.TestCase):
             if args[0].tag == 'get-directory-usage-information':
                 return self._read_file(
                     'get-directory-usage-information_error2.xml')
+
+    def _mock_manager_linux(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-system-storage':
+                return self._read_file(
+                    'get-storage-usage-linux.xml')

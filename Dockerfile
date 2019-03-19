@@ -16,11 +16,11 @@ ADD lib lib
 ## Install dependancies and Pyez
 RUN apk add --no-cache build-base python3-dev py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    ca-certificates openssl wget 
-RUN pip3 install -r requirements.txt
-RUN apk del -r --purge gcc make g++ \
+    ca-certificates openssl wget \
+    && pip3 install -r requirements.txt \
+    && apk del -r --purge gcc make g++ \
     && ln -s /usr/bin/python3 /usr/bin/python \
-    && python setup.py install \
+    && pip3 install . \
     && rm -rf /source/* \
     && rm -rf /var/cache/apk/*
 
