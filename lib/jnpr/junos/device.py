@@ -1113,6 +1113,10 @@ class Device(_Connection):
         :param bool allow_agent:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             SSH config file is not parsed by Pyez and passed down to ncclient
+
+        .. note::
+            value of allow_agent may change to ``True``, in case the user passes
+            ``False`` without specifying **passwd** or **ssh_private_key_file**
         """
 
         # ----------------------------------------
