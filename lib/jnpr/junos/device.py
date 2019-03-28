@@ -1130,7 +1130,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
-        self.allow_agent = kvargs.get('allow_agent')
+        self._allow_agent = kvargs.get('allow_agent')
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1162,10 +1162,14 @@ class Device(_Connection):
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
-            # but if user or private key is explicit from call, then use it.
+
+            # if allow_agent is provided and is True, then PyEZ shouldn't load
+            # the values from config file
             if self.allow_agent is not None and self.allow_agent is True:
                 self._auth_user = kvargs.get('user')
                 self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            # if allow_agent is not provided or provided but set to False, and
+            # if user or private key is explicit from call, then use it.
             else:
                 self._auth_user = kvargs.get('user') or self._conf_auth_user or \
                                   self._auth_user
@@ -1255,11 +1259,11 @@ class Device(_Connection):
             # in this condition it means we want to query the agent
             # for available ssh keys
 
-            if self.allow_agent is None:
-                _allow_agent = bool((self._auth_password is None) and
+            if self._allow_agent is None:
+                allow_agent = bool((self._auth_password is None) and
                                (self._ssh_private_key_file is None))
             else:
-                _allow_agent = self.allow_agent
+                allow_agent = self.allow_agent
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
@@ -1270,7 +1274,7 @@ class Device(_Connection):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
-                allow_agent=_allow_agent,
+                allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local':
                     self.__class__.ON_JUNOS})
