@@ -20,7 +20,7 @@ RUN apk add --no-cache build-base python3-dev py-lxml \
     && pip3 install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
     && ln -s /usr/bin/python3 /usr/bin/python \
-    && python setup.py install \
+    && pip3 install . \
     && rm -rf /source/* \
     && rm -rf /var/cache/apk/*
 
