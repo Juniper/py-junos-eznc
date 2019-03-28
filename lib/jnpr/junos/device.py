@@ -1165,7 +1165,7 @@ class Device(_Connection):
 
             # if allow_agent is provided and is True, then PyEZ shouldn't load
             # the values from config file
-            if self.allow_agent is not None and self.allow_agent is True:
+            if self._allow_agent is not None and self._allow_agent is True:
                 self._auth_user = kvargs.get('user')
                 self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
             # if allow_agent is not provided or provided but set to False, and
