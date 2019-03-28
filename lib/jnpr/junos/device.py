@@ -1111,12 +1111,11 @@ class Device(_Connection):
             XML returned by :meth:`execute` will have whitespace normalized
 
         :param bool allow_agent:
-            *OPTIONAL* default is ``False``.  If ``True`` then the
-            SSH config file is not parsed by Pyez and passed down to ncclient
-
-        .. note::
-            value of allow_agent may change to ``True``, in case the user passes
-            ``False`` without specifying **passwd** or **ssh_private_key_file**
+            *OPTIONAL* If ``True`` then the SSH config file is not parsed by PyEZ
+             and passed down to ncclient. If ``False`` then the SSH config file will
+             be parsed by PyEZ. If option is not provided will fallback to default
+             behavior. This option is passed down to the ncclient as is, if it is
+             present in the kwargs.
         """
 
         # ----------------------------------------
@@ -1131,7 +1130,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
-        self.allow_agent = kvargs.get('allow_agent', False)
+        self.allow_agent = kvargs.get('allow_agent')
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1164,7 +1163,7 @@ class Device(_Connection):
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
-            if self.allow_agent is True:
+            if self.allow_agent is not None and self.allow_agent is True:
                 self._auth_user = kvargs.get('user')
                 self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
             else:
@@ -1256,8 +1255,11 @@ class Device(_Connection):
             # in this condition it means we want to query the agent
             # for available ssh keys
 
-            allow_agent = bool((self._auth_password is None) and
+            if self.allow_agent is None:
+                _allow_agent = bool((self._auth_password is None) and
                                (self._ssh_private_key_file is None))
+            else:
+                _allow_agent = self.allow_agent
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
@@ -1268,7 +1270,7 @@ class Device(_Connection):
                 password=self._auth_password,
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
-                allow_agent=allow_agent,
+                allow_agent=_allow_agent,
                 ssh_config=self._sshconf_lkup(),
                 device_params={'name': 'junos', 'local':
                     self.__class__.ON_JUNOS})
