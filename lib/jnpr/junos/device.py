@@ -1254,10 +1254,12 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
-            # not given a password or an ssh key file.
-            # in this condition it means we want to query the agent
-            # for available ssh keys
+            # if allow_agent is provided in the call, then the same
+            # value is passed to the ncclient.
+            # if allow_agent isn't provided in the call, then it is
+            # set to True if we are not able to find password or
+            # ssh_keyfile. user provided allow_agent value should be
+            # preferred over the runtime value
 
             if self._allow_agent is None:
                 allow_agent = bool((self._auth_password is None) and
