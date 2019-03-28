@@ -30,4 +30,4 @@ def loadyaml(path):
     # if no extension is given, default to '.yml'
     if os.path.splitext(path)[1] == '':
         path += '.yml'
-    return FactoryLoader().load(yaml.load(open(path, 'r')))
+    return FactoryLoader().load(yaml.load(open(path, 'r'), Loader=yaml.FullLoader))
