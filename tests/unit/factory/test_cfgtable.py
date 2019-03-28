@@ -53,7 +53,7 @@ yaml_data = \
         args_key: name
         options: {}
       """
-globals().update(FactoryLoader().load(yaml.load(yaml_data)))
+globals().update(FactoryLoader().load(yaml.load(yaml_data, Loader=yaml.FullLoader)))
 
 yaml_bgp_data = \
     """---
@@ -79,7 +79,7 @@ yaml_bgp_data = \
       neigh      : name
    """
 
-globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data)))
+globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data, Loader=yaml.FullLoader)))
 
 
 @attr('unit')
@@ -231,7 +231,7 @@ class TestFactoryCfgTable(unittest.TestCase):
               fields_auth:
                 password: user/encrypted-password
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = UserConfigTable1(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.username = 'user1'
@@ -264,7 +264,7 @@ class TestFactoryCfgTable(unittest.TestCase):
               fields_auth:
                 password: user/encrypted-password
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = UserConfigTable1(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.username = True
@@ -377,7 +377,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 100
@@ -403,7 +403,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: autonomous-system/as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 150
@@ -429,7 +429,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number': {'type': {'UserDefined': ''}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 100
@@ -449,7 +449,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : { 'type' : 'int'} }
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = '100'
         self.assertRaises(TypeError, at.append)
@@ -468,7 +468,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : { 'type' : 'interger'} }
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -487,7 +487,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : {'type' : {'enum': '100'}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(ValueError, at.append)
@@ -506,7 +506,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : {'type' : {'enum': {'100': ''}}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -525,7 +525,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number': {'type': ['abc']}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -544,7 +544,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(TypeError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
@@ -559,7 +559,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(ValueError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
@@ -569,7 +569,7 @@ class TestFactoryCfgTable(unittest.TestCase):
           AutoSysTable:
             set: routing-options/autonomous-system
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(ValueError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
