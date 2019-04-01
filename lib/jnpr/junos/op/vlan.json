@@ -1,0 +1,19 @@
+{
+   "VlanTable" : {
+      "rpc" : "get-vlan-information",
+      "view" : "VlanView",
+      "key" : "vlan-name",
+      "item" : "vlan"
+   },
+   "VlanView" : {
+      "fields" : {
+         "instance" : "vlan-instance",
+         "owner" : "vlan-owner",
+         "name" : "vlan-name",
+         "created" : "vlan-create-time",
+         "status" : "vlan-status",
+         "members" : ".//vlan-member-interface",
+         "tag" : "vlan-tag"
+      }
+   }
+}

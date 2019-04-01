@@ -1,0 +1,16 @@
+{
+   "NdTable" : {
+      "item" : "ipv6-nd-entry",
+      "view" : "NdView",
+      "rpc" : "get-ipv6-nd-information",
+      "key" : "ipv6-nd-neighbor-l2-address"
+   },
+   "NdView" : {
+      "fields" : {
+         "ip_address" : "ipv6-nd-neighbor-address",
+         "mac_address" : "ipv6-nd-neighbor-l2-address",
+         "router" : "ipv6-nd-isrouter",
+         "interface_name" : "ipv6-nd-interface-name"
+      }
+   }
+}

@@ -1,0 +1,66 @@
+{
+   "OspfInterfaceView" : {
+      "fields" : {
+         "neighbor_count" : "neighbor-count",
+         "ospf_interface_state" : "ospf-interface-state",
+         "interface_name" : "interface-name"
+      }
+   },
+   "ospfTable" : {
+      "rpc" : "get-ospf-overview-information",
+      "view" : "ospfView",
+      "key" : "ospf-area-overview/ospf-area",
+      "item" : "ospf-overview"
+   },
+   "OspfRoutesTable" : {
+      "rpc" : "get-ospf-route-information",
+      "key" : "ospf-route-entry/address-prefix",
+      "view" : "OspfRoutesView",
+      "item" : "ospf-topology-route-table/ospf-route"
+   },
+   "OspfNeighborView" : {
+      "fields" : {
+         "ospf_neighbor_state" : "ospf-neighbor-state",
+         "neighbor_id" : "neighbor-id",
+         "interface_name" : "interface-name",
+         "neighbor_up_time" : "neighbor-up-time",
+         "activity_timer" : "activity-timer",
+         "neighbor_adjacency_time" : "neighbor-adjacency-time",
+         "ospf_area" : "ospf-area",
+         "dr_address" : "dr-address",
+         "bdr_address" : "bdr-address",
+         "neighbor_address" : "neighbor-address"
+      }
+   },
+   "OspfNeighborTable" : {
+      "args" : {
+         "extensive" : "True"
+      },
+      "item" : "ospf-neighbor",
+      "view" : "OspfNeighborView",
+      "key" : [
+         "interface-name",
+         "neighbor-id"
+      ],
+      "rpc" : "get-ospf-neighbor-information"
+   },
+   "ospfView" : {
+      "fields" : {
+         "router_id" : "ospf-router-id",
+         "neighbors" : "ospf-area-overview/ospf-nbr-up-count",
+         "area" : "ospf-area-overview/ospf-area"
+      }
+   },
+   "OspfRoutesView" : {
+      "fields" : {
+         "interface" : "ospf-route-entry/ospf-next-hop/next-hop-name/interface-name",
+         "prefix" : "ospf-route-entry/address-prefix"
+      }
+   },
+   "OspfInterfaceTable" : {
+      "item" : "ospf-interface",
+      "rpc" : "get-ospf-interface-information",
+      "key" : "interface-name",
+      "view" : "OspfInterfaceView"
+   }
+}

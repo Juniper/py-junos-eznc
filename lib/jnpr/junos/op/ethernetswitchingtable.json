@@ -1,0 +1,47 @@
+{
+   "EthernetSwitchingTable" : {
+      "args" : {
+         "detail" : true
+      },
+      "item" : "ethernet-switching-table",
+      "rpc" : "get-ethernet-switching-table-information",
+      "view" : "EthernetSwitchingView"
+   },
+   "EthernetSwitchingView" : {
+      "fields" : {
+         "count" : "mac-table-count",
+         "entries" : "_MacTableEntriesTable",
+         "learned" : "mac-table-learned",
+         "persistent" : "mac-table-persistent"
+      }
+   },
+   "_MacTableEntriesTable" : {
+      "item" : "mac-table-entry",
+      "key" : "mac-vlan",
+      "view" : "_MacTableEntriesView"
+   },
+   "_MacTableEntriesView" : {
+      "fields" : {
+         "action" : "mac-action",
+         "age" : "mac-age",
+         "interface" : "mac-interface",
+         "interface-list" : "_MacTableInterfacesTable",
+         "learned_time" : "mac-learned-time",
+         "mac_address" : "mac-address",
+         "next_hop" : "mac-nexthop",
+         "type" : "mac-type",
+         "vlan" : "mac-vlan",
+         "vlan_tag" : "mac-vlan-tag"
+      }
+   },
+   "_MacTableInterfacesTable" : {
+      "item" : "mac-interfaces-list",
+      "key" : "mac-interfaces",
+      "view" : "_MacTableInterfacesView"
+   },
+   "_MacTableInterfacesView" : {
+      "fields" : {
+         "interfaces" : "mac-interfaces"
+      }
+   }
+}

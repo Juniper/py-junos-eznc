@@ -1,0 +1,27 @@
+{
+   "L2CircuitConnectionTable" : {
+      "item" : "l2circuit-neighbor/connection",
+      "view" : "L2CircuitConnectionView",
+      "rpc" : "get-l2ckt-connection-information",
+      "key" : [
+         "ancestor::l2circuit-neighbor/neighbor-address",
+         "connection-id"
+      ]
+   },
+   "L2CircuitConnectionView" : {
+      "fields" : {
+         "inboud_label" : "inbound-label",
+         "connection_status" : "connection-status",
+         "outbound_label" : "outbound-label",
+         "connection_type" : "connection-type",
+         "local_interface" : "local-interface/interface-name",
+         "remote_pe" : "remote-pe",
+         "interface_description" : "local-interface/interface-description",
+         "interface_encapsulation" : "local-interface/interface-encapsulation",
+         "pw_status_tlv" : "pw-status-tlv",
+         "connection_id" : "connection-id",
+         "control_word" : "control-word",
+         "interface_status" : "local-interface/interface-status"
+      }
+   }
+}

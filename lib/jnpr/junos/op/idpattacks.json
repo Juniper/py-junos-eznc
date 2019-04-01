@@ -1,0 +1,14 @@
+{
+   "IDPAttackView" : {
+      "fields" : {
+         "attack_name" : "name",
+         "count" : "value"
+      }
+   },
+   "IDPAttackTable" : {
+      "item" : "idp-attack-statistics",
+      "key" : "name",
+      "rpc" : "get-idp-attack-table-information",
+      "view" : "IDPAttackView"
+   }
+}

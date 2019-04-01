@@ -1,7 +1,7 @@
 """
 Pythonifier for EthPort Table/View
 """
-from jnpr.junos.factory import loadyaml
-from os.path import splitext
-_YAML_ = splitext(__file__)[0] + '.yml'
-globals().update(loadyaml(_YAML_))
+import jnpr.junos.factory
+import os
+_PATH_ = os.path.splitext(__file__)[0]
+globals().update(jnpr.junos.factory.load(_PATH_)

@@ -1,0 +1,36 @@
+{
+   "UserTable" : {
+      "key-field" : "user",
+      "view" : "userView",
+      "set" : "system/login/user"
+   },
+   "userView" : {
+      "groups" : {
+         "auth" : "authentication"
+      },
+      "fields_auth" : {
+         "password" : "encrypted-password"
+      },
+      "fields" : {
+         "uid" : {
+            "uid" : {
+               "maxValue" : "64000",
+               "minValue" : "100",
+               "type" : "int"
+            }
+         },
+         "class_name" : {
+            "class" : {
+               "type" : {
+                  "enum" : [
+                     "operator",
+                     "read-only",
+                     "super-user"
+                  ]
+               }
+            }
+         },
+         "user" : "name"
+      }
+   }
+}

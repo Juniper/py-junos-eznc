@@ -1,0 +1,18 @@
+{
+   "ArpView" : {
+      "fields" : {
+         "ip_address" : "ip-address",
+         "mac_address" : "mac-address",
+         "interface_name" : "interface-name"
+      }
+   },
+   "ArpTable" : {
+      "rpc" : "get-arp-table-information",
+      "item" : "arp-table-entry",
+      "key" : "mac-address",
+      "view" : "ArpView",
+      "args" : {
+         "no-resolve" : "True"
+      }
+   }
+}

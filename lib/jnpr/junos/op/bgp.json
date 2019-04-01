@@ -1,0 +1,18 @@
+{
+   "bgpTable" : {
+      "rpc" : "get-bgp-neighbor-information",
+      "item" : "bgp-peer",
+      "key" : "peer-id",
+      "view" : "bgpView"
+   },
+   "bgpView" : {
+      "fields" : {
+         "local_address" : "local-address",
+         "local_as" : "local-as",
+         "peer_id" : "peer-id",
+         "route_received" : "bgp-rib/received-prefix-count",
+         "peer_as" : "peer-as",
+         "local_id" : "local-id"
+      }
+   }
+}

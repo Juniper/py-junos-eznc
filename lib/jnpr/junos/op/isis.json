@@ -1,0 +1,46 @@
+{
+   "_IsisAdjacencyLogTable" : {
+      "key" : [
+         "adjacency-when",
+         "adjacency-state"
+      ],
+      "item" : "isis-adjacency-log",
+      "view" : "_IsisAdjacencyLogView"
+   },
+   "IsisAdjacencyTable" : {
+      "item" : "isis-adjacency",
+      "args" : {
+         "extensive" : "True"
+      },
+      "key" : [
+         "interface-name",
+         "system-name"
+      ],
+      "rpc" : "get-isis-adjacency-information",
+      "view" : "IsisAdjacencyView"
+   },
+   "IsisAdjacencyView" : {
+      "fields" : {
+         "adjacency_flag" : "adjacency-flag",
+         "adjacency_log" : "_IsisAdjacencyLogTable",
+         "adjacency_state" : "adjacency-state",
+         "adjacency_topologies" : "adjacency-topologies",
+         "ip_address" : "ip-address",
+         "interface_priority" : "interface-priority",
+         "adjacency_restart_capable" : "adjacency-restart-capable",
+         "circuit_type" : "circuit-type",
+         "system_name" : "system-name",
+         "adjacency_advertisement" : "adjacency-advertisement",
+         "holdtime" : "holdtime",
+         "interface_name" : "interface-name",
+         "level" : "level"
+      }
+   },
+   "_IsisAdjacencyLogView" : {
+      "fields" : {
+         "state" : "adjacency-state",
+         "when" : "adjacency-when",
+         "event" : "adjacency-event"
+      }
+   }
+}

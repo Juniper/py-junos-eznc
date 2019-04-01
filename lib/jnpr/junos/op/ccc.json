@@ -1,0 +1,31 @@
+{
+   "_CCCPortsView" : {
+      "fields" : {
+         "status" : "ccc-circuit-status",
+         "type" : "ccc-circuit-type"
+      }
+   },
+   "CCCView" : {
+      "fields" : {
+         "ports" : "_CCCPorts",
+         "status" : "ccc-connection-status"
+      }
+   },
+   "CCCTable" : {
+      "key" : "ccc-connection-name",
+      "view" : "CCCView",
+      "args" : {
+         "status" : "True",
+         "interface-switch" : "True"
+      },
+      "item" : "ccc-connection",
+      "rpc" : "get-ccc-information"
+   },
+   "_CCCPorts" : {
+      "key" : [
+         "ccc-circuit-name"
+      ],
+      "view" : "_CCCPortsView",
+      "item" : "ccc-connection-circuit"
+   }
+}

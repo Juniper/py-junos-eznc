@@ -1,0 +1,34 @@
+{
+   "InterfaceTable" : {
+      "key-field" : [
+         "name",
+         "unit_name"
+      ],
+      "view" : "InterfaceView",
+      "set" : "interfaces/interface"
+   },
+   "InterfaceView" : {
+      "groups" : {
+         "unit" : "unit",
+         "bridge" : "unit/family/bridge"
+      },
+      "fields" : {
+         "name" : "name",
+         "native_vlan" : "native-vlan-id",
+         "disable" : {
+            "disable" : {
+               "type" : "bool"
+            }
+         },
+         "enc" : "encapsulation"
+      },
+      "fields_unit" : {
+         "desc" : "description",
+         "unit_name" : "name"
+      },
+      "fields_bridge" : {
+         "vlan_list" : "vlan-id-list",
+         "mode" : "interface-mode"
+      }
+   }
+}

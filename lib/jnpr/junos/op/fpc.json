@@ -1,0 +1,47 @@
+{
+   "_fpc_hw_view" : {
+      "fields" : {
+         "model" : "model-number",
+         "ver" : "version",
+         "sn" : "serial-number",
+         "pn" : "part-number",
+         "desc" : "description"
+      }
+   },
+   "FpcInfoTable" : {
+      "view" : "_fpc_info_view",
+      "key" : "slot",
+      "rpc" : "get-fpc-information",
+      "item" : ".//fpc"
+   },
+   "_fpc_info_view" : {
+      "fields" : {
+         "state" : "state",
+         "memory" : "memory-heap-utilization",
+         "cpu" : "cpu-total"
+      }
+   },
+   "FpcHwTable" : {
+      "view" : "_fpc_hw_view",
+      "rpc" : "get-chassis-inventory",
+      "item" : ".//name[starts-with(.,'FPC')]/parent::*"
+   },
+   "FpcMiReHwTable" : {
+      "item" : ".//name[starts-with(.,'FPC')]/parent::*",
+      "rpc" : "get-chassis-inventory",
+      "key" : [
+         "ancestor::multi-routing-engine-item/re-name",
+         "name"
+      ],
+      "view" : "_fpc_hw_view"
+   },
+   "FpcMiReInfoTable" : {
+      "rpc" : "get-fpc-information",
+      "item" : ".//fpc",
+      "view" : "_fpc_info_view",
+      "key" : [
+         "ancestor::multi-routing-engine-item/re-name",
+         "slot"
+      ]
+   }
+}

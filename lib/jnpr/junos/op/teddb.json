@@ -1,0 +1,64 @@
+{
+   "TedTable" : {
+      "args" : {
+         "extensive" : "True"
+      },
+      "rpc" : "get-ted-database-information",
+      "key" : "ted-database-id",
+      "view" : "TedView",
+      "item" : "ted-database"
+   },
+   "_linkView" : {
+      "fields" : {
+         "remoteRTR" : "ted-link-to",
+         "metric" : {
+            "ted-link-metric" : "int"
+         },
+         "localIfI" : {
+            "ted-link-local-ifindex" : "int"
+         },
+         "remoteIfI" : {
+            "ted-link-remote-ifindex" : "int"
+         },
+         "color" : "admin-groups/color",
+         "remoteADD" : "ted-link-remote-address",
+         "localADD" : "ted-link-local-address"
+      }
+   },
+   "TedSummaryView" : {
+      "fields" : {
+         "inet-count" : {
+            "ted-database-inet-count" : "int"
+         },
+         "iso-count" : {
+            "ted-database-iso-count" : "int"
+         }
+      }
+   },
+   "TedSummaryTable" : {
+      "item" : "ted-database-summary",
+      "rpc" : "get-ted-database-information",
+      "view" : "TedSummaryView"
+   },
+   "_linkTable" : {
+      "view" : "_linkView",
+      "key" : "ted-link-local-ifindex",
+      "item" : "ted-link"
+   },
+   "TedView" : {
+      "fields" : {
+         "link" : "_linkTable",
+         "type" : "ted-database-type",
+         "age" : {
+            "ted-database-age" : "int"
+         },
+         "link-in" : {
+            "ted-database-link-in" : "int"
+         },
+         "link-out" : {
+            "ted-database-link-out" : "int"
+         },
+         "protocol" : "ted-database-protocol"
+      }
+   }
+}

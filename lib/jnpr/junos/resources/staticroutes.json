@@ -1,0 +1,15 @@
+{
+   "StaticRouteTable" : {
+      "key-field" : [
+         "route_name"
+      ],
+      "set" : "routing-options/static/route",
+      "view" : "StaticRouteView"
+   },
+   "StaticRouteView" : {
+      "fields" : {
+         "hop" : "next-hop",
+         "route_name" : "name"
+      }
+   }
+}

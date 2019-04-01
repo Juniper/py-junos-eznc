@@ -1,0 +1,19 @@
+{
+   "LLDPNeighborTable" : {
+      "view" : "LLDPNeighborView",
+      "rpc" : "get-lldp-neighbors-information",
+      "key" : "lldp-local-interface | lldp-local-port-id",
+      "item" : "lldp-neighbor-information"
+   },
+   "LLDPNeighborView" : {
+      "fields" : {
+         "remote_sysname" : "lldp-remote-system-name",
+         "remote_chassis_id" : "lldp-remote-chassis-id",
+         "remote_type" : "lldp-remote-chassis-id-subtype",
+         "remote_port_desc" : "lldp-remote-port-description",
+         "local_parent" : "lldp-local-parent-interface-name",
+         "remote_port_id" : "lldp-remote-port-id",
+         "local_int" : "lldp-local-interface | lldp-local-port-id"
+      }
+   }
+}

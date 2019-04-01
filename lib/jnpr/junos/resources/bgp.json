@@ -1,0 +1,42 @@
+{
+   "BgpView" : {
+      "fields_neigh" : {
+         "neigh_addr" : "name"
+      },
+      "fields" : {
+         "peer" : {
+            "peer-as" : {
+               "type" : "int"
+            }
+         },
+         "bgp_name" : {
+            "name" : {
+               "minValue" : "1",
+               "maxValue" : "255",
+               "type" : "str"
+            }
+         },
+         "local_addr" : "local-address",
+         "bgp_type" : {
+            "type" : {
+               "type" : {
+                  "enum" : [
+                     "external",
+                     "internal"
+                  ]
+               }
+            }
+         }
+      },
+      "groups" : {
+         "neigh" : "neighbor"
+      }
+   },
+   "BgpTable" : {
+      "view" : "BgpView",
+      "set" : "protocols/bgp/group",
+      "key-field" : [
+         "bgp_name"
+      ]
+   }
+}

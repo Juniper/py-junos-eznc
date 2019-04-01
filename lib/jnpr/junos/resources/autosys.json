@@ -1,0 +1,14 @@
+{
+   "AutoSysTable" : {
+      "key-field" : [
+         "as_num"
+      ],
+      "view" : "AutoSysView",
+      "set" : "routing-options/autonomous-system"
+   },
+   "AutoSysView" : {
+      "fields" : {
+         "as_num" : "as-number"
+      }
+   }
+}

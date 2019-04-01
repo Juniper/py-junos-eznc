@@ -1,0 +1,57 @@
+{
+   "BfdSessionTable" : {
+      "key" : "session-neighbor",
+      "rpc" : "get-bfd-session-information",
+      "args" : {
+         "extensive" : "True"
+      },
+      "item" : "bfd-session",
+      "view" : "BfdSessionView"
+   },
+   "_BfdSessionClientView" : {
+      "fields" : {
+         "name" : "client-name",
+         "reception_interval" : "client-reception-interval",
+         "transmission_interval" : "client-transmission-interval"
+      }
+   },
+   "_BfdSessionClientTable" : {
+      "view" : "_BfdSessionClientView",
+      "item" : "bfd-client"
+   },
+   "BfdSessionView" : {
+      "fields" : {
+         "bfd_client" : "_BfdSessionClientTable",
+         "detection_time" : "session-detection-time",
+         "remote_state" : "remote-state",
+         "local_diagnostic" : "local-diagnostic",
+         "no_absorb" : {
+            "no-absorb" : "True=regex(no-absorb)"
+         },
+         "neighbor_minimum_transmission_interval" : "neighbor-minimum-transmission_interval",
+         "remote_diagnostic" : "remote-diagnostic",
+         "state" : "session-state",
+         "neighbor_minimum_reception_interval" : "neighbor-minimum-reception_interval",
+         "neighbor" : "session-neighbor",
+         "minimum_reception_interval" : "minimum-reception-interval",
+         "minimum_asynchronous_interval" : "minimum-asynchronous-interval",
+         "adaptive_asynchronous_transmission_interval" : "adaptive-asynchronous-transmission_interval",
+         "echo_mode_state" : "echo-mode-state",
+         "detection_multiplier" : "detection-multiplier",
+         "minimum_transmission_interval" : "minimum-transmission-interval",
+         "no_refresh" : {
+            "no-refresh" : "True=no-refresh"
+         },
+         "echo_mode_desired" : "echo-mode-desired",
+         "remote_discriminator" : "remote-discriminator",
+         "adaptive_reception_interval" : "adaptive-reception-interval",
+         "version" : "session-version",
+         "adaptive_multiplier" : "session-adaptive-multiplier",
+         "local_discriminator" : "local-discriminator",
+         "transmission_interval" : "session-transmission-interval",
+         "neighbor_session_multiplier" : "neighbor-session-multiplier",
+         "interface" : "session-interface",
+         "minimum_slow_interval" : "minimum-slow-interval"
+      }
+   }
+}

@@ -1,0 +1,27 @@
+{
+   "SyslogView" : {
+      "fields" : {
+         "name" : {
+            "name" : {
+               "default" : "messages"
+            }
+         }
+      },
+      "groups" : {
+         "contents" : "contents"
+      },
+      "fields_contents" : {
+         "error" : "error",
+         "contents_name" : "name",
+         "info" : "info"
+      }
+   },
+   "SyslogTable" : {
+      "key-field" : [
+         "name",
+         "contents_name"
+      ],
+      "view" : "SyslogView",
+      "set" : "system/syslog/file"
+   }
+}

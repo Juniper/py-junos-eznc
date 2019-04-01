@@ -1,0 +1,42 @@
+{
+   "EthPortView" : {
+      "fields" : {
+         "macaddr" : "current-physical-address",
+         "admin" : "admin-status",
+         "oper" : "oper-status",
+         "description" : "description",
+         "mtu" : {
+            "mtu" : "int"
+         },
+         "link_mode" : "link-mode"
+      },
+      "groups" : {
+         "flags" : "if-device-flags",
+         "mac_stats" : "ethernet-mac-statistics"
+      },
+      "fields_mac_stats" : {
+         "tx_packets" : "output-packets",
+         "tx_bytes" : "output-bytes",
+         "rx_bytes" : "input-bytes",
+         "rx_packets" : "input-packets"
+      },
+      "fields_flags" : {
+         "running" : {
+            "ifdf-running" : "flag"
+         },
+         "present" : {
+            "ifdf-present" : "flag"
+         }
+      }
+   },
+   "EthPortTable" : {
+      "args_key" : "interface_name",
+      "args" : {
+         "interface_name" : "[afgxe][et]-*",
+         "media" : "True"
+      },
+      "view" : "EthPortView",
+      "rpc" : "get-interface-information",
+      "item" : "physical-interface"
+   }
+}

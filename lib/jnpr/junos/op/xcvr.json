@@ -1,0 +1,20 @@
+{
+   "XcvrTable" : {
+      "rpc" : "get-chassis-inventory",
+      "view" : "XcvrTableView",
+      "key" : [
+         "ancestor::*[starts-with(name,'FPC')]/name",
+         "ancestor::*[starts-with(name,'PIC')]/name",
+         "name"
+      ],
+      "item" : "//*[starts-with(name,\"Xcvr\")]"
+   },
+   "XcvrTableView" : {
+      "fields" : {
+         "ver" : "version",
+         "sn" : "serial-number",
+         "type" : "description",
+         "pn" : "part-number"
+      }
+   }
+}

@@ -1,0 +1,58 @@
+{
+   "LacpPortView" : {
+      "fields" : {
+         "state" : "_LacpPortStateTable",
+         "proto" : "_LacpPortProtoTable"
+      }
+   },
+   "_LacpPortProtoTable" : {
+      "item" : "lag-lacp-protocol",
+      "view" : "_LacpPortProtoView"
+   },
+   "_LacpPortStateView" : {
+      "fields" : {
+         "defaulted" : {
+            "lacp-defaulted" : "True=Yes"
+         },
+         "distributing" : {
+            "lacp-distributing" : "True=Yes"
+         },
+         "expired" : {
+            "lacp-expired" : "True=Yes"
+         },
+         "aggregation" : {
+            "lacp-aggregation" : "True=Yes"
+         },
+         "timeout" : "lacp-timeout",
+         "sync" : {
+            "lacp-synchronization" : "True=Yes"
+         },
+         "collecting" : {
+            "lacp-collecting" : "True=Yes"
+         },
+         "activity" : "lacp-activity"
+      }
+   },
+   "_LacpPortStateTable" : {
+      "key" : [
+         "name",
+         "lacp-role"
+      ],
+      "item" : "lag-lacp-state",
+      "view" : "_LacpPortStateView"
+   },
+   "_LacpPortProtoView" : {
+      "fields" : {
+         "tx_state" : "lacp-transmit-state",
+         "mx_state" : "lacp-mux-state",
+         "rx_state" : "lacp-receive-state"
+      }
+   },
+   "LacpPortTable" : {
+      "args_key" : "interface_name",
+      "key" : "lag-lacp-header/aggregate-name",
+      "rpc" : "get-lacp-interface-information",
+      "view" : "LacpPortView",
+      "item" : "lacp-interface-information"
+   }
+}

@@ -1,0 +1,52 @@
+{
+   "_LdpNeighborHelloFlagsView" : {
+      "fields" : {
+         "flag" : "ldp-neighbor-hello-flag"
+      }
+   },
+   "LdpNeighborView" : {
+      "fields" : {
+         "label_space_id" : "ldp-label-space-id",
+         "hello_flags" : "_LdpNeighborHelloFlagsTable",
+         "proposed_local_holdtime" : "ldp-proposed-local-holdtime",
+         "reference_count" : "ldp-reference-count",
+         "neighbor_address" : "ldp-neighbor-address",
+         "proposed_peer_holdtime" : "ldp-proposed-peer-holdtime",
+         "hello_interval" : "ldp-hello-interval",
+         "types" : "_LdpNeighborTypesTable",
+         "remaining_time" : "ldp-remaining-time",
+         "interface_name" : "interface-name",
+         "up_time" : "ldp-up-time",
+         "holdtime" : "ldp-holdtime",
+         "config_sequence" : "ldp-config-sequence",
+         "transport_address" : "ldp-transport-address"
+      }
+   },
+   "_LdpNeighborHelloFlagsTable" : {
+      "item" : "ldp-neighbor-hello-flags",
+      "key" : "ldp-neighbor-hello-flag",
+      "view" : "_LdpNeighborHelloFlagsView"
+   },
+   "_LdpNeighborTypesTable" : {
+      "key" : "ldp-neighbor-type",
+      "view" : "_LdpNeighborTypesView",
+      "item" : "ldp-neighbor-types"
+   },
+   "_LdpNeighborTypesView" : {
+      "fields" : {
+         "type" : "ldp-neighbor-type"
+      }
+   },
+   "LdpNeighborTable" : {
+      "item" : "ldp-neighbor",
+      "args" : {
+         "extensive" : "True"
+      },
+      "rpc" : "get-ldp-neighbor-information",
+      "key" : [
+         "interface-name",
+         "ldp-neighbor-address"
+      ],
+      "view" : "LdpNeighborView"
+   }
+}

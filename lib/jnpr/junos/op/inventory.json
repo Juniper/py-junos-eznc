@@ -1,0 +1,19 @@
+{
+   "ModuleTableView" : {
+      "fields" : {
+         "ver" : "version",
+         "jname" : "name",
+         "pn" : "part-number",
+         "sn" : "serial-number",
+         "type" : "description"
+      }
+   },
+   "ModuleTable" : {
+      "key" : [
+         "name"
+      ],
+      "view" : "ModuleTableView",
+      "item" : ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module",
+      "rpc" : "get-chassis-inventory"
+   }
+}
