@@ -17,6 +17,7 @@ class Table(object):
     ITEM_XPATH = None
     ITEM_NAME_XPATH = 'name'
     VIEW = None
+    USE_FILTER = None
 
     def __init__(self, dev=None, xml=None, path=None, use_filter=True):
         """
