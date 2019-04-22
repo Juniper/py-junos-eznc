@@ -1,4 +1,4 @@
-## Release 2.2.1 - 22 Apr 2019
+## Release 2.2.1 - 22 April 2019
 ### Features Added
 - None
 
