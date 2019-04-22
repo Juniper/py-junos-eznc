@@ -1,3 +1,19 @@
+## Release 2.2.1 - 22 Apr 2019
+### Features Added
+- None
+
+### Bugs Fixed
+- Handle multiple package-result values from sw.install #864 
+- Extended support to WR-Based Linux H/W #882  #883 #889
+- Fixed issues in Console over SSH #877
+- Optimized PyEZ docker image size and minor bug fixes #894 #911
+- Fixed JSON serialization for Junos facts #902 
+- Updated securityzone.yml. Added item `zone-security` #909 
+- Fixed runtime error while using Outbound-SSH #915
+- Fixed Pyyaml bugs #914 #917 #918
+
+
+
 ## Release 2.2.0 - 27 August 2018
 ### Features Added:
 - Support for Node virt based platforms #856
