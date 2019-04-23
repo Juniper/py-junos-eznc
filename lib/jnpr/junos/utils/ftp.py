@@ -99,9 +99,9 @@ class FTP(ftplib.FTP):
             local_file = local_path
 
         with open(local_file, 'wb') as local_fh:
+            args_callback = self._ftpargs.get('callback')
             def callback(data):
                 local_fh.write(data)
-                args_callback = self._ftpargs.get('callback')
                 if args_callback:
                     args_callback(data)
             try:
