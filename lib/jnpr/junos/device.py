@@ -1119,8 +1119,8 @@ class Device(_Connection):
 
         :param bool use_filter:
             *OPTIONAL* To choose between SAX and DOM parsing.
-            default is ``True`` to use SAX (if SAX input is provided).
-            Select ``False`` to use DOM.
+            default is ``False`` to use DOM.
+            Select ``True`` to use SAX (if SAX input is provided).
 
         """
 
@@ -1136,7 +1136,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
-        self._use_filter = kvargs.get('use_filter', True)
+        self._use_filter = kvargs.get('use_filter', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
