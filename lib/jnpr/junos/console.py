@@ -269,7 +269,7 @@ class Console(_Connection):
             self.connected = False
 
     @ignoreWarnDecorator
-    def _rpc_reply(self, rpc_cmd_e):
+    def _rpc_reply(self, rpc_cmd_e, *args, **kwargs):
         encode = None if sys.version < '3' else 'unicode'
         rpc_cmd = etree.tostring(rpc_cmd_e, encoding=encode) \
             if isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e

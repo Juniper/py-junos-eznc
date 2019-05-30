@@ -771,7 +771,9 @@ class _Connection(object):
 
         try:
             rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
-                                        ignore_warning=ignore_warning)
+                                        ignore_warning=ignore_warning,
+                                        filter_xml=kvargs.get(
+                                            'filter_xml'))
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
@@ -1114,6 +1116,12 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool use_filter:
+            *OPTIONAL* To choose between SAX and DOM parsing.
+            default is ``False`` to use DOM.
+            Select ``True`` to use SAX (if SAX input is provided).
+
         """
 
         # ----------------------------------------
@@ -1128,6 +1136,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._use_filter = kvargs.get('use_filter', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1262,8 +1271,9 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local':
-                    self.__class__.ON_JUNOS})
+                device_params={'name': 'junos',
+                               'local': self.__class__.ON_JUNOS,
+                               'use_filter': self._use_filter})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1337,8 +1347,8 @@ class Device(_Connection):
                 self.connected = False
 
     @ignoreWarnDecorator
-    def _rpc_reply(self, rpc_cmd_e):
-        return self._conn.rpc(rpc_cmd_e)._NCElement__doc
+    def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
+        return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager
