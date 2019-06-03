@@ -23,7 +23,7 @@ class TestStartShell(unittest.TestCase):
     def test_startshell_open_with_shell_term(self, mock_wait, mock_connect):
         mock_wait.return_value = ["user # "]
         self.shell.open()
-        mock_wait.assert_called_with('(%|>|#)')
+        mock_wait.assert_called_with('(%|>|#|\\$)')
 
     @patch('paramiko.SSHClient')
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
@@ -31,6 +31,13 @@ class TestStartShell(unittest.TestCase):
         mock_wait.return_value = ["user > "]
         self.shell.open()
         mock_wait.assert_called_with('(%|#|\\$)\\s')
+
+    @patch('paramiko.SSHClient')
+    @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
+    def test_startshell_open_with_bourne_shell(self, mock_wait, mock_connect):
+        mock_wait.return_value = ["foo@bar:~$ "]
+        self.shell.open()
+        mock_wait.assert_called_with('(%|>|#|\\$)')
 
     @patch('paramiko.SSHClient')
     def test_startshell_close(self, mock_connect):

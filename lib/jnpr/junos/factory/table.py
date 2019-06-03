@@ -138,6 +138,10 @@ class Table(object):
                                                      key_value.split(' | ')]))
             return self._keys_simple(xpath + '/' + key_value)
 
+        # user explicitly passed key as Null in Table
+        if key_value is None:
+            return []
+
         if not isinstance(key_value, list):
             raise RuntimeError(
                 "What to do with key, table:'%s'" %

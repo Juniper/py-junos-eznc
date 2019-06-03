@@ -391,6 +391,9 @@ class _Connection(object):
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
+        # When sockfd passed to device for 'outbound ssh'
+        if self.__class__.__name__ == 'Device' and self._sock_fd is not None:
+            return None
         if self._ssh_config:
             sshconf_path = os.path.expanduser(self._ssh_config)
         else:
