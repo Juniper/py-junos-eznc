@@ -94,6 +94,22 @@ class TestFtp(unittest.TestCase):
         self.assertEqual(self.dev_ftp.get(local_path="testfile",
                                           remote_file="testfile"), True)
 
+    @patch('ftplib.FTP.connect')
+    @patch('ftplib.FTP.login')
+    @patch('ftplib.FTP.retrbinary')
+    def test_ftp_dnload_file_get_rf_filename_cb(
+        self,
+        mock_ftp_connect,
+        mock_ftp_login,
+        mock_ftp_retrbinary,
+    ):
+        def callback():
+            pass
+
+        kwargs = {"callback": callback}
+        dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev, **kwargs)
+        self.assertEqual(dev_ftp.get(remote_file="/var/tmp/testfile"), True)
+
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_path(self, mock_open, mock_ftpstore):

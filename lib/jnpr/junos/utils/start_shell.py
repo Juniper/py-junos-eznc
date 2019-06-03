@@ -97,7 +97,7 @@ class StartShell(object):
         self._client = client
         self._chan = chan
 
-        got = self.wait_for(r'(%|>|#)')
+        got = self.wait_for(r'(%|>|#|\$)')
         if got[-1].endswith(_JUNOS_PROMPT):
             self.send('start shell')
             self.wait_for(_SHELL_PROMPT)
@@ -151,7 +151,7 @@ class StartShell(object):
             # use $? to get the exit code of the command
             self.send('echo $?')
             rc = ''.join(self.wait_for(_SHELL_PROMPT))
-            self.last_ok = rc.find('0') > 0
+            self.last_ok = rc.find('\r\n0\r\n') > 0
         return (self.last_ok, got)
 
     # -------------------------------------------------------------------------
