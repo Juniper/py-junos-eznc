@@ -84,7 +84,7 @@ class TestToJson(unittest.TestCase):
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:
-            if 'normalize' in kwargs and args:
+            if args and ('normalize' in kwargs or 'filter_xml' in kwargs):
                 return self._read_file(args[0].tag + '.xml')
             device_params = kwargs['device_params']
             device_handler = make_device_handler(device_params)
