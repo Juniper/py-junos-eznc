@@ -17,7 +17,13 @@ class TableJSONEncoder(json.JSONEncoder):
         if isinstance(obj, View):
             obj = dict(obj.items())
         elif isinstance(obj, Table):
-            obj = dict((str(item.name), item) for item in obj)
+            ret = dict()
+            for item in obj:
+                if isinstance(item.name, list) and len(item.name) == 0:
+                    ret.update(item)
+                else:
+                    ret[str(item.name)] = item
+            return ret
         elif isinstance(obj, CMDTable):
             obj = {str(key): val for key, val in obj.items()}
         else:

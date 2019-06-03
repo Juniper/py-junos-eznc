@@ -1,7 +1,7 @@
 ---
 SecurityZoneTable:
   rpc: get-zones-information
-  item: zones-security
+  item: //zones-security
   key: zones-security-zonename
   view: SecurityZoneView
 
