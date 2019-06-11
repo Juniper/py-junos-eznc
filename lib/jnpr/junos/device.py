@@ -1112,6 +1112,13 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool allow_agent:
+            *OPTIONAL* If ``True`` then the SSH config file is not parsed by PyEZ
+             and passed down to ncclient. If ``False`` then the SSH config file will
+             be parsed by PyEZ. If option is not provided will fallback to default
+             behavior. This option is passed down to the ncclient as is, if it is
+             present in the kwargs.
         """
 
         # ----------------------------------------
@@ -1126,6 +1133,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._allow_agent = kvargs.get('allow_agent')
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1157,11 +1165,19 @@ class Device(_Connection):
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get('ssh_config')
             self._sshconf_lkup()
-            # but if user or private key is explicit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
-                self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
-                or self._conf_ssh_private_key_file
+
+            # if allow_agent is provided and is True, then PyEZ shouldn't load
+            # the values from config file
+            if self._allow_agent is not None and self._allow_agent is True:
+                self._auth_user = kvargs.get('user')
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            # if allow_agent is not provided or provided but set to False, and
+            # if user or private key is explicit from call, then use it.
+            else:
+                self._auth_user = kvargs.get('user') or self._conf_auth_user or \
+                                  self._auth_user
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
+                                             or self._conf_ssh_private_key_file
             self._auth_password = kvargs.get(
                 'password') or kvargs.get('passwd')
 
@@ -1241,13 +1257,18 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
-            # not given a password or an ssh key file.
-            # in this condition it means we want to query the agent
-            # for available ssh keys
+            # if allow_agent is provided in the call, then the same
+            # value is passed to the ncclient.
+            # if allow_agent isn't provided in the call, then it is
+            # set to True if we are not able to find password or
+            # ssh_keyfile. user provided allow_agent value should be
+            # preferred over the runtime value
 
-            allow_agent = bool((self._auth_password is None) and
+            if self._allow_agent is None:
+                allow_agent = bool((self._auth_password is None) and
                                (self._ssh_private_key_file is None))
+            else:
+                allow_agent = self.allow_agent
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
