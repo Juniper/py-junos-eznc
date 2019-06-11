@@ -46,7 +46,7 @@ class TestFactoryView(unittest.TestCase):
 
     def test_view_name_xpath_none(self):
         self.v.ITEM_NAME_XPATH = None
-        self.assertEqual(self.v.name, '1.1.1.1')
+        self.assertEqual(self.v.name, [])
 
     def test_view_name_xpath_composite(self):
         self.v.ITEM_NAME_XPATH = ['name', 'missing', 'admin-status']
