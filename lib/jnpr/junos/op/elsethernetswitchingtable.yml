@@ -1,0 +1,24 @@
+---
+ElsEthernetSwitchingTable:
+    rpc: get-ethernet-switching-table-information
+    args:
+        detail: True
+    item: l2ng-l2ald-mac-entry-vlan
+    key: l2ng-l2-mac-address
+    view: ElsEthernetSwitchingView
+
+ElsEthernetSwitchingView:
+    fields:
+        mac_address: l2ng-l2-mac-address
+        count: mac-count-global
+        learnt: learnt-mac-count
+        routing_instance: l2ng-l2-mac-routing-instance
+        vlan_id: l2ng-l2-vlan-id
+        vlan_name: l2ng-l2-mac-vlan-name
+        logical_interface: l2ng-l2-mac-logical-interface
+        active_source: l2ng-l2-active-source
+        ifl_generation: l2ng-l2-mac-ifl-generation
+        flags: l2ng-l2-mac-entry-flags
+        epoch: l2ng-l2-mac-epoch
+        sequence_number: l2ng-l2-mac-sequence-number
+        learn_mask: l2ng-l2-mac-learn-mask
