@@ -1,8 +1,8 @@
 <rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.3X48/junos">
     <software-information>
         <host-name>lsys500</host-name>
-        <product-model>srx5400</product-model>
-        <product-name>srx5400</product-name>
+        <product-model>srx3600</product-model>
+        <product-name>srx3600</product-name>
         <jsr/>
         <package-information>
             <name>junos</name>
