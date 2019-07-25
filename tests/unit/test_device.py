@@ -345,6 +345,12 @@ class TestDevice(unittest.TestCase):
         self.dev._sshconf_lkup()
         mock_paramiko.assert_called_once_with('1.1.1.1')
 
+    @patch('paramiko.config.SSHConfig.lookup')
+    def test_device__sshconf_lkup_sock_fd(self, mock_paramiko):
+        self.dev2 = Device(sock_fd=6)
+        self.dev2._sshconf_lkup()
+        self.assertEqual(self.dev2._sshconf_lkup(), None)
+
     @patch('os.getenv')
     def test_device__sshconf_lkup_path_not_exists(self, mock_env):
         mock_env.return_value = '/home/test'

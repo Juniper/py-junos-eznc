@@ -98,14 +98,20 @@ class FTP(ftplib.FTP):
                 local_file = local_path
         else:
             local_file = local_path
-        try:
-            with open(local_file, 'wb') as open_local_file:
+            
+        with open(local_file, 'wb') as local_fh:
+            args_callback = self._ftpargs.get('callback')
+            def callback(data):
+                local_fh.write(data)
+                if args_callback:
+                    args_callback(data)
+            try:
                 self.retrbinary('RETR ' + remote_file,
-                                open_local_file.write)
-        except Exception as ex:
-            logger.error(ex)
-            return False
-        return True
+                                callback)
+            except Exception as ex:
+                logger.error(ex)
+                return False
+            return True
 
     # -------------------------------------------------------------------------
     # CONTEXT MANAGER
