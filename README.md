@@ -52,9 +52,15 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 * Make configuration changes in unstructured and structured ways
 * Provide common utilities for tasks such as secure copy of files and software updates
 
-# NOTICE
+# NOTICES
 
-As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
+- As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
+- When using the `ssh_private_key_file` argument of the Device constructor on MacOS Mojave and higher, ensure that the SSH keys are in the RSA format, and not the newer OPENSSH format.
+  - New key: `ssh-keygen -p -m PEM -f ~/.ssh/id_rsa`
+  - Convert an existing OPENSSH key: ``ssh-keygen -p -m PEM -f ~/.ssh/private_key`
+  - Check if a given key is RSA or OPENSSH format: `head -n1 ~/.ssh/private_key`
+    - RSA: `-----BEGIN RSA PRIVATE KEY-----`
+    - OPENSSH: `-----BEGIN OPENSSH PRIVATE KEY-----` 
 
 # INSTALLATION
 
