@@ -33,6 +33,15 @@ from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
     ignoreWarnDecorator
 from jnpr.junos.exception import JSONLoadError, ConnectError
 
+# check for ncclient support for filter_xml. Remove these changes once ncclient
+# release filter_xml/SAX parsing feature
+# https://github.com/ncclient/ncclient/pull/324
+from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
+import inspect
+if sys.version_info.major >= 3:
+    NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
+else:
+    NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -1351,7 +1360,10 @@ class Device(_Connection):
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
-        return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
+        if NCCLIENT_FILTER_XML:
+            return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
+        else:
+            return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager
