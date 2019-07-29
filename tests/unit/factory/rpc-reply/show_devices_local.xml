@@ -1,0 +1,106 @@
+<output>
+
+TSEC Ethernet Device Driver: .le1, Control 0x4296c218, (1000Mbit)
+HW reg base 0xff724000
+  [0]: TxBD base 0x7853ce20, RxBD Base 0x7853d640
+  [1]: TxBD base 0x7853d860, RxBD Base 0x7853e080
+  [2]: TxBD base 0x7853e2a0, RxBD Base 0x785422c0
+  [3]: TxBD base 0x785426e0, RxBD Base 0x78544700
+Receive:
+  185584608 bytes, 2250212 packets, 0 FCS errors, 0 multicast packets
+  107271 broadcast packets, 0 control frame packets
+  0 PAUSE frame packets, 0 unknown OP codes
+  0 alignment errors, 0 frame length errors
+  0 code errors, 0 carrier sense errors
+  0 undersize packets, 0 oversize packets
+  0 fragments, 0 jabbers, 0 drops
+Receive per queue:
+  [0]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [1]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [2]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [3]: 203586808 bytes, 2250219 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+Transmit:
+  288184646 bytes, 2038370 packets, 0 multicast packets
+  106531 broadcast packets, 0 PAUSE control frames
+  0 deferral packets, 0 excessive deferral packets
+  0 single collision packets, 0 multiple collision packets
+  0 late collision packets, 0 excessive collision packets
+  0 total collisions, 0 drop frames, 0 jabber frames
+  0 FCS errors, 0 control frames, 0 oversize frames
+  0 undersize frames, 0 fragments frames
+Transmit per queue:
+  [0]:   10300254 bytes,        72537 packets
+                0 dropped,          0 fifo errors
+  [1]:    4474302 bytes,       106531 packets
+                0 dropped,          0 fifo errors
+  [2]:  260203538 bytes,      1857137 packets
+                0 dropped,          0 fifo errors
+  [3]:     199334 bytes,         2179 packets
+                0 dropped,          0 fifo errors
+TSEC status counters:
+kernel_dropped:0, rx_large:0 rx_short: 0
+rx_nonoctet: 0, rx_crcerr: 0, rx_overrun: 0
+rx_bsy: 0,rx_babr:0, rx_trunc: 0
+rx_length_errors: 0, rx_frame_errors: 0 rx_crc_errors: 0
+rx_errors: 0, rx_ints: 2250110, collisions: 0
+eberr:0, tx_babt: 0, tx_underrun: 0
+tx_timeout: 0, tx_timeout: 0,tx_window_errors: 0
+tx_aborted_errors: 0, tx_ints: 2038385, resets: 1
+
+
+TSEC Ethernet Device Driver: .le3, Control 0x42979220, (1000Mbit)
+HW reg base 0xff726000
+  [0]: TxBD base 0x78545720, RxBD Base 0x78545f40
+  [1]: TxBD base 0x78546160, RxBD Base 0x78546980
+  [2]: TxBD base 0x78546ba0, RxBD Base 0x7854abc0
+  [3]: TxBD base 0x7854afe0, RxBD Base 0x7854d000
+Receive:
+  0 bytes, 0 packets, 0 FCS errors, 0 multicast packets
+  0 broadcast packets, 0 control frame packets
+  0 PAUSE frame packets, 0 unknown OP codes
+  0 alignment errors, 0 frame length errors
+  0 code errors, 0 carrier sense errors
+  0 undersize packets, 0 oversize packets
+  0 fragments, 0 jabbers, 0 drops
+Receive per queue:
+  [0]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [1]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [2]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+  [3]: 0 bytes, 0 packets, 0 dropped
+        0 jumbo, 0 truncated jumbo
+Transmit:
+  6817984 bytes, 106531 packets, 0 multicast packets
+  106531 broadcast packets, 0 PAUSE control frames
+  0 deferral packets, 0 excessive deferral packets
+  0 single collision packets, 0 multiple collision packets
+  0 late collision packets, 0 excessive collision packets
+  0 total collisions, 0 drop frames, 0 jabber frames
+  0 FCS errors, 0 control frames, 0 oversize frames
+  0 undersize frames, 0 fragments frames
+Transmit per queue:
+  [0]:          0 bytes,            0 packets
+                0 dropped,          0 fifo errors
+  [1]:    4474302 bytes,       106531 packets
+                0 dropped,          0 fifo errors
+  [2]:          0 bytes,            0 packets
+                0 dropped,          0 fifo errors
+  [3]:          0 bytes,            0 packets
+                0 dropped,          0 fifo errors
+TSEC status counters:
+kernel_dropped:0, rx_large:0 rx_short: 0
+rx_nonoctet: 0, rx_crcerr: 0, rx_overrun: 0
+rx_bsy: 0,rx_babr:0, rx_trunc: 0
+rx_length_errors: 0, rx_frame_errors: 0 rx_crc_errors: 0
+rx_errors: 0, rx_ints: 0, collisions: 0
+eberr:0, tx_babt: 0, tx_underrun: 0
+tx_timeout: 0, tx_timeout: 0,tx_window_errors: 0
+tx_aborted_errors: 0, tx_ints: 106531, resets: 1
+
+</output>

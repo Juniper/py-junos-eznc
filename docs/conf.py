@@ -62,7 +62,7 @@ master_doc = 'index'
 # General information about the project.
 import jnpr.junos
 project = u'Junos PyEZ'
-copyright = u'2014, Juniper Networks, Inc.'
+copyright = u'2017, Juniper Networks, Inc.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
