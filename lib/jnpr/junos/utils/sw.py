@@ -657,9 +657,9 @@ class SW(Util):
            c) The checksum computed in step 2 does not match the checksum
               computed in step 4.
         6. If step 5 was executed, computes the checksum of the :package:
-           filename in the :remote_path: directory of the remote Junos device
+           filename in the :remote_path: directory of the remote Junos device.
         7. Validates the checksum computed in step 2 matches the checksum
-              computed in step 6.
+           computed in step 6.
         8. validates the package if :validate: is True
         9. installs the package
 

@@ -1,0 +1,6 @@
+<output>
+SENT: Ukern command: show pci errors 2
+
+PCI ERROR: 2:2:9:0 (0x0082)                    Slot status : 0x0000004c
+PCI ERROR: 2:2:9:0 (0x007a)                    Link status : 0x00000001
+</output>

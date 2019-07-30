@@ -1,0 +1,16 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.3X48/junos">
+    <software-information>
+        <host-name>lsys500</host-name>
+        <product-model>srx3600</product-model>
+        <product-name>srx3600</product-name>
+        <jsr/>
+        <package-information>
+            <name>junos</name>
+            <comment>JUNOS Software Release [12.3X48-D40.5]</comment>
+        </package-information>
+        <package-information>
+            <name>jais</name>
+            <comment>AI-Scripts [6.0R2-THIN.0]</comment>
+        </package-information>
+    </software-information>
+</rpc-reply>

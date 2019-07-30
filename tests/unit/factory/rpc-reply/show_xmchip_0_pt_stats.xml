@@ -1,0 +1,23 @@
+<output>
+WAN PT statistics (Index 0)
+---------------------------
+
+PCT entries used by all WI-1 streams         : 0
+PCT entries used by all WI-0 streams         : 0
+PCT entries used by all LI streams           : 0
+CPT entries used by all multicast packets    : 0
+CPT entries used by all WI-1 streams         : 0
+CPT entries used by all WI-0 streams         : 0
+CPT entries used by all LI streams           : 0
+
+Fabric PT statistics (Index 1)
+------------------------------
+
+PCT entries used by all FI streams           : 0
+PCT entries used by all WI (Unused) streams  : 0
+PCT entries used by all LI streams           : 0
+CPT entries used by all multicast packets    : 0
+CPT entries used by all FI streams           : 0
+CPT entries used by all WI (Unused) streams  : 0
+CPT entries used by all LI streams           : 0
+</output>

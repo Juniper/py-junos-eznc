@@ -31,8 +31,17 @@ from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
     ignoreWarnDecorator
-from jnpr.junos.exception import JSONLoadError
+from jnpr.junos.exception import JSONLoadError, ConnectError
 
+# check for ncclient support for filter_xml. Remove these changes once ncclient
+# release filter_xml/SAX parsing feature
+# https://github.com/ncclient/ncclient/pull/324
+from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
+import inspect
+if sys.version_info.major >= 3:
+    NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
+else:
+    NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -391,7 +400,15 @@ class _Connection(object):
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
-        # When sockfd passed to device for 'outbound ssh'
+        """ Controls the ssh connection:
+            If using ssh_private_key_file on MacOS Mojave or greater
+            (specifically > OpenSSH_7.4p1) ensure that the keys are generated
+            in PEM format or convert existing 'new' keys to the PEM format:
+            Check format: `head -n1 ~/.ssh/some_key`
+            Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
+            Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
+            Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
+            """
         if self.__class__.__name__ == 'Device' and self._sock_fd is not None:
             return None
         if self._ssh_config:
@@ -774,7 +791,9 @@ class _Connection(object):
 
         try:
             rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
-                                        ignore_warning=ignore_warning)
+                                        ignore_warning=ignore_warning,
+                                        filter_xml=kvargs.get(
+                                            'filter_xml'))
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
@@ -1011,7 +1030,12 @@ class Device(_Connection):
         """
         :returns: the current RPC XML Transformation.
         """
-        return self._conn._device_handler.transform_reply
+        try:
+            return self._conn._device_handler.transform_reply
+        except AttributeError:
+            if self._conn is None:
+                raise ConnectError(self, "Not connected to the Device")
+
 
     @transform.setter
     def transform(self, func):
@@ -1112,6 +1136,12 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool use_filter:
+            *OPTIONAL* To choose between SAX and DOM parsing.
+            default is ``False`` to use DOM.
+            Select ``True`` to use SAX (if SAX input is provided).
+
         """
 
         # ----------------------------------------
@@ -1126,6 +1156,7 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._use_filter = kvargs.get('use_filter', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1260,8 +1291,9 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local':
-                    self.__class__.ON_JUNOS})
+                device_params={'name': 'junos',
+                               'local': self.__class__.ON_JUNOS,
+                               'use_filter': self._use_filter})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1335,8 +1367,11 @@ class Device(_Connection):
                 self.connected = False
 
     @ignoreWarnDecorator
-    def _rpc_reply(self, rpc_cmd_e):
-        return self._conn.rpc(rpc_cmd_e)._NCElement__doc
+    def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
+        if NCCLIENT_FILTER_XML:
+            return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
+        else:
+            return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager
