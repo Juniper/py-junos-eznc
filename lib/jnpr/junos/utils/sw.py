@@ -946,9 +946,8 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # reboot - system reboot
     # -------------------------------------------------------------------------
-    @timeoutDecorator
     def reboot(self, in_min=0, at=None, all_re=True, on_node=None,
-               vmhost=False, **kwargs):
+               vmhost=False):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -1005,7 +1004,7 @@ class SW(Util):
             if self._dev.facts['_is_linux']:
                 got = rsp.text
             else:
-                got = rsp.getparent().findtext('.//request-reboot-status').strip()
+                got = rsp.getparent().findtext('.//request-reboot-status')
                 if got is None:
                     # Oon some platforms stopping/rebooting both
                     # REs produces <output> messages and
