@@ -110,6 +110,8 @@ class Config(Util):
 
         confirm = kvargs.get('confirm')
         if confirm:
+            if self.mode == 'private':
+                raise ValueError('commit confirmed not supported for private configuration')
             rpc_args['confirmed'] = True
             confirm_val = str(confirm)
             if 'True' != confirm_val:
