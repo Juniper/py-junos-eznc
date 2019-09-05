@@ -60,6 +60,12 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(self.dev.facts['virtual'], False)
 
     @patch('jnpr.junos.Device.execute')
+    def test_personality_srx_mid_range(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_personality_srx_mid_range
+        self.assertEqual(self.dev.facts['personality'], 'SRX_MIDRANGE')
+        self.assertEqual(self.dev.facts['virtual'], False)
+
+    @patch('jnpr.junos.Device.execute')
     def test_personality_srx_high_end(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_srx_high_end
         self.assertEqual(self.dev.facts['personality'], 'SRX_HIGHEND')
@@ -189,6 +195,11 @@ class TestPersonality(unittest.TestCase):
     def _mock_manager_personality_srx_high_end(self, *args, **kwargs):
         if args:
             return self._read_file('personality_srx_high_end_' + args[0].tag +
+                                   '.xml')
+
+    def _mock_manager_personality_srx_mid_range(self, *args, **kwargs):
+        if args:
+            return self._read_file('personality_srx_mid_range_' + args[0].tag +
                                    '.xml')
 
     def _mock_manager_personality_t(self, *args, **kwargs):
