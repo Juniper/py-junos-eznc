@@ -66,6 +66,8 @@ class OpTable(Table):
         if self._use_filter:
             try:
                 filter_xml = generate_sax_parser_input(self)
+                logger.debug("SAX parser input: {}".format(etree.tostring(
+                    filter_xml)))
                 rpc_args['filter_xml'] = filter_xml
             except Exception as ex:
                 logger.debug("Not able to create SAX parser input due to "
@@ -98,13 +100,20 @@ def generate_sax_parser_input(obj):
     Returns: lxml etree object to be used as sax parser input
 
     """
+    if isinstance(obj.ITEM_NAME_XPATH, list):
+        # key can be passed as list and list can have many keys
+        key_elem = E(obj.ITEM_NAME_XPATH[0])
+        for item in obj.ITEM_NAME_XPATH[1:]:
+            key_elem.append(E(item))
+    else:
+        key_elem = E(obj.ITEM_NAME_XPATH)
     if '/' in obj.ITEM_XPATH:
         tags = obj.ITEM_XPATH.split('/')
-        parser_ingest = E(tags.pop(-1), E(obj.ITEM_NAME_XPATH))
+        parser_ingest = E(tags.pop(-1), key_elem)
         for tag in tags[::-1]:
             parser_ingest = E(tag, parser_ingest)
     else:
-        parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
+        parser_ingest = E(obj.ITEM_XPATH, key_elem)
     local_field_dict = deepcopy(obj.VIEW.FIELDS)
     # first make element out of group fields
     if obj.VIEW.GROUPS:
@@ -118,7 +127,7 @@ def generate_sax_parser_input(obj):
                 group_ele.append(E(val.get('xpath')))
             parser_ingest.append(group_ele)
     for i, item in enumerate(local_field_dict.items()):
-        # i is the index and item will be taple of field key and value
+        # i is the index and item will be tuple of field key and value
         field_dict = item[1]
         if 'table' in field_dict:
             # handle nested table/view

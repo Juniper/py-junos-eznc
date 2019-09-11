@@ -10,6 +10,7 @@ from lxml import etree
 from jnpr.junos.exception import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
+from jnpr.junos.decorators import timeoutDecorator
 
 """
 Configuration Utilities
@@ -34,6 +35,7 @@ class Config(Util):
     # ------------------------------------------------------------------------
     # commit
     # ------------------------------------------------------------------------
+    @timeoutDecorator
     def commit(self, **kvargs):
         """
         Commit a configuration.
@@ -143,7 +145,7 @@ class Config(Util):
             rpc_varg = [{'detail': 'detail'}]
 
         # dbl-splat the rpc_args since we want to pass key/value to metaexec
-        # if there is a commit/check error, this will raise an execption
+        # if there is a commit/check error, this will raise an exception
 
         try:
             rsp = self.rpc.commit_configuration(*rpc_varg, **rpc_args)
@@ -171,8 +173,8 @@ class Config(Util):
     # -------------------------------------------------------------------------
     # commit check
     # -------------------------------------------------------------------------
-
-    def commit_check(self):
+    @timeoutDecorator
+    def commit_check(self, **kwargs):
         """
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
@@ -198,9 +200,9 @@ class Config(Util):
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
             if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
-	            return JXML.rpc_error(err.xml)
+                return JXML.rpc_error(err.xml)
             else:
-	            raise
+                raise
                 
         return True
 
