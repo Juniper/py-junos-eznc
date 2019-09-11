@@ -1,0 +1,32 @@
+<rpc-reply>
+{
+    "configuration" : {
+        "@" : {
+            "junos:changed-seconds" : "1492754952", 
+            "junos:changed-localtime" : "2017-04-21 11:39:12 IST"
+        }, 
+        "system" : {
+            "services" : {
+                "netconf" : {
+                    "ssh" : {
+                        "port" : 830
+                    }, 
+                    "traceoptions" : {
+                        "file" : {
+                            "filename" : "netconf-ops.log", 
+                            "size" : 3m, 
+                            "files" : 20, 
+                            "world-readable" : [null]
+                        }, 
+                        "flag" : [
+                        {
+                            "name" : "all"
+                        }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+</rpc-reply>

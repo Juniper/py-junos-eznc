@@ -30,7 +30,8 @@ class FTP(ftplib.FTP):
 
         self._junos = junos
         self._ftpargs = ftpargs
-        ftplib.FTP.__init__(self, self._junos._hostname, self._junos._auth_user,
+        ftplib.FTP.__init__(self, self._junos._hostname,
+                            self._junos._auth_user,
                             self._junos._auth_password)
 
     # dummy function, as connection is created by ftb lib in __init__ only
@@ -67,7 +68,11 @@ class FTP(ftplib.FTP):
                     remote_file = os.path.join('/tmp/', local_file)
                 else:
                     remote_file = os.path.join(remote_path, local_file)
-            self.storbinary('STOR ' + remote_file, open(local_file, 'rb'))
+
+            with open(local_file, 'rb') as open_local_file:
+                self.storbinary(cmd='STOR ' + remote_file,
+                                fp=open_local_file,
+                                callback=self._ftpargs.get('callback'))
         except Exception as ex:
             logger.error(ex)
             return False
@@ -93,13 +98,20 @@ class FTP(ftplib.FTP):
                 local_file = local_path
         else:
             local_file = local_path
-        try:
-            self.retrbinary('RETR ' + remote_file,
-                            open(local_file, 'wb').write)
-        except Exception as ex:
-            logger.error(ex)
-            return False
-        return True
+            
+        with open(local_file, 'wb') as local_fh:
+            args_callback = self._ftpargs.get('callback')
+            def callback(data):
+                local_fh.write(data)
+                if args_callback:
+                    args_callback(data)
+            try:
+                self.retrbinary('RETR ' + remote_file,
+                                callback)
+            except Exception as ex:
+                logger.error(ex)
+                return False
+            return True
 
     # -------------------------------------------------------------------------
     # CONTEXT MANAGER

@@ -1,35 +1,44 @@
 ### Installation on stock FreeBSD
 
-The following are instructions for setting up a system starting from a stock system images.
-
-These instructions were tested on a 64-bit systems from https://github.com/opscode/bento, and using the _Junos PyEZ_ library version 0.0.5.
+The following are instructions for setting up a system starting from a stock system image.
 
 Operating Systems
 ---------------
-- FreeBSD 9.2
+- FreeBSD 10.4
+- FreeBSD 11.1
 
-#### Step 1: Install packages for Junos PyEZ
+FreeBSD contains py-junos-eznc in its official repositories. It could be installed from binary packages using pkg package manager or built from sources using ports collection.
 
-    sudo pkg_add -r py27-pip libxml2 libxslt
-	
-#### Step 2: Install Junos PyEZ
+## Installing from binary packages.
 
-    sudo pip install junos-eznc
-    
-#### Step 3: Verify 
+##### For Python 2.7
+sudo pkg install py27-junos-eznc
+
+##### For Python 3.6
+sudo pkg install py36-junos-eznc
+
+## Installing from ports collection
+
+#### For Python 2.7
+sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py27
+
+#### For Python 3.6
+sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py36
+
+## Verify
 
 Once you've completed the above step, you should be able to create a `Device` instance, connect to a Junos system, and display the "facts", as illustrated in the README.md file.
 
 Enjoy!
 
 
-#### Installing from GitHub
+## Installing from GitHub
 
 Development code can be installed directly from GitHub based on any branch, commit, or tag.
 
-***Packages from Step 1 are required.***
+***Packages from Steps 1 and 2 are required.***
 
-    sudo pkg_add -r git
+    sudo pkg install git
 	sudo pip install git+https://github.com/Juniper/py-junos-eznc.git
 	
 	or

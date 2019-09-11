@@ -25,12 +25,12 @@ class TestFileList(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_home_fact(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_file_list
-        self.assertEqual(self.dev.facts['HOME'],'/var/home/user')
+        self.assertEqual(self.dev.facts['HOME'], '/var/home/user')
 
     @patch('jnpr.junos.Device.execute')
     def test_home_fact_multi_dir(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_file_list2
-        self.assertEqual(self.dev.facts['HOME'],'/var/home/user')
+        self.assertEqual(self.dev.facts['HOME'], '/var/home/user')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

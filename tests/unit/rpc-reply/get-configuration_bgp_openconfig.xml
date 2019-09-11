@@ -1,0 +1,13 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+<bgp xmlns="http://openconfig.net/yang/bgp">
+    <neighbors>
+        <neighbor>
+            <neighbor-address>10.10.0.1</neighbor-address>
+            <config>
+                <peer-group>OC</peer-group>
+                <peer-as>110</peer-as>
+            </config>
+        </neighbor>
+    </neighbors>
+</bgp>
+</rpc-reply>

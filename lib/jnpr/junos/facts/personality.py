@@ -29,10 +29,14 @@ def get_facts(device):
         personality = 'SWITCH'
         virtual = False
     elif model.startswith('MX'):
+        re_type = device.facts['re_info']['default']['default']['model']
         # The VMX has an RE type of 'RE-VMX'
-        if (device.facts['re_info']['default']['default']['model'] ==
-                'RE-VMX'):
+        if re_type == 'RE-VMX':
             personality = 'MX'
+            virtual = True
+        # An MX GNF has an RE type that includes the letters 'GNF'
+        elif re_type is not None and 'GNF' in re_type:
+            personality = 'MX-GNF'
             virtual = True
         else:
             personality = 'MX'
@@ -61,7 +65,11 @@ def get_facts(device):
         else:
             virtual = False
     elif re.match('SRX\s?(\d){4}', model):
-        personality = 'SRX_HIGHEND'
+        srx_model = int(model[-4:])
+        if srx_model > 5000:
+            personality = 'SRX_HIGHEND'
+        else:
+            personality = 'SRX_MIDRANGE'
         virtual = False
     elif re.match('SRX\s?(\d){3}', model):
         personality = 'SRX_BRANCH'
@@ -75,6 +83,9 @@ def get_facts(device):
     elif model.startswith('NFX'):
         personality = 'NFX'
         virtual = False
+    elif 'JUNOS_NODE_SLICING' == model:
+        personality = 'JDM'
+        virtual = True
 
     return {'personality': personality,
             'virtual': virtual, }

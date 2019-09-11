@@ -1,0 +1,17 @@
+<output>
+SENT: Ukern command: show pq3 pci
+
+PQ3 PEX EXC Count 1288, PCIX EXC Count 0.
+PQ3 PCI Error Status Indexes, head 0  tail 0.
+PCI 0:0:0:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:0:0:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:1:0:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:1:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:2:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:4:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:5:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:6:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:7:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:8:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+PCI 2:2:9:0 Correctable   Counts:  rxe 0, btlp 0, bdllp 0, rnr 0, rto 0
+</output>

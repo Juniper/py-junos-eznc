@@ -9,7 +9,6 @@ from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
 
 from mock import patch
-import sys
 
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
@@ -52,13 +51,13 @@ class TestScp(unittest.TestCase):
     @patch('paramiko.config.SSHConfig.lookup')
     @patch('paramiko.SSHClient')
     @patch('paramiko.proxy.ProxyCommand')
-    def test_scp_proxycommand(self, os_mock, open_mock, mock_paramiko,
-                              mock_connect, mock_proxy):
+    def test_scp_proxycommand(self, mock_proxy, mock_paramiko, mock_connect,
+                              open_mock, os_mock):
         os_mock.path.exists.return_value = True
         # self.dev._sshconf_path = '/home/rsherman/.ssh/config'
         with SCP(self.dev) as scp:
             scp.get('addrbook.conf')
-        mock_proxy.assert_called_any()
+        mock_proxy.assert_called_once()
 
     def test_scp_progress(self):
         scp = SCP(self.dev)

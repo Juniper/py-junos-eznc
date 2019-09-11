@@ -27,12 +27,16 @@ class TestIfdStyle(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_ifd_style_switch(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_ifd_style_switch
-        self.assertEqual(self.dev.facts['ifd_style'],'SWITCH')
+        self.assertEqual(self.dev.facts['ifd_style'], 'SWITCH')
 
     @patch('jnpr.junos.Device.execute')
     def test_ifd_style_classic(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_ifd_style_classic
-        self.assertEqual(self.dev.facts['ifd_style'],'CLASSIC')
+        self.assertEqual(self.dev.facts['ifd_style'], 'CLASSIC')
+
+    def test_ifd_style_None(self):
+        self.dev.facts._cache['personality'] = 'JDM'
+        self.assertEqual(self.dev.facts['ifd_style'], None)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

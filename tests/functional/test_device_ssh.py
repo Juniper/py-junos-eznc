@@ -12,13 +12,8 @@ class TestDeviceSsh(unittest.TestCase):
     def tearDown(self):
         self.dev.close()
 
-    # def test_device_open_default_key(self):
-    #     self.dev = Device(host='highlife.englab.juniper.net', user='jenkins')
-    #     self.dev.open()
-    #     self.assertEqual(self.dev.connected, True)
-
     def test_device_open_key_pass(self):
-        self.dev = Device(host='highlife.englab.juniper.net', user='jenkins',
+        self.dev = Device(host='xxxx', user='jenkins',
                           ssh_private_key_file='/var/lib/jenkins/.ssh/passkey',
                           passwd='password')
         self.dev.open()

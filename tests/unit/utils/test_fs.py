@@ -1,5 +1,4 @@
 import unittest
-from mock import patch
 from nose.plugins.attrib import attr
 import os
 
@@ -137,7 +136,7 @@ class TestFS(unittest.TestCase):
         self.fs.dev.rpc.file_list = \
             MagicMock(side_effect=self._mock_manager)
         self.fs.ls(path, followlink=False)
-        mock_decode_file.assert_has_calls(call().get('link'))
+        mock_decode_file.assert_has_calls([call().get('link')])
 
     def test_ls_brief_true(self):
         path = 'test/stat/decode_dir'
@@ -272,6 +271,19 @@ class TestFS(unittest.TestCase):
                            'total': '4F'}})
 
     @patch('jnpr.junos.Device.execute')
+    def test_storage_usage_linux(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_linux
+        self.assertEqual(self.fs.storage_usage(),
+                         {'re0': {'/dev/sda6': {'avail': '916M',
+                                                'avail_block': 1874712,
+                                                'mount': '/data/config',
+                                                'total': '984M',
+                                                'total_blocks': 2015024,
+                                                'used': '1.4M',
+                                                'used_blocks': 2688,
+                                                'used_pct': '1'}}})
+
+    @patch('jnpr.junos.Device.execute')
     def test_directory_usage(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertEqual(self.fs.directory_usage(path="/var/tmp", depth=1),
@@ -310,12 +322,20 @@ class TestFS(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage_no_directory(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_error1
-        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+        self.assertRaises(
+            RpcError,
+            self.fs.directory_usage,
+            path="/var/tmp",
+            depth="1")
 
     @patch('jnpr.junos.Device.execute')
     def test_directory_usage_no_dir_name(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_error2
-        self.assertRaises(RpcError, self.fs.directory_usage, path="/var/tmp", depth="1")
+        self.assertRaises(
+            RpcError,
+            self.fs.directory_usage,
+            path="/var/tmp",
+            depth="1")
 
     @patch('jnpr.junos.Device.execute')
     def test_storage_cleanup(self, mock_execute):
@@ -393,9 +413,17 @@ class TestFS(unittest.TestCase):
     def _mock_manager_error1(self, *args, **kwargs):
         if args:
             if args[0].tag == 'get-directory-usage-information':
-                return self._read_file('get-directory-usage-information_error1.xml')
+                return self._read_file(
+                    'get-directory-usage-information_error1.xml')
 
     def _mock_manager_error2(self, *args, **kwargs):
         if args:
             if args[0].tag == 'get-directory-usage-information':
-                return self._read_file('get-directory-usage-information_error2.xml')
+                return self._read_file(
+                    'get-directory-usage-information_error2.xml')
+
+    def _mock_manager_linux(self, *args, **kwargs):
+        if args:
+            if args[0].tag == 'get-system-storage':
+                return self._read_file(
+                    'get-storage-usage-linux.xml')

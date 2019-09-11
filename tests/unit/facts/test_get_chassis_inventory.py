@@ -25,30 +25,28 @@ class TestChassis(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_serialnumber_fact_from_chassis(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_chassis_serialnumber
-        self.assertEqual(self.dev.facts['serialnumber'],'JN1249018AFB')
+        self.assertEqual(self.dev.facts['serialnumber'], 'JN1249018AFB')
         self.assertFalse(self.dev.facts['RE_hw_mi'])
 
     @patch('jnpr.junos.Device.execute')
     def test_serialnumber_fact_from_backplane(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_backplane_serialnumber
-        self.assertEqual(self.dev.facts['serialnumber'],'123456789')
+        self.assertEqual(self.dev.facts['serialnumber'], '123456789')
         self.assertTrue(self.dev.facts['RE_hw_mi'])
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.facts.get_chassis_inventory.ConnectNotMasterError')
     def test_serialnumber_not_master(self, mock_not_master, mock_execute):
         mock_execute.side_effect = self._mock_manager_connect_not_master
-        self.assertEqual(self.dev.facts['serialnumber'],None)
+        self.assertEqual(self.dev.facts['serialnumber'], None)
         self.assertTrue(mock_not_master.called)
 
     @patch('jnpr.junos.Device.execute')
     @patch('jnpr.junos.facts.get_chassis_inventory.RpcError')
     def test_serialnumber_error_xml(self, mock_rpc_error, mock_execute):
         mock_execute.side_effect = self._mock_manager_error_xml
-        self.assertEqual(self.dev.facts['serialnumber'],None)
+        self.assertEqual(self.dev.facts['serialnumber'], None)
         self.assertTrue(mock_rpc_error.called)
-
-
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

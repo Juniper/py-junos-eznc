@@ -1,5 +1,4 @@
 # stdlib
-import warnings
 from pprint import pformat
 from copy import deepcopy
 
@@ -234,7 +233,7 @@ class Resource(object):
         self._r_has_init()
         self._has_xml = self._r_config_read_xml()
 
-        if None == self._has_xml or not len(self._has_xml):
+        if self._has_xml is None or not len(self._has_xml):
             self._is_new = True
             self._r_when_new()
             return None
@@ -277,11 +276,11 @@ class Resource(object):
 
         # construct the XML change structure
         xml_change = self._xml_build_change()
-        if None == xml_change:
+        if xml_change is None:
             return False
 
         # write these changes to the device
-        rsp = self._r_config_write_xml(xml_change)
+        self._r_config_write_xml(xml_change)
 
         # copy :should: into :has: and then clear :should:
         self.has.update(self.should)
@@ -338,7 +337,7 @@ class Resource(object):
         xml = self._xml_edit_at_res()
         xml.attrib.update(JXML.DEL)
         self._xml_hook_on_delete(xml)
-        rsp = self._r_config_write_xml(xml)
+        self._r_config_write_xml(xml)
 
         # reset the :has: attribute
         self._r_has_init()
@@ -363,7 +362,7 @@ class Resource(object):
         xml.attrib.update(JXML.REN)
         xml.attrib.update(JXML.NAME(new_name))
 
-        rsp = self._r_config_write_xml(xml)
+        self._r_config_write_xml(xml)
         self._name = new_name
 
         return True
@@ -389,7 +388,7 @@ class Resource(object):
         xml.attrib.update(JXML.INSERT(cmd))
         xml.attrib.update(JXML.NAME(name))
 
-        rsp = self._r_config_write_xml(xml)
+        self._r_config_write_xml(xml)
         return True
 
     def list_refresh(self):

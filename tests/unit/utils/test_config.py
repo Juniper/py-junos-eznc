@@ -1,14 +1,11 @@
-__author__ = "Nitin Kumar, Rick Sherman"
-__credits__ = "Jeremy Schulman"
-
 import unittest
 import sys
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import RpcError, LockError,\
-    UnlockError, CommitError, RpcTimeoutError, ConfigLoadError
+from jnpr.junos.exception import RpcError, LockError, UnlockError, \
+    CommitError, RpcTimeoutError, ConfigLoadError, ConnectClosedError
 
 import ncclient
 from ncclient.manager import Manager, make_device_handler
@@ -18,6 +15,9 @@ from ncclient.operations import RPCError, RPCReply
 from mock import MagicMock, patch
 from lxml import etree
 import os
+
+__author__ = "Nitin Kumar, Rick Sherman"
+__credits__ = "Jeremy Schulman"
 
 if sys.version < '3':
     builtin_string = '__builtin__'
@@ -71,7 +71,8 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.conf.commit(force_sync=True)
         self.conf.rpc.commit_configuration\
-            .assert_called_with(**{'synchronize': True, 'force-synchronize': True})
+            .assert_called_with(**{'synchronize': True,
+                                   'force-synchronize': True})
 
     def test_config_commit_timeout(self):
         self.conf.rpc.commit_configuration = MagicMock()
@@ -103,7 +104,8 @@ class TestConfig(unittest.TestCase):
                 full=True))
         self.conf.rpc.commit_configuration\
             .assert_called_with({'detail': 'detail'},
-                                **{'synchronize': True, 'full': True, 'force-synchronize': True})
+                                **{'synchronize': True, 'full': True,
+                                   'force-synchronize': True})
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_commit_xml_exception(self, mock_jxml):
@@ -139,13 +141,28 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.commit_configuration = MagicMock()
         self.assertTrue(self.conf.commit_check())
 
-    @patch('jnpr.junos.utils.config.JXML.rpc_error')
-    def test_commit_check_exception(self, mock_jxml):
+    # @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_commit_check_exception(self):
         class MyException(Exception):
-            xml = 'test'
+            xml = etree.fromstring("""
+            <rpc-reply>
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>permission denied</error-message>
+<error-info>
+<bad-element>system</bad-element>
+</error-info>
+</rpc-error>
+</rpc-reply>
+            """)
         self.conf.rpc.commit_configuration = MagicMock(side_effect=MyException)
         # with self.assertRaises(AttributeError):
-        self.conf.commit_check()
+        self.assertDictEqual(self.conf.commit_check(),
+                             {'source': None, 'message': 'permission denied',
+                              'bad_element': 'system', 'severity': 'error',
+                              'edit_path': None})
 
     def test_config_commit_check_exception_RpcError(self):
         ex = RpcError(rsp='ok')
@@ -169,10 +186,43 @@ class TestConfig(unittest.TestCase):
             assert_called_with(
                 {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
 
+    def test_config_diff_exception_severity_warning(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>mgd: statement must contain additional statements</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertEqual(self.conf.diff(),
+                         "Unable to parse diff from response!")
+
+    def test_config_diff_exception_severity_warning_still_raise(self):
+        rpc_xml = '''
+            <rpc-error>
+            <error-severity>warning</error-severity>
+            <error-info><bad-element>bgp</bad-element></error-info>
+            <error-message>statement not found</error-message>
+        </rpc-error>
+        '''
+        rsp = etree.XML(rpc_xml)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=RpcError(rsp=rsp))
+        self.assertRaises(RpcError, self.conf.diff)
+
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value='Stuff')
         self.conf.pdiff()
         self.conf.diff.assert_called_once_with(0)
+
+    def test_config_diff_rpc_timeout(self):
+        ex = RpcTimeoutError(self.dev, None, 10)
+        self.conf.rpc.get_configuration = MagicMock(
+            side_effect=ex)
+        self.assertRaises(RpcTimeoutError, self.conf.diff)
 
     def test_config_load(self):
         self.assertRaises(RuntimeError, self.conf.load)
@@ -241,6 +291,21 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(op.tag, 'load-configuration-results')
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
                          'json')
+
+    @patch(builtin_string + '.open')
+    def test_config_load_update(self, mock_open):
+        self.conf.rpc.load_config = \
+            MagicMock(return_value=etree.fromstring("""<load-configuration-results>
+                            <ok/>
+                        </load-configuration-results>"""))
+        op = self.conf.load(path='test.conf', update=True)
+        self.assertEqual(op.tag, 'load-configuration-results')
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['format'],
+                         'text')
+
+    def test_config_load_update_merge_overwrite(self):
+        self.assertRaises(ValueError, self.conf.load, path='test.jnpr',
+                          update=True, merge=True, overwrite=True)
 
     @patch(builtin_string + '.open')
     def test_config_load_lformat_byext_ValueError(self, mock_open):
@@ -335,6 +400,12 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.lock_configuration = MagicMock(side_effect=ex)
         self.assertRaises(LockError, self.conf.lock)
 
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_lock_ConnectClosedError(self, mock_jxml):
+        ex = ConnectClosedError(dev=self)
+        self.conf.rpc.lock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(ConnectClosedError, self.conf.lock)
+
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_lock_exception(self, mock_jxml):
         class MyException(Exception):
@@ -351,6 +422,12 @@ class TestConfig(unittest.TestCase):
         ex = RpcError(rsp='ok')
         self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
         self.assertRaises(UnlockError, self.conf.unlock)
+
+    @patch('jnpr.junos.utils.config.JXML.rpc_error')
+    def test_config_unlock_ConnectClosedError(self, mock_jxml):
+        ex = ConnectClosedError(dev=self)
+        self.conf.rpc.unlock_configuration = MagicMock(side_effect=ex)
+        self.assertRaises(ConnectClosedError, self.conf.unlock)
 
     @patch('jnpr.junos.utils.config.JXML.remove_namespaces')
     def test_config_unlock_exception(self, mock_jxml):
@@ -440,6 +517,62 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
                          'set')
 
+    def test_config_load_lset_from_rexp_set_rename(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """rename firewall family inet filter f1 to filter f2"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_insert(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """insert policy-options policy-statement hop term 10 after 9"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_activate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """activate system services ftp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_deactivate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """deactivate system services ftp"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_annotate(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """annotate system \"Annotation test\""""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_copy(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """copy firewall family inet filter f1 to filter f2"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_protect(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """protect system services"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
+    def test_config_load_lset_from_rexp_set_unprotect(self):
+        self.conf.rpc.load_config = MagicMock()
+        conf = """unprotect system services"""
+        self.conf.load(conf)
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['action'],
+                         'set')
+
     def test_config_load_lset_from_rexp_conf(self):
         self.conf.rpc.load_config = MagicMock()
         conf = """
@@ -501,18 +634,18 @@ class TestConfig(unittest.TestCase):
             self.dev.rpc.commit_configuration()
         except Exception as ex:
             self.assertTrue(isinstance(ex, RpcError))
-            if ncclient.__version__ > (0, 4, 5):
-                self.assertEqual(ex.message,
-                                 "error: interface-range 'axp' is not defined\n"
-                                 "error: interface-ranges expansion failed")
-                self.assertEqual(ex.errs, [{'source': None, 'message':
-                                            "interface-range 'axp' is not defined", 'bad_element': None, 'severity':
-                                            'error', 'edit_path': None}, {'source': None, 'message':
-                                                                          'interface-ranges expansion failed', 'bad_element': None,
-                                                                          'severity': 'error', 'edit_path': None}])
-            else:
-                self.assertEqual(ex.message,
-                                 "interface-range 'axp' is not defined")
+            self.assertEqual(ex.message,
+                             "error: interface-range 'axp' is not defined\n"
+                             "error: interface-ranges expansion failed")
+            self.assertEqual(ex.errs, [
+                {'source': None, 'message':
+                    "interface-range 'axp' is not defined",
+                 'bad_element': None, 'severity': 'error',
+                 'edit_path': None},
+                {'source': None,
+                 'message': 'interface-ranges expansion failed',
+                 'bad_element': None, 'severity': 'error',
+                 'edit_path': None}])
 
     @patch('jnpr.junos.utils.config.Config.lock')
     @patch('jnpr.junos.utils.config.Config.unlock')
@@ -544,6 +677,31 @@ class TestConfig(unittest.TestCase):
         self.dev.rpc.open_configuration.assert_called_with(dynamic=True)
 
     @patch('jnpr.junos.Device.execute')
+    def test_config_mode_ephemeral_default(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='ephemeral') as conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(ephemeral=True)
+
+    @patch('jnpr.junos.Device.execute')
+    def test_config_mode_ephemeral_instance(self, mock_exec):
+        self.dev.rpc.open_configuration = MagicMock()
+        with Config(self.dev, mode='ephemeral', ephemeral_instance='xyz') as \
+                conf:
+            conf.load('conf', format='set')
+        self.dev.rpc.open_configuration.assert_called_with(
+            ephemeral_instance='xyz')
+
+    def test_config_unsupported_kwargs(self):
+        self.dev.rpc.open_configuration = MagicMock()
+        try:
+            with Config(self.dev, mode='ephemeral', xyz='xyz') as conf:
+                conf.load('conf', format='set')
+        except Exception as ex:
+            self.assertEqual(str(ex),
+                             'Unsupported argument provided to Config class')
+
+    @patch('jnpr.junos.Device.execute')
     def test_config_mode_close_configuration_ex(self, mock_exec):
         self.dev.rpc.open_configuration = MagicMock()
         ex = RpcError(rsp='ok')
@@ -556,8 +714,7 @@ class TestConfig(unittest.TestCase):
             self.assertTrue(isinstance(ex, RpcError))
         self.assertTrue(self.dev.rpc.close_configuration.called)
 
-    @patch('jnpr.junos.Device.execute')
-    def test_config_mode_undefined(self, mock_exec):
+    def test_config_mode_undefined(self):
         try:
             with Config(self.dev, mode='unknown') as conf:
                 conf.load('conf', format='set')
@@ -608,7 +765,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__private_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -619,7 +776,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='private'))
 
     def test__enter__dyanamic_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -636,7 +793,7 @@ class TestConfig(unittest.TestCase):
                           Config(self.dev, mode='batch'))
 
     def test__enter__batch_exception_RpcError(self):
-        rpc_xml ="""<rpc-error>
+        rpc_xml = """<rpc-error>
             <error-severity>error</error-severity>
             <error-message>syntax error</error-message>
             </rpc-error>"""
@@ -645,6 +802,12 @@ class TestConfig(unittest.TestCase):
             MagicMock(side_effect=RpcError(rsp=rsp))
         self.assertRaises(RpcError, Config.__enter__,
                           Config(self.dev, mode='batch'))
+
+    def test_config_load_url(self):
+        self.conf.rpc.load_config = MagicMock()
+        self.conf.load(url="/var/home/user/golden.conf")
+        self.assertEqual(self.conf.rpc.load_config.call_args[1]['url'],
+                         '/var/home/user/golden.conf')
 
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
@@ -656,10 +819,7 @@ class TestConfig(unittest.TestCase):
             raw = etree.XML(foo)
             obj = RPCReply(raw)
             obj.parse()
-            if ncclient.__version__ > (0, 4, 5):
-                raise RPCError(etree.XML(foo), errs=obj._errors)
-            else:
-                raise RPCError(etree.XML(foo))
+            raise RPCError(etree.XML(foo), errs=obj._errors)
 
     def _mock_manager(self, *args, **kwargs):
         if kwargs:

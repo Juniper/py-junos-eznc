@@ -53,7 +53,7 @@ yaml_data = \
         args_key: name
         options: {}
       """
-globals().update(FactoryLoader().load(yaml.load(yaml_data)))
+globals().update(FactoryLoader().load(yaml.load(yaml_data, Loader=yaml.FullLoader)))
 
 yaml_bgp_data = \
     """---
@@ -79,7 +79,7 @@ yaml_bgp_data = \
       neigh      : name
    """
 
-globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data)))
+globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data, Loader=yaml.FullLoader)))
 
 
 @attr('unit')
@@ -116,6 +116,29 @@ class TestFactoryCfgTable(unittest.TestCase):
         self.dev.ON_JUNOS = True
         self.ut.get(user='test')
         self.assertEqual(self.ut[0]['uidgroup'], 'global')
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.jxml.conf_transform')
+    def test_cfgtable_junos1(self, mock_jxml, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        mock_jxml.result_value = None
+        with patch.dict('sys.modules', junos=MagicMock()):
+            import junos
+            self.dev.ON_JUNOS = True
+            self.bgp.get()
+            self.assertEqual(self.bgp.bgp_type, 'external')
+
+    @patch('jnpr.junos.Device.execute')
+    @patch('jnpr.junos.jxml.conf_transform')
+    def test_cfgtable_junos2(self, mock_jxml, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        mock_jxml.result_value = None
+        with patch.dict('sys.modules', junos= MagicMock()):
+            import junos
+            junos.Junos_Configuration = None
+            self.dev.ON_JUNOS = True
+            self.bgp.get()
+            self.assertEqual(self.bgp.bgp_type, 'external')
 
     @patch('jnpr.junos.Device.execute')
     def test_cfgtable_get(self, mock_execute):
@@ -185,6 +208,72 @@ class TestFactoryCfgTable(unittest.TestCase):
         xml = self.bgp.get_table_xml()
         self.assertEqual(
             xml.xpath('protocols/bgp/group/name')[0].text, 'external_1'
+        )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_inactive(self, mock_execute):
+        yaml_auto_data = \
+            """---
+           UserConfigTable1:
+             set: system/login
+             key-field:
+               - username
+             view: UserConfigView1
+
+           UserConfigView1:
+              groups:  
+                auth: authentication
+              fields:
+                user: user
+                username: user/name
+                classname: { user/class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+                uid: { user/uid : { 'type' : 'int', 'minValue' : 100, 'maxValue' : 64000 } }
+              fields_auth:
+                password: user/encrypted-password
+           """
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
+        at = UserConfigTable1(self.dev)
+        at.rpc.lock_configuration = MagicMock()
+        at.username = 'user1'
+        at.user = {"inactive" : "inactive"}
+        at.append()
+        at.set()
+        xml = at.get_table_xml()
+        self.assertEqual(
+            xml.xpath('system/login/user[@inactive="inactive"]/name')[0].text, 'user1'
+        )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_cfgtable_set_bool(self, mock_execute):
+        yaml_auto_data = \
+            """---
+           UserConfigTable1:
+             set: system/login
+             key-field:
+               - username
+             view: UserConfigView1
+
+           UserConfigView1:
+              groups:
+                auth: authentication
+              fields:
+                user: user
+                username: user/name
+                classname: { user/class : { 'type' : { 'enum' : ['operator', 'read-only', 'super-user'] } } }
+                uid: { user/uid : { 'type' : bool , 'default' :False} }
+              fields_auth:
+                password: user/encrypted-password
+           """
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
+        at = UserConfigTable1(self.dev)
+        at.rpc.lock_configuration = MagicMock()
+        at.username = True
+        at.user = {'inactive': 'inactive'}
+        at.append()
+        at.set()
+        xml = at.get_table_xml()
+        self.assertNotEqual(
+            xml.xpath('system/login/user/name')[0].text, 'user1'
         )
 
     @patch('jnpr.junos.Device.execute')
@@ -288,7 +377,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 100
@@ -314,7 +403,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: autonomous-system/as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 150
@@ -340,7 +429,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number': {'type': {'UserDefined': ''}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.rpc.lock_configuration = MagicMock()
         at.as_num = 100
@@ -360,7 +449,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : { 'type' : 'int'} }
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = '100'
         self.assertRaises(TypeError, at.append)
@@ -379,7 +468,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : { 'type' : 'interger'} }
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -398,7 +487,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : {'type' : {'enum': '100'}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(ValueError, at.append)
@@ -417,7 +506,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number' : {'type' : {'enum': {'100': ''}}}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -436,7 +525,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: {'as-number': {'type': ['abc']}}
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         at = AutoSysTable(self.dev)
         at.as_num = 100
         self.assertRaises(TypeError, at.append)
@@ -455,7 +544,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(TypeError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
@@ -470,7 +559,7 @@ class TestFactoryCfgTable(unittest.TestCase):
             fields:
               as_num: as-number
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(ValueError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')
@@ -480,7 +569,7 @@ class TestFactoryCfgTable(unittest.TestCase):
           AutoSysTable:
             set: routing-options/autonomous-system
            """
-        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data)))
+        globals().update(FactoryLoader().load(yaml.load(yaml_auto_data, Loader=yaml.FullLoader)))
         self.assertRaises(ValueError, AutoSysTable, self.dev)
 
     @patch('jnpr.junos.Device.execute')

@@ -1,0 +1,31 @@
+<rpc-reply>
+    <system-uptime-information>
+        <current-time>
+            <date-time seconds="1498780787">2017-06-29 16:59:47 PDT</date-time>
+        </current-time>
+        <time-source> NTP CLOCK </time-source>
+        <system-booted-time>
+            <date-time seconds="1498766553">2017-06-29 13:02:33 PDT</date-time>
+            <time-length seconds="14234">03:57:14</time-length>
+        </system-booted-time>
+        <protocols-started-time>
+            <date-time seconds="1498766692">2017-06-29 13:04:52 PDT</date-time>
+            <time-length seconds="14095">03:54:55</time-length>
+        </protocols-started-time>
+        <last-configured-time>
+            <date-time seconds="1498766651">2017-06-29 13:04:11 PDT</date-time>
+            <time-length seconds="14136">03:55:36</time-length>
+            <user>root</user>
+        </last-configured-time>
+        <uptime-information>
+            <date-time seconds="1498780787">4:59PM</date-time>
+            <up-time seconds="14220">3:57</up-time>
+            <active-user-count format="1 users">1</active-user-count>
+            <load-average-1>4.29</load-average-1>
+            <load-average-5>3.81</load-average-5>
+            <load-average-15>3.72</load-average-15>
+            <user-table>
+            </user-table>
+        </uptime-information>
+    </system-uptime-information>
+</rpc-reply>

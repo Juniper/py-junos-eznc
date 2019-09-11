@@ -1,6 +1,7 @@
 from ncclient import manager
 from ncclient.xml_ import NCElement
 from lxml import etree
+import six
 
 """
   These are Junos XML 'helper' definitions use for generic XML processing
@@ -79,38 +80,42 @@ conf_xslt = '''\
             <xsl:otherwise/>
         </xsl:choose>
     </xsl:template>
-  </xsl:stylesheet>'''
+</xsl:stylesheet>'''
 
 conf_xslt_root = etree.XML(conf_xslt)
 conf_transform = etree.XSLT(conf_xslt_root)
 
 
 normalize_xslt = '''\
-        <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-            <xsl:output method="xml" indent="no"/>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="no"/>
 
-            <xsl:template match="/|comment()|processing-instruction()">
-                <xsl:copy>
-                    <xsl:apply-templates/>
-                </xsl:copy>
-            </xsl:template>
+    <xsl:template match="/*[local-name()='rpc-reply']/*[local-name()='output']">
+        <xsl:copy-of select="."/>
+    </xsl:template>
 
-            <xsl:template match="*">
-                <xsl:element name="{local-name()}">
-                    <xsl:apply-templates select="@*|node()"/>
-                </xsl:element>
-            </xsl:template>
+    <xsl:template match="/|comment()|processing-instruction()">
+        <xsl:copy>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
 
-            <xsl:template match="@*">
-                <xsl:attribute name="{local-name()}">
-                    <xsl:value-of select="."/>
-                </xsl:attribute>
-            </xsl:template>
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}">
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:element>
+    </xsl:template>
 
-            <xsl:template match="text()">
-                <xsl:value-of select="normalize-space(.)"/>
-            </xsl:template>
-        </xsl:stylesheet>'''
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+            <xsl:value-of select="."/>
+        </xsl:attribute>
+    </xsl:template>
+
+    <xsl:template match="text()">
+        <xsl:value-of select="normalize-space(.)"/>
+    </xsl:template>
+</xsl:stylesheet>'''
 
 
 # XSLT to strip comments
@@ -131,6 +136,26 @@ strip_comments_xslt = '''\
 strip_xslt_root = etree.XML(strip_comments_xslt)
 strip_comments_transform = etree.XSLT(strip_xslt_root)
 
+# XSLT to strip <rpc-error> elements
+strip_rpc_error_xslt = '''
+<xsl:stylesheet version="1.0"
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+  <xsl:strip-space elements="*"/>
+
+    <xsl:template match="node()|@*">
+      <xsl:copy>
+         <xsl:apply-templates select="node()|@*"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="rpc-error"/>
+</xsl:stylesheet>
+'''
+
+strip_rpc_error_root = etree.XML(strip_rpc_error_xslt)
+strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
+
 
 def remove_namespaces(xml):
     for elem in xml.getiterator():
@@ -139,6 +164,27 @@ def remove_namespaces(xml):
         i = elem.tag.find('}')
         if i > 0:
             elem.tag = elem.tag[i + 1:]
+    return xml
+
+
+def remove_namespaces_and_spaces(xml):
+    for elem in xml.getiterator():
+        if elem.tag is etree.Comment:
+            continue
+        # Remove namespace from attributes
+        for k, v in elem.attrib.items():
+            i = k.find('}')
+            if i >= 0:
+                del (elem.attrib[k])
+                k = k[i + 1:]
+                elem.set(k, v)
+        # Remove namespace from tags
+        i = elem.tag.find('}')
+        if i >= 0:
+            elem.tag = elem.tag[i + 1:]
+        # remove white spaces from text
+        if elem.text:
+            elem.text = elem.text.strip()
     return xml
 
 
@@ -175,3 +221,27 @@ def cscript_conf(reply):
         return NCElement(reply, transform_reply)._NCElement__doc
     except:
         return None
+
+# xslt to remove prefix like junos:ns
+strip_namespaces_prefix = six.b("""<?xml version="1.0" encoding="UTF-8" ?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="xml" indent="no" omit-xml-declaration="no" />
+
+    <xsl:template match="/ |comment() |processing-instruction()">
+        <xsl:copy>
+          <xsl:apply-templates select="/*" />
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}" namespace="{namespace-uri()}">
+          <xsl:apply-templates select="@*|node()" />
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+          <xsl:value-of select="." />
+        </xsl:attribute>
+    </xsl:template>
+</xsl:stylesheet>""")

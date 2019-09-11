@@ -1,0 +1,17 @@
+---
+
+ModuleTable:
+  rpc: get-chassis-inventory
+  item: .//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module
+  key:
+    - name
+  view: ModuleTableView
+
+ModuleTableView:
+  fields:
+    jname: name
+    sn: serial-number
+    pn: part-number
+    ver: version
+    type: description
+

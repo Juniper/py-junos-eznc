@@ -246,7 +246,7 @@ class CfgTable(Table):
                         'to field %s.\n' % (value, field_name)
                     )
 
-        if isinstance(value, dict) and 'operation' in value:
+        if isinstance(value, dict):
             # in case user want to pass operation attr for ex:
             # <unit operation="delete"/>
             pass
@@ -267,12 +267,12 @@ class CfgTable(Table):
 
     def _grindxpath(self, key_xpath, key_value):
         """ returns xpath elements for key values """
-        simple = lambda: "[{0}='{1}']".format(
+        simple = lambda: "[{}='{}']".format(
             key_xpath.replace('_', '-'),
             key_value
         )
-        composite = lambda: "[{0}]".format(' and '.join(
-                            ["{0}='{1}'".format(xp.replace('_', '-'), xv)
+        composite = lambda: "[{}]".format(' and '.join(
+                            ["{}='{}'".format(xp.replace('_', '-'), xv)
                                 for xp, xv in zip(key_xpath, key_value)]))
         return simple() if isinstance(key_xpath, str) else composite()
 
@@ -287,7 +287,7 @@ class CfgTable(Table):
                 lst.append(E(xpath.replace('_', '-')))
             elif value is False:
                 lst.append(E(xpath.replace('_', '-'), {'operation': 'delete'}))
-        elif isinstance(value, dict) and 'operation' in value:
+        elif isinstance(value, dict):
             lst.append(E(xpath.replace('_', '-'), value))
         else:
             lst.append(E(xpath.replace('_', '-'), str(value)))
@@ -319,7 +319,7 @@ class CfgTable(Table):
                 dot.insert(_at, _add)
 
             # Add required key values to _get_xpath
-            xid = re.search(r"\b{0}\b".format(key_name),
+            xid = re.search(r"\b{}\b".format(key_name),
                             self._get_xpath).start() + len(key_name)
 
             self._get_xpath = self._get_xpath[:xid] + \

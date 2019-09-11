@@ -24,7 +24,7 @@ class SCP(object):
     """
     def __init__(self, junos, **scpargs):
         """
-        Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` related objects.
+        Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` objects.
 
         :param Device junos: the Device object
         :param kvargs scpargs: any additional args to be passed to paramiko SCP
@@ -42,7 +42,8 @@ class SCP(object):
             # expects. Function will take path, total size, transferred.
             # https://github.com/jbardin/scp.py/blob/master/scp.py#L97
             spec = inspect.getargspec(self._user_progress)
-            if len(spec.args) == 3:
+            if ((len(spec.args) == 3 and spec.args[0] != 'self') or
+                (len(spec.args) == 4 and spec.args[0] == 'self')):
                 self._scpargs['progress'] = self._user_progress
             else:
                 # this will override the function _progress defined for this
@@ -74,12 +75,12 @@ class SCP(object):
         .. note:: This method uses the same username/password authentication
                    credentials as used by :class:`jnpr.junos.device.Device`.
                    It can also use ``ssh_private_key_file`` option if provided
-                   to the :class:`jnpr.junos.device.Device` 
+                   to the :class:`jnpr.junos.device.Device`
 
         :returns: SCPClient object
         """
-        #@@@ should check for multi-calls to connect to ensure we don't keep
-        #@@@ opening new connections
+        # @@@ should check for multi-calls to connect to ensure we don't keep
+        # @@@ opening new connections
         junos = self._junos
         self._ssh = paramiko.SSHClient()
         self._ssh.load_system_host_keys()
@@ -93,14 +94,15 @@ class SCP(object):
         ssh_config = getattr(junos, '_sshconf_path')
         if ssh_config:
             config = paramiko.SSHConfig()
-            config.parse(open(ssh_config))
+            with open(ssh_config) as open_ssh_config:
+                config.parse(open_ssh_config)
             config = config.lookup(junos._hostname)
         sock = None
         if config.get("proxycommand"):
             sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
 
         if self._junos._ssh_private_key_file is not None:
-            kwargs['key_filename']=self._junos._ssh_private_key_file
+            kwargs['key_filename'] = self._junos._ssh_private_key_file
 
         self._ssh.connect(hostname=junos._hostname,
                           port=(

@@ -87,7 +87,7 @@ class tty_netconf(object):
         cmd = E.command('request system zeroize')
         try:
             encode = None if sys.version < '3' else 'unicode'
-            rsp = self.rpc(etree.tostring(cmd, encoding=encode))
+            self.rpc(etree.tostring(cmd, encoding=encode))
         except:
             return False
         return True
@@ -112,8 +112,8 @@ class tty_netconf(object):
           performing by this routine.
         """
         if not cmd.startswith('<'):
-            cmd = '<{0}/>'.format(cmd)
-        rpc = six.b('<rpc>{0}</rpc>'.format(cmd))
+            cmd = '<{}/>'.format(cmd)
+        rpc = six.b('<rpc>{}</rpc>'.format(cmd))
         logger.info('Calling rpc: %s' % rpc)
         self._tty.rawwrite(rpc)
 

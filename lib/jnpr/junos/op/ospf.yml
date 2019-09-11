@@ -32,3 +32,51 @@ OspfInterfaceView:
     interface_name: interface-name
     ospf_interface_state: ospf-interface-state
     neighbor_count: neighbor-count
+
+ospfTable:
+ rpc: get-ospf-overview-information
+ item: ospf-overview
+ key: ospf-area-overview/ospf-area
+ view: ospfView
+
+ospfView:
+ fields:
+  router_id: ospf-router-id
+  area: ospf-area-overview/ospf-area
+  neighbors: ospf-area-overview/ospf-nbr-up-count
+
+
+OspfRoutesTable:
+ rpc: get-ospf-route-information
+ item: ospf-topology-route-table/ospf-route
+ key: ospf-route-entry/address-prefix
+ view: OspfRoutesView
+
+OspfRoutesView:
+ fields:
+  prefix: ospf-route-entry/address-prefix
+  interface: ospf-route-entry/ospf-next-hop/next-hop-name/interface-name
+
+OSPFStatsTable:
+  rpc: get-ospf-statistics-information
+  item: ospf-statistics/packet-statistics
+  key: ospf-packet-type
+  view: OSPFStatsView
+
+OSPFStatsView:
+  fields:
+    packets_sent: packets-sent
+    packets_received: packets-received
+    packets_sent_5seconds: packets-sent-5seconds
+
+OSPFIOStatsTable:
+  rpc: get-ospf-io-statistics-information
+  item: ospf-io-statistics
+  key: packets-read
+  view: OSPFIOStatsView
+
+OSPFIOStatsView:
+  fields:
+    packets_read: packets-read
+    average_per_run: average-per-run
+    max_run: max-run

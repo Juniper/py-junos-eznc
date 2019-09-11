@@ -27,15 +27,15 @@ class TestDomain(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_domain_fact_from_config(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_domain_config
-        self.assertEqual(self.dev.facts['domain'],'juniper.net')
-        self.assertEqual(self.dev.facts['fqdn'],'r0.juniper.net')
+        self.assertEqual(self.dev.facts['domain'], 'juniper.net')
+        self.assertEqual(self.dev.facts['fqdn'], 'r0.juniper.net')
 
     @patch('jnpr.junos.Device.execute')
     def test_domain_fact_from_file(self, mock_execute):
         self.dev.facts._cache['hostname'] = 'r0'
         mock_execute.side_effect = self._mock_manager_domain_file
-        self.assertEqual(self.dev.facts['domain'],'juniper.net')
-        self.assertEqual(self.dev.facts['fqdn'],'r0.juniper.net')
+        self.assertEqual(self.dev.facts['domain'], 'juniper.net')
+        self.assertEqual(self.dev.facts['fqdn'], 'r0.juniper.net')
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

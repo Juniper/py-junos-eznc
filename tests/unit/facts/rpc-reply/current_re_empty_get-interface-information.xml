@@ -1,0 +1,6 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/15.1F5/junos">
+    <interface-information xmlns="http://xml.juniper.net/junos/15.1F5/junos-interface" junos:style="terse">
+        <physical-interface>
+        </physical-interface>
+    </interface-information>
+</rpc-reply>

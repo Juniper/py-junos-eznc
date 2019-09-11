@@ -4,6 +4,7 @@ from copy import deepcopy
 from lxml import etree
 import json
 import sys
+from jinja2 import Template, meta
 
 from jnpr.junos.factory.viewfields import ViewFields
 from jnpr.junos.factory.to_json import TableViewJSONEncoder
@@ -18,6 +19,7 @@ class View(object):
 
     ITEM_NAME_XPATH = 'name'
     FIELDS = {}
+    EVAL = {}
     GROUPS = None
 
     # -------------------------------------------------------------------------
@@ -78,7 +80,8 @@ class View(object):
     def name(self):
         """ return the name of view item """
         if self.ITEM_NAME_XPATH is None:
-            return self._table.D.hostname
+            return []
+            # return self._table.D.hostname
         if isinstance(self.ITEM_NAME_XPATH, str):
             # xpath union key
             if ' | ' in self.ITEM_NAME_XPATH:
@@ -130,6 +133,10 @@ class View(object):
             self.GROUPS = deepcopy(self.__class__.GROUPS)
             self.GROUPS.update(more.groups)
 
+        if hasattr(more, 'eval'):
+            self.EVAL = deepcopy(self.__class__.EVAL)
+            self.EVAL.update(more.eval)
+
     def _updater_class(self, more):
         """ called from extend """
         if hasattr(more, 'fields'):
@@ -137,6 +144,9 @@ class View(object):
 
         if hasattr(more, 'groups'):
             self.GROUPS.update(more.groups)
+
+        if hasattr(more, 'eval'):
+            self.EVAL.update(more.eval)
 
     @contextmanager
     def updater(self, fields=True, groups=False, all=True, **kvargs):
@@ -210,6 +220,15 @@ class View(object):
         """
         returns a view item value, called as :obj.name:
         """
+        expression = self.EVAL.get(name)
+        if expression:
+            variables = meta.find_undeclared_variables(expression)
+            t = Template(expression)
+            expression = t.render({k: self.__getitem__(k) for k in variables})
+            val = eval(expression)
+            setattr(self, name, val)
+            return val
+
         item = self.FIELDS.get(name)
         if item is None:
             raise ValueError("Unknown field: '%s'" % name)
@@ -248,10 +267,10 @@ class View(object):
             # -- 2031-dec-06, JLS
             # added support to use the element tag if the text is empty
             def _munch(x):
-                if sys.version<'3':
+                if sys.version < '3':
                     as_str = x if isinstance(x, str) else x.text
                     if isinstance(as_str, unicode):
-                        as_str = as_str.encode('ascii','replace')
+                        as_str = as_str.encode('ascii', 'replace')
                 else:
                     as_str = x if isinstance(x, str) else x.text
                 if as_str is not None:

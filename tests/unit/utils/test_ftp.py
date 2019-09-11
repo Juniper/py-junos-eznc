@@ -22,7 +22,8 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.login')
     @patch('ftplib.FTP.close')
     @patch('ncclient.manager.connect')
-    def setUp(self, mock_connect, mock_ftp_connect, mock_ftpconnect, mock_ftplogin):
+    def setUp(self, mock_connect, mock_ftp_connect, mock_ftpconnect,
+              mock_ftplogin):
         self.dev = Device(host='1.1.1.1', user="testuser",
                           passwd="testpasswd",
                           gather_facts=False)
@@ -37,9 +38,10 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.connect')
     def test_ftp_open_erors(self, mock_ftpconnect,
                             mock_ftplogin):
-        dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev)
+        jnpr.junos.utils.ftp.FTP(self.dev)
         mock_ftplogin.assert_called_with('testuser', 'testpasswd', '')
     #
+
     @patch('ftplib.FTP.close')
     def test_ftp_close(self, mock_close):
         self.dev_ftp.open()
@@ -67,7 +69,7 @@ class TestFtp(unittest.TestCase):
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file_errors(self, mock_open):
         self.assertEqual(self.dev_ftp.get(local_path="testfile",
-                                             remote_file="testfile"), False)
+                                          remote_file="testfile"), False)
 
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file_get(self, mock_open):
@@ -76,7 +78,7 @@ class TestFtp(unittest.TestCase):
 
     @patch('ftplib.FTP.retrbinary')
     @patch(builtin_string + '.open')
-    def test_ftp_dnload_file_get(self, mock_open, mock_ftpretr):
+    def test_ftp_dnload_file_get_retr(self, mock_open, mock_ftpretr):
         self.assertEqual(self.dev_ftp.get(remote_file="/var/tmp/testfile"),
                          True)
 
@@ -90,14 +92,30 @@ class TestFtp(unittest.TestCase):
     @patch(builtin_string + '.open')
     def test_ftp_dnload_file(self, mock_ftpretr, mock_open):
         self.assertEqual(self.dev_ftp.get(local_path="testfile",
-                                             remote_file="testfile"), True)
+                                          remote_file="testfile"), True)
+
+    @patch('ftplib.FTP.connect')
+    @patch('ftplib.FTP.login')
+    @patch('ftplib.FTP.retrbinary')
+    def test_ftp_dnload_file_get_rf_filename_cb(
+        self,
+        mock_ftp_connect,
+        mock_ftp_login,
+        mock_ftp_retrbinary,
+    ):
+        def callback():
+            pass
+
+        kwargs = {"callback": callback}
+        dev_ftp = jnpr.junos.utils.ftp.FTP(self.dev, **kwargs)
+        self.assertEqual(dev_ftp.get(remote_file="/var/tmp/testfile"), True)
 
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_path(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="/var/tmp/conf.txt",
                                           remote_path="/var/tmp"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
+        self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR /var/tmp/conf.txt')
 
     @patch('ftplib.FTP.storbinary')
@@ -105,7 +123,7 @@ class TestFtp(unittest.TestCase):
     def test_ftp_upload_file_rem_full_path(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="/var/tmp/conf.txt",
                                           remote_path="/var/tmp/test.txt"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
+        self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR /var/tmp/test.txt')
 
     @patch('ftplib.FTP.storbinary')
@@ -113,5 +131,5 @@ class TestFtp(unittest.TestCase):
     def test_ftp_upload_file_rem_path_create(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="conf.txt",
                                           remote_path="/var/tmp"), True)
-        self.assertEqual(mock_ftpstore.call_args[0][0],
+        self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR /var/tmp/conf.txt')

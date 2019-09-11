@@ -1,6 +1,7 @@
-FROM alpine:3.4
+FROM alpine:3.6
 
-MAINTAINER ssteiner@juniper.net
+LABEL net.juniper.description="Junos PyEZ library for Python in a lightweight container." \
+      net.juniper.maintainer="Stephen Steiner <ssteiner@juniper.net>"
 
 RUN mkdir /source \
     && mkdir /scripts
@@ -13,20 +14,16 @@ ADD requirements.txt requirements.txt
 ADD lib lib
 
 ## Install dependancies and Pyez
-RUN apk update \
-    && apk upgrade \
-    && apk add build-base gcc g++ make python-dev py-pip py-lxml \
+RUN apk add --no-cache build-base python3-dev py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
     ca-certificates openssl wget \
-    && update-ca-certificates \
-    && pip install -r requirements.txt \
+    && pip3 install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
-    && python setup.py install \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && pip3 install . \
     && rm -rf /source/* \
     && rm -rf /var/cache/apk/*
 
 WORKDIR /scripts
 
-VOLUME ["$PWD:/scripts"]
-
-CMD sh
+VOLUME /scripts

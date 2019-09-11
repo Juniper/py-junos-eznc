@@ -5,5 +5,6 @@ def provides_facts():
     """
     return {'foo': 'The foo information.'}
 
+
 def get_facts(device):
-    return {'foo': None }
+    return {'foo': None}

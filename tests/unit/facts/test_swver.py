@@ -4,8 +4,8 @@ __credits__ = "Jeremy Schulman, Nitin Kumar"
 import unittest2 as unittest
 from nose.plugins.attrib import attr
 
-from jnpr.junos.facts.swver import version_info
-import jnpr.junos.facts.swver
+from jnpr.junos.facts.swver import version_info, get_facts
+
 
 @attr('unit')
 class TestVersionInfo(unittest.TestCase):
@@ -58,7 +58,7 @@ class TestVersionInfo(unittest.TestCase):
         import yaml
         self.assertEqual(
             yaml.dump(version_info('11.4R7.5')),
-            "build: 5\nmajor: !!python/tuple [11, 4]\nminor: '7'\ntype: R\n")
+            "build: 5\nmajor: !!python/tuple\n- 11\n- 4\nminor: '7'\ntype: R\n")
 
     def test_version_iter(self):
         self.assertItemsEqual(
@@ -71,4 +71,4 @@ class TestVersionInfo(unittest.TestCase):
             [('build', 5), ('major', (15, 4)), ('minor', '7'), ('type', 'F')])
 
     def test_emptyget_facts(self):
-        self.assertEqual(jnpr.junos.facts.swver.get_facts(None),{})
+        self.assertEqual(get_facts(None), {})

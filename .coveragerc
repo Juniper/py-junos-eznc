@@ -1,3 +1,6 @@
 [run]
 omit =
     lib/jnpr/junos/cfg/*
+
+[report]
+show_missing = True
