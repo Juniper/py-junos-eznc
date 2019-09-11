@@ -12,11 +12,20 @@ class TableJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         from jnpr.junos.factory.view import View
         from jnpr.junos.factory.table import Table
+        from jnpr.junos.factory.cmdtable import CMDTable
 
         if isinstance(obj, View):
             obj = dict(obj.items())
         elif isinstance(obj, Table):
-            obj = dict((str(item.name), item) for item in obj)
+            ret = dict()
+            for item in obj:
+                if isinstance(item.name, list) and len(item.name) == 0:
+                    ret.update(item)
+                else:
+                    ret[str(item.name)] = item
+            return ret
+        elif isinstance(obj, CMDTable):
+            obj = {str(key): val for key, val in obj.items()}
         else:
             obj = super(TableJSONEncoder, self).default(obj)
         return obj

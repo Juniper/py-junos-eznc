@@ -1,0 +1,883 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.3X48/junos">
+    <file-content filename="/etc/hosts.junos" junos:seconds="1483306895" filesize="24317" encoding="text">
+        #$Id: hosts.junos,v 1.7.72.1 2009-04-16 05:22:03 kdickman Exp $
+        #
+        # File mapping AF_INET/AF_INET6 hostnames for REs on Single and Multichassis
+        # systems
+        #
+        # This file is looked at before /etc/hosts by gethostbyname(3),
+        # gethostbyname2(3) and  getaddrinfo(3)
+        #
+        # The IP addresses in this file are only used for communication between REs
+        # over the Internal Routing Instances
+        #
+        # WARNING:
+        #
+        # The names in this file are effectively reserved for internal use.
+        #
+        
+        # New IP address format (RT_IRS_V3)
+        
+        #
+        # Single Chassis Hostnames
+        #
+        
+        128.0.0.1        master
+        128.0.0.1        node
+        128.0.0.1        fwdd
+        128.0.0.1        member
+        128.0.0.1        pfem
+        128.0.0.2        scb
+        128.0.0.2        sbr
+        128.0.0.2        ssb
+        128.0.0.2        feb
+        128.0.0.2        cfeb0
+        128.0.0.2        cfeb
+        128.0.0.2        cpp0
+        128.0.0.3        cfeb1
+        128.0.0.3        cpp1
+        128.0.0.4        re0
+        128.0.0.5        re1
+        128.0.0.6        backup
+        128.0.0.8        sfm0
+        128.0.0.9        sfm1
+        128.0.0.10       sfm2
+        128.0.0.16       fpc0
+        128.0.0.17       fpc1
+        128.0.0.18       fpc2
+        128.0.0.19       fpc3
+        128.0.0.20       fpc4
+        128.0.0.21       fpc5
+        128.0.0.22       fpc6
+        128.0.0.23       fpc7
+        128.0.0.24       fpc8
+        128.0.0.25       fpc9
+        128.0.0.26       fpc10
+        128.0.0.27       fpc11
+        128.0.0.28       fpc12
+        128.0.0.29       fpc13
+        128.0.0.30       fpc14
+        128.0.0.31       fpc15
+        128.0.0.32       feb0
+        128.0.0.32       fpc16
+        128.0.0.33       feb1
+        128.0.0.33       fpc17
+        128.0.0.34       feb2
+        128.0.0.34       fpc18
+        128.0.0.35       feb3
+        128.0.0.35       fpc19
+        128.0.0.36       feb4
+        128.0.0.37       feb5
+        128.0.0.48       spmb0
+        128.0.0.49       spmb1
+        128.0.0.50       tfeb0
+        
+        128.0.1.16       fpc0.pic0
+        128.0.1.17       fpc1.pic0
+        128.0.1.18       fpc2.pic0
+        128.0.1.19       fpc3.pic0
+        128.0.1.20       fpc4.pic0
+        128.0.1.21       fpc5.pic0
+        128.0.1.22       fpc6.pic0
+        128.0.1.23       fpc7.pic0
+        128.0.1.24       fpc8.pic0
+        128.0.1.25       fpc9.pic0
+        128.0.1.26       fpc10.pic0
+        128.0.1.27       fpc11.pic0
+        128.0.1.28       fpc12.pic0
+        128.0.1.29       fpc13.pic0
+        128.0.1.30       fpc14.pic0
+        128.0.1.31       fpc15.pic0
+        
+        128.0.2.16       fpc0.pic1
+        128.0.2.17       fpc1.pic1
+        128.0.2.18       fpc2.pic1
+        128.0.2.19       fpc3.pic1
+        128.0.2.20       fpc4.pic1
+        128.0.2.21       fpc5.pic1
+        128.0.2.22       fpc6.pic1
+        128.0.2.23       fpc7.pic1
+        128.0.2.24       fpc8.pic1
+        128.0.2.25       fpc9.pic1
+        128.0.2.26       fpc10.pic1
+        128.0.2.27       fpc11.pic1
+        128.0.2.28       fpc12.pic1
+        128.0.2.29       fpc13.pic1
+        128.0.2.30       fpc14.pic1
+        128.0.2.31       fpc15.pic1
+        
+        128.0.3.16       fpc0.pic2
+        128.0.3.17       fpc1.pic2
+        128.0.3.18       fpc2.pic2
+        128.0.3.19       fpc3.pic2
+        128.0.3.20       fpc4.pic2
+        128.0.3.21       fpc5.pic2
+        128.0.3.22       fpc6.pic2
+        128.0.3.23       fpc7.pic2
+        128.0.3.24       fpc8.pic2
+        128.0.3.25       fpc9.pic2
+        128.0.3.26       fpc10.pic2
+        128.0.3.27       fpc11.pic2
+        128.0.3.28       fpc12.pic2
+        128.0.3.29       fpc13.pic2
+        128.0.3.30       fpc14.pic2
+        128.0.3.31       fpc15.pic2
+        
+        128.0.4.16       fpc0.pic3
+        128.0.4.17       fpc1.pic3
+        128.0.4.18       fpc2.pic3
+        128.0.4.19       fpc3.pic3
+        128.0.4.20       fpc4.pic3
+        128.0.4.21       fpc5.pic3
+        128.0.4.22       fpc6.pic3
+        128.0.4.23       fpc7.pic3
+        128.0.4.24       fpc8.pic3
+        128.0.4.25       fpc9.pic3
+        128.0.4.26       fpc10.pic3
+        128.0.4.27       fpc11.pic3
+        128.0.4.28       fpc12.pic3
+        128.0.4.29       fpc13.pic3
+        128.0.4.30       fpc14.pic3
+        128.0.4.31       fpc15.pic3
+        
+        #
+        # DCF-Root Hostname
+        #
+        128.0.130.2      dcf-root
+        
+        #
+        # Multi Chassis Hostnames
+        #
+        
+        #SCC
+        144.0.0.1       scc-master
+        144.0.0.4       scc-re0
+        144.0.0.5       scc-re1
+        144.0.0.6       scc-backup
+        144.0.0.48      scc-spmb0
+        144.0.0.49      scc-spmb1
+        
+        #LCC 0 (or MEMBER 0 on Virtual Chassis)
+        129.0.0.1        lcc0-master member0-master member0
+        129.0.0.4        lcc0-re0 member0-re0
+        129.0.0.5        lcc0-re1 member0-re1
+        129.0.0.6        lcc0-backup member0-backup
+        129.0.0.16       member0-fpc0
+        129.0.0.17       member0-fpc1
+        129.0.0.18       member0-fpc2
+        129.0.0.19       member0-fpc3
+        129.0.0.20       member0-fpc4
+        129.0.0.21       member0-fpc5
+        129.0.0.22       member0-fpc6
+        129.0.0.23       member0-fpc7
+        129.0.0.24       member0-fpc8
+        129.0.0.25       member0-fpc9
+        129.0.0.26       member0-fpc10
+        129.0.0.27       member0-fpc11
+        129.0.0.28       member0-fpc12
+        129.0.0.29       member0-fpc13
+        129.0.0.30       member0-fpc14
+        129.0.0.31       member0-fpc15
+        129.0.0.6        lcc0-backup
+        129.0.0.16       lcc0-fpc0
+        129.0.0.17       lcc0-fpc1
+        129.0.0.18       lcc0-fpc2
+        129.0.0.19       lcc0-fpc3
+        129.0.0.20       lcc0-fpc4
+        129.0.0.21       lcc0-fpc5
+        129.0.0.22       lcc0-fpc6
+        129.0.0.23       lcc0-fpc7
+        129.0.0.48       lcc0-spmb0
+        129.0.0.49       lcc0-spmb1
+        
+        #LCC 1 (or MEMBER 1 on Virtual Chassis)
+        130.0.0.1        lcc1-master member1-master member1
+        130.0.0.4        lcc1-re0 member1-re0
+        130.0.0.5        lcc1-re1 member1-re1
+        130.0.0.6        lcc1-backup member1-backup
+        130.0.0.16       member1-fpc0
+        130.0.0.17       member1-fpc1
+        130.0.0.18       member1-fpc2
+        130.0.0.19       member1-fpc3
+        130.0.0.20       member1-fpc4
+        130.0.0.21       member1-fpc5
+        130.0.0.22       member1-fpc6
+        130.0.0.23       member1-fpc7
+        130.0.0.24       member1-fpc8
+        130.0.0.25       member1-fpc9
+        130.0.0.26       member1-fpc10
+        130.0.0.27       member1-fpc11
+        130.0.0.28       member1-fpc12
+        130.0.0.29       member1-fpc13
+        130.0.0.30       member1-fpc14
+        130.0.0.31       member1-fpc15
+        130.0.0.6        lcc1-backup
+        130.0.0.16       lcc1-fpc0
+        130.0.0.17       lcc1-fpc1
+        130.0.0.18       lcc1-fpc2
+        130.0.0.19       lcc1-fpc3
+        130.0.0.20       lcc1-fpc4
+        130.0.0.21       lcc1-fpc5
+        130.0.0.22       lcc1-fpc6
+        130.0.0.23       lcc1-fpc7
+        130.0.0.48       lcc1-spmb0
+        130.0.0.49       lcc1-spmb1
+        
+        #LCC 2 (or MEMBER 2 on Virtual Chassis)
+        131.0.0.1        lcc2-master member2-master member2
+        131.0.0.4        lcc2-re0 member2-re0
+        131.0.0.5        lcc2-re1 member2-re1
+        131.0.0.6        lcc2-backup member2-backup
+        131.0.0.16       member2-fpc0
+        131.0.0.17       member2-fpc1
+        131.0.0.18       member2-fpc2
+        131.0.0.19       member2-fpc3
+        131.0.0.20       member2-fpc4
+        131.0.0.21       member2-fpc5
+        131.0.0.22       member2-fpc6
+        131.0.0.23       member2-fpc7
+        131.0.0.24       member2-fpc8
+        131.0.0.25       member2-fpc9
+        131.0.0.26       member2-fpc10
+        131.0.0.27       member2-fpc11
+        131.0.0.28       member2-fpc12
+        131.0.0.29       member2-fpc13
+        131.0.0.30       member2-fpc14
+        131.0.0.31       member2-fpc15
+        131.0.0.6        lcc2-backup
+        131.0.0.16       lcc2-fpc0
+        131.0.0.17       lcc2-fpc1
+        131.0.0.18       lcc2-fpc2
+        131.0.0.19       lcc2-fpc3
+        131.0.0.20       lcc2-fpc4
+        131.0.0.21       lcc2-fpc5
+        131.0.0.22       lcc2-fpc6
+        131.0.0.23       lcc2-fpc7
+        131.0.0.48       lcc2-spmb0
+        131.0.0.49       lcc20-spmb1
+        
+        #LCC 3 (or MEMBER 3 on Virtual Chassis)
+        132.0.0.1        lcc3-master member3-master member3
+        132.0.0.4        lcc3-re0 member3-re0
+        132.0.0.5        lcc3-re1 member3-re1
+        132.0.0.6        lcc3-backup member3-backup
+        132.0.0.16       member3-fpc0
+        132.0.0.17       member3-fpc1
+        132.0.0.18       member3-fpc2
+        132.0.0.19       member3-fpc3
+        132.0.0.20       member3-fpc4
+        132.0.0.21       member3-fpc5
+        132.0.0.22       member3-fpc6
+        132.0.0.23       member3-fpc7
+        132.0.0.24       member3-fpc8
+        132.0.0.25       member3-fpc9
+        132.0.0.26       member3-fpc10
+        132.0.0.27       member3-fpc11
+        132.0.0.28       member3-fpc12
+        132.0.0.29       member3-fpc13
+        132.0.0.30       member3-fpc14
+        132.0.0.31       member3-fpc15
+        132.0.0.6        lcc3-backup
+        132.0.0.16       lcc3-fpc0
+        132.0.0.17       lcc3-fpc1
+        132.0.0.18       lcc3-fpc2
+        132.0.0.19       lcc3-fpc3
+        132.0.0.20       lcc3-fpc4
+        132.0.0.21       lcc3-fpc5
+        132.0.0.22       lcc3-fpc6
+        132.0.0.23       lcc3-fpc7
+        132.0.0.48       lcc3-spmb0
+        132.0.0.49       lcc3-spmb1
+        
+        #LCC 4 (or MEMBER 4 on Virtual Chassis)
+        133.0.0.1        lcc4-master member4-master member4
+        133.0.0.4        lcc4-re0 member4-re0
+        133.0.0.5        lcc4-re1 member4-re1
+        133.0.0.6        lcc4-backup member4-backup
+        133.0.0.16       member4-fpc0
+        133.0.0.17       member4-fpc1
+        133.0.0.18       member4-fpc2
+        133.0.0.19       member4-fpc3
+        133.0.0.20       member4-fpc4
+        133.0.0.21       member4-fpc5
+        133.0.0.22       member4-fpc6
+        133.0.0.23       member4-fpc7
+        133.0.0.24       member4-fpc8
+        133.0.0.25       member4-fpc9
+        133.0.0.26       member4-fpc10
+        133.0.0.27       member4-fpc11
+        133.0.0.28       member4-fpc12
+        133.0.0.29       member4-fpc13
+        133.0.0.30       member4-fpc14
+        133.0.0.31       member4-fpc15
+        133.0.0.6        lcc4-backup
+        133.0.0.16       lcc4-fpc0
+        133.0.0.17       lcc4-fpc1
+        133.0.0.18       lcc4-fpc2
+        133.0.0.19       lcc4-fpc3
+        133.0.0.20       lcc4-fpc4
+        133.0.0.21       lcc4-fpc5
+        133.0.0.22       lcc4-fpc6
+        133.0.0.23       lcc4-fpc7
+        133.0.0.48       lcc4-spmb0
+        133.0.0.49       lcc4-spmb1
+        
+        #LCC 5 (or MEMBER 5 on Virtual Chassis)
+        134.0.0.1        lcc5-master member5-master member5
+        134.0.0.4        lcc5-re0 member5-re0
+        134.0.0.5        lcc5-re1 member5-re1
+        134.0.0.6        lcc5-backup member5-backup
+        134.0.0.16       member5-fpc0
+        134.0.0.17       member5-fpc1
+        134.0.0.18       member5-fpc2
+        134.0.0.19       member5-fpc3
+        134.0.0.20       member5-fpc4
+        134.0.0.21       member5-fpc5
+        134.0.0.22       member5-fpc6
+        134.0.0.23       member5-fpc7
+        134.0.0.24       member5-fpc8
+        134.0.0.25       member5-fpc9
+        134.0.0.26       member5-fpc10
+        134.0.0.27       member5-fpc11
+        134.0.0.28       member5-fpc12
+        134.0.0.29       member5-fpc13
+        134.0.0.30       member5-fpc14
+        134.0.0.31       member5-fpc15
+        134.0.0.6        lcc5-backup
+        134.0.0.16       lcc5-fpc0
+        134.0.0.17       lcc5-fpc1
+        134.0.0.18       lcc5-fpc2
+        134.0.0.19       lcc5-fpc3
+        134.0.0.20       lcc5-fpc4
+        134.0.0.21       lcc5-fpc5
+        134.0.0.22       lcc5-fpc6
+        134.0.0.23       lcc5-fpc7
+        134.0.0.48       lcc5-spmb0
+        134.0.0.49       lcc5-spmb1
+        
+        #LCC 6 (or MEMBER 6 on Virtual Chassis)
+        135.0.0.1        lcc6-master member6-master member6
+        135.0.0.4        lcc6-re0 member6-re0
+        135.0.0.5        lcc6-re1 member6-re1
+        135.0.0.6        lcc6-backup member6-backup
+        135.0.0.16       member6-fpc0
+        135.0.0.17       member6-fpc1
+        135.0.0.18       member6-fpc2
+        135.0.0.19       member6-fpc3
+        135.0.0.20       member6-fpc4
+        135.0.0.21       member6-fpc5
+        135.0.0.22       member6-fpc6
+        135.0.0.23       member6-fpc7
+        135.0.0.24       member6-fpc8
+        135.0.0.25       member6-fpc9
+        135.0.0.26       member6-fpc10
+        135.0.0.27       member6-fpc11
+        135.0.0.28       member6-fpc12
+        135.0.0.29       member6-fpc13
+        135.0.0.30       member6-fpc14
+        135.0.0.31       member6-fpc15
+        135.0.0.6        lcc6-backup
+        135.0.0.16       lcc6-fpc0
+        135.0.0.17       lcc6-fpc1
+        135.0.0.18       lcc6-fpc2
+        135.0.0.19       lcc6-fpc3
+        135.0.0.20       lcc6-fpc4
+        135.0.0.21       lcc6-fpc5
+        135.0.0.22       lcc6-fpc6
+        135.0.0.23       lcc6-fpc7
+        135.0.0.48       lcc6-spmb0
+        135.0.0.49       lcc6-spmb1
+        
+        #LCC 7 (or MEMBER 7 on Virtual Chassis)
+        136.0.0.1        lcc7-master member7-master member7
+        136.0.0.4        lcc7-re0 member7-re0
+        136.0.0.5        lcc7-re1 member7-re1
+        136.0.0.6        lcc7-backup member7-backup
+        136.0.0.16       member7-fpc0
+        136.0.0.17       member7-fpc1
+        136.0.0.18       member7-fpc2
+        136.0.0.19       member7-fpc3
+        136.0.0.20       member7-fpc4
+        136.0.0.21       member7-fpc5
+        136.0.0.22       member7-fpc6
+        136.0.0.23       member7-fpc7
+        136.0.0.24       member7-fpc8
+        136.0.0.25       member7-fpc9
+        136.0.0.26       member7-fpc10
+        136.0.0.27       member7-fpc11
+        136.0.0.28       member7-fpc12
+        136.0.0.29       member7-fpc13
+        136.0.0.30       member7-fpc14
+        136.0.0.31       member7-fpc15
+        136.0.0.6        lcc7-backup
+        136.0.0.16       lcc7-fpc0
+        136.0.0.17       lcc7-fpc1
+        136.0.0.18       lcc7-fpc2
+        136.0.0.19       lcc7-fpc3
+        136.0.0.20       lcc7-fpc4
+        136.0.0.21       lcc7-fpc5
+        136.0.0.22       lcc7-fpc6
+        136.0.0.23       lcc7-fpc7
+        136.0.0.48       lcc7-spmb0
+        136.0.0.49       lcc7-spmb1
+        
+        137.0.0.6        lcc8-backup
+        137.0.0.16       lcc8-fpc0
+        137.0.0.17       lcc8-fpc1
+        137.0.0.18       lcc8-fpc2
+        137.0.0.19       lcc8-fpc3
+        137.0.0.20       lcc8-fpc4
+        137.0.0.21       lcc8-fpc5
+        137.0.0.22       lcc8-fpc6
+        137.0.0.23       lcc8-fpc7
+        137.0.0.48       lcc8-spmb0
+        137.0.0.49       lcc8-spmb1
+        
+        #LCC 8 (or MEMBER 8 on Virtual Chassis)
+        137.0.0.1        lcc8-master member8-master member8
+        137.0.0.4        lcc8-re0 member8-re0
+        137.0.0.5        lcc8-re1 member8-re1
+        137.0.0.6        lcc8-backup member8-backup
+        137.0.0.16       member8-fpc0
+        137.0.0.17       member8-fpc1
+        137.0.0.18       member8-fpc2
+        137.0.0.19       member8-fpc3
+        137.0.0.20       member8-fpc4
+        137.0.0.21       member8-fpc5
+        137.0.0.22       member8-fpc6
+        137.0.0.23       member8-fpc7
+        137.0.0.24       member8-fpc8
+        137.0.0.25       member8-fpc9
+        137.0.0.26       member8-fpc10
+        137.0.0.27       member8-fpc11
+        137.0.0.28       member8-fpc12
+        137.0.0.29       member8-fpc13
+        137.0.0.30       member8-fpc14
+        137.0.0.31       member8-fpc15
+        138.0.0.6        lcc9-backup
+        138.0.0.16       lcc9-fpc0
+        138.0.0.17       lcc9-fpc1
+        138.0.0.18       lcc9-fpc2
+        138.0.0.19       lcc9-fpc3
+        138.0.0.20       lcc9-fpc4
+        138.0.0.21       lcc9-fpc5
+        138.0.0.22       lcc9-fpc6
+        138.0.0.23       lcc9-fpc7
+        138.0.0.48       lcc9-spmb0
+        138.0.0.49       lcc9-spmb1
+        
+        #LCC 9 (or MEMBER 9 on Virtual Chassis)
+        138.0.0.1        lcc9-master member9-master member9
+        138.0.0.4        lcc9-re0 member9-re0
+        138.0.0.5        lcc9-re1 member9-re1
+        138.0.0.6        lcc9-backup member9-backup
+        138.0.0.16       member9-fpc0
+        138.0.0.17       member9-fpc1
+        138.0.0.18       member9-fpc2
+        138.0.0.19       member9-fpc3
+        138.0.0.20       member9-fpc4
+        138.0.0.21       member9-fpc5
+        138.0.0.22       member9-fpc6
+        138.0.0.23       member9-fpc7
+        138.0.0.24       member9-fpc8
+        138.0.0.25       member9-fpc9
+        138.0.0.26       member9-fpc10
+        138.0.0.27       member9-fpc11
+        138.0.0.28       member9-fpc12
+        138.0.0.29       member9-fpc13
+        138.0.0.30       member9-fpc14
+        138.0.0.31       member9-fpc15
+        139.0.0.6        lcc10-backup
+        139.0.0.16       lcc10-fpc0
+        139.0.0.17       lcc10-fpc1
+        139.0.0.18       lcc10-fpc2
+        139.0.0.19       lcc10-fpc3
+        139.0.0.20       lcc10-fpc4
+        139.0.0.21       lcc10-fpc5
+        139.0.0.22       lcc10-fpc6
+        139.0.0.23       lcc10-fpc7
+        139.0.0.48       lcc10-spmb0
+        139.0.0.49       lcc10-spmb1
+        
+        #LCC 10 (or MEMBER 10 on Virtual Chassis)
+        139.0.0.1        lcc10-master member10-master
+        139.0.0.4        lcc10-re0 member10-re0
+        139.0.0.5        lcc10-re1 member10-re1
+        139.0.0.6        lcc10-backup member10-backup
+        139.0.0.16       member10-fpc0
+        139.0.0.17       member10-fpc1
+        139.0.0.18       member10-fpc2
+        139.0.0.19       member10-fpc3
+        139.0.0.20       member10-fpc4
+        139.0.0.21       member10-fpc5
+        139.0.0.22       member10-fpc6
+        139.0.0.23       member10-fpc7
+        139.0.0.24       member10-fpc8
+        139.0.0.25       member10-fpc9
+        139.0.0.26       member10-fpc10
+        139.0.0.27       member10-fpc11
+        139.0.0.28       member10-fpc12
+        139.0.0.29       member10-fpc13
+        139.0.0.30       member10-fpc14
+        139.0.0.31       member10-fpc15
+        140.0.0.6        lcc11-backup
+        140.0.0.16       lcc11-fpc0
+        140.0.0.17       lcc11-fpc1
+        140.0.0.18       lcc11-fpc2
+        140.0.0.19       lcc11-fpc3
+        140.0.0.20       lcc11-fpc4
+        140.0.0.21       lcc11-fpc5
+        140.0.0.22       lcc11-fpc6
+        140.0.0.23       lcc11-fpc7
+        140.0.0.48       lcc11-spmb0
+        140.0.0.49       lcc11-spmb1
+        
+        #LCC 11 (or MEMBER 11 on Virtual Chassis)
+        140.0.0.1        lcc11-master member11-master
+        140.0.0.4        lcc11-re0 member11-re0
+        140.0.0.5        lcc11-re1 member11-re1
+        140.0.0.6        lcc11-backup member11-backup
+        140.0.0.16       member11-fpc0
+        140.0.0.17       member11-fpc1
+        140.0.0.18       member11-fpc2
+        140.0.0.19       member11-fpc3
+        140.0.0.20       member11-fpc4
+        140.0.0.21       member11-fpc5
+        140.0.0.22       member11-fpc6
+        140.0.0.23       member11-fpc7
+        140.0.0.24       member11-fpc8
+        140.0.0.25       member11-fpc9
+        140.0.0.26       member11-fpc10
+        140.0.0.27       member11-fpc11
+        140.0.0.28       member11-fpc12
+        140.0.0.29       member11-fpc13
+        140.0.0.30       member11-fpc14
+        140.0.0.31       member11-fpc15
+        141.0.0.6        lcc12-backup
+        141.0.0.16       lcc12-fpc0
+        141.0.0.17       lcc12-fpc1
+        141.0.0.18       lcc12-fpc2
+        141.0.0.19       lcc12-fpc3
+        141.0.0.20       lcc12-fpc4
+        141.0.0.21       lcc12-fpc5
+        141.0.0.22       lcc12-fpc6
+        141.0.0.23       lcc12-fpc7
+        141.0.0.48       lcc12-spmb0
+        141.0.0.49       lcc12-spmb1
+        
+        #LCC 12 (or MEMBER 12 on Virtual Chassis)
+        141.0.0.1        lcc12-master member12-master
+        141.0.0.4        lcc12-re0 member12-re0
+        141.0.0.5        lcc12-re1 member12-re1
+        141.0.0.6        lcc12-backup member12-backup
+        141.0.0.16       member12-fpc0
+        141.0.0.17       member12-fpc1
+        141.0.0.18       member12-fpc2
+        141.0.0.19       member12-fpc3
+        141.0.0.20       member12-fpc4
+        141.0.0.21       member12-fpc5
+        141.0.0.22       member12-fpc6
+        141.0.0.23       member12-fpc7
+        141.0.0.24       member12-fpc8
+        141.0.0.25       member12-fpc9
+        141.0.0.26       member12-fpc10
+        141.0.0.27       member12-fpc11
+        141.0.0.28       member12-fpc12
+        141.0.0.29       member12-fpc13
+        141.0.0.30       member12-fpc14
+        141.0.0.31       member12-fpc15
+        142.0.0.6        lcc13-backup
+        142.0.0.16       lcc13-fpc0
+        142.0.0.17       lcc13-fpc1
+        142.0.0.18       lcc13-fpc2
+        142.0.0.19       lcc13-fpc3
+        142.0.0.20       lcc13-fpc4
+        142.0.0.21       lcc13-fpc5
+        142.0.0.22       lcc13-fpc6
+        142.0.0.23       lcc13-fpc7
+        142.0.0.48       lcc13-spmb0
+        142.0.0.49       lcc13-spmb1
+        
+        #LCC 13 (or MEMBER 13 on Virtual Chassis)
+        142.0.0.1        lcc13-master member13-master
+        142.0.0.4        lcc13-re0 member13-re0
+        142.0.0.5        lcc13-re1 member13-re1
+        142.0.0.6        lcc13-backup member13-backup
+        142.0.0.16       member13-fpc0
+        142.0.0.17       member13-fpc1
+        142.0.0.18       member13-fpc2
+        142.0.0.19       member13-fpc3
+        142.0.0.20       member13-fpc4
+        142.0.0.21       member13-fpc5
+        142.0.0.22       member13-fpc6
+        142.0.0.23       member13-fpc7
+        142.0.0.24       member13-fpc8
+        142.0.0.25       member13-fpc9
+        142.0.0.26       member13-fpc10
+        142.0.0.27       member13-fpc11
+        142.0.0.28       member13-fpc12
+        142.0.0.29       member13-fpc13
+        142.0.0.30       member13-fpc14
+        142.0.0.31       member13-fpc15
+        143.0.0.6        lcc14-backup
+        143.0.0.16       lcc14-fpc0
+        143.0.0.17       lcc14-fpc1
+        143.0.0.18       lcc14-fpc2
+        143.0.0.19       lcc14-fpc3
+        143.0.0.20       lcc14-fpc4
+        143.0.0.21       lcc14-fpc5
+        143.0.0.22       lcc14-fpc6
+        143.0.0.23       lcc14-fpc7
+        143.0.0.48       lcc14-spmb0
+        143.0.0.49       lcc14-spmb1
+        
+        #LCC 14 (or MEMBER 14 on Virtual Chassis)
+        143.0.0.1        lcc14-master member14-master
+        143.0.0.4        lcc14-re0 member14-re0
+        143.0.0.5        lcc14-re1 member14-re1
+        143.0.0.6        lcc14-backup member14-backup
+        143.0.0.16       member14-fpc0
+        143.0.0.17       member14-fpc1
+        143.0.0.18       member14-fpc2
+        143.0.0.19       member14-fpc3
+        143.0.0.20       member14-fpc4
+        143.0.0.21       member14-fpc5
+        143.0.0.22       member14-fpc6
+        143.0.0.23       member14-fpc7
+        143.0.0.24       member14-fpc8
+        143.0.0.25       member14-fpc9
+        143.0.0.26       member14-fpc10
+        143.0.0.27       member14-fpc11
+        143.0.0.28       member14-fpc12
+        143.0.0.29       member14-fpc13
+        143.0.0.30       member14-fpc14
+        143.0.0.31       member14-fpc15
+        144.0.0.6       lcc15-backup
+        144.0.0.16      lcc15-fpc0
+        144.0.0.17      lcc15-fpc1
+        144.0.0.18      lcc15-fpc2
+        144.0.0.19      lcc15-fpc3
+        144.0.0.20      lcc15-fpc4
+        144.0.0.21      lcc15-fpc5
+        144.0.0.22      lcc15-fpc6
+        144.0.0.23      lcc15-fpc7
+        144.0.0.48      lcc15-spmb0
+        144.0.0.49      lcc15-spmb1
+        
+        #LCC 15 (or MEMBER 15 on Virtual Chassis)
+        144.0.0.1       lcc15-master member15-master
+        144.0.0.4       lcc15-re0 member15-re0
+        144.0.0.5       lcc15-re1 member15-re1
+        144.0.0.6       lcc15-backup member15-backup
+        144.0.0.16      member15-fpc0
+        144.0.0.17      member15-fpc1
+        144.0.0.18      member15-fpc2
+        144.0.0.19      member15-fpc3
+        144.0.0.20      member15-fpc4
+        144.0.0.21      member15-fpc5
+        144.0.0.22      member15-fpc6
+        144.0.0.23      member15-fpc7
+        144.0.0.24      member15-fpc8
+        144.0.0.25      member15-fpc9
+        144.0.0.26      member15-fpc10
+        144.0.0.27      member15-fpc11
+        144.0.0.28      member15-fpc12
+        144.0.0.29      member15-fpc13
+        144.0.0.30      member15-fpc14
+        144.0.0.31      member15-fpc15
+        
+        #VIRT SC
+        161.0.0.1       sc-master
+        161.0.0.4       sc-re0
+        161.0.0.5       sc-re1
+        161.0.0.6       sc-backup
+        
+        #SFC 0
+        162.0.0.1       sfc0-master
+        162.0.0.4       sfc0-re0
+        162.0.0.5       sfc0-re1
+        162.0.0.6       sfc0-backup
+        162.0.0.48      sfc0-spmb0
+        162.0.0.49      sfc0-spmb1
+        
+        #SFC 1
+        163.0.0.1       sfc1-master
+        163.0.0.4       sfc1-re0
+        163.0.0.5       sfc1-re1
+        163.0.0.6       sfc1-backup
+        163.0.0.48      sfc1-spmb0
+        163.0.0.49      sfc1-spmb1
+        
+        #SFC 2
+        164.0.0.1       sfc2-master
+        164.0.0.4       sfc2-re0
+        164.0.0.5       sfc2-re1
+        164.0.0.6       sfc2-backup
+        164.0.0.48      sfc2-spmb0
+        164.0.0.49      sfc2-spmb1
+        
+        #SFC 3
+        165.0.0.1       sfc3-master
+        165.0.0.4       sfc3-re0
+        165.0.0.5       sfc3-re1
+        165.0.0.6       sfc3-backup
+        165.0.0.48      sfc3-spmb0
+        165.0.0.49      sfc3-spmb1
+        
+        #SFC 4
+        166.0.0.1       sfc4-master
+        166.0.0.4       sfc4-re0
+        166.0.0.5       sfc4-re1
+        166.0.0.6       sfc4-backup
+        166.0.0.48      sfc4-spmb0
+        166.0.0.49      sfc4-spmb1
+        
+        #JCS
+        190.0.0.1        psd%d-master
+        190.0.0.4        psd%d-re0
+        190.0.0.5        psd%d-re1
+        190.0.0.6        psd%d-backup
+        
+        # Old IP address format (RT_IRS_V2)
+        
+        #
+        # Single Chassis Hostnames
+        #
+        10.0.0.1        master
+        10.0.0.4        re0
+        10.0.0.5        re1
+        
+        #
+        # Multi Chassis Hostnames
+        #
+        
+        
+        #SCC
+        10.16.0.1       scc-master
+        10.16.0.4       scc-re0
+        10.16.0.5       scc-re1
+        
+        #LCC 0
+        10.1.0.1        lcc0-master member0-master
+        10.1.0.4        lcc0-re0 member0-re0
+        10.1.0.5        lcc0-re1 member0-re1
+        10.1.0.6        lcc0-backup member0-backup
+        
+        #LCC 1
+        10.2.0.1        lcc1-master member1-master
+        10.2.0.4        lcc1-re0 member1-re0
+        10.2.0.5        lcc1-re1 member1-re1
+        10.2.0.6        lcc1-backup member1-backup
+        
+        #LCC 2
+        10.3.0.1        lcc2-master member2-master
+        10.3.0.4        lcc2-re0 member2-re0
+        10.3.0.5        lcc2-re1 member2-re1
+        10.3.0.6        lcc2-backup member2-backup
+        
+        #LCC 3
+        10.4.0.1        lcc3-master member3-master
+        10.4.0.4        lcc3-re0 member3-re0
+        10.4.0.5        lcc3-re1 member3-re1
+        10.4.0.6        lcc3-backup member3-backup
+        
+        #LCC 4
+        10.5.0.1        lcc4-master member4-master
+        10.5.0.4        lcc4-re0 member4-re0
+        10.5.0.5        lcc4-re1 member4-re1
+        10.5.0.6        lcc4-backup member4-backup
+        
+        #LCC 5
+        10.6.0.1        lcc5-master member5-master
+        10.6.0.4        lcc5-re0 member5-re0
+        10.6.0.5        lcc5-re1 member5-re1
+        10.6.0.6        lcc5-backup member5-backup
+        
+        #LCC 6
+        10.7.0.1        lcc6-master member6-master
+        10.7.0.4        lcc6-re0 member6-re0
+        10.7.0.5        lcc6-re1 member6-re1
+        10.7.0.6        lcc6-backup member6-backup
+        
+        #LCC 7
+        10.8.0.1        lcc7-master member7-master
+        10.8.0.4        lcc7-re0 member7-re0
+        10.8.0.5        lcc7-re1 member7-re1
+        10.8.0.6        lcc7-backup member7-backup
+        
+        #LCC 8
+        10.9.0.1        lcc8-master member8-master
+        10.9.0.4        lcc8-re0 member8-re0
+        10.9.0.5        lcc8-re1 member8-re1
+        10.9.0.6        lcc8-backup member8-backup
+        
+        #LCC 9
+        10.10.0.1        lcc9-master member9-master
+        10.10.0.4        lcc9-re0 member9-re0
+        10.10.0.5        lcc9-re1 member9-re1
+        10.10.0.6        lcc9-backup member9-backup
+        
+        #LCC 10
+        10.11.0.1        lcc10-master member10-master
+        10.11.0.4        lcc10-re0 member10-re0
+        10.11.0.5        lcc10-re1 member10-re1
+        10.11.0.6        lcc10-backup member10-backup
+        
+        #LCC 11
+        10.12.0.1        lcc11-master member11-master
+        10.12.0.4        lcc11-re0 member11-re0
+        10.12.0.5        lcc11-re1 member11-re1
+        10.12.0.6        lcc11-backup member11-backup
+        
+        #LCC 12
+        10.13.0.1        lcc12-master member12-master
+        10.13.0.4        lcc12-re0 member12-re0
+        10.13.0.5        lcc12-re1 member12-re1
+        10.13.0.6        lcc12-backup member12-backup
+        
+        #LCC 13
+        10.14.0.1        lcc13-master member13-master
+        10.14.0.4        lcc13-re0 member13-re0
+        10.14.0.5        lcc13-re1 member13-re1
+        10.14.0.6        lcc13-backup member13-backup
+        
+        #LCC 14
+        10.15.0.1        lcc14-master member14-master
+        10.15.0.4        lcc14-re0 member14-re0
+        10.15.0.5        lcc14-re1 member14-re1
+        10.15.0.6        lcc14-backup member14-backup
+        
+        #LCC 15
+        10.16.0.1        lcc15-master member15-master
+        10.16.0.4        lcc15-re0 member15-re0
+        10.16.0.5        lcc15-re1 member15-re1
+        10.16.0.6        lcc15-backup member15-backup
+        
+        #SFC 0
+        10.34.0.1       sfc0-master
+        10.34.0.4       sfc0-re0
+        10.34.0.5       sfc0-re1
+        
+        #SFC 1
+        10.35.0.1       sfc1-master
+        10.35.0.4       sfc1-re0
+        10.35.0.5       sfc1-re1
+        
+        #SFC 2
+        10.36.0.1       sfc2-master
+        10.36.0.4       sfc2-re0
+        10.36.0.5       sfc2-re1
+        
+        #SFC 3
+        10.37.0.1       sfc3-master
+        10.37.0.4       sfc3-re0
+        10.37.0.5       sfc3-re1
+        
+        #SFC 4
+        10.38.0.1       sfc4-master
+        10.38.0.4       sfc4-re0
+        10.38.0.5       sfc4-re1
+        
+        # End of internal names
+    </file-content>
+</rpc-reply>

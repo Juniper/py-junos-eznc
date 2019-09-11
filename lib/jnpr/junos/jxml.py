@@ -90,6 +90,10 @@ normalize_xslt = '''\
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="no"/>
 
+    <xsl:template match="/*[local-name()='rpc-reply']/*[local-name()='output']">
+        <xsl:copy-of select="."/>
+    </xsl:template>
+
     <xsl:template match="/|comment()|processing-instruction()">
         <xsl:copy>
             <xsl:apply-templates/>
@@ -160,6 +164,27 @@ def remove_namespaces(xml):
         i = elem.tag.find('}')
         if i > 0:
             elem.tag = elem.tag[i + 1:]
+    return xml
+
+
+def remove_namespaces_and_spaces(xml):
+    for elem in xml.getiterator():
+        if elem.tag is etree.Comment:
+            continue
+        # Remove namespace from attributes
+        for k, v in elem.attrib.items():
+            i = k.find('}')
+            if i >= 0:
+                del (elem.attrib[k])
+                k = k[i + 1:]
+                elem.set(k, v)
+        # Remove namespace from tags
+        i = elem.tag.find('}')
+        if i >= 0:
+            elem.tag = elem.tag[i + 1:]
+        # remove white spaces from text
+        if elem.text:
+            elem.text = elem.text.strip()
     return xml
 
 

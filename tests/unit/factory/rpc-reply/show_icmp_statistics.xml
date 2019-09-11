@@ -1,0 +1,47 @@
+<output>
+SENT: Ukern command: show icmp statistics
+
+ICMP Statistics:
+           0 requests
+           0 throttled
+           0 network unreachables
+           0 ttl expired
+           0 redirects
+           0 mtu exceeded
+           0 source route denials
+           0 filter prohibited
+           0 other unreachables
+           0 parameter problems
+           0 ttl captured
+           0 icmp/option handoffs
+           0 igmp v1 handoffs
+           0 tag te requests
+           0 tag te to RE
+
+ICMP Errors:
+           0 unknown unreachables
+           0 unsupported ICMP type
+           0 unprocessed redirects
+           0 invalid ICMP type
+           0 invalid protocol
+           0 bad input interface
+           0 bad route lookup
+           0 bad nh lookup
+           0 bad cf mtu
+           0 runts
+
+ICMP Discards:
+           0 multicasts
+           0 bad source addresses
+           0 bad dest addresses
+           0 IP fragments
+           0 ICMP errors
+           0 unknown originators
+
+ICMP Debug Messages:
+           0 throttled
+
+ICMP Rate Limit Settings:
+         500 pps per iff
+        1000 pps total
+</output>

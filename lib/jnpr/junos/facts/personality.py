@@ -65,7 +65,11 @@ def get_facts(device):
         else:
             virtual = False
     elif re.match('SRX\s?(\d){4}', model):
-        personality = 'SRX_HIGHEND'
+        srx_model = int(model[-4:])
+        if srx_model > 5000:
+            personality = 'SRX_HIGHEND'
+        else:
+            personality = 'SRX_MIDRANGE'
         virtual = False
     elif re.match('SRX\s?(\d){3}', model):
         personality = 'SRX_BRANCH'

@@ -871,7 +871,7 @@ class TestSW(unittest.TestCase):
         return rpc_reply
 
     def _mock_manager(self, *args, **kwargs):
-        if kwargs:
+        if kwargs and 'ignore_warning' not in kwargs:
             # Little hack for mocked execute
             if 'dev_timeout' in kwargs:
                 if (args and args[0].findtext('package-name') ==
