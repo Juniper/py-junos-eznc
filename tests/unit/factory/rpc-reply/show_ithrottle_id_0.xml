@@ -1,0 +1,31 @@
+<output>
+SENT: Ukern command: show ithrottle id 0
+
+ ID  Usage %  Cfg State  Oper State     Name
+ --  -------  ---------  ----------   --------
+  0     50.0       1           1      TOE ithrottle
+
+Throttle Times:             In hptime ticks     In ms
+                            ---------------     ------
+  Timer Interval                     333333     5.000
+  Allowed time                       166666     2.500
+  Allowed excess                       8333     0.125
+  Start time                      488655082     n/a
+  Run time this interval                  0     0.000
+  Deficit                                 0     0.000
+  Run time max                        17712     0.266
+  Run time total               144154525761     2162317
+
+Min Usage Perc:    25.0
+Max Usage Perc:    50.0
+AdjustUsageEnable: 1
+
+Throttle Stats:
+  Starts    : 65708652
+  Stops     : 65708652
+  Checks    : 124149442
+  Enables   : 0
+  Disables  : 0
+  AdjUp     : 6
+  AdjDown   : 4
+</output>

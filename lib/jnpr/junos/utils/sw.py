@@ -17,6 +17,7 @@ from lxml.builder import E
 from lxml import etree
 
 # local modules
+from jnpr.junos.decorators import timeoutDecorator
 from jnpr.junos.utils.util import Util
 from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.ftp import FTP
@@ -75,7 +76,7 @@ class SW(Util):
         # Branch SRX in an SRX cluster doesn't really support multi_RE
         # functionality for SW.
         if (dev.facts.get('personality', '') == 'SRX_BRANCH' and
-            dev.facts.get('srx_cluster') is True):
+                dev.facts.get('srx_cluster') is True):
             self._multi_RE = False
         self._multi_VC = bool(
             self._multi_RE is True and dev.facts.get('vc_capable') is True and
@@ -162,7 +163,7 @@ class SW(Util):
     @classmethod
     def progress(cls, dev, report):
         """ simple progress report function """
-        print (dev.hostname + ": " + report)
+        print(dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
     # put - Copy the image onto the device
@@ -235,8 +236,8 @@ class SW(Util):
             rsp = self.rpc.request_package_add(**args)
         else:
             rsp = self.rpc.request_vmhost_package_add(
-                      package_name=remote_package,
-                      **kvargs)
+                package_name=remote_package,
+                **kvargs)
 
         return self._parse_pkgadd_response(rsp)
 
@@ -274,31 +275,33 @@ class SW(Util):
           The file-path to the install package on the remote (Junos) device.
 
 
-        :param bool vhmhost:
+        :param bool vmhost:
           (Optional) A boolean indicating if this is a software update of the
           vhmhost. The default is ``vmhost=False``.
         """
 
         if vmhost is False:
             rsp = self.rpc.request_package_in_service_upgrade(
-                      package_name=remote_package,
-                      **kvargs)
+                package_name=remote_package,
+                **kvargs)
         else:
             rsp = self.rpc.request_vmhost_package_in_service_upgrade(
-                      package_name=remote_package,
-                      **kvargs)
+                package_name=remote_package,
+                **kvargs)
         return self._parse_pkgadd_response(rsp)
 
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         # If <package-result> is not present, then assume success.
         # That is, assume <package-result>0</package-result>
+        rc = 0
         package_result = got.findtext('package-result')
         if package_result is None:
             self.log("software pkgadd response is missing package-result "
                      "element. Assuming success.")
-            package_result = '0'
-        rc = int(package_result.strip())
+        else:
+            for result in got.findall('package-result'):
+                rc += int(result.text.strip())
         output_msg = '\n'.join([i.text for i in got.findall('output')
                                 if i.text is not None])
         self.log("software pkgadd package-result: %s\nOutput: %s" % (
@@ -319,7 +322,7 @@ class SW(Util):
             * * ``False`` otherwise
         """
         if nssu and not self._issu_nssu_requirement_validation():
-                return False
+            return False
         if issu:
             if not self._issu_requirement_validation():
                 return False
@@ -372,8 +375,8 @@ class SW(Util):
         output = ''
         try:
             op = self._dev.rpc.request_shell_execute(
-                     routing_engine='backup',
-                     command="cli show system switchover")
+                routing_engine='backup',
+                command="cli show system switchover")
             if op.findtext('.//switchover-state', default='').lower() == 'on':
                 self.log('Graceful switchover status is On')
                 return True
@@ -395,7 +398,7 @@ class SW(Util):
                     self.log('Requirement FAILED: Not able run '
                              '"show system switchover"')
                     return False
-        gres_status = re.search('Graceful switchover: (\w+)', output, re.I)
+        gres_status = re.search(r'Graceful switchover: (\w+)', output, re.I)
         if not (gres_status is not None and
                 gres_status.group(1).lower() == 'on'):
             self.log('Requirement FAILED: Graceful switchover status '
@@ -451,16 +454,16 @@ class SW(Util):
             return False
         self.log('Checking NSR configuration')
         conf = self._dev.rpc.get_config(
-                   filter_xml=etree.XML('''
+            filter_xml=etree.XML('''
                    <configuration>
                        <routing-options>
                            <nonstop-routing/>
                        </routing-options>
                    </configuration>
                    '''),
-                   options={'database': 'committed',
-                            'inherit': 'inherit',
-                            'commit-scripts': 'apply'})
+            options={'database': 'committed',
+                     'inherit': 'inherit',
+                     'commit-scripts': 'apply'})
         if conf.find('routing-options/nonstop-routing') is None:
             self.log('Requirement FAILED: NSR is not Enabled in configuration')
             return False
@@ -602,9 +605,9 @@ class SW(Util):
             _progress('before copy, computing checksum on remote package: %s' %
                       remote_package)
             remote_checksum = self.remote_checksum(
-                                  remote_package,
-                                  timeout=checksum_timeout,
-                                  algorithm=checksum_algorithm)
+                remote_package,
+                timeout=checksum_timeout,
+                algorithm=checksum_algorithm)
 
         if remote_checksum != checksum:
             # Need to copy the file.
@@ -654,9 +657,9 @@ class SW(Util):
            c) The checksum computed in step 2 does not match the checksum
               computed in step 4.
         6. If step 5 was executed, computes the checksum of the :package:
-           filename in the :remote_path: directory of the remote Junos device
+           filename in the :remote_path: directory of the remote Junos device.
         7. Validates the checksum computed in step 2 matches the checksum
-              computed in step 6.
+           computed in step 6.
         8. validates the package if :validate: is True
         9. installs the package
 
@@ -782,7 +785,7 @@ class SW(Util):
           all Routing Engines of the Junos device. When ``False``  if the
           only preform the software install on the current Routing Engine.
 
-        :param bool vhmhost:
+        :param bool vmhost:
           (Optional) A boolean indicating if this is a software update of the
           vhmhost. The default is ``vmhost=False``.
 
@@ -821,7 +824,7 @@ class SW(Util):
 
         remote_pkg_set = []
         if ((sys.version < '3' and isinstance(package, (str, unicode))) or
-           isinstance(package, str)):
+                isinstance(package, str)):
             pkg_set = [package]
         if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
             for pkg in pkg_set:
@@ -831,15 +834,15 @@ class SW(Util):
                         # To disable cleanfs after 1st iteration
                         cleanfs = cleanfs and pkg_set.index(pkg) == 0
                         copy_ok = self.safe_copy(
-                                      pkg,
-                                      remote_path=remote_path,
-                                      progress=progress,
-                                      cleanfs=cleanfs,
-                                      checksum=checksum,
-                                      cleanfs_timeout=cleanfs_timeout,
-                                      checksum_timeout=checksum_timeout,
-                                      checksum_algorithm=checksum_algorithm,
-                                      force_copy=force_copy)
+                            pkg,
+                            remote_path=remote_path,
+                            progress=progress,
+                            cleanfs=cleanfs,
+                            checksum=checksum,
+                            cleanfs_timeout=cleanfs_timeout,
+                            checksum_timeout=checksum_timeout,
+                            checksum_algorithm=checksum_algorithm,
+                            force_copy=force_copy)
                         if copy_ok is False:
                             return False
                     pkg = remote_path + '/' + path.basename(pkg)
@@ -943,8 +946,8 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # reboot - system reboot
     # -------------------------------------------------------------------------
-
-    def reboot(self, in_min=0, at=None, all_re=True, on_node=None):
+    def reboot(self, in_min=0, at=None, all_re=True, on_node=None,
+               vmhost=False):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -964,6 +967,10 @@ class SW(Util):
             reboot the whole device. If any specific node is mentioned,
             reboot will be performed on mentioned node
 
+        :param bool vmhost:
+            (Optional) A boolean indicating to run 'request vmhost reboot'.
+            The default is ``vmhost=False``.
+
         :returns:
             * reboot message (string) if command successful
 
@@ -977,29 +984,40 @@ class SW(Util):
             else:
                 cmd = E('request-node-reboot')
                 cmd.append(E('node', on_node))
+        elif vmhost is True:
+            cmd = E('request-vmhost-reboot')
         else:
             cmd = E('request-reboot')
-            if all_re is True:
-                if self._multi_RE is True and self._multi_VC is False:
-                    cmd.append(E('both-routing-engines'))
-                elif self._mixed_VC is True:
-                    cmd.append(E('all-members'))
+        if all_re is True:
+            if vmhost is True:
+                cmd.append(E('routing-engine', 'both'))
+            elif self._multi_RE is True and self._multi_VC is False:
+                cmd.append(E('both-routing-engines'))
+            elif self._mixed_VC is True:
+                cmd.append(E('all-members'))
         if in_min >= 0 and at is None:
             cmd.append(E('in', str(in_min)))
         else:
             cmd.append(E('at', str(at)))
         try:
-            rsp = self.rpc(cmd)
+            rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
             if self._dev.facts['_is_linux']:
                 got = rsp.text
             else:
-                got = rsp.getparent().findtext('.//request-reboot-status').strip()
+                got = rsp.getparent().findtext('.//request-reboot-status')
+                if got is None:
+                    # Oon some platforms stopping/rebooting both
+                    # REs produces <output> messages and
+                    # <request-reboot-status> messages.
+                    output_msg = '\n'.join([i.text for i in got.findall('output')
+                                            if i.text is not None])
+                    if output_msg is not '':
+                        got = output_msg
             return got
         except RpcTimeoutError as err:
             raise err
         except Exception as err:
-            if err.rsp.findtext('.//error-severity') != 'warning':
-                raise err
+            raise err
 
     # -------------------------------------------------------------------------
     # poweroff - system shutdown

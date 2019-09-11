@@ -52,9 +52,15 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 * Make configuration changes in unstructured and structured ways
 * Provide common utilities for tasks such as secure copy of files and software updates
 
-# NOTICE
+# NOTICES
 
-As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
+- As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
+- When using the `ssh_private_key_file` argument of the Device constructor on MacOS Mojave and higher, ensure that the SSH keys are in the RSA format, and not the newer OPENSSH format.
+  - New key: `ssh-keygen -p -m PEM -f ~/.ssh/id_rsa`
+  - Convert an existing OPENSSH key: ``ssh-keygen -p -m PEM -f ~/.ssh/private_key`
+  - Check if a given key is RSA or OPENSSH format: `head -n1 ~/.ssh/private_key`
+    - RSA: `-----BEGIN RSA PRIVATE KEY-----`
+    - OPENSSH: `-----BEGIN OPENSSH PRIVATE KEY-----` 
 
 # INSTALLATION
 
@@ -76,7 +82,7 @@ Installing from Git is also supported (OS must have git installed).
 
 Move to the local directory which contains your script(s) and run the container
 
-`docker run -it --rm --name pyez -v $PWD:/scripts juniper/pyez sh`
+`docker run -it --rm --name pyez -v "$(pwd)":/scripts juniper/pyez sh`
 
 Your local scripts will be mounted to /scripts in the container
 
@@ -134,6 +140,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 [Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
 
+* v2.2.1: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Dinesh Babu](https://github.com/dineshbaburam91), [Marcel Wiget](https://github.com/mwiget), [John Tishey](https://github.com/jtishey), [Alex Carp](https://github.com/carpalex), [Cory Councilman](https://github.com/dragonballbw3) 
 * v2.2.0: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Marek](https://github.com/mzbroch), [Marcel Wiget](https://github.com/mwiget)
 * v2.1.9: [Dinesh Babu](https://github.com/dineshbaburam91), [Nitin Kumar](https://github.com/vnitinv), [Jacob Neil Taylor](https://github.com/jacobneiltaylor), [Raja Shekar Mekala](https://github.com/rsmekala)
 * v2.1.8: [Dinesh Babu](https://github.com/dineshbaburam91), [Stephen Steiner](https://github.com/ntwrkguru)

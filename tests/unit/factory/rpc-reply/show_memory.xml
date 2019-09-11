@@ -1,0 +1,10 @@
+<output>
+SENT: Ukern command: show memory
+
+ID        Base      Total(b)       Free(b)       Used(b)   %   Name
+--  ----------   -----------   -----------   -----------  ---   -----------
+0    4d9ad8e8    1726292636    1514622708     211669928   12  Kernel
+1    b47ffb88      67108860      53057404      14051456   20  LAN buffer
+2    bcdfffe0      52428784      52428784             0    0  Blob
+3    b87ffb88      73400316      73400316             0    0  ISSU scratch
+</output>

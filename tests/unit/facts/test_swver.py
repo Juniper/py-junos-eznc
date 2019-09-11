@@ -58,7 +58,7 @@ class TestVersionInfo(unittest.TestCase):
         import yaml
         self.assertEqual(
             yaml.dump(version_info('11.4R7.5')),
-            "build: 5\nmajor: !!python/tuple [11, 4]\nminor: '7'\ntype: R\n")
+            "build: 5\nmajor: !!python/tuple\n- 11\n- 4\nminor: '7'\ntype: R\n")
 
     def test_version_iter(self):
         self.assertItemsEqual(

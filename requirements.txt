@@ -1,9 +1,12 @@
 lxml>=3.2.4
-ncclient>=0.5.4
+ncclient>=0.6.3
 paramiko>=1.15.2
 scp>=0.7.0
 jinja2>=2.7.1
-PyYAML>=3.10
+PyYAML>=5.1
 netaddr
 six
 pyserial
+yamlordereddictloader
+pyparsing
+transitions

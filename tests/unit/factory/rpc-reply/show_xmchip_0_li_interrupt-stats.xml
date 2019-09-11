@@ -1,0 +1,28 @@
+<output>
+LI interrupt statistics
+-----------------------
+
+---------------------------------------------------------------
+LI Block  Interrupt Name  Number of Interrupts  Last Occurrence
+---------------------------------------------------------------
+0         pb_overflow     0                     -
+0         parser_drop     0                     -
+0         max_len_err     0                     -
+0         eope_err        23                    -
+0         bp_nodata_err   0                     -
+0         dwr_nodata_err  0                     -
+0         drr_nodata_err  13                    -
+0         pkt_nodata_err  0                     -
+0         cookie_sz_err   22                     -
+
+1         pb_overflow     0                     -
+1         parser_drop     0                     -
+1         max_len_err     11                    -
+1         eope_err        0                     -
+1         bp_nodata_err   0                     -
+1         dwr_nodata_err  0                     -
+1         drr_nodata_err  0                     -
+1         pkt_nodata_err  0                     -
+1         cookie_sz_err   12                     -
+---------------------------------------------------------------
+</output>

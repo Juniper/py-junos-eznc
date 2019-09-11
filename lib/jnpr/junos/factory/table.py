@@ -17,12 +17,14 @@ class Table(object):
     ITEM_XPATH = None
     ITEM_NAME_XPATH = 'name'
     VIEW = None
+    USE_FILTER = None
 
-    def __init__(self, dev=None, xml=None, path=None):
+    def __init__(self, dev=None, xml=None, path=None, use_filter=True):
         """
         :dev: Device instance
         :xml: lxml Element instance
         :path: file path to XML, to be used rather than :dev:
+        :use_filter: Default usage is SAX parsing, disable this variable to use DOM
         """
         self._dev = dev
         self.xml = xml
@@ -30,8 +32,11 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
+        self._use_filter = self.USE_FILTER and use_filter
+        if self._dev is not None:
+            self._use_filter = self._use_filter and self._dev._use_filter
 
-    # -------------------------------------------------------------------------
+            # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
@@ -132,6 +137,10 @@ class Table(object):
                 return self._keys_simple(' | '.join([xpath + '/' + x for x in
                                                      key_value.split(' | ')]))
             return self._keys_simple(xpath + '/' + key_value)
+
+        # user explicitly passed key as Null in Table
+        if key_value is None:
+            return []
 
         if not isinstance(key_value, list):
             raise RuntimeError(
