@@ -1,0 +1,17 @@
+---
+SystemStorageTable:
+  rpc: get-system-storage
+  key: filesystem-name
+  item: filesystem
+  view: SystemStorageView
+
+SystemStorageView:
+  fields:
+    total_blocks: total-blocks
+    used_blocks: used-blocks
+    available_blocks: available-blocks
+    used_percent: used-percent
+    mounted_on: mounted-on
+
+
+

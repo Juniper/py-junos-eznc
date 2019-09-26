@@ -94,7 +94,8 @@ class SCP(object):
         ssh_config = getattr(junos, '_sshconf_path')
         if ssh_config:
             config = paramiko.SSHConfig()
-            config.parse(open(ssh_config))
+            with open(ssh_config) as open_ssh_config:
+                config.parse(open_ssh_config)
             config = config.lookup(junos._hostname)
         sock = None
         if config.get("proxycommand"):

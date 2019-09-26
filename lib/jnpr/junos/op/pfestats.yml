@@ -1,0 +1,32 @@
+PFEStatsTrafficTable:
+  rpc: get-pfe-statistics
+  item: pfe-traffic-statistics
+  key: pfe-input-packets
+  view: PFEStatsTrafficView
+
+PFEStatsTrafficView:
+  fields:
+    input_packets: pfe-input-packets
+    output_packets: pfe-output-packets
+    local_traffic: _PFEStatsLocalTrafficTable
+    local_protocol: _PFEStatsLocalProtocolTable
+
+_PFEStatsLocalTrafficTable:
+  item: ../pfe-local-traffic-statistics
+  key: pfe-input-packets
+  view: _PFEStatsLocalTrafficView
+
+_PFEStatsLocalTrafficView:
+  fields:
+    input_packets: pfe-input-packets
+    output_packets: pfe-output-packets
+
+_PFEStatsLocalProtocolTable:
+  item: ../pfe-local-protocol-statistics
+  key: ospf-hello-count
+  view: _PFEStatsLocalProtocolView
+
+_PFEStatsLocalProtocolView:
+  fields:
+    hello_count: ospf-hello-count
+    arp_count: arp-count
