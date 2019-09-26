@@ -4,6 +4,7 @@ import six
 import types
 import platform
 import warnings
+import logging
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -44,6 +45,8 @@ else:
     NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3
 
 _MODULEPATH = os.path.dirname(__file__)
+
+logger = logging.getLogger("jnpr.junos.device")
 
 
 class _MyTemplateLoader(jinja2.BaseLoader):
@@ -1384,4 +1387,8 @@ class Device(_Connection):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._conn.connected and \
                 not isinstance(exc_val, EzErrors.ConnectError):
-            self.close()
+            try:
+                self.close()
+            except Exception as ex:
+                # exit should not raise any exception
+                logger.error("Close in context manager hit exception: {}".format(ex))
