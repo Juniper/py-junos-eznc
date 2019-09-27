@@ -1,0 +1,15 @@
+---
+CChipFiStatsTable:
+  command: show mqss {{ instance }} fi stats
+  args:
+    instance: 0
+  target: Null
+  item: '*'
+  view: CenterChipFabricInStatsView
+
+CenterChipFabricInStatsView:
+  regex:
+    cchip-fi-packets-received: 'Received packets in input block for enabled streams\s+(\d+)'
+    cchip-fi-packets-dropped: 'Packets dropped in FI memory interface\s+(\d+)'
+    cchip-fi-packets-sent-ok: 'Packets sent out of PSV\s+(\d+)'
+    cchip-fi-packets-with-error: 'Error packets sent out of PSV\s+(\d+)'

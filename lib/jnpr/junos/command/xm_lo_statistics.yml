@@ -1,0 +1,19 @@
+---
+CChipLoStatsTable:
+  command: show xmchip {{ chip_instance }} lo stats 0
+  target: Null
+  args:
+    chip_instance: 0
+  title: 'LU  Parcel Name         Counter Name'
+  key: block
+  eval:
+    cchip-lookup-out-errors: >
+      sum([v['total'] for k,v in {{ data }}.items()])
+  view: CChipLoStatsView
+CChipLoStatsView:
+  regex:
+    # data: '.*'
+    block: '\d+'
+    counter: 'Error parcels sent to LU'
+    total: '\d+'
+    rate: '\d+ pps'

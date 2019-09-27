@@ -1,0 +1,37 @@
+---
+PreClStatsTable:
+  command: show precl-eng {{ precl_index }} statistics
+  target: Null
+  args:
+    precl_index: 2
+  key:
+    - port
+    - id
+  view: PreClStatsView
+
+PreClStatsView:
+  columns:
+    port: port
+    id: ID
+    class: Class
+    transmitted-packets: TX pkts
+    recieved-packets: RX pkts
+    dropped-packets: Dropped pkts
+
+PreclSummTable:
+  command: show precl-eng summary
+  target: Null
+  key: id
+  view: PreclSummView
+
+PreclSummView:
+  regex:
+    id: "[0-9]+"
+    engine_name: "[A-Za-z_.0-9]+"
+    fpc: "[0-9]+"
+    pic: "[0-9]+"
+    ptr: "[0-9a-f]+"
+  filters:
+    - id
+    - fpc
+    - pic

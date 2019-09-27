@@ -1,0 +1,12 @@
+---
+CChipFOStatsTable:
+  command: show xmchip {{ instance }} fo stats
+  args:
+    instance: 0
+  target: Null
+  item: '*'
+  view: XMChipFoStatsView
+
+XMChipFoStatsView:
+  regex:
+    cchip-fo-packets-sent: 'Transmitted packets\s+:\s(\d+)'

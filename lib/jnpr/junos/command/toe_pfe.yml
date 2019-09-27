@@ -1,0 +1,23 @@
+---
+ShowToePfeTable:
+  command: >
+    show toe pfe {{ pfe_instance }} {{ asic_type }}
+    {{ asic_instance }} toe-inst {{ toe_instance }}
+    wedge-stats stream {{ stream_id }}
+  args:
+    pfe_instance: 0
+    asic_type: xm
+    asic_instance: 0
+    toe_instance: 0
+    stream_id: 0
+  target: Null
+  view: ShowToePfeView
+
+ShowToePfeView:
+  exists:
+    wedge-not-declared: 'Declared Wedge: NO'
+    wedge-window-size-0: 'Wedge window size: 0'
+    toe-ucode-not-halted: 'TOE ucode halted..................NO'
+    to-asic-not-blocked: 'Suspected to-asic blockage........NO'
+    toe-driver-host-path-app-running: 'TOE driver host path app halted...NO'
+    toe-packets-received: 'RX packets received...YES'

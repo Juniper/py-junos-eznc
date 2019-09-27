@@ -1,0 +1,10 @@
+veriexecTable:
+    command: request routing-engine execute command "sysctl security.mac.veriexec.state"
+    key: veriexec-name
+    view: veriexecView
+
+veriexecView:
+   regex:
+        veriexec-name: '(.*):'
+        veriexec-state: '(.*)'
+

@@ -1,0 +1,19 @@
+---
+FpcMemory:
+    command: show memory
+    target: Null
+    key: ID
+    key_items:
+        - 0
+        - 1
+    view: FPCMemoryView
+
+FPCMemoryView:
+    columns:
+        id: ID
+        base: Base
+        total: Total(b)
+        free: Free(b)
+        used: Used(b)
+        perc: "%"
+        name: Name

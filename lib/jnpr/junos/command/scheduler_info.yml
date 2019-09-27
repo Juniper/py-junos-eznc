@@ -1,0 +1,33 @@
+---
+SchedulerTable:
+  command: show sched
+  target: Null
+  key: name
+  view: SchedulerView
+
+SchedulerView:
+  fields:
+    thread: _TopThreadTable
+  columns:
+    cpu: CPU
+    name: Name
+    time-ms: Time(ms)
+  regex:
+    interrupt-time: 'Total interrupt time (\d+)'
+
+_TopThreadTable:
+  title: Top Thread
+  delimiter: "="
+
+SchedulerCpuTable:
+  command: show sched
+  target: Null
+  item: '*'
+  view: SchedulerCpuView
+
+SchedulerCpuView:
+  regex:
+    cpu-1-second: 'CPU load is (\d+)% \(1 second\),\s+'
+    cpu-5-seconds: '(\d+)% \(5 second\)'
+    cpu-10-seconds: '\s+(\d+)% \(10 second\),\s+'
+    cpu-1-minute: '(\d+)% \(1 minute\)'

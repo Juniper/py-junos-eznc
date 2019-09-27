@@ -1,0 +1,39 @@
+---
+CChipWiStatsTable:
+  command: show mqss {{ chip_instance }} wi stats
+  target: Null
+  args:
+    chip_instance: 0
+  key: mac
+  view: CChipWiStatsView
+  eval:
+    total-drop: >
+        sum([v['total_drop_packet'] for k, v in {{ data }}.items()
+        if isinstance(v, dict) and 'total_drop_packet' in v])
+
+CChipWiStatsView:
+  fields:
+    cchip-wi-stall: _CchipWiStallTable
+  columns:
+    mac:
+      - MAC
+      - Port
+    total_drop_packet: Total Dropped Packets
+    drop_packet:
+      - Dropped Packets
+      - Rate (pps)
+    total_drop_byte: Total Dropped Bytes
+    drop_byte:
+      - Dropped Bytes Rate
+      - (bps)
+
+_CchipWiStallTable:
+  title: WI debug statistics
+  item: '*'
+  view: _CchipWiStallView
+
+_CchipWiStallView:
+  regex:
+    cchip-wi-stall-0: wsch_stall_hi\s+:\s+(\d+)
+    cchip-wi-stall-1: wsch_stall_lo\s+:\s+(\d+)
+    cchip-wi-received-packets: Received Packets\s+(\d+)
