@@ -1,0 +1,22 @@
+---
+CChipHostDropTable:
+  command: show xmchip {{ instance }} phy-stream q-node-stats 1151 0
+  target: Null
+  args:
+    instance: 0
+  key:
+    - color
+    - counter-id
+    - counter-name
+  eval:
+    cchip-host-path-drops: sum([i['total_error'] for i in {{ data }}.values()])
+  view: CChipHostDropView
+
+CChipHostDropView:
+  regex:
+    color: word
+    outcome: \w+ drops
+    counter-id: numbers
+    counter-name: Packets
+    total_error: numbers
+    rate: (\d+) pps

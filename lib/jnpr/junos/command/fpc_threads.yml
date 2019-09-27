@@ -1,0 +1,17 @@
+---
+FPCThread:
+  command: show threads
+  target: Null
+  key: Name
+  view: FPCThreadView
+
+FPCThreadView:
+  columns:
+    pid-pr: PID PR
+    state: State
+    name: Name
+    stack: Stack Use
+    time: Time (Last/Max/Total)
+    cpu: cpu
+  eval:
+    cpu: "'{{ cpu }}'[:-1]"

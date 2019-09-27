@@ -1,0 +1,29 @@
+---
+CChipDRDErrTable:
+  command: show mqss {{ instance }} drd error-stats
+  args:
+    instance: 0
+  target: Null
+  key: Interrupt Name
+  item: '*'
+  view: CChipDRDErrView
+  eval:
+    cchip-drd-wan-errors: >
+        sum([v['interrupt-count-wan'] for k, v in {{ data }}.items()
+        if isinstance(v, dict)])
+    cchip-drd-fab-errors: >
+        sum([v['interrupt-count-fab'] for k, v in {{ data }}.items()
+        if isinstance(v, dict)])
+
+CChipDRDErrView:
+  regex:
+    cchip-drd-wan-timeouts: 'Total WAN reorder ID timeout errors:\s+(\d+)'
+    cchip-drd-fab-timeouts: 'Total fabric reorder ID timeout errors:\s+(\d+)'
+  columns:
+    interrupt-name: Interrupt Name
+    interrupt-count-wan:
+      - Number of
+      - Reorder Engine 0
+    interrupt-count-fab:
+      - Interrupts
+      - Reorder Engine 1
