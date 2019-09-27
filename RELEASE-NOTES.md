@@ -8,7 +8,7 @@
 - Added ElsEthernetSwitchingTable TableView #939
 - Added callback functionality to ftp get #932
 - Extended start shell support for Bourne shell #934
-- Added `at` option support for sw.reboot() and sw.poweroff() #916
+- Added `at` option support for `sw.reboot()` and `sw.poweroff()` #916
 - Added generalized function for ssh-client #957
 
 
