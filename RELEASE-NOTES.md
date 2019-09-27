@@ -1,4 +1,4 @@
-## Release 2.3.1 - 27 September 2019
+## Release 2.3.0 - 27 September 2019
 ### Features Added
 - TableView extended for vty/cli unstructured command #950
 - Added junos SAX parser feature #942 #955 #951
