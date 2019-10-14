@@ -79,7 +79,6 @@ sysctlView:
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = sysctlVeriexecTable(self.dev)
         stats = stats.get()
-        print(dict(stats))
         self.assertEqual(dict(stats),
                          {'veriexec-name': 'security.mac.veriexec.state',
                           'veriexec-state': 'loaded active enforce'})
