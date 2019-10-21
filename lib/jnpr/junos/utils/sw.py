@@ -818,7 +818,7 @@ class SW(Util):
         # Before doing anything, Do check if any pending install exists.
         # ---------------------------------------------------------------------
         try:
-            pending_install = self._dev.rpc.request_package_check_pending_install()
+            pending_install = self._dev.rpc.request_package_checks_pending_install()
             msg = pending_install.text
             if msg and msg.strip() != '' and pending_install.getparent().findtext(
                     'package-result').strip() == '1':
