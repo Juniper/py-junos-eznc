@@ -815,6 +815,23 @@ class SW(Util):
         self.log = _progress
 
         # ---------------------------------------------------------------------
+        # Before doing anything, Do check if any pending install exists.
+        # ---------------------------------------------------------------------
+        try:
+            pending_install = self._dev.rpc.request_package_check_pending_install()
+            msg = pending_install.text
+            if msg and msg.strip() != '' and pending_install.getparent().findtext(
+                    'package-result').strip() == '1':
+                _progress(msg)
+                return False
+        except RpcError:
+            _progress("request-package-check-pending-install rpc is not "
+                      "supported on given device")
+        except Exception as ex:
+            _progress("check pending install failed with exception: %s" % ex)
+            # Continue with software installation
+
+        # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
 
