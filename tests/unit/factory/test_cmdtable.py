@@ -79,7 +79,6 @@ sysctlView:
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = sysctlVeriexecTable(self.dev)
         stats = stats.get()
-        print (dict(stats))
         self.assertEqual(dict(stats),
                          {'veriexec-name': 'security.mac.veriexec.state',
                           'veriexec-state': 'loaded active enforce'})
@@ -115,17 +114,29 @@ CMErrorView:
         stats = CMErrorTable(self.dev)
         stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats),
-                         {1: {'errors': 0, 'pfe': 'Yes', 'name': 'PQ3 Chip',
-                              'module': 1, 'callback': '0x00000000',
+                         {1: {'errors': 0,
+                              'pfe': 'Yes',
+                              'name': 'PQ3 Chip',
+                              'module': 1,
+                              'callback': '0x00000000',
                               'data': '0x00000000'},
-                          2: {'errors': 0, 'pfe': 'No', 'name': 'Host Loopback',
-                              'module': 2, 'callback': '0x00000000',
+                          2: {'errors': 0,
+                              'pfe': 'No',
+                              'name': 'Host Loopback',
+                              'module': 2,
+                              'callback': '0x00000000',
                               'data': '0x464295b0'},
-                          3: {'errors': 0, 'pfe': 'No', 'name': 'CM[0]',
-                              'module': 3, 'callback': '0x41f550f0',
+                          3: {'errors': 0,
+                              'pfe': 'No',
+                              'name': 'CM[0]',
+                              'module': 3,
+                              'callback': '0x41f550f0',
                               'data': '0x462f767c'},
-                          4: {'errors': 0, 'pfe': 'No', 'name': 'LUCHIP(0)',
-                              'module': 4, 'callback': '0x00000000',
+                          4: {'errors': 0,
+                              'pfe': 'No',
+                              'name': 'LUCHIP(0)',
+                              'module': 4,
+                              'callback': '0x00000000',
                               'data': '0x481b84d8'}})
         self.assertEqual(repr(stats), 'CMErrorTable:1.1.1.1: 4 items')
         self.assertEqual(len(stats), 4)
@@ -197,7 +208,8 @@ CMErrorView:
         stats = CMErrorTable(self.dev)
         with patch('jnpr.junos.utils.start_shell.StartShell.run') as ss_run:
             stats.get()
-        ss_run.assert_called_with('cprod -A fpc1 -c "show cmerror module brief"')
+        ss_run.assert_called_with(
+            'cprod -A fpc1 -c "show cmerror module brief"')
 
     @patch('jnpr.junos.Device.execute')
     def test_get_api_params(self, mock_execute):
@@ -245,8 +257,8 @@ CMErrorView:
         self.assertEqual(stats.VIEW.T.__class__.__name__, 'property')
         self.assertEqual(stats.VIEW.xml.__class__.__name__, 'property')
         expected = ['Host Loopback', 'CM[1]', 'CM[0]', 'LUCHIP(0)',
-                                                   'TOE-LU-0:0:0',
-                                  'PQ3 Chip']
+                    'TOE-LU-0:0:0',
+                    'PQ3 Chip']
         expected.sort()
         got_keys = list(stats.keys())
         got_keys.sort()
@@ -269,7 +281,7 @@ FPCLinkStatTable:
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = FPCLinkStatTable(self.dev)
         stats = stats.get(target='fpc1')
-        self.assertEqual({k: v for k,v in stats},
+        self.assertEqual({k: v for k, v in stats},
                          {'PPP LCP/NCP': 0, 'ISIS': 0, 'BFD': 15, 'OAM': 0,
                           'ETHOAM': 0, 'LACP': 0, 'LMI': 0, 'UBFD': 0,
                           'HDLC keepalives': 0, 'OSPF Hello': 539156, 'RSVP':
@@ -296,7 +308,7 @@ ShowLuchipView:
     active_zones: '\((0x[a-z0-9]+)\)'
 """
         globals().update(FactoryLoader().load(yaml.load(
-                yaml_data, Loader=yamlordereddictloader.Loader)))
+            yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = ShowLuchipTable(self.dev)
         stats = stats.get(target='fpc1')
         self.assertEqual(dict(stats),
@@ -376,7 +388,7 @@ XMChipStatsView:
         globals().update(FactoryLoader().load(yaml.load(
             yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = XMChipStatsTable(self.dev)
-        stats = stats.get(target='fpc1', args = {'instance': 0})
+        stats = stats.get(target='fpc1', args={'instance': 0})
         self.assertEqual(dict(stats), {'pct_wi_1': 0, 'pct_wi_0': 0,
                                        'total_pct': 0})
 
@@ -466,7 +478,7 @@ _FPCTTPQueueSizesTable2:
     - High
     - Low
   view: _FPCTTPQueueSizesView
-  
+
 _FPCTTPQueueSizesView:
   fields:
     high: High
@@ -494,7 +506,7 @@ FPCTTPReceiveStatsView:
                          {'TTPQueueSizes': {'High': '0 (max is 4473)',
                                             'Low': '0 (max is 2236)'},
                           'TTPQueueSizes2': {'High': '0 (max is 4473)',
-                                            'Low': '0 (max is 2236)'},
+                                             'Low': '0 (max is 2236)'},
                           'TTPReceiveStatistics': {'Coalesce': {'control': 0,
                                                                 'discard': 0,
                                                                 'high': 0,
@@ -600,7 +612,7 @@ ICMPStatsView:
     discards: _ICMPDiscardsTable
     errors: _ICMPErrorsTable
     rate: _ICMPRateTable
-    
+
 _ICMPStatisticsTable:
   title: ICMP Statistics
   key: name
@@ -610,7 +622,7 @@ _ICMPStatisticsView:
   regex:
     value: numbers
     name: words
-    
+
 _ICMPDiscardsTable:
   title: ICMP Discards
   key: name
@@ -1738,7 +1750,7 @@ FPCThreadView:
     - state
             """
         globals().update(FactoryLoader().load(yaml.load(
-                yaml_data, Loader=yamlordereddictloader.Loader)))
+            yaml_data, Loader=yamlordereddictloader.Loader)))
         stats = FPCThreads(self.dev)
         stats = stats.get()
         self.assertEqual(dict(stats),
@@ -1926,6 +1938,40 @@ FPCThreadView:
                           u'zlTxTsMgrTaskzl303xx': {u'cpu': u'0',
                                                     u'state': u'asleep'}}
                          )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_new_line_in_data(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+CChipLoStatsTable:
+  command: show xmchip {{ chip_instance }} lo stats 0
+  target: fpc4
+  args:
+    chip_instance: 0
+  title: 'LU  Parcel Name         Counter Name'
+  key:
+    - index
+    - parcel
+    - counter
+  eval:
+    cchip-lookup-out-errors: >
+      sum([v['total'] for k,v in {{ data }}.items() if v['parcel']=='Error'])
+  view: CChipLoStatsView
+
+CChipLoStatsView:
+  regex:
+    index: '^\d+'
+    parcel: '\w*(?=_)?\w*'
+    counter: '(\w+(\s\w+)+)'
+    total: '\d+'
+    rate: '\d+ pps'
+"""
+        globals().update(FactoryLoader().load(yaml.load(
+            yaml_data, Loader=yamlordereddictloader.Loader)))
+        stats = CChipLoStatsTable(self.dev)
+        stats = stats.get(target='fpc0')
+        self.assertEqual(stats['cchip-lookup-out-errors'], 500)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

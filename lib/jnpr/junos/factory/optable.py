@@ -117,6 +117,7 @@ def generate_sax_parser_input(obj):
             for key, val in group_field_dict.items():
                 group_ele.append(E(val.get('xpath')))
             parser_ingest.append(group_ele)
+    map_multilayer_fields = dict()
     for i, item in enumerate(local_field_dict.items()):
         # i is the index and item will be taple of field key and value
         field_dict = item[1]
@@ -129,9 +130,23 @@ def generate_sax_parser_input(obj):
             # xpath can be multi level, for ex traffic-statistics/input-pps
             if '/' in xpath:
                 tags = xpath.split('/')
-                obj = E(tags[0])
-                for tag in tags[1:]:
-                    obj.append(E(tag))
+                if tags[0] in map_multilayer_fields:
+                    # cases where multiple fields got same parents
+                    # fields:
+                    #    input-bytes: traffic-statistics/input-bytes
+                    #    output-bytes: traffic-statistics/output-bytes
+                    existing_elem = parser_ingest.xpath(tags[0])
+                    if existing_elem:
+                        obj = existing_elem[0]
+                        for tag in tags[1:]:
+                            obj.append(E(tag))
+                    else:
+                        continue
+                else:
+                    obj = E(tags[0])
+                    for tag in tags[1:]:
+                        obj.append(E(tag))
+                    map_multilayer_fields[tags[0]] = obj
                 parser_ingest.insert(i + 1, obj)
             else:
                 parser_ingest.insert(i + 1, E(xpath))
