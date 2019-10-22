@@ -1174,6 +1174,8 @@ class Device(_Connection):
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
         self._use_filter = kvargs.get('use_filter', False)
+        # Specifying timeout for opening connection is now possible after
+        # https://github.com/ncclient/ncclient/pull/314
         self._conn_open_timeout = kvargs.get('conn_open_timeout', None)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
