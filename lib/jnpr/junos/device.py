@@ -1058,6 +1058,16 @@ class Device(_Connection):
         if kwargs.get('port') in [23, '23'] or kwargs.get('mode') or \
                         kwargs.get('cs_user') is not None:
             from jnpr.junos.console import Console
+            if kwargs.get('conn_open_timeout', None):
+                # Console already supports timeout while opening connections
+                # via `timeout` parameter. Refer `Console` documentation
+                # for more details.
+
+                # Note: The actual timeout may appear higher than set timeout as
+                # Console retries the connection attempt for 3 times, with a backoff
+                # time of 2s. SO, if my math is correct, the actual timeout is
+                # 3*(timeout+2)
+                kwargs['timeout'] = kwargs.pop('conn_open_timeout')
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
             # __new__() is an instance of the class in which the __new__()
@@ -1145,6 +1155,10 @@ class Device(_Connection):
             default is ``False`` to use DOM.
             Select ``True`` to use SAX (if SAX input is provided).
 
+        :param int conn_open_timeout:
+            *OPTIONAL* To specify the timeout in seconds, which will
+            be used while opening SSH connection to the device
+
         """
 
         # ----------------------------------------
@@ -1160,6 +1174,7 @@ class Device(_Connection):
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
         self._use_filter = kvargs.get('use_filter', False)
+        self._conn_open_timeout = kvargs.get('conn_open_timeout', None)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1294,6 +1309,7 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
+                timeout=self._conn_open_timeout,
                 device_params={'name': 'junos',
                                'local': self.__class__.ON_JUNOS,
                                'use_filter': self._use_filter})
