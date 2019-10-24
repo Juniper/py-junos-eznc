@@ -117,11 +117,11 @@ taskmallocview:
                                                         Loader=yaml.Loader)))
         tbl = taskmallocdetail(self.dev)
         data = generate_sax_parser_input(tbl)
-        self.assertEqual(
-            etree.tostring(data),
+        self.assertEqual(data.tag, 'task-memory-malloc-usage-report')
+        self.assertEqual(len(etree.tostring(data)), len(
             b'<task-memory-malloc-usage-report><task-malloc-list><task-malloc><tm-name/><t'
             b'm-allocs/><tm-alloc-bytes/><tm-max-allocs/><tm-max-alloc-bytes/><tm-function'
-            b'-calls/></task-malloc></task-malloc-list></task-memory-malloc-usage-report>')
+            b'-calls/></task-malloc></task-malloc-list></task-memory-malloc-usage-report>'))
 
     def test_generate_sax_parser_same_parents_with_diff_fields(self):
         yaml_data = """
@@ -163,8 +163,8 @@ VtepTunnelView:
                                                         Loader=yaml.Loader)))
         tbl = VtepTable(self.dev)
         data = generate_sax_parser_input(tbl)
-        self.assertEqual(
-            etree.tostring(data),
+        self.assertEqual(data.tag, 'physical-interface')
+        self.assertEqual(len(etree.tostring(data)),len(
             b'<physical-interface><name/><admin-status/><oper-status/>'
             b'<link-level-type/><traffic-statistics><input-bytes/>'
             b'<output-bytes/></traffic-statistics><input-error-list>'
@@ -172,7 +172,7 @@ VtepTunnelView:
             b'<output-errors/><carrier-transitions/></output-error-list>'
             b'<logical-interface><name/><vtep-info><vtep-type/><vtep-address/>'
             b'</vtep-info><traffic-statistics><input-bytes/><output-bytes/>'
-            b'</traffic-statistics></logical-interface></physical-interface>'
+            b'</traffic-statistics></logical-interface></physical-interface>')
         )
 
     def _read_file(self, fname):
