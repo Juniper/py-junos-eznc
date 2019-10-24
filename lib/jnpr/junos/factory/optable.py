@@ -78,7 +78,6 @@ class OpTable(Table):
             rpc_args.update(kvargs.pop('args'))
         rpc_args.update(kvargs)           # copy caller provided args
 
-
         if hasattr(self, 'GET_KEY') and argkey is not None:
             rpc_args.update({self.GET_KEY: argkey})
 
@@ -98,11 +97,10 @@ def generate_sax_parser_input(obj):
     Returns: lxml etree object to be used as sax parser input
 
     """
+    item_tags = []
     if '/' in obj.ITEM_XPATH:
-        tags = obj.ITEM_XPATH.split('/')
-        parser_ingest = E(tags.pop(-1), E(obj.ITEM_NAME_XPATH))
-        for tag in tags[::-1]:
-            parser_ingest = E(tag, parser_ingest)
+        item_tags = obj.ITEM_XPATH.split('/')
+        parser_ingest = E(item_tags.pop(-1), E(obj.ITEM_NAME_XPATH))
     else:
         parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
     local_field_dict = deepcopy(obj.VIEW.FIELDS)
@@ -150,4 +148,12 @@ def generate_sax_parser_input(obj):
                 parser_ingest.insert(i + 1, obj)
             else:
                 parser_ingest.insert(i + 1, E(xpath))
+    # cases where item is something like
+    # item: task-memory-malloc-usage-report/task-malloc-list/task-malloc
+    # created filter from last item task-malloc
+    # Now add all the tags if present
+    for item_tag in item_tags[::-1]:
+        parser_ingest = E(item_tag, parser_ingest)
+    logger.debug("Generated filter XML is: %s" % etree.tostring(parser_ingest))
+
     return parser_ingest
