@@ -1064,9 +1064,7 @@ class Device(_Connection):
                 # for more details.
 
                 # Note: The actual timeout may appear higher than set timeout as
-                # Console retries the connection attempt for 3 times, with a backoff
-                # time of 2s. SO, if my math is correct, the actual timeout is
-                # 3*(timeout+2)
+                # the actual timeout is 3*(timeout+2)
                 kwargs['timeout'] = kwargs.pop('conn_open_timeout')
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
