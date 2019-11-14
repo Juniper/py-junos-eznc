@@ -119,7 +119,7 @@ class tty_netconf(object):
 
         rsp = self._receive()
         rsp = rsp.decode('utf-8') if isinstance(rsp, bytes) else rsp
-        reply = RPCReply(rsp)
+        reply = RPCReply(rsp, huge_tree=self._tty._huge_tree)
         errors = reply.errors
         if len(errors) > 1:
             raise RPCError(to_ele(reply._raw), errs=errors)
@@ -161,8 +161,10 @@ class tty_netconf(object):
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
             logger.debug('Received: \n%s' % rcvd_data)
+            parser = etree.XMLParser(remove_blank_text=True,
+                                     huge_tree=self._tty._huge_tree)
             try:
-                etree.XML(rcvd_data)
+                etree.XML(rcvd_data, parser)
             except XMLSyntaxError:
                 if _NETCONF_EOM in rcvd_data:
                     rcvd_data = rcvd_data[:rcvd_data.index(_NETCONF_EOM)]
