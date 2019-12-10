@@ -1,3 +1,13 @@
+## Release 2.3.1 - 10 December 2019
+### Features Added 
+- None
+
+### Bugs fixed:
+- Handled a check for pending Junos OS or package installation #966
+- Fixed  MetaPathLoader support only for jnpr.junos* modules #977
+- Fixed huge tree XML support #975
+- Fixed Junos sax parser issue for filter_xml broken #969
+
 ## Release 2.3.0 - 27 September 2019
 ### Features Added
 - TableView extended for vty/cli unstructured command #950
