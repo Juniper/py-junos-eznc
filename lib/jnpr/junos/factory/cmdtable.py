@@ -95,11 +95,12 @@ class CMDTable(object):
                                                                 str) else \
                 kvargs['filters']
 
+        cmd_args = self.CMD_ARGS.copy()
         if 'args' in kvargs and isinstance(kvargs['args'], dict):
-            self.CMD_ARGS.update(kvargs['args'])
+            cmd_args.update(kvargs['args'])
 
-        if len(self.CMD_ARGS) > 0:
-            self.GET_CMD = Template(self.GET_CMD).render(**self.CMD_ARGS)
+        if len(cmd_args) > 0:
+            self.GET_CMD = Template(self.GET_CMD).render(**cmd_args)
 
         # execute the Junos RPC to retrieve the table
         if hasattr(self, 'TARGET'):
