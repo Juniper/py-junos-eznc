@@ -1,0 +1,34 @@
+---
+CChipWoStatsTable:
+  command: show mqss {{ chip_instance }} wo stats
+  target: Null
+  args:
+    chip_instance: 0
+  eval:
+    cchip-wo-packets-sent: >
+      {{ data }}['counter_0']['total_packets_0'] +
+      {{ data }}['counter_1']['total_packets_1']
+  view: CChipWoStatsView
+
+CChipWoStatsView:
+  fields:
+    counter_0: _counter0_table
+    counter_1: _counter1_table
+
+_counter0_table:
+  title: Counter set 0
+  item: "*"
+  view: _counter_0_view
+
+_counter_0_view:
+  regex:
+    total_packets_0: 'Transmitted packets\s+:\s+(\d+)'
+
+_counter1_table:
+  title: Counter set 1
+  item: "*"
+  view: _counter_1_view
+
+_counter_1_view:
+  regex:
+    total_packets_1: 'Transmitted packets\s+:\s+(\d+)'

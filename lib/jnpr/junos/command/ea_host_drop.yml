@@ -1,0 +1,10 @@
+---
+CChipHostDropTable:
+  command: show xqss {{ instance }} sched queue 1008 local-stats
+  target: Null
+  args:
+    instance: 0
+  view: CChipHostDropView
+CChipHostDropView:
+  regex:
+    cchip-host-path-drops: Dropped pkts\s+:\s+(\d+)

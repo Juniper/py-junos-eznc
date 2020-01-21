@@ -17,12 +17,14 @@ class Table(object):
     ITEM_XPATH = None
     ITEM_NAME_XPATH = 'name'
     VIEW = None
+    USE_FILTER = None
 
-    def __init__(self, dev=None, xml=None, path=None):
+    def __init__(self, dev=None, xml=None, path=None, use_filter=True):
         """
         :dev: Device instance
         :xml: lxml Element instance
         :path: file path to XML, to be used rather than :dev:
+        :use_filter: Default usage is SAX parsing, disable this variable to use DOM
         """
         self._dev = dev
         self.xml = xml
@@ -30,8 +32,11 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
+        self._use_filter = self.USE_FILTER and use_filter
+        if self._dev is not None:
+            self._use_filter = self._use_filter and self._dev._use_filter
 
-    # -------------------------------------------------------------------------
+            # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
@@ -94,6 +99,9 @@ class Table(object):
             try:
                 keys.append(this.xpath(k)[0].text)
             except:
+                # Case where key is provided like key: re-name | Null
+                if ' | ' in k and 'Null' in k:
+                    continue
                 keys.append(None)
         return tuple(keys)
 
@@ -129,8 +137,9 @@ class Table(object):
             # Check if pipe is in the key_value, if so append xpath
             # to each value
             if ' | ' in key_value:
-                return self._keys_simple(' | '.join([xpath + '/' + x for x in
-                                                     key_value.split(' | ')]))
+                return self._keys_simple(' | '.join(
+                    [xpath + '/' + x for x in key_value.split(' | ') if
+                     x != 'Null']))
             return self._keys_simple(xpath + '/' + key_value)
 
         # user explicitly passed key as Null in Table

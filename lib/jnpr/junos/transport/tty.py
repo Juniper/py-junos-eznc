@@ -82,6 +82,7 @@ class Terminal(object):
         self.cs_passwd = kvargs.get('cs_passwd')
         self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
         self.console_has_banner = kvargs.get('console_has_banner') or False
+        self._huge_tree = kvargs.get('huge_tree', False)
 
         # misc setup
         self.nc = tty_netconf(self)

@@ -1,0 +1,26 @@
+---
+CChipDRDErrTable:
+  command: show xmchip {{ instance }} drd error-stats
+  args:
+    instance: 0
+  target: Null
+  key: Interrupt Name
+  item: '*'
+  view: CChipDRDErrView
+  eval:
+    cchip-drd-wan-errors: >
+        sum([v['interrupt-count'] for k, v in {{ data }}.items()
+        if k.endswith('_0')])
+    cchip-drd-fab-errors: >
+        sum([v['interrupt-count'] for k, v in {{ data }}.items()
+        if k.endswith('_1')])
+
+CChipDRDErrView:
+  regex:
+    cchip-drd-wan-timeouts: 'Total WAN reorder ID timeout errors:\s+(\d+)'
+    cchip-drd-fab-timeouts: 'Total fabric reorder ID timeout errors:\s+(\d+)'
+  columns:
+    interrupt-name: Interrupt Name
+    interrupt-count: Number of Interrupts
+  filters:
+    - interrupt-count

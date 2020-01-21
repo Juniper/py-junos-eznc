@@ -1,0 +1,21 @@
+---
+CChipLiInterruptStatsTable:
+  command: show mqss {{ chip_instance }} li interrupt-stats
+  target: Null
+  args:
+    chip_instance: 0
+  title: 'LI Block  Interrupt Name          Number of Interrupts'
+  key:
+    - li-block
+    - name
+  view: CChipLiInterruptStatsView
+  eval:
+    cchip-errors-from-lookup-chip: >
+      sum([v['interrupts'] for k,v in {{ data }}.items()])
+
+CChipLiInterruptStatsView:
+  columns:
+    li-block: LI Block
+    name: Interrupt Name
+    interrupts: Number of Interrupts
+    last-occurance: Last Occurrence

@@ -1,0 +1,16 @@
+---
+CChipFiErrTable:
+  command: show xmchip {{ instance }} fi error-stats
+  args:
+    instance: 0
+  target: Null
+  item: '*'
+  view: CChipFiErrView
+
+CChipFiErrView:
+  regex:
+    cchip-fi-cell-timeout: 'cell_timeout\s+:\s?(\d+)'
+    cchip-fi-error-cells: 'err_cell\s+:\s?(\d+)'
+    cchip-fi-late-cells: 'late_cell\s+:\s?(\d+)'
+    cchip-fi-crc-error-packets: 'pkt_crc_err\s+:\s?(\d+)'
+    cchip-fi-malloc-drops: 'ptuse_drops\s+:\s?(\d+)'

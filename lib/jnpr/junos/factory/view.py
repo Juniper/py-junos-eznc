@@ -4,6 +4,7 @@ from copy import deepcopy
 from lxml import etree
 import json
 import sys
+from jinja2 import Template, meta
 
 from jnpr.junos.factory.viewfields import ViewFields
 from jnpr.junos.factory.to_json import TableViewJSONEncoder
@@ -18,6 +19,7 @@ class View(object):
 
     ITEM_NAME_XPATH = 'name'
     FIELDS = {}
+    EVAL = {}
     GROUPS = None
 
     # -------------------------------------------------------------------------
@@ -83,6 +85,8 @@ class View(object):
         if isinstance(self.ITEM_NAME_XPATH, str):
             # xpath union key
             if ' | ' in self.ITEM_NAME_XPATH:
+                if 'Null' in self.ITEM_NAME_XPATH:
+                    return self._check_key_delimiter_null(self._xml, self.ITEM_NAME_XPATH)
                 return self._xml.xpath(self.ITEM_NAME_XPATH)[0].text.strip()
             # simple key
             return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
@@ -90,16 +94,44 @@ class View(object):
             # composite key
             # keys with missing XPATH nodes are set to None
             keys = []
-            for i in self.ITEM_NAME_XPATH:
-                try:
-                    keys.append(self.xml.xpath(i)[0].text.strip())
-                except:
-                    keys.append(None)
-            return tuple(keys)
+            for item_name_xpath in self.ITEM_NAME_XPATH:
+                if ' | ' in item_name_xpath:
+                    key_with_null_cleaned = \
+                        self._check_key_delimiter_null(self._xml,
+                                                       item_name_xpath)
+                    if key_with_null_cleaned:
+                        keys.append(key_with_null_cleaned)
+                else:
+                    try:
+                        keys.append(self.xml.xpath(item_name_xpath)[0].text.strip())
+                    except:
+                        keys.append(None)
+            if keys:
+                return tuple(keys)
+            else:
+                return keys
 
     # ALIAS key <=> name
     key = name
 
+    def _check_key_delimiter_null(self, xml, item_name_xpath):
+        """
+        Case where key is provided like key: re-name | Null
+
+        :param xml: xml object retrieved from device
+        :param item_name_xpath: key xpath
+        :return: key if fetched else []
+        """
+        if 'Null' in item_name_xpath:
+            # Let try get value for valid xpath key
+            xpath_key = [x for x in item_name_xpath.split(' | ') if x != 'Null']
+            if xpath_key:
+                val = xml.xpath(xpath_key[0])
+                if val:
+                    return val[0].text.strip()
+                else:
+                    # To handle Null key
+                    return []
     @property
     def xml(self):
         """ returns the XML associated to the item """
@@ -131,6 +163,10 @@ class View(object):
             self.GROUPS = deepcopy(self.__class__.GROUPS)
             self.GROUPS.update(more.groups)
 
+        if hasattr(more, 'eval'):
+            self.EVAL = deepcopy(self.__class__.EVAL)
+            self.EVAL.update(more.eval)
+
     def _updater_class(self, more):
         """ called from extend """
         if hasattr(more, 'fields'):
@@ -138,6 +174,9 @@ class View(object):
 
         if hasattr(more, 'groups'):
             self.GROUPS.update(more.groups)
+
+        if hasattr(more, 'eval'):
+            self.EVAL.update(more.eval)
 
     @contextmanager
     def updater(self, fields=True, groups=False, all=True, **kvargs):
@@ -211,6 +250,15 @@ class View(object):
         """
         returns a view item value, called as :obj.name:
         """
+        expression = self.EVAL.get(name)
+        if expression:
+            variables = meta.find_undeclared_variables(expression)
+            t = Template(expression)
+            expression = t.render({k: self.__getitem__(k) for k in variables})
+            val = eval(expression)
+            setattr(self, name, val)
+            return val
+
         item = self.FIELDS.get(name)
         if item is None:
             raise ValueError("Unknown field: '%s'" % name)

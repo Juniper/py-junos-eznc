@@ -1,0 +1,23 @@
+---
+CMErrorTable:
+  command: show cmerror module brief
+  target: Null
+  key:
+    - module
+  view: CMErrorView
+
+CMErrorView:
+  columns:
+    module: Module
+    name: Name
+    errors: Active Errors
+    pfe-specific:
+      - PFE
+      - Specific
+    callback:
+      - Callback
+      - Function
+    module-data: ModuleData
+  filters:
+    - errors
+    - name

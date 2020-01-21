@@ -4,6 +4,7 @@ import six
 import types
 import platform
 import warnings
+import logging
 
 # stdlib, in support of the the 'probe' method
 import socket
@@ -31,10 +32,21 @@ from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
     ignoreWarnDecorator
-from jnpr.junos.exception import JSONLoadError
+from jnpr.junos.exception import JSONLoadError, ConnectError
 
+# check for ncclient support for filter_xml. Remove these changes once ncclient
+# release filter_xml/SAX parsing feature
+# https://github.com/ncclient/ncclient/pull/324
+from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
+import inspect
+if sys.version_info.major >= 3:
+    NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
+else:
+    NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3
 
 _MODULEPATH = os.path.dirname(__file__)
+
+logger = logging.getLogger("jnpr.junos.device")
 
 
 class _MyTemplateLoader(jinja2.BaseLoader):
@@ -782,7 +794,9 @@ class _Connection(object):
 
         try:
             rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
-                                        ignore_warning=ignore_warning)
+                                        ignore_warning=ignore_warning,
+                                        filter_xml=kvargs.get(
+                                            'filter_xml'))
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
@@ -1019,7 +1033,12 @@ class Device(_Connection):
         """
         :returns: the current RPC XML Transformation.
         """
-        return self._conn._device_handler.transform_reply
+        try:
+            return self._conn._device_handler.transform_reply
+        except AttributeError:
+            if self._conn is None:
+                raise ConnectError(self, "Not connected to the Device")
+
 
     @transform.setter
     def transform(self, func):
@@ -1120,6 +1139,15 @@ class Device(_Connection):
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
+
+        :param bool use_filter:
+            *OPTIONAL* To choose between SAX and DOM parsing.
+            default is ``False`` to use DOM.
+            Select ``True`` to use SAX (if SAX input is provided).
+
+        :param bool huge_tree:
+            *OPTIONAL* parse XML with very deep trees and long text content.
+            default is ``False``.
         """
 
         # ----------------------------------------
@@ -1134,6 +1162,8 @@ class Device(_Connection):
         self._normalize = kvargs.get('normalize', False)
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._use_filter = kvargs.get('use_filter', False)
+        self._huge_tree = kvargs.get('huge_tree', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1268,8 +1298,9 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos', 'local':
-                    self.__class__.ON_JUNOS})
+                device_params={'name': 'junos',
+                               'local': self.__class__.ON_JUNOS,
+                               'use_filter': self._use_filter})
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1312,6 +1343,8 @@ class Device(_Connection):
             cnx_err._orig = err
             raise cnx_err
 
+        if self._huge_tree:
+            self._conn.huge_tree = True
         self.connected = True
 
         self._nc_transform = self.transform
@@ -1343,8 +1376,11 @@ class Device(_Connection):
                 self.connected = False
 
     @ignoreWarnDecorator
-    def _rpc_reply(self, rpc_cmd_e):
-        return self._conn.rpc(rpc_cmd_e)._NCElement__doc
+    def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
+        if NCCLIENT_FILTER_XML:
+            return self._conn.rpc(rpc_cmd_e, filter_xml)._NCElement__doc
+        else:
+            return self._conn.rpc(rpc_cmd_e)._NCElement__doc
 
     # -----------------------------------------------------------------------
     # Context Manager
@@ -1357,4 +1393,8 @@ class Device(_Connection):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._conn.connected and \
                 not isinstance(exc_val, EzErrors.ConnectError):
-            self.close()
+            try:
+                self.close()
+            except Exception as ex:
+                # exit should not raise any exception
+                logger.error("Close in context manager hit exception: {}".format(ex))

@@ -1,0 +1,40 @@
+<output>
+SENT: Ukern command: show ttp statistics
+
+TTP Statistics:
+                   Receive    Transmit
+                ----------  ----------
+ L2 Packets           4292     1093544
+ L3 Packets         542638           0
+ Drops                   0           0
+ Netwk Fail              0           0
+ Queue Drops             0           0
+ Unknown                 0           0
+ Coalesce                0           0
+ Coalesce Fail           0           0
+
+TTP Transmit Statistics:
+                   Queue 0     Queue 1     Queue 2    Queue 3
+                ----------  ----------  ----------  ----------
+ L2 Packets        1093544           0           0           0
+ L3 Packets              0           0           0           0
+
+TTP Receive Statistics:
+                   Control        High      Medium         Low     Discard
+                ----------  ----------  ----------  ----------  ----------
+ L2 Packets              0           0        4292           0           0
+ L3 Packets              0      539172        3466           0           0
+ Drops                   0           0           0           0           0
+ Queue Drops             0           0           0           0           0
+ Unknown                 0           0           0           0           0
+ Coalesce                0           0           0           0           0
+ Coalesce Fail           0           0           0           0           0
+
+TTP Receive Queue Sizes:
+ Control Plane : 0 (max is 4473)
+ High          : 0 (max is 4473)
+ Medium        : 0 (max is 4473)
+ Low           : 0 (max is 2236)
+
+TTP Transmit Queue Size: 0 (max is 6710)
+</output>

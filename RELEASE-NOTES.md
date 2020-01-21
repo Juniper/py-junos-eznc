@@ -1,3 +1,34 @@
+## Release 2.3.1 - 10 December 2019
+### Features Added 
+- None
+
+### Bugs fixed:
+- Handled a check for pending Junos OS or package installation #966
+- Fixed  MetaPathLoader support only for jnpr.junos* modules #977
+- Fixed huge tree XML support #975
+- Fixed Junos sax parser issue for filter_xml broken #969
+
+## Release 2.3.0 - 27 September 2019
+### Features Added
+- TableView extended for vty/cli unstructured command #950
+- Added junos SAX parser feature #942 #955 #951
+- Added TableView Null Key support #910
+- Added command tables #958.
+- Added reboot support for junos vmhost platform #952
+- Added ElsEthernetSwitchingTable TableView #939
+- Added callback functionality to ftp get #932
+- Extended start shell support for Bourne shell #934
+- Added `at` option support for `sw.reboot()` and `sw.poweroff()` #916
+- Added generalized function for ssh-client #957
+
+
+### Bugs Fixed
+- Updated fact collection for srx platform #935
+- Supports new ssh private key format #945
+- Handled exception in dev.close() #956
+- Updated file transfers to use context manager to open files #885
+- Fixed reboot and poweroff behavior #916
+
 ## Release 2.2.1 - 22 April 2019
 ### Features Added
 - None

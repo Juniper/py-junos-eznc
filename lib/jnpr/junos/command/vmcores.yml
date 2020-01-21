@@ -1,0 +1,8 @@
+vmcoreTable:
+    command: request routing-engine execute command "ls /var/crash/ | grep vmcore | wc -l"
+    key: .
+    view: vmcoreView
+
+vmcoreView:
+   regex:
+        num_cores: '(\d+)'

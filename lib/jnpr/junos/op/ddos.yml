@@ -1,0 +1,13 @@
+---
+DDOSTable:
+  rpc: get-ddos-statistics-information
+  item: .
+  key: ddos-policing-re-enabled
+  view: DDOSView
+
+DDOSView:
+  fields:
+    policing_on_re: ddos-policing-re-enabled
+    policing_on_fpc: ddos-policing-fpc-enabled
+    flow_detection: ddos-flow-detection-enabled
+    logging: ddos-logging-enabled

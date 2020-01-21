@@ -1,0 +1,11 @@
+<output>
+SENT: Ukern command: show mtip-cge summary
+
+ ID mtip_cge name        FPC PIC ifd                  (ptr)
+--- -------------------- --- --- -------------------- --------
+  1 mtip_cge.1.0.8192      1   0                      4f11a058
+  2 mtip_cge.1.0.0         1   0 et-1/0/0             4f119fb8
+  3 mtip_cge.1.257.8192    1 257                      4f119d38
+  4 mtip_cge.1.2.0         1   2 et-1/2/0             4f119c98
+  5 mtip_cge.1.2.1         1   2 et-1/2/1             4f119bf8
+</output>

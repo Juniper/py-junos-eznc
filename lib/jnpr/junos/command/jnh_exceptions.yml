@@ -1,0 +1,15 @@
+---
+ShowJnhExceptions:
+  command: show jnh {{ jnh_instance }} exceptions terse
+  args:
+    jnh_instance: 0
+  target: Null
+  key: reason
+  view: ShowJnhExceptionsView
+
+ShowJnhExceptionsView:
+  regex:
+    reason: '(\w+(\s\w+)*)'
+    type: '((DISC|PUNT)\(\s*\d+\)|M2L ERROR|TRAP\(\))'
+    packets: '\d+'
+    bytes: '\d*'

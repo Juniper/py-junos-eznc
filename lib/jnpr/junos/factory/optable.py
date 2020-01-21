@@ -1,9 +1,16 @@
+from copy import deepcopy
+import logging
+
 # 3rd-party
 from lxml import etree
+from lxml.builder import E
 
 # local
 from jnpr.junos.factory.table import Table
-from jnpr.junos.jxml import remove_namespaces
+from jnpr.junos.jxml import remove_namespaces, remove_namespaces_and_spaces
+from jnpr.junos.decorators import checkSAXParserDecorator
+
+logger = logging.getLogger("jnpr.junos.factory.optable")
 
 
 class OpTable(Table):
@@ -12,6 +19,7 @@ class OpTable(Table):
     # PUBLIC METHODS
     # -------------------------------------------------------------------------
 
+    @checkSAXParserDecorator
     def get(self, *vargs, **kvargs):
         """
         Retrieve the XML table data from the Device instance and
@@ -53,8 +61,21 @@ class OpTable(Table):
 
         argkey = vargs[0] if len(vargs) else None
 
-        rpc_args = {'normalize': True}    # create default <dict>
+        rpc_args = {}
+
+        if self._use_filter:
+            try:
+                filter_xml = generate_sax_parser_input(self)
+                rpc_args['filter_xml'] = filter_xml
+            except Exception as ex:
+                logger.debug("Not able to create SAX parser input due to "
+                               "'%s'" % ex)
+
+        self.D.transform = lambda: remove_namespaces_and_spaces
         rpc_args.update(self.GET_ARGS)    # copy default args
+        # saltstack get_table pass args as named keyword
+        if 'args' in kvargs and isinstance(kvargs['args'], dict):
+            rpc_args.update(kvargs.pop('args'))
         rpc_args.update(kvargs)           # copy caller provided args
 
         if hasattr(self, 'GET_KEY') and argkey is not None:
@@ -65,3 +86,74 @@ class OpTable(Table):
 
         # returning self for call-chaining purposes, yo!
         return self
+
+
+def generate_sax_parser_input(obj):
+    """
+    Used to generate xml object from Table/view to be used in SAX parsing
+    Args:
+        obj: self object which contains table/view details
+
+    Returns: lxml etree object to be used as sax parser input
+
+    """
+    item_tags = []
+    if '/' in obj.ITEM_XPATH:
+        item_tags = obj.ITEM_XPATH.split('/')
+        parser_ingest = E(item_tags.pop(-1), E(obj.ITEM_NAME_XPATH))
+    else:
+        parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
+    local_field_dict = deepcopy(obj.VIEW.FIELDS)
+    # first make element out of group fields
+    if obj.VIEW.GROUPS:
+        for group, group_xpath in obj.VIEW.GROUPS.items():
+            # need to pop out group items so that it wont be reused with fields
+            group_field_dict = ({k: local_field_dict.pop(k)
+                                 for k, v in obj.VIEW.FIELDS.items()
+                                 if v.get('group') == group})
+            group_ele = E(group_xpath)
+            for key, val in group_field_dict.items():
+                group_ele.append(E(val.get('xpath')))
+            parser_ingest.append(group_ele)
+    map_multilayer_fields = dict()
+    for i, item in enumerate(local_field_dict.items()):
+        # i is the index and item will be taple of field key and value
+        field_dict = item[1]
+        if 'table' in field_dict:
+            # handle nested table/view
+            child_table = field_dict.get('table')
+            parser_ingest.insert(i + 1, generate_sax_parser_input(child_table))
+        else:
+            xpath = field_dict.get('xpath')
+            # xpath can be multi level, for ex traffic-statistics/input-pps
+            if '/' in xpath:
+                tags = xpath.split('/')
+                if tags[0] in map_multilayer_fields:
+                    # cases where multiple fields got same parents
+                    # fields:
+                    #    input-bytes: traffic-statistics/input-bytes
+                    #    output-bytes: traffic-statistics/output-bytes
+                    existing_elem = parser_ingest.xpath(tags[0])
+                    if existing_elem:
+                        obj = existing_elem[0]
+                        for tag in tags[1:]:
+                            obj.append(E(tag))
+                    else:
+                        continue
+                else:
+                    obj = E(tags[0])
+                    for tag in tags[1:]:
+                        obj.append(E(tag))
+                    map_multilayer_fields[tags[0]] = obj
+                parser_ingest.insert(i + 1, obj)
+            else:
+                parser_ingest.insert(i + 1, E(xpath))
+    # cases where item is something like
+    # item: task-memory-malloc-usage-report/task-malloc-list/task-malloc
+    # created filter from last item task-malloc
+    # Now add all the tags if present
+    for item_tag in item_tags[::-1]:
+        parser_ingest = E(item_tag, parser_ingest)
+    logger.debug("Generated filter XML is: %s" % etree.tostring(parser_ingest))
+
+    return parser_ingest
