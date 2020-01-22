@@ -458,6 +458,8 @@ class _Connection(object):
                 encode = None if sys.version < '3' else 'unicode'
                 return etree.tostring(rsp[0], encoding=encode)
             return rsp[0]
+        except TypeError:
+            return "No RPC equivalent found for: " + command
         except:
             return "invalid command: " + command
 
