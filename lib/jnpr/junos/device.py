@@ -1147,6 +1147,9 @@ class Device(_Connection):
             default is ``False`` to use DOM.
             Select ``True`` to use SAX (if SAX input is provided).
 
+        :param bool huge_tree:
+            *OPTIONAL* parse XML with very deep trees and long text content.
+            default is ``False``.
         """
 
         # ----------------------------------------
@@ -1162,6 +1165,7 @@ class Device(_Connection):
         self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
         self._fact_style = kvargs.get('fact_style', 'new')
         self._use_filter = kvargs.get('use_filter', False)
+        self._huge_tree = kvargs.get('huge_tree', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in a future '
                           'release.' %
@@ -1341,6 +1345,8 @@ class Device(_Connection):
             cnx_err._orig = err
             raise cnx_err
 
+        if self._huge_tree:
+            self._conn.huge_tree = True
         self.connected = True
 
         self._nc_transform = self.transform

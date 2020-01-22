@@ -711,18 +711,15 @@ class StateMachine(Machine):
             # checking index as there can be blank line at position 0 and 2
             if line.strip() == '':
                 if index > 2:
-                    if self.is_row_column():
+                    if self.is_row_column() or self.is_regex_data():
                         try:
-                            if len(_regex.scanString(self._lines[self._lines.index(
-                                    line) + 1])[0]) == 0:
-                                break
-                        except IndexError:
-                            break
-                    elif self.is_regex_data():
-                        try:
+                            match = []
+                            # check if line after new line matches condition
+                            # There can be data set where there are new line in between.
                             for result, start, end in _regex.scanString(
-                                    self._lines[self._lines.index(
-                                        line) + 1]):
+                                    self._lines[index + 1]):
+                                match.extend(result)
+                            if match:
                                 continue
                             else:
                                 break

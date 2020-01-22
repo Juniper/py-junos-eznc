@@ -208,7 +208,7 @@ class Config(Util):
     # show | compare rollback <number|0*>
     # -------------------------------------------------------------------------
 
-    def diff(self, rb_id=0):
+    def diff(self, rb_id=0, ignore_warning=False):
         """
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
@@ -224,9 +224,9 @@ class Config(Util):
             raise ValueError("Invalid rollback #" + str(rb_id))
 
         try:
-            rsp = self.rpc.get_configuration(dict(
-                compare='rollback', rollback=str(rb_id), format='text'
-            ))
+            rsp = self.rpc.get_configuration(
+                    dict(compare='rollback', rollback=str(rb_id), format='text'),
+                    ignore_warning=ignore_warning)
         except RpcTimeoutError:
             raise 
         except RpcError as err:
