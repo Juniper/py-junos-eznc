@@ -10,3 +10,4 @@ pyserial
 yamlordereddictloader
 pyparsing
 transitions
+ntc_template

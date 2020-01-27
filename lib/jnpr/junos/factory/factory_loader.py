@@ -196,11 +196,16 @@ class FactoryLoader(object):
             #     self._add_dictfield(fields, f_name, f_data, kvargs)
             #     continue
 
+            # self._fields.update(field)
+
             if f_data in self._catalog_dict:
                 # f_data is the table name
                 cls_tbl = self.catalog.get(f_data, self._build_cmdtable(f_data))
                 fields.table(f_name, cls_tbl)
                 continue
+
+            # if we are here, then it means that the field is a string value
+            fields.update({f_name: f_data})
     # -------------------------------------------------------------------------
 
     def _build_view(self, view_name):

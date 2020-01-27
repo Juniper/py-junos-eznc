@@ -2,20 +2,22 @@ import re
 import copy
 # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
 
+# stdlib
+from inspect import isclass
+from lxml import etree
+import json
+
 # local
 from jnpr.junos.exception import RpcError
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
-# stdlib
-from inspect import isclass
-from lxml import etree
-
-import json
-
 from jinja2 import Template
+from ntc_templates import parse as ntc_parse
 
+import logging
+logger = logging.getLogger("jnpr.junos.factory.cmdtable")
 
 class CMDTable(object):
 
@@ -139,10 +141,14 @@ class CMDTable(object):
             self.xml = self.RPC.cli(self.GET_CMD)
             self.data = self.xml.text
 
-        # state machine
-        sm = StateMachine(self)
-
-        self.output = sm.parse(self.data.splitlines())
+        if self.USE_TEXTFSM:
+            self.output = self._parse_textfsm(platform=self.PLATFORM,
+                                              command=self.GET_CMD,
+                                              data=self.data)
+        else:
+            # state machine
+            sm = StateMachine(self)
+            self.output = sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
         return self
@@ -296,3 +302,42 @@ class CMDTable(object):
     def __contains__(self, key):
         """ membership for use with 'in' """
         return bool(key in self.keys())
+
+    # ------------------------------------------------------------------------
+    # textfsm
+    # ------------------------------------------------------------------------
+
+    def _parse_textfsm(self, platform=None, command=None, data=None):
+        """ textfsm returns list of dict, make it JSON/dict """
+        template_dir = ntc_parse._get_template_dir()
+
+        # we also need to take custom template directory
+        cli_table = ntc_parse.clitable.CliTable('index', template_dir)
+
+        attrs = dict(
+            Command=command,
+            Platform=platform
+        )
+        try:
+            cli_table.ParseCmd(data, attrs)
+        except ntc_parse.clitable.CliTableError as ex:
+            logger.error('Unable to parse command "%s" on platform %s' % (command, platform))
+            raise ex
+
+        # preference to user provided key, then template and at last default
+        # Check if we need to update KEY from template file
+        if self.KEY == 'name' and cli_table._keys is not None:
+            template_keys = list(cli_table._keys)
+            self.KEY = template_keys[0] if len(template_keys) == 1 else \
+                template_keys
+        logger.debug("KEY being used: {}".format(self.KEY))
+
+        output = {}
+        for row in cli_table:
+            temp_dict = {}
+            for index, element in enumerate(row):
+                temp_dict[cli_table.header[index]] = element
+            logger.debug("data at index {} is {}".format(row.row, temp_dict))
+            if self.KEY in temp_dict:
+                output[temp_dict[self.KEY]] = temp_dict
+        return output
