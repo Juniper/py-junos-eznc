@@ -16,7 +16,6 @@ from jnpr.junos.factory.to_json import TableJSONEncoder
 
 from jinja2 import Template
 from ntc_templates import parse as ntc_parse
-import textfsm
 
 import logging
 logger = logging.getLogger("jnpr.junos.factory.cmdtable")
@@ -319,7 +318,7 @@ class CMDTable(object):
             Command=command,
             Platform=platform
         )
-        
+
         template = None
         template_dir = None
         if self.template_dir is not None:
@@ -328,7 +327,7 @@ class CMDTable(object):
             template_path = os.path.join(self.template_dir, '{}_{}.textfsm'.format(
                 platform, '_'.join(command.split())))
             if not os.path.exists(template_path):
-                logger.error('Template %s file missing, '
+                logger.debug('Template %s file missing, '
                              'looking default ntc-templates location' % template_path)
             else:
                 template = template_path
@@ -362,17 +361,20 @@ class CMDTable(object):
                 key = cli_table.header[index]
                 if key in self.KEY:
                     temp_dict[key] = element
-                elif reverse_fields:
+                if reverse_fields:
                     if key in reverse_fields:
                         temp_dict[reverse_fields[key]] = element
                 else:
                     temp_dict[key] = element
             logger.debug("data at index {} is {}".format(row.row, temp_dict))
             if self.KEY in temp_dict:
-                if self.KEY not in reverse_fields:
+                if self.KEY not in fields:
                     output[temp_dict.pop(self.KEY)] = temp_dict
                 else:
                     output[temp_dict[self.KEY]] = temp_dict
+            else:
+                logger.debug("Key {} not present in {}".format(self.KEY,
+                                                               temp_dict))
         return output
 
     def _set_key(self, cli_table):
@@ -383,7 +385,7 @@ class CMDTable(object):
         :param cli_table: CLiTable object from textfsm
         :return:
         """
-        if self.KEY == 'name' and cli_table._keys is not None:
+        if self.KEY == 'name' and len(cli_table._keys) > 0:
             template_keys = list(cli_table._keys)
             self.KEY = template_keys[0] if len(template_keys) == 1 else \
                 template_keys
