@@ -313,7 +313,14 @@ class CMDTable(object):
     # ------------------------------------------------------------------------
 
     def _parse_textfsm(self, platform=None, command=None, data=None):
-        """ textfsm returns list of dict, make it JSON/dict """
+        """
+        textfsm returns list of dict, make it JSON/dict
+
+        :param platform: vendor platform, for ex cisco_xr
+        :param command: cli command to be parsed
+        :param data: string blob output from the cli command execution
+        :return: dict of parsed data.
+        """
         attrs = dict(
             Command=command,
             Platform=platform
@@ -322,13 +329,16 @@ class CMDTable(object):
         template = None
         template_dir = None
         if self.template_dir is not None:
-            # we dont need index file foor lookup
+            # we dont need index file for lookup
             index = None
-            template_path = os.path.join(self.template_dir, '{}_{}.textfsm'.format(
-                platform, '_'.join(command.split())))
+            template_path = os.path.join(self.template_dir,
+                                         '{}_{}.textfsm'.format(
+                                             platform,
+                                             '_'.join(command.split())))
             if not os.path.exists(template_path):
-                logger.debug('Template %s file missing, '
-                             'looking default ntc-templates location' % template_path)
+                msg = 'Template file %s missing' % template_path
+                logger.error(msg)
+                raise FileNotFoundError(msg)
             else:
                 template = template_path
                 template_dir = self.template_dir
@@ -340,7 +350,8 @@ class CMDTable(object):
         try:
             cli_table.ParseCmd(data, attrs, template)
         except ntc_parse.clitable.CliTableError as ex:
-            logger.error('Unable to parse command "%s" on platform %s' % (command, platform))
+            logger.error('Unable to parse command "%s" on platform %s' % (
+                command, platform))
             raise ex
         return self._filter_output(cli_table)
 
@@ -349,23 +360,25 @@ class CMDTable(object):
         textfsm return list of list, covert it into more consumable format
 
         :param cli_table: CLiTable object from textfsm
-        :return: dict of key, fields and its values
+        :return: dict of key, fields and its values, list of dict when key is None
         """
         self._set_key(cli_table)
-        output = {}
+
         fields = self.VIEW.FIELDS if self.VIEW is not None else {}
         reverse_fields = {val: key for key, val in fields.items()}
+        if self.KEY is None:
+            cli_table_size = cli_table.size
+            if cli_table_size > 1:
+                raise KeyError("Key is Mandatory for parsed o/p of %s "
+                               "length" % cli_table_size)
+            elif cli_table_size == 1:
+                temp_dict = self._parse_row(cli_table[1], cli_table,
+                                            reverse_fields)
+                logger.debug("For Null Key, data returned: {}".format(temp_dict))
+                return temp_dict
+        output = {}
         for row in cli_table:
-            temp_dict = {}
-            for index, element in enumerate(row):
-                key = cli_table.header[index]
-                if key in self.KEY:
-                    temp_dict[key] = element
-                if reverse_fields:
-                    if key in reverse_fields:
-                        temp_dict[reverse_fields[key]] = element
-                else:
-                    temp_dict[key] = element
+            temp_dict = self._parse_row(row, cli_table, reverse_fields)
             logger.debug("data at index {} is {}".format(row.row, temp_dict))
             if self.KEY in temp_dict:
                 if self.KEY not in fields:
@@ -376,6 +389,19 @@ class CMDTable(object):
                 logger.debug("Key {} not present in {}".format(self.KEY,
                                                                temp_dict))
         return output
+
+    def _parse_row(self, row, cli_table, reverse_fields):
+        temp_dict = {}
+        for index, element in enumerate(row):
+            key = cli_table.header[index]
+            if self.KEY and key in self.KEY:
+                temp_dict[key] = element
+            if reverse_fields:
+                if key in reverse_fields:
+                    temp_dict[reverse_fields[key]] = element
+            else:
+                temp_dict[key] = element
+        return temp_dict
 
     def _set_key(self, cli_table):
         """
