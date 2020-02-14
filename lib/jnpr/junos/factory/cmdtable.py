@@ -23,7 +23,7 @@ logger = logging.getLogger("jnpr.junos.factory.cmdtable")
 
 class CMDTable(object):
 
-    def __init__(self, dev=None, data=None, path=None, template_dir=None):
+    def __init__(self, dev=None, raw=None, path=None, template_dir=None):
         """
         :dev: Device instance
         :data: string blob of the command output
@@ -38,7 +38,7 @@ class CMDTable(object):
         self._path = path
         self._parser = None
         self.output = None
-        self.data = data
+        self.data = raw
         self.template_dir = template_dir
 
     # -------------------------------------------------------------------------
@@ -149,7 +149,7 @@ class CMDTable(object):
         if self.USE_TEXTFSM:
             self.output = self._parse_textfsm(platform=self.PLATFORM,
                                               command=self.GET_CMD,
-                                              data=self.data)
+                                              raw=self.data)
         else:
             # state machine
             sm = StateMachine(self)
@@ -312,13 +312,13 @@ class CMDTable(object):
     # textfsm
     # ------------------------------------------------------------------------
 
-    def _parse_textfsm(self, platform=None, command=None, data=None):
+    def _parse_textfsm(self, platform=None, command=None, raw=None):
         """
         textfsm returns list of dict, make it JSON/dict
 
         :param platform: vendor platform, for ex cisco_xr
         :param command: cli command to be parsed
-        :param data: string blob output from the cli command execution
+        :param raw: string blob output from the cli command execution
         :return: dict of parsed data.
         """
         attrs = dict(
@@ -348,7 +348,7 @@ class CMDTable(object):
 
         cli_table = ntc_parse.clitable.CliTable(index, template_dir)
         try:
-            cli_table.ParseCmd(data, attrs, template)
+            cli_table.ParseCmd(raw, attrs, template)
         except ntc_parse.clitable.CliTableError as ex:
             logger.error('Unable to parse command "%s" on platform %s' % (
                 command, platform))
