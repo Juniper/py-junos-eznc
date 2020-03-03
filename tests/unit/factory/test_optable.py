@@ -118,7 +118,7 @@ bgpNeighborView:
             b'</bgp-option-information></bgp-peer>'))
 
     def test_generate_sax_parser_item_with_many_slash(self):
-            yaml_data = """
+        yaml_data = """
 ---
 taskmallocdetail:
     rpc: get-task-memory-information
@@ -136,15 +136,15 @@ taskmallocview:
         tmmaxallocbytes: tm-max-alloc-bytes
         tmfunctioncalls: tm-function-calls
     """
-            globals().update(FactoryLoader().load(yaml.load(yaml_data,
-                                                            Loader=yaml.Loader)))
-            tbl = taskmallocdetail(self.dev)
-            data = generate_sax_parser_input(tbl)
-            self.assertEqual(data.tag, 'task-memory-malloc-usage-report')
-            self.assertEqual(len(etree.tostring(data)), len(
-                b'<task-memory-malloc-usage-report><task-malloc-list><task-malloc><tm-name/><t'
-                b'm-allocs/><tm-alloc-bytes/><tm-max-allocs/><tm-max-alloc-bytes/><tm-function'
-                b'-calls/></task-malloc></task-malloc-list></task-memory-malloc-usage-report>'))
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = taskmallocdetail(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'task-memory-malloc-usage-report')
+        self.assertEqual(len(etree.tostring(data)), len(
+            b'<task-memory-malloc-usage-report><task-malloc-list><task-malloc><tm-name/><t'
+            b'm-allocs/><tm-alloc-bytes/><tm-max-allocs/><tm-max-alloc-bytes/><tm-function'
+            b'-calls/></task-malloc></task-malloc-list></task-memory-malloc-usage-report>'))
 
     def test_generate_sax_parser_same_parents_with_diff_fields(self):
         yaml_data = """
