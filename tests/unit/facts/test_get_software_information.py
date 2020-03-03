@@ -110,7 +110,6 @@ class TestGetSoftwareInformation(unittest.TestCase):
     @patch('jnpr.junos.Device.execute')
     def test_sw_info_dual_other_re_off(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_dual_other_re_off
-        print (self.dev.facts)
         self.assertEqual(self.dev.facts['junos_info']['re1']['text'],
                          '18.3I20180716_1639')
         self.assertEqual(self.dev.facts['hostname'], 'R1_re01')
