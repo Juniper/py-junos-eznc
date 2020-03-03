@@ -1,0 +1,21 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/20.2I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="urn:uuid:c9c57ecd-dc9f-44cf-803b-5487182b9475">
+<multi-routing-engine-results>
+
+<multi-routing-engine-item>
+
+<re-name>node0</re-name>
+
+<utmd-status xmlns="http://xml.juniper.net/junos/20.2I0/junos-utmd"><running/>
+</utmd-status>
+</multi-routing-engine-item>
+
+<multi-routing-engine-item>
+
+<re-name>node1</re-name>
+
+<utmd-status xmlns="http://xml.juniper.net/junos/20.2I0/junos-utmd"><running/>
+</utmd-status>
+</multi-routing-engine-item>
+
+</multi-routing-engine-results>
+</rpc-reply>
