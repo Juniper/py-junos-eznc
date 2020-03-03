@@ -136,7 +136,7 @@ taskmallocview:
         tmmaxallocs: tm-max-allocs
         tmmaxallocbytes: tm-max-alloc-bytes
         tmfunctioncalls: tm-function-calls
-    """
+"""
         globals().update(FactoryLoader().load(yaml.load(yaml_data,
                                                         Loader=yaml.Loader)))
         tbl = taskmallocdetail(self.dev)
