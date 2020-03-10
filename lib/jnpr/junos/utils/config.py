@@ -172,11 +172,13 @@ class Config(Util):
     # commit check
     # -------------------------------------------------------------------------
 
-    def commit_check(self):
+    def commit_check(self, **kvargs):
         """
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
         are reported and available in the Exception errs.
+        :param int timeout: If provided the command will wait for completion
+                            using the provided value as timeout (seconds).       
 
         :returns: ``True`` if commit-check is successful (no errors)
         :raises CommitError: When errors detected in candidate configuration.
@@ -184,8 +186,16 @@ class Config(Util):
                              to identify the specific problems
         :raises RpcError: When underlying ncclient has an error
         """
+        rpc_args = {}
+
+        # if a timeout is provided, then include that in the RPC
+        
+        timeout = kvargs.get('timeout')
+        if timeout:
+            rpc_args['dev_timeout'] = timeout
+
         try:
-            self.rpc.commit_configuration(check=True)
+            self.rpc.commit_configuration(check=True, **rpc_args)
         except RpcTimeoutError:
             raise
         except RpcError as err:        # jnpr.junos exception
