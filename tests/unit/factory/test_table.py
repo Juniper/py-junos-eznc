@@ -125,7 +125,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_items(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        print (self.ppt.items())
+        # print (self.ppt.items())
         self.assertEqual(len(self.ppt.items()[1][1]), 8)
 
     def test_table_get_return_none(self):
@@ -150,7 +150,7 @@ class TestFactoryTable(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        foo = open(fpath, encoding='utf8').read()
 
         rpc_reply = NCElement(foo, self.device_handler.transform_reply())\
             ._NCElement__doc[0]

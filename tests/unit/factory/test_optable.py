@@ -180,7 +180,7 @@ VtepTunnelView:
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        foo = open(fpath, encoding='utf8').read()
         reply = RPCReply(foo)
         reply.parse()
         rpc_reply = NCElement(reply, self.dev._conn.

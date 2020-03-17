@@ -59,7 +59,7 @@ class TestEthernetMacTable(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        foo = open(fpath, encoding='utf8').read()
 
         rpc_reply = NCElement(foo,
                               self.dev._conn._device_handler

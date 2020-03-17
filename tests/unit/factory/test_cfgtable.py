@@ -604,7 +604,7 @@ class TestFactoryCfgTable(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath).read()
+        foo = open(fpath, encoding='utf8').read()
 
         if fname == 'user.xml':
             return etree.fromstring(foo)
