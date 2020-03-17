@@ -813,7 +813,7 @@ class TestDevice(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        with open(fpath, encoding='utf8') as fp:
+        with open(fpath) as fp:
             foo = fp.read()
 
             if fname == 'get-rpc-error.xml':

@@ -53,6 +53,6 @@ class Test_JXML(unittest.TestCase):
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        with open(fpath, encoding='utf8') as fp:
+        with open(fpath) as fp:
             foo = fp.read()
         return foo

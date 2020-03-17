@@ -143,7 +143,7 @@ class TestTTYNetconf(unittest.TestCase):
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
-        foo = open(fpath, encoding='utf8').read()
+        foo = open(fpath).read()
 
         # specific to multi rpc error
         if fname == 'commit-configuration.xml':
