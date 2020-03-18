@@ -99,6 +99,9 @@ class Table(object):
             try:
                 keys.append(this.xpath(k)[0].text)
             except:
+                # Case where key is provided like key: re-name | Null
+                if ' | ' in k and 'Null' in k:
+                    continue
                 keys.append(None)
         return tuple(keys)
 
@@ -134,8 +137,9 @@ class Table(object):
             # Check if pipe is in the key_value, if so append xpath
             # to each value
             if ' | ' in key_value:
-                return self._keys_simple(' | '.join([xpath + '/' + x for x in
-                                                     key_value.split(' | ')]))
+                return self._keys_simple(' | '.join(
+                    [xpath + '/' + x for x in key_value.split(' | ') if
+                     x != 'Null']))
             return self._keys_simple(xpath + '/' + key_value)
 
         # user explicitly passed key as Null in Table
