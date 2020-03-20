@@ -133,17 +133,23 @@ def generate_sax_parser_input(obj):
                     # fields:
                     #    input-bytes: traffic-statistics/input-bytes
                     #    output-bytes: traffic-statistics/output-bytes
-                    existing_elem = parser_ingest.xpath(tags[0])
-                    if existing_elem:
-                        obj = existing_elem[0]
-                        for tag in tags[1:]:
-                            obj.append(E(tag))
+                    # or
+                    # fields:
+                    #     prefix-count: bgp-option-information/prefix-limit/prefix-count
+                    #     prefix-dummy: bgp-option-information/prefix-limit/prefix-dummy
+                    local_obj = parser_ingest
+                    for tag in tags[:-1]:
+                        existing_elem = local_obj.xpath(tag)
+                        if existing_elem:
+                            local_obj = existing_elem[0]
+                        else:
+                            continue
                     else:
-                        continue
+                        local_obj.append(E(tags[-1]))
                 else:
-                    obj = E(tags[0])
-                    for tag in tags[1:]:
-                        obj.append(E(tag))
+                    obj = E(tags[-1])
+                    for tag in tags[:-1][::-1]:
+                        obj = E(tag, obj)
                     map_multilayer_fields[tags[0]] = obj
                 parser_ingest.insert(i + 1, obj)
             else:
