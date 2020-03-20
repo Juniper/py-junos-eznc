@@ -8,20 +8,21 @@ LacpPortTable:
   args_key: interface_name
   item: lacp-interface-information
   key: lag-lacp-header/aggregate-name
-  view: LacpPortView
-
-# the view provides access to two tables states and protocols
-
-LacpPortView:
-  fields:
-    state: _LacpPortStateTable
-    proto: _LacpPortProtoTable
+  view: _LacpPortView
 
 # -----------------------------------------------------------------------------
 # Each LACP port maintains a "state" table that ha a composite key of the
 # interface name and it's role (Actor/Partner).  name with the "_" so this 
 # item does not get exported to the global namespace
 # -----------------------------------------------------------------------------
+
+# the view provides access to two tables states and protocols
+
+_LacpPortView:
+  fields:
+    name: lag-lacp-header/aggregate-name
+    state: _LacpPortStateTable
+    proto: _LacpPortProtoTable
 
 _LacpPortStateTable:
   item: lag-lacp-state
