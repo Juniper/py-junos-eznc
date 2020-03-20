@@ -26,7 +26,7 @@ class CMDTable(object):
     def __init__(self, dev=None, raw=None, path=None, template_dir=None):
         """
         :dev: Device instance
-        :data: string blob of the command output
+        :raw: string blob of the command output
         :path: file path to XML, to be used rather than :dev:
         :template_dir: To look for textfsm templates in this folder first
         """
