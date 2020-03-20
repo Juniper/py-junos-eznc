@@ -9,8 +9,9 @@ PhyPortTable:
 
 PhyPortView:
   fields:
-    oper : oper-status
-    admin : admin-status
+    name: name
+    oper: oper-status
+    admin: admin-status
     description: description
     mtu: { mtu : int }
     link_mode: link-mode
@@ -32,6 +33,7 @@ PhyPortStatsTable:
   view: PhyPortStatsView
 
 PhyPortStatsView:
+  name: name
   groups:
     ts: traffic-statistics
     rxerrs: input-error-list
@@ -59,6 +61,7 @@ PhyPortErrorTable:
   view: PhyPortErrorView
 
 PhyPortErrorView:
+  name: name
   groups:
     ts: traffic-statistics
     rxerrs: input-error-list
