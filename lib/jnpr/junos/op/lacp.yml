@@ -26,13 +26,12 @@ _LacpPortView:
 
 _LacpPortStateTable:
   item: lag-lacp-state
-  key:
-    - name 
-    - lacp-role 
   view: _LacpPortStateView
 
 _LacpPortStateView:
   fields:
+    name: name
+    role: lacp-role
     activity: lacp-activity
     timeout: lacp-timeout   
     expired: { lacp-expired: True=Yes }
@@ -52,6 +51,7 @@ _LacpPortProtoTable:
 
 _LacpPortProtoView:
   fields:
+    name: name
     rx_state: lacp-receive-state
     tx_state: lacp-transmit-state
     mx_state: lacp-mux-state
