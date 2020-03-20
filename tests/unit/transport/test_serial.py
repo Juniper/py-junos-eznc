@@ -119,3 +119,38 @@ class TestSerialWin(unittest.TestCase):
 
     def test_tty_serial_win_connected(self):
         self.assertTrue(self.dev.connected)
+
+    @patch('jnpr.junos.transport.tty.tty_netconf.close')
+    @patch('jnpr.junos.transport.tty_serial.Serial._tty_close')
+    def test_tty_serial_win_rpc_call(self, mock_serial_close, mock_close):
+        self.dev._tty.read = MagicMock()
+        self.dev._tty.rawwrite = MagicMock()
+        self.dev._tty.read.side_effect = \
+            [six.b('<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"'
+                   ' xmlns:junos="http://xml.juniper.net/junos/15.1X49/junos">'
+                   '<route-engine-information xmlns="http://xml.juniper.net/ju'
+                   'nos/15.1X49/junos-chassis"><route-engine><status>OK</statu'
+                   's><temperature junos:celsius="45">45 degrees C / 113 degre'
+                   'es F</temperature><cpu-temperature junos:celsius="61">61 d'
+                   'egrees C / 141 degrees F</cpu-temperature><memory-system-t'
+                   'otal>4096</memory-system-total><memory-system-total-used>1'
+                   '024</memory-system-total-used><memory-system-total-util>25'
+                   '</memory-system-total-util><memory-control-plane>2624</mem'
+                   'ory-control-plane><memory-control-plane-used>682</memory-c'
+                   'ontrol-plane-used><memory-control-plane-util>26</memory-co'
+                   'ntrol-plane-util><memory-data-plane>1472</memory-data-plan'
+                   'e><memory-data-plane-used>353</memory-data-plane-used><mem'
+                   'ory-data-plane-util>24</memory-data-plane-util><cpu-user>1'
+                   '2</cpu-user><cpu-background>0</cpu-background><cpu-system>'
+                   '6</cpu-system><cpu-interrupt>0</cpu-interrupt><cpu-idle>83'
+                   '</cpu-idle><model>RE-SRX300</model><serial-number>CV0918AF'
+                   '1022</serial-number><start-time junos:seconds="1584539305"'
+                   '>2020-03-18 08:48:25 CDT</start-time><up-time junos:second'
+                   's="137925">1 day, 14 hours, 18 minutes, 45 seconds</up-tim'
+                   'e><last-reboot-reason>0x1:power cycle/failure</last-reboot'
+                   '-reason><load-average-one>0.12</load-average-one><load-ave'
+                   'rage-five>0.08</load-average-five><load-average-fifteen>0.'
+                   '06</load-average-fifteen></route-engine></route-engine-inf'
+                   'ormation></rpc-reply>]]>]]>')]
+        res = self.dev.rpc.get_route_engine_information()
+        self.assertEqual(res.tag, 'route-engine-information')

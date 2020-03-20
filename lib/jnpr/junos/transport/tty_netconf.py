@@ -187,8 +187,10 @@ class tty_netconf(object):
     def _parse_buffer(self, rxbuf):
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
-            rxbuf.pop()
-
+            if rxbuf[-1] == _NETCONF_EOM:
+                rxbuf.pop()
+            else:
+                rxbuf[-1] = rxbuf[-1].split(_NETCONF_EOM)[0]
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
