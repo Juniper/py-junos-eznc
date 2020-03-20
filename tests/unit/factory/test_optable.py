@@ -4,6 +4,7 @@ __credits__ = "Jeremy Schulman"
 import unittest
 import os
 import yaml
+import json
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
@@ -94,6 +95,29 @@ class TestFactoryOpTable(unittest.TestCase):
 
         self.assertRaises(ValueError, bad, 'bunk')
 
+    def test_generate_sax_parser_fields_with_many_slash(self):
+        yaml_data = """
+---
+bgpNeighborTable:
+    rpc: get-bgp-neighbor-information
+    item: bgp-peer
+    key: peer-address
+    view: bgpNeighborView
+bgpNeighborView:
+    fields:
+        prefix-count: bgp-option-information/prefix-limit/prefix-count
+        prefix-dummy: bgp-option-information/prefix-limit/prefix-dummy
+"""
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = bgpNeighborTable(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'bgp-peer')
+        self.assertEqual(len(etree.tostring(data)), len(
+            b'<bgp-peer><peer-address/><bgp-option-information><prefix-limit>'
+            b'<prefix-count/><prefix-dummy/></prefix-limit>'
+            b'</bgp-option-information></bgp-peer>'))
+
     def test_generate_sax_parser_item_with_many_slash(self):
         yaml_data = """
 ---
@@ -174,6 +198,71 @@ VtepTunnelView:
             b'</vtep-info><traffic-statistics><input-bytes/><output-bytes/>'
             b'</traffic-statistics></logical-interface></physical-interface>')
         )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_pipe_delim_with_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status
+    item: //utmd-status
+    view: UTMStatusView
+    key: ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()),
+                         {'node0': {'running': True}, 'node1': {'running': True}})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_pipe_delim_with_Null_use_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status_use_Null
+    item: //utmd-status
+    view: UTMStatusView
+    key: ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()), {'running': True})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_and_item_pipe_delim_with_Null_use_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status_use_Null
+    item: //multi-routing-engine-item/utmd-status | //utmd-status
+    view: UTMStatusView
+    key: 
+      - ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()), {'running': True})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
