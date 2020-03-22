@@ -125,7 +125,7 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_items(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.get('ge-0/0/0')
-        self.assertEqual(len(self.ppt.items()[1][1]), 8)
+        self.assertEqual(len(self.ppt.items()[1][1]), 9)
 
     def test_table_get_return_none(self):
         self.assertEqual(self.table.get('ge-0/0/0'), None)
