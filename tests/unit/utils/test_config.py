@@ -184,7 +184,8 @@ class TestConfig(unittest.TestCase):
         self.conf.diff()
         self.conf.rpc.get_configuration.\
             assert_called_with(
-                {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
+                {'compare': 'rollback', 'rollback': '0', 'format': 'text'},
+                ignore_warning=False)
 
     def test_config_diff_exception_severity_warning(self):
         rpc_xml = '''

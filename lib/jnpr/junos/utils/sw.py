@@ -781,9 +781,9 @@ class SW(Util):
           checksum, then skip the copy to optimize time.
 
         :param bool all_re:
-          (Optional) When ``True`` (default) perform the software install on
-          all Routing Engines of the Junos device. When ``False``  if the
-          only preform the software install on the current Routing Engine.
+          (Optional) When ``True`` (default) install the package on
+          all Routing Engines of the Junos device. When ``False`` perform
+          the software install only on the current Routing Engine.
 
         :param bool vmhost:
           (Optional) A boolean indicating if this is a software update of the
@@ -1045,7 +1045,7 @@ class SW(Util):
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also handles EX/QFX VC.
+        shut down.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before shutting down the device.
 
