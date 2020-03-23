@@ -311,6 +311,9 @@ class Config(Util):
 
           .. note:: This option cannot be used if **format** is "set".
 
+        :param bool patch:
+          If set to ``True`` will set the load-config action to load patch.
+
         :param str template_path:
           Similar to the **path** parameter, but this indicates that
           the file contents are ``Jinja2`` format and will require
@@ -382,7 +385,7 @@ class Config(Util):
         rpc_contents = None
 
         actions = filter(lambda item: kvargs.get(item, False),
-                         ('overwrite', 'merge', 'update'))
+                         ('overwrite', 'merge', 'update', 'patch'))
         if len(list(actions)) >= 2:
             raise ValueError('actions can be only one among %s'
                              % ', '.join(actions))
@@ -397,6 +400,8 @@ class Config(Util):
             rpc_xattrs['action'] = 'update'
         elif kvargs.get('merge') is True:
             del rpc_xattrs['action']
+        elif kvargs.get('patch') is True:
+            rpc_xattrs['action'] = 'patch'
 
         ignore_warning = kvargs.get('ignore_warning', False)
 
