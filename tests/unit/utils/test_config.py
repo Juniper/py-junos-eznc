@@ -184,7 +184,8 @@ class TestConfig(unittest.TestCase):
         self.conf.diff()
         self.conf.rpc.get_configuration.\
             assert_called_with(
-                {'compare': 'rollback', 'rollback': '0', 'format': 'text'})
+                {'compare': 'rollback', 'rollback': '0', 'format': 'text'},
+                ignore_warning=False)
 
     def test_config_diff_exception_severity_warning(self):
         rpc_xml = '''
@@ -808,6 +809,18 @@ class TestConfig(unittest.TestCase):
         self.conf.load(url="/var/home/user/golden.conf")
         self.assertEqual(self.conf.rpc.load_config.call_args[1]['url'],
                          '/var/home/user/golden.conf')
+
+    @patch('jnpr.junos.Device.execute')
+    def test_load_config_patch(self, mock_exec):
+        conf = \
+            """[edit system]
+            -  host-name pakzds904;
+            +  host-name pakzds904_set;
+            """
+        self.conf.load(conf, format='text', patch=True)
+        self.assertEqual(mock_exec.call_args[0][0].tag, 'load-configuration')
+        self.assertEqual(mock_exec.call_args[0][0].attrib,
+                         {'format': 'text', 'action': 'patch'})
 
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
