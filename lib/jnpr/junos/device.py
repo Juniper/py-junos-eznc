@@ -428,11 +428,7 @@ class _Connection(object):
             with open(sshconf_path, 'r') as fp:
                 sshconf.parse(fp)
                 found = sshconf.lookup(self._hostname)
-                if 'proxycommand' not in found:
-                    # hostname and port will be used by proxy and should not
-                    # be set as host for PyEZ
-                    self._hostname = found.get('hostname', self._hostname)
-                    self._port = found.get('port', self._port)
+                self._port = found.get('port', self._port)
                 self._conf_auth_user = found.get('user')
                 self._conf_ssh_private_key_file = found.get('identityfile')
             return sshconf_path
