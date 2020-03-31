@@ -311,6 +311,10 @@ class View(object):
 
             if 1 == len_found:
                 return _munch(found[0])
+            # -- 2020-March-26, if  string function (like string-before or string-after) is used as xpath (instead of as xpath condition), lxml will return ElementUnicodeResult object, which will be converted wrongly by the next interation, we should return the original UnicodeResult
+            if isinstance(found, etree._ElementUnicodeResult):
+                return found
+
             return [_munch(this) for this in found]
 
         except:

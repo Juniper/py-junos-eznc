@@ -132,6 +132,14 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def _receive(self):
+        # On windows select.select throws io.UnsupportedOperation: fileno
+        # so use read function for windows serial COM ports
+        if hasattr(self._tty, 'port') and self._tty.port.startswith('COM'):
+            return self._receive_serial_win()
+        else:
+            return self._receive_serial()
+
+    def _receive_serial(self):
         """ process the XML response into an XML object """
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
@@ -153,10 +161,36 @@ class tty_netconf(object):
                     rxbuf = rxbuf + line
                     if _NETCONF_EOM in rxbuf:
                         break
+        return self._parse_buffer(rxbuf)
+
+    # -------------------------------------------------------------------------
+    # Read message from windows COM ports
+    # -------------------------------------------------------------------------
+
+    def _receive_serial_win(self):
+        """ process incoming data from windows port"""
+        rxbuf = PY6.EMPTY_STR
+        line = PY6.EMPTY_STR
+        while True:
+            line, lastline = self._tty.read().strip(), line
+            if not line:
+                continue
+            if _NETCONF_EOM in line or _NETCONF_EOM in lastline + line:
+                rxbuf = rxbuf + line
+                break
+            else:
+                rxbuf = rxbuf + line
+                if _NETCONF_EOM in rxbuf:
+                    break
+        return self._parse_buffer(rxbuf)
+
+    def _parse_buffer(self, rxbuf):
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
-            rxbuf.pop()
-
+            if rxbuf[-1] == _NETCONF_EOM:
+                rxbuf.pop()
+            else:
+                rxbuf[-1] = rxbuf[-1].split(_NETCONF_EOM)[0]
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
