@@ -3,6 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 import os
+
 from nose.plugins.attrib import attr
 import yaml
 
@@ -604,6 +605,7 @@ class TestFactoryCfgTable(unittest.TestCase):
 
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
+
         foo = open(fpath).read()
 
         if fname == 'user.xml':
