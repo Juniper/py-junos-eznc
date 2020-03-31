@@ -469,7 +469,7 @@ _FPCTTPQueueSizesTable:
   key_items:
     - High
     - Low
-  view: _FPCTTPQueueSizesView
+  # view: _FPCTTPQueueSizesView
 
 _FPCTTPQueueSizesTable2:
   title: TTP Receive Queue Sizes
@@ -477,7 +477,7 @@ _FPCTTPQueueSizesTable2:
   key_items:
     - High
     - Low
-  view: _FPCTTPQueueSizesView
+  # view: _FPCTTPQueueSizesView
 
 _FPCTTPQueueSizesView:
   fields:
