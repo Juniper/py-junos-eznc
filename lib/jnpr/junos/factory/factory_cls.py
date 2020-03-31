@@ -45,9 +45,8 @@ def FactoryOpTable(cmd, args=None, args_key=None, item=None,
 
 def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
                     key='name', view=None, table_name=None, title=None,
-                    delimiter=None, eval=None, **kwargs):
-    # if table_name is None:
-    #     table_name = "CMDTable." + cmd
+                    delimiter=None, eval=None, platform='juniper_junos', use_textfsm=False,
+                    **kwargs):
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
     if 'target' in kwargs:
@@ -60,6 +59,8 @@ def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
     new_cls.TITLE = title
     new_cls.DELIMITER = delimiter
     new_cls.EVAL = eval
+    new_cls.PLATFORM = platform
+    new_cls.USE_TEXTFSM = use_textfsm
     new_cls.__module__ = __name__.replace('factory_cls', 'CMDTable')
     return new_cls
 
@@ -67,8 +68,6 @@ def FactoryCMDTable(cmd, args=None, item=None, key_items=None,
 def FactoryCMDChildTable(title=None, regex=None,
                          key='name', delimiter=None, table_name=None, view=None,
                          key_items=None, item=None, eval=None):
-    # if table_name is None:
-    #     table_name = "CMDTable." + title
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.DELIMITER = delimiter
     new_cls.KEY = key
