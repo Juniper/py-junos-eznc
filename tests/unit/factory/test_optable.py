@@ -95,6 +95,29 @@ class TestFactoryOpTable(unittest.TestCase):
 
         self.assertRaises(ValueError, bad, 'bunk')
 
+    def test_generate_sax_parser_fields_with_many_slash(self):
+        yaml_data = """
+---
+bgpNeighborTable:
+    rpc: get-bgp-neighbor-information
+    item: bgp-peer
+    key: peer-address
+    view: bgpNeighborView
+bgpNeighborView:
+    fields:
+        prefix-count: bgp-option-information/prefix-limit/prefix-count
+        prefix-dummy: bgp-option-information/prefix-limit/prefix-dummy
+"""
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = bgpNeighborTable(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'bgp-peer')
+        self.assertEqual(len(etree.tostring(data)), len(
+            b'<bgp-peer><peer-address/><bgp-option-information><prefix-limit>'
+            b'<prefix-count/><prefix-dummy/></prefix-limit>'
+            b'</bgp-option-information></bgp-peer>'))
+
     def test_generate_sax_parser_item_with_many_slash(self):
         yaml_data = """
 ---

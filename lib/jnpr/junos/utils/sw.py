@@ -1045,7 +1045,7 @@ class SW(Util):
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also handles EX/QFX VC.
+        shut down.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before shutting down the device.
 
