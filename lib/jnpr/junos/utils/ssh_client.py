@@ -35,8 +35,10 @@ def open_ssh_client(dev):
     if dev._ssh_private_key_file is not None:
         kwargs['key_filename'] = dev._ssh_private_key_file
 
-    ssh_client.connect(hostname=dev._hostname,
-                       port=(22, int(dev._port))[dev._hostname == 'localhost'],
+    # pick hostname from .ssh config if any
+    hostname = config.get('hostname', dev._hostname)
+    ssh_client.connect(hostname=hostname,
+                       port=(22, int(dev._port))[hostname == 'localhost'],
                        username=dev._auth_user,
                        password=dev._auth_password,
                        sock=sock, **kwargs
