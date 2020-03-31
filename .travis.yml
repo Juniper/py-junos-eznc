@@ -13,6 +13,9 @@ matrix:
         - python: 3.7
           dist: xenial
           sudo: true
+        - python: 3.8
+          dist: xenial
+          sudo: true
 
 addons:
   apt:
@@ -24,7 +27,6 @@ addons:
 install:
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
-  - "pip install -U git+https://github.com/vnitinv/ncclient.git@junos-sax-parser"
 
 script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
