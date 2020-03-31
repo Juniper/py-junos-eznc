@@ -14,6 +14,7 @@ class TestTTYNetconf(unittest.TestCase):
 
     def setUp(self):
         self.tty_net = tty_netconf(MagicMock())
+        self.tty_net._tty.port = '/dev/tty'
 
     @patch('jnpr.junos.transport.tty_netconf.tty_netconf._receive')
     def test_open_at_shell_true(self, mock_rcv):
@@ -108,6 +109,7 @@ class TestTTYNetconf(unittest.TestCase):
     @patch('jnpr.junos.transport.tty_netconf.select.select')
     def test_tty_netconf_receive_XMLSyntaxError(self, mock_select):
         rx = MagicMock()
+
         rx.read_until.side_effect = iter([
             six.b('<rpc-reply>ok<dummy></rpc-reply>'),
             six.b('\n]]>]]>')])
