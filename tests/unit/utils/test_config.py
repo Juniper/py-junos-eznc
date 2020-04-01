@@ -822,6 +822,31 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(mock_exec.call_args[0][0].attrib,
                          {'format': 'text', 'action': 'patch'})
 
+    @patch('jnpr.junos.Device.execute')
+    def test_load_config_text(self, mock_exec):
+        textdata = """policy-options {
+            prefix-list TEST1-NETS {
+                100.0.0.0/24;
+            }
+            policy-statement TEST1-NETS {
+                term TEST1 {
+                    from {
+                        prefix-list TEST1-NETS;
+                    }
+                    then accept;
+                }
+                term REJECT {
+                    then reject;
+                }
+            }
+        }"""
+        self.conf.load(textdata, overwrite=True)
+        self.assertEqual(mock_exec.call_args[0][0].tag, 'load-configuration')
+        self.assertEqual(mock_exec.call_args[0][0].getchildren()[0].tag,
+                         'configuration-text')
+        self.assertEqual(mock_exec.call_args[0][0].attrib,
+                         {'format': 'text', 'action': 'override'})
+
     def _read_file(self, fname):
         fpath = os.path.join(os.path.dirname(__file__),
                              'rpc-reply', fname)
