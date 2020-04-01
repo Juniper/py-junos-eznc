@@ -261,9 +261,9 @@ class _RpcMetaExec(object):
 
         if contents is None and 'url' in options:
             pass
-        elif 'action' in options and (options['action'] == 'set'):
+        elif ('action' in options) and (options['action'] == 'set'):
             rpc.append(E('configuration-set', contents))
-        elif 'action' in options and options['action'] == 'patch':
+        elif ('action' in options) and (options['action'] == 'patch'):
             rpc.append(E('configuration-patch', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))
