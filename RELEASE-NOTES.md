@@ -1,3 +1,18 @@
+## Release 2.3.2 - 1 APRIL 2020
+### Features Added
+- Added TableView Null Key support #983
+- Added timeout support for commit_check() #998
+- Added Win serial COM support #1000
+- Added load patch support #1001
+- Added textfsm support for table/view #1009
+
+### Bugs fixed:
+- Fixed table/view issue w.r.t to get() call #981
+- Fixed documentation typo #986
+- Handled sax parser input for nested fields #997
+- Fixed outbound ssh issue #1007
+- Fixed xpath issue when defined with a string function #1008
+
 ## Release 2.3.1 - 10 December 2019
 ### Features Added 
 - None
