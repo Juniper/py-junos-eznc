@@ -1,4 +1,4 @@
-## Release 2.3.2 - 1 APRIL 2020
+## Release 2.4.0 - 1 APRIL 2020
 ### Features Added
 - Added TableView Null Key support #983
 - Added timeout support for commit_check() #998
