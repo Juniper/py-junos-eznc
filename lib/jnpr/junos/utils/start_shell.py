@@ -138,7 +138,7 @@ class StartShell(object):
         elif this != _SHELL_PROMPT:
             if re.search(r'{}\s?$'.format(this), got) is not None:
                 self.send('echo $?')
-                rc = ''.join(self.wait_for(this)
+                rc = ''.join(self.wait_for(this))
                 self.last_ok = rc.find('\r\n0\r\n') > 0
         elif re.search(r'{}\s?$'.format(_SHELL_PROMPT), got) is not None:
             # use $? to get the exit code of the command
