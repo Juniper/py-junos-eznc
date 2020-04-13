@@ -756,6 +756,8 @@ class TestSW(unittest.TestCase):
         self.assertEqual(eval(self.sw.rollback()), msg)
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_sw_rollback_multi_exception(self, mock_execute):
         fname = 'request-package-rollback-multi-error.xml'
         mock_execute.side_effect = self._read_file(fname)

@@ -3,6 +3,7 @@ import unittest
 from nose.plugins.attrib import attr
 import ftplib
 import sys
+import os
 
 from jnpr.junos import Device
 import jnpr.junos.utils.ftp
@@ -121,15 +122,18 @@ class TestFtp(unittest.TestCase):
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_full_path(self, mock_open, mock_ftpstore):
-        self.assertEqual(self.dev_ftp.put(local_file="/var/tmp/conf.txt",
-                                          remote_path="/var/tmp/test.txt"), True)
+        self.assertEqual(self.dev_ftp.put(local_file=os.path.abspath(
+            "/var/tmp/conf.txt"),
+                                          remote_path=os.path.abspath(
+                                              "/var/tmp/test.txt")), True)
         self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
-                         'STOR /var/tmp/test.txt')
+                         'STOR '+os.path.abspath("/var/tmp/test.txt"))
 
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_path_create(self, mock_open, mock_ftpstore):
         self.assertEqual(self.dev_ftp.put(local_file="conf.txt",
-                                          remote_path="/var/tmp"), True)
+                                          remote_path=os.path.abspath(
+                                              "/var/tmp")), True)
         self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
-                         'STOR /var/tmp/conf.txt')
+                         'STOR '+os.path.abspath("/var/tmp/conf.txt"))
