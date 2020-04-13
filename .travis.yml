@@ -12,8 +12,13 @@ matrix:
         - python: 3.8
           dist: xenial
         - os: windows
-          language: sh
+          language: shell
           python: 3.7
+          before_install:
+            - choco install python3 --version=3.7.4
+          env:
+            - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+            - TRAVIS_PYTHON_VERSION=3.7
 addons:
   apt:
     packages:
