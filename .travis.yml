@@ -11,7 +11,9 @@ matrix:
           dist: xenial
         - python: 3.8
           dist: xenial
-
+        - os: windows
+          language: sh
+          python: 3.7
 addons:
   apt:
     packages:
