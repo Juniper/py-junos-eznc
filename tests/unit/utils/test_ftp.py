@@ -17,6 +17,8 @@ else:
 
 
 @attr('unit')
+@unittest.skipIf(sys.platform == 'win32',
+                 "will work for windows in coming days")
 class TestFtp(unittest.TestCase):
 
     @patch('ftplib.FTP.connect')
@@ -119,8 +121,6 @@ class TestFtp(unittest.TestCase):
         self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR /var/tmp/conf.txt')
 
-    @unittest.skipIf(sys.platform == 'win32',
-                     "will work for windows in coming days")
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_full_path(self, mock_open, mock_ftpstore):
@@ -131,8 +131,6 @@ class TestFtp(unittest.TestCase):
         self.assertEqual(tuple(mock_ftpstore.call_args)[1]['cmd'],
                          'STOR '+os.path.abspath("/var/tmp/test.txt"))
 
-    @unittest.skipIf(sys.platform == 'win32',
-                     "will work for windows in coming days")
     @patch('ftplib.FTP.storbinary')
     @patch(builtin_string + '.open')
     def test_ftp_upload_file_rem_path_create(self, mock_open, mock_ftpstore):
