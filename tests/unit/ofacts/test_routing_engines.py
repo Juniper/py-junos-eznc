@@ -5,6 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import os
+import sys
 
 from jnpr.junos import Device
 from jnpr.junos.ofacts.routing_engines import facts_routing_engines as routing_engines
@@ -30,6 +31,8 @@ class TestRoutingEngines(unittest.TestCase):
         self.vcf = False
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_multi_re_vc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.mode = 'multi'
@@ -52,6 +55,8 @@ class TestRoutingEngines(unittest.TestCase):
         self.assertEqual(self.facts['RE1']['mastership_state'], 'backup')
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_mixed_mode_vcf(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.mode = 'multi'
