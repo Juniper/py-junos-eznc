@@ -11,6 +11,7 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
+import warnings
 
 # 3rd-party modules
 from lxml.builder import E
@@ -291,6 +292,8 @@ class SW(Util):
         return self._parse_pkgadd_response(rsp)
 
     def _parse_pkgadd_response(self, rsp):
+        warnings.warn("sw.install interface bool response is going to change "
+                      "in next release.", PendingDeprecationWarning)
         got = rsp.getparent()
         # If <package-result> is not present, then assume success.
         # That is, assume <package-result>0</package-result>
