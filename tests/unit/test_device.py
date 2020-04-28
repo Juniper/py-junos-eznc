@@ -680,6 +680,8 @@ class TestDevice(unittest.TestCase):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertRaises(RpcError, self.dev.rpc.get_rpc_error)
 
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_device_execute_permission_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertRaises(

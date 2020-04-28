@@ -134,7 +134,7 @@ class tty_netconf(object):
     def _receive(self):
         # On windows select.select throws io.UnsupportedOperation: fileno
         # so use read function for windows serial COM ports
-        if hasattr(self._tty, 'port') and self._tty.port.startswith('COM'):
+        if hasattr(self._tty, 'port') and str(self._tty.port).startswith('COM'):
             return self._receive_serial_win()
         else:
             return self._receive_serial()

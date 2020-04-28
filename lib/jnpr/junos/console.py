@@ -133,6 +133,7 @@ class Console(_Connection):
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
                                                     'local': False})
+        self._conn = None
         self._j2ldr = _Jinja2ldr
         if self._fact_style == 'old':
             self.facts = self.ofacts
@@ -237,6 +238,7 @@ class Console(_Connection):
             logger.info('facts: retrieving device facts...')
             self.facts_refresh()
             self.results['facts'] = self.facts
+        self._conn = self._tty
         return self
 
     def close(self, skip_logout=False):
@@ -333,7 +335,7 @@ class Console(_Connection):
     # -----------------------------------------------------------------------
 
     def __enter__(self):
-        self._conn = self.open()
+        self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
