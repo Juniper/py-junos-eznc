@@ -1,3 +1,13 @@
+## Release 2.4.1 - 29 APRIL 2020
+### Features Added
+- None
+
+### Bugs fixed:
+- Latest `textfsm` doesn’t support in windows. Hence, supporting `textfsm 0.4.1` for windows user #1019
+- Convert `port` argument when passed  as `str` to `int` data type #1020
+- Return type of `sw.install` function going to change in the upcoming major release. 
+  So, added a deprecation warning in `sw.install` #1025
+
 ## Release 2.4.0 - 1 APRIL 2020
 ### Features Added
 - Added TableView Null Key support #983
