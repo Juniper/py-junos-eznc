@@ -11,6 +11,8 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
+import warnings
+warnings.simplefilter('default', PendingDeprecationWarning)
 
 # 3rd-party modules
 from lxml.builder import E
@@ -797,6 +799,8 @@ class SW(Util):
             * ``True`` when the installation is successful
             * ``False`` otherwise
         """
+        warnings.warn("sw.install interface bool response is going to change "
+                      "in next release.", PendingDeprecationWarning)
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
