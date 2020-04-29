@@ -5,6 +5,7 @@ import unittest
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import os
+import sys
 from lxml import etree
 
 from jnpr.junos import Device
@@ -57,6 +58,8 @@ class TestGetVirtualChassisInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['vc_master'], None)
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_vc_mmvcf(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_vc_mmvcf
         self.assertEqual(self.dev.facts['vc_capable'], True)
@@ -65,6 +68,8 @@ class TestGetVirtualChassisInformation(unittest.TestCase):
         self.assertEqual(self.dev.facts['vc_master'], '0')
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_vc_mmvc(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_vc_mmvc
         self.assertEqual(self.dev.facts['vc_capable'], True)
