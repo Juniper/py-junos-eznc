@@ -1,4 +1,8 @@
-## Release 2.4.1 - 29 APRIL 2020
+## Release 2.4.2.dev0 - 29 APRIL 2020
+## Features Added
+
+## Bugs fixed
+
 ### Features Added
 - None
 

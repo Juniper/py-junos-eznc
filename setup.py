@@ -14,7 +14,7 @@ if sys.platform == 'win32':
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="2.4.1",
+    version="2.4.2.dev0",
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
