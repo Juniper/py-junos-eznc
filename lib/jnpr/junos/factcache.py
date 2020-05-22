@@ -1,13 +1,14 @@
-import collections
 import warnings
 from pprint import pformat
+
+from six.moves.collections_abc import MutableMapping
 
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc
 import jnpr.junos.exception
 
 
-class _FactCache(collections.MutableMapping):
+class _FactCache(MutableMapping):
     """
     A dictionary-like object which performs on-demand fact gathering.
 

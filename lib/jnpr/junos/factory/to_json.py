@@ -2,7 +2,8 @@ from jnpr.junos.jxml import strip_comments_transform
 import json
 from lxml import etree
 from copy import deepcopy
-import collections
+
+from six.moves.collections_abc import MutableMapping
 
 
 class TableJSONEncoder(json.JSONEncoder):
@@ -63,7 +64,7 @@ class PyEzJSONEncoder(json.JSONEncoder):
             # JSON does not support comments - strip them
             obj = strip_comments_transform(deepcopy(obj)).getroot()
             _, obj = recursive_dict(obj)
-        elif isinstance(obj, collections.MutableMapping):
+        elif isinstance(obj, MutableMapping):
             obj = {k: v for k, v in obj.items()}
         else:
             obj = super(PyEzJSONEncoder, self).default(obj)
