@@ -143,7 +143,7 @@ class _RpcMetaExec(object):
         # in case of model provided top level should be data
         # return response
         if model and filter_xml is None and options.get('format') \
-                is not 'json':
+                != 'json':
             response = response.getparent()
             response.tag = 'data'
         return response

@@ -218,7 +218,7 @@ class Test_RpcMetaExec(unittest.TestCase):
             self.dev.rpc.get_config(options={'format': 'json'})
         except JSONLoadError as ex:
             self.assertTrue(re.search(
-                "Expecting \'?,\'? delimiter: line 17 column 39 \(char 516\)",
+                "Expecting \'?,\'? delimiter: line 17 column 39 \\(char 516\\)",
                 ex.ex_msg) is not None)
 
     def _mock_manager(self, *args, **kwargs):

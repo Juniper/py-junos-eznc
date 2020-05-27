@@ -71,7 +71,7 @@ class TestStartShell(unittest.TestCase):
         JUNOS Services Deep Packet Inspection package [15.1
         ---(more)---
         """
-        self.assertTrue(self.shell.wait_for('---\(more\s?\d*%?\)---\n\s*|%')[0]
+        self.assertTrue(self.shell.wait_for('---\\(more\\s?\\d*%?\\)---\n\\s*|%')[0]
                         in self.shell._chan.recv.return_value)
 
     @patch('jnpr.junos.utils.start_shell.StartShell.open')
@@ -92,7 +92,7 @@ class TestStartShell(unittest.TestCase):
         ---(more)---
         """]
         self.assertTrue(self.shell.run('show version',
-                                       '---\(more\s?\d*%?\)---\n\s*|%')[0])
+                                       '---\\(more\\s?\\d*%?\\)---\n\\s*|%')[0])
 
     @patch('jnpr.junos.utils.start_shell.StartShell.wait_for')
     def test_startshell_run_this_None(self, mock_wait_for):

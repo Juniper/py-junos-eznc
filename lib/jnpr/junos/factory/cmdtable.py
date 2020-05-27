@@ -46,7 +46,7 @@ class CMDTable(object):
     # -------------------------------------------------------------------------
 
     def get(self, *vargs, **kvargs):
-        """
+        r"""
         Retrieve the XML (string blob under <output> tag of table data from the
         Device instance and returns back the Table instance - for call-chaining
         purposes.
@@ -139,7 +139,7 @@ class CMDTable(object):
                         self.data = self.data.replace("GOT: ", "")
                 except RpcError:
                     with StartShell(self.D) as ss:
-                        ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
+                        ret = ss.run('cprod -A {} -c "{}"'.format(self.TARGET,
                                                               self.GET_CMD))
                         if ret[0]:
                             self.data = ret[1]
@@ -272,10 +272,10 @@ class CMDTable(object):
         source = self.D.hostname if self.D is not None else self._path
 
         if self.data is None:
-            return "%s:%s - Table empty" % (cls_name, source)
+            return "{}:{} - Table empty".format(cls_name, source)
         else:
             n_items = len(self.keys())
-            return "%s:%s: %s items" % (cls_name, source, n_items)
+            return "{}:{}: {} items".format(cls_name, source, n_items)
 
     def __len__(self):
         self._assert_data()
@@ -351,7 +351,7 @@ class CMDTable(object):
         try:
             cli_table.ParseCmd(raw, attrs, template)
         except ntc_parse.clitable.CliTableError as ex:
-            logger.error('Unable to parse command "%s" on platform %s' % (
+            logger.error('Unable to parse command "{}" on platform {}'.format(
                 command, platform))
             raise ex
         return self._filter_output(cli_table)

@@ -58,7 +58,7 @@ class FTP(ftplib.FTP):
                     remote_file = '/tmp/' + mat.group(1)
                 else:
                     if re.search('^.*/(.*)$', remote_path) and \
-                            re.search('\.\w+$', remote_path):
+                            re.search(r'\.\w+$', remote_path):
                         remote_file = remote_path
                         # Looks like remote path is given as file location
                     else:

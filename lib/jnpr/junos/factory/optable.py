@@ -21,7 +21,7 @@ class OpTable(Table):
 
     @checkSAXParserDecorator
     def get(self, *vargs, **kvargs):
-        """
+        r"""
         Retrieve the XML table data from the Device instance and
         returns back the Table instance - for call-chaining purposes.
 
