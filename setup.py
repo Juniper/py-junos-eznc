@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import sys
+import versioneer
 
 # parse requirements
 req_lines = [line.strip() for line in open(
