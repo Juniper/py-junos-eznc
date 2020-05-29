@@ -10,6 +10,7 @@ install_reqs = list(filter(None, req_lines))
 # should be removed when textfsm releases >=1.1.1
 if sys.platform == 'win32':
     install_reqs.append('textfsm==0.4.1')
+    install_reqs.append('ntc-templates==1.4.1')
 
 setup(
     name="junos-eznc",
