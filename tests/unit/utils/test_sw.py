@@ -2,7 +2,10 @@ from __future__ import print_function
 import os
 import sys
 from six import StringIO
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 from contextlib import contextmanager
 from jnpr.junos import Device

@@ -1,5 +1,8 @@
 import sys
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch
 from jnpr.junos.transport.tty_telnet import Telnet
