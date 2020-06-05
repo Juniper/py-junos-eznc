@@ -9,6 +9,9 @@ install_reqs = list(filter(None, req_lines))
 # refer: https://github.com/Juniper/py-junos-eznc/issues/1015
 # should be removed when textfsm releases >=1.1.1
 if sys.platform == 'win32':
+    if 'ntc_templates' in install_reqs:
+        install_reqs.remove("ntc_templates")
+        install_reqs.append("ntc_templates==1.4.1")
     install_reqs.append('textfsm==0.4.1')
 
 setup(
