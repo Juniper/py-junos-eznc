@@ -6,4 +6,3 @@ nose         # http://nose.readthedocs.org/en/latest/
 pep8	     # https://github.com/jcrocholl/pep8
 pyflakes	 # https://launchpad.net/pyflakes
 coveralls	 # https://coveralls.io/
-unittest2>=0.5.1  # https://pypi.python.org/pypi/unittest2

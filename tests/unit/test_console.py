@@ -1,4 +1,7 @@
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from jnpr.junos.utils.config import Config
 from nose.plugins.attrib import attr
 from mock import patch, MagicMock, call
