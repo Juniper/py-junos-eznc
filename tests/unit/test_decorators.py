@@ -1,4 +1,7 @@
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 
 from lxml.etree import XML
