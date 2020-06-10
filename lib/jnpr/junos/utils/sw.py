@@ -799,8 +799,6 @@ class SW(Util):
             * ``True`` when the installation is successful
             * ``False`` otherwise
         """
-        warnings.warn("sw.install interface bool response is going to change "
-                      "in next release.", PendingDeprecationWarning)
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
@@ -865,7 +863,7 @@ class SW(Util):
                             checksum_algorithm=checksum_algorithm,
                             force_copy=force_copy)
                         if copy_ok is False:
-                            return False
+                            return False,"File couldn't be copied"
                     pkg = remote_path + '/' + path.basename(pkg)
                 remote_pkg_set.append(pkg)
         else:
@@ -888,7 +886,7 @@ class SW(Util):
                     v_ok = self.validate(remote_package, issu, nssu,
                                          dev_timeout=timeout)
                     if v_ok is not True:
-                        return v_ok
+                        return v_ok,"Package validation failed"
             else:
                 if vmhost is True:
                     # Need to pass the no_validate option via kwargs.

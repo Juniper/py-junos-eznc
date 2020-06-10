@@ -575,12 +575,14 @@ class TestSW(unittest.TestCase):
     @patch('jnpr.junos.utils.sw.SW.safe_copy')
     def test_sw_safe_install_copy_fail(self, mock_copy):
         mock_copy.return_value = False
-        self.assertFalse(self.sw.install('file'))
+        output = self.sw.install('file')
+        self.assertFalse(output[0])
 
     @patch('jnpr.junos.utils.sw.SW.validate')
     def test_sw_install_validate(self, mock_validate):
         mock_validate.return_value = False
-        self.assertFalse(self.sw.install('file', validate=True, no_copy=True))
+        output = self.sw.install('file', validate=True, no_copy=True)
+        self.assertFalse(output[0])
 
     @patch(builtin_string + '.print')
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
@@ -671,12 +673,12 @@ class TestSW(unittest.TestCase):
         self.sw._RE_list = ('version_RE0', 'version_RE1')
         with patch('jnpr.junos.utils.sw.SW.local_md5',
                    MagicMock(return_value='d41d8cd98f00b204e9800998ecf8427e')):
-            self.assertFalse(
-                self.sw.install(
+            output = self.sw.install(
                     pkg_set=[
                         'install.tgz',
                         'install.tgz'],
-                    cleanfs=False))
+                    cleanfs=False)
+            self.assertFalse(output[0])
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_install_mixed_vc_ValueError(self, mock_pkgadd):
@@ -853,7 +855,8 @@ class TestSW(unittest.TestCase):
     def test_sw_check_pending_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = 'test.tgz'
-        self.assertFalse(self.sw.install(package))
+        output = self.sw.install(package)
+        self.assertFalse(output[0])
 
     @patch('jnpr.junos.utils.sw.SW.pkgadd')
     def test_sw_check_pending_install_RpcError_continue(self, mock_pkgadd):
