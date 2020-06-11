@@ -31,7 +31,9 @@ install:
   - "pip install -r requirements.txt"
   - "pip install ."
 
-script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
+script:
+  - black --check .
+  - nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
 after_success:
   coveralls

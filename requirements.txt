@@ -11,3 +11,4 @@ yamlordereddictloader
 pyparsing
 transitions
 ntc_templates
+black
