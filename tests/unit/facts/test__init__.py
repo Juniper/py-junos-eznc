@@ -1,7 +1,10 @@
 __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 import importlib
 import sys

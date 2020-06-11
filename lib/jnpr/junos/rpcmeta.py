@@ -263,6 +263,8 @@ class _RpcMetaExec(object):
             pass
         elif ('action' in options) and (options['action'] == 'set'):
             rpc.append(E('configuration-set', contents))
+        elif ('action' in options) and (options['action'] == 'patch'):
+            rpc.append(E('configuration-patch', contents))
         elif ('format' in options) and (options['format'] == 'text'):
             rpc.append(E('configuration-text', contents))
         elif ('format' in options) and (options['format'] == 'json'):

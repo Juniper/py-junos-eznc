@@ -10,15 +10,15 @@ __all__ = []
 
 class MetaPathFinder(object):
     def find_module(self, fullname, path=None):
-        mod = fullname.split('.')[-1]
-        if mod in [os.path.splitext(i)[0] for i in os.listdir(
-                os.path.dirname(__file__))]:
-            return MetaPathLoader()
+        if fullname.startswith('jnpr.junos'):
+            mod = fullname.split('.')[-1]
+            if mod in [os.path.splitext(i)[0] for i in os.listdir(
+                    os.path.dirname(__file__))]:
+                return MetaPathLoader()
 
 
 class MetaPathLoader(object):
     def load_module(self, fullname):
-        # print('load_module {}'.format(fullname))
         if fullname in sys.modules:
             return sys.modules[fullname]
         mod = fullname.split('.')[-1]

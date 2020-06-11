@@ -1,0 +1,35 @@
+---
+IthrottleTable:
+  command: show ithrottle
+  target: Null
+  key:
+    - Name
+  view: IthrottleView
+
+IthrottleView:
+  columns:
+    id: ID
+    usage: "Usage %"
+    configuration-state: "Cfg State"
+    operating-state: "Oper State"
+    name: Name
+
+IthrottleIDTable:
+  command: show ithrottle id {{ id }}
+  args:
+    id: 0
+  item: '*'
+  target: Null
+  view: IthrottleIDView
+
+IthrottleIDView:
+  regex:
+    min-usage: 'Min Usage Perc:    (\d+\.\d+)'
+    max-usage: 'Max Usage Perc:    (\d+\.\d+)'
+    usage-enable: 'AdjustUsageEnable: (\d)'
+  fields:
+    throttle-stats: _ThrottleStatsTable
+
+_ThrottleStatsTable:
+  title: Throttle Stats
+  delimiter: ":"

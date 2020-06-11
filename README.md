@@ -66,7 +66,7 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 
 ## PIP
 
-Installation requires Python 2.7 or >=3.4 and associated `pip` tool
+Installation requires Python 2.7 or >=3.5 and associated `pip` tool
 
     pip install junos-eznc
 
@@ -140,6 +140,9 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 [Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
 
+* v2.4.1: [Nitin Kumar](https://github.com/vnitinv)
+* v2.4.0: [Nitin Kumar](https://github.com/vnitinv)
+* v2.3.0: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Dinesh Babu](https://github.com/dineshbaburam91), [Chris Jenn](https://github.com/ipmonk), [Shigechika](https://github.com/shigechika)
 * v2.2.1: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Dinesh Babu](https://github.com/dineshbaburam91), [Marcel Wiget](https://github.com/mwiget), [John Tishey](https://github.com/jtishey), [Alex Carp](https://github.com/carpalex), [Cory Councilman](https://github.com/dragonballbw3) 
 * v2.2.0: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Marek](https://github.com/mzbroch), [Marcel Wiget](https://github.com/mwiget)
 * v2.1.9: [Dinesh Babu](https://github.com/dineshbaburam91), [Nitin Kumar](https://github.com/vnitinv), [Jacob Neil Taylor](https://github.com/jacobneiltaylor), [Raja Shekar Mekala](https://github.com/rsmekala)

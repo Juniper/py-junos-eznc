@@ -2,7 +2,10 @@ from __future__ import print_function
 import os
 import sys
 from six import StringIO
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 from contextlib import contextmanager
 from jnpr.junos import Device
@@ -756,6 +759,8 @@ class TestSW(unittest.TestCase):
         self.assertEqual(eval(self.sw.rollback()), msg)
 
     @patch('jnpr.junos.Device.execute')
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_sw_rollback_multi_exception(self, mock_execute):
         fname = 'request-package-rollback-multi-error.xml'
         mock_execute.side_effect = self._read_file(fname)
@@ -844,6 +849,17 @@ class TestSW(unittest.TestCase):
         self.sw._multi_VC = False
         self.assertTrue('Shutdown NOW' in self.sw.poweroff())
 
+    @patch('jnpr.junos.Device.execute')
+    def test_sw_check_pending_install(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = 'test.tgz'
+        self.assertFalse(self.sw.install(package))
+
+    @patch('jnpr.junos.utils.sw.SW.pkgadd')
+    def test_sw_check_pending_install_RpcError_continue(self, mock_pkgadd):
+        mock_pkgadd.return_value = True
+        self.assertTrue(self.sw.install('test.tgz', no_copy=True))
+
     def _myprogress(self, dev, report):
         pass
 
@@ -889,6 +905,22 @@ class TestSW(unittest.TestCase):
         elif args:
             if args[0].find('at') is not None:
                 return self._read_file('request-reboot-at.xml')
+            elif self._testMethodName == 'test_sw_check_pending_install':
+                    if args[0].text == 'request-package-check-pending-install':
+                        return self._read_file(
+                            'request-package-check-pending-install-error.xml')
+            elif self._testMethodName == 'test_sw_check_pending_install_RpcError_continue':
+                    if args[0].text == 'request-package-check-pending-install':
+                        xml = '''<rpc-error>
+                        <error-type>protocol</error-type>
+                        <error-tag>operation-failed</error-tag>
+                        <error-severity>error</error-severity>
+                        <error-message>syntax error</error-message>
+                        <error-info>
+                        <bad-element>request-package-check-pendings-install</bad-element>
+                        </error-info>
+                        </rpc-error>'''
+                        return RpcError(rsp=etree.fromstring(xml))
             else:
                 return self._read_file(args[0].tag + '.xml')
 

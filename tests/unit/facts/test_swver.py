@@ -1,7 +1,11 @@
 __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
-import unittest2 as unittest
+import six
+try:
+    import unittest2 as unittest
+except:
+    import unittest
 from nose.plugins.attrib import attr
 
 from jnpr.junos.facts.swver import version_info, get_facts
@@ -9,17 +13,18 @@ from jnpr.junos.facts.swver import version_info, get_facts
 
 @attr('unit')
 class TestVersionInfo(unittest.TestCase):
-
+    if six.PY2:
+        assertCountEqual = unittest.TestCase.assertItemsEqual
     def test_version_info_after_type_len_else(self):
         self.assertEqual(version_info('12.1X46-D10').build, None)
 
     def test_version_info_X_type_non_hyphenated(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             version_info('11.4X12.2'),
             [('build', 2), ('major', (11, 4)), ('minor', '12'), ('type', 'X')])
 
     def test_version_info_X_type_non_hyphenated_nobuild(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             version_info('11.4X12'),
             [('build', None), ('major', (11, 4)), ('minor', '12'), ('type', 'X')])
 
@@ -61,12 +66,12 @@ class TestVersionInfo(unittest.TestCase):
             "build: 5\nmajor: !!python/tuple\n- 11\n- 4\nminor: '7'\ntype: R\n")
 
     def test_version_iter(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             version_info('11.4R7.5'),
             [('build', 5), ('major', (11, 4)), ('minor', '7'), ('type', 'R')])
 
     def test_version_feature_velocity(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             version_info('15.4F7.5'),
             [('build', 5), ('major', (15, 4)), ('minor', '7'), ('type', 'F')])
 

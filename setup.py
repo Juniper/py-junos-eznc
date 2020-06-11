@@ -1,17 +1,25 @@
 from setuptools import setup, find_packages
 import sys
+import versioneer
 
 # parse requirements
 req_lines = [line.strip() for line in open(
     'requirements.txt').readlines()]
 install_reqs = list(filter(None, req_lines))
-if sys.version_info[:2] == (2, 6):
-    install_reqs.append('importlib>=1.0.3')
+
+# refer: https://github.com/Juniper/py-junos-eznc/issues/1015
+# should be removed when textfsm releases >=1.1.1
+if sys.platform == 'win32':
+    if 'ntc_templates' in install_reqs:
+        install_reqs.remove("ntc_templates")
+        install_reqs.append("ntc_templates==1.4.1")
+    install_reqs.append('textfsm==0.4.1')
 
 setup(
     name="junos-eznc",
     namespace_packages=['jnpr'],
-    version="2.2.2.dev0",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),

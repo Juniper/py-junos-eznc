@@ -2,37 +2,44 @@ import re
 import copy
 # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
 
+# stdlib
+import os
+from inspect import isclass
+from lxml import etree
+import json
+
 # local
 from jnpr.junos.exception import RpcError
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
-# stdlib
-from inspect import isclass
-from lxml import etree
-
-import json
-
 from jinja2 import Template
+from ntc_templates import parse as ntc_parse
+
+import logging
+logger = logging.getLogger("jnpr.junos.factory.cmdtable")
 
 
 class CMDTable(object):
 
-    def __init__(self, dev=None, output=None, path=None):
+    def __init__(self, dev=None, raw=None, path=None, template_dir=None):
         """
         :dev: Device instance
-        :output: string blob of the command output
+        :raw: string blob of the command output
         :path: file path to XML, to be used rather than :dev:
+        :template_dir: To look for textfsm templates in this folder first
         """
         self._dev = dev
-        self.xml = output
+        self.xml = None
         self.view = None
         self.ITEM_FILTER = 'name'
         self._key_list = []
         self._path = path
         self._parser = None
         self.output = None
+        self.data = raw
+        self.template_dir = template_dir
 
     # -------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -69,6 +76,8 @@ class CMDTable(object):
         """
         self._clearkeys()
 
+        if self._path and self.data:
+            raise AttributeError('path and data are mutually exclusive')
         if self._path is not None:
             # for loading from local file-path
             with open(self._path, 'r') as fp:
@@ -76,9 +85,6 @@ class CMDTable(object):
             if self.data.startswith('<output>') and self.data.endswith(
                     '</output>'):
                 self.data = etree.fromstring(self.data).text
-            sm = StateMachine(self)
-            self.output = sm.parse(self.data.splitlines())
-            return self
 
         if 'target' in kvargs:
             self.TARGET = kvargs['target']
@@ -95,54 +101,60 @@ class CMDTable(object):
                                                                 str) else \
                 kvargs['filters']
 
+        cmd_args = self.CMD_ARGS.copy()
         if 'args' in kvargs and isinstance(kvargs['args'], dict):
-            self.CMD_ARGS.update(kvargs['args'])
+            cmd_args.update(kvargs['args'])
 
-        if len(self.CMD_ARGS) > 0:
-            self.GET_CMD = Template(self.GET_CMD).render(**self.CMD_ARGS)
+        if len(cmd_args) > 0:
+            self.GET_CMD = Template(self.GET_CMD).render(**cmd_args)
 
-        # execute the Junos RPC to retrieve the table
-        if hasattr(self, 'TARGET'):
-            if self.TARGET is None:
-                raise ValueError('"target" value not provided')
-            rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
-                        'timeout': '0'}
-            try:
-                self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
+        if self.data is None:
+            # execute the Junos RPC to retrieve the table
+            if hasattr(self, 'TARGET'):
+                if self.TARGET is None:
+                    raise ValueError('"target" value not provided')
+                rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
+                            'timeout': '0'}
+                try:
+                    self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
+                    self.data = self.xml.text
+                    ver_info = self._dev.facts.get('version_info')
+                    if ver_info and ver_info.major[0] <= 15:
+                        # Junos <=15.x output has output something like below
+                        #
+                        # <rpc-reply>
+                        # <output>
+                        # SENT: Ukern command: show memory
+                        # GOT:
+                        # GOT: ID      Base      Total(b)       Free(b)     Used(b)
+                        # GOT: --  --------     ---------     ---------   ---------
+                        # GOT:  0  44e72078    1882774284    1689527364   193246920
+                        # GOT:  1  b51ffb88      67108860      57651900     9456960
+                        # GOT:  2  bcdfffe0      52428784      52428784           0
+                        # GOT:  3  b91ffb88      62914556      62914556           0
+                        # LOCAL: End of file
+                        # </output>
+                        # </rpc-reply>
+                        # hence need to do cleanup
+                        self.data = self.data.replace("GOT: ", "")
+                except RpcError:
+                    with StartShell(self.D) as ss:
+                        ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
+                                                              self.GET_CMD))
+                        if ret[0]:
+                            self.data = ret[1]
+            else:
+                self.xml = self.RPC.cli(self.GET_CMD)
                 self.data = self.xml.text
-                ver_info = self._dev.facts.get('version_info')
-                if ver_info and ver_info.major[0] <= 15:
-                    # Junos <=15.x output has output something like below
-                    #
-                    # <rpc-reply>
-                    # <output>
-                    # SENT: Ukern command: show memory
-                    # GOT:
-                    # GOT: ID      Base      Total(b)       Free(b)     Used(b)
-                    # GOT: --  --------     ---------     ---------   ---------
-                    # GOT:  0  44e72078    1882774284    1689527364   193246920
-                    # GOT:  1  b51ffb88      67108860      57651900     9456960
-                    # GOT:  2  bcdfffe0      52428784      52428784           0
-                    # GOT:  3  b91ffb88      62914556      62914556           0
-                    # LOCAL: End of file
-                    # </output>
-                    # </rpc-reply>
-                    # hence need to do cleanup
-                    self.data = self.data.replace("GOT: ", "")
-            except RpcError:
-                with StartShell(self.D) as ss:
-                    ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
-                                                          self.GET_CMD))
-                    if ret[0]:
-                        self.data = ret[1]
+
+        if self.USE_TEXTFSM:
+            self.output = self._parse_textfsm(platform=self.PLATFORM,
+                                              command=self.GET_CMD,
+                                              raw=self.data)
         else:
-            self.xml = self.RPC.cli(self.GET_CMD)
-            self.data = self.xml.text
-
-        # state machine
-        sm = StateMachine(self)
-
-        self.output = sm.parse(self.data.splitlines())
+            # state machine
+            sm = StateMachine(self)
+            self.output = sm.parse(self.data.splitlines())
 
         # returning self for call-chaining purposes, yo!
         return self
@@ -296,3 +308,112 @@ class CMDTable(object):
     def __contains__(self, key):
         """ membership for use with 'in' """
         return bool(key in self.keys())
+
+    # ------------------------------------------------------------------------
+    # textfsm
+    # ------------------------------------------------------------------------
+
+    def _parse_textfsm(self, platform=None, command=None, raw=None):
+        """
+        textfsm returns list of dict, make it JSON/dict
+
+        :param platform: vendor platform, for ex cisco_xr
+        :param command: cli command to be parsed
+        :param raw: string blob output from the cli command execution
+        :return: dict of parsed data.
+        """
+        attrs = dict(
+            Command=command,
+            Platform=platform
+        )
+
+        template = None
+        template_dir = None
+        if self.template_dir is not None:
+            # we dont need index file for lookup
+            index = None
+            template_path = os.path.join(self.template_dir,
+                                         '{}_{}.textfsm'.format(
+                                             platform,
+                                             '_'.join(command.split())))
+            if not os.path.exists(template_path):
+                msg = 'Template file %s missing' % template_path
+                logger.error(msg)
+                raise FileNotFoundError(msg)
+            else:
+                template = template_path
+                template_dir = self.template_dir
+        if template_dir is None:
+            index = 'index'
+            template_dir = ntc_parse._get_template_dir()
+
+        cli_table = ntc_parse.clitable.CliTable(index, template_dir)
+        try:
+            cli_table.ParseCmd(raw, attrs, template)
+        except ntc_parse.clitable.CliTableError as ex:
+            logger.error('Unable to parse command "%s" on platform %s' % (
+                command, platform))
+            raise ex
+        return self._filter_output(cli_table)
+
+    def _filter_output(self, cli_table):
+        """
+        textfsm return list of list, covert it into more consumable format
+
+        :param cli_table: CLiTable object from textfsm
+        :return: dict of key, fields and its values, list of dict when key is None
+        """
+        self._set_key(cli_table)
+
+        fields = self.VIEW.FIELDS if self.VIEW is not None else {}
+        reverse_fields = {val: key for key, val in fields.items()}
+        if self.KEY is None:
+            cli_table_size = cli_table.size
+            if cli_table_size > 1:
+                raise KeyError("Key is Mandatory for parsed o/p of %s "
+                               "length" % cli_table_size)
+            elif cli_table_size == 1:
+                temp_dict = self._parse_row(cli_table[1], cli_table,
+                                            reverse_fields)
+                logger.debug("For Null Key, data returned: {}".format(temp_dict))
+                return temp_dict
+        output = {}
+        for row in cli_table:
+            temp_dict = self._parse_row(row, cli_table, reverse_fields)
+            logger.debug("data at index {} is {}".format(row.row, temp_dict))
+            if self.KEY in temp_dict:
+                if self.KEY not in fields:
+                    output[temp_dict.pop(self.KEY)] = temp_dict
+                else:
+                    output[temp_dict[self.KEY]] = temp_dict
+            else:
+                logger.debug("Key {} not present in {}".format(self.KEY,
+                                                               temp_dict))
+        return output
+
+    def _parse_row(self, row, cli_table, reverse_fields):
+        temp_dict = {}
+        for index, element in enumerate(row):
+            key = cli_table.header[index]
+            if self.KEY and key in self.KEY:
+                temp_dict[key] = element
+            if reverse_fields:
+                if key in reverse_fields:
+                    temp_dict[reverse_fields[key]] = element
+            else:
+                temp_dict[key] = element
+        return temp_dict
+
+    def _set_key(self, cli_table):
+        """
+        Preference to user provided key, then template and at last default
+        Checks and update if we need KEY from template file
+
+        :param cli_table: CLiTable object from textfsm
+        :return:
+        """
+        if self.KEY == 'name' and len(cli_table._keys) > 0:
+            template_keys = list(cli_table._keys)
+            self.KEY = template_keys[0] if len(template_keys) == 1 else \
+                template_keys
+        logger.debug("KEY being used: {}".format(self.KEY))

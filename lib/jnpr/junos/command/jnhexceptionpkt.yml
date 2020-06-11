@@ -1,0 +1,25 @@
+---
+ShowJnhExceptions:
+  command: show jnh exceptions-trace
+  target: Null
+  item: '\[(\d+)\].*###############'
+  key: name
+  view: ShowJnhExceptionsPacketView
+
+ShowJnhExceptionsPacketView:
+  fields:
+    packets: _PacketTable
+
+_PacketTable:
+  item: '*'
+  title: 'token'
+  view: _PacketView
+
+_PacketView:
+  regex:
+    reason: '.*token=\d+ \]'
+    packets_00: '0x00: (.*)'
+    packets_10: '0x10: (.*)'
+    packets_20: '0x20: (.*)'
+    packets_30: '0x30: (.*)'
+    packets_40: '0x40: (.*)'

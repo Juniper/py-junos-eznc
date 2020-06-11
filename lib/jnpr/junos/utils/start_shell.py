@@ -1,7 +1,7 @@
-import paramiko
 from select import select
 import re
 import datetime
+from jnpr.junos.utils.ssh_client import open_ssh_client
 
 _JUNOS_PROMPT = '> '
 _SHELL_PROMPT = '(%|#|\$)\s'
@@ -33,6 +33,8 @@ class StartShell(object):
         """
         self._nc = nc
         self.timeout = timeout
+        self._client = None
+        self._chan = None
 
     def wait_for(self, this=_SHELL_PROMPT, timeout=0):
         """
@@ -82,20 +84,8 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
-        junos = self._nc
-
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=junos.hostname,
-                       port=(22, junos._port)[junos.hostname == 'localhost'],
-                       username=junos._auth_user,
-                       password=junos._auth_password,
-                       )
-
-        chan = client.invoke_shell()
-        self._client = client
-        self._chan = chan
+        self._client = open_ssh_client(dev=self._nc)
+        self._chan = self._client.invoke_shell()
 
         got = self.wait_for(r'(%|>|#|\$)')
         if got[-1].endswith(_JUNOS_PROMPT):

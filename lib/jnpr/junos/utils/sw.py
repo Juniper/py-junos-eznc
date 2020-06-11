@@ -11,6 +11,8 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
+import warnings
+warnings.simplefilter('default', PendingDeprecationWarning)
 
 # 3rd-party modules
 from lxml.builder import E
@@ -781,9 +783,9 @@ class SW(Util):
           checksum, then skip the copy to optimize time.
 
         :param bool all_re:
-          (Optional) When ``True`` (default) perform the software install on
-          all Routing Engines of the Junos device. When ``False``  if the
-          only preform the software install on the current Routing Engine.
+          (Optional) When ``True`` (default) install the package on
+          all Routing Engines of the Junos device. When ``False`` perform
+          the software install only on the current Routing Engine.
 
         :param bool vmhost:
           (Optional) A boolean indicating if this is a software update of the
@@ -797,6 +799,8 @@ class SW(Util):
             * ``True`` when the installation is successful
             * ``False`` otherwise
         """
+        warnings.warn("sw.install interface bool response is going to change "
+                      "in next release.", PendingDeprecationWarning)
         if issu is True and nssu is True:
             raise TypeError(
                 'install function can either take issu or nssu not both')
@@ -813,6 +817,23 @@ class SW(Util):
                 progress(self._dev, report)
 
         self.log = _progress
+
+        # ---------------------------------------------------------------------
+        # Before doing anything, Do check if any pending install exists.
+        # ---------------------------------------------------------------------
+        try:
+            pending_install = self._dev.rpc.request_package_checks_pending_install()
+            msg = pending_install.text
+            if msg and msg.strip() != '' and pending_install.getparent().findtext(
+                    'package-result').strip() == '1':
+                _progress(msg)
+                return False
+        except RpcError:
+            _progress("request-package-check-pending-install rpc is not "
+                      "supported on given device")
+        except Exception as ex:
+            _progress("check pending install failed with exception: %s" % ex)
+            # Continue with software installation
 
         # ---------------------------------------------------------------------
         # perform a 'safe-copy' of the image to the remote device
@@ -1004,7 +1025,7 @@ class SW(Util):
                 cmd.append(E('all-members'))
         if in_min >= 0 and at is None:
             cmd.append(E('in', str(in_min)))
-        else:
+        elif at is not None:
             cmd.append(E('at', str(at)))
         try:
             rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
@@ -1030,14 +1051,17 @@ class SW(Util):
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
 
-    def poweroff(self, in_min=0, on_node=None):
+    def poweroff(self, in_min=0, at=None, on_node=None):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
         If the device is equipped with dual-RE, then both RE will be
-        rebooted.  This code also handles EX/QFX VC.
+        shut down.  This code also handles EX/QFX VC.
 
         :param int in_min: time (minutes) before shutting down the device.
+
+        :param str at: date and time the poweroff should take place. The
+            string must match the junos cli poweroff syntax
 
         :param str on_node: In case of linux based device, function will by default
             shutdown the whole device. If any specific node is mentioned,
@@ -1060,7 +1084,10 @@ class SW(Util):
             cmd = E('request-power-off')
             if self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E('both-routing-engines'))
-        cmd.append(E('in', str(in_min)))
+        if in_min >= 0 and at is None:
+            cmd.append(E('in', str(in_min)))
+        elif at is not None:
+            cmd.append(E('at', str(at)))
         try:
             rsp = self.rpc(cmd)
             if self._dev.facts['_is_linux']:

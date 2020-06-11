@@ -122,6 +122,7 @@ class Console(_Connection):
         self._attempts = kvargs.get('attempts', 10)
         self._gather_facts = kvargs.get('gather_facts', False)
         self._fact_style = kvargs.get('fact_style', 'new')
+        self._huge_tree = kvargs.get('huge_tree', False)
         if self._fact_style != 'new':
             warnings.warn('fact-style %s will be removed in '
                           'a future release.' %
@@ -132,6 +133,7 @@ class Console(_Connection):
         self.junos_dev_handler = JunosDeviceHandler(
                                      device_params={'name': 'junos',
                                                     'local': False})
+        self._conn = None
         self._j2ldr = _Jinja2ldr
         if self._fact_style == 'old':
             self.facts = self.ofacts
@@ -236,6 +238,7 @@ class Console(_Connection):
             logger.info('facts: retrieving device facts...')
             self.facts_refresh()
             self.results['facts'] = self.facts
+        self._conn = self._tty
         return self
 
     def close(self, skip_logout=False):
@@ -275,7 +278,8 @@ class Console(_Connection):
             if isinstance(rpc_cmd_e, etree._Element) else rpc_cmd_e
         reply = self._tty.nc.rpc(rpc_cmd)
         rpc_rsp_e = NCElement(reply,
-                              self.junos_dev_handler.transform_reply()
+                              self.junos_dev_handler.transform_reply(),
+                              self._huge_tree
                               )._NCElement__doc
         return rpc_rsp_e
 
@@ -290,6 +294,7 @@ class Console(_Connection):
         tty_args['timeout'] = float(self._timeout)
         tty_args['attempts'] = int(self._attempts)
         tty_args['baud'] = self._baud
+        tty_args['huge_tree'] = self._huge_tree
         if self._mode and self._mode.upper() == 'TELNET':
             tty_args['host'] = self._hostname
             tty_args['port'] = self._port
@@ -330,7 +335,7 @@ class Console(_Connection):
     # -----------------------------------------------------------------------
 
     def __enter__(self):
-        self._conn = self.open()
+        self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

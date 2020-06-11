@@ -3,15 +3,21 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 import os
+import yaml
+import json
 from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
 from jnpr.junos.op.phyport import PhyPortStatsTable
 from jnpr.junos.op.ethport import EthPortTable
+from jnpr.junos.factory.factory_loader import FactoryLoader
+from jnpr.junos.factory.optable import generate_sax_parser_input
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from ncclient.operations.rpc import RPCReply
+
+from lxml import etree
 
 from mock import patch
 
@@ -88,6 +94,175 @@ class TestFactoryOpTable(unittest.TestCase):
             return v[key]
 
         self.assertRaises(ValueError, bad, 'bunk')
+
+    def test_generate_sax_parser_fields_with_many_slash(self):
+        yaml_data = """
+---
+bgpNeighborTable:
+    rpc: get-bgp-neighbor-information
+    item: bgp-peer
+    key: peer-address
+    view: bgpNeighborView
+bgpNeighborView:
+    fields:
+        prefix-count: bgp-option-information/prefix-limit/prefix-count
+        prefix-dummy: bgp-option-information/prefix-limit/prefix-dummy
+"""
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = bgpNeighborTable(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'bgp-peer')
+        self.assertEqual(len(etree.tostring(data)), len(
+            b'<bgp-peer><peer-address/><bgp-option-information><prefix-limit>'
+            b'<prefix-count/><prefix-dummy/></prefix-limit>'
+            b'</bgp-option-information></bgp-peer>'))
+
+    def test_generate_sax_parser_item_with_many_slash(self):
+        yaml_data = """
+---
+taskmallocdetail:
+    rpc: get-task-memory-information
+    args:
+        level: detail
+    item: task-memory-malloc-usage-report/task-malloc-list/task-malloc
+    key: tm-name
+    view: taskmallocview
+
+taskmallocview:
+    fields:
+        tmallocs: tm-allocs
+        tmallocbytes: tm-alloc-bytes
+        tmmaxallocs: tm-max-allocs
+        tmmaxallocbytes: tm-max-alloc-bytes
+        tmfunctioncalls: tm-function-calls
+"""
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = taskmallocdetail(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'task-memory-malloc-usage-report')
+        self.assertEqual(len(etree.tostring(data)), len(
+            b'<task-memory-malloc-usage-report><task-malloc-list><task-malloc><tm-name/><t'
+            b'm-allocs/><tm-alloc-bytes/><tm-max-allocs/><tm-max-alloc-bytes/><tm-function'
+            b'-calls/></task-malloc></task-malloc-list></task-memory-malloc-usage-report>'))
+
+    def test_generate_sax_parser_same_parents_with_diff_fields(self):
+        yaml_data = """
+---
+VtepTable:
+    rpc: get-interface-information
+    args:
+        interface-name: "vtep"
+        extensive: True
+    item: physical-interface
+    key: name
+    view: VtepView
+
+VtepView:
+    fields:
+        admin-status: admin-status
+        oper-status: oper-status
+        link-level-type: link-level-type
+        input-bytes: traffic-statistics/input-bytes
+        output-bytes: traffic-statistics/output-bytes
+        input-errors: input-error-list/input-errors
+        output-errors: output-error-list/output-errors
+        carrier-transitions: output-error-list/carrier-transitions
+        vtep-tunnel-stats: VtepTunnelTable
+
+VtepTunnelTable:
+    item: logical-interface
+    key: name
+    view: VtepTunnelView
+
+VtepTunnelView:
+    fields:
+        vtep-type: vtep-info/vtep-type
+        vtep-address: vtep-info/vtep-address
+        tunnel-input-bytes: traffic-statistics/input-bytes
+        tunnel-output-bytes: traffic-statistics/output-bytes
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = VtepTable(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, 'physical-interface')
+        self.assertEqual(len(etree.tostring(data)),len(
+            b'<physical-interface><name/><admin-status/><oper-status/>'
+            b'<link-level-type/><traffic-statistics><input-bytes/>'
+            b'<output-bytes/></traffic-statistics><input-error-list>'
+            b'<input-errors/></input-error-list><output-error-list>'
+            b'<output-errors/><carrier-transitions/></output-error-list>'
+            b'<logical-interface><name/><vtep-info><vtep-type/><vtep-address/>'
+            b'</vtep-info><traffic-statistics><input-bytes/><output-bytes/>'
+            b'</traffic-statistics></logical-interface></physical-interface>')
+        )
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_pipe_delim_with_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status
+    item: //utmd-status
+    view: UTMStatusView
+    key: ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()),
+                         {'node0': {'running': True}, 'node1': {'running': True}})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_pipe_delim_with_Null_use_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status_use_Null
+    item: //utmd-status
+    view: UTMStatusView
+    key: ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()), {'running': True})
+
+    @patch('jnpr.junos.Device.execute')
+    def test_key_and_item_pipe_delim_with_Null_use_Null(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+UTMStatusTable:
+    rpc: show-utmd-status_use_Null
+    item: //multi-routing-engine-item/utmd-status | //utmd-status
+    view: UTMStatusView
+    key: 
+      - ../re-name | Null
+
+UTMStatusView:
+    fields:
+        running: { running: flag }
+    """
+        globals().update(FactoryLoader().load(yaml.load(yaml_data,
+                                                        Loader=yaml.Loader)))
+        tbl = UTMStatusTable(self.dev)
+        data = tbl.get()
+        self.assertEqual(json.loads(data.to_json()), {'running': True})
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement

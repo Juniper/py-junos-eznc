@@ -1,0 +1,20 @@
+---
+CChipPTStatTable:
+  command: show mqss {{ instance }} drd stats
+  args:
+    instance: 0
+  target: Null
+  item: '*'
+  view: CChipPTStatView
+
+
+CChipPTStatView:
+  fields:
+    cchip-free-internal-packet-table-wan: _wan_view
+    cchip-free-internal-packet-table-fabric: _fab_view
+
+_wan_view:
+  title: free_rid[0]
+
+_fab_view:
+  title: free_rid[1]

@@ -1,4 +1,7 @@
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 from nose.plugins.attrib import attr
 from mock import MagicMock, patch, mock_open, call
 import os
@@ -680,6 +683,8 @@ class TestDevice(unittest.TestCase):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertRaises(RpcError, self.dev.rpc.get_rpc_error)
 
+    @unittest.skipIf(sys.platform == 'win32',
+                     "will work for windows in coming days")
     def test_device_execute_permission_error(self):
         self.dev._conn.rpc = MagicMock(side_effect=self._mock_manager)
         self.assertRaises(
