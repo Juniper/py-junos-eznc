@@ -31,10 +31,10 @@ yaml.SafeDumper.add_multi_representer(version_info, version_yaml_representer)
 
 
 # Suppress Paramiko logger warnings
-plog = logging.getLogger('paramiko')
+plog = logging.getLogger("paramiko")
 if not plog.handlers:
-    class NullHandler(logging.Handler):
 
+    class NullHandler(logging.Handler):
         def emit(self, record):
             pass
 

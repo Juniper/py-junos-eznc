@@ -1,5 +1,6 @@
 import re
 import copy
+
 # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
 
 # stdlib
@@ -18,11 +19,11 @@ from jinja2 import Template
 from ntc_templates import parse as ntc_parse
 
 import logging
+
 logger = logging.getLogger("jnpr.junos.factory.cmdtable")
 
 
 class CMDTable(object):
-
     def __init__(self, dev=None, raw=None, path=None, template_dir=None):
         """
         :dev: Device instance
@@ -33,7 +34,7 @@ class CMDTable(object):
         self._dev = dev
         self.xml = None
         self.view = None
-        self.ITEM_FILTER = 'name'
+        self.ITEM_FILTER = "name"
         self._key_list = []
         self._path = path
         self._parser = None
@@ -77,48 +78,51 @@ class CMDTable(object):
         self._clearkeys()
 
         if self._path and self.data:
-            raise AttributeError('path and data are mutually exclusive')
+            raise AttributeError("path and data are mutually exclusive")
         if self._path is not None:
             # for loading from local file-path
-            with open(self._path, 'r') as fp:
+            with open(self._path, "r") as fp:
                 self.data = fp.read().strip()
-            if self.data.startswith('<output>') and self.data.endswith(
-                    '</output>'):
+            if self.data.startswith("<output>") and self.data.endswith("</output>"):
                 self.data = etree.fromstring(self.data).text
 
-        if 'target' in kvargs:
-            self.TARGET = kvargs['target']
+        if "target" in kvargs:
+            self.TARGET = kvargs["target"]
 
-        if 'key' in kvargs:
-            self.KEY = kvargs['key']
+        if "key" in kvargs:
+            self.KEY = kvargs["key"]
 
-        if 'key_items' in kvargs:
-            self.KEY_ITEMS = kvargs['key_items']
+        if "key_items" in kvargs:
+            self.KEY_ITEMS = kvargs["key_items"]
 
-        if 'filters' in kvargs:
-            self.VIEW.FILTERS = [kvargs['filters']] if isinstance(kvargs[
-                                                                   'filters'],
-                                                                str) else \
-                kvargs['filters']
+        if "filters" in kvargs:
+            self.VIEW.FILTERS = (
+                [kvargs["filters"]]
+                if isinstance(kvargs["filters"], str)
+                else kvargs["filters"]
+            )
 
         cmd_args = self.CMD_ARGS.copy()
-        if 'args' in kvargs and isinstance(kvargs['args'], dict):
-            cmd_args.update(kvargs['args'])
+        if "args" in kvargs and isinstance(kvargs["args"], dict):
+            cmd_args.update(kvargs["args"])
 
         if len(cmd_args) > 0:
             self.GET_CMD = Template(self.GET_CMD).render(**cmd_args)
 
         if self.data is None:
             # execute the Junos RPC to retrieve the table
-            if hasattr(self, 'TARGET'):
+            if hasattr(self, "TARGET"):
                 if self.TARGET is None:
                     raise ValueError('"target" value not provided')
-                rpc_args = {'target': self.TARGET, 'command': self.GET_CMD,
-                            'timeout': '0'}
+                rpc_args = {
+                    "target": self.TARGET,
+                    "command": self.GET_CMD,
+                    "timeout": "0",
+                }
                 try:
-                    self.xml = getattr(self.RPC, 'request_pfe_execute')(**rpc_args)
+                    self.xml = getattr(self.RPC, "request_pfe_execute")(**rpc_args)
                     self.data = self.xml.text
-                    ver_info = self._dev.facts.get('version_info')
+                    ver_info = self._dev.facts.get("version_info")
                     if ver_info and ver_info.major[0] <= 15:
                         # Junos <=15.x output has output something like below
                         #
@@ -139,8 +143,9 @@ class CMDTable(object):
                         self.data = self.data.replace("GOT: ", "")
                 except RpcError:
                     with StartShell(self.D) as ss:
-                        ret = ss.run('cprod -A %s -c "%s"' % (self.TARGET,
-                                                              self.GET_CMD))
+                        ret = ss.run(
+                            'cprod -A %s -c "%s"' % (self.TARGET, self.GET_CMD)
+                        )
                         if ret[0]:
                             self.data = ret[1]
             else:
@@ -148,9 +153,9 @@ class CMDTable(object):
                 self.data = self.xml.text
 
         if self.USE_TEXTFSM:
-            self.output = self._parse_textfsm(platform=self.PLATFORM,
-                                              command=self.GET_CMD,
-                                              raw=self.data)
+            self.output = self._parse_textfsm(
+                platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
+            )
         else:
             # state machine
             sm = StateMachine(self)
@@ -322,37 +327,35 @@ class CMDTable(object):
         :param raw: string blob output from the cli command execution
         :return: dict of parsed data.
         """
-        attrs = dict(
-            Command=command,
-            Platform=platform
-        )
+        attrs = dict(Command=command, Platform=platform)
 
         template = None
         template_dir = None
         if self.template_dir is not None:
             # we dont need index file for lookup
             index = None
-            template_path = os.path.join(self.template_dir,
-                                         '{}_{}.textfsm'.format(
-                                             platform,
-                                             '_'.join(command.split())))
+            template_path = os.path.join(
+                self.template_dir,
+                "{}_{}.textfsm".format(platform, "_".join(command.split())),
+            )
             if not os.path.exists(template_path):
-                msg = 'Template file %s missing' % template_path
+                msg = "Template file %s missing" % template_path
                 logger.error(msg)
                 raise FileNotFoundError(msg)
             else:
                 template = template_path
                 template_dir = self.template_dir
         if template_dir is None:
-            index = 'index'
+            index = "index"
             template_dir = ntc_parse._get_template_dir()
 
         cli_table = ntc_parse.clitable.CliTable(index, template_dir)
         try:
             cli_table.ParseCmd(raw, attrs, template)
         except ntc_parse.clitable.CliTableError as ex:
-            logger.error('Unable to parse command "%s" on platform %s' % (
-                command, platform))
+            logger.error(
+                'Unable to parse command "%s" on platform %s' % (command, platform)
+            )
             raise ex
         return self._filter_output(cli_table)
 
@@ -370,11 +373,11 @@ class CMDTable(object):
         if self.KEY is None:
             cli_table_size = cli_table.size
             if cli_table_size > 1:
-                raise KeyError("Key is Mandatory for parsed o/p of %s "
-                               "length" % cli_table_size)
+                raise KeyError(
+                    "Key is Mandatory for parsed o/p of %s " "length" % cli_table_size
+                )
             elif cli_table_size == 1:
-                temp_dict = self._parse_row(cli_table[1], cli_table,
-                                            reverse_fields)
+                temp_dict = self._parse_row(cli_table[1], cli_table, reverse_fields)
                 logger.debug("For Null Key, data returned: {}".format(temp_dict))
                 return temp_dict
         output = {}
@@ -387,8 +390,7 @@ class CMDTable(object):
                 else:
                     output[temp_dict[self.KEY]] = temp_dict
             else:
-                logger.debug("Key {} not present in {}".format(self.KEY,
-                                                               temp_dict))
+                logger.debug("Key {} not present in {}".format(self.KEY, temp_dict))
         return output
 
     def _parse_row(self, row, cli_table, reverse_fields):
@@ -412,8 +414,7 @@ class CMDTable(object):
         :param cli_table: CLiTable object from textfsm
         :return:
         """
-        if self.KEY == 'name' and len(cli_table._keys) > 0:
+        if self.KEY == "name" and len(cli_table._keys) > 0:
             template_keys = list(cli_table._keys)
-            self.KEY = template_keys[0] if len(template_keys) == 1 else \
-                template_keys
+            self.KEY = template_keys[0] if len(template_keys) == 1 else template_keys
         logger.debug("KEY being used: {}".format(self.KEY))
