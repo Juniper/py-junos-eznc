@@ -16,7 +16,7 @@ if sys.platform == "win32":
 
 setup(
     name="junos-eznc",
-    namespace_packages=['jnpr'],
+    namespace_packages=["jnpr"],
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
