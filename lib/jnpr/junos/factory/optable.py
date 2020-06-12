@@ -116,7 +116,6 @@ def generate_sax_parser_input(obj):
             for key, val in group_field_dict.items():
                 group_ele.append(E(val.get("xpath")))
             parser_ingest.append(group_ele)
-    map_multilayer_fields = dict()
     for i, item in enumerate(local_field_dict.items()):
         # i is the index and item will be taple of field key and value
         field_dict = item[1]
@@ -127,32 +126,35 @@ def generate_sax_parser_input(obj):
         else:
             xpath = field_dict.get("xpath")
             # xpath can be multi level, for ex traffic-statistics/input-pps
-            if "/" in xpath:
-                tags = xpath.split("/")
-                if tags[0] in map_multilayer_fields:
-                    # cases where multiple fields got same parents
-                    # fields:
-                    #    input-bytes: traffic-statistics/input-bytes
-                    #    output-bytes: traffic-statistics/output-bytes
-                    # or
-                    # fields:
-                    #     prefix-count: bgp-option-information/prefix-limit/prefix-count
-                    #     prefix-dummy: bgp-option-information/prefix-limit/prefix-dummy
+            # going in reverse order, for fields example.
+            # split xpath in 2 part, search for first part xpath, if exists, append later
+            # else continue, and finally add full xpath to parent
+            # min-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/min-delay
+            # max-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/max-delay
+            # avg-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
+            # positive-rtt-jitter: probe-test-global-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
+            # loss-percentage: probe-test-global-results/probe-test-generic-results/loss-percentage
+            # current-min-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/min-delay
+            # current-max-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/max-delay
+            # current-avg-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
+            # current-positive-rtt-jitter: probe-last-test-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
+            # current-loss-percentage: probe-last-test-results/probe-test-generic-results/loss-percentage
+            if '/' in xpath:
+                tags = xpath.split('/')
+                tags_len = len(tags)
+                local_elem_to_add = E(tags[-1])
+                for i in range(tags_len, 0, -1):
+                    xpath = "/".join(tags[:i])
                     local_obj = parser_ingest
-                    for tag in tags[:-1]:
-                        existing_elem = local_obj.xpath(tag)
-                        if existing_elem:
-                            local_obj = existing_elem[0]
-                        else:
-                            continue
-                    else:
-                        local_obj.append(E(tags[-1]))
+                    elem_exists = local_obj.xpath(xpath)
+                    if elem_exists:
+                        xpath_exists = elem_exists[0]
+                        xpath_exists.insert(1, local_elem_to_add)
+                        break
+                    if local_elem_to_add.tag != tags[i-1]:
+                        local_elem_to_add = E(tags[i-1], local_elem_to_add)
                 else:
-                    obj = E(tags[-1])
-                    for tag in tags[:-1][::-1]:
-                        obj = E(tag, obj)
-                    map_multilayer_fields[tags[0]] = obj
-                parser_ingest.insert(i + 1, obj)
+                    parser_ingest.insert(1, local_elem_to_add)
             else:
                 parser_ingest.insert(i + 1, E(xpath))
     # cases where item is something like

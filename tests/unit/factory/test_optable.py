@@ -121,6 +121,51 @@ bgpNeighborView:
             ),
         )
 
+    def test_generate_sax_parser_fields_with_diff_child_xpaths(self):
+        yaml_data = """
+---
+twampProbeTable:
+    rpc: twamp-get-probe-results
+    item: probe-test-results
+    key: test-name
+    view: probeResultsView
+probeResultsView:
+    fields:
+        min-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/min-delay
+        max-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/max-delay
+        avg-delay: probe-test-global-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
+        positive-rtt-jitter: probe-test-global-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
+        loss-percentage: probe-test-global-results/probe-test-generic-results/loss-percentage
+        current-min-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/min-delay
+        current-max-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/max-delay
+        current-avg-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
+        current-positive-rtt-jitter: probe-last-test-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
+        current-loss-percentage: probe-last-test-results/probe-test-generic-results/loss-percentage
+"""
+        globals().update(FactoryLoader().load(yaml.load(yaml_data, Loader=yaml.Loader)))
+        tbl = twampProbeTable(self.dev)
+        data = generate_sax_parser_input(tbl)
+        self.assertEqual(data.tag, "probe-test-results")
+        self.assertEqual(
+            len(etree.tostring(data)),
+            len(
+                b"<probe-test-results><test-name/><probe-last-test-results>"
+                b"<probe-test-generic-results><probe-test-rtt><probe-summary"
+                b"-results><min-delay/><avg-delay/><max-delay/></probe-summary"
+                b"-results></probe-test-rtt><loss-percentage/>"
+                b"<probe-test-positive-round-trip-jitter><probe-summary-results>"
+                b"<avg-delay/></probe-summary-results></probe-test-positive-round"
+                b"-trip-jitter></probe-test-generic-results></probe-last-test-resu"
+                b"lts><probe-test-global-results><probe-test-generic-results>"
+                b"<probe-test-rtt><probe-summary-results><min-delay/><avg-delay/>"
+                b"<max-delay/></probe-summary-results></probe-test-rtt>"
+                b"<loss-percentage/><probe-test-positive-round-trip-jitter>"
+                b"<probe-summary-results><avg-delay/></probe-summary-results>"
+                b"</probe-test-positive-round-trip-jitter></probe-test-generic-"
+                b"results></probe-test-global-results></probe-test-results>"
+            ),
+        )
+
     def test_generate_sax_parser_item_with_many_slash(self):
         yaml_data = """
 ---
