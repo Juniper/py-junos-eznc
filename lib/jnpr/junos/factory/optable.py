@@ -115,7 +115,6 @@ def generate_sax_parser_input(obj):
             for key, val in group_field_dict.items():
                 group_ele.append(E(val.get('xpath')))
             parser_ingest.append(group_ele)
-    # map_multilayer_fields = dict()
     for i, item in enumerate(local_field_dict.items()):
         # i is the index and item will be taple of field key and value
         field_dict = item[1]
