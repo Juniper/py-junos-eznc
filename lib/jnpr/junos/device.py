@@ -436,10 +436,7 @@ class _Connection(object):
         if self._ssh_config:
             sshconf_path = os.path.expanduser(self._ssh_config)
         else:
-            home = os.getenv("HOME")
-            if not home:
-                return None
-            sshconf_path = os.path.join(os.getenv("HOME"), ".ssh/config")
+            sshconf_path = os.path.join(os.path.expanduser('~'), '.ssh', 'config')
         if not os.path.exists(sshconf_path):
             return None
         else:

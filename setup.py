@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import sys
+import versioneer
 
 # parse requirements
 req_lines = [line.strip() for line in open("requirements.txt").readlines()]
@@ -15,8 +16,9 @@ if sys.platform == "win32":
 
 setup(
     name="junos-eznc",
-    namespace_packages=["jnpr"],
-    version="2.4.2.dev0",
+    namespace_packages=['jnpr'],
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),

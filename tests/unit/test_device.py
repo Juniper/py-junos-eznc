@@ -444,19 +444,13 @@ class TestDevice(unittest.TestCase):
         self.dev2._sshconf_lkup()
         self.assertEqual(self.dev2._sshconf_lkup(), None)
 
-    @patch("os.getenv")
-    def test_device__sshconf_lkup_path_not_exists(self, mock_env):
-        mock_env.return_value = "/home/test"
+    @patch('os.path.expanduser')
+    def test_device__sshconf_lkup_path_not_exists(self, mock_path):
+        mock_path.return_value = '/home/test'
         self.assertEqual(self.dev._sshconf_lkup(), None)
 
-    @patch("os.getenv")
-    def test_device__sshconf_lkup_home_not_defined(self, mock_env):
-        mock_env.return_value = None
-        self.assertEqual(self.dev._sshconf_lkup(), None)
-        mock_env.assert_called_with("HOME")
-
-    @patch("ncclient.manager.connect")
-    @patch("jnpr.junos.Device.execute")
+    @patch('ncclient.manager.connect')
+    @patch('jnpr.junos.Device.execute')
     def test_device_open(self, mock_connect, mock_execute):
         with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
             mock_cat.return_value = """
