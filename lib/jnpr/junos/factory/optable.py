@@ -139,8 +139,8 @@ def generate_sax_parser_input(obj):
             # current-avg-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
             # current-positive-rtt-jitter: probe-last-test-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
             # current-loss-percentage: probe-last-test-results/probe-test-generic-results/loss-percentage
-            if '/' in xpath:
-                tags = xpath.split('/')
+            if "/" in xpath:
+                tags = xpath.split("/")
                 tags_len = len(tags)
                 local_elem_to_add = E(tags[-1])
                 for i in range(tags_len, 0, -1):
@@ -151,8 +151,8 @@ def generate_sax_parser_input(obj):
                         xpath_exists = elem_exists[0]
                         xpath_exists.insert(1, local_elem_to_add)
                         break
-                    if local_elem_to_add.tag != tags[i-1]:
-                        local_elem_to_add = E(tags[i-1], local_elem_to_add)
+                    if local_elem_to_add.tag != tags[i - 1]:
+                        local_elem_to_add = E(tags[i - 1], local_elem_to_add)
                 else:
                     parser_ingest.insert(1, local_elem_to_add)
             else:
