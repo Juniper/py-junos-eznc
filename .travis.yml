@@ -30,8 +30,11 @@ install:
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
   - "pip install ."
+  - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then pip install -U black; fi
 
-script: nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then black --check --exclude=docs/* . ; fi
+  - nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
 after_success:
   coveralls

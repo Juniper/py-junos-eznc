@@ -9,16 +9,15 @@ from jnpr.junos.ofacts.srx_cluster import facts_srx_cluster
 from jnpr.junos.ofacts.domain import facts_domain
 
 FACT_LIST = [
-    facts_chassis,                  # first
-    facts_routing_engines,          # second
-    facts_personality,              # third
-    facts_srx_cluster,              # four
-    facts_software_version,         # fifth
-
+    facts_chassis,  # first
+    facts_routing_engines,  # second
+    facts_personality,  # third
+    facts_srx_cluster,  # four
+    facts_software_version,  # fifth
     facts_domain,
     facts_ifd_style,
     facts_switch_style,
-    facts_session
+    facts_session,
 ]
 
-__all__ = ['FACT_LIST']
+__all__ = ["FACT_LIST"]

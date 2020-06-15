@@ -19,33 +19,33 @@ def facts_chassis(junos, facts):
             inherited configs are checked.
     """
     # Set default values.
-    facts['2RE'] = False
-    facts['RE_hw_mi'] = False
-    facts['model'] = 'UNKNOWN'
-    facts['serialnumber'] = 'UNKNOWN'
+    facts["2RE"] = False
+    facts["RE_hw_mi"] = False
+    facts["model"] = "UNKNOWN"
+    facts["serialnumber"] = "UNKNOWN"
 
     rsp = junos.rpc.get_chassis_inventory()
-    if rsp.tag == 'error':
+    if rsp.tag == "error":
         raise RuntimeError()
 
-    if rsp.tag == 'output':
+    if rsp.tag == "output":
         # this means that there was an error; due to the
         # fact that this connection is not on the master
         # @@@ need to validate on VC-member
         raise ConnectNotMasterError(junos)
 
-    if rsp.tag == 'multi-routing-engine-results':
-        facts['2RE'] = True
-        facts['RE_hw_mi'] = True
+    if rsp.tag == "multi-routing-engine-results":
+        facts["2RE"] = True
+        facts["RE_hw_mi"] = True
     else:
-        facts['2RE'] = False
+        facts["2RE"] = False
 
-    facts['model'] = rsp.findtext('.//chassis[1]/description', 'UNKNOWN')
-    facts['serialnumber'] = (
-        rsp.findtext('.//chassis[1]/serial-number') or
-        rsp.findtext('.//chassis-module[name="Backplane"]/serial-number') or
-        rsp.findtext('.//chassis-module[name="Midplane"]/serial-number',
-                     'UNKNOWN'))
+    facts["model"] = rsp.findtext(".//chassis[1]/description", "UNKNOWN")
+    facts["serialnumber"] = (
+        rsp.findtext(".//chassis[1]/serial-number")
+        or rsp.findtext('.//chassis-module[name="Backplane"]/serial-number')
+        or rsp.findtext('.//chassis-module[name="Midplane"]/serial-number', "UNKNOWN")
+    )
 
-    if facts['model'] == 'UNKNOWN' or facts['serialnumber'] == 'UNKNOWN':
+    if facts["model"] == "UNKNOWN" or facts["serialnumber"] == "UNKNOWN":
         raise RpcError()
