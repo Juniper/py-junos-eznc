@@ -12,8 +12,7 @@ class Util(object):
         self._dev = dev
 
     def __repr__(self):
-        return "jnpr.junos.utils.%s(%s)" % (
-            self.__class__.__name__, self._dev.hostname)
+        return "jnpr.junos.utils.%s(%s)" % (self.__class__.__name__, self._dev.hostname)
 
     # -------------------------------------------------------------------------
     # property: dev

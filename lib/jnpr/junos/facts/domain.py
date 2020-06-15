@@ -8,9 +8,11 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'domain': "The domain name configured at the [edit system "
-                      "domain-name] configuration hierarchy.",
-            'fqdn': "The device's hostname + domain", }
+    return {
+        "domain": "The domain name configured at the [edit system "
+        "domain-name] configuration hierarchy.",
+        "fqdn": "The device's hostname + domain",
+    }
 
 
 def get_facts(device):
@@ -29,11 +31,15 @@ def get_facts(device):
     # Try to read the domain-name from the config.
     # This might fail due to lack of permissions.
     try:
-        rsp = device.rpc.get_config(filter_xml=etree.XML(domain_config),
-                                    options={'database': 'committed',
-                                             'inherit': 'inherit',
-                                             'commit-scripts': 'apply', })
-        domain = rsp.findtext('.//domain-name')
+        rsp = device.rpc.get_config(
+            filter_xml=etree.XML(domain_config),
+            options={
+                "database": "committed",
+                "inherit": "inherit",
+                "commit-scripts": "apply",
+            },
+        )
+        domain = rsp.findtext(".//domain-name")
     # Ignore if user can't view the configuration.
     except PermissionError:
         pass
@@ -42,17 +48,18 @@ def get_facts(device):
     # view permissions.
     if domain is None:
         fs = FS(device)
-        file_content = (fs.cat('/etc/resolv.conf') or
-                        fs.cat('/var/etc/resolv.conf'))
+        file_content = fs.cat("/etc/resolv.conf") or fs.cat("/var/etc/resolv.conf")
         words = file_content.split() if file_content is not None else []
-        if 'domain' in words:
-            idx = words.index('domain') + 1
+        if "domain" in words:
+            idx = words.index("domain") + 1
             domain = words[idx]
 
     # Set the fqdn
-    fqdn = device.facts['hostname']
+    fqdn = device.facts["hostname"]
     if fqdn is not None and domain is not None:
-        fqdn = fqdn + '.' + domain
+        fqdn = fqdn + "." + domain
 
-    return {'domain': domain,
-            'fqdn': fqdn, }
+    return {
+        "domain": domain,
+        "fqdn": fqdn,
+    }

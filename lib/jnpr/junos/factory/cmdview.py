@@ -1,5 +1,3 @@
-
-
 class CMDView(object):
 
     """
@@ -7,7 +5,7 @@ class CMDView(object):
     data appear as objects with attributes.
     """
 
-    KEY = 'name'
+    KEY = "name"
     KEY_ITEMS = []
     COLUMNS = {}
     FILTERS = None

@@ -66,19 +66,18 @@ class OpTable(Table):
         if self._use_filter:
             try:
                 filter_xml = generate_sax_parser_input(self)
-                rpc_args['filter_xml'] = filter_xml
+                rpc_args["filter_xml"] = filter_xml
             except Exception as ex:
-                logger.debug("Not able to create SAX parser input due to "
-                               "'%s'" % ex)
+                logger.debug("Not able to create SAX parser input due to " "'%s'" % ex)
 
         self.D.transform = lambda: remove_namespaces_and_spaces
-        rpc_args.update(self.GET_ARGS)    # copy default args
+        rpc_args.update(self.GET_ARGS)  # copy default args
         # saltstack get_table pass args as named keyword
-        if 'args' in kvargs and isinstance(kvargs['args'], dict):
-            rpc_args.update(kvargs.pop('args'))
-        rpc_args.update(kvargs)           # copy caller provided args
+        if "args" in kvargs and isinstance(kvargs["args"], dict):
+            rpc_args.update(kvargs.pop("args"))
+        rpc_args.update(kvargs)  # copy caller provided args
 
-        if hasattr(self, 'GET_KEY') and argkey is not None:
+        if hasattr(self, "GET_KEY") and argkey is not None:
             rpc_args.update({self.GET_KEY: argkey})
 
         # execute the Junos RPC to retrieve the table
@@ -98,8 +97,8 @@ def generate_sax_parser_input(obj):
 
     """
     item_tags = []
-    if '/' in obj.ITEM_XPATH:
-        item_tags = obj.ITEM_XPATH.split('/')
+    if "/" in obj.ITEM_XPATH:
+        item_tags = obj.ITEM_XPATH.split("/")
         parser_ingest = E(item_tags.pop(-1), E(obj.ITEM_NAME_XPATH))
     else:
         parser_ingest = E(obj.ITEM_XPATH, E(obj.ITEM_NAME_XPATH))
@@ -108,22 +107,24 @@ def generate_sax_parser_input(obj):
     if obj.VIEW.GROUPS:
         for group, group_xpath in obj.VIEW.GROUPS.items():
             # need to pop out group items so that it wont be reused with fields
-            group_field_dict = ({k: local_field_dict.pop(k)
-                                 for k, v in obj.VIEW.FIELDS.items()
-                                 if v.get('group') == group})
+            group_field_dict = {
+                k: local_field_dict.pop(k)
+                for k, v in obj.VIEW.FIELDS.items()
+                if v.get("group") == group
+            }
             group_ele = E(group_xpath)
             for key, val in group_field_dict.items():
-                group_ele.append(E(val.get('xpath')))
+                group_ele.append(E(val.get("xpath")))
             parser_ingest.append(group_ele)
     for i, item in enumerate(local_field_dict.items()):
         # i is the index and item will be taple of field key and value
         field_dict = item[1]
-        if 'table' in field_dict:
+        if "table" in field_dict:
             # handle nested table/view
-            child_table = field_dict.get('table')
+            child_table = field_dict.get("table")
             parser_ingest.insert(i + 1, generate_sax_parser_input(child_table))
         else:
-            xpath = field_dict.get('xpath')
+            xpath = field_dict.get("xpath")
             # xpath can be multi level, for ex traffic-statistics/input-pps
             # going in reverse order, for fields example.
             # split xpath in 2 part, search for first part xpath, if exists, append later
@@ -138,8 +139,8 @@ def generate_sax_parser_input(obj):
             # current-avg-delay: probe-last-test-results/probe-test-generic-results/probe-test-rtt/probe-summary-results/avg-delay
             # current-positive-rtt-jitter: probe-last-test-results/probe-test-generic-results/probe-test-positive-round-trip-jitter/probe-summary-results/avg-delay
             # current-loss-percentage: probe-last-test-results/probe-test-generic-results/loss-percentage
-            if '/' in xpath:
-                tags = xpath.split('/')
+            if "/" in xpath:
+                tags = xpath.split("/")
                 tags_len = len(tags)
                 local_elem_to_add = E(tags[-1])
                 for i in range(tags_len, 0, -1):
@@ -150,8 +151,8 @@ def generate_sax_parser_input(obj):
                         xpath_exists = elem_exists[0]
                         xpath_exists.insert(1, local_elem_to_add)
                         break
-                    if local_elem_to_add.tag != tags[i-1]:
-                        local_elem_to_add = E(tags[i-1], local_elem_to_add)
+                    if local_elem_to_add.tag != tags[i - 1]:
+                        local_elem_to_add = E(tags[i - 1], local_elem_to_add)
                 else:
                     parser_ingest.insert(1, local_elem_to_add)
             else:
