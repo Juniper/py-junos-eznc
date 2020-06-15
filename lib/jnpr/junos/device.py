@@ -848,7 +848,7 @@ class _Connection(object):
                 or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
             ):
                 try:
-                    return json.loads(rpc_rsp_e.text)
+                    return json.loads(rpc_rsp_e.text, strict=False)
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith("Extra data"):
