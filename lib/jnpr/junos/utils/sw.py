@@ -1027,7 +1027,7 @@ class SW(Util):
             )
             return add_ok
 
-    def send_rpc_and_check_response(self, cmd, in_min=0, at=None, all_re=True,
+    def _system_operation(self, cmd, in_min=0, at=None, all_re=True,
                                     other_re=False, vmhost=False):
         """
         Send the rpc for actions like shutdown, reboot, halt  with optional
@@ -1136,7 +1136,7 @@ class SW(Util):
             cmd = E('request-reboot')
 
         try:
-            return self.send_rpc_and_check_response(cmd, in_min, at, all_re,
+            return self._system_operation(cmd, in_min, at, all_re,
                                                other_re, vmhost)
         except RpcTimeoutError as err:
             raise err
@@ -1185,7 +1185,7 @@ class SW(Util):
         else:
             cmd = E('request-power-off')
         try:
-            return self.send_rpc_and_check_response(cmd, in_min, at, all_re,
+            return self._system_operation(cmd, in_min, at, all_re,
                                                other_re, vmhost=False)
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
@@ -1219,7 +1219,7 @@ class SW(Util):
             cmd = E('request-halt')
 
         try:
-            return self.send_rpc_and_check_response(cmd, in_min, at, all_re,
+            return self._system_operation(cmd, in_min, at, all_re,
                                                other_re, vmhost=False)
         except Exception as err:
             raise err
@@ -1247,7 +1247,7 @@ class SW(Util):
 
         try:
             # all_re is handled above, pass False.
-            return self.send_rpc_and_check_response(cmd, in_min=-1, at=None, all_re=False,
+            return self._system_operation(cmd, in_min=-1, at=None, all_re=False,
                                                other_re=False, vmhost=False)
         except Exception as err:
             raise err
