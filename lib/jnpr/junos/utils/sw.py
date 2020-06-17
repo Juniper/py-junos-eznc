@@ -14,7 +14,7 @@ except ImportError:
 
 import warnings
 
-warnings.simplefilter('default', PendingDeprecationWarning)
+warnings.simplefilter("default", PendingDeprecationWarning)
 
 # 3rd-party modules
 from lxml.builder import E
@@ -1027,8 +1027,9 @@ class SW(Util):
             )
             return add_ok
 
-    def _system_operation(self, cmd, in_min=0, at=None, all_re=True,
-                                    other_re=False, vmhost=False):
+    def _system_operation(
+        self, cmd, in_min=0, at=None, all_re=True, other_re=False, vmhost=False
+    ):
         """
         Send the rpc for actions like shutdown, reboot, halt  with optional
         delay (in minutes) or at a specified date and time.
@@ -1058,8 +1059,8 @@ class SW(Util):
         :raises RpcError: when command is not successful.
         """
         if other_re is True:
-            if self._dev.facts['2RE']:
-                cmd = E('other-routing-engine')
+            if self._dev.facts["2RE"]:
+                cmd = E("other-routing-engine")
         elif all_re is True:
             if vmhost is True:
                 cmd.append(E("routing-engine", "both"))
@@ -1093,8 +1094,9 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # reboot - system reboot
     # -------------------------------------------------------------------------
-    def reboot(self, in_min=0, at=None, all_re=True, on_node=None,
-               vmhost=False, other_re=False):
+    def reboot(
+        self, in_min=0, at=None, all_re=True, on_node=None, vmhost=False, other_re=False
+    ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -1124,20 +1126,19 @@ class SW(Util):
         :returns:
             * reboot message (string) if command successful
         """
-        if self._dev.facts['_is_linux']:
+        if self._dev.facts["_is_linux"]:
             if on_node is None:
-                cmd = E('request-shutdown-reboot')
+                cmd = E("request-shutdown-reboot")
             else:
-                cmd = E('request-node-reboot')
-                cmd.append(E('node', on_node))
+                cmd = E("request-node-reboot")
+                cmd.append(E("node", on_node))
         elif vmhost is True:
-            cmd = E('request-vmhost-reboot')
+            cmd = E("request-vmhost-reboot")
         else:
-            cmd = E('request-reboot')
+            cmd = E("request-reboot")
 
         try:
-            return self._system_operation(cmd, in_min, at, all_re,
-                                               other_re, vmhost)
+            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except RpcTimeoutError as err:
             raise err
         except Exception as err:
@@ -1146,8 +1147,7 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-    def poweroff(self, in_min=0, at=None, on_node=None,
-                 all_re=True, other_re=False):
+    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1183,10 +1183,11 @@ class SW(Util):
                 cmd = E("request-node-power-off")
                 cmd.append(E("node", on_node))
         else:
-            cmd = E('request-power-off')
+            cmd = E("request-power-off")
         try:
-            return self._system_operation(cmd, in_min, at, all_re,
-                                               other_re, vmhost=False)
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost=False
+            )
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
                 raise err
@@ -1213,14 +1214,15 @@ class SW(Util):
         :returns:
             *rpc response message (string) if command successful
         """
-        if self._dev.facts['_is_linux']:
-            cmd = E('request-shutdown-halt')
+        if self._dev.facts["_is_linux"]:
+            cmd = E("request-shutdown-halt")
         else:
-            cmd = E('request-halt')
+            cmd = E("request-halt")
 
         try:
-            return self._system_operation(cmd, in_min, at, all_re,
-                                               other_re, vmhost=False)
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost=False
+            )
         except Exception as err:
             raise err
 
@@ -1238,17 +1240,18 @@ class SW(Util):
         :returns:
             * rpc response message (string) if command successful
         """
-        cmd = E('request-system-zeroize')
+        cmd = E("request-system-zeroize")
         if all_re is False:
-            if self._dev.facts['2RE']:
-                cmd = E('local')
+            if self._dev.facts["2RE"]:
+                cmd = E("local")
             if media is True:
-                cmd = E('media')
+                cmd = E("media")
 
         try:
             # all_re is handled above, pass False.
-            return self._system_operation(cmd, in_min=-1, at=None, all_re=False,
-                                               other_re=False, vmhost=False)
+            return self._system_operation(
+                cmd, in_min=-1, at=None, all_re=False, other_re=False, vmhost=False
+            )
         except Exception as err:
             raise err
 
