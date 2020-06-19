@@ -10,6 +10,8 @@ WORKDIR /source
 
 ## Copy project inside the container
 ADD setup.py setup.py
+ADD versioneer.py versioneer.py
+ADD setup.cfg setup.cfg
 ADD requirements.txt requirements.txt
 ADD lib lib
 
@@ -22,7 +24,8 @@ RUN apk add --no-cache build-base python3-dev py-lxml \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && pip3 install . \
     && rm -rf /source/* \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* \
+    && rm -rf setup.cfg versioneer.py
 
 WORKDIR /scripts
 
