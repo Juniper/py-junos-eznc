@@ -17,35 +17,36 @@ import six
 
 """
 
-DEL = {'delete': 'delete'}              # Junos XML resource delete
-REN = {'rename': 'rename'}              # Junos XML resource rename
-ACTIVATE = {'active': 'active'}         # activate resource
-DEACTIVATE = {'inactive': 'inactive'}   # deactivate resource
-REPLACE = {'replace': 'replace'}         # replace elements
+DEL = {"delete": "delete"}  # Junos XML resource delete
+REN = {"rename": "rename"}  # Junos XML resource rename
+ACTIVATE = {"active": "active"}  # activate resource
+DEACTIVATE = {"inactive": "inactive"}  # deactivate resource
+REPLACE = {"replace": "replace"}  # replace elements
 
 
 def NAME(name):
-    return {'name': name}
+    return {"name": name}
 
 
 def INSERT(cmd):
-    return {'insert': cmd}
+    return {"insert": cmd}
 
-BEFORE = {'insert': 'before'}
-AFTER = {'insert': 'after'}
+
+BEFORE = {"insert": "before"}
+AFTER = {"insert": "after"}
 
 # used with <get-configuration> to load only the object identifiers and
 # not all the subsequent configuration
 
-NAMES_ONLY = {'recurse': "false"}
+NAMES_ONLY = {"recurse": "false"}
 
 # for <get-configuration>, attributes to retrieve from apply-groups
-INHERIT = {'inherit': 'inherit'}
-INHERIT_GROUPS = {'inherit': 'inherit', 'groups': 'groups'}
-INHERIT_DEFAULTS = {'inherit': 'defaults', 'groups': 'groups'}
+INHERIT = {"inherit": "inherit"}
+INHERIT_GROUPS = {"inherit": "inherit", "groups": "groups"}
+INHERIT_DEFAULTS = {"inherit": "defaults", "groups": "groups"}
 
 # XSLT for on-box commit script
-conf_xslt = '''\
+conf_xslt = """\
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="xml" indent="yes"/>
     <xsl:strip-space elements="*"/>
@@ -80,13 +81,13 @@ conf_xslt = '''\
             <xsl:otherwise/>
         </xsl:choose>
     </xsl:template>
-</xsl:stylesheet>'''
+</xsl:stylesheet>"""
 
 conf_xslt_root = etree.XML(conf_xslt)
 conf_transform = etree.XSLT(conf_xslt_root)
 
 
-normalize_xslt = '''\
+normalize_xslt = """\
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="no"/>
 
@@ -115,11 +116,11 @@ normalize_xslt = '''\
     <xsl:template match="text()">
         <xsl:value-of select="normalize-space(.)"/>
     </xsl:template>
-</xsl:stylesheet>'''
+</xsl:stylesheet>"""
 
 
 # XSLT to strip comments
-strip_comments_xslt = '''\
+strip_comments_xslt = """\
 <xsl:stylesheet version="1.0"
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output omit-xml-declaration="yes" indent="yes"/>
@@ -131,13 +132,13 @@ strip_comments_xslt = '''\
         </xsl:copy>
    </xsl:template>
    <xsl:template match="comment()"/>
-</xsl:stylesheet>'''
+</xsl:stylesheet>"""
 
 strip_xslt_root = etree.XML(strip_comments_xslt)
 strip_comments_transform = etree.XSLT(strip_xslt_root)
 
 # XSLT to strip <rpc-error> elements
-strip_rpc_error_xslt = '''
+strip_rpc_error_xslt = """
 <xsl:stylesheet version="1.0"
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output omit-xml-declaration="yes" indent="yes"/>
@@ -151,7 +152,7 @@ strip_rpc_error_xslt = '''
 
     <xsl:template match="rpc-error"/>
 </xsl:stylesheet>
-'''
+"""
 
 strip_rpc_error_root = etree.XML(strip_rpc_error_xslt)
 strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
@@ -161,9 +162,9 @@ def remove_namespaces(xml):
     for elem in xml.getiterator():
         if elem.tag is etree.Comment:
             continue
-        i = elem.tag.find('}')
+        i = elem.tag.find("}")
         if i > 0:
-            elem.tag = elem.tag[i + 1:]
+            elem.tag = elem.tag[i + 1 :]
     return xml
 
 
@@ -173,15 +174,15 @@ def remove_namespaces_and_spaces(xml):
             continue
         # Remove namespace from attributes
         for k, v in elem.attrib.items():
-            i = k.find('}')
+            i = k.find("}")
             if i >= 0:
-                del (elem.attrib[k])
-                k = k[i + 1:]
+                del elem.attrib[k]
+                k = k[i + 1 :]
                 elem.set(k, v)
         # Remove namespace from tags
-        i = elem.tag.find('}')
+        i = elem.tag.find("}")
         if i >= 0:
-            elem.tag = elem.tag[i + 1:]
+            elem.tag = elem.tag[i + 1 :]
         # remove white spaces from text
         if elem.text:
             elem.text = elem.text.strip()
@@ -195,35 +196,36 @@ def rpc_error(rpc_xml):
     """
     remove_namespaces(rpc_xml)
 
-    if 'rpc-reply' == rpc_xml.tag:
+    if "rpc-reply" == rpc_xml.tag:
         rpc_xml = rpc_xml[0]
 
     def find_strip(x):
         ele = rpc_xml.find(x)
-        return ele.text.strip() if ele is not None and ele.text is not None \
-            else None
+        return ele.text.strip() if ele is not None and ele.text is not None else None
 
     this_err = {}
-    this_err['severity'] = find_strip('error-severity')
-    this_err['source'] = find_strip('source-daemon')
-    this_err['edit_path'] = find_strip('error-path')
-    this_err['bad_element'] = find_strip('error-info/bad-element')
-    this_err['message'] = find_strip('error-message')
+    this_err["severity"] = find_strip("error-severity")
+    this_err["source"] = find_strip("source-daemon")
+    this_err["edit_path"] = find_strip("error-path")
+    this_err["bad_element"] = find_strip("error-info/bad-element")
+    this_err["message"] = find_strip("error-message")
 
     return this_err
 
 
 def cscript_conf(reply):
     try:
-        device_params = {'name': 'junos'}
+        device_params = {"name": "junos"}
         device_handler = manager.make_device_handler(device_params)
         transform_reply = device_handler.transform_reply()
         return NCElement(reply, transform_reply)._NCElement__doc
     except:
         return None
 
+
 # xslt to remove prefix like junos:ns
-strip_namespaces_prefix = six.b("""<?xml version="1.0" encoding="UTF-8" ?>
+strip_namespaces_prefix = six.b(
+    """<?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" indent="no" omit-xml-declaration="no" />
 
@@ -244,4 +246,5 @@ strip_namespaces_prefix = six.b("""<?xml version="1.0" encoding="UTF-8" ?>
           <xsl:value-of select="." />
         </xsl:attribute>
     </xsl:template>
-</xsl:stylesheet>""")
+</xsl:stylesheet>"""
+)

@@ -8,14 +8,13 @@ from nose.plugins.attrib import attr
 from jnpr.junos.exception import RpcTimeoutError
 
 
-@attr('functional')
+@attr("functional")
 class TestCore(unittest.TestCase):
-
     @classmethod
     def setUpClass(self):
         from jnpr.junos import Device
-        self.dev = Device(host='xxxx',
-                          user='jenkins', password='password')
+
+        self.dev = Device(host="xxxx", user="jenkins", password="password")
         self.dev.open()
 
     @classmethod
@@ -26,7 +25,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(self.dev.connected, True)
 
     def test_device_facts(self):
-        assert self.dev.facts['hostname'] == 'highlife'
+        assert self.dev.facts["hostname"] == "highlife"
 
     def test_device_get_timeout(self):
         assert self.dev.timeout == 30
@@ -36,15 +35,15 @@ class TestCore(unittest.TestCase):
         assert self.dev.timeout == 35
 
     def test_device_cli(self):
-        self.assertTrue('qfx5100' in self.dev.cli('show version'))
+        self.assertTrue("qfx5100" in self.dev.cli("show version"))
 
     def test_device_rpc(self):
-        res = self.dev.rpc.get_route_information(destination='10.48.21.71')
-        self.assertEqual(res.tag, 'route-information')
+        res = self.dev.rpc.get_route_information(destination="10.48.21.71")
+        self.assertEqual(res.tag, "route-information")
 
     def test_device_rpc_format_text(self):
-        res = self.dev.rpc.get_interface_information({'format': 'text'})
-        self.assertEqual(res.tag, 'output')
+        res = self.dev.rpc.get_interface_information({"format": "text"})
+        self.assertEqual(res.tag, "output")
 
     def test_device_rpc_timeout(self):
         with self.assertRaises(RpcTimeoutError):
@@ -52,12 +51,13 @@ class TestCore(unittest.TestCase):
 
     def test_device_rpc_normalize_true(self):
         rsp = self.dev.rpc.get_interface_information(
-            interface_name='ge-0/0/1', normalize=True)
-        self.assertEqual(rsp.xpath('physical-interface/name')[0].text,
-                         'ge-0/0/1')
+            interface_name="ge-0/0/1", normalize=True
+        )
+        self.assertEqual(rsp.xpath("physical-interface/name")[0].text, "ge-0/0/1")
 
     def test_load_config(self):
         from jnpr.junos.utils.config import Config
+
         cu = Config(self.dev)
         data = """interfaces {
            ge-1/0/0 {
@@ -68,7 +68,7 @@ class TestCore(unittest.TestCase):
           }
         }
         """
-        cu.load(data, format='text')
+        cu.load(data, format="text")
         self.assertTrue(cu.commit_check())
         if cu.commit_check():
             cu.rollback()

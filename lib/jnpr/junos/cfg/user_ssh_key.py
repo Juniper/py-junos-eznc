@@ -30,15 +30,14 @@ class UserSSHKey(Resource):
 
     def _xml_at_top(self):
         key_t, key_v = self._name
-        return E.system(E.login(E.user(
-            E.name(self.P.name),
-            E.authentication(
-                E(key_t, E.name(key_v)
-                  )
-            ))))
+        return E.system(
+            E.login(
+                E.user(E.name(self.P.name), E.authentication(E(key_t, E.name(key_v))))
+            )
+        )
 
     def _xml_at_res(self, xml):
-        return xml.find('.//authentication/%s' % self._name[0])
+        return xml.find(".//authentication/%s" % self._name[0])
 
     def _xml_to_py(self, has_xml, has_py):
         Resource._r_has_xml_status(has_xml, has_py)
@@ -68,7 +67,7 @@ class UserSSHKey(Resource):
 
         if path is not None:
             # snarf the file into key_value, yo!
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 key_value = f.read().strip()
 
         # extract some data from the key value, this will either
@@ -76,7 +75,7 @@ class UserSSHKey(Resource):
         # the type correctly in the RPC.
 
         vt = key_value[0:7]
-        key_map = {'ssh-rsa': 'ssh-rsa', 'ssh-dss': 'ssh-dsa'}
+        key_map = {"ssh-rsa": "ssh-rsa", "ssh-dss": "ssh-dsa"}
         key_type = key_map.get(vt)
         if key_type is None:
             raise RuntimeError("Unknown ssh public key file type: %s" % vt)
@@ -94,7 +93,7 @@ class UserSSHKey(Resource):
 
     def _r_list(self):
         # the key list comes from the parent object.
-        self._rlist = self.P['$sshkeys']
+        self._rlist = self.P["$sshkeys"]
 
     def _r_catalog(self):
         # no catalog but the keys

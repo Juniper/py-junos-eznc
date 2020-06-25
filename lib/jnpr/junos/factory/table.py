@@ -15,7 +15,7 @@ _TSFMT = "%Y%m%d%H%M%S"
 
 class Table(object):
     ITEM_XPATH = None
-    ITEM_NAME_XPATH = 'name'
+    ITEM_NAME_XPATH = "name"
     VIEW = None
     USE_FILTER = None
 
@@ -37,6 +37,7 @@ class Table(object):
             self._use_filter = self._use_filter and self._dev._use_filter
 
             # -------------------------------------------------------------------------
+
     # PROPERTIES
     # -------------------------------------------------------------------------
 
@@ -100,7 +101,7 @@ class Table(object):
                 keys.append(this.xpath(k)[0].text)
             except:
                 # Case where key is provided like key: re-name | Null
-                if ' | ' in k and 'Null' in k:
+                if " | " in k and "Null" in k:
                     continue
                 keys.append(None)
         return tuple(keys)
@@ -136,11 +137,13 @@ class Table(object):
         if isinstance(key_value, str):
             # Check if pipe is in the key_value, if so append xpath
             # to each value
-            if ' | ' in key_value:
-                return self._keys_simple(' | '.join(
-                    [xpath + '/' + x for x in key_value.split(' | ') if
-                     x != 'Null']))
-            return self._keys_simple(xpath + '/' + key_value)
+            if " | " in key_value:
+                return self._keys_simple(
+                    " | ".join(
+                        [xpath + "/" + x for x in key_value.split(" | ") if x != "Null"]
+                    )
+                )
+            return self._keys_simple(xpath + "/" + key_value)
 
         # user explicitly passed key as Null in Table
         if key_value is None:
@@ -148,8 +151,8 @@ class Table(object):
 
         if not isinstance(key_value, list):
             raise RuntimeError(
-                "What to do with key, table:'%s'" %
-                self.__class__.__name__)
+                "What to do with key, table:'%s'" % self.__class__.__name__
+            )
 
         # ok, so it's a list, which means we need to extract tuple values
         return self._keys_composite(xpath, key_value)
@@ -242,7 +245,7 @@ class Table(object):
             fname += "_%s" % append
 
         path = fname + fext
-        return etree.ElementTree(self.xml).write(open(path, 'wb'))
+        return etree.ElementTree(self.xml).write(open(path, "wb"))
 
     def to_json(self):
         """
@@ -323,8 +326,8 @@ class Table(object):
                 kv = []
                 for k, v in zip(namekey_xpath, find_value):
                     if v is not None:
-                        kv.append(xnkv.format(k.replace('_', '-'), v))
-                xpf = ''.join(kv)
+                        kv.append(xnkv.format(k.replace("_", "-"), v))
+                xpf = "".join(kv)
                 return item_xpath + xpf
 
         # ---[END: get_xpath ] ------------------------------------------------
