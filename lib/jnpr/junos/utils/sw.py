@@ -1083,7 +1083,11 @@ class SW(Util):
                     # REs produces <output> messages and
                     # <request-reboot-status> messages.
                     output_msg = "\n".join(
-                        [i.text for i in rsp.getparent().findall("output") if i.text is not None]
+                        [
+                            i.text
+                            for i in rsp.getparent().findall("output")
+                            if i.text is not None
+                        ]
                     )
                     if output_msg is not "":
                         got = output_msg
