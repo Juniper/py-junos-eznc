@@ -617,13 +617,13 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW.safe_copy")
     def test_sw_safe_install_copy_fail(self, mock_copy):
         mock_copy.return_value = False
-        output = self.sw.install('file')
+        output = self.sw.install("file")
         self.assertFalse(output[0])
 
     @patch("jnpr.junos.utils.sw.SW.validate")
     def test_sw_install_validate(self, mock_validate):
         mock_validate.return_value = False
-        output = self.sw.install('file', validate=True, no_copy=True)
+        output = self.sw.install("file", validate=True, no_copy=True)
         self.assertFalse(output[0])
 
     @patch(builtin_string + ".print")
@@ -894,7 +894,7 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.Device.execute")
     def test_sw_check_pending_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        package = 'test.tgz'
+        package = "test.tgz"
         output = self.sw.install(package)
         self.assertFalse(output[0])
 

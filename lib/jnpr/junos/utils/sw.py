@@ -931,8 +931,8 @@ class SW(Util):
                             force_copy=force_copy,
                         )
                         if copy_ok is False:
-                            return False,"File couldn't be copied"
-                    pkg = remote_path + '/' + path.basename(pkg)
+                            return False, "File couldn't be copied"
+                    pkg = remote_path + "/" + path.basename(pkg)
 
                 remote_pkg_set.append(pkg)
         else:
@@ -956,7 +956,7 @@ class SW(Util):
                         remote_package, issu, nssu, dev_timeout=timeout
                     )
                     if v_ok is not True:
-                        return v_ok,"Package validation failed"
+                        return v_ok, "Package validation failed"
             else:
                 if vmhost is True:
                     # Need to pass the no_validate option via kwargs.
