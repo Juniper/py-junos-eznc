@@ -1248,17 +1248,14 @@ class SW(Util):
                 cmd = E("media")
 
         try:
-            # For zweroize we don't get a response similar to reboot,shutdown.
+            # For zeroize we don't get a response similar to reboot, shutdown.
             # In ansible it was passed even if rpc-reply was not coming.
             # Code is added here to reply the message else pass an empty string.
             rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
-            got = ""
             output_msg = "\n".join(
                 [i.text for i in rsp.xpath("//message") if i.text is not None]
             )
-            if output_msg is not "":
-                got = output_msg
-            return got
+            return output_msg
         except Exception as err:
             raise err
 
