@@ -12,10 +12,6 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
-import warnings
-
-warnings.simplefilter("default", PendingDeprecationWarning)
-
 # 3rd-party modules
 from lxml.builder import E
 from lxml import etree
@@ -315,7 +311,10 @@ class SW(Util):
             [i.text for i in got.findall("output") if i.text is not None]
         )
         self.log("software pkgadd package-result: %s\nOutput: %s" % (rc, output_msg))
-        return rc == 0
+        if rc == 0:
+            return True, output_msg
+        else:
+            return False, output_msg
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
@@ -930,7 +929,7 @@ class SW(Util):
                             force_copy=force_copy,
                         )
                         if copy_ok is False:
-                            return False, "File couldn't be copied"
+                            return False, "Package %s couldn't be copied" % pkg
                     pkg = remote_path + "/" + path.basename(pkg)
 
                 remote_pkg_set.append(pkg)
@@ -987,7 +986,7 @@ class SW(Util):
                             "installing software on VC member: {} ... please "
                             "be patient ...".format(vc_id)
                         )
-                        ok &= self.pkgadd(
+                        ok = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
                             member=vc_id,
@@ -998,9 +997,8 @@ class SW(Util):
                 else:
                     # then this is a device with two RE that supports the "re0"
                     # and "re1" options to the command (M, MX tested only)
-                    ok = True
                     _progress("installing software on RE0 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    ok = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re0=True,
@@ -1008,7 +1006,7 @@ class SW(Util):
                         **kwargs
                     )
                     _progress("installing software on RE1 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    ok = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re1=True,
