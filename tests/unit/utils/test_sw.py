@@ -892,6 +892,38 @@ class TestSW(unittest.TestCase):
         self.assertTrue("Shutdown NOW" in self.sw.poweroff())
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_halt(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertTrue("Shutdown NOW" in self.sw.halt())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_halt_exception(self, mock_execute):
+        rsp = etree.XML("<rpc-reply><a>test</a></rpc-reply>")
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.halt)
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_halt_multi_re_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.sw._multi_VC = False
+        self.assertTrue("Shutdown NOW" in self.sw.halt())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        test_str = "System will be rebooted and may not boot without configuration"
+        self.assertTrue(test_str in self.sw.zeroize())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_exception(self, mock_execute):
+        rsp = etree.XML("<rpc-reply><a>test</a></rpc-reply>")
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.zeroize)
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_check_pending_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"

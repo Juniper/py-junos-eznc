@@ -1,0 +1,43 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/20.2I0/junos">
+    <xnm:warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+        <message>
+            System will be rebooted and may not boot without configuration
+        </message>
+    </xnm:warning>
+    <rpc junos:tag-type="confirm-choice">
+        <select-choice>
+            <choice-item>
+                <name>yes</name>
+                <help>Perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <choice-item>
+                <name>no</name>
+                <help>Don't perform the operation</help>
+                <expandable/>
+            </choice-item>
+            <default>no</default>
+            <prompt>Erase all data, including configuration and log files? [yes,no] (no) </prompt>
+        </select-choice>
+    </rpc>
+    <multi-routing-engine-results>
+        <multi-routing-engine-item>
+            <re-name>re1</re-name>
+            <warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+                <message>ipsec-key-management subsystem not running - not needed by configuration.</message>
+                <reason>
+                    <daemon>ipsec-key-management</daemon>
+                    <process-not-configured/>
+                </reason>
+            </warning>
+            <warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+                <message>zeroizing re1</message>
+            </warning>
+        </multi-routing-engine-item>
+    </multi-routing-engine-results>
+    <xnm:warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+        <message>
+            zeroizing re0
+        </message>
+    </xnm:warning>
+</rpc-reply>
