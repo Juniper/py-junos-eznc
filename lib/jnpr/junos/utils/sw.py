@@ -311,10 +311,7 @@ class SW(Util):
             [i.text for i in got.findall("output") if i.text is not None]
         )
         self.log("software pkgadd package-result: %s\nOutput: %s" % (rc, output_msg))
-        if rc == 0:
-            return True, output_msg
-        else:
-            return False, output_msg
+        return rc == 0, output_msg
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
