@@ -12,10 +12,6 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
-import warnings
-
-warnings.simplefilter("default", PendingDeprecationWarning)
-
 # 3rd-party modules
 from lxml.builder import E
 from lxml import etree
@@ -315,7 +311,7 @@ class SW(Util):
             [i.text for i in got.findall("output") if i.text is not None]
         )
         self.log("software pkgadd package-result: %s\nOutput: %s" % (rc, output_msg))
-        return rc == 0
+        return rc == 0, output_msg
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
@@ -859,10 +855,6 @@ class SW(Util):
             * ``True`` when the installation is successful
             * ``False`` otherwise
         """
-        warnings.warn(
-            "sw.install interface bool response is going to change " "in next release.",
-            PendingDeprecationWarning,
-        )
         if issu is True and nssu is True:
             raise TypeError("install function can either take issu or nssu not both")
         elif (issu is True or nssu is True) and (
@@ -934,8 +926,9 @@ class SW(Util):
                             force_copy=force_copy,
                         )
                         if copy_ok is False:
-                            return False
+                            return False, "Package %s couldn't be copied" % pkg
                     pkg = remote_path + "/" + path.basename(pkg)
+
                 remote_pkg_set.append(pkg)
         else:
             raise ValueError("proper value for either package or pkg_set is missing")
@@ -958,7 +951,7 @@ class SW(Util):
                         remote_package, issu, nssu, dev_timeout=timeout
                     )
                     if v_ok is not True:
-                        return v_ok
+                        return v_ok, "Package validation failed"
             else:
                 if vmhost is True:
                     # Need to pass the no_validate option via kwargs.
@@ -982,7 +975,7 @@ class SW(Util):
             else:
                 # we need to update multiple devices
                 if self._multi_VC is True:
-                    ok = True
+                    ok = True, ""
                     # extract the VC number out of the _RE_list
                     vc_members = [re.search("(\d+)", x).group(1) for x in self._RE_list]
                     for vc_id in vc_members:
@@ -990,20 +983,20 @@ class SW(Util):
                             "installing software on VC member: {} ... please "
                             "be patient ...".format(vc_id)
                         )
-                        ok &= self.pkgadd(
+                        bool_ret, msg = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs
                         )
+                        ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
                 else:
                     # then this is a device with two RE that supports the "re0"
                     # and "re1" options to the command (M, MX tested only)
-                    ok = True
                     _progress("installing software on RE0 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    ok = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re0=True,
@@ -1011,13 +1004,14 @@ class SW(Util):
                         **kwargs
                     )
                     _progress("installing software on RE1 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    bool_ret, msg = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs
                     )
+                    ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
 
         elif len(remote_pkg_set) > 1 and self._mixed_VC:
