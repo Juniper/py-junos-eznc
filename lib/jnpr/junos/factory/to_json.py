@@ -10,6 +10,7 @@ class TableJSONEncoder(json.JSONEncoder):
     """
     Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
     """
+
     def default(self, obj):
         from jnpr.junos.factory.view import View
         from jnpr.junos.factory.table import Table
@@ -36,6 +37,7 @@ class TableViewJSONEncoder(json.JSONEncoder):
     """
     Used to encode Table/View instances into JSON.  See :meth:`Table.to_json`.
     """
+
     def default(self, obj):
         from jnpr.junos.factory.view import View
         from jnpr.junos.factory.table import Table
@@ -53,14 +55,17 @@ class PyEzJSONEncoder(json.JSONEncoder):
     """
     Used to encode facts and rpc instances into JSON.`.
     """
+
     def default(self, obj):
         from jnpr.junos.facts.swver import version_info
+
         if isinstance(obj, version_info):
             obj = obj.v_dict
         elif isinstance(obj, etree._Element):
+
             def recursive_dict(element):
-                return (element.tag,
-                        dict(map(recursive_dict, element)) or element.text)
+                return (element.tag, dict(map(recursive_dict, element)) or element.text)
+
             # JSON does not support comments - strip them
             obj = strip_comments_transform(deepcopy(obj)).getroot()
             _, obj = recursive_dict(obj)

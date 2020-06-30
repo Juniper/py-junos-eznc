@@ -6,10 +6,12 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'switch_style': "A string which indicates the Ethernet "
-                            "switching syntax style supported by the device. "
-                            "Possible values are: 'BRIDGE_DOMAIN', 'VLAN', "
-                            "'VLAN_L2NG', or 'NONE'.", }
+    return {
+        "switch_style": "A string which indicates the Ethernet "
+        "switching syntax style supported by the device. "
+        "Possible values are: 'BRIDGE_DOMAIN', 'VLAN', "
+        "'VLAN_L2NG', or 'NONE'.",
+    }
 
 
 def get_facts(device):
@@ -22,10 +24,10 @@ def get_facts(device):
         # RPC if VLAN style (Older EX, QFX, and SRX)
         # or if VLAN_L2NG (aka ELS) style (Newer EX and QFX)
         rsp = device.rpc.get_ethernet_switching_table_information(summary=True)
-        if rsp.tag == 'l2ng-l2ald-rtb-macdb':
-            switch_style = 'VLAN_L2NG'
-        elif rsp.tag == 'ethernet-switching-table-information':
-            switch_style = 'VLAN'
+        if rsp.tag == "l2ng-l2ald-rtb-macdb":
+            switch_style = "VLAN_L2NG"
+        elif rsp.tag == "ethernet-switching-table-information":
+            switch_style = "VLAN"
     except RpcError:
         pass
 
@@ -42,20 +44,21 @@ def get_facts(device):
             # However, on the backup RE for devices that really do support
             # bridge domains, we get an RpcError stating:
             # 'the l2-learning subsystem is not running'
-            rsp = device.rpc.cli('show bridge mac-table count',
-                                 format='xml',
-                                 normalize=True)
-            if rsp.tag == 'l2ald-rtb-mac-count':
-                switch_style = 'BRIDGE_DOMAIN'
+            rsp = device.rpc.cli(
+                "show bridge mac-table count", format="xml", normalize=True
+            )
+            if rsp.tag == "l2ald-rtb-mac-count":
+                switch_style = "BRIDGE_DOMAIN"
             else:
-                switch_style = 'NONE'
+                switch_style = "NONE"
         except RpcError as err:
             # Probably a PTX.
-            if err.rpc_error['bad_element'] == 'bridge':
-                switch_style = 'NONE'
+            if err.rpc_error["bad_element"] == "bridge":
+                switch_style = "NONE"
             # Probably a non-master RE on an MX.
-            elif (err.rpc_error['message'] ==
-                  'the l2-learning subsystem is not running'):
-                switch_style = 'BRIDGE_DOMAIN'
+            elif err.rpc_error["message"] == "the l2-learning subsystem is not running":
+                switch_style = "BRIDGE_DOMAIN"
 
-    return {'switch_style': switch_style, }
+    return {
+        "switch_style": switch_style,
+    }

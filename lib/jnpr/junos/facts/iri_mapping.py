@@ -3,12 +3,14 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'_iri_hostname': 'A dictionary keyed by internal routing instance '
-                             'ip addresses. The value of each key is the '
-                             'internal routing instance hostname for the ip',
-            '_iri_ip': 'A dictionary keyed by internal routing instance '
-                       'hostnames. The value of each key is the internal '
-                       'routing instance ip for the hostname', }
+    return {
+        "_iri_hostname": "A dictionary keyed by internal routing instance "
+        "ip addresses. The value of each key is the "
+        "internal routing instance hostname for the ip",
+        "_iri_ip": "A dictionary keyed by internal routing instance "
+        "hostnames. The value of each key is the internal "
+        "routing instance ip for the hostname",
+    }
 
 
 def get_facts(device):
@@ -18,13 +20,13 @@ def get_facts(device):
     iri_hostname = None
     iri_ip = None
 
-    rsp = device.rpc.file_show(filename='/etc/hosts.junos', normalize=False)
+    rsp = device.rpc.file_show(filename="/etc/hosts.junos", normalize=False)
 
     if rsp is not None:
-        hosts_file_content = rsp.findtext('.', default='')
+        hosts_file_content = rsp.findtext(".", default="")
         if hosts_file_content is not None:
             for line in hosts_file_content.splitlines():
-                (line, _, _) = line.partition('#')
+                (line, _, _) = line.partition("#")
                 components = line.split(None)
                 if len(components) > 1:
                     ip = components[0]
@@ -44,12 +46,19 @@ def get_facts(device):
                             iri_ip[host] = [ip]
                     for host in hosts:
                         # Handle templates with %d
-                        if '%d' in host:
-                            octets = ip.split('.', 3)
+                        if "%d" in host:
+                            octets = ip.split(".", 3)
                             for count in range(255):
-                                t_ip = (octets[0] + '.' + octets[1] +
-                                        '.' + str(count) + '.' + octets[3])
-                                t_host = host.replace('%d', str(count))
+                                t_ip = (
+                                    octets[0]
+                                    + "."
+                                    + octets[1]
+                                    + "."
+                                    + str(count)
+                                    + "."
+                                    + octets[3]
+                                )
+                                t_host = host.replace("%d", str(count))
                                 if t_ip in iri_hostname:
                                     iri_hostname[t_ip].append(t_host)
                                 else:
@@ -59,5 +68,7 @@ def get_facts(device):
                                 else:
                                     iri_ip[t_host] = [t_ip]
 
-    return {'_iri_hostname': iri_hostname,
-            '_iri_ip': iri_ip, }
+    return {
+        "_iri_hostname": iri_hostname,
+        "_iri_ip": iri_ip,
+    }

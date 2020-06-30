@@ -6,7 +6,7 @@ from jnpr.junos.transport.tty_netconf import tty_netconf
 
 logger = logging.getLogger("jnpr.junos.tty")
 
-__all__ = ['Terminal']
+__all__ = ["Terminal"]
 
 # =========================================================================
 # Terminal class
@@ -29,9 +29,10 @@ class Terminal(object):
     device supports auto-DHCP, but is not an option due to the
     specific situation
     """
-    TIMEOUT = 0.2           # serial readline timeout, seconds
-    EXPECT_TIMEOUT = 10     # total read timeout, seconds
-    LOGIN_RETRY = 20         # total number of passes thru login state-machine
+
+    TIMEOUT = 0.2  # serial readline timeout, seconds
+    EXPECT_TIMEOUT = 10  # total read timeout, seconds
+    LOGIN_RETRY = 20  # total number of passes thru login state-machine
 
     _ST_INIT = 0
     _ST_LOADER = 1
@@ -43,18 +44,18 @@ class Terminal(object):
     _ST_TTY_OPTION = 7
     _ST_TTY_HOTKEY = 8
 
-    _re_pat_login = '(?P<login>ogin:\s*$)'
+    _re_pat_login = "(?P<login>ogin:\s*$)"
 
     _RE_PAT = [
-        '(?P<loader>oader>\s*$)',
+        "(?P<loader>oader>\s*$)",
         _re_pat_login,
-        '(?P<passwd>assword:\s*$)',
-        '(?P<badpasswd>ogin incorrect)',
-        '(?P<netconf_closed><!-- session end at .*-->\s*)',
-        '(?P<shell>%|#|(~\$)\s*$)',
+        "(?P<passwd>assword:\s*$)",
+        "(?P<badpasswd>ogin incorrect)",
+        "(?P<netconf_closed><!-- session end at .*-->\s*)",
+        "(?P<shell>%|#|(~\$)\s*$)",
         '(?P<cli>[^\\-"]>\s*$)',
-        '(?P<option>Enter your option:\s*$)',
-        '(?P<hotkey>connection: <CTRL>Z)',
+        "(?P<option>Enter your option:\s*$)",
+        "(?P<hotkey>connection: <CTRL>Z)",
     ]
 
     # -----------------------------------------------------------------------
@@ -75,14 +76,14 @@ class Terminal(object):
           state-machine
         """
         # logic args
-        self.hostname = self.__dict__.get('host')
-        self.user = kvargs.get('user', 'root')
-        self.passwd = kvargs.get('passwd', '')
-        self.cs_user = kvargs.get('cs_user')
-        self.cs_passwd = kvargs.get('cs_passwd')
-        self.login_attempts = kvargs.get('attempts') or self.LOGIN_RETRY
-        self.console_has_banner = kvargs.get('console_has_banner') or False
-        self._huge_tree = kvargs.get('huge_tree', False)
+        self.hostname = self.__dict__.get("host")
+        self.user = kvargs.get("user", "root")
+        self.passwd = kvargs.get("passwd", "")
+        self.cs_user = kvargs.get("cs_user")
+        self.cs_passwd = kvargs.get("cs_passwd")
+        self.login_attempts = kvargs.get("attempts") or self.LOGIN_RETRY
+        self.console_has_banner = kvargs.get("console_has_banner") or False
+        self._huge_tree = kvargs.get("huge_tree", False)
 
         # misc setup
         self.nc = tty_netconf(self)
@@ -103,16 +104,16 @@ class Terminal(object):
         open the TTY connection and login.  once the login is successful,
         start the NETCONF XML API process
         """
-        logger.info('TTY: connecting to TTY:{} ...'.format(self.tty_name))
+        logger.info("TTY: connecting to TTY:{} ...".format(self.tty_name))
         self._tty_open()
 
-        logger.info('TTY: logging in......')
+        logger.info("TTY: logging in......")
 
         self.state = self._ST_INIT
         self._login_state_machine()
 
         # now start NETCONF XML
-        logger.info('TTY: OK.....starting NETCONF')
+        logger.info("TTY: OK.....starting NETCONF")
         self.nc.open(at_shell=self.at_shell)
         return True
 
@@ -120,7 +121,7 @@ class Terminal(object):
         """
         cleanly logout of the TTY
         """
-        logger.info('logout: logging out.....')
+        logger.info("logout: logging out.....")
         self.nc.close()
         self._logout_state_machine()
         return True
@@ -131,7 +132,7 @@ class Terminal(object):
 
     def _logout_state_machine(self, attempt=0):
         if 10 == attempt:
-            raise RuntimeError('logout_sm_failure')
+            raise RuntimeError("logout_sm_failure")
 
         prompt, found = self.read_prompt()
 
@@ -140,20 +141,20 @@ class Terminal(object):
             self._tty_close()
 
         def _ev_shell():
-            self.write('exit')
+            self.write("exit")
 
         def _ev_cli():
-            self.write('exit')
+            self.write("exit")
 
         # Connection closed by foreign host
         def _ev_netconf_closed():
             return True
 
         _ev_tbl = {
-            'login': _ev_login,
-            'shell': _ev_shell,
-            'cli': _ev_cli,
-            'netconf_closed': _ev_netconf_closed
+            "login": _ev_login,
+            "shell": _ev_shell,
+            "cli": _ev_cli,
+            "netconf_closed": _ev_netconf_closed,
         }
 
         # hack for now
@@ -165,7 +166,7 @@ class Terminal(object):
         else:
             return True
 
-        if found == 'login':
+        if found == "login":
             return True
 
         else:
@@ -177,14 +178,14 @@ class Terminal(object):
     # -----------------------------------------------------------------------
     def _login_state_machine(self, attempt=0):
         if self.login_attempts == attempt:
-            raise RuntimeError('login_sm_failure')
+            raise RuntimeError("login_sm_failure")
 
         prompt, found = self.read_prompt()
 
         def _ev_loader():
             self.state = self._ST_LOADER
-            self.write('boot')
-            self.write('\n')
+            self.write("boot")
+            self.write("\n")
             sleep(300)
             self._login_state_machine(attempt=0)
             self._loader += 1
@@ -201,7 +202,7 @@ class Terminal(object):
 
         def _ev_bad_passwd():
             self.state = self._ST_BAD_PASSWD
-            self.write('\n')
+            self.write("\n")
             self._badpasswd += 1
             if self._badpasswd == 2:
                 # raise RuntimeError("Bad username/password")
@@ -218,17 +219,17 @@ class Terminal(object):
                     # if console connection has a banner or warning,
                     # use this hack
                     sleep(5)
-                    self.write('\n')
+                    self.write("\n")
                 else:
                     # @@@ this is still a hack - used by default
-                    self.write('<close-session/>')
+                    self.write("<close-session/>")
 
         def _ev_shell():
             if self.state == self._ST_INIT:
                 # this means that the shell was left
                 # open.  probably not a good thing,
                 # so issue a logging message, but move on.
-                logger.warning('login_warn: Shell login was open!!')
+                logger.warning("login_warn: Shell login was open!!")
 
             self.at_shell = True
             self.state = self._ST_DONE
@@ -239,7 +240,7 @@ class Terminal(object):
                 # this means that the shell was left open.  probably not a
                 # good thing, so issue a logging message, hit <ENTER> and try
                 # again just to be sure...
-                logger.warning('login_warn: waiting on TTY..... ')
+                logger.warning("login_warn: waiting on TTY..... ")
                 sleep(5)
                 #  return
 
@@ -255,14 +256,14 @@ class Terminal(object):
             self.write("\n")
 
         _ev_tbl = {
-            'loader': _ev_loader,
-            'login': _ev_login,
-            'passwd': _ev_passwd,
-            'badpasswd': _ev_bad_passwd,
-            'shell': _ev_shell,
-            'cli': _ev_cli,
-            'option': _ev_option,
-            'hotkey': _ev_hot_key
+            "loader": _ev_loader,
+            "login": _ev_login,
+            "passwd": _ev_passwd,
+            "badpasswd": _ev_bad_passwd,
+            "shell": _ev_shell,
+            "cli": _ev_cli,
+            "option": _ev_option,
+            "hotkey": _ev_hot_key,
         }
 
         _ev_tbl.get(found, _ev_tty_nologin)()
