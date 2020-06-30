@@ -975,7 +975,7 @@ class SW(Util):
             else:
                 # we need to update multiple devices
                 if self._multi_VC is True:
-                    ok = True
+                    ok = True, ""
                     # extract the VC number out of the _RE_list
                     vc_members = [re.search("(\d+)", x).group(1) for x in self._RE_list]
                     for vc_id in vc_members:
@@ -983,13 +983,14 @@ class SW(Util):
                             "installing software on VC member: {} ... please "
                             "be patient ...".format(vc_id)
                         )
-                        ok = self.pkgadd(
+                        bool_ret, msg = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs
                         )
+                        ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
                 else:
                     # then this is a device with two RE that supports the "re0"
@@ -1003,13 +1004,14 @@ class SW(Util):
                         **kwargs
                     )
                     _progress("installing software on RE1 ... please be patient ...")
-                    ok = self.pkgadd(
+                    bool_ret, msg = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs
                     )
+                    ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
 
         elif len(remote_pkg_set) > 1 and self._mixed_VC:

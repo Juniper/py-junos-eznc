@@ -629,18 +629,40 @@ class TestSW(unittest.TestCase):
     @patch(builtin_string + ".print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_mx(self, mock_pkgadd, mock_print):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        self.assertTrue(self.sw.install("file", no_copy=True, progress=True))
+        self.assertTrue(self.sw.install("file", no_copy=True, progress=True)[0])
+
+    @patch(builtin_string + ".print")
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_mx_msg_check(self, mock_pkgadd, mock_print):
+        # mock_pkgadd.return_value = True
+        mock_pkgadd.side_effect = [(True, "re0"), (True, "re1")]
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        self.assertEqual(msg, "re0\nre1")
+        self.assertTrue(bool_ret)
+
+    @patch(builtin_string + ".print")
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_mx_msg_check_failure(self, mock_pkgadd, mock_print):
+        # mock_pkgadd.return_value = True
+        mock_pkgadd.side_effect = [(True, "re0"), (False, "re1 install failed")]
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        self.assertEqual(msg, "re0\nre1 install failed")
+        self.assertFalse(bool_ret)
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.sw._multi_RE = True
         self.sw._multi_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", no_copy=True))
+        self.assertTrue(self.sw.install("file", no_copy=True)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc(self, mock_pkgadd):
@@ -651,7 +673,7 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.dev._facts = {
             "2RE": True,
             "domain": None,
@@ -932,8 +954,8 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_check_pending_install_RpcError_continue(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
-        self.assertTrue(self.sw.install("test.tgz", no_copy=True))
+        mock_pkgadd.return_value = True, "msg"
+        self.assertTrue(self.sw.install("test.tgz", no_copy=True)[0])
 
     def _myprogress(self, dev, report):
         pass
