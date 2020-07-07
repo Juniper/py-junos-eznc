@@ -1206,7 +1206,7 @@ class SW(Util):
             then the action is performed on the other REs in the system.
 
         :returns:
-            *rpc response message (string) if command successful
+            * rpc response message (string) if command successful
         """
         if self._dev.facts["_is_linux"]:
             cmd = E("request-shutdown-halt")
