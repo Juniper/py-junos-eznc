@@ -851,9 +851,9 @@ class SW(Util):
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
 
-        :returns:
-            * ``True`` when the installation is successful
-            * ``False`` otherwise
+        :returns: tuple(<status>, <msg>)
+            * status : ``True`` when the installation is successful and ``False`` otherwise
+            * msg : msg received as response or error message created
         """
         if issu is True and nssu is True:
             raise TypeError("install function can either take issu or nssu not both")
