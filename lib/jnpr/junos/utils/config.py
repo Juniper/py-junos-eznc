@@ -177,8 +177,9 @@ class Config(Util):
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
         are reported and available in the Exception errs.
+
         :param int timeout: If provided the command will wait for completion
-                            using the provided value as timeout (seconds).       
+                            using the provided value as timeout (seconds).
 
         :returns: ``True`` if commit-check is successful (no errors)
         :raises CommitError: When errors detected in candidate configuration.
