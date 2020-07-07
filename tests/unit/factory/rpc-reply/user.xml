@@ -1,4 +1,4 @@
-﻿<configuration changed-seconds="1435177642" changed-localtime="2015-06-24 13:27:22 PDT">
+<configuration changed-seconds="1435177642" changed-localtime="2015-06-24 13:27:22 PDT">
     <system group="global">
         <login group="global">
             <user group="global">
@@ -12,3 +12,4 @@
         </login>
     </system>
 </configuration>
+
