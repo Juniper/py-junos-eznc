@@ -6,10 +6,11 @@ LABEL net.juniper.description="Junos PyEZ library for Python in a lightweight co
 WORKDIR /source
 
 ## Copy project inside the container
-ADD setup.py setup.py
-ADD setup.cfg setup.cfg
-ADD requirements.txt requirements.txt
-ADD lib lib
+ADD setup.py .
+ADD setup.cfg .
+ADD versioneer.py .
+ADD requirements.txt .
+ADD lib .
 
 ## Install dependancies and PyEZ
 RUN apk add --no-cache build-base python3-dev py-lxml \
