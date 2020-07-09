@@ -21,7 +21,7 @@ class ViewFields(object):
         """ field is a string """
         if xpath is None:
             xpath = name
-        field = {name: {'xpath': xpath}}
+        field = {name: {"xpath": xpath}}
         self._prockvargs(field, name, **kvargs)
         self._fields.update(field)
         return self
@@ -40,9 +40,7 @@ class ViewFields(object):
         """
         if xpath is None:
             xpath = name
-        field = {
-            name: {'xpath': xpath, 'astype': astype}
-        }
+        field = {name: {"xpath": xpath, "astype": astype}}
         self._prockvargs(field, name, **kvargs)
         self._fields.update(field)
         return self
@@ -63,12 +61,10 @@ class ViewFields(object):
         field is an apply group, results in value of group attr if the xpath
         element has the associated group attribute.
         """
-        xpath = './{}/@group'.format(xpath)
+        xpath = "./{}/@group".format(xpath)
         return self.astype(name, xpath, str, **kvargs)
 
     def table(self, name, table):
         """ field is a RunstatTable """
-        self._fields.update({
-            name: {'table': table}
-        })
+        self._fields.update({name: {"table": table}})
         return self

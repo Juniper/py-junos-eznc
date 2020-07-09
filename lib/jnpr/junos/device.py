@@ -30,8 +30,11 @@ from jnpr.junos import exception as EzErrors
 from jnpr.junos.factcache import _FactCache
 from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator, \
-    ignoreWarnDecorator
+from jnpr.junos.decorators import (
+    timeoutDecorator,
+    normalizeDecorator,
+    ignoreWarnDecorator,
+)
 from jnpr.junos.exception import JSONLoadError, ConnectError
 
 # check for ncclient support for filter_xml. Remove these changes once ncclient
@@ -39,6 +42,7 @@ from jnpr.junos.exception import JSONLoadError, ConnectError
 # https://github.com/ncclient/ncclient/pull/324
 from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
 import inspect
+
 if sys.version_info.major >= 3:
     NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
 else:
@@ -58,7 +62,7 @@ class _MyTemplateLoader(jinja2.BaseLoader):
     """
 
     def __init__(self):
-        self.paths = ['.', os.path.join(_MODULEPATH, 'templates')]
+        self.paths = [".", os.path.join(_MODULEPATH, "templates")]
 
     def get_source(self, environment, template):
         def _in_path(dir):
@@ -79,14 +83,17 @@ class _MyTemplateLoader(jinja2.BaseLoader):
             source = f.read()
         return source, path, lambda: mtime == os.path.getmtime(path)
 
+
 _Jinja2ldr = jinja2.Environment(loader=_MyTemplateLoader())
 
 
 class _Connection(object):
-    ON_JUNOS = platform.system().upper() == 'JUNOS' or \
-        platform.release().startswith('JNPR') or \
-               os.path.isfile('/usr/share/cevo/cevo_version')
-    auto_probe = 0          # default is no auto-probe
+    ON_JUNOS = (
+        platform.system().upper() == "JUNOS"
+        or platform.release().startswith("JNPR")
+        or os.path.isfile("/usr/share/cevo/cevo_version")
+    )
+    auto_probe = 0  # default is no auto-probe
 
     # ------------------------------------------------------------------------
     # property: hostname
@@ -97,8 +104,11 @@ class _Connection(object):
         """
         :returns: the host-name of the Junos device.
         """
-        return self._hostname if (
-            self._hostname != 'localhost') else self.facts.get('hostname')
+        return (
+            self._hostname
+            if (self._hostname != "localhost")
+            else self.facts.get("hostname")
+        )
 
     # ------------------------------------------------------------------------
     # property: user
@@ -161,11 +171,12 @@ class _Connection(object):
             self._logfile = False
             return rc
 
-        if sys.version < '3':
+        if sys.version < "3":
             if not isinstance(value, file):
                 raise ValueError("value must be a file object")
         else:
             import io
+
             if not isinstance(value, io.TextIOWrapper):
                 raise ValueError("value must be a file object")
 
@@ -194,8 +205,9 @@ class _Connection(object):
         try:
             self._conn.timeout = int(value)
         except (ValueError, TypeError):
-            raise RuntimeError("could not convert timeout value of %s to an "
-                               "integer" % (value))
+            raise RuntimeError(
+                "could not convert timeout value of %s to an " "integer" % (value)
+            )
 
     # ------------------------------------------------------------------------
     # property: facts
@@ -206,7 +218,7 @@ class _Connection(object):
         """
         :returns: Device fact dictionary
         """
-        if self._fact_style != 'old' and self._fact_style != 'both':
+        if self._fact_style != "old" and self._fact_style != "both":
             raise RuntimeError("Old-style facts gathering is not in use!")
         if self._ofacts == {} and self.connected:
             self.facts_refresh()
@@ -255,48 +267,52 @@ class _Connection(object):
         master = None
 
         # Make sure the 'current_re' fact has a value
-        if self.facts.get('current_re') is not None:
+        if self.facts.get("current_re") is not None:
             # Typical master case
-            if 'master' in self.facts['current_re']:
+            if "master" in self.facts["current_re"]:
                 master = True
             # Typical backup case
-            elif 'backup' in self.facts['current_re']:
+            elif "backup" in self.facts["current_re"]:
                 master = False
             # Some single chassis and single RE platforms don't have
             # 'master' in the 'current_re' fact. It's best to check if it's a
             #  single chassis and single RE platform based on the
             # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
-            elif (self.facts.get('2RE') is False and
-                  self.facts.get('RE_hw_mi') is False and
-                  're0' in self.facts['current_re']):
+            elif (
+                self.facts.get("2RE") is False
+                and self.facts.get("RE_hw_mi") is False
+                and "re0" in self.facts["current_re"]
+            ):
                 master = True
             # Is it an SRX cluster?
             # If so, the cluster's "primary" is the "master"
-            elif self.facts.get('srx_cluster') is True:
-                if 'primary' in self.facts['current_re']:
+            elif self.facts.get("srx_cluster") is True:
+                if "primary" in self.facts["current_re"]:
                     master = True
                 else:
                     master = False
             else:
                 # Might be a GNF case.
-                if (self.re_name is not None and
-                        'gnf' in self.re_name and
-                        '-re' in self.re_name):
+                if (
+                    self.re_name is not None
+                    and "gnf" in self.re_name
+                    and "-re" in self.re_name
+                ):
                     # Get the name of the GNF from re_name/
                     # re_name will be in the format gnfX-reY
-                    (gnf, _) = self.re_name.split('-re', 1)
-                    if gnf + '-master' in self.facts.get('current_re'):
+                    (gnf, _) = self.re_name.split("-re", 1)
+                    if gnf + "-master" in self.facts.get("current_re"):
                         master = True
-                    elif gnf + '-backup' in self.facts.get('current_re'):
+                    elif gnf + "-backup" in self.facts.get("current_re"):
                         master = False
                 else:
                     # Might be a multi-chassis case where this RE is neither
                     # the master or the backup for the entire system. In that
                     # case, it's either a chassis master or a chassis backup.
-                    for re_state in self.facts['current_re']:
+                    for re_state in self.facts["current_re"]:
                         # Multi-chassis case. A chassis master/backup, but
                         # not the system master/backup.
-                        if '-backup' in re_state or '-master' in re_state:
+                        if "-backup" in re_state or "-master" in re_state:
                             master = False
                             break
         return master
@@ -328,9 +344,9 @@ class _Connection(object):
         uptime = None
         rsp = self.rpc.get_system_uptime_information(normalize=True)
         if rsp is not None:
-            element = rsp.find('.//system-booted-time/time-length')
+            element = rsp.find(".//system-booted-time/time-length")
             if element is not None:
-                uptime_string = element.get('seconds')
+                uptime_string = element.get("seconds")
                 if uptime_string is not None:
                     uptime = int(uptime_string)
         return uptime
@@ -363,12 +379,15 @@ class _Connection(object):
         re_name = None
 
         # Make sure the 'current_re' and 'hostname_info' facts have values
-        if (self.facts.get('current_re') is not None and
-           self.facts.get('hostname_info') is not None):
+        if (
+            self.facts.get("current_re") is not None
+            and self.facts.get("hostname_info") is not None
+        ):
             # re_name should be the intersection of the values in the
             # 'current_re' fact and the keys in the 'hostname_info' fact.
-            intersect = (set(self.facts['current_re']) &
-                         set(self.facts['hostname_info'].keys()))
+            intersect = set(self.facts["current_re"]) & set(
+                self.facts["hostname_info"].keys()
+            )
             # intersect should usually contain a single element (the RE's
             # name) if things worked correctly.
             if len(intersect) == 1:
@@ -377,23 +396,23 @@ class _Connection(object):
             elif len(intersect) == 0:
                 # Look for the first value
                 # in 'current_re' which contains '-re'.
-                for re_state in self.facts['current_re']:
-                    if '-re' in re_state:
+                for re_state in self.facts["current_re"]:
+                    if "-re" in re_state:
                         re_name = re_state
                         break
                 if re_name is None:
                     # Still haven't figured it out, if there's only one key
                     # in 'hostname_info', assume that.
-                    all_re_names = list(self.facts['hostname_info'].keys())
+                    all_re_names = list(self.facts["hostname_info"].keys())
                     if len(all_re_names) == 1:
                         re_name = all_re_names[0]
                 if re_name is None:
                     # Still haven't figured it out. Is this a bsys?
-                    for re_state in self.facts['current_re']:
-                        match = re.search('^re\d+$', re_state)
+                    for re_state in self.facts["current_re"]:
+                        match = re.search("^re\d+$", re_state)
                         if match:
-                            re_string = 'bsys-' + match.group(0)
-                            if re_string in self.facts['hostname_info'].keys():
+                            re_string = "bsys-" + match.group(0)
+                            if re_string in self.facts["hostname_info"].keys():
                                 re_name = re_string
         return re_name
 
@@ -412,29 +431,25 @@ class _Connection(object):
             Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
             Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
             """
-        if self.__class__.__name__ == 'Device' and self._sock_fd is not None:
+        if self.__class__.__name__ == "Device" and self._sock_fd is not None:
             return None
         if self._ssh_config:
             sshconf_path = os.path.expanduser(self._ssh_config)
         else:
-            home = os.getenv('HOME')
-            if not home:
-                return None
-            sshconf_path = os.path.join(os.getenv('HOME'), '.ssh/config')
+            sshconf_path = os.path.join(os.path.expanduser("~"), ".ssh", "config")
         if not os.path.exists(sshconf_path):
             return None
         else:
             sshconf = paramiko.SSHConfig()
-            with open(sshconf_path, 'r') as fp:
+            with open(sshconf_path, "r") as fp:
                 sshconf.parse(fp)
                 found = sshconf.lookup(self._hostname)
-                self._hostname = found.get('hostname', self._hostname)
-                self._port = found.get('port', self._port)
-                self._conf_auth_user = found.get('user')
-                self._conf_ssh_private_key_file = found.get('identityfile')
+                self._port = found.get("port", self._port)
+                self._conf_auth_user = found.get("user")
+                self._conf_ssh_private_key_file = found.get("identityfile")
             return sshconf_path
 
-    def display_xml_rpc(self, command, format='xml'):
+    def display_xml_rpc(self, command, format="xml"):
         """
         Executes the CLI command and returns the CLI xml object by default.
 
@@ -451,13 +466,15 @@ class _Connection(object):
           "text" to return the XML structure as a string.
         """
         try:
-            command = command + '| display xml rpc'
+            command = command + "| display xml rpc"
             rsp = self.rpc.cli(command, format="xml")
-            rsp = rsp.getparent().find('.//rpc')
-            if format == 'text':
-                encode = None if sys.version < '3' else 'unicode'
+            rsp = rsp.getparent().find(".//rpc")
+            if format == "text":
+                encode = None if sys.version < "3" else "unicode"
                 return etree.tostring(rsp[0], encoding=encode)
             return rsp[0]
+        except TypeError:
+            return "No RPC equivalent found for: " + command
         except:
             return "invalid command: " + command
 
@@ -524,21 +541,16 @@ class _Connection(object):
                 # check for name clashes before binding
                 if hasattr(self, fn.__name__):
                     raise ValueError(
-                        "request attribute name %s already exists" %
-                        fn.__name__)
+                        "request attribute name %s already exists" % fn.__name__
+                    )
             for fn in vargs:
                 # bind as instance method, majik.
-                if sys.version < '3':
-                    self.__dict__[
-                        fn.__name__] = types.MethodType(
-                        fn,
-                        self,
-                        self.__class__)
+                if sys.version < "3":
+                    self.__dict__[fn.__name__] = types.MethodType(
+                        fn, self, self.__class__
+                    )
                 else:
-                    self.__dict__[
-                        fn.__name__] = types.MethodType(
-                        fn,
-                        self.__class__)
+                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
             return
 
         # first verify that the names do not conflict with
@@ -547,9 +559,7 @@ class _Connection(object):
         for name in kvargs.keys():
             # check for name-clashes before binding
             if hasattr(self, name):
-                raise ValueError(
-                    "requested attribute name %s already exists" %
-                    name)
+                raise ValueError("requested attribute name %s already exists" % name)
 
         # now instantiate items and bind to this :Device:
         for name, thing in kvargs.items():
@@ -624,7 +634,7 @@ class _Connection(object):
         """
 
         # Strip off any pipe modifiers
-        (command, _, _) = command.partition('|')
+        (command, _, _) = command.partition("|")
         # Strip any leading or trailing whitespace
         command = command.strip()
         # Get the equivalent RPC
@@ -632,17 +642,17 @@ class _Connection(object):
         if isinstance(rpc, six.string_types):
             # No RPC is available.
             return None
-        rpc_string = "rpc.%s(" % (rpc.tag.replace('-', '_'))
+        rpc_string = "rpc.%s(" % (rpc.tag.replace("-", "_"))
         arguments = []
         for child in rpc:
-            key = child.tag.replace('-', '_')
+            key = child.tag.replace("-", "_")
             if child.text:
                 value = "'" + child.text + "'"
             else:
                 value = "True"
             arguments.append("%s=%s" % (key, value))
         if arguments:
-            rpc_string += ', '.join(arguments)
+            rpc_string += ", ".join(arguments)
         rpc_string += ")"
         return rpc_string
 
@@ -650,7 +660,7 @@ class _Connection(object):
     # cli - for cheating commands :-)
     # ------------------------------------------------------------------------
 
-    def cli(self, command, format='text', warning=True):
+    def cli(self, command, format="text", warning=True):
         """
         Executes the CLI command and returns the CLI text output by default.
 
@@ -682,7 +692,7 @@ class _Connection(object):
             or ``| count``, etc.  The only value use of the "pipe" is for the
             ``| display xml rpc`` as noted above.
         """
-        if 'display xml rpc' not in command and warning is True:
+        if "display xml rpc" not in command and warning is True:
             # Get the equivalent rpc metamethod
             rpc_string = self.cli_to_rpc_string(command)
             if rpc_string is not None:
@@ -695,7 +705,7 @@ class _Connection(object):
 
         try:
             rsp = self.rpc.cli(command=command, format=format)
-            if isinstance(rsp, dict) and format.lower() == 'json':
+            if isinstance(rsp, dict) and format.lower() == "json":
                 return rsp
             # rsp returned True means <rpc-reply> is empty, hence return
             # empty str as would be the case on cli
@@ -703,14 +713,15 @@ class _Connection(object):
             # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
             # </rpc-reply>
             if rsp is True:
-                return ''
-            if rsp.tag in ['output', 'rpc-reply']:
-                encode = None if sys.version < '3' else 'unicode'
-                return etree.tostring(rsp, method="text", with_tail=False,
-                                      encoding=encode)
-            if rsp.tag == 'configuration-information':
-                return rsp.findtext('configuration-output')
-            if rsp.tag == 'rpc':
+                return ""
+            if rsp.tag in ["output", "rpc-reply"]:
+                encode = None if sys.version < "3" else "unicode"
+                return etree.tostring(
+                    rsp, method="text", with_tail=False, encoding=encode
+                )
+            if rsp.tag == "configuration-information":
+                return rsp.findtext("configuration-output")
+            if rsp.tag == "rpc":
                 return rsp[0]
             return rsp
         except EzErrors.ConnectClosedError as ex:
@@ -785,18 +796,19 @@ class _Connection(object):
             rpc_cmd_e = rpc_cmd
         else:
             raise ValueError(
-                "Dont know what to do with rpc of type %s" %
-                rpc_cmd.__class__.__name__)
+                "Dont know what to do with rpc of type %s" % rpc_cmd.__class__.__name__
+            )
 
         # invoking a bad RPC will cause a connection object exception
         # will will be raised directly to the caller ... for now ...
         # @@@ need to trap this and re-raise accordingly.
 
         try:
-            rpc_rsp_e = self._rpc_reply(rpc_cmd_e,
-                                        ignore_warning=ignore_warning,
-                                        filter_xml=kvargs.get(
-                                            'filter_xml'))
+            rpc_rsp_e = self._rpc_reply(
+                rpc_cmd_e,
+                ignore_warning=ignore_warning,
+                filter_xml=kvargs.get("filter_xml"),
+            )
         except NcOpErrors.TimeoutExpiredError:
             # err is a TimeoutExpiredError from ncclient,
             # which has no such attribute as xml.
@@ -804,23 +816,20 @@ class _Connection(object):
         except NcErrors.TransportError:
             raise EzErrors.ConnectClosedError(self)
         except RPCError as ex:
-            if hasattr(ex, 'xml'):
+            if hasattr(ex, "xml"):
                 rsp = JXML.remove_namespaces(ex.xml)
-                message = rsp.findtext('error-message')
+                message = rsp.findtext("error-message")
                 # see if this is a permission error
-                if message and message == 'permission denied':
-                    raise EzErrors.PermissionError(cmd=rpc_cmd_e,
-                                                   rsp=rsp,
-                                                   errs=ex)
+                if message and message == "permission denied":
+                    raise EzErrors.PermissionError(cmd=rpc_cmd_e, rsp=rsp, errs=ex)
             else:
                 rsp = None
-            raise EzErrors.RpcError(cmd=rpc_cmd_e,
-                                    rsp=rsp,
-                                    errs=ex)
+            raise EzErrors.RpcError(cmd=rpc_cmd_e, rsp=rsp, errs=ex)
         # Something unexpected happened - raise it up
         except Exception as err:
-            warnings.warn("An unknown exception occured - please report.",
-                          RuntimeWarning)
+            warnings.warn(
+                "An unknown exception occured - please report.", RuntimeWarning
+            )
             raise
 
         # From 14.2 onward, junos supports JSON, so now code can be written as
@@ -828,23 +837,28 @@ class _Connection(object):
         # should not convert rpc response to json when loading json config
         # as response should be rpc-reply xml object.
 
-        if (rpc_cmd_e.tag != 'load-configuration' and
-           rpc_cmd_e.attrib.get('format') in ['json', 'JSON']):
-            ver_info = self.facts.get('version_info')
-            if ver_info and ver_info.major[0] >= 15 or \
-                    (ver_info.major[0] == 14 and ver_info.major[1] >= 2):
+        if rpc_cmd_e.tag != "load-configuration" and rpc_cmd_e.attrib.get("format") in [
+            "json",
+            "JSON",
+        ]:
+            ver_info = self.facts.get("version_info")
+            if (
+                ver_info
+                and ver_info.major[0] >= 15
+                or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
+            ):
                 try:
                     return json.loads(rpc_rsp_e.text)
                 except ValueError as ex:
                     # when data is {}{.*} types
-                    if str(ex).startswith('Extra data'):
-                        return json.loads(
-                            re.sub('\s?{\s?}\s?', '', rpc_rsp_e.text))
+                    if str(ex).startswith("Extra data"):
+                        return json.loads(re.sub("\s?{\s?}\s?", "", rpc_rsp_e.text))
                     else:
                         raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
-                warnings.warn("Native JSON support is only from 14.2 onwards",
-                              RuntimeWarning)
+                warnings.warn(
+                    "Native JSON support is only from 14.2 onwards", RuntimeWarning
+                )
 
         # This section is here for the possible use of something other than
         # ncclient for RPCs that have embedded rpc-errors, need to check for
@@ -865,7 +879,7 @@ class _Connection(object):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not '':
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not "":
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
@@ -874,8 +888,8 @@ class _Connection(object):
         # that now and return the results of that function.  otherwise just
         # return the RPC results as XML
 
-        if kvargs.get('to_py'):
-            return kvargs['to_py'](self, ret_rpc_rsp, **kvargs)
+        if kvargs.get("to_py"):
+            return kvargs["to_py"](self, ret_rpc_rsp, **kvargs)
         else:
             return ret_rpc_rsp
 
@@ -883,10 +897,9 @@ class _Connection(object):
     # facts
     # ------------------------------------------------------------------------
 
-    def facts_refresh(self,
-                      exception_on_failure=False,
-                      warnings_on_failure=None,
-                      keys=None):
+    def facts_refresh(
+        self, exception_on_failure=False, warnings_on_failure=None, keys=None
+    ):
         """
         Refresh the facts from the Junos device into :attr:`facts` property.
         See :module:`jnpr.junos.facts` for a complete list of available facts.
@@ -935,14 +948,16 @@ class _Connection(object):
             If old-style fact gathering is in use and a keys argument is
             specified.
         """
-        if self._fact_style not in ['old', 'new', 'both']:
+        if self._fact_style not in ["old", "new", "both"]:
             raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
-        if self._fact_style == 'old' or self._fact_style == 'both':
+        if self._fact_style == "old" or self._fact_style == "both":
             if warnings_on_failure is None:
                 warnings_on_failure = True
             if keys is not None:
-                raise RuntimeError("The keys argument can not be specified "
-                                   "when old-style fact gathering is in use!")
+                raise RuntimeError(
+                    "The keys argument can not be specified "
+                    "when old-style fact gathering is in use!"
+                )
             should_warn = False
             for gather in FACT_LIST:
                 try:
@@ -951,18 +966,25 @@ class _Connection(object):
                     if exception_on_failure:
                         raise
                     should_warn = True
-            if (warnings_on_failure is True and should_warn is True and
-               self._fact_style != 'both'):
-                warnings.warn('Facts gathering is incomplete. '
-                              'To know the reason call '
-                              '"dev.facts_refresh(exception_on_failure=True)"',
-                              RuntimeWarning)
-        if self._fact_style == 'new' or self._fact_style == 'both':
+            if (
+                warnings_on_failure is True
+                and should_warn is True
+                and self._fact_style != "both"
+            ):
+                warnings.warn(
+                    "Facts gathering is incomplete. "
+                    "To know the reason call "
+                    '"dev.facts_refresh(exception_on_failure=True)"',
+                    RuntimeWarning,
+                )
+        if self._fact_style == "new" or self._fact_style == "both":
             if warnings_on_failure is None:
                 warnings_on_failure = False
-            self.facts._refresh(exception_on_failure=exception_on_failure,
-                                warnings_on_failure=warnings_on_failure,
-                                keys=keys)
+            self.facts._refresh(
+                exception_on_failure=exception_on_failure,
+                warnings_on_failure=warnings_on_failure,
+                keys=keys,
+            )
         return
 
     # -----------------------------------------------------------------------
@@ -979,6 +1001,7 @@ class DeviceSessionListener(SessionListener):
     Listens to Session class of Netconf Transport
     and detects errors in the transport.
     """
+
     def __init__(self, device):
         self._device = device
 
@@ -1039,7 +1062,6 @@ class Device(_Connection):
             if self._conn is None:
                 raise ConnectError(self, "Not connected to the Device")
 
-
     @transform.setter
     def transform(self, func):
         """
@@ -1055,19 +1077,23 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
 
     def __new__(cls, *args, **kwargs):
-        if kwargs.get('port') in [23, '23'] or kwargs.get('mode') or \
-                        kwargs.get('cs_user') is not None:
+        if (
+            kwargs.get("port") in [23, "23"]
+            or kwargs.get("mode")
+            or kwargs.get("cs_user") is not None
+        ):
             from jnpr.junos.console import Console
+
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
             # __new__() is an instance of the class in which the __new__()
             # method is contained (here Device class). Hence calling __init__
             # explicitly.
-            kwargs['host'] = args[0] if len(args) else kwargs.get('host')
+            kwargs["host"] = args[0] if len(args) else kwargs.get("host")
             instance.__init__(**kwargs)
             return instance
         else:
-            if sys.version < '3':
+            if sys.version < "3":
                 return super(Device, cls).__new__(cls, *args, **kwargs)
             else:
                 return super().__new__(cls)
@@ -1154,21 +1180,22 @@ class Device(_Connection):
         # setup instance connection/open variables
         # ----------------------------------------
 
-        hostname = vargs[0] if len(vargs) else kvargs.get('host')
+        hostname = vargs[0] if len(vargs) else kvargs.get("host")
 
-        self._port = kvargs.get('port', 830)
-        self._sock_fd = kvargs.get('sock_fd', None)
-        self._gather_facts = kvargs.get('gather_facts', True)
-        self._normalize = kvargs.get('normalize', False)
-        self._auto_probe = kvargs.get('auto_probe', self.__class__.auto_probe)
-        self._fact_style = kvargs.get('fact_style', 'new')
-        self._use_filter = kvargs.get('use_filter', False)
-        self._huge_tree = kvargs.get('huge_tree', False)
-        if self._fact_style != 'new':
-            warnings.warn('fact-style %s will be removed in a future '
-                          'release.' %
-                          (self._fact_style),
-                          RuntimeWarning)
+        self._port = kvargs.get("port", 830)
+        self._sock_fd = kvargs.get("sock_fd", None)
+        self._gather_facts = kvargs.get("gather_facts", True)
+        self._normalize = kvargs.get("normalize", False)
+        self._auto_probe = kvargs.get("auto_probe", self.__class__.auto_probe)
+        self._fact_style = kvargs.get("fact_style", "new")
+        self._use_filter = kvargs.get("use_filter", False)
+        self._huge_tree = kvargs.get("huge_tree", False)
+        if self._fact_style != "new":
+            warnings.warn(
+                "fact-style %s will be removed in a future "
+                "release." % (self._fact_style),
+                RuntimeWarning,
+            )
 
         if self.__class__.ON_JUNOS is True and hostname is None:
             # ---------------------------------
@@ -1176,32 +1203,33 @@ class Device(_Connection):
             # ---------------------------------
             self._auth_user = None
             self._auth_password = None
-            self._hostname = 'localhost'
+            self._hostname = "localhost"
             self._ssh_private_key_file = None
             self._ssh_config = None
         else:
             # --------------------------
-            # making a remote connection 
+            # making a remote connection
             # if hostname is None, this is an 'outbound-ssh' connection
             # which uses the established TCP connection from sock_fd
             # --------------------------
-            if hostname is None and self._sock_fd is None: 
+            if hostname is None and self._sock_fd is None:
                 raise ValueError("You must provide either 'host' or 'sock_fd' value")
             self._hostname = hostname
             # user will default to $USER
-            self._auth_user = os.getenv('USER')
+            self._auth_user = os.getenv("USER")
             self._conf_auth_user = None
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
-            self._ssh_config = kvargs.get('ssh_config')
+            self._ssh_config = kvargs.get("ssh_config")
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
-            self._auth_user = kvargs.get('user') or self._conf_auth_user or \
-                self._auth_user
-            self._ssh_private_key_file = kvargs.get('ssh_private_key_file') \
-                or self._conf_ssh_private_key_file
-            self._auth_password = kvargs.get(
-                'password') or kvargs.get('passwd')
+            self._auth_user = (
+                kvargs.get("user") or self._conf_auth_user or self._auth_user
+            )
+            self._ssh_private_key_file = (
+                kvargs.get("ssh_private_key_file") or self._conf_ssh_private_key_file
+            )
+            self._auth_password = kvargs.get("password") or kvargs.get("passwd")
 
         # -----------------------------
         # initialize instance variables
@@ -1215,7 +1243,7 @@ class Device(_Connection):
         # public attributes
         self.connected = False
         self.rpc = _RpcMetaExec(self)
-        if self._fact_style == 'old':
+        if self._fact_style == "old":
             self.facts = self.ofacts
         else:
             self.facts = _FactCache(self)
@@ -1271,7 +1299,7 @@ class Device(_Connection):
             and re-raised to the caller.
         """
 
-        auto_probe = kvargs.get('auto_probe', self._auto_probe)
+        auto_probe = kvargs.get("auto_probe", self._auto_probe)
         if auto_probe is not 0:
             if not self.probe(auto_probe):
                 raise EzErrors.ProbeError(self)
@@ -1284,8 +1312,9 @@ class Device(_Connection):
             # in this condition it means we want to query the agent
             # for available ssh keys
 
-            allow_agent = bool((self._auth_password is None) and
-                               (self._ssh_private_key_file is None))
+            allow_agent = bool(
+                (self._auth_password is None) and (self._ssh_private_key_file is None)
+            )
 
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
@@ -1298,9 +1327,12 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
-                device_params={'name': 'junos',
-                               'local': self.__class__.ON_JUNOS,
-                               'use_filter': self._use_filter})
+                device_params={
+                    "name": "junos",
+                    "local": self.__class__.ON_JUNOS,
+                    "use_filter": self._use_filter,
+                },
+            )
             self._conn._session.add_listener(DeviceSessionListener(self))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
@@ -1322,7 +1354,7 @@ class Device(_Connection):
             # at this point, we assume that the connection
             # has timed out due to ip-reachability issues
 
-            if str(err).find('not open') > 0:
+            if str(err).find("not open") > 0:
                 raise EzErrors.ConnectTimeoutError(self)
             else:
                 # otherwise raise a generic connection
@@ -1348,16 +1380,16 @@ class Device(_Connection):
         self.connected = True
 
         self._nc_transform = self.transform
-        self._norm_transform = lambda: JXML.normalize_xslt.encode('UTF-8')
+        self._norm_transform = lambda: JXML.normalize_xslt.encode("UTF-8")
 
         # normalize argument to open() overrides normalize argument value
         # to __init__(). Save value to self._normalize where it is used by
         # normalizeDecorator()
-        self._normalize = kvargs.get('normalize', self._normalize)
+        self._normalize = kvargs.get("normalize", self._normalize)
         if self._normalize is True:
             self.transform = self._norm_transform
 
-        gather_facts = kvargs.get('gather_facts', self._gather_facts)
+        gather_facts = kvargs.get("gather_facts", self._gather_facts)
         if gather_facts is True:
             self.facts_refresh()
 
@@ -1391,8 +1423,7 @@ class Device(_Connection):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self._conn.connected and \
-                not isinstance(exc_val, EzErrors.ConnectError):
+        if self._conn.connected and not isinstance(exc_val, EzErrors.ConnectError):
             try:
                 self.close()
             except Exception as ex:

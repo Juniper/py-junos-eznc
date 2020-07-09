@@ -26,8 +26,10 @@ def provides_facts():
     Returns a dictionary keyed on the facts provided by this module. The value
     of each key is the doc string describing the fact.
     """
-    return {'foo': 'The foo information.',
-            'bar': 'The bar information.', }
+    return {
+        "foo": "The foo information.",
+        "bar": "The bar information.",
+    }
 
 
 # The file must include a get_facts(device) function. The get_facts(device)
@@ -66,20 +68,23 @@ def get_facts(device):
     # getting values for ALL of the facts provided by this module.
     # These are examples which MAY or MAY NOT apply to your particular RPC.
     # Don't just blindly leave these in.
-    if rsp.tag == 'error':
+    if rsp.tag == "error":
         raise RpcError()
 
     # An example of a boolean fact. False if the top-level tag is not 'foo'.
     foo = False
-    if rsp.tag == 'foo':
+    if rsp.tag == "foo":
         foo = True
 
     # An example of a string value which might be found at various levels or
     # locations within the response hierarchy.
     bar = (
-        rsp.findtext('.//chassis[1]/bar') or
-        rsp.findtext('.//chassis-module[name="Backplane"]/bar') or
-        rsp.findtext('.//chassis-module[name="Midplane"]/bar'))
+        rsp.findtext(".//chassis[1]/bar")
+        or rsp.findtext('.//chassis-module[name="Backplane"]/bar')
+        or rsp.findtext('.//chassis-module[name="Midplane"]/bar')
+    )
 
-    return {'foo': foo,
-            'bar': bar, }
+    return {
+        "foo": foo,
+        "bar": bar,
+    }

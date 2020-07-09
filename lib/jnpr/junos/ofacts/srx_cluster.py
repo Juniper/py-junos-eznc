@@ -4,22 +4,22 @@ def facts_srx_cluster(junos, facts):
 
     try:
         cluster_st = junos.rpc.get_chassis_cluster_status(redundancy_group="0")
-        if 'error' == cluster_st.tag:
-            facts['srx_cluster'] = False
+        if "error" == cluster_st.tag:
+            facts["srx_cluster"] = False
             return
 
-        primary = cluster_st.xpath(
-            './/redundancy-group-status[.="primary"]')[0]
+        primary = cluster_st.xpath('.//redundancy-group-status[.="primary"]')[0]
 
-        node = primary.xpath(
-            'preceding-sibling::device-name[1]')[0].text.replace('node', 'RE')
+        node = primary.xpath("preceding-sibling::device-name[1]")[0].text.replace(
+            "node", "RE"
+        )
 
-        if not facts.get('master'):
-            facts['master'] = node
-        elif node not in facts['master']:
-            facts['master'].append(node)
+        if not facts.get("master"):
+            facts["master"] = node
+        elif node not in facts["master"]:
+            facts["master"].append(node)
 
-        facts['srx_cluster'] = True
+        facts["srx_cluster"] = True
 
     except:
         # this device doesn't support SRX chassis clustering; i.e.

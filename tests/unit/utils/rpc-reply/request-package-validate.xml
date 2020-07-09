@@ -1,40 +1,40 @@
 <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/10.4R3/junos">
-    <cli>
-        <ignore-signals>
-            hup
-        </ignore-signals>
-    </cli>
-    <output>
-        Checking compatibility with configuration
-        Initializing...
-        rm: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
-        rm: /var/validate/chroot/var/etc: Directory not empty
-        rm: /var/validate/chroot/var: Directory not empty
-        rm: /var/validate/chroot: Directory not empty
-        Using jbase-13.2I20140401_1054_katharh
-        Using /var/tmp/py-extensions-i386-13.2I20140430_1237_katharh.tgz
-        Checking py-extensions-i386 requirements on /
-        Verified py-extensions-i386-13.2I20140430_1237_katharh signed by PackageDevelopment_13_2_0
-        Registering py-extensions-i386 as unsupported
-        Using jruntime-13.2I20140401_1054_katharh
-        Using jkernel-13.2I20140401_1054_katharh
-        Using jroute-13.2I20140401_1054_katharh
-        Using jcrypto-13.2I20140401_1054_katharh
-        cp: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
-        Hardware Database regeneration succeeded
-        Validating against /config/juniper.conf.gz
-        mgd: error: schema: dbs_remap_daemon_index: could not find daemon name 'analyticsd'
-        mgd: warning: schema: init: 'logical-systems-vlans' contains-node 'juniper-config vlans': not found
-        mgd: error: rename failed for /var/etc/pam.conf
-        mgd: commit complete
-        Validation succeeded
-        rm: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
-        rm: /var/validate/chroot/var/etc: Directory not empty
-        rm: /var/validate/chroot/var: Directory not empty
-        rm: /var/validate/chroot: Directory not empty
-    </output>
-    <package-result>0</package-result>
-    <cli>
-        <banner></banner>
-    </cli>
+    <cli>
+        <ignore-signals>
+            hup
+        </ignore-signals>
+    </cli>
+    <output>
+        Checking compatibility with configuration
+        Initializing...
+        rm: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
+        rm: /var/validate/chroot/var/etc: Directory not empty
+        rm: /var/validate/chroot/var: Directory not empty
+        rm: /var/validate/chroot: Directory not empty
+        Using jbase-13.2I20140401_1054_katharh
+        Using /var/tmp/py-extensions-i386-13.2I20140430_1237_katharh.tgz
+        Checking py-extensions-i386 requirements on /
+        Verified py-extensions-i386-13.2I20140430_1237_katharh signed by PackageDevelopment_13_2_0
+        Registering py-extensions-i386 as unsupported
+        Using jruntime-13.2I20140401_1054_katharh
+        Using jkernel-13.2I20140401_1054_katharh
+        Using jroute-13.2I20140401_1054_katharh
+        Using jcrypto-13.2I20140401_1054_katharh
+        cp: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
+        Hardware Database regeneration succeeded
+        Validating against /config/juniper.conf.gz
+        mgd: error: schema: dbs_remap_daemon_index: could not find daemon name 'analyticsd'
+        mgd: warning: schema: init: 'logical-systems-vlans' contains-node 'juniper-config vlans': not found
+        mgd: error: rename failed for /var/etc/pam.conf
+        mgd: commit complete
+        Validation succeeded
+        rm: /var/validate/chroot/var/etc/pam.conf: Operation not permitted
+        rm: /var/validate/chroot/var/etc: Directory not empty
+        rm: /var/validate/chroot/var: Directory not empty
+        rm: /var/validate/chroot: Directory not empty
+    </output>
+    <package-result>0</package-result>
+    <cli>
+        <banner></banner>
+    </cli>
 </rpc-reply>

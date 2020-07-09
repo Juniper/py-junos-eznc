@@ -1,10 +1,11 @@
-VERSION = "2.3.2.dev0"
-DATE = "2019-Dec-10"
+VERSION = "2.4.2.dev0"
+DATE = "2020-Apr-29"
 
 # Augment with the internal version if present
 try:
     from jnpr.junos.internal_version import INTERNAL_VERSION
-    VERSION += '+internal.' + str(INTERNAL_VERSION)
+
+    VERSION += "+internal." + str(INTERNAL_VERSION)
 except ImportError:
     # No internal version
     pass

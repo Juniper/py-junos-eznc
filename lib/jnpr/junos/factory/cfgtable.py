@@ -16,27 +16,26 @@ class CfgTable(Table):
     # CONSTRUCTOR
     # -----------------------------------------------------------------------
     def __init__(self, dev=None, xml=None, path=None, mode=None):
-        Table.__init__(self, dev, xml, path)       # call parent constructor
+        Table.__init__(self, dev, xml, path)  # call parent constructor
 
         self._init_get()
         self._data_dict = self.DEFINE  # crutch
-        self.ITEM_NAME_XPATH = self._data_dict.get('key', 'name')
-        self.view = self._data_dict.get('view')
-        self._options = self._data_dict.get('options')
+        self.ITEM_NAME_XPATH = self._data_dict.get("key", "name")
+        self.view = self._data_dict.get("view")
+        self._options = self._data_dict.get("options")
         self.mode = mode
-        if 'set' in self._data_dict:
-            Config.__init__(self, dev, mode)    # call parent constructor
+        if "set" in self._data_dict:
+            Config.__init__(self, dev, mode)  # call parent constructor
 
             self._init_set()
             if self._view:
                 self.fields = self._view.FIELDS.copy()
             else:
                 raise ValueError(
-                    "%s set table view is not defined.\n"
-                    % (self.__class__.__name__)
+                    "%s set table view is not defined.\n" % (self.__class__.__name__)
                 )
-            if 'key-field' in self._data_dict:
-                key_name = self._data_dict.get('key-field', None)
+            if "key-field" in self._data_dict:
+                key_name = self._data_dict.get("key-field", None)
                 if isinstance(key_name, list):
                     self.key_field = key_name
                 elif isinstance(key_name, str):
@@ -47,13 +46,11 @@ class CfgTable(Table):
                         % (key_name, type(key_name))
                     )
             else:
-                raise ValueError(
-                    "Table should have key-field attribute defined\n"
-                )
-            self._type = 'set'
+                raise ValueError("Table should have key-field attribute defined\n")
+            self._type = "set"
             self._init_field()
         else:
-            self._type = 'get'
+            self._type = "get"
         self.ITEM_XPATH = self._data_dict[self._type]
 
         # no new attributes.
@@ -69,7 +66,7 @@ class CfgTable(Table):
         return a list of the keys required when invoking :get():
         and :get_keys():
         """
-        return self._data_dict.get('required_keys')
+        return self._data_dict.get("required_keys")
 
     @property
     def keys_required(self):
@@ -119,15 +116,15 @@ class CfgTable(Table):
         to retrieve the specifc data
         """
         xpath = self._data_dict[self._type]
-        self._get_xpath = '//configuration/' + xpath
-        top = E('configuration')
+        self._get_xpath = "//configuration/" + xpath
+        top = E("configuration")
         dot = top
-        for name in xpath.split('/'):
+        for name in xpath.split("/"):
             dot.append(E(name))
             dot = dot[0]
 
         if namesonly is True:
-            dot.attrib['recurse'] = 'false'
+            dot.attrib["recurse"] = "false"
         return top
 
     def _build_config_xml(self, top):
@@ -150,13 +147,13 @@ class CfgTable(Table):
 
             field_dict = self.fields[field_name]
 
-            if 'group' in field_dict:
-                group_xpath = self._view.GROUPS[field_dict['group']]
-                dot = self._encode_xpath(top, group_xpath.split('/'))
+            if "group" in field_dict:
+                group_xpath = self._view.GROUPS[field_dict["group"]]
+                dot = self._encode_xpath(top, group_xpath.split("/"))
 
-            lxpath = field_dict['xpath'].split('/')
+            lxpath = field_dict["xpath"].split("/")
             if len(lxpath) > 1:
-                dot = self._encode_xpath(top, lxpath[0:len(lxpath) - 1])
+                dot = self._encode_xpath(top, lxpath[0 : len(lxpath) - 1])
 
             add_field = self._grindfield(lxpath[-1], field_value)
             for _add in add_field:
@@ -182,13 +179,11 @@ class CfgTable(Table):
         :param opt: Dictionary of data type and constraint check.
         :return:
         """
+
         def _get_field_type(ftype):
-            ft = {
-                'str': str,
-                'int': int,
-                'float': float,
-                'bool': bool,
-            }.get(ftype, None)
+            ft = {"str": str, "int": int, "float": float, "bool": bool,}.get(
+                ftype, None
+            )
 
             if ft is None:
                 raise TypeError("Unsupported type %s\n" % (ftype))
@@ -197,53 +192,54 @@ class CfgTable(Table):
         def _validate_enum_value(field_name, value, enum_value):
             if isinstance(enum_value, list):
                 if value not in enum_value:
-                    raise ValueError('Invalid value %s assigned '
-                                     'to field %s' % (value, field_name))
+                    raise ValueError(
+                        "Invalid value %s assigned " "to field %s" % (value, field_name)
+                    )
             elif isinstance(enum_value, str):
                 if not value == enum_value:
-                    raise ValueError('Invalid value %s assigned '
-                                     'to field %s' % (value, field_name))
+                    raise ValueError(
+                        "Invalid value %s assigned " "to field %s" % (value, field_name)
+                    )
             else:
-                raise TypeError('Value of enum should '
-                                'be either a string or list of strings.\n')
+                raise TypeError(
+                    "Value of enum should " "be either a string or list of strings.\n"
+                )
 
         def _validate_type(field_name, value, opt):
-            if isinstance(opt['type'], dict):
-                if 'enum' in opt['type']:
-                    _validate_enum_value(field_name,
-                                         value, opt['type']['enum'])
+            if isinstance(opt["type"], dict):
+                if "enum" in opt["type"]:
+                    _validate_enum_value(field_name, value, opt["type"]["enum"])
                 else:
                     # More user defined type check can be added in future.
                     # raise execption for now.
-                    raise TypeError("Unsupported type %s\n" % (opt['type']))
+                    raise TypeError("Unsupported type %s\n" % (opt["type"]))
 
-            elif isinstance(opt['type'], str):
-                field_type = _get_field_type(opt['type'])
+            elif isinstance(opt["type"], str):
+                field_type = _get_field_type(opt["type"])
                 if not isinstance(value, field_type):
                     raise TypeError(
-                        'Invalid value %s asigned to field %s,'
-                        ' value should be of type %s\n'
+                        "Invalid value %s asigned to field %s,"
+                        " value should be of type %s\n"
                         % (value, field_name, field_type)
                     )
             else:
                 raise TypeError(
-                    'Invalid value %s, should be either of'
-                    ' type string or dictionary.\n' % (opt['type'])
+                    "Invalid value %s, should be either of"
+                    " type string or dictionary.\n" % (opt["type"])
                 )
 
         def _validate_min_max_value(field_name, value, opt):
             if isinstance(value, (int, float)):
-                if value < opt['minValue'] or value > opt['maxValue']:
+                if value < opt["minValue"] or value > opt["maxValue"]:
                     raise ValueError(
-                        'Invalid value %s assigned '
-                        'to field %s.\n' % (value, field_name)
+                        "Invalid value %s assigned "
+                        "to field %s.\n" % (value, field_name)
                     )
             elif isinstance(value, str):
-                if len(value) < opt['minValue'] or \
-                        len(value) > opt['maxValue']:
+                if len(value) < opt["minValue"] or len(value) > opt["maxValue"]:
                     raise ValueError(
-                        'Invalid value %s assigned '
-                        'to field %s.\n' % (value, field_name)
+                        "Invalid value %s assigned "
+                        "to field %s.\n" % (value, field_name)
                     )
 
         if isinstance(value, dict):
@@ -253,27 +249,30 @@ class CfgTable(Table):
         elif isinstance(value, (list, tuple, dict, set)):
             raise ValueError("%s value is invalid %s\n" % (field_name, value))
         else:
-            if 'type' in opt:
+            if "type" in opt:
                 _validate_type(field_name, value, opt)
-            if ('minValue' or 'maxValue') in opt:
+            if ("minValue" or "maxValue") in opt:
                 _validate_min_max_value(field_name, value, opt)
 
     def _grindkey(self, key_xpath, key_value):
         """ returns list of XML elements for key values """
-        simple = lambda: [E(key_xpath.replace('_', '-'), key_value)]
-        composite = lambda: [E(xp.replace('_', '-'), xv)
-                             for xp, xv in zip(key_xpath, key_value)]
+        simple = lambda: [E(key_xpath.replace("_", "-"), key_value)]
+        composite = lambda: [
+            E(xp.replace("_", "-"), xv) for xp, xv in zip(key_xpath, key_value)
+        ]
         return simple() if isinstance(key_xpath, str) else composite()
 
     def _grindxpath(self, key_xpath, key_value):
         """ returns xpath elements for key values """
-        simple = lambda: "[{}='{}']".format(
-            key_xpath.replace('_', '-'),
-            key_value
+        simple = lambda: "[{}='{}']".format(key_xpath.replace("_", "-"), key_value)
+        composite = lambda: "[{}]".format(
+            " and ".join(
+                [
+                    "{}='{}'".format(xp.replace("_", "-"), xv)
+                    for xp, xv in zip(key_xpath, key_value)
+                ]
+            )
         )
-        composite = lambda: "[{}]".format(' and '.join(
-                            ["{}='{}'".format(xp.replace('_', '-'), xv)
-                                for xp, xv in zip(key_xpath, key_value)]))
         return simple() if isinstance(key_xpath, str) else composite()
 
     def _grindfield(self, xpath, value):
@@ -281,16 +280,16 @@ class CfgTable(Table):
         lst = []
         if isinstance(value, (list, tuple, set)):
             for v in value:
-                lst.append(E(xpath.replace('_', '-'), str(v)))
+                lst.append(E(xpath.replace("_", "-"), str(v)))
         elif isinstance(value, bool):
             if value is True:
-                lst.append(E(xpath.replace('_', '-')))
+                lst.append(E(xpath.replace("_", "-")))
             elif value is False:
-                lst.append(E(xpath.replace('_', '-'), {'operation': 'delete'}))
+                lst.append(E(xpath.replace("_", "-"), {"operation": "delete"}))
         elif isinstance(value, dict):
-            lst.append(E(xpath.replace('_', '-'), value))
+            lst.append(E(xpath.replace("_", "-"), value))
         else:
-            lst.append(E(xpath.replace('_', '-'), str(value)))
+            lst.append(E(xpath.replace("_", "-"), str(value)))
         return lst
 
     def _encode_requiredkeys(self, get_cmd, kvargs):
@@ -298,7 +297,7 @@ class CfgTable(Table):
         used to encode the required_keys values into the XML get-command.
         each of the required_key=<value> pairs are defined in :kvargs:
         """
-        rqkeys = self._data_dict['required_keys']
+        rqkeys = self._data_dict["required_keys"]
         for key_name in self.required_keys:
             # create an XML element with the key/value
             key_value = kvargs.get(key_name)
@@ -309,35 +308,38 @@ class CfgTable(Table):
 
             # now link this item into the XML command, where key_name
             # designates the XML parent element
-            key_name = key_name.replace('_', '-')
-            dot = get_cmd.find('.//' + key_name)
+            key_name = key_name.replace("_", "-")
+            dot = get_cmd.find(".//" + key_name)
             if dot is None:
                 raise RuntimeError(
-                    "Unable to find parent XML for key: '%s'" %
-                    (key_name))
+                    "Unable to find parent XML for key: '%s'" % (key_name)
+                )
             for _at, _add in enumerate(add_keylist_xml):
                 dot.insert(_at, _add)
 
             # Add required key values to _get_xpath
-            xid = re.search(r"\b{}\b".format(key_name),
-                            self._get_xpath).start() + len(key_name)
+            xid = re.search(r"\b{}\b".format(key_name), self._get_xpath).start() + len(
+                key_name
+            )
 
-            self._get_xpath = self._get_xpath[:xid] + \
-                self._grindxpath(key_xpath, key_value) + \
-                self._get_xpath[xid:]
+            self._get_xpath = (
+                self._get_xpath[:xid]
+                + self._grindxpath(key_xpath, key_value)
+                + self._get_xpath[xid:]
+            )
 
     def _encode_namekey(self, get_cmd, dot, namekey_value):
         """
         encodes the specific namekey_value into the get command so that the
         returned XML configuration is the complete hierarchy of data.
         """
-        namekey_xpath = self._data_dict.get('key', 'name')
+        namekey_xpath = self._data_dict.get("key", "name")
         keylist_xml = self._grindkey(namekey_xpath, namekey_value)
         for _add in keylist_xml:
             dot.append(_add)
 
     def _encode_getfields(self, get_cmd, dot):
-        for field_xpath in self._data_dict['get_fields']:
+        for field_xpath in self._data_dict["get_fields"]:
             dot.append(E(field_xpath))
 
     def _encode_xpath(self, top, lst):
@@ -347,7 +349,7 @@ class CfgTable(Table):
         """
         dot = top
         for index in range(1, len(lst) + 1):
-            xp = '/'.join(lst[0:index])
+            xp = "/".join(lst[0:index])
             if not len(top.xpath(xp)):
                 dot.append(E(lst[index - 1]))
             dot = dot.find(lst[index - 1])
@@ -355,8 +357,7 @@ class CfgTable(Table):
 
     def _keyspec(self):
         """ returns tuple (keyname-xpath, item-xpath) """
-        return (self._data_dict.get('key', 'name'),
-                self._data_dict[self._type])
+        return (self._data_dict.get("key", "name"), self._data_dict[self._type])
 
     def _init_field(self):
         """
@@ -364,8 +365,7 @@ class CfgTable(Table):
         (if mentioned in yml Table/View) else set to None.
         """
         for fname, opt in self.fields.items():
-            self.__dict__[fname] = opt['default'] \
-                if 'default' in opt else None
+            self.__dict__[fname] = opt["default"] if "default" in opt else None
 
     def _mandatory_check(self):
         """ Mandatory checks for set table/view  """
@@ -434,7 +434,7 @@ class CfgTable(Table):
         else:
             self._insert_node.extend(top.getparent())
 
-        self.reset()                 # Reset field values
+        self.reset()  # Reset field values
         self._is_field_set = False
 
     # ----------------------------------------------------------------------
@@ -470,9 +470,7 @@ class CfgTable(Table):
             return self
 
         if self.keys_required is True and not len(kvargs):
-            raise ValueError(
-                "This table has required-keys\n",
-                self.required_keys)
+            raise ValueError("This table has required-keys\n", self.required_keys)
 
         self._clearkeys()
 
@@ -480,8 +478,8 @@ class CfgTable(Table):
         # hierarchical data from the config.  The caller can explicitly set
         # :namesonly: in the call.
 
-        if 'namesonly' in kvargs:
-            namesonly = kvargs.get('namesonly')
+        if "namesonly" in kvargs:
+            namesonly = kvargs.get("namesonly")
         else:
             namesonly = False
 
@@ -498,11 +496,11 @@ class CfgTable(Table):
             # see if the caller provided a named item.  this must
             # be an actual name of a thing, and not an index number.
             # ... at least for now ...
-            named_item = kvargs.get('key') or vargs[0]
+            named_item = kvargs.get("key") or vargs[0]
             dot = get_cmd.find(self._data_dict[self._type])
             self._encode_namekey(get_cmd, dot, named_item)
 
-            if 'get_fields' in self._data_dict:
+            if "get_fields" in self._data_dict:
                 self._encode_getfields(get_cmd, dot)
 
         except:
@@ -510,8 +508,8 @@ class CfgTable(Table):
             pass
 
         # Check for options in get
-        if 'options' in kvargs:
-            options = kvargs.get('options') or {}
+        if "options" in kvargs:
+            options = kvargs.get("options") or {}
         else:
             if self._options is not None:
                 options = self._options
@@ -533,7 +531,7 @@ class CfgTable(Table):
                     # Convert the onbox XML to ncclient reply
                     config = jxml.conf_transform(
                         deepcopy(jxml.cscript_conf(Junos_Configuration)),
-                        subSelectionXPath=self._get_xpath
+                        subSelectionXPath=self._get_xpath,
                     )
                     self.xml = config.getroot()
                 else:
@@ -621,15 +619,15 @@ class CfgTable(Table):
             was successful.  Manual verification may be required.
         """
         if self._is_field_set:
-            raise RuntimeError("Field value is changed, append() "
-                               "must be called before set()")
+            raise RuntimeError(
+                "Field value is changed, append() " "must be called before set()"
+            )
 
         self.lock()
 
         try:
             # Invoke config class load() api, with xml object.
-            self._load_rsp = super(CfgTable, self).load(self._config_xml_req,
-                                                        **kvargs)
+            self._load_rsp = super(CfgTable, self).load(self._config_xml_req, **kvargs)
             self._commit_rsp = self.commit(**kvargs)
         finally:
             self.unlock()
@@ -656,8 +654,8 @@ class CfgTable(Table):
         else:
             # pass 'up' to standard setattr method
             object.__setattr__(self, attribute, value)
-            if hasattr(self, 'fields') and attribute in self.fields:
-                object.__setattr__(self, '_is_field_set', True)
+            if hasattr(self, "fields") and attribute in self.fields:
+                object.__setattr__(self, "_is_field_set", True)
 
     def __enter__(self):
         return super(CfgTable, self).__enter__()
@@ -697,10 +695,10 @@ class CfgTable(Table):
                     message.
         """
         if self._is_field_set:
-            raise RuntimeError("Field value is changed, append() "
-                               "must be called before load()")
+            raise RuntimeError(
+                "Field value is changed, append() " "must be called before load()"
+            )
 
         # pass up to config class load() api, with xml object as vargs[0].
-        self._load_rsp = super(CfgTable, self).load(self._config_xml_req,
-                                                    **kvargs)
+        self._load_rsp = super(CfgTable, self).load(self._config_xml_req, **kvargs)
         return self

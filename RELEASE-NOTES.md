@@ -1,3 +1,32 @@
+## Release 2.4.2.dev0 - 29 APRIL 2020
+## Features Added
+
+## Bugs fixed
+
+### Features Added
+- None
+
+### Bugs fixed:
+- Latest `textfsm` doesn’t support in windows. Hence, supporting `textfsm 0.4.1` for windows user #1019
+- Convert `port` argument when passed  as `str` to `int` data type #1020
+- Return type of `sw.install` function going to change in the upcoming major release. 
+  So, added a deprecation warning in `sw.install` #1025
+
+## Release 2.4.0 - 1 APRIL 2020
+### Features Added
+- Added TableView Null Key support #983
+- Added timeout support for commit_check() #998
+- Added Win serial COM support #1000
+- Added load patch support #1001
+- Added textfsm support for table/view #1009
+
+### Bugs fixed:
+- Fixed table/view issue w.r.t to get() call #981
+- Fixed documentation typo #986
+- Handled sax parser input for nested fields #997
+- Fixed outbound ssh issue #1007
+- Fixed xpath issue when defined with a string function #1008
+
 ## Release 2.3.1 - 10 December 2019
 ### Features Added 
 - None

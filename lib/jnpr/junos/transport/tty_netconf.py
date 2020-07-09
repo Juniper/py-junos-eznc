@@ -15,17 +15,18 @@ import six
 
 
 class PY6:
-    NEW_LINE = six.b('\n')
-    EMPTY_STR = six.b('')
-    NETCONF_EOM = six.b(']]>]]>')
+    NEW_LINE = six.b("\n")
+    EMPTY_STR = six.b("")
+    NETCONF_EOM = six.b("]]>]]>")
     STARTS_WITH = six.b("<!--")
 
-__all__ = ['xmlmode_netconf']
 
-_NETCONF_EOM = six.b(']]>]]>')
-_xmlns = re.compile(six.b('xmlns=[^>]+'))
+__all__ = ["xmlmode_netconf"]
+
+_NETCONF_EOM = six.b("]]>]]>")
+_xmlns = re.compile(six.b("xmlns=[^>]+"))
 _xmlns_strip = lambda text: _xmlns.sub(PY6.EMPTY_STR, text)
-_junosns = re.compile(six.b('junos:'))
+_junosns = re.compile(six.b("junos:"))
 _junosns_strip = lambda text: _junosns.sub(PY6.EMPTY_STR, text)
 
 logger = logging.getLogger("jnpr.junos.tty_netconf")
@@ -51,8 +52,8 @@ class tty_netconf(object):
 
     def open(self, at_shell):
         """ start the XML API process and receive the 'hello' message """
-        nc_cmd = ('junoscript', 'xml-mode')[at_shell]
-        self._tty.write(nc_cmd + ' netconf need-trailer')
+        nc_cmd = ("junoscript", "xml-mode")[at_shell]
+        self._tty.write(nc_cmd + " netconf need-trailer")
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=15)
 
@@ -75,7 +76,7 @@ class tty_netconf(object):
             if self.hello is None:
                 return
 
-        self.rpc('close-session')
+        self.rpc("close-session")
         # removed flush
 
     # -------------------------------------------------------------------------
@@ -84,9 +85,9 @@ class tty_netconf(object):
 
     def zeroize(self):
         """ issue a reboot to the device """
-        cmd = E.command('request system zeroize')
+        cmd = E.command("request system zeroize")
         try:
-            encode = None if sys.version < '3' else 'unicode'
+            encode = None if sys.version < "3" else "unicode"
             self.rpc(etree.tostring(cmd, encoding=encode))
         except:
             return False
@@ -111,14 +112,14 @@ class tty_netconf(object):
           the <rpc-reply>.  There is also no error-checking
           performing by this routine.
         """
-        if not cmd.startswith('<'):
-            cmd = '<{}/>'.format(cmd)
-        rpc = six.b('<rpc>{}</rpc>'.format(cmd))
-        logger.info('Calling rpc: %s' % rpc)
+        if not cmd.startswith("<"):
+            cmd = "<{}/>".format(cmd)
+        rpc = six.b("<rpc>{}</rpc>".format(cmd))
+        logger.info("Calling rpc: %s" % rpc)
         self._tty.rawwrite(rpc)
 
         rsp = self._receive()
-        rsp = rsp.decode('utf-8') if isinstance(rsp, bytes) else rsp
+        rsp = rsp.decode("utf-8") if isinstance(rsp, bytes) else rsp
         reply = RPCReply(rsp, huge_tree=self._tty._huge_tree)
         errors = reply.errors
         if len(errors) > 1:
@@ -132,6 +133,14 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def _receive(self):
+        # On windows select.select throws io.UnsupportedOperation: fileno
+        # so use read function for windows serial COM ports
+        if hasattr(self._tty, "port") and str(self._tty.port).startswith("COM"):
+            return self._receive_serial_win()
+        else:
+            return self._receive_serial()
+
+    def _receive_serial(self):
         """ process the XML response into an XML object """
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
@@ -153,32 +162,59 @@ class tty_netconf(object):
                     rxbuf = rxbuf + line
                     if _NETCONF_EOM in rxbuf:
                         break
+        return self._parse_buffer(rxbuf)
+
+    # -------------------------------------------------------------------------
+    # Read message from windows COM ports
+    # -------------------------------------------------------------------------
+
+    def _receive_serial_win(self):
+        """ process incoming data from windows port"""
+        rxbuf = PY6.EMPTY_STR
+        line = PY6.EMPTY_STR
+        while True:
+            line, lastline = self._tty.read().strip(), line
+            if not line:
+                continue
+            if _NETCONF_EOM in line or _NETCONF_EOM in lastline + line:
+                rxbuf = rxbuf + line
+                break
+            else:
+                rxbuf = rxbuf + line
+                if _NETCONF_EOM in rxbuf:
+                    break
+        return self._parse_buffer(rxbuf)
+
+    def _parse_buffer(self, rxbuf):
         rxbuf = rxbuf.splitlines()
         if _NETCONF_EOM in rxbuf[-1]:
-            rxbuf.pop()
-
+            if rxbuf[-1] == _NETCONF_EOM:
+                rxbuf.pop()
+            else:
+                rxbuf[-1] = rxbuf[-1].split(_NETCONF_EOM)[0]
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
-            logger.debug('Received: \n%s' % rcvd_data)
-            parser = etree.XMLParser(remove_blank_text=True,
-                                     huge_tree=self._tty._huge_tree)
+            logger.debug("Received: \n%s" % rcvd_data)
+            parser = etree.XMLParser(
+                remove_blank_text=True, huge_tree=self._tty._huge_tree
+            )
             try:
                 etree.XML(rcvd_data, parser)
             except XMLSyntaxError:
                 if _NETCONF_EOM in rcvd_data:
-                    rcvd_data = rcvd_data[:rcvd_data.index(_NETCONF_EOM)]
-                    etree.XML(rcvd_data)     # just to recheck
+                    rcvd_data = rcvd_data[: rcvd_data.index(_NETCONF_EOM)]
+                    etree.XML(rcvd_data)  # just to recheck
                 else:
                     parser = etree.XMLParser(recover=True)
-                    rcvd_data = etree.tostring(etree.XML(rcvd_data,
-                                                         parser=parser))
+                    rcvd_data = etree.tostring(etree.XML(rcvd_data, parser=parser))
             return rcvd_data
         except:
-            if '</xnm:error>' in rxbuf:
+            if "</xnm:error>" in rxbuf:
                 for x in rxbuf:
-                    if '<message>' in x:
+                    if "<message>" in x:
                         return etree.XML(
-                            '<error-in-receive>' + x + '</error-in-receive>')
+                            "<error-in-receive>" + x + "</error-in-receive>"
+                        )
             else:
-                return etree.XML('<error-in-receive/>')
+                return etree.XML("<error-in-receive/>")
