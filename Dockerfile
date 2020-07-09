@@ -10,12 +10,12 @@ ADD setup.py .
 ADD setup.cfg .
 ADD versioneer.py .
 ADD requirements.txt .
-ADD lib .
+ADD lib lib 
 
 ## Install dependancies and PyEZ
 RUN apk add --no-cache build-base python3-dev py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    ca-certificates openssl \
+    ca-certificates \
     && pip3 install -U pip \
     && pip3 install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
