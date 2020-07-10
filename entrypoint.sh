@@ -21,6 +21,10 @@ if [  "${#@}" == 0 ]
 elif [ "${#@}" == 1 ]
     then 
     case $1 in
+        requirements.txt)
+            echo -e "When passing 1 argument, it should only be Python script whose file name ends with .py"
+            echo "$USAGE"
+            exit 1
         *.py)
             echo -e "Executing $1 Python script\n"
             /usr/bin/python3 "$1"
