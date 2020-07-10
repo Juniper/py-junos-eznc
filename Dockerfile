@@ -15,7 +15,7 @@ ADD entrypoint.sh /usr/local/bin/.
 ## Install dependancies and PyEZ
 RUN apk add --no-cache build-base python3-dev py-lxml \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    ca-certificates py3-pip \
+    ca-certificates py3-pip bash \
     && pip install -U pip \
     && pip install -r requirements.txt \
     && apk del -r --purge gcc make g++ \
