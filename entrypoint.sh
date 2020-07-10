@@ -1,55 +1,70 @@
 #!/bin/bash
 
-MSG="Valid arguments are one 'requirements.txt' file and/or one Python script"
+read -r -d '' USAGE << EOM
+
+Usage:
+------
+0, 1, or 2 arguments are accepted.
+    - If 0 arguments are given, an interactive Bash session is started.
+    - If 1 argument is given, it's expected to be a Python script
+      with the file suffix of .py
+    - If 2 arguments are given, it's expected that the first argument will be
+      a pip requirements file, named requirements.txt and the second argument
+      will be a Python script with the file suffix of .py
+
+EOM
 
 if [  "${#@}" == 0 ]
     then
-    echo "Starting an interactive Bash session"
+    echo -e "Starting an interactive Bash session\n"
     /bin/bash
 elif [ "${#@}" == 1 ]
     then 
     case $1 in
-        requirements.txt)
-            echo "Installing Python packages defined in $1"
-            pip install -r "$1"
-            ;;
         *.py)
-            echo "Executing $1 Python script"
+            echo -e "Executing $1 Python script\n"
             /usr/bin/python3 "$1"
             ;;
         *)
-            echo "$MSG"
+            echo "$USAGE"
+            exit 1
             ;;
     esac
 elif [ "${#@}" == 2 ]
     then 
     case $1 in
         requirements.txt)
-            echo "Installing Python packages defined in $1"
+            echo -e "Installing Python packages defined in $1\n"
             pip install -r "$1"
             ;;
         *.py)
-            echo "Executing $1 Python script"
-            /usr/bin/python3 "$1"
+            echo -e "When passing 2 arguments, the first argument should be a file of Python packages named requirements.txt\n"
+            echo "$USAGE"
+            exit 1
             ;;
         *)
-            echo "$MSG"
+            echo "$USAGE"
+            exit 1
             ;;
     esac
     case $2 in
         requirements.txt)
-            echo "Installing Python packages defined in $2"
-            pip install -r "$2"
+            echo -e "When passing 2 arguments, the second argument should be a Python script ending in .py\e"
+            echo "$USAGE"
+            exit 1
             ;;
         *.py)
-            echo "Executing $2 Python script"
+            echo -e "Executing $2 Python script\n"
             /usr/bin/python3 "$2"
             ;;
         *)
-            echo "$MSG"
+            echo "$USAGE"
+            exit 1
             ;;
     esac
 elif [ "${#@}" -gt 2 ]
     then
-    echo "Only 0, 1, or 2 arguments are expected. Got ${#@}"
+    echo -e "Only 0, 1, or 2 arguments are allowed. Got ${#@\n}"
+    echo "$USAGE"
+    exit 1
 fi
