@@ -4,7 +4,7 @@ MSG="Valid arguments are one 'requirements.txt' file and/or one Python script"
 
 if [  "${#@}" == 0 ]
     then
-    echo "Starting an interactive bash session"
+    echo "Starting an interactive Bash session"
     /bin/bash
 elif [ "${#@}" == 1 ]
     then 
