@@ -49,7 +49,7 @@ elif [ "${#@}" == 2 ]
     esac
     case $2 in
         requirements.txt)
-            echo -e "When passing 2 arguments, the second argument should be a Python script ending in .py\e"
+            echo -e "When passing 2 arguments, the second argument should be a Python script ending in .py\n"
             echo "$USAGE"
             exit 1
             ;;
@@ -64,7 +64,7 @@ elif [ "${#@}" == 2 ]
     esac
 elif [ "${#@}" -gt 2 ]
     then
-    echo -e "Only 0, 1, or 2 arguments are allowed. Got ${#@\n}"
+    echo -e "Only 0, 1, or 2 arguments are allowed. Got ${#@}\n"
     echo "$USAGE"
     exit 1
 fi
