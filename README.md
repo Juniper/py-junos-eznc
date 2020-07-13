@@ -90,9 +90,9 @@ Your local scripts will be mounted to /scripts in the container.
 
 ### Microservice Usage
 
-This image can also be used as a Python "executable" with the required Python PyEZ libraries pre-installed. To use the image in this way, mount the volume which contains the Python script and pass the script name as an argument to `docker run`. Optionally, you may also pass in a `requirements.txt` file to install additional python packages via `pip`.
+This image can also be used as a Python "executable" with the required Python PyEZ libraries pre-installed. To use the image in this way, mount the volume which contains the Python script and pass the script name as an argument to `docker run`. Optionally, you may also pass in a `requirements.txt` file to install additional python packages via `pip`. To add OS packages (Alpine Linux), provide a file with a list of packages --one per line-- and either reference it as an env var (`$APK`) or mount it to the container `/extras/apk.txt`. To add additional Python packages (via pip), provide a `requirements.txt` file and pass it in as an env var (`$REQ`) or mount it to the container at `/extras/requirements.txt`.
 
-`Usage: `docker run -it [ --rm ] -v some/dir:/scripts juniper/pyez [ requirements.txt ] [ myscript.py ]`
+`Usage: `docker run -it [ --rm ] -v some/dir:/scripts juniper/pyez [ myscript.py ]`
 
 Example:
 
