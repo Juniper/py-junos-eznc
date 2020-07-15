@@ -12,7 +12,6 @@ import json
 import yaml
 import logging
 
-__version__ = version.VERSION
 __date__ = version.DATE
 
 # import time
