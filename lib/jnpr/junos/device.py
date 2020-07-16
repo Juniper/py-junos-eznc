@@ -732,7 +732,8 @@ class _Connection(object):
             raise ex
         except Exception as ex:
             warnings.warn(
-                "An unknown exception occurred - please report.", RuntimeWarning
+                "An unknown exception occurred : %s - please report." % ex,
+                RuntimeWarning,
             )
             raise ex
 
