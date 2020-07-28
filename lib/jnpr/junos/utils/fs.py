@@ -233,9 +233,9 @@ class FS(Util):
         if brief is True:
             results["files"] = [f.findtext("file-name").strip() for f in files]
         else:
-            results["files"] = dict(
-                (f.findtext("file-name").strip(), FS._decode_file(f)) for f in files
-            )
+            results["files"] = {
+                f.findtext("file-name").strip(): FS._decode_file(f) for f in files
+            }
 
         return results
 
@@ -274,14 +274,14 @@ class FS(Util):
             fs_dict = {}
             for re in re_list:
                 re_name = re.findtext("re-name").strip()
-                re_fs_dict = dict(
-                    (_name(fs), _decode(fs))
+                re_fs_dict = {
+                    _name(fs): _decode(fs)
                     for fs in re.xpath("system-storage-information/filesystem")
-                )
+                }
                 fs_dict[re_name] = re_fs_dict
             return fs_dict
 
-        return dict((_name(fs), _decode(fs)) for fs in rsp.xpath("filesystem"))
+        return {_name(fs): _decode(fs) for fs in rsp.xpath("filesystem")}
 
     # -------------------------------------------------------------------------
     # directory_usage - filesystem directory usage
@@ -342,7 +342,7 @@ class FS(Util):
             }
 
         # return a dict of name/decode pairs for each file
-        return dict((_name(f), _decode(f)) for f in files)
+        return {_name(f): _decode(f) for f in files}
 
     def storage_cleanup_check(self):
         """
@@ -493,5 +493,5 @@ class FS(Util):
 
         :returns: ``True`` if OK, or error-message (str) otherwise
         """
-        results = self._ssh_exec("ln -sf %s %s" % (from_path, to_path))
+        results = self._ssh_exec("ln -sf {} {}".format(from_path, to_path))
         return True if results[0] is True else "".join(results[1][2:-1])

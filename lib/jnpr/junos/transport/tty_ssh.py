@@ -136,7 +136,7 @@ class SSH(Terminal):
     def write(self, content):
         """ write content + <ENTER> """
         logger.debug("Write: %s" % content)
-        self._ssh.sendall(six.b((content + "\n")))
+        self._ssh.sendall(six.b(content + "\n"))
 
     def rawwrite(self, content):
         """ write content as-is """

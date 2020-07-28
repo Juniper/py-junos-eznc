@@ -264,10 +264,10 @@ class Table(object):
         source = self.D.hostname if self.D is not None else self._path
 
         if self.xml is None:
-            return "%s:%s - Table empty" % (cls_name, source)
+            return "{}:{} - Table empty".format(cls_name, source)
         else:
             n_items = len(self.keys())
-            return "%s:%s: %s items" % (cls_name, source, n_items)
+            return "{}:{}: {} items".format(cls_name, source, n_items)
 
     def __len__(self):
         self._assert_data()

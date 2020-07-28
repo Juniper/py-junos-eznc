@@ -463,7 +463,7 @@ class Config(Util):
                 kvargs["format"] = "xml"
             elif re.search(
                 r"^\s*(set|delete|rename|insert|activate|deactivate"
-                "|annotate|copy|protect|unprotect)\s",
+                r"|annotate|copy|protect|unprotect)\s",
                 rpc,
             ):
                 kvargs["format"] = "set"

@@ -72,7 +72,7 @@ class _FactCache(collections.MutableMapping):
         if key not in self._callbacks:
             # Not a fact that we know how to provide.
             raise KeyError(
-                "%s: There is no function to gather the %s fact" % (key, key)
+                "{}: There is no function to gather the {} fact".format(key, key)
             )
         if key not in self._cache:
             # A known fact, but not yet cached. Go get it and cache it.
@@ -211,7 +211,7 @@ class _FactCache(collections.MutableMapping):
         string = ""
         for key in sorted(self):
             if not key.startswith("_"):
-                current = "'%s': %s" % (key, repr(self.get(key)))
+                current = "'{}': {}".format(key, repr(self.get(key)))
                 if string:
                     string = ", ".join([string, current])
                 else:

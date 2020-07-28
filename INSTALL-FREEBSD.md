@@ -11,16 +11,10 @@ FreeBSD contains py-junos-eznc in its official repositories. It could be install
 
 ## Installing from binary packages.
 
-##### For Python 2.7
-sudo pkg install py27-junos-eznc
-
 ##### For Python 3.6
 sudo pkg install py36-junos-eznc
 
 ## Installing from ports collection
-
-#### For Python 2.7
-sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py27
 
 #### For Python 3.6
 sudo make -C /usr/ports/net-mgmt/py-junos-eznc install clean FLAVOR=py36

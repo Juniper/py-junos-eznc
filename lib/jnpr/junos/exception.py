@@ -54,7 +54,7 @@ class RpcError(Exception):
             self.message = (
                 "\n".join(
                     [
-                        "%s: %s" % (err["severity"].strip(), err["message"].strip())
+                        "{}: {}".format(err["severity"].strip(), err["message"].strip())
                         for err in errs
                         if err["message"] is not None and err["severity"] is not None
                     ]
@@ -329,12 +329,12 @@ class JSONLoadError(Exception):
         self.ex_msg = str(exception)
         self.rpc_content = rpc_content
         self.offending_line = ""
-        obj = re.search("line (\d+)", self.ex_msg)
+        obj = re.search(r"line (\d+)", self.ex_msg)
         if obj:
             line_no = int(obj.group(1))
             rpc_lines = rpc_content.splitlines()
             for line in range(line_no - 3, line_no + 2):
-                self.offending_line += "%s: %s\n" % (line + 1, rpc_lines[line])
+                self.offending_line += "{}: {}\n".format(line + 1, rpc_lines[line])
 
     def __repr__(self):
         if self.offending_line:

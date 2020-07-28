@@ -13,13 +13,6 @@ Operating Systems
 
 #### Step 1: Install Python and PIP
 
-##### For Python 2.x:
-###### For Fedora:
-        sudo yum install python-pip python-devel
-###### For CentOS:
-        sudo yum install python-devel
-        wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python
-
 ##### For Python 3.x:
 ###### For Fedora:
         sudo yum install python3-devel
@@ -31,9 +24,6 @@ Operating Systems
     sudo yum install libxml2-devel libxslt-devel gcc openssl-devel libffi-devel redhat-rpm-config
 	
 #### Step 2: Install Junos PyEZ
-
-##### For Python 2.x:
-        sudo pip install junos-eznc
 
 ##### For Python 3.x:
         sudo pip3 install junos-eznc
@@ -56,11 +46,6 @@ Development code can be installed directly from GitHub based on any branch, comm
     sudo yum install git
 
 #### Step 4b: Install Junos PyEZ from GitHub
-
-##### For Python 2.x:
-	    sudo pip install git+https://github.com/Juniper/py-junos-eznc.git
-	    or
-	    sudo pip install git+https://github.com/Juniper/py-junos-eznc.git@<branch,tag,commit>
 
 ##### For Python 3.x:
 	    sudo pip3 install git+https://github.com/Juniper/py-junos-eznc.git

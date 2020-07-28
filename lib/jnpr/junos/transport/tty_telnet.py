@@ -79,7 +79,7 @@ class Telnet(Terminal):
     def write(self, content):
         """ write content + <ENTER> """
         logger.debug("Write: %s" % content)
-        self._tn.write(six.b((content + "\n")))
+        self._tn.write(six.b(content + "\n"))
 
     def rawwrite(self, content):
         """ write content as-is """

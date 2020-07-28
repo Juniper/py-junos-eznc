@@ -246,7 +246,7 @@ class View(object):
 
     def __repr__(self):
         """ returns the name of the View with the associate item name """
-        return "%s:%s" % (self.__class__.__name__, self.name)
+        return "{}:{}".format(self.__class__.__name__, self.name)
 
     def __getattr__(self, name):
         """

@@ -66,7 +66,7 @@ class SCP(object):
         # if 10% more has been copied, then print a message
         if 0 == (pct % 10) and pct != self._by10pct:
             self._by10pct = pct
-            self._progress("%s: %s / %s (%s%%)" % (_path, _xfrd, _total, str(pct)))
+            self._progress("{}: {} / {} ({}%)".format(_path, _xfrd, _total, str(pct)))
 
     def open(self, **scpargs):
         """

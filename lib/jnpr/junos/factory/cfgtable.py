@@ -247,7 +247,7 @@ class CfgTable(Table):
             # <unit operation="delete"/>
             pass
         elif isinstance(value, (list, tuple, dict, set)):
-            raise ValueError("%s value is invalid %s\n" % (field_name, value))
+            raise ValueError("{} value is invalid {}\n".format(field_name, value))
         else:
             if "type" in opt:
                 _validate_type(field_name, value, opt)

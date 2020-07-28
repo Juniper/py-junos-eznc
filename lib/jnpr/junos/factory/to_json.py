@@ -44,7 +44,7 @@ class TableViewJSONEncoder(json.JSONEncoder):
         if isinstance(obj, View):
             obj = {str(obj.name): dict(obj.items())}
         elif isinstance(obj, Table):
-            obj = dict((str(item.name), dict(item.items())) for item in obj)
+            obj = {str(item.name): dict(item.items()) for item in obj}
         else:
             obj = super(TableViewJSONEncoder, self).default(obj)
         return obj

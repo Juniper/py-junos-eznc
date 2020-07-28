@@ -4,7 +4,7 @@ import datetime
 from jnpr.junos.utils.ssh_client import open_ssh_client
 
 _JUNOS_PROMPT = "> "
-_SHELL_PROMPT = "(%|#|\$)\s"
+_SHELL_PROMPT = r"(%|#|\$)\s"
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -132,7 +132,7 @@ class StartShell(object):
         got = "".join(self.wait_for(this, timeout))
         self.last_ok = False
         if this is None:
-            self.last_ok = got is not ""
+            self.last_ok = got != ""
         elif this != _SHELL_PROMPT:
             self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
         elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
