@@ -64,7 +64,7 @@ def get_facts(device):
                                 octets = ip.split(".", 3)
                                 # The 2nd octet will be cluster-id << 4
                                 cluster_id_octet = str(
-                                    int(device.facts["srx_cluster_id"]) << 4
+                                    (int(device.facts["srx_cluster_id"]) & 0x000F) << 4
                                 )
                                 # node0 will have an IP of
                                 #     129.<cluster_id_octet>.0.1

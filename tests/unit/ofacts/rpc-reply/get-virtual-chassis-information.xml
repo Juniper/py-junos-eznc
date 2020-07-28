@@ -1,4 +1,4 @@
-﻿<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
 	<virtual-chassis-information>
 		<preprovisioned-virtual-chassis-information>
 			<virtual-chassis-id>4b43.17d9.1dcf</virtual-chassis-id>

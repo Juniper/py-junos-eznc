@@ -724,12 +724,18 @@ class _Connection(object):
             if rsp.tag == "rpc":
                 return rsp[0]
             return rsp
-        except EzErrors.ConnectClosedError as ex:
+        except (
+            EzErrors.ConnectClosedError,
+            EzErrors.RpcError,
+            EzErrors.RpcTimeoutError,
+        ) as ex:
             raise ex
-        except EzErrors.RpcError as ex:
-            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
-            return "invalid command: " + command
+            warnings.warn(
+                "An unknown exception occurred : %s - please report." % ex,
+                RuntimeWarning,
+            )
+            raise ex
 
     # ------------------------------------------------------------------------
     # execute
@@ -828,7 +834,7 @@ class _Connection(object):
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn(
-                "An unknown exception occured - please report.", RuntimeWarning
+                "An unknown exception occurred - please report.", RuntimeWarning
             )
             raise
 

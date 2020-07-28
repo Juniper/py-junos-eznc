@@ -1,3 +1,4 @@
 include requirements.txt
 recursive-include lib *.yml
 include versioneer.py
+include lib/jnpr/junos/_version.py

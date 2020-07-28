@@ -91,7 +91,7 @@ def generate_sax_parser_input(obj):
     """
     Used to generate xml object from Table/view to be used in SAX parsing
     Args:
-        obj: self object which contains table/view details
+    obj: self object which contains table/view details
 
     Returns: lxml etree object to be used as sax parser input
 
