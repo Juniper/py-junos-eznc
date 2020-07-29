@@ -62,12 +62,14 @@ def get_facts(device):
                                 stats.findall("redundancy-group-status"),
                                 stats.findall("preempt"),
                                 stats.findall("failover-mode"),
+                                stats.findall("monitor-failures"),
                             ):
                                 redundancy_group[group_id][node[0].text] = {
                                     "priority": node[1].text,
                                     "status": node[2].text,
                                     "preempt": node[3].text,
                                     "failover_mode": node[4].text,
+                                    "monitor-failures": node[5].text,
                                 }
     except RpcError:
         # Likely a device that doesn't implement the
