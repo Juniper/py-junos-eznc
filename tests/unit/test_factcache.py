@@ -286,6 +286,6 @@ def get_hidden_fact(device):
         "_hidden": True,
     }
 
+
 def get_foo_raise_error(device):
     raise ValueError("Error")
-
