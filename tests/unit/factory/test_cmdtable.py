@@ -14,7 +14,7 @@ from mock import MagicMock, patch
 import yamlordereddictloader
 from jnpr.junos.factory.factory_loader import FactoryLoader
 import yaml
-
+import json
 
 @attr("unit")
 class TestFactoryCMDTable(unittest.TestCase):
@@ -2333,6 +2333,65 @@ CChipLoStatsView:
         stats = CChipLoStatsTable(self.dev)
         stats = stats.get(target="fpc0")
         self.assertEqual(stats["cchip-lookup-out-errors"], 500)
+
+    @patch("jnpr.junos.Device.execute")
+    def test_textfsm_table(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+ARPtable:
+  command: show arp no-resolve
+  platform: juniper_junos
+  key: ip
+  use_textfsm: True
+  view: ARPview
+
+ARPview:
+    fields:
+      mac: MAC
+      ip: IP_ADDRESS
+      interface: INTERFACE
+      flag: FLAGS
+"""
+        globals().update(
+                FactoryLoader().load(
+                    yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                )
+            )
+        stats = ARPtable(self.dev)
+        stats = stats.get()
+        self.assertEqual(len(stats), 34)
+        self.assertIn("10.221.128.201", stats)
+
+    @patch("jnpr.junos.Device.execute")
+    def test_textfsm_table_mutli_key(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        yaml_data = """
+---
+ARPtable:
+    command: show arp no-resolve
+    platform: juniper_junos
+    key:
+      - ip
+      - mac
+    use_textfsm: True
+    view: ARPview
+
+ARPview:
+    fields:
+        mac: MAC
+        ip: IP_ADDRESS
+        interface: INTERFACE
+        flag: FLAGS
+"""
+        globals().update(
+                FactoryLoader().load(
+                    yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                )
+            )
+        stats = ARPtable(self.dev)
+        stats = stats.get()
+        self.assertIn("('10.221.129.121', '56:68:ad:d8:10:f4')", json.loads(stats.to_json()))
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
