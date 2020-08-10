@@ -16,6 +16,7 @@ from jnpr.junos.factory.factory_loader import FactoryLoader
 import yaml
 import json
 
+
 @attr("unit")
 class TestFactoryCMDTable(unittest.TestCase):
     @patch("ncclient.manager.connect")
@@ -2354,10 +2355,10 @@ ARPview:
       flag: FLAGS
 """
         globals().update(
-                FactoryLoader().load(
-                    yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
-                )
+            FactoryLoader().load(
+                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
             )
+        )
         stats = ARPtable(self.dev)
         stats = stats.get()
         self.assertEqual(len(stats), 34)
@@ -2385,13 +2386,15 @@ ARPview:
         flag: FLAGS
 """
         globals().update(
-                FactoryLoader().load(
-                    yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
-                )
+            FactoryLoader().load(
+                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
             )
+        )
         stats = ARPtable(self.dev)
         stats = stats.get()
-        self.assertIn("('10.221.129.121', '56:68:ad:d8:10:f4')", json.loads(stats.to_json()))
+        self.assertIn(
+            "('10.221.129.121', '56:68:ad:d8:10:f4')", json.loads(stats.to_json())
+        )
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
