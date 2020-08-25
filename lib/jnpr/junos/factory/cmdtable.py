@@ -384,7 +384,15 @@ class CMDTable(object):
         for row in cli_table:
             temp_dict = self._parse_row(row, cli_table, reverse_fields)
             logger.debug("data at index {} is {}".format(row.row, temp_dict))
-            if self.KEY in temp_dict:
+            if isinstance(self.KEY, list):
+                key_list = []
+                for key in self.KEY:
+                    if key not in fields:
+                        key_list.append(temp_dict.pop(key))
+                    else:
+                        key_list.append(temp_dict[key])
+                output[tuple(key_list)] = temp_dict
+            elif self.KEY in temp_dict:
                 if self.KEY not in fields:
                     output[temp_dict.pop(self.KEY)] = temp_dict
                 else:

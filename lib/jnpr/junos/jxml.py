@@ -92,7 +92,9 @@ normalize_xslt = """\
     <xsl:output method="xml" indent="no"/>
 
     <xsl:template match="/*[local-name()='rpc-reply']/*[local-name()='output']">
-        <xsl:copy-of select="."/>
+        <output>
+        <xsl:value-of select="."/>
+        </output>
     </xsl:template>
 
     <xsl:template match="/|comment()|processing-instruction()">

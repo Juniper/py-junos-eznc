@@ -212,9 +212,29 @@ class TestFactCache(unittest.TestCase):
 
     @patch("jnpr.junos.device.warnings")
     def test_factcache_refresh_exception_on_failure(self, mock_warn):
+        # Override the callbacks
+        self.dev.facts._callbacks = {
+            "foo": get_foo_raise_error,
+        }
+        # Populate the cache
+        self.dev.facts._cache["foo"] = "before"
+        # Confirm the cached values
+        self.assertEqual(self.dev.facts["foo"], "before")
         with self.assertRaises(ValueError):
-            # Refresh all facts with exception on failure
-            self.dev.facts._refresh(exception_on_failure=True)
+            self.dev.facts._refresh(exception_on_failure=True, keys="foo")
+
+    @patch("jnpr.junos.device.warnings")
+    def test_factcache_refresh_no_exception_on_failure(self, mock_warn):
+        # Override the callbacks
+        self.dev.facts._callbacks = {
+            "foo": get_foo_raise_error,
+        }
+        # Populate the cache
+        self.dev.facts._cache["foo"] = "before"
+        # Confirm the cached values
+        self.assertEqual(self.dev.facts["foo"], "before")
+        self.dev.facts._refresh(exception_on_failure=False, keys="foo")
+        self.assertEqual(self.dev.facts["foo"], None)
 
     @patch("jnpr.junos.device.warnings")
     @patch("jnpr.junos.factcache.warnings")
@@ -265,3 +285,7 @@ def get_hidden_fact(device):
     return {
         "_hidden": True,
     }
+
+
+def get_foo_raise_error(device):
+    raise ValueError("Error")
