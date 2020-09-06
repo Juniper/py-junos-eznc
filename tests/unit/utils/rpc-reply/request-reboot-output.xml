@@ -1,0 +1,21 @@
+<rpc-reply>
+<output>
+Initiating vmhost reboot...
+</output>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+Rebooting re0 in 1 min
+</error-message>
+</rpc-error>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+Initiating Junos shutdown...
+</error-message>
+</rpc-error>
+<output>
+shutdown: [pid 13192]
+Shutdown at Thu Aug  6 09:27:13 2020.
+</output>
+</rpc-reply>
