@@ -496,13 +496,12 @@ class CfgTable(Table):
             # see if the caller provided a named item.  this must
             # be an actual name of a thing, and not an index number.
             # ... at least for now ...
-            named_item = kvargs.get("key") or vargs[0]
             dot = get_cmd.find(self._data_dict[self._type])
+            key = str(etree.tostring(dot), 'utf-8').split('<')[1].split('/')[0]
+            named_item = kvargs.get(key)
             self._encode_namekey(get_cmd, dot, named_item)
-
             if "get_fields" in self._data_dict:
                 self._encode_getfields(get_cmd, dot)
-
         except:
             # caller not requesting a specific table item
             pass
