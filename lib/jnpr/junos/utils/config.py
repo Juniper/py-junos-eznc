@@ -301,8 +301,10 @@ class Config(Util):
             .. note:: The format can specifically set using **format**.
 
         :param str format:
-          Determines the format of the contents. Refer to options
-          from the **path** description.
+            Determines the format of the contents.
+            Supported options - text, set, xml, json
+
+            If not provided, internally application will try to find out the format
 
         :param bool overwrite:
           Determines if the contents completely replace the existing
