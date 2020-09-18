@@ -3,6 +3,7 @@
 coverage     # http://nedbatchelder.com/code/coverage/
 mock         # http://www.voidspace.org.uk/python/mock/
 pytest       # https://docs.pytest.org/
+pytest-cov
 pep8	     # https://github.com/jcrocholl/pep8
 pyflakes	 # https://launchpad.net/pyflakes
 coveralls	 # https://coveralls.io/
