@@ -34,7 +34,7 @@ install:
 
 script:
   - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then black --check --exclude=docs/* . ; fi
-  - nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
+  - pytest --cov=jnpr.junos -m unit
 
 after_success:
   coveralls

@@ -27,7 +27,6 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
-nosetests.xml
 tests/unit/cover
 
 # Translations
