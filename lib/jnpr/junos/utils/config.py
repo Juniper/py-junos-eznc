@@ -346,7 +346,7 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
-          
+
         :param ignore_warning: A boolean, string or list of string.
           If the value is True, it will ignore all warnings regardless of the
           warning message. If the value is a string, it will ignore

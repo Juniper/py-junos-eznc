@@ -95,7 +95,10 @@ class TestFtp(unittest.TestCase):
     @patch("ftplib.FTP.login")
     @patch("ftplib.FTP.retrbinary")
     def test_ftp_dnload_file_get_rf_filename_cb(
-        self, mock_ftp_connect, mock_ftp_login, mock_ftp_retrbinary,
+        self,
+        mock_ftp_connect,
+        mock_ftp_login,
+        mock_ftp_retrbinary,
     ):
         def callback():
             pass
