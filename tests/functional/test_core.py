@@ -4,11 +4,11 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import pytest
 from jnpr.junos.exception import RpcTimeoutError
 
 
-@attr("functional")
+@pytest.mark.functional
 class TestCore(unittest.TestCase):
     @classmethod
     def setUpClass(self):

@@ -1,13 +1,13 @@
 __author__ = "mwiget"
 
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 
 import socket
 from jnpr.junos import Device
 
 
-@attr("functional")
+@pytest.mark.functional
 class TestDeviceSsh(unittest.TestCase):
     def tearDown(self):
         self.dev.close()

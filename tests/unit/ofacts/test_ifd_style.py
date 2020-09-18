@@ -3,13 +3,13 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from mock import patch
-from nose.plugins.attrib import attr
+import pytest
 
 from jnpr.junos import Device
 from jnpr.junos.ofacts.ifd_style import facts_ifd_style as ifd_style
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestIFDStyle(unittest.TestCase):
     @patch("jnpr.junos.device.warnings")
     def setUp(self, mock_warnings):

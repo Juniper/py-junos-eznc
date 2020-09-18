@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 
 from jnpr.junos import Device
 from jnpr.junos.utils.start_shell import StartShell
@@ -10,7 +10,7 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestStartShell(unittest.TestCase):
     @patch("paramiko.SSHClient")
     def setUp(self, mock_connect):

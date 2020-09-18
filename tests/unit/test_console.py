@@ -3,7 +3,7 @@ try:
 except ImportError:
     import unittest
 from jnpr.junos.utils.config import Config
-from nose.plugins.attrib import attr
+import pytest
 from mock import patch, MagicMock, call
 import re
 import sys
@@ -23,7 +23,7 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestConsole(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_telnet.Telnet._tty_open")
     @patch("jnpr.junos.transport.tty_telnet.telnetlib.Telnet.expect")

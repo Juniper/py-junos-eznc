@@ -2,7 +2,7 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 from mock import MagicMock, patch
 from jnpr.junos import Device
 from jnpr.junos.factory.view import View
@@ -10,7 +10,7 @@ from jnpr.junos.op.phyport import PhyPortStatsTable, PhyPortStatsView
 from lxml import etree
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestFactoryView(unittest.TestCase):
     def setUp(self):
         self.dev = Device(

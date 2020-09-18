@@ -2,7 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import pytest
 from mock import MagicMock, patch, mock_open, call
 import os
 from lxml import etree
@@ -53,7 +53,7 @@ facts = {
 }
 
 
-@attr("unit")
+@pytest.mark.unit
 class Test_MyTemplateLoader(unittest.TestCase):
     def setUp(self):
         from jnpr.junos.device import _MyTemplateLoader
@@ -78,7 +78,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
             self.template_loader.get_source(None, None)
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestDevice(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

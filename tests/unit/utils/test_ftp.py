@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 import ftplib
 import sys
 import os
@@ -15,7 +15,7 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
+@pytest.mark.unit
 @unittest.skipIf(sys.platform == "win32", "will work for windows in coming days")
 class TestFtp(unittest.TestCase):
     @patch("ftplib.FTP.connect")
