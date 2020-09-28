@@ -886,7 +886,7 @@ class SW(Util):
                 return False
         except RpcError:
             _progress(
-                "request-package-check-pending-install rpc is not "
+                "request-package-checks-pending-install rpc is not "
                 "supported on given device"
             )
         except Exception as ex:

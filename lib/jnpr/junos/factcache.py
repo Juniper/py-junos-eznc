@@ -296,4 +296,5 @@ class _FactCache(collections.MutableMapping):
 
     # Precede the class's documentation with the documentation on the specific
     # facts from  the jnpr.junos.facts package.
+    print(__doc__)
     __doc__ = facts_doc + "Implementation details on the _FactCache class:" + __doc__

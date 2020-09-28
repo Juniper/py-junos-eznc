@@ -37,7 +37,9 @@ def get_facts(device):
                 current_re.append(re_name[0].text)
         else:
             rsp = device.rpc.get_interface_information(
-                normalize=True, routing_instance="__juniper_private1__", terse=True,
+                normalize=True,
+                routing_instance="__juniper_private1__",
+                terse=True,
             )
 
             # Get the local IPv4 addresses from the response.

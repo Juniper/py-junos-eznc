@@ -193,8 +193,8 @@ def remove_namespaces_and_spaces(xml):
 
 def rpc_error(rpc_xml):
     """
-      extract the various bits from an <rpc-error> element
-      into a dictionary
+    extract the various bits from an <rpc-error> element
+    into a dictionary
     """
     remove_namespaces(rpc_xml)
 
