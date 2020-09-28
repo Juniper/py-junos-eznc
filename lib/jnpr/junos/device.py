@@ -422,15 +422,15 @@ class _Connection(object):
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
-        """ Controls the ssh connection:
-            If using ssh_private_key_file on MacOS Mojave or greater
-            (specifically > OpenSSH_7.4p1) ensure that the keys are generated
-            in PEM format or convert existing 'new' keys to the PEM format:
-            Check format: `head -n1 ~/.ssh/some_key`
-            Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
-            Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
-            Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
-            """
+        """Controls the ssh connection:
+        If using ssh_private_key_file on MacOS Mojave or greater
+        (specifically > OpenSSH_7.4p1) ensure that the keys are generated
+        in PEM format or convert existing 'new' keys to the PEM format:
+        Check format: `head -n1 ~/.ssh/some_key`
+        Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
+        Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
+        Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
+        """
         if self.__class__.__name__ == "Device" and self._sock_fd is not None:
             return None
         if self._ssh_config:
@@ -1116,7 +1116,7 @@ class Device(_Connection):
 
         :param str sock_fd:
             **REQUIRED** file descriptor of an existing socket instead of providing a host.
-            Used for outbound ssh. 
+            Used for outbound ssh.
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided
