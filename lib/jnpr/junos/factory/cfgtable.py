@@ -181,9 +181,12 @@ class CfgTable(Table):
         """
 
         def _get_field_type(ftype):
-            ft = {"str": str, "int": int, "float": float, "bool": bool,}.get(
-                ftype, None
-            )
+            ft = {
+                "str": str,
+                "int": int,
+                "float": float,
+                "bool": bool,
+            }.get(ftype, None)
 
             if ft is None:
                 raise TypeError("Unsupported type %s\n" % (ftype))
