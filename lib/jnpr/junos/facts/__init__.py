@@ -86,6 +86,10 @@ def _build_fact_callbacks_and_doc_strings():
 # Import all of the fact modules and build the callbacks and doc strings
 (_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
+# In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
+if __doc__ is None:
+    __doc__ = " "
+
 # Append the doc string (__doc__) with the documentation for each fact.
 for key in sorted(_doc_strings, key=lambda s: s.lower()):
     __doc__ += ":%s:\n  %s\n" % (key, _doc_strings[key])
