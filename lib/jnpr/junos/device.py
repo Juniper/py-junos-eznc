@@ -93,6 +93,18 @@ class _Connection(object):
         or platform.release().startswith("JNPR")
         or os.path.isfile("/usr/share/cevo/cevo_version")
     )
+
+    if ON_JUNOS is False:
+        if os.path.isfile("/etc/product.conf") is True:
+            model_dict = {}
+            with open("/etc/product.conf") as f:
+                for line in f:
+                    (key, val) = line.rstrip().split('=')
+                    model_dict[key] = val
+
+            if 'model' in model_dict and model_dict['model'] in ['crpd', 'cbng', 'cmgd']:
+                ON_JUNOS = True
+
     auto_probe = 0  # default is no auto-probe
 
     # ------------------------------------------------------------------------
