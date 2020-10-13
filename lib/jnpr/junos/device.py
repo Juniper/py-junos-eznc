@@ -94,12 +94,16 @@ class _Connection(object):
         or os.path.isfile("/usr/share/cevo/cevo_version")
     )
 
+    # for juniper specific containers likes crpd, cmgd, cbng
+    # and similar entities, we will need to check the product.conf
+    # file for on-box implementation
+
     if ON_JUNOS is False:
         if os.path.isfile("/etc/product.conf") is True:
             model_dict = {}
             with open("/etc/product.conf") as f:
                 for line in f:
-                    (key, val) = line.rstrip().split("=")
+                    (key, val) = line.strip().split("=")
                     model_dict[key] = val
 
             if "model" in model_dict and model_dict["model"] in [
