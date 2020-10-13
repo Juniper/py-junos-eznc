@@ -659,7 +659,9 @@ class SW(Util):
             _progress(
                 "after copy, computing checksum on remote package: %s" % remote_package
             )
-            remote_checksum = self.remote_checksum(remote_package)
+            remote_checksum = self.remote_checksum(
+                remote_package, timeout=checksum_timeout, algorithm=checksum_algorithm
+            )
 
         if remote_checksum != checksum:
             _progress("checksum check failed.")
