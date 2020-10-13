@@ -296,7 +296,7 @@ class _FactCache(collections.MutableMapping):
 
     # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
     if __doc__ is None:
-        __doc__ = " "
+        __doc__ = ""
 
     # Precede the class's documentation with the documentation on the specific
     # facts from  the jnpr.junos.facts package.

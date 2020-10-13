@@ -88,7 +88,7 @@ def _build_fact_callbacks_and_doc_strings():
 
 # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
 if __doc__ is None:
-    __doc__ = " "
+    __doc__ = ""
 
 # Append the doc string (__doc__) with the documentation for each fact.
 for key in sorted(_doc_strings, key=lambda s: s.lower()):
