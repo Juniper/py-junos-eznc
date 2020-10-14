@@ -103,8 +103,9 @@ class _Connection(object):
             model_dict = {}
             with open("/etc/product.conf") as f:
                 for line in f:
-                    (key, val) = line.strip().split("=")
-                    model_dict[key] = val
+                    if "=" in line:
+                        (key, val) = line.strip().split("=")
+                        model_dict[key] = val
 
             if "model" in model_dict and model_dict["model"] in [
                 "crpd",
