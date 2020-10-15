@@ -151,8 +151,9 @@ class DCS(_Connection):
         elif len(errors) == 1:
             raise reply.error
 
-        rpc_rsp_e = NCElement(reply, self.junos_dev_handler.transform_reply()
-                              )._NCElement__doc
+        rpc_rsp_e = NCElement(
+            reply, self.junos_dev_handler.transform_reply()
+        )._NCElement__doc
         return rpc_rsp_e
 
     # -----------------------------------------------------------------------

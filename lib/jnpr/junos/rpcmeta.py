@@ -13,9 +13,9 @@ class _RpcMetaExec(object):
 
     def __init__(self, junos):
         """
-          ~PRIVATE CLASS~
-          creates an RPC meta-executor object bound to the provided
-          ez-netconf :junos: object
+        ~PRIVATE CLASS~
+        creates an RPC meta-executor object bound to the provided
+        ez-netconf :junos: object
         """
         self._junos = junos
 
@@ -303,12 +303,12 @@ class _RpcMetaExec(object):
 
     def __getattr__(self, rpc_cmd_name):
         """
-          metaprograms a function to execute the :rpc_cmd_name:
+        metaprograms a function to execute the :rpc_cmd_name:
 
-          the caller will be passing (*vargs, **kvargs) on
-          execution of the meta function; these are the specific
-          rpc command arguments(**kvargs) and options bound
-          as XML attributes (*vargs)
+        the caller will be passing (*vargs, **kvargs) on
+        execution of the meta function; these are the specific
+        rpc command arguments(**kvargs) and options bound
+        as XML attributes (*vargs)
         """
 
         rpc_cmd = re.sub("_", "-", rpc_cmd_name)
@@ -378,10 +378,10 @@ class _RpcMetaExec(object):
 
     def __call__(self, rpc_cmd, **kvargs):
         """
-          callable will execute the provided :rpc_cmd: against the
-          attached :junos: object and return the RPC response per
-          :junos:execute()
+        callable will execute the provided :rpc_cmd: against the
+        attached :junos: object and return the RPC response per
+        :junos:execute()
 
-          kvargs is simply passed 'as-is' to :junos:execute()
+        kvargs is simply passed 'as-is' to :junos:execute()
         """
         return self._junos.execute(rpc_cmd, **kvargs)
