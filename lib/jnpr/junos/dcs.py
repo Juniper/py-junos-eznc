@@ -51,6 +51,7 @@ class DCS(_Connection):
         self._grpc_meta_data = self._grpc_deps.get("meta_data", {})
         self._grpc_types_pb2 = self._grpc_deps.get("types_pb2")
         self._grpc_dcs_pb2 = self._grpc_deps.get("dcs_pb2")
+        self._dev_uuid = self._grpc_deps.get("uuid")
 
         self.junos_dev_handler = JunosDeviceHandler(
             device_params={"name": "junos", "local": False}
@@ -140,7 +141,7 @@ class DCS(_Connection):
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
-        di = self._grpc_types_pb2.DeviceInfo(UUID="test1234")
+        di = self._grpc_types_pb2.DeviceInfo(UUID=self._dev_uuid)
         exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
         res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
         result = res.result[0].result
