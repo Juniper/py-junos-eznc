@@ -3,6 +3,7 @@ OspfNeighborTable:
     command: show ospf neighbor
     key: Address
     view: OspfNeighborView
+
 OspfNeighborView:
     columns:
         neighbor_address: Address

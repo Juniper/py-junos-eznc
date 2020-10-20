@@ -1103,7 +1103,15 @@ class Device(_Connection):
     # -----------------------------------------------------------------------
 
     def __new__(cls, *args, **kwargs):
-        if (
+        if kwargs.get("mode") == "grpc":
+            if "grpc_deps" not in kwargs:
+                raise ValueError
+            from jnpr.junos.dcs import DCS
+
+            instance = object.__new__(DCS, *args, **kwargs)
+            instance.__init__(**kwargs)
+            return instance
+        elif (
             kwargs.get("port") in [23, "23"]
             or kwargs.get("mode")
             or kwargs.get("cs_user") is not None
