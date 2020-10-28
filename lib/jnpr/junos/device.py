@@ -93,6 +93,27 @@ class _Connection(object):
         or platform.release().startswith("JNPR")
         or os.path.isfile("/usr/share/cevo/cevo_version")
     )
+
+    # for juniper specific containers likes crpd, cmgd, cbng
+    # and similar entities, we will need to check the product.conf
+    # file for on-box implementation
+
+    if ON_JUNOS is False:
+        if os.path.isfile("/etc/product.conf") is True:
+            model_dict = {}
+            with open("/etc/product.conf") as f:
+                for line in f:
+                    if "=" in line:
+                        (key, val) = line.strip().split("=")
+                        model_dict[key] = val
+
+            if "model" in model_dict and model_dict["model"] in [
+                "crpd",
+                "cbng",
+                "cmgd",
+            ]:
+                ON_JUNOS = True
+
     auto_probe = 0  # default is no auto-probe
 
     # ------------------------------------------------------------------------
@@ -422,15 +443,15 @@ class _Connection(object):
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
-        """ Controls the ssh connection:
-            If using ssh_private_key_file on MacOS Mojave or greater
-            (specifically > OpenSSH_7.4p1) ensure that the keys are generated
-            in PEM format or convert existing 'new' keys to the PEM format:
-            Check format: `head -n1 ~/.ssh/some_key`
-            Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
-            Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
-            Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
-            """
+        """Controls the ssh connection:
+        If using ssh_private_key_file on MacOS Mojave or greater
+        (specifically > OpenSSH_7.4p1) ensure that the keys are generated
+        in PEM format or convert existing 'new' keys to the PEM format:
+        Check format: `head -n1 ~/.ssh/some_key`
+        Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
+        Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
+        Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
+        """
         if self.__class__.__name__ == "Device" and self._sock_fd is not None:
             return None
         if self._ssh_config:
@@ -1116,7 +1137,7 @@ class Device(_Connection):
 
         :param str sock_fd:
             **REQUIRED** file descriptor of an existing socket instead of providing a host.
-            Used for outbound ssh. 
+            Used for outbound ssh.
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided

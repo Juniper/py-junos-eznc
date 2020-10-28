@@ -659,7 +659,9 @@ class SW(Util):
             _progress(
                 "after copy, computing checksum on remote package: %s" % remote_package
             )
-            remote_checksum = self.remote_checksum(remote_package)
+            remote_checksum = self.remote_checksum(
+                remote_package, timeout=checksum_timeout, algorithm=checksum_algorithm
+            )
 
         if remote_checksum != checksum:
             _progress("checksum check failed.")
@@ -886,7 +888,7 @@ class SW(Util):
                 return False
         except RpcError:
             _progress(
-                "request-package-check-pending-install rpc is not "
+                "request-package-checks-pending-install rpc is not "
                 "supported on given device"
             )
         except Exception as ex:
@@ -1056,7 +1058,7 @@ class SW(Util):
             if self._dev.facts["2RE"]:
                 cmd = E("other-routing-engine")
         elif all_re is True:
-            if vmhost is True:
+            if self._multi_RE is True and vmhost is True:
                 cmd.append(E("routing-engine", "both"))
             elif self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E("both-routing-engines"))
