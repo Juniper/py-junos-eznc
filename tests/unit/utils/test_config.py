@@ -243,7 +243,7 @@ class TestConfig(unittest.TestCase):
     def test_config_pdiff(self):
         self.conf.diff = MagicMock(return_value="Stuff")
         self.conf.pdiff()
-        self.conf.diff.assert_called_once_with(0)
+        self.conf.diff.assert_called_once_with(0, False, False)
 
     def test_config_diff_rpc_timeout(self):
         ex = RpcTimeoutError(self.dev, None, 10)
