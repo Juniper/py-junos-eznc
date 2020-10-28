@@ -198,6 +198,20 @@ class TestConfig(unittest.TestCase):
             ignore_warning=False,
         )
 
+    def test_config_diff_use_fast_diff(self):
+        self.conf.rpc.get_configuration = MagicMock()
+        self.conf.diff(use_fast_diff=True)
+        self.conf.rpc.get_configuration.assert_called_with(
+            {"compare": "rollback", "rollback": "0", "format": "text",
+             "use-fast-diff": "yes"},
+            ignore_warning=False,
+        )
+
+    def test_config_diff_use_fast_diff_rb_id_gt_0(self):
+        self.conf.rpc.get_configuration = MagicMock()
+        with self.assertRaises(ValueError):
+            self.conf.diff(use_fast_diff=True, rb_id=1)
+
     def test_config_diff_exception_severity_warning(self):
         rpc_xml = """
             <rpc-error>
