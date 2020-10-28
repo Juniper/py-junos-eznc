@@ -1,0 +1,30 @@
+<rpc-reply>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+ipsec-key-management subsystem not running - not needed by configuration.
+</error-message>
+</rpc-error>
+<warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+<message>
+ipsec-key-management subsystem not running - not needed by configuration.
+</message>
+<reason>
+<daemon>
+ipsec-key-management
+</daemon>
+<process-not-configured/>
+</reason>
+</warning>
+<warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+<message>
+zeroizing re1
+</message>
+</warning>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+zeroizing re0
+</error-message>
+</rpc-error>
+</rpc-reply>

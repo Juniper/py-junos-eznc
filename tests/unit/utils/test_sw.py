@@ -942,8 +942,7 @@ class TestSW(unittest.TestCase):
     def test_sw_zeroize(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
-        test_str = "System will be rebooted and may not boot without configuration"
-        self.assertTrue(test_str in self.sw.zeroize())
+        self.assertTrue("zeroizing" in self.sw.zeroize())
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_zeroize_exception(self, mock_execute):
@@ -1002,6 +1001,8 @@ class TestSW(unittest.TestCase):
             if "path" in kwargs:
                 if kwargs["path"] == "/packages":
                     return self._read_file("file-list_dir.xml")
+            if args and self._testMethodName == "test_sw_zeroize":
+                return self._read_file("request-zeroize.xml")
             device_params = kwargs["device_params"]
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
