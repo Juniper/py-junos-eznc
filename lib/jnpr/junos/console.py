@@ -1,7 +1,3 @@
-"""
-This file defines the 'netconifyCmdo' class.
-Used by the 'netconify' shell utility.
-"""
 import traceback
 import sys
 import logging

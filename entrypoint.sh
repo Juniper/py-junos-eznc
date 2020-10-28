@@ -19,7 +19,7 @@ function pip_install {
 
 function run_scripts {
     echo "Executing defined script"
-    python3 "$1"
+    python3 $1 ${@:2}
 }
 
 ## Manually defined variables will take precedence
@@ -34,7 +34,7 @@ elif [ -f "/extras/requirements.txt" ];then REQ="/extras/requirements.txt"
 else REQ=''
 fi
 
-if [ "$1" ]; then SCRIPT=$1
+if [ "$#" ]; then SCRIPT=$@
 else SCRIPT=''
 fi
 

@@ -16,7 +16,14 @@ from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
 from jinja2 import Template
-from ntc_templates import parse as ntc_parse
+
+HAS_NTC_TEMPLATE = False
+try:
+    from ntc_templates import parse as ntc_parse
+
+    HAS_NTC_TEMPLATE = True
+except:
+    pass
 
 import logging
 
@@ -153,9 +160,14 @@ class CMDTable(object):
                 self.data = self.xml.text
 
         if self.USE_TEXTFSM:
-            self.output = self._parse_textfsm(
-                platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
-            )
+            if HAS_NTC_TEMPLATE:
+                self.output = self._parse_textfsm(
+                    platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
+                )
+            else:
+                raise ImportError(
+                    "ntc_template is missing. Need to be installed explicitly."
+                )
         else:
             # state machine
             sm = StateMachine(self)
@@ -384,7 +396,15 @@ class CMDTable(object):
         for row in cli_table:
             temp_dict = self._parse_row(row, cli_table, reverse_fields)
             logger.debug("data at index {} is {}".format(row.row, temp_dict))
-            if self.KEY in temp_dict:
+            if isinstance(self.KEY, list):
+                key_list = []
+                for key in self.KEY:
+                    if key not in fields:
+                        key_list.append(temp_dict.pop(key))
+                    else:
+                        key_list.append(temp_dict[key])
+                output[tuple(key_list)] = temp_dict
+            elif self.KEY in temp_dict:
                 if self.KEY not in fields:
                     output[temp_dict.pop(self.KEY)] = temp_dict
                 else:
