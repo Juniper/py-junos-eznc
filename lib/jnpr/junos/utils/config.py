@@ -242,8 +242,10 @@ class Config(Util):
                 raise ValueError("use_fast_diff can only be used with rb_id 0")
             rpc_params["use-fast-diff"] = "yes"
         try:
-            rsp = self.rpc.get_configuration(rpc_params,
-                                             ignore_warning=ignore_warning,)
+            rsp = self.rpc.get_configuration(
+                rpc_params,
+                ignore_warning=ignore_warning,
+            )
         except RpcTimeoutError:
             raise
         except RpcError as err:

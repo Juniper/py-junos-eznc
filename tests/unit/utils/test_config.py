@@ -202,8 +202,12 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.get_configuration = MagicMock()
         self.conf.diff(use_fast_diff=True)
         self.conf.rpc.get_configuration.assert_called_with(
-            {"compare": "rollback", "rollback": "0", "format": "text",
-             "use-fast-diff": "yes"},
+            {
+                "compare": "rollback",
+                "rollback": "0",
+                "format": "text",
+                "use-fast-diff": "yes",
+            },
             ignore_warning=False,
         )
 
