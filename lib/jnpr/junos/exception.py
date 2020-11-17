@@ -21,12 +21,12 @@ class RpcError(Exception):
 
     def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
         """
-          :cmd: is the rpc command
-          :rsp: is the rpc response (after <rpc-reply>)
-          :errs: is a list of dictionaries of extracted <rpc-error> elements.
-          :dev: is the device rpc was executed on
-          :timeout: is the timeout value of the device
-          :re: is the RE or member exception occured on
+        :cmd: is the rpc command
+        :rsp: is the rpc response (after <rpc-reply>)
+        :errs: is a list of dictionaries of extracted <rpc-error> elements.
+        :dev: is the device rpc was executed on
+        :timeout: is the timeout value of the device
+        :re: is the RE or member exception occured on
         """
         self.cmd = cmd
         self.rsp = rsp
@@ -71,7 +71,7 @@ class RpcError(Exception):
 
     def __repr__(self):
         """
-          pprints the response XML attribute
+        pprints the response XML attribute
         """
         if self.rpc_error is not None:
             return "{}(severity: {}, bad_element: {}, message: {})".format(

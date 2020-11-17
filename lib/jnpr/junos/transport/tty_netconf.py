@@ -64,7 +64,7 @@ class tty_netconf(object):
                 break
         else:
             # exceeded the while loop timeout
-            raise RuntimeError("Netconify Error: netconf not responding")
+            raise RuntimeError("Error: netconf not responding")
 
         self.hello = self._receive()
 

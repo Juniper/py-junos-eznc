@@ -849,6 +849,12 @@ class TestSW(unittest.TestCase):
         self.assertTrue("Shutdown NOW" in self.sw.reboot())
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_reboot_output_in_reply(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertTrue("shutdown: [pid 13192]" in self.sw.reboot())
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_reboot_at(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertTrue("Shutdown at" in self.sw.reboot(at="201407091815"))
@@ -936,8 +942,7 @@ class TestSW(unittest.TestCase):
     def test_sw_zeroize(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_MX = True
-        test_str = "System will be rebooted and may not boot without configuration"
-        self.assertTrue(test_str in self.sw.zeroize())
+        self.assertTrue("zeroizing" in self.sw.zeroize())
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_zeroize_exception(self, mock_execute):
@@ -996,12 +1001,16 @@ class TestSW(unittest.TestCase):
             if "path" in kwargs:
                 if kwargs["path"] == "/packages":
                     return self._read_file("file-list_dir.xml")
+            if args and self._testMethodName == "test_sw_zeroize":
+                return self._read_file("request-zeroize.xml")
             device_params = kwargs["device_params"]
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
         elif args:
-            if args[0].find("at") is not None:
+            if self._testMethodName == "test_sw_reboot_output_in_reply":
+                return self._read_file("request-reboot-output.xml")
+            elif args[0].find("at") is not None:
                 return self._read_file("request-reboot-at.xml")
             elif self._testMethodName == "test_sw_check_pending_install":
                 if args[0].text == "request-package-check-pending-install":

@@ -1,18 +1,9 @@
 from setuptools import setup, find_packages
-import sys
 import versioneer
 
 # parse requirements
 req_lines = [line.strip() for line in open("requirements.txt").readlines()]
 install_reqs = list(filter(None, req_lines))
-
-# refer: https://github.com/Juniper/py-junos-eznc/issues/1015
-# should be removed when textfsm releases >=1.1.1
-if sys.platform == "win32":
-    if "ntc_templates" in install_reqs:
-        install_reqs.remove("ntc_templates")
-        install_reqs.append("ntc_templates==1.4.1")
-    install_reqs.append("textfsm==0.4.1")
 
 setup(
     name="junos-eznc",
@@ -51,6 +42,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "Topic :: Software Development :: Libraries :: Python Modules",
