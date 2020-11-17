@@ -1,7 +1,10 @@
 import warnings
 from pprint import pformat
 
-from six.moves.collections_abc import MutableMapping
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc

@@ -3,7 +3,10 @@ import json
 from lxml import etree
 from copy import deepcopy
 
-from six.moves.collections_abc import MutableMapping
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 
 class TableJSONEncoder(json.JSONEncoder):
