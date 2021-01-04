@@ -260,6 +260,10 @@ class Config(Util):
             else:
                 raise
 
+        # Check return type is an etree Element, if not return None for no changes
+        if not type(rsp) == etree._Element:
+            return None
+
         diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
 
