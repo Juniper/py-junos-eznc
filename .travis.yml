@@ -16,6 +16,7 @@ matrix:
           python: 3.7
           before_install:
             - choco install python3 --version=3.7.4
+            - choco install choco install openssl=1.1.1.900
             - pip install ntc_templates==1.4.1
             - pip install textfsm==0.4.1
           env:
