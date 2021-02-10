@@ -19,6 +19,7 @@ matrix:
             - choco install openssl --version=1.1.1.900 
             - pip install ntc_templates==1.4.1
             - pip install textfsm==0.4.1
+            - set
           env:
             - PATH=/c/Python37:/c/Python37/Scripts:$PATH
             - TRAVIS_PYTHON_VERSION=3.7
