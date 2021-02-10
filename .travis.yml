@@ -16,11 +16,15 @@ matrix:
           python: 3.7
           before_install:
             - choco install python3 --version=3.7.4
+            - choco install openssl --version=1.1.1.900 
             - pip install ntc_templates==1.4.1
             - pip install textfsm==0.4.1
           env:
             - PATH=/c/Python37:/c/Python37/Scripts:$PATH
             - TRAVIS_PYTHON_VERSION=3.7
+            - CRYPTOGRAPHY_DONT_BUILD_RUST=1
+            - INCLUDE='C:\OpenSSL-Win32\include'
+            - LIB='C:\OpenSSL-Win32\lib'
 addons:
   apt:
     packages:
@@ -29,6 +33,7 @@ addons:
     - libxslt1-dev
 
 install:
+  - "set"
   - "pip install -r development.txt"
   - "pip install -r requirements.txt"
   - "pip install ."
