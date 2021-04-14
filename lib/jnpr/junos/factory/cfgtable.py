@@ -336,7 +336,7 @@ class CfgTable(Table):
         encodes the specific namekey_value into the get command so that the
         returned XML configuration is the complete hierarchy of data.
         """
-        namekey_xpath = self._data_dict.get("key-field", "name")
+        namekey_xpath = self._data_dict.get("key-field") or "name"
         keylist_xml = self._grindkey(namekey_xpath, namekey_value)
         for _add in keylist_xml:
             dot.append(_add)
