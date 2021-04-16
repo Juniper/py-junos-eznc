@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from ncclient.operations.rpc import RPCReply, RPCError
 from ncclient.xml_ import to_ele
 import six
+from ncclient.transport.session import HelloHandler
 
 
 class PY6:
@@ -67,6 +68,7 @@ class tty_netconf(object):
             raise RuntimeError("Error: netconf not responding")
 
         self.hello = self._receive()
+        self._session_id, _ = HelloHandler.parse(self.hello.decode("utf-8"))
 
     def close(self, force=False):
         """ issue the XML API to close the session """
