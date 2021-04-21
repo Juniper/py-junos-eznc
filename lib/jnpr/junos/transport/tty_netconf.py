@@ -46,6 +46,7 @@ class tty_netconf(object):
     def __init__(self, tty):
         self._tty = tty
         self.hello = None
+        self._session_id = -1
 
     # -------------------------------------------------------------------------
     # NETCONF session open and close
