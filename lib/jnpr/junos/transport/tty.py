@@ -115,16 +115,14 @@ class Terminal(object):
         # now start NETCONF XML
         logger.info("TTY: OK.....starting NETCONF")
         self.nc.open(at_shell=self.at_shell)
-        self.session_id = self.nc._session_id
-
         return True
 
-    def logout(self):
+    def logout(self, device_handler):
         """
         cleanly logout of the TTY
         """
         logger.info("logout: logging out.....")
-        self.nc.close()
+        self.nc.close(device_handler)
         self._logout_state_machine()
         return True
 

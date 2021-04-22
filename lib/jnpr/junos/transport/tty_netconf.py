@@ -71,7 +71,7 @@ class tty_netconf(object):
         self.hello = self._receive()
         self._session_id, _ = HelloHandler.parse(self.hello.decode("utf-8"))
 
-    def close(self, force=False):
+    def close(self, device_handler, force=False):
         """ issue the XML API to close the session """
 
         # if we do not have an open connection, then return now.
@@ -79,7 +79,7 @@ class tty_netconf(object):
             if self.hello is None:
                 return
 
-        self.rpc("close-session")
+        self.rpc("close-session", device_handler)
         # removed flush
 
     # -------------------------------------------------------------------------
@@ -100,7 +100,7 @@ class tty_netconf(object):
     # XML RPC command execution
     # -------------------------------------------------------------------------
 
-    def rpc(self, cmd):
+    def rpc(self, cmd, device_handler):
         """
         Write the XML cmd and return the response as XML object.
 
@@ -123,13 +123,13 @@ class tty_netconf(object):
 
         rsp = self._receive()
         rsp = rsp.decode("utf-8") if isinstance(rsp, bytes) else rsp
-        reply = RPCReply(rsp, huge_tree=self._tty._huge_tree)
+        reply = RPCReply(rsp, device_handler, huge_tree=self._tty._huge_tree)
         errors = reply.errors
         if len(errors) > 1:
             raise RPCError(to_ele(reply._raw), errs=errors)
         elif len(errors) == 1:
             raise reply.error
-        return rsp
+        return reply
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL I/O for reading back XML response

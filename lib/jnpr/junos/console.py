@@ -114,6 +114,7 @@ class Console(_Connection):
         self._attempts = kvargs.get("attempts", 10)
         self._gather_facts = kvargs.get("gather_facts", False)
         self._fact_style = kvargs.get("fact_style", "new")
+        self._use_filter = kvargs.get("use_filter", False)
         self._huge_tree = kvargs.get("huge_tree", False)
         if self._fact_style != "new":
             warnings.warn(
@@ -272,7 +273,7 @@ class Console(_Connection):
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
-        reply = self._tty.nc.rpc(rpc_cmd)
+        reply = self._tty.nc.rpc(rpc_cmd, self.junos_dev_handler)
         rpc_rsp_e = NCElement(
             reply, self.junos_dev_handler.transform_reply(), self._huge_tree
         )._NCElement__doc
@@ -316,7 +317,7 @@ class Console(_Connection):
         self._tty.login()
 
     def _tty_logout(self):
-        self._tty.logout()
+        self._tty.logout(self.junos_dev_handler)
 
     def zeroize(self):
         """ perform device ZEROIZE actions """
