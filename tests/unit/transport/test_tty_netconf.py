@@ -20,7 +20,21 @@ class TestTTYNetconf(unittest.TestCase):
 
     @patch("jnpr.junos.transport.tty_netconf.tty_netconf._receive")
     def test_open_at_shell_true(self, mock_rcv):
-        mock_rcv.return_value = "]]>]]>"
+        mock_rcv.return_value = (
+            b""
+            b"<!-- user lab, class j-superuser -->"
+            b'<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            b"<capabilities>"
+            b"<capability>urn:ietf:params:netconf:base:1.0</capability>"
+            b"<capability>urn:ietf:params:xml:ns:netconf:capability:validate:1.0</capability>"
+            b"<capability>urn:ietf:params:xml:ns:netconf:capability:url:1.0?scheme=http,ftp,file</capability>"
+            b"<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</capability>"
+            b"<capability>http://xml.juniper.net/netconf/junos/1.0</capability>"
+            b"<capability>http://xml.juniper.net/dmi/system/1.0</capability>"
+            b"</capabilities>"
+            b"<session-id>82697</session-id>"
+            b"</hello>"
+        )
         self.tty_net.open(True)
         self.tty_net._tty.write.assert_called_with("xml-mode netconf need-trailer")
 
