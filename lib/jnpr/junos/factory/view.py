@@ -68,17 +68,17 @@ class View(object):
 
     @property
     def T(self):
-        """ return the Table instance for the View """
+        """return the Table instance for the View"""
         return self._table
 
     @property
     def D(self):
-        """ return the Device instance for this View """
+        """return the Device instance for this View"""
         return self.T.D
 
     @property
     def name(self):
-        """ return the name of view item """
+        """return the name of view item"""
         if self.ITEM_NAME_XPATH is None:
             return []
             # return self._table.D.hostname
@@ -137,7 +137,7 @@ class View(object):
 
     @property
     def xml(self):
-        """ returns the XML associated to the item """
+        """returns the XML associated to the item"""
         return self._xml
 
     # -------------------------------------------------------------------------
@@ -145,19 +145,19 @@ class View(object):
     # -------------------------------------------------------------------------
 
     def keys(self):
-        """ list of view keys, i.e. field names """
+        """list of view keys, i.e. field names"""
         return self.FIELDS.keys()
 
     def values(self):
-        """ list of view values """
+        """list of view values"""
         return [getattr(self, field) for field in self.keys()]
 
     def items(self):
-        """ list of tuple(key,value) """
+        """list of tuple(key,value)"""
         return zip(self.keys(), self.values())
 
     def _updater_instance(self, more):
-        """ called from extend """
+        """called from extend"""
         if hasattr(more, "fields"):
             self.FIELDS = deepcopy(self.__class__.FIELDS)
             self.FIELDS.update(more.fields.end)
@@ -171,7 +171,7 @@ class View(object):
             self.EVAL.update(more.eval)
 
     def _updater_class(self, more):
-        """ called from extend """
+        """called from extend"""
         if hasattr(more, "fields"):
             self.FIELDS.update(more.fields.end)
 
@@ -211,7 +211,7 @@ class View(object):
         updater(more)
 
     def asview(self, view_cls):
-        """ create a new View object for this item """
+        """create a new View object for this item"""
         return view_cls(self._table, self._xml)
 
     def refresh(self):
@@ -245,7 +245,7 @@ class View(object):
     # -------------------------------------------------------------------------
 
     def __repr__(self):
-        """ returns the name of the View with the associate item name """
+        """returns the name of the View with the associate item name"""
         return "%s:%s" % (self.__class__.__name__, self.name)
 
     def __getattr__(self, name):

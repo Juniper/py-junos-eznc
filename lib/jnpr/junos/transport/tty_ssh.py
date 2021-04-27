@@ -134,12 +134,12 @@ class SSH(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        """ write content + <ENTER> """
+        """write content + <ENTER>"""
         logger.debug("Write: %s" % content)
         self._ssh.sendall(six.b((content + "\n")))
 
     def rawwrite(self, content):
-        """ write content as-is """
+        """write content as-is"""
         logger.debug("rawwrite: %s" % content)
         # If baud set to 0 write full speed
         if int(self.baud) == 0:
@@ -157,7 +157,7 @@ class SSH(Terminal):
             sleep(wtime)  # do not remove
 
     def read(self):
-        """ read a single line """
+        """read a single line"""
         rxb = six.b("")
         while True:
             data = self._ssh.recv(self.RECVSZ)

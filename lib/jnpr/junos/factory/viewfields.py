@@ -18,7 +18,7 @@ class ViewFields(object):
         return self._fields
 
     def str(self, name, xpath=None, **kvargs):
-        """ field is a string """
+        """field is a string"""
         if xpath is None:
             xpath = name
         field = {name: {"xpath": xpath}}
@@ -46,7 +46,7 @@ class ViewFields(object):
         return self
 
     def int(self, name, xpath=None, **kvargs):
-        """ field is an integer """
+        """field is an integer"""
         return self.astype(name, xpath, int, **kvargs)
 
     def flag(self, name, xpath=None, **kvargs):
@@ -65,6 +65,6 @@ class ViewFields(object):
         return self.astype(name, xpath, str, **kvargs)
 
     def table(self, name, table):
-        """ field is a RunstatTable """
+        """field is a RunstatTable"""
         self._fields.update({name: {"table": table}})
         return self
