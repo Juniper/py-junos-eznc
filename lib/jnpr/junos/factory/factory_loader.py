@@ -86,7 +86,7 @@ class FactoryLoader(object):
 
     def _fieldfunc_Search(self, regex_pattern):
         def search_field(field_text):
-            """ Returns the first occurrence of regex_pattern within given field_text."""
+            """Returns the first occurrence of regex_pattern within given field_text."""
             match = re.search(regex_pattern, field_text)
             if match:
                 return match.groups()[0]
@@ -96,7 +96,7 @@ class FactoryLoader(object):
         return search_field
 
     def _add_dictfield(self, fields, f_name, f_dict, kvargs):
-        """ add a field based on its associated dictionary """
+        """add a field based on its associated dictionary"""
         # at present if a field is a <dict> then there is **one
         # item** - { the xpath value : the option control }.  typically
         # the option would be a bultin class type like 'int'
@@ -142,7 +142,7 @@ class FactoryLoader(object):
     # ---[ END: _add_dictfield ] ---------------------------------------------
 
     def _add_view_fields(self, view_dict, fields_name, fields):
-        """ add a group of fields to the view """
+        """add a group of fields to the view"""
         fields_dict = view_dict[fields_name]
         try:
             # see if this is a 'fields_<group>' collection, and if so
@@ -175,7 +175,7 @@ class FactoryLoader(object):
             fields.str(f_name, xpath, **kvargs)
 
     def _add_cmd_view_fields(self, view_dict, fields_name, fields):
-        """ add a group of fields to the view """
+        """add a group of fields to the view"""
         fields_dict = view_dict[fields_name]
         for f_name, f_data in fields_dict.items():
             if f_data in self._catalog_dict:
@@ -189,7 +189,7 @@ class FactoryLoader(object):
     # -------------------------------------------------------------------------
 
     def _build_view(self, view_name):
-        """ build a new View definition """
+        """build a new View definition"""
         if view_name in self.catalog:
             return self.catalog[view_name]
 
@@ -225,7 +225,7 @@ class FactoryLoader(object):
     # -------------------------------------------------------------------------
 
     def _build_cmdview(self, view_name):
-        """ build a new View definition """
+        """build a new View definition"""
         if view_name in self.catalog:
             return self.catalog[view_name]
 
@@ -261,7 +261,7 @@ class FactoryLoader(object):
     # -----------------------------------------------------------------------
 
     def _build_optable(self, table_name):
-        """ build a new Get-Table definition """
+        """build a new Get-Table definition"""
         if table_name in self.catalog:
             return self.catalog[table_name]
 
@@ -285,7 +285,7 @@ class FactoryLoader(object):
     # -----------------------------------------------------------------------
 
     def _build_cmdtable(self, table_name):
-        """ build a new command-Table definition """
+        """build a new command-Table definition"""
         if table_name in self.catalog:
             return self.catalog[table_name]
 
@@ -333,7 +333,7 @@ class FactoryLoader(object):
     # -----------------------------------------------------------------------
 
     def _build_table(self, table_name):
-        """ build a new Table definition """
+        """build a new Table definition"""
         if table_name in self.catalog:
             return self.catalog[table_name]
 
@@ -353,7 +353,7 @@ class FactoryLoader(object):
         return cls
 
     def _build_cfgtable(self, table_name):
-        """ build a new Config-Table definition """
+        """build a new Config-Table definition"""
         if table_name in self.catalog:
             return self.catalog[table_name]
         tbl_dict = deepcopy(self._catalog_dict[table_name])

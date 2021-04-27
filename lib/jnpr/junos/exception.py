@@ -219,22 +219,22 @@ class ConnectError(Exception):
 
     @property
     def user(self):
-        """ login user-name """
+        """login user-name"""
         return self.dev.user
 
     @property
     def host(self):
-        """ login host name/ipaddr """
+        """login host name/ipaddr"""
         return self.dev.hostname
 
     @property
     def port(self):
-        """ login SSH port """
+        """login SSH port"""
         return self.dev._port
 
     @property
     def msg(self):
-        """ login SSH port """
+        """login SSH port"""
         return self._orig
 
     def __repr__(self):

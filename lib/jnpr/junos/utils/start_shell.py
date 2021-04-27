@@ -91,7 +91,7 @@ class StartShell(object):
             self.wait_for(_SHELL_PROMPT)
 
     def close(self):
-        """ Close the SSH client channel """
+        """Close the SSH client channel"""
         self._chan.close()
         self._client.close()
 

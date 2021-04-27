@@ -166,7 +166,7 @@ class SW(Util):
 
     @classmethod
     def progress(cls, dev, report):
-        """ simple progress report function """
+        """simple progress report function"""
         print(dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------

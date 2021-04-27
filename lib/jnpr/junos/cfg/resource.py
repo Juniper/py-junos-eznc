@@ -196,22 +196,22 @@ class Resource(object):
 
     @property
     def D(self):
-        """ returns the Device object bound to this resource/manager """
+        """returns the Device object bound to this resource/manager"""
         return self._junos
 
     @property
     def R(self):
-        """ returns the Device RPC meta object """
+        """returns the Device RPC meta object"""
         return self._junos.rpc
 
     @property
     def M(self):
-        """ returns the :Resource: manager associated to this resource """
+        """returns the :Resource: manager associated to this resource"""
         return self._manager
 
     @property
     def P(self):
-        """ returns the parent of the associated Junos object """
+        """returns the parent of the associated Junos object"""
         return self._parent
 
     # -----------------------------------------------------------------------
@@ -554,7 +554,7 @@ class Resource(object):
         # ---------------------------------------------------------------------
 
     def __iter__(self):
-        """ iterate through each Resource in the Manager list """
+        """iterate through each Resource in the Manager list"""
         for name in self.list:
             yield self[name]
 
