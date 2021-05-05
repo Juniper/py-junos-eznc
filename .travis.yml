@@ -1,12 +1,6 @@
 language: python
 matrix:
     include:
-        - python: 2.7
-          dist: trusty
-        - python: 3.5
-          dist: trusty
-        - python: 3.6
-          dist: trusty
         - python: 3.7
           dist: xenial
         - python: 3.8
@@ -21,6 +15,7 @@ matrix:
           env:
             - PATH=/c/Python37:/c/Python37/Scripts:$PATH
             - TRAVIS_PYTHON_VERSION=3.7
+            - CRYPTOGRAPHY_DONT_BUILD_RUST=1
 addons:
   apt:
     packages:

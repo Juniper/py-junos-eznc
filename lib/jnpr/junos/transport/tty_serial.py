@@ -55,7 +55,7 @@ class Serial(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        """ write content + <RETURN> """
+        """write content + <RETURN>"""
         self._ser.write(six.b(content + "\n"))
         self._ser.flush()
 
@@ -63,7 +63,7 @@ class Serial(Terminal):
         self._ser.write(content)
 
     def read(self):
-        """ read a single line """
+        """read a single line"""
         return self._ser.readline()
 
     def read_prompt(self):

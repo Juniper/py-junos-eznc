@@ -176,8 +176,12 @@ def checkSAXParserDecorator(function):
         restore_value = args[0]._use_filter
         args[0]._use_filter = use_filter
         try:
+            if args[0].D != None:
+                func = args[0].D.transform
             result = function(*args, **kwargs)
             args[0]._use_filter = restore_value
+            if args[0].D != None:
+                args[0].D.transform = func
             return result
         except Exception:
             args[0]._use_filter = restore_value
