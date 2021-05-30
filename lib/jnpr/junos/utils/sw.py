@@ -981,7 +981,11 @@ class SW(Util):
                 if self._multi_VC is True:
                     ok = True, ""
                     # extract the VC number out of the _RE_list
-                    vc_members = [re.search("(\d+)", x).group(1) for x in self._RE_list]
+                    vc_members = [
+                        re.search("(\d+)", x).group(1)
+                        for x in self._RE_list
+                        if re.search("(\d+)", x)
+                    ]
                     for vc_id in vc_members:
                         _progress(
                             "installing software on VC member: {} ... please "
