@@ -247,7 +247,7 @@ class _Connection(object):
 
     @ofacts.setter
     def ofacts(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("facts is read-only!")
 
     # ------------------------------------------------------------------------
@@ -340,7 +340,7 @@ class _Connection(object):
 
     @master.setter
     def master(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("master is read-only!")
 
     # ------------------------------------------------------------------------
@@ -374,7 +374,7 @@ class _Connection(object):
 
     @uptime.setter
     def uptime(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("uptime is read-only!")
 
     # ------------------------------------------------------------------------
@@ -439,7 +439,7 @@ class _Connection(object):
 
     @re_name.setter
     def re_name(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
