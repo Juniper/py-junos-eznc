@@ -70,7 +70,7 @@ class CfgTable(Table):
 
     @property
     def keys_required(self):
-        """ True/False - if this Table requires keys """
+        """True/False - if this Table requires keys"""
         return self.required_keys is not None
 
     # -----------------------------------------------------------------------
@@ -258,7 +258,7 @@ class CfgTable(Table):
                 _validate_min_max_value(field_name, value, opt)
 
     def _grindkey(self, key_xpath, key_value):
-        """ returns list of XML elements for key values """
+        """returns list of XML elements for key values"""
         simple = lambda: [E(key_xpath.replace("_", "-"), key_value)]
         composite = lambda: [
             E(xp.replace("_", "-"), xv) for xp, xv in zip(key_xpath, key_value)
@@ -266,7 +266,7 @@ class CfgTable(Table):
         return simple() if isinstance(key_xpath, str) else composite()
 
     def _grindxpath(self, key_xpath, key_value):
-        """ returns xpath elements for key values """
+        """returns xpath elements for key values"""
         simple = lambda: "[{}='{}']".format(key_xpath.replace("_", "-"), key_value)
         composite = lambda: "[{}]".format(
             " and ".join(
@@ -279,7 +279,7 @@ class CfgTable(Table):
         return simple() if isinstance(key_xpath, str) else composite()
 
     def _grindfield(self, xpath, value):
-        """ returns list of xml elements for field name-value pairs """
+        """returns list of xml elements for field name-value pairs"""
         lst = []
         if isinstance(value, (list, tuple, set)):
             for v in value:
@@ -359,7 +359,7 @@ class CfgTable(Table):
         return dot
 
     def _keyspec(self):
-        """ returns tuple (keyname-xpath, item-xpath) """
+        """returns tuple (keyname-xpath, item-xpath)"""
         return (self._data_dict.get("key", "name"), self._data_dict[self._type])
 
     def _init_field(self):
@@ -371,7 +371,7 @@ class CfgTable(Table):
             self.__dict__[fname] = opt["default"] if "default" in opt else None
 
     def _mandatory_check(self):
-        """ Mandatory checks for set table/view  """
+        """Mandatory checks for set table/view"""
         for key in self.key_field:
             value = getattr(self, key)
             if value is None:
