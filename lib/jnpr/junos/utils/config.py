@@ -177,8 +177,9 @@ class Config(Util):
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
         are reported and available in the Exception errs.
+
         :param int timeout: If provided the command will wait for completion
-                            using the provided value as timeout (seconds).       
+                            using the provided value as timeout (seconds).
 
         :returns: ``True`` if commit-check is successful (no errors)
         :raises CommitError: When errors detected in candidate configuration.
@@ -218,12 +219,14 @@ class Config(Util):
     # show | compare rollback <number|0*>
     # -------------------------------------------------------------------------
 
-    def diff(self, rb_id=0, ignore_warning=False):
+    def diff(self, rb_id=0, ignore_warning=False, use_fast_diff=False):
         """
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
         :param int rb_id: rollback id [0..49]
+        :param bool ignore_warning: Ignore any rpc-error with severity warning
+        :param bool use_fast_diff: equivalent to "show | compare use-fast-diff"
 
         :returns:
             * ``None`` if there is no difference
@@ -233,9 +236,14 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
+        rpc_params = dict(compare="rollback", rollback=str(rb_id), format="text")
+        if use_fast_diff:
+            if rb_id > 0:
+                raise ValueError("use_fast_diff can only be used with rb_id 0")
+            rpc_params["use-fast-diff"] = "yes"
         try:
             rsp = self.rpc.get_configuration(
-                dict(compare="rollback", rollback=str(rb_id), format="text"),
+                rpc_params,
                 ignore_warning=ignore_warning,
             )
         except RpcTimeoutError:
@@ -255,16 +263,18 @@ class Config(Util):
         diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
 
-    def pdiff(self, rb_id=0):
+    def pdiff(self, rb_id=0, ignore_warning=False, use_fast_diff=False):
         """
         Helper method that calls ``print`` on the diff (patch-format) between
         the current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
+        :param bool ignore_warning: Ignore any rpc-error with severity warning
+        :param bool use_fast_diff: equivalent to "show | compare use-fast-diff"
 
         :returns: ``None``
         """
-        print(self.diff(rb_id))
+        print(self.diff(rb_id, ignore_warning, use_fast_diff))
 
     # -------------------------------------------------------------------------
     # helper on loading configs
@@ -300,8 +310,10 @@ class Config(Util):
             .. note:: The format can specifically set using **format**.
 
         :param str format:
-          Determines the format of the contents. Refer to options
-          from the **path** description.
+            Determines the format of the contents.
+            Supported options - text, set, xml, json
+
+            If not provided, internally application will try to find out the format
 
         :param bool overwrite:
           Determines if the contents completely replace the existing
@@ -345,7 +357,7 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
-          
+
         :param ignore_warning: A boolean, string or list of string.
           If the value is True, it will ignore all warnings regardless of the
           warning message. If the value is a string, it will ignore
@@ -424,7 +436,7 @@ class Config(Util):
         # ---------------------------------------------------------------------
 
         def _lformat_byext(path):
-            """ determine the format style from the file extension """
+            """determine the format style from the file extension"""
             ext = os.path.splitext(path)[1]
             if ext == ".xml":
                 return "xml"
@@ -437,7 +449,7 @@ class Config(Util):
             raise ValueError("Unknown file contents from extension: %s" % ext)
 
         def _lset_format(kvargs, rpc_xattrs):
-            """ setup the kvargs/rpc_xattrs """
+            """setup the kvargs/rpc_xattrs"""
             # when format is given, setup the xml attrs appropriately
             if kvargs["format"] == "set":
                 if overwrite is True or kvargs.get("update") is True:
@@ -450,14 +462,14 @@ class Config(Util):
             rpc_xattrs["format"] = kvargs["format"]
 
         def _lset_fromfile(path):
-            """ setup the kvargs/rpc_xattrs based on path """
+            """setup the kvargs/rpc_xattrs based on path"""
             if "format" not in kvargs:
                 # we use the extension to determine the format
                 kvargs["format"] = _lformat_byext(path)
                 _lset_format(kvargs, rpc_xattrs)
 
         def _lset_from_rexp(rpc):
-            """ setup the kvargs/rpc_xattrs using string regular expression """
+            """setup the kvargs/rpc_xattrs using string regular expression"""
             if re.search(r"^\s*<.*>$", rpc, re.MULTILINE):
                 kvargs["format"] = "xml"
             elif re.search(

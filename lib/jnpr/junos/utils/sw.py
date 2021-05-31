@@ -12,10 +12,6 @@ except ImportError:
     # Python 2.x
     from urlparse import urlparse
 
-import warnings
-
-warnings.simplefilter("default", PendingDeprecationWarning)
-
 # 3rd-party modules
 from lxml.builder import E
 from lxml import etree
@@ -27,6 +23,8 @@ from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.ftp import FTP
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
+from ncclient.xml_ import NCElement
+from jnpr.junos import jxml as JXML
 
 """
 Software Installation Utilities
@@ -44,7 +42,6 @@ def _hashfile(afile, hasher, blocksize=65536):
 
 
 class SW(Util):
-
     """
     Software Utility class, used to perform a software upgrade and
     associated functions.  These methods have been tested on
@@ -169,7 +166,7 @@ class SW(Util):
 
     @classmethod
     def progress(cls, dev, report):
-        """ simple progress report function """
+        """simple progress report function"""
         print(dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
@@ -316,7 +313,7 @@ class SW(Util):
             [i.text for i in got.findall("output") if i.text is not None]
         )
         self.log("software pkgadd package-result: %s\nOutput: %s" % (rc, output_msg))
-        return rc == 0
+        return rc == 0, output_msg
 
     # -------------------------------------------------------------------------
     # validate - perform 'request' operation to validate the package
@@ -664,7 +661,9 @@ class SW(Util):
             _progress(
                 "after copy, computing checksum on remote package: %s" % remote_package
             )
-            remote_checksum = self.remote_checksum(remote_package)
+            remote_checksum = self.remote_checksum(
+                remote_package, timeout=checksum_timeout, algorithm=checksum_algorithm
+            )
 
         if remote_checksum != checksum:
             _progress("checksum check failed.")
@@ -856,14 +855,10 @@ class SW(Util):
           (Optional) Additional keyword arguments are passed through to the
           "package add" RPC.
 
-        :returns:
-            * ``True`` when the installation is successful
-            * ``False`` otherwise
+        :returns: tuple(<status>, <msg>)
+            * status : ``True`` when the installation is successful and ``False`` otherwise
+            * msg : msg received as response or error message created
         """
-        warnings.warn(
-            "sw.install interface bool response is going to change " "in next release.",
-            PendingDeprecationWarning,
-        )
         if issu is True and nssu is True:
             raise TypeError("install function can either take issu or nssu not both")
         elif (issu is True or nssu is True) and (
@@ -895,7 +890,7 @@ class SW(Util):
                 return False
         except RpcError:
             _progress(
-                "request-package-check-pending-install rpc is not "
+                "request-package-checks-pending-install rpc is not "
                 "supported on given device"
             )
         except Exception as ex:
@@ -935,8 +930,9 @@ class SW(Util):
                             force_copy=force_copy,
                         )
                         if copy_ok is False:
-                            return False
+                            return False, "Package %s couldn't be copied" % pkg
                     pkg = remote_path + "/" + path.basename(pkg)
+
                 remote_pkg_set.append(pkg)
         else:
             raise ValueError("proper value for either package or pkg_set is missing")
@@ -959,7 +955,7 @@ class SW(Util):
                         remote_package, issu, nssu, dev_timeout=timeout
                     )
                     if v_ok is not True:
-                        return v_ok
+                        return v_ok, "Package validation failed"
             else:
                 if vmhost is True:
                     # Need to pass the no_validate option via kwargs.
@@ -983,28 +979,32 @@ class SW(Util):
             else:
                 # we need to update multiple devices
                 if self._multi_VC is True:
-                    ok = True
+                    ok = True, ""
                     # extract the VC number out of the _RE_list
-                    vc_members = [re.search("(\d+)", x).group(1) for x in self._RE_list]
+                    vc_members = [
+                        re.search("(\d+)", x).group(1)
+                        for x in self._RE_list
+                        if re.search("(\d+)", x)
+                    ]
                     for vc_id in vc_members:
                         _progress(
                             "installing software on VC member: {} ... please "
                             "be patient ...".format(vc_id)
                         )
-                        ok &= self.pkgadd(
+                        bool_ret, msg = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
                             **kwargs
                         )
+                        ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
                 else:
                     # then this is a device with two RE that supports the "re0"
                     # and "re1" options to the command (M, MX tested only)
-                    ok = True
                     _progress("installing software on RE0 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    ok = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re0=True,
@@ -1012,13 +1012,14 @@ class SW(Util):
                         **kwargs
                     )
                     _progress("installing software on RE1 ... please be patient ...")
-                    ok &= self.pkgadd(
+                    bool_ret, msg = self.pkgadd(
                         remote_package,
                         vmhost=vmhost,
                         re1=True,
                         dev_timeout=timeout,
                         **kwargs
                     )
+                    ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
 
         elif len(remote_pkg_set) > 1 and self._mixed_VC:
@@ -1028,10 +1029,80 @@ class SW(Util):
             )
             return add_ok
 
+    def _system_operation(
+        self, cmd, in_min=0, at=None, all_re=True, other_re=False, vmhost=False
+    ):
+        """
+        Send the rpc for actions like shutdown, reboot, halt  with optional
+        delay (in minutes) or at a specified date and time.
+
+        :param int in_min: time (minutes) before rebooting/shutting down the device.
+
+        :param str at: date and time the reboot should take place. The
+            string must match the junos cli reboot/poweroff/halt syntax
+
+        :param bool all_re: In case of dual re or VC setup, function by default
+            will reboot/shutdown all. If all is False will only reboot/shutdown connected device
+
+        :param str on_node: In case of linux based device, function will by default
+            reboot the whole device. If any specific node is mentioned,
+            reboot will be performed on mentioned node
+
+        :param str other_re: If the system has dual Routing Engines and this option is C(true),
+            then the action is performed on the other REs in the system.
+
+        :param bool vmhost:
+            (Optional) A boolean indicating to run 'request vmhost reboot'.
+            The default is ``vmhost=False``.
+
+        :returns:
+            * rpc response message (string) if command successful
+
+        :raises RpcError: when command is not successful.
+        """
+        if other_re is True:
+            if self._dev.facts["2RE"]:
+                cmd = E("other-routing-engine")
+        elif all_re is True:
+            if self._multi_RE is True and vmhost is True:
+                cmd.append(E("routing-engine", "both"))
+            elif self._multi_RE is True and self._multi_VC is False:
+                cmd.append(E("both-routing-engines"))
+            elif self._mixed_VC is True:
+                cmd.append(E("all-members"))
+        if in_min >= 0 and at is None:
+            cmd.append(E("in", str(in_min)))
+        elif at is not None:
+            cmd.append(E("at", str(at)))
+        try:
+            rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
+            if self._dev.facts["_is_linux"]:
+                got = rsp.text
+            else:
+                got = rsp.getparent().findtext(".//request-reboot-status")
+                if got is None:
+                    # On some platforms stopping/rebooting
+                    # REs produces <output> messages and
+                    # <request-reboot-status> messages.
+                    output_msg = "\n".join(
+                        [
+                            i.text
+                            for i in rsp.getparent().xpath("//output")
+                            if i.text is not None
+                        ]
+                    )
+                    if output_msg is not "":
+                        got = output_msg
+            return got
+        except Exception as err:
+            raise err
+
     # -------------------------------------------------------------------------
     # reboot - system reboot
     # -------------------------------------------------------------------------
-    def reboot(self, in_min=0, at=None, all_re=True, on_node=None, vmhost=False):
+    def reboot(
+        self, in_min=0, at=None, all_re=True, on_node=None, vmhost=False, other_re=False
+    ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
         a specified date and time.
@@ -1055,12 +1126,11 @@ class SW(Util):
             (Optional) A boolean indicating to run 'request vmhost reboot'.
             The default is ``vmhost=False``.
 
+        :param str other_re: If the system has dual Routing Engines and this option is C(true),
+            then the action is performed on the other REs in the system.
+
         :returns:
             * reboot message (string) if command successful
-
-        :raises RpcError: when command is not successful.
-
-        .. todo:: need to better handle the exception event.
         """
         if self._dev.facts["_is_linux"]:
             if on_node is None:
@@ -1072,33 +1142,9 @@ class SW(Util):
             cmd = E("request-vmhost-reboot")
         else:
             cmd = E("request-reboot")
-        if all_re is True:
-            if vmhost is True:
-                cmd.append(E("routing-engine", "both"))
-            elif self._multi_RE is True and self._multi_VC is False:
-                cmd.append(E("both-routing-engines"))
-            elif self._mixed_VC is True:
-                cmd.append(E("all-members"))
-        if in_min >= 0 and at is None:
-            cmd.append(E("in", str(in_min)))
-        elif at is not None:
-            cmd.append(E("at", str(at)))
+
         try:
-            rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
-            if self._dev.facts["_is_linux"]:
-                got = rsp.text
-            else:
-                got = rsp.getparent().findtext(".//request-reboot-status")
-                if got is None:
-                    # Oon some platforms stopping/rebooting both
-                    # REs produces <output> messages and
-                    # <request-reboot-status> messages.
-                    output_msg = "\n".join(
-                        [i.text for i in got.findall("output") if i.text is not None]
-                    )
-                    if output_msg is not "":
-                        got = output_msg
-            return got
+            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except RpcTimeoutError as err:
             raise err
         except Exception as err:
@@ -1107,8 +1153,7 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-
-    def poweroff(self, in_min=0, at=None, on_node=None):
+    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1123,6 +1168,12 @@ class SW(Util):
         :param str on_node: In case of linux based device, function will by default
             shutdown the whole device. If any specific node is mentioned,
             shutdown will be performed on mentioned node
+
+        :param bool all_re: In case of dual re or VC setup, function by default
+            will shutdown all. If all is False will only shutdown connected device
+
+        :param str other_re: If the system has dual Routing Engines and this option is C(true),
+            then the action is performed on the other REs in the system.
 
         :returns:
             * power-off message (string) if command successful
@@ -1139,22 +1190,115 @@ class SW(Util):
                 cmd.append(E("node", on_node))
         else:
             cmd = E("request-power-off")
-            if self._multi_RE is True and self._multi_VC is False:
-                cmd.append(E("both-routing-engines"))
-        if in_min >= 0 and at is None:
-            cmd.append(E("in", str(in_min)))
-        elif at is not None:
-            cmd.append(E("at", str(at)))
         try:
-            rsp = self.rpc(cmd)
-            if self._dev.facts["_is_linux"]:
-                got = rsp.text
-            else:
-                got = rsp.getparent().findtext(".//request-reboot-status").strip()
-            return got
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost=False
+            )
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
                 raise err
+
+    # -------------------------------------------------------------------------
+    # halt - system halt
+    # -------------------------------------------------------------------------
+    def halt(self, in_min=0, at=None, all_re=True, other_re=False):
+        """
+        Perform a system halt, with optional delay (in minutes) or at
+        a specified date and time.
+
+        :param int in_min: time (minutes) before halting the device.
+
+        :param str at: date and time the halt should take place. The
+            string must match the junos cli reboot syntax
+
+        :param bool all_re: In case of dual re or VC setup, function by default
+            will halt all. If all is False will only halt connected device
+
+        :param str other_re: If the system has dual Routing Engines and this option is C(true),
+            then the action is performed on the other REs in the system.
+
+        :returns:
+            * rpc response message (string) if command successful
+        """
+        if self._dev.facts["_is_linux"]:
+            cmd = E("request-shutdown-halt")
+        else:
+            cmd = E("request-halt")
+
+        try:
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost=False
+            )
+        except Exception as err:
+            raise err
+
+    def zeroize(self, all_re=False, media=None):
+        """
+        Restore the system (configuration, log files, etc.) to a
+        factory default state. This is the equivalent of the
+        C(request system zeroize) CLI command.
+
+        :param bool all_re: In case of dual re or VC setup, function by default
+            will halt all. If all is False will only halt connected device
+
+        :param str media: Overwrite media when performing the zeroize operation.
+
+        :returns:
+            * rpc response message (string) if command successful
+        """
+        cmd = E("request-system-zeroize")
+        if all_re is False:
+            if self._dev.facts["2RE"]:
+                cmd = E("local")
+            if media is True:
+                cmd = E("media")
+
+        # initialize an empty output message
+        output_msg = ""
+
+        try:
+            # For zeroize we don't get a response similar to reboot, shutdown.
+            # The response may come as a warning message only.
+            # Code is added here to extract the warning message and append it.
+            # Don't pass ignore warning true and handle the warning here.
+            rsp = self.rpc(cmd, normalize=True)
+        except RpcError as ex:
+            if hasattr(ex, "xml"):
+                if hasattr(ex, "errs"):
+                    errors = ex.errs
+                else:
+                    errors = [ex]
+                for err in errors:
+                    if err.get("severity", "") != "warning":
+                        # Not a warning (probably an error).
+                        raise ex
+                    output_msg += err.get("message", "") + "\n"
+                rsp = ex.xml.getroottree().getroot()
+                # 1) A normal response has been run through the XSLT
+                #    transformation, but ex.xml has not. Do that now.
+                encode = None if sys.version < "3" else "unicode"
+                rsp = NCElement(
+                    etree.tostring(rsp, encoding=encode), self._dev.transform()
+                )._NCElement__doc
+                # 2) Now remove all of the <rpc-error> elements from
+                #    the response. We've already confirmed they are all warnings
+                rsp = etree.fromstring(str(JXML.strip_rpc_error_transform(rsp)))
+            else:
+                # ignore_warning was false, or an RPCError which doesn't have
+                #  an XML attribute. Raise it up for the caller to deal with.
+                raise ex
+        except Exception as err:
+            raise err
+
+        # safety check added in case the rpc-reply for zeroize doesn't have message
+        # This scenario is not expected.
+        if isinstance(rsp, bool):
+            return "zeroize initiated with no message"
+
+        output_msg += "\n".join(
+            [i.text for i in rsp.xpath("//message") if i.text is not None]
+        )
+        return output_msg
 
     # -------------------------------------------------------------------------
     # rollback - clears the install request

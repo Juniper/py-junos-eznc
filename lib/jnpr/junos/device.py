@@ -93,6 +93,27 @@ class _Connection(object):
         or platform.release().startswith("JNPR")
         or os.path.isfile("/usr/share/cevo/cevo_version")
     )
+
+    # for juniper specific containers likes crpd, cmgd, cbng
+    # and similar entities, we will need to check the product.conf
+    # file for on-box implementation
+
+    if ON_JUNOS is False:
+        if os.path.isfile("/etc/product.conf") is True:
+            model_dict = {}
+            with open("/etc/product.conf") as f:
+                for line in f:
+                    if "=" in line:
+                        (key, val) = line.strip().split("=")
+                        model_dict[key] = val
+
+            if "model" in model_dict and model_dict["model"] in [
+                "crpd",
+                "cbng",
+                "cmgd",
+            ]:
+                ON_JUNOS = True
+
     auto_probe = 0  # default is no auto-probe
 
     # ------------------------------------------------------------------------
@@ -226,7 +247,7 @@ class _Connection(object):
 
     @ofacts.setter
     def ofacts(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("facts is read-only!")
 
     # ------------------------------------------------------------------------
@@ -319,7 +340,7 @@ class _Connection(object):
 
     @master.setter
     def master(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("master is read-only!")
 
     # ------------------------------------------------------------------------
@@ -353,7 +374,7 @@ class _Connection(object):
 
     @uptime.setter
     def uptime(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("uptime is read-only!")
 
     # ------------------------------------------------------------------------
@@ -418,19 +439,19 @@ class _Connection(object):
 
     @re_name.setter
     def re_name(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
-        """ Controls the ssh connection:
-            If using ssh_private_key_file on MacOS Mojave or greater
-            (specifically > OpenSSH_7.4p1) ensure that the keys are generated
-            in PEM format or convert existing 'new' keys to the PEM format:
-            Check format: `head -n1 ~/.ssh/some_key`
-            Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
-            Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
-            Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
-            """
+        """Controls the ssh connection:
+        If using ssh_private_key_file on MacOS Mojave or greater
+        (specifically > OpenSSH_7.4p1) ensure that the keys are generated
+        in PEM format or convert existing 'new' keys to the PEM format:
+        Check format: `head -n1 ~/.ssh/some_key`
+        Correct RSA fomat: -----BEGIN RSA PRIVATE KEY-----
+        Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
+        Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
+        """
         if self.__class__.__name__ == "Device" and self._sock_fd is not None:
             return None
         if self._ssh_config:
@@ -724,12 +745,18 @@ class _Connection(object):
             if rsp.tag == "rpc":
                 return rsp[0]
             return rsp
-        except EzErrors.ConnectClosedError as ex:
+        except (
+            EzErrors.ConnectClosedError,
+            EzErrors.RpcError,
+            EzErrors.RpcTimeoutError,
+        ) as ex:
             raise ex
-        except EzErrors.RpcError as ex:
-            return "invalid command: %s: %s" % (command, ex)
         except Exception as ex:
-            return "invalid command: " + command
+            warnings.warn(
+                "An unknown exception occurred : %s - please report." % ex,
+                RuntimeWarning,
+            )
+            raise ex
 
     # ------------------------------------------------------------------------
     # execute
@@ -828,7 +855,7 @@ class _Connection(object):
         # Something unexpected happened - raise it up
         except Exception as err:
             warnings.warn(
-                "An unknown exception occured - please report.", RuntimeWarning
+                "An unknown exception occurred - please report.", RuntimeWarning
             )
             raise
 
@@ -1110,7 +1137,7 @@ class Device(_Connection):
 
         :param str sock_fd:
             **REQUIRED** file descriptor of an existing socket instead of providing a host.
-            Used for outbound ssh. 
+            Used for outbound ssh.
 
         :param str user:
             *OPTIONAL* login user-name, uses $USER if not provided

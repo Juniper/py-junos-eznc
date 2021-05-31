@@ -617,28 +617,52 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW.safe_copy")
     def test_sw_safe_install_copy_fail(self, mock_copy):
         mock_copy.return_value = False
-        self.assertFalse(self.sw.install("file"))
+        output = self.sw.install("file")
+        self.assertFalse(output[0])
 
     @patch("jnpr.junos.utils.sw.SW.validate")
     def test_sw_install_validate(self, mock_validate):
         mock_validate.return_value = False
-        self.assertFalse(self.sw.install("file", validate=True, no_copy=True))
+        output = self.sw.install("file", validate=True, no_copy=True)
+        self.assertFalse(output[0])
 
     @patch(builtin_string + ".print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_mx(self, mock_pkgadd, mock_print):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        self.assertTrue(self.sw.install("file", no_copy=True, progress=True))
+        self.assertTrue(self.sw.install("file", no_copy=True, progress=True)[0])
+
+    @patch(builtin_string + ".print")
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_mx_msg_check(self, mock_pkgadd, mock_print):
+        # mock_pkgadd.return_value = True
+        mock_pkgadd.side_effect = [(True, "re0"), (True, "re1")]
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        self.assertEqual(msg, "re0\nre1")
+        self.assertTrue(bool_ret)
+
+    @patch(builtin_string + ".print")
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_mx_msg_check_failure(self, mock_pkgadd, mock_print):
+        # mock_pkgadd.return_value = True
+        mock_pkgadd.side_effect = [(True, "re0"), (False, "re1 install failed")]
+        self.sw._multi_RE = True
+        self.sw._multi_MX = True
+        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        self.assertEqual(msg, "re0\nre1 install failed")
+        self.assertFalse(bool_ret)
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.sw._multi_RE = True
         self.sw._multi_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", no_copy=True))
+        self.assertTrue(self.sw.install("file", no_copy=True)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc(self, mock_pkgadd):
@@ -649,7 +673,7 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_mode_disabled(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
+        mock_pkgadd.return_value = True, "msg"
         self.dev._facts = {
             "2RE": True,
             "domain": None,
@@ -709,9 +733,10 @@ class TestSW(unittest.TestCase):
             "jnpr.junos.utils.sw.SW.local_md5",
             MagicMock(return_value="d41d8cd98f00b204e9800998ecf8427e"),
         ):
-            self.assertFalse(
-                self.sw.install(pkg_set=["install.tgz", "install.tgz"], cleanfs=False)
+            output = self.sw.install(
+                pkg_set=["install.tgz", "install.tgz"], cleanfs=False
             )
+            self.assertFalse(output[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc_ValueError(self, mock_pkgadd):
@@ -824,6 +849,12 @@ class TestSW(unittest.TestCase):
         self.assertTrue("Shutdown NOW" in self.sw.reboot())
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_reboot_output_in_reply(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertTrue("shutdown: [pid 13192]" in self.sw.reboot())
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_reboot_at(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.assertTrue("Shutdown at" in self.sw.reboot(at="201407091815"))
@@ -889,15 +920,47 @@ class TestSW(unittest.TestCase):
         self.assertTrue("Shutdown NOW" in self.sw.poweroff())
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_halt(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertTrue("Shutdown NOW" in self.sw.halt())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_halt_exception(self, mock_execute):
+        rsp = etree.XML("<rpc-reply><a>test</a></rpc-reply>")
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.halt)
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_halt_multi_re_vc(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = True
+        self.sw._multi_VC = False
+        self.assertTrue("Shutdown NOW" in self.sw.halt())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_MX = True
+        self.assertTrue("zeroizing" in self.sw.zeroize())
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_exception(self, mock_execute):
+        rsp = etree.XML("<rpc-reply><a>test</a></rpc-reply>")
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.zeroize)
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_check_pending_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
-        self.assertFalse(self.sw.install(package))
+        output = self.sw.install(package)
+        self.assertFalse(output[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_check_pending_install_RpcError_continue(self, mock_pkgadd):
-        mock_pkgadd.return_value = True
-        self.assertTrue(self.sw.install("test.tgz", no_copy=True))
+        mock_pkgadd.return_value = True, "msg"
+        self.assertTrue(self.sw.install("test.tgz", no_copy=True)[0])
 
     def _myprogress(self, dev, report):
         pass
@@ -938,12 +1001,16 @@ class TestSW(unittest.TestCase):
             if "path" in kwargs:
                 if kwargs["path"] == "/packages":
                     return self._read_file("file-list_dir.xml")
+            if args and self._testMethodName == "test_sw_zeroize":
+                return self._read_file("request-zeroize.xml")
             device_params = kwargs["device_params"]
             device_handler = make_device_handler(device_params)
             session = SSHSession(device_handler)
             return Manager(session, device_handler)
         elif args:
-            if args[0].find("at") is not None:
+            if self._testMethodName == "test_sw_reboot_output_in_reply":
+                return self._read_file("request-reboot-output.xml")
+            elif args[0].find("at") is not None:
                 return self._read_file("request-reboot-at.xml")
             elif self._testMethodName == "test_sw_check_pending_install":
                 if args[0].text == "request-package-check-pending-install":

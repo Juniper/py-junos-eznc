@@ -1,7 +1,3 @@
-"""
-This file defines the 'netconifyCmdo' class.
-Used by the 'netconify' shell utility.
-"""
 import traceback
 import sys
 import logging
@@ -323,7 +319,7 @@ class Console(_Connection):
         self._tty.logout()
 
     def zeroize(self):
-        """ perform device ZEROIZE actions """
+        """perform device ZEROIZE actions"""
         logger.info("zeroize : ZEROIZE device, rebooting")
         self._tty.nc.zeroize()
         self._skip_logout = True

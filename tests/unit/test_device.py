@@ -710,16 +710,26 @@ class TestDevice(unittest.TestCase):
             "get-system-uptime-information",
         )
 
-    def test_device_cli_exception(self):
-        self.dev.rpc.cli = MagicMock(side_effect=AttributeError)
-        val = self.dev.cli("show version")
-        self.assertEqual(val, "invalid command: show version")
+    def test_device_cli_connection_exception(self):
+        self.dev.connected = False
+        self.assertRaises(EzErrors.ConnectClosedError, self.dev.cli, "foo")
 
     @patch("jnpr.junos.Device.execute")
     def test_device_cli_rpc_exception(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        val = self.dev.cli("foo")
-        self.assertEqual(val, "invalid command: foo: RpcError")
+        self.assertRaises(EzErrors.RpcError, self.dev.cli, "foo")
+
+    def test_device_cli_timeout_exception(self):
+        self.dev._conn.rpc = MagicMock(side_effect=TimeoutExpiredError)
+        self.assertRaises(EzErrors.RpcTimeoutError, self.dev.cli, "foo")
+
+    @patch("jnpr.junos.device.warnings")
+    def test_device_cli_unknown_exception(self, mock_warnings):
+        class MyException(Exception):
+            pass
+
+        self.dev._conn.rpc = MagicMock(side_effect=MyException)
+        self.assertRaises(MyException, self.dev.cli, "foo")
 
     @patch("jnpr.junos.Device.execute")
     def test_device_display_xml_rpc(self, mock_execute):
