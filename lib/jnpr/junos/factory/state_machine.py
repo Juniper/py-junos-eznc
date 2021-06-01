@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from functools import reduce
 import re
 import copy
@@ -6,11 +7,6 @@ import logging
 from jinja2 import Template, meta
 from transitions import Machine
 import pyparsing as pp
-
-try:
-    from collections.abc import OrderedDict
-except ImportError:
-    from collections import OrderedDict
 
 logger = logging.getLogger("jnpr.junos.factory.state_machine")
 
