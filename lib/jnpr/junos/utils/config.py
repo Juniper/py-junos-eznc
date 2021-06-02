@@ -260,6 +260,11 @@ class Config(Util):
             else:
                 raise
 
+        # Fix for Issue #1093, Newer Junos versions return a bool for config 
+        # diff if there are no changes
+        if isinstance(rsp, bool) and rsp:
+            return None
+                
         diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
 
