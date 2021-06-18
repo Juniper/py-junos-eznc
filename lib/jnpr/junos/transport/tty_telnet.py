@@ -67,7 +67,7 @@ class Telnet(Terminal):
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
-        self.write("\n")
+        # self.write("\n")
 
     def _tty_close(self):
         self._tn.close()
