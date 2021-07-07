@@ -217,14 +217,17 @@ class Terminal(object):
                 # assume we're in a hung state, i.e. we don't see
                 # a login prompt for whatever reason
                 self.state = self._ST_TTY_NOLOGIN
-                if self.console_has_banner:
-                    # if console connection has a banner or warning,
-                    # use this hack
-                    sleep(5)
-                    self.write("\n")
-                else:
-                    # @@@ this is still a hack - used by default
-                    self.write("<close-session/>")
+                #if self.console_has_banner:
+                    # # if console connection has a banner or warning,
+                    # # use this hack
+                    # sleep(5)
+                    # self.write("\n")
+                # For console based telnet connection a new-line is required.
+                sleep(5)
+                self.write("\n")
+            else:
+                # @@@ this is still a hack - used by default
+                self.write("<close-session/>")
 
         def _ev_shell():
             if self.state == self._ST_INIT:
