@@ -217,12 +217,14 @@ class Terminal(object):
                 # assume we're in a hung state, i.e. we don't see
                 # a login prompt for whatever reason
                 self.state = self._ST_TTY_NOLOGIN
-                #if self.console_has_banner:
-                    # # if console connection has a banner or warning,
-                    # # use this hack
-                    # sleep(5)
-                    # self.write("\n")
                 # For console based telnet connection a new-line is required.
+                # Code modified to check with a newline for telnet based connections.
+                # Keeping below code as a comment for future enhancement.
+                # if self.console_has_banner:
+                # # if console connection has a banner or warning,
+                # # use this hack
+                #     sleep(5)
+                #     self.write("\n")
                 sleep(5)
                 self.write("\n")
             else:
