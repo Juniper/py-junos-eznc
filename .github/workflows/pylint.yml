@@ -22,6 +22,6 @@ jobs:
         pip install .
         nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
         
-    - name: Analysing the code with pylint
+    - name: Run unit tests
       run: |
-        pylint `ls -R|grep .py$|xargs`
+        nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
