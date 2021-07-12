@@ -5,11 +5,15 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: [3.7, 3.8]
+        exclude:
+          - os: windows-latest
+            python-version: 3.8
 
     steps:
     - uses: actions/checkout@v2
@@ -23,6 +27,8 @@ jobs:
         pip install pylint
         pip install -r requirements.txt
         pip install -r development.txt
+        pip install ntc_templates==1.4.1
+        pip install textfsm==0.4.1
         pip install .
     
     - name: Run black tool
