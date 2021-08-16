@@ -643,7 +643,7 @@ class Config(Util):
     # rollback <number|0*>
     # -------------------------------------------------------------------------
 
-    def rollback(self, rb_id=0):
+    def rollback(self, rb_id=0, ignore_warning=False):
         """
         Rollback the candidate config to either the last active or
         a specific rollback number.
@@ -659,7 +659,7 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        self.rpc.load_configuration(dict(compare="rollback", rollback=str(rb_id)))
+        self.rpc.load_configuration(dict(compare="rollback", rollback=str(rb_id)), ignore_warning=ignore_warning)
 
         return True
 
