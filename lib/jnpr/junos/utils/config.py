@@ -659,7 +659,9 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        self.rpc.load_configuration(dict(compare="rollback", rollback=str(rb_id)), ignore_warning=ignore_warning)
+        self.rpc.load_configuration(
+            dict(compare="rollback", rollback=str(rb_id)), ignore_warning=ignore_warning
+        )
 
         return True
 
