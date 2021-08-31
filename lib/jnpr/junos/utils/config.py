@@ -268,7 +268,7 @@ class Config(Util):
                 "diff shouldn't return boolean as a rpc-reply",
                 RuntimeWarning,
             )
-            return None
+            return None 
                 
         diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
