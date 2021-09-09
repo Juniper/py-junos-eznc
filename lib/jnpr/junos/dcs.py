@@ -147,9 +147,11 @@ class DCS(_Connection):
         res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
         if res.error_code != self._grpc_types_pb2.NoError:
             raise EzErrors.RpcError(
-                cmd=rpc_cmd, errs="error-code: '{}' error: '{}'".
-                format(self._grpc_types_pb2.ErrorCode.Name(res.error_code),
-                       res.error))
+                cmd=rpc_cmd,
+                errs="error-code: '{}' error: '{}'".format(
+                    self._grpc_types_pb2.ErrorCode.Name(res.error_code), res.error
+                ),
+            )
         result = res.result[0].result
         reply = RPCReply(result)
         errors = reply.errors

@@ -51,7 +51,7 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def open(self, at_shell):
-        """ start the XML API process and receive the 'hello' message """
+        """start the XML API process and receive the 'hello' message"""
         nc_cmd = ("junoscript", "xml-mode")[at_shell]
         self._tty.write(nc_cmd + " netconf need-trailer")
         mark_start = datetime.now()
@@ -69,7 +69,7 @@ class tty_netconf(object):
         self.hello = self._receive()
 
     def close(self, force=False):
-        """ issue the XML API to close the session """
+        """issue the XML API to close the session"""
 
         # if we do not have an open connection, then return now.
         if force is False:
@@ -84,7 +84,7 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def zeroize(self):
-        """ issue a reboot to the device """
+        """issue a reboot to the device"""
         cmd = E.command("request system zeroize")
         try:
             encode = None if sys.version < "3" else "unicode"
@@ -141,7 +141,7 @@ class tty_netconf(object):
             return self._receive_serial()
 
     def _receive_serial(self):
-        """ process the XML response into an XML object """
+        """process the XML response into an XML object"""
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:
@@ -169,7 +169,7 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def _receive_serial_win(self):
-        """ process incoming data from windows port"""
+        """process incoming data from windows port"""
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:

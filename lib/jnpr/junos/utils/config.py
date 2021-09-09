@@ -427,7 +427,7 @@ class Config(Util):
         # ---------------------------------------------------------------------
 
         def _lformat_byext(path):
-            """ determine the format style from the file extension """
+            """determine the format style from the file extension"""
             ext = os.path.splitext(path)[1]
             if ext == ".xml":
                 return "xml"
@@ -440,7 +440,7 @@ class Config(Util):
             raise ValueError("Unknown file contents from extension: %s" % ext)
 
         def _lset_format(kvargs, rpc_xattrs):
-            """ setup the kvargs/rpc_xattrs """
+            """setup the kvargs/rpc_xattrs"""
             # when format is given, setup the xml attrs appropriately
             if kvargs["format"] == "set":
                 if overwrite is True or kvargs.get("update") is True:
@@ -453,14 +453,14 @@ class Config(Util):
             rpc_xattrs["format"] = kvargs["format"]
 
         def _lset_fromfile(path):
-            """ setup the kvargs/rpc_xattrs based on path """
+            """setup the kvargs/rpc_xattrs based on path"""
             if "format" not in kvargs:
                 # we use the extension to determine the format
                 kvargs["format"] = _lformat_byext(path)
                 _lset_format(kvargs, rpc_xattrs)
 
         def _lset_from_rexp(rpc):
-            """ setup the kvargs/rpc_xattrs using string regular expression """
+            """setup the kvargs/rpc_xattrs using string regular expression"""
             if re.search(r"^\s*<.*>$", rpc, re.MULTILINE):
                 kvargs["format"] = "xml"
             elif re.search(
