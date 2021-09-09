@@ -15,6 +15,7 @@ from ncclient.xml_ import to_ele
 from jnpr.junos.device import _Connection
 from jnpr.junos.rpcmeta import _RpcMetaExec
 from jnpr.junos.factcache import _FactCache
+from jnpr.junos import exception as EzErrors
 from jnpr.junos import jxml as JXML
 
 from jnpr.junos.decorators import ignoreWarnDecorator
@@ -144,6 +145,13 @@ class DCS(_Connection):
         di = self._grpc_types_pb2.DeviceInfo(UUID=self._dev_uuid)
         exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
         res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
+        if res.error_code != self._grpc_types_pb2.NoError:
+            raise EzErrors.RpcError(
+                cmd=rpc_cmd,
+                errs="error-code: '{}' error: '{}'".format(
+                    self._grpc_types_pb2.ErrorCode.Name(res.error_code), res.error
+                ),
+            )
         result = res.result[0].result
         reply = RPCReply(result)
         errors = reply.errors

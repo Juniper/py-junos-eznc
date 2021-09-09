@@ -67,7 +67,9 @@ class Telnet(Terminal):
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
-        self.write("\n")
+        # the below line was added for console based telnet connection as it needs newline to work.
+        # it causes issue in EVO devices. Keeping it as a comment for future enhancement.
+        # self.write("\n")
 
     def _tty_close(self):
         self._tn.close()
@@ -77,12 +79,12 @@ class Telnet(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        """ write content + <ENTER> """
+        """write content + <ENTER>"""
         logger.debug("Write: %s" % content)
         self._tn.write(six.b((content + "\n")))
 
     def rawwrite(self, content):
-        """ write content as-is """
+        """write content as-is"""
         logger.debug("rawwrite: %s" % content)
         # If baud set to 0 write full speed
         if int(self.baud) == 0:
@@ -100,7 +102,7 @@ class Telnet(Terminal):
             sleep(wtime)  # do not remove
 
     def read(self):
-        """ read a single line """
+        """read a single line"""
         return self._tn.read_until(PY6.NEW_LINE, self.EXPECT_TIMEOUT)
 
     def read_prompt(self):

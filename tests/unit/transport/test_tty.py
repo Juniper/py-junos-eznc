@@ -39,6 +39,10 @@ class TestTTY(unittest.TestCase):
         self.terminal.read_prompt.return_value = (None, "testing")
         self.terminal.write = MagicMock()
         self.assertRaises(RuntimeError, self.terminal._login_state_machine)
+        self.terminal.write.assert_called_with("\n")
+        self.terminal.read_prompt.return_value = (None, "testing")
+        self.terminal.write = MagicMock()
+        self.assertRaises(RuntimeError, self.terminal._login_state_machine)
         self.terminal.write.assert_called_with("<close-session/>")
 
     @patch("jnpr.junos.transport.tty.sleep")

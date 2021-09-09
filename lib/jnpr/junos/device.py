@@ -103,8 +103,9 @@ class _Connection(object):
             model_dict = {}
             with open("/etc/product.conf") as f:
                 for line in f:
-                    (key, val) = line.strip().split("=")
-                    model_dict[key] = val
+                    if "=" in line:
+                        (key, val) = line.strip().split("=")
+                        model_dict[key] = val
 
             if "model" in model_dict and model_dict["model"] in [
                 "crpd",
@@ -246,7 +247,7 @@ class _Connection(object):
 
     @ofacts.setter
     def ofacts(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("facts is read-only!")
 
     # ------------------------------------------------------------------------
@@ -339,7 +340,7 @@ class _Connection(object):
 
     @master.setter
     def master(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("master is read-only!")
 
     # ------------------------------------------------------------------------
@@ -373,7 +374,7 @@ class _Connection(object):
 
     @uptime.setter
     def uptime(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("uptime is read-only!")
 
     # ------------------------------------------------------------------------
@@ -438,7 +439,7 @@ class _Connection(object):
 
     @re_name.setter
     def re_name(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("re_name is read-only!")
 
     def _sshconf_lkup(self):
@@ -874,7 +875,7 @@ class _Connection(object):
                 or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
             ):
                 try:
-                    return json.loads(rpc_rsp_e.text)
+                    return json.loads(rpc_rsp_e.text, strict=False)
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith("Extra data"):

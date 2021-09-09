@@ -16,7 +16,14 @@ from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
 from jinja2 import Template
-from ntc_templates import parse as ntc_parse
+
+HAS_NTC_TEMPLATE = False
+try:
+    from ntc_templates import parse as ntc_parse
+
+    HAS_NTC_TEMPLATE = True
+except:
+    pass
 
 import logging
 
@@ -153,9 +160,14 @@ class CMDTable(object):
                 self.data = self.xml.text
 
         if self.USE_TEXTFSM:
-            self.output = self._parse_textfsm(
-                platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
-            )
+            if HAS_NTC_TEMPLATE:
+                self.output = self._parse_textfsm(
+                    platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
+                )
+            else:
+                raise ImportError(
+                    "ntc_template is missing. Need to be installed explicitly."
+                )
         else:
             # state machine
             sm = StateMachine(self)
@@ -170,27 +182,27 @@ class CMDTable(object):
 
     @property
     def D(self):
-        """ the Device instance """
+        """the Device instance"""
         return self._dev
 
     @property
     def CLI(self):
-        """ the Device.cli instance """
+        """the Device.cli instance"""
         return self.D.cli
 
     @property
     def RPC(self):
-        """ the Device.rpc instance """
+        """the Device.rpc instance"""
         return self.D.rpc
 
     @property
     def view(self):
-        """ returns the current view assigned to this table """
+        """returns the current view assigned to this table"""
         return self._view
 
     @view.setter
     def view(self, cls):
-        """ assigns a new view to the table """
+        """assigns a new view to the table"""
         if cls is None:
             self._view = None
             return
@@ -206,7 +218,7 @@ class CMDTable(object):
 
     @property
     def key_list(self):
-        """ the list of keys, as property for caching """
+        """the list of keys, as property for caching"""
         return self._key_list
 
     # -------------------------------------------------------------------------
@@ -229,7 +241,7 @@ class CMDTable(object):
     # ------------------------------------------------------------------------
 
     def _keys(self):
-        """ return a list of data item keys from the data string """
+        """return a list of data item keys from the data string"""
 
         return self.output.keys()
 
@@ -247,7 +259,7 @@ class CMDTable(object):
     # ------------------------------------------------------------------------
 
     def values(self):
-        """ returns list of table entry items() """
+        """returns list of table entry items()"""
 
         self._assert_data()
         return self.output.values()
@@ -257,7 +269,7 @@ class CMDTable(object):
     # ------------------------------------------------------------------------
 
     def items(self):
-        """ returns list of tuple(name,values) for each table entry """
+        """returns list of tuple(name,values) for each table entry"""
         return self.output.items()
 
     def to_json(self):
@@ -287,7 +299,7 @@ class CMDTable(object):
         return len(self.keys())
 
     def __iter__(self):
-        """ iterate over each time in the table """
+        """iterate over each time in the table"""
         self._assert_data()
 
         for key, value in self.output.items():
@@ -311,7 +323,7 @@ class CMDTable(object):
         return self.output[value]
 
     def __contains__(self, key):
-        """ membership for use with 'in' """
+        """membership for use with 'in'"""
         return bool(key in self.keys())
 
     # ------------------------------------------------------------------------
