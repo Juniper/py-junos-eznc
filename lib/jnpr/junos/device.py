@@ -103,8 +103,9 @@ class _Connection(object):
             model_dict = {}
             with open("/etc/product.conf") as f:
                 for line in f:
-                    (key, val) = line.strip().split("=")
-                    model_dict[key] = val
+                    if "=" in line:
+                        (key, val) = line.strip().split("=")
+                        model_dict[key] = val
 
             if "model" in model_dict and model_dict["model"] in [
                 "crpd",
@@ -874,7 +875,7 @@ class _Connection(object):
                 or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
             ):
                 try:
-                    return json.loads(rpc_rsp_e.text)
+                    return json.loads(rpc_rsp_e.text, strict=False)
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith("Extra data"):

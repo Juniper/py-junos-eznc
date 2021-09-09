@@ -158,7 +158,7 @@ class CfgTable(Table):
             add_field = self._grindfield(lxpath[-1], field_value)
             for _add in add_field:
                 if len(_add.attrib) > 0:
-                    for i in dot.getiterator():
+                    for i in dot.iter():
                         if i.tag == _add.tag:
                             i.attrib.update(_add.attrib)
                             break

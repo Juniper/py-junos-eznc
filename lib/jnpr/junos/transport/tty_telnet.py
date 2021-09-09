@@ -67,7 +67,9 @@ class Telnet(Terminal):
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
-        self.write("\n")
+        # the below line was added for console based telnet connection as it needs newline to work.
+        # it causes issue in EVO devices. Keeping it as a comment for future enhancement.
+        # self.write("\n")
 
     def _tty_close(self):
         self._tn.close()

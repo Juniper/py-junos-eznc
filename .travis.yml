@@ -27,9 +27,6 @@ matrix:
             - CRYPTOGRAPHY_DONT_BUILD_RUST=1
             - INCLUDE='C:\OpenSSL-Win32\include;C:\OpenSSL-win64\include'
             - LIB='C:\OpenSSL-Win32\lib;C:\OpenSSL-win64\lib'
-
-            set LIB=C:\OpenSSL-win64\lib;%LIB%
-set INCLUDE=C:\OpenSSL-win64\include;%INCLUDE%
 addons:
   apt:
     packages:

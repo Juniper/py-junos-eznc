@@ -16,7 +16,14 @@ from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
 
 from jinja2 import Template
-from ntc_templates import parse as ntc_parse
+
+HAS_NTC_TEMPLATE = False
+try:
+    from ntc_templates import parse as ntc_parse
+
+    HAS_NTC_TEMPLATE = True
+except:
+    pass
 
 import logging
 
@@ -153,9 +160,14 @@ class CMDTable(object):
                 self.data = self.xml.text
 
         if self.USE_TEXTFSM:
-            self.output = self._parse_textfsm(
-                platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
-            )
+            if HAS_NTC_TEMPLATE:
+                self.output = self._parse_textfsm(
+                    platform=self.PLATFORM, command=self.GET_CMD, raw=self.data
+                )
+            else:
+                raise ImportError(
+                    "ntc_template is missing. Need to be installed explicitly."
+                )
         else:
             # state machine
             sm = StateMachine(self)

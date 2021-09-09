@@ -161,7 +161,7 @@ strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
 
 
 def remove_namespaces(xml):
-    for elem in xml.getiterator():
+    for elem in xml.iter():
         if elem.tag is etree.Comment:
             continue
         i = elem.tag.find("}")
@@ -171,7 +171,7 @@ def remove_namespaces(xml):
 
 
 def remove_namespaces_and_spaces(xml):
-    for elem in xml.getiterator():
+    for elem in xml.iter():
         if elem.tag is etree.Comment:
             continue
         # Remove namespace from attributes
