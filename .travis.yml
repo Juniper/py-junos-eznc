@@ -21,8 +21,8 @@ matrix:
             - PATH=/c/Python37:/c/Python37/Scripts:$PATH
             - TRAVIS_PYTHON_VERSION=3.7
             - CRYPTOGRAPHY_DONT_BUILD_RUST=1
-            - INCLUDE='C:\OpenSSL-Win32\include'
-            - LIB='C:\OpenSSL-Win32\lib'
+            - INCLUDE='C:\OpenSSL-Win32\include;C:\OpenSSL-win64\include'
+            - LIB='C:\OpenSSL-Win32\lib;C:\OpenSSL-win64\lib'
 addons:
   apt:
     packages:
