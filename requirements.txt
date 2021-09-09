@@ -11,4 +11,3 @@ yamlordereddictloader
 pyparsing
 transitions
 ntc_templates
-setuptools-rust
