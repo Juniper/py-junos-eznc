@@ -7,6 +7,8 @@ matrix:
           dist: trusty
         - python: 3.7
           dist: xenial
+          before_install:
+            - pip3 install setuptools-rust
         - python: 3.8
           dist: xenial
         - os: windows
