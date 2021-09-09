@@ -5,6 +5,8 @@ matrix:
           dist: trusty
         - python: 3.6
           dist: trusty
+          before_install:
+            - pip3 install setuptools-rust
         - python: 3.7
           dist: xenial
           before_install:
