@@ -260,6 +260,16 @@ class Config(Util):
             else:
                 raise
 
+        # The output is expected to be an etree, it may have empty <configuration-output> tags
+        # Adding a preventive check and displaying warning in case the value is bool.
+        # This check is added for PR 1564189 (juniper internal) which has issue for certain junos releases.
+        if isinstance(rsp, bool):
+            warnings.warn(
+                "diff shouldn't return boolean as a rpc-reply",
+                RuntimeWarning,
+            )
+            return None
+
         diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
 
