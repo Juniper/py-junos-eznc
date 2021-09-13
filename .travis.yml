@@ -1,10 +1,6 @@
 language: python
 matrix:
     include:
-        - python: 3.5
-          dist: trusty
-        - python: 3.6
-          dist: trusty
         - python: 3.7
           dist: xenial
         - python: 3.8
@@ -14,9 +10,12 @@ matrix:
           python: 3.7
           before_install:
             - choco install python3 --version=3.7.4
+            - pip install ntc_templates==1.4.1
+            - pip install textfsm==0.4.1
           env:
             - PATH=/c/Python37:/c/Python37/Scripts:$PATH
             - TRAVIS_PYTHON_VERSION=3.7
+            - CRYPTOGRAPHY_DONT_BUILD_RUST=1
 addons:
   apt:
     packages:

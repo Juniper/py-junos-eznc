@@ -23,6 +23,8 @@ from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.ftp import FTP
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
+from ncclient.xml_ import NCElement
+from jnpr.junos import jxml as JXML
 
 """
 Software Installation Utilities
@@ -164,7 +166,7 @@ class SW(Util):
 
     @classmethod
     def progress(cls, dev, report):
-        """ simple progress report function """
+        """simple progress report function"""
         print(dev.hostname + ": " + report)
 
     # -------------------------------------------------------------------------
@@ -663,7 +665,9 @@ class SW(Util):
             _progress(
                 "after copy, computing checksum on remote package: %s" % remote_package
             )
-            remote_checksum = self.remote_checksum(remote_package)
+            remote_checksum = self.remote_checksum(
+                remote_package, timeout=checksum_timeout, algorithm=checksum_algorithm
+            )
 
         if remote_checksum != checksum:
             _progress("checksum check failed.")
@@ -890,7 +894,7 @@ class SW(Util):
                 return False
         except RpcError:
             _progress(
-                "request-package-check-pending-install rpc is not "
+                "request-package-checks-pending-install rpc is not "
                 "supported on given device"
             )
         except Exception as ex:
@@ -1062,7 +1066,7 @@ class SW(Util):
             if self._dev.facts["2RE"]:
                 cmd = E("other-routing-engine")
         elif all_re is True:
-            if vmhost is True:
+            if self._multi_RE is True and vmhost is True:
                 cmd.append(E("routing-engine", "both"))
             elif self._multi_RE is True and self._multi_VC is False:
                 cmd.append(E("both-routing-engines"))
@@ -1083,7 +1087,11 @@ class SW(Util):
                     # REs produces <output> messages and
                     # <request-reboot-status> messages.
                     output_msg = "\n".join(
-                        [i.text for i in rsp.xpath("//output") if i.text is not None]
+                        [
+                            i.text
+                            for i in rsp.getparent().xpath("//output")
+                            if i.text is not None
+                        ]
                     )
                     if output_msg != "":
                         got = output_msg
@@ -1247,17 +1255,52 @@ class SW(Util):
             if media is True:
                 cmd = E("media")
 
+        # initialize an empty output message
+        output_msg = ""
+
         try:
             # For zeroize we don't get a response similar to reboot, shutdown.
-            # In ansible it was passed even if rpc-reply was not coming.
-            # Code is added here to reply the message else pass an empty string.
-            rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
-            output_msg = "\n".join(
-                [i.text for i in rsp.xpath("//message") if i.text is not None]
-            )
-            return output_msg
+            # The response may come as a warning message only.
+            # Code is added here to extract the warning message and append it.
+            # Don't pass ignore warning true and handle the warning here.
+            rsp = self.rpc(cmd, normalize=True)
+        except RpcError as ex:
+            if hasattr(ex, "xml"):
+                if hasattr(ex, "errs"):
+                    errors = ex.errs
+                else:
+                    errors = [ex]
+                for err in errors:
+                    if err.get("severity", "") != "warning":
+                        # Not a warning (probably an error).
+                        raise ex
+                    output_msg += err.get("message", "") + "\n"
+                rsp = ex.xml.getroottree().getroot()
+                # 1) A normal response has been run through the XSLT
+                #    transformation, but ex.xml has not. Do that now.
+                encode = None if sys.version < "3" else "unicode"
+                rsp = NCElement(
+                    etree.tostring(rsp, encoding=encode), self._dev.transform()
+                )._NCElement__doc
+                # 2) Now remove all of the <rpc-error> elements from
+                #    the response. We've already confirmed they are all warnings
+                rsp = etree.fromstring(str(JXML.strip_rpc_error_transform(rsp)))
+            else:
+                # ignore_warning was false, or an RPCError which doesn't have
+                #  an XML attribute. Raise it up for the caller to deal with.
+                raise ex
         except Exception as err:
             raise err
+
+        # safety check added in case the rpc-reply for zeroize doesn't have message
+        # This scenario is not expected.
+        if isinstance(rsp, bool):
+            return "zeroize initiated with no message"
+
+        output_msg += "\n".join(
+            [i.text for i in rsp.xpath("//message") if i.text is not None]
+        )
+        return output_msg
 
     # -------------------------------------------------------------------------
     # rollback - clears the install request

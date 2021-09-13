@@ -92,7 +92,9 @@ normalize_xslt = """\
     <xsl:output method="xml" indent="no"/>
 
     <xsl:template match="/*[local-name()='rpc-reply']/*[local-name()='output']">
-        <xsl:copy-of select="."/>
+        <output>
+        <xsl:value-of select="."/>
+        </output>
     </xsl:template>
 
     <xsl:template match="/|comment()|processing-instruction()">
@@ -159,7 +161,7 @@ strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
 
 
 def remove_namespaces(xml):
-    for elem in xml.getiterator():
+    for elem in xml.iter():
         if elem.tag is etree.Comment:
             continue
         i = elem.tag.find("}")
@@ -169,7 +171,7 @@ def remove_namespaces(xml):
 
 
 def remove_namespaces_and_spaces(xml):
-    for elem in xml.getiterator():
+    for elem in xml.iter():
         if elem.tag is etree.Comment:
             continue
         # Remove namespace from attributes
@@ -191,8 +193,8 @@ def remove_namespaces_and_spaces(xml):
 
 def rpc_error(rpc_xml):
     """
-      extract the various bits from an <rpc-error> element
-      into a dictionary
+    extract the various bits from an <rpc-error> element
+    into a dictionary
     """
     remove_namespaces(rpc_xml)
 

@@ -55,7 +55,7 @@ class SCP(object):
                 self._scpargs["progress"] = self._scp_progress
 
     def _progress(self, report):
-        """ simple progress report function """
+        """simple progress report function"""
         print(self._junos.hostname + ": " + report)
 
     def _scp_progress(self, _path, _total, _xfrd):

@@ -196,22 +196,22 @@ class Resource(object):
 
     @property
     def D(self):
-        """ returns the Device object bound to this resource/manager """
+        """returns the Device object bound to this resource/manager"""
         return self._junos
 
     @property
     def R(self):
-        """ returns the Device RPC meta object """
+        """returns the Device RPC meta object"""
         return self._junos.rpc
 
     @property
     def M(self):
-        """ returns the :Resource: manager associated to this resource """
+        """returns the :Resource: manager associated to this resource"""
         return self._manager
 
     @property
     def P(self):
-        """ returns the parent of the associated Junos object """
+        """returns the parent of the associated Junos object"""
         return self._parent
 
     # -----------------------------------------------------------------------
@@ -535,11 +535,11 @@ class Resource(object):
 
     def __repr__(self):
         """
-          stringify for debug/printing
+        stringify for debug/printing
 
-          this will show the resource manager (class) name,
-          the resource (Junos) name, and the contents
-          of the :has: dict and the contents of the :should: dict
+        this will show the resource manager (class) name,
+        the resource (Junos) name, and the contents
+        of the :has: dict and the contents of the :should: dict
         """
         mgr_name = self.__class__.__name__
         return (
@@ -554,7 +554,7 @@ class Resource(object):
         # ---------------------------------------------------------------------
 
     def __iter__(self):
-        """ iterate through each Resource in the Manager list """
+        """iterate through each Resource in the Manager list"""
         for name in self.list:
             yield self[name]
 
@@ -600,9 +600,9 @@ class Resource(object):
 
     def _xml_build_change(self):
         """
-          iterate through the :should: properties creating the
-          necessary configuration change structure.  if there
-          are no changes, then return :None:
+        iterate through the :should: properties creating the
+        necessary configuration change structure.  if there
+        are no changes, then return :None:
         """
         edit_xml = self._xml_edit_at_res()
 
@@ -638,8 +638,8 @@ class Resource(object):
 
     def _r_config_write_xml(self, xml):
         """
-          write the xml change to the Junos device,
-          trapping on exceptions.
+        write the xml change to the Junos device,
+        trapping on exceptions.
         """
         top_xml = xml.getroottree().getroot()
 
@@ -757,8 +757,8 @@ class Resource(object):
 
     def _r_when_new(self):
         """
-          called by :read(): when the resource is new; i.e.
-          there is no existing Junos configuration
+        called by :read(): when the resource is new; i.e.
+        there is no existing Junos configuration
         """
         pass
 
@@ -786,7 +786,7 @@ class Resource(object):
     @classmethod
     def _r_has_xml_status(klass, as_xml, as_py):
         """
-          set the 'exists' and 'active' :has: values
+        set the 'exists' and 'active' :has: values
         """
         as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get("inactive") else True
         as_py[P_JUNOS_EXISTS] = True

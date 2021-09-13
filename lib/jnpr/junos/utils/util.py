@@ -29,7 +29,7 @@ class Util(object):
 
     @dev.setter
     def dev(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("read-only: dev")
 
     # -------------------------------------------------------------------------
@@ -45,5 +45,5 @@ class Util(object):
 
     @rpc.setter
     def rpc(self, value):
-        """ read-only property """
+        """read-only property"""
         raise RuntimeError("read-only: rpc")

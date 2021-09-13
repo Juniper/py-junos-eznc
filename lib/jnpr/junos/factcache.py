@@ -1,13 +1,17 @@
-import collections
 import warnings
 from pprint import pformat
+
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc
 import jnpr.junos.exception
 
 
-class _FactCache(collections.MutableMapping):
+class _FactCache(MutableMapping):
     """
     A dictionary-like object which performs on-demand fact gathering.
 
@@ -293,6 +297,10 @@ class _FactCache(collections.MutableMapping):
                 self._exception_on_failure = False
                 self._warnings_on_failure = False
                 self._should_warn = False
+
+    # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
+    if __doc__ is None:
+        __doc__ = ""
 
     # Precede the class's documentation with the documentation on the specific
     # facts from  the jnpr.junos.facts package.

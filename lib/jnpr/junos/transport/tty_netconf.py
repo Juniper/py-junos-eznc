@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from ncclient.operations.rpc import RPCReply, RPCError
 from ncclient.xml_ import to_ele
 import six
+from ncclient.transport.session import HelloHandler
 
 
 class PY6:
@@ -45,13 +46,14 @@ class tty_netconf(object):
     def __init__(self, tty):
         self._tty = tty
         self.hello = None
+        self._session_id = -1
 
     # -------------------------------------------------------------------------
     # NETCONF session open and close
     # -------------------------------------------------------------------------
 
     def open(self, at_shell):
-        """ start the XML API process and receive the 'hello' message """
+        """start the XML API process and receive the 'hello' message"""
         nc_cmd = ("junoscript", "xml-mode")[at_shell]
         self._tty.write(nc_cmd + " netconf need-trailer")
         mark_start = datetime.now()
@@ -64,12 +66,13 @@ class tty_netconf(object):
                 break
         else:
             # exceeded the while loop timeout
-            raise RuntimeError("Netconify Error: netconf not responding")
+            raise RuntimeError("Error: netconf not responding")
 
         self.hello = self._receive()
+        self._session_id, _ = HelloHandler.parse(self.hello.decode("utf-8"))
 
     def close(self, force=False):
-        """ issue the XML API to close the session """
+        """issue the XML API to close the session"""
 
         # if we do not have an open connection, then return now.
         if force is False:
@@ -84,7 +87,7 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def zeroize(self):
-        """ issue a reboot to the device """
+        """issue a reboot to the device"""
         cmd = E.command("request system zeroize")
         try:
             encode = None if sys.version < "3" else "unicode"
@@ -141,7 +144,7 @@ class tty_netconf(object):
             return self._receive_serial()
 
     def _receive_serial(self):
-        """ process the XML response into an XML object """
+        """process the XML response into an XML object"""
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:
@@ -169,7 +172,7 @@ class tty_netconf(object):
     # -------------------------------------------------------------------------
 
     def _receive_serial_win(self):
-        """ process incoming data from windows port"""
+        """process incoming data from windows port"""
         rxbuf = PY6.EMPTY_STR
         line = PY6.EMPTY_STR
         while True:
