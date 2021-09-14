@@ -1,0 +1,16 @@
+---
+CChipFOStatsTable:
+  command: show mqss {{ chip_instance }} fo stats
+  target: Null
+  args:
+    chip_instance: 0
+  title: Counter group 0
+  key: set
+  view: MQSSFOStatsView
+
+MQSSFOStatsView:
+  regex:
+    set: (\d+)\s+Stream\s+\d+x\d+\s+\d+x\d+
+    total-packets-sent: (\d+).*
+  filters:
+    - total-packets-sent

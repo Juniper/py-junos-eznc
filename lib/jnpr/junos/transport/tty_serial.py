@@ -10,12 +10,11 @@ from jnpr.junos.transport.tty import Terminal
 # Terminal connection over SERIAL CONSOLE
 # -------------------------------------------------------------------------
 
-_PROMPT = re.compile(six.b('|').join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
 
 
 class Serial(Terminal):
-
-    def __init__(self, port='/dev/ttyUSB0', **kvargs):
+    def __init__(self, port="/dev/ttyUSB0", **kvargs):
         """
         :port:
           the serial port, defaults to USB0 since this
@@ -30,7 +29,7 @@ class Serial(Terminal):
         self._ser = serial.Serial()
         self._rx = self._ser
         self._ser.port = port
-        self._ser.timeout = kvargs.get('timeout', self.TIMEOUT)
+        self._ser.timeout = kvargs.get("timeout", self.TIMEOUT)
 
         self._tty_name = self.port
 
@@ -44,8 +43,8 @@ class Serial(Terminal):
         try:
             self._ser.open()
         except OSError as err:
-            raise RuntimeError("open_failed:{0}".format(err.strerror))
-        self.write('\n\n\n')      # hit <ENTER> a few times, yo!
+            raise RuntimeError("open_failed:{}".format(err.strerror))
+        self.write("\n\n\n")  # hit <ENTER> a few times, yo!
 
     def _tty_close(self):
         self._ser.flush()
@@ -56,15 +55,15 @@ class Serial(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        """ write content + <RETURN> """
-        self._ser.write(six.b(content + '\n'))
+        """write content + <RETURN>"""
+        self._ser.write(six.b(content + "\n"))
         self._ser.flush()
 
     def rawwrite(self, content):
         self._ser.write(content)
 
     def read(self):
-        """ read a single line """
+        """read a single line"""
         return self._ser.readline()
 
     def read_prompt(self):
@@ -76,19 +75,19 @@ class Serial(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b('')
+        rxb = six.b("")
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=self.EXPECT_TIMEOUT)
 
         while datetime.now() < mark_end:
-            sleep(0.1)                          # do not remove
+            sleep(0.1)  # do not remove
             line = self._ser.readline()
             if not line:
                 continue
             rxb += line
             found = _PROMPT.search(rxb)
             if found is not None:
-                break         # done reading
+                break  # done reading
         else:
             # exceeded the while loop timeout
             return (None, None)

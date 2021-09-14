@@ -1,0 +1,15 @@
+---
+ShowJnhIfdStream:
+  command: show jnh ifd {{ ifd }} stream
+  args:
+    ifd: 343
+  target: Null
+  title: Detail Statistics
+  key: counter
+  view: ShowJnhIfdStreamView
+
+ShowJnhIfdStreamView:
+  regex:
+    counter: '([a-zA-Z0-9-]+):'
+    packets: '(\d+) pkts,'
+    bytes: '(\d+) bytes'

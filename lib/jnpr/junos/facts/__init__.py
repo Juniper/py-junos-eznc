@@ -46,6 +46,7 @@ import jnpr.junos.facts.ifd_style
 import jnpr.junos.facts.iri_mapping
 import jnpr.junos.facts.personality
 import jnpr.junos.facts.swver
+import jnpr.junos.facts.is_linux
 
 
 def _build_fact_callbacks_and_doc_strings():
@@ -66,25 +67,29 @@ def _build_fact_callbacks_and_doc_strings():
     callbacks = {}
     doc_strings = {}
     for (name, module) in sys.modules.items():
-        if name.startswith('jnpr.junos.facts.') and module is not None:
+        if name.startswith("jnpr.junos.facts.") and module is not None:
             new_doc_strings = module.provides_facts()
             for key in new_doc_strings:
                 if key not in callbacks:
                     callbacks[key] = module.get_facts
                     doc_strings[key] = new_doc_strings[key]
                 else:
-                    raise RuntimeError('Both the %s module and the %s module '
-                                       'claim to provide the %s fact. Please '
-                                       'report this error.' %
-                                       (callbacks[key].__module__,
-                                        module.__name__,
-                                        key))
+                    raise RuntimeError(
+                        "Both the %s module and the %s module "
+                        "claim to provide the %s fact. Please "
+                        "report this error."
+                        % (callbacks[key].__module__, module.__name__, key)
+                    )
     return (callbacks, doc_strings)
 
 
 # Import all of the fact modules and build the callbacks and doc strings
 (_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
+# In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
+if __doc__ is None:
+    __doc__ = ""
+
 # Append the doc string (__doc__) with the documentation for each fact.
 for key in sorted(_doc_strings, key=lambda s: s.lower()):
-    __doc__ += ':%s:\n  %s\n' % (key, _doc_strings[key])
+    __doc__ += ":%s:\n  %s\n" % (key, _doc_strings[key])

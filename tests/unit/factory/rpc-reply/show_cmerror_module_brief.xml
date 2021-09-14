@@ -1,0 +1,15 @@
+<output>
+command: show cmerror module brief
+
+Output for given command:
+
+---------------------------------------
+Module  Name              Active Errors
+---------------------------------------
+1       PQ3 Chip          0
+2       Host Loopback     0
+3       CM[0]             0
+4       CM[1]             0
+5       LUCHIP(0)         0
+6       TOE-LU-0:0:0      0
+</output>

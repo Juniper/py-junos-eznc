@@ -1,21 +1,22 @@
-﻿<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
-	<configuration junos:commit-seconds="1400665891" junos:commit-localtime="2014-05-21 09:51:31 UTC" junos:commit-user="rick">
-		<system>
-			<login>
-				<user group="global">
-					<name group="global">test</name>
-					<full-name group="member0">Test User</full-name>
-					<uid group="global">928</uid>
-					<class group="global">superuser</class>
-					<undocumented><shell group="global">csh</shell></undocumented>
-					<authentication group="global">
-						<encrypted-password group="global">$encryptedpass.</encrypted-password>
-					</authentication>
-				</user>
-			</login>
-		</system>
-	</configuration>
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos">
+        <configuration junos:commit-seconds="1400665891" junos:commit-localtime="2014-05-21 09:51:31 UTC" junos:commit-user="rick">
+                <system>
+                        <login>
+                                <user group="global">
+                                        <name group="global">test</name>
+                                        <full-name group="member0">Test User</full-name>
+                                        <uid group="global">928</uid>
+                                        <class group="global">superuser</class>
+                                        <undocumented><shell group="global">csh</shell></undocumented>
+                                        <authentication group="global">
+                                                <encrypted-password group="global">$encryptedpass.</encrypted-password>
+                                        </authentication>
+                                </user>
+                        </login>
+                </system>
+        </configuration>
     <cli>
         <banner></banner>
-    </cli>	
+    </cli>
 </rpc-reply>
+

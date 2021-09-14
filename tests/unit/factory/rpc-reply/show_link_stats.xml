@@ -1,0 +1,15 @@
+<output>
+SENT: Ukern command: show link stats
+
+PPP LCP/NCP: 0
+HDLC keepalives: 0
+RSVP: 0
+ISIS: 0
+OSPF Hello: 539156
+OAM:  0
+BFD:  15
+UBFD:  0
+LMI:  0
+LACP: 0
+ETHOAM: 0
+</output>

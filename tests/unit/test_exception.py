@@ -1,7 +1,14 @@
 import unittest
 from nose.plugins.attrib import attr
-from jnpr.junos.exception import RpcError, CommitError, \
-    ConnectError, ConfigLoadError, RpcTimeoutError, SwRollbackError
+from jnpr.junos.exception import (
+    RpcError,
+    CommitError,
+    ConnectError,
+    ConfigLoadError,
+    RpcTimeoutError,
+    SwRollbackError,
+    JSONLoadError,
+)
 from jnpr.junos import Device
 from lxml import etree
 
@@ -9,7 +16,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-commit_xml = '''
+commit_xml = """
         <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
         <error-severity>error</error-severity>
         <source-daemon>dcd</source-daemon>
@@ -21,9 +28,9 @@ commit_xml = '''
         Only unit 0 is valid for this encapsulation
         </error-message>
         </rpc-error>
-    '''
+    """
 
-rpc_xml = '''
+rpc_xml = """
     <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X47/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
     <error-severity>error</error-severity>
     <error-info>
@@ -31,9 +38,9 @@ rpc_xml = '''
     </error-info>
     <error-message>syntax error</error-message>
     </rpc-error>
-    '''
+    """
 
-conf_xml = '''
+conf_xml = """
     <rpc-error>
         <error-severity>error</error-severity>
         <error-info>
@@ -41,9 +48,9 @@ conf_xml = '''
         </error-info>
         <error-message>syntax error</error-message>
     </rpc-error>
-'''
+"""
 
-multi_warning_xml = '''
+multi_warning_xml = """
 <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
 <load-configuration-results>
 <rpc-error>
@@ -61,17 +68,25 @@ statement not found
 <ok/>
 </load-configuration-results>
 </rpc-reply>
-'''
+"""
+
+config_json = """{
+    "configuration" : {
+      "system" : {
+            "services" : {
+                "telnet" : [nul] 
+             }
+        }
+    }
+}"""
 
 
-@attr('unit')
+@attr("unit")
 class Test_RpcError(unittest.TestCase):
-
     def test_rpcerror_repr(self):
         rsp = etree.XML(rpc_xml)
         obj = RpcError(rsp=rsp)
-        err = 'RpcError(severity: error, bad_element: bgp, ' \
-              'message: syntax error)'
+        err = "RpcError(severity: error, bad_element: bgp, " "message: syntax error)"
         self.assertEqual(str, type(obj.__repr__()))
         self.assertEqual(obj.__repr__(), err)
 
@@ -79,66 +94,88 @@ class Test_RpcError(unittest.TestCase):
         # this test is intended to hit jxml code
         rsp = etree.XML(commit_xml)
         obj = CommitError(rsp=rsp)
-        self.assertEqual(obj.rpc_error['bad_element'], 'unit 2')
+        self.assertEqual(obj.rpc_error["bad_element"], "unit 2")
 
     def test_ConnectError(self):
-        self.dev = Device(host='1.1.1.1', user='rick')
+        self.dev = Device(host="1.1.1.1", user="rick")
         obj = ConnectError(self.dev)
-        self.assertEqual(obj.user, 'rick')
-        self.assertEqual(obj.host, '1.1.1.1')
+        self.assertEqual(obj.user, "rick")
+        self.assertEqual(obj.host, "1.1.1.1")
         self.assertEqual(obj.port, 830)
-        self.assertEqual(repr(obj), 'ConnectError(1.1.1.1)')
+        self.assertEqual(repr(obj), "ConnectError(1.1.1.1)")
 
     def test_ConnectError_msg(self):
-        self.dev = Device(host='1.1.1.1', user='rick')
-        obj = ConnectError(self.dev, msg='underlying exception info')
-        self.assertEqual(obj.msg, 'underlying exception info')
+        self.dev = Device(host="1.1.1.1", user="rick")
+        obj = ConnectError(self.dev, msg="underlying exception info")
+        self.assertEqual(obj.msg, "underlying exception info")
         self.assertEqual(
-            repr(obj),
-            'ConnectError(host: 1.1.1.1, msg: underlying exception info)')
+            repr(obj), "ConnectError(host: 1.1.1.1, msg: underlying exception info)"
+        )
 
     def test_CommitError_repr(self):
         rsp = etree.XML(commit_xml)
         obj = CommitError(rsp=rsp)
-        err = ("CommitError(edit_path: [edit interfaces ge-0/0/1], "
-               "bad_element: unit 2, message: Only unit 0 is valid "
-               "for this encapsulation)")
+        err = (
+            "CommitError(edit_path: [edit interfaces ge-0/0/1], "
+            "bad_element: unit 2, message: Only unit 0 is valid "
+            "for this encapsulation)"
+        )
         self.assertEqual(obj.__repr__(), err)
 
     def test_ConfigLoadError_repr(self):
         rsp = etree.XML(conf_xml)
         obj = ConfigLoadError(rsp=rsp)
-        err = 'ConfigLoadError(severity: error, bad_element: ' \
-              'system1, message: syntax error)'
+        err = (
+            "ConfigLoadError(severity: error, bad_element: "
+            "system1, message: syntax error)"
+        )
         self.assertEqual(obj.__repr__(), err)
 
     def test_RpcTimeoutError_repr(self):
-        dev = Device('test')
-        obj = RpcTimeoutError(dev=dev, cmd='test', timeout=50)
-        err = 'RpcTimeoutError(host: test, cmd: test, timeout: 50)'
+        dev = Device("test")
+        obj = RpcTimeoutError(dev=dev, cmd="test", timeout=50)
+        err = "RpcTimeoutError(host: test, cmd: test, timeout: 50)"
         self.assertEqual(obj.__repr__(), err)
 
     def test_SwRollbackError_repr(self):
         obj = SwRollbackError(rsp="Single RE exception")
-        err = 'SwRollbackError(output: Single RE exception)'
+        err = "SwRollbackError(output: Single RE exception)"
         self.assertEqual(obj.__repr__(), err)
 
     def test_SwRollbackError_repr_multi(self):
-        obj = SwRollbackError(re='test1', rsp="Multi RE exception")
-        err = 'SwRollbackError(re: test1, output: Multi RE exception)'
+        obj = SwRollbackError(re="test1", rsp="Multi RE exception")
+        err = "SwRollbackError(re: test1, output: Multi RE exception)"
         self.assertEqual(obj.__repr__(), err)
 
     def test_repr_multi_warning(self):
         rsp = etree.XML(multi_warning_xml)
         from ncclient.operations import RPCError
-        warn_msg = '''
+
+        warn_msg = """
         <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/16.1I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
         <error-severity>warning</error-severity>
         <error-message>
         statement not found
         </error-message>
-        </rpc-error>'''
+        </rpc-error>"""
         errs = RPCError(etree.XML(warn_msg))
         errs.errors = [errs, errs]
         obj = RpcError(rsp=rsp, errs=errs)
-        self.assertEqual(obj.rpc_error['severity'], 'warning')
+        self.assertEqual(obj.rpc_error["severity"], "warning")
+
+    def test_json_error(self):
+        err = "ValueError: No JSON object could be decoded"
+        obj = JSONLoadError(err, config_json)
+        errs = "JSONLoadError(reason: ValueError: No JSON object could be decoded)"
+        self.assertEqual(obj.__repr__(), errs)
+
+    def test_json_error_offending_line(self):
+        err = "ValueError: No"
+        obj = JSONLoadError(err, config_json)
+        obj.offending_line = "Value"
+        errs = (
+            "JSONLoadError(reason: ValueError: No, "
+            "\nThe offending config appears to be: "
+            "\nValue)"
+        )
+        self.assertEqual(obj.__repr__(), errs)

@@ -9,6 +9,7 @@ class FactLoopError(RuntimeError):
     """
     Generated when there is a loop in fact gathering.
     """
+
     pass
 
 
@@ -18,15 +19,14 @@ class RpcError(Exception):
     Parent class for all junos-pyez RPC Exceptions
     """
 
-    def __init__(self, cmd=None, rsp=None, errs=None, dev=None,
-                 timeout=None, re=None):
+    def __init__(self, cmd=None, rsp=None, errs=None, dev=None, timeout=None, re=None):
         """
-          :cmd: is the rpc command
-          :rsp: is the rpc response (after <rpc-reply>)
-          :errs: is a list of dictionaries of extracted <rpc-error> elements.
-          :dev: is the device rpc was executed on
-          :timeout: is the timeout value of the device
-          :re: is the RE or member exception occured on
+        :cmd: is the rpc command
+        :rsp: is the rpc response (after <rpc-reply>)
+        :errs: is a list of dictionaries of extracted <rpc-error> elements.
+        :dev: is the device rpc was executed on
+        :timeout: is the timeout value of the device
+        :re: is the RE or member exception occured on
         """
         self.cmd = cmd
         self.rsp = rsp
@@ -36,42 +36,50 @@ class RpcError(Exception):
         self.rpc_error = None
         self.xml = rsp
         # To handle errors coming from ncclient, Here errs is list of RPCError
-        if isinstance(errs, RPCError) and hasattr(errs, 'errors'):
+        if isinstance(errs, RPCError) and hasattr(errs, "errors"):
             self.errs = [JXML.rpc_error(error.xml) for error in errs.errors]
             for error in errs.errors:
-                if error.severity == 'error':
+                if error.severity == "error":
                     self.rsp = JXML.remove_namespaces(error.xml)
                     break
             else:
-                if errs.severity == 'warning':
+                if errs.severity == "warning":
                     for error in errs.errors:
-                        if error.severity == 'warning':
+                        if error.severity == "warning":
                             self.rsp = JXML.remove_namespaces(error.xml)
                             break
             self.message = errs.message
         else:
             self.errs = errs
-            self.message = "\n".join(["%s: %s" % (err['severity'].strip(),
-                                                  err['message'].strip())
-                                      for err in errs
-                                      if err['message'] is not None and
-                                      err['severity'] is not None]) \
-                if isinstance(errs, list) else ''
+            self.message = (
+                "\n".join(
+                    [
+                        "%s: %s" % (err["severity"].strip(), err["message"].strip())
+                        for err in errs
+                        if err["message"] is not None and err["severity"] is not None
+                    ]
+                )
+                if isinstance(errs, list)
+                else ""
+            )
 
         if isinstance(self.rsp, _Element):
             self.rpc_error = jxml.rpc_error(self.rsp)
-            self.message = self.message or self.rpc_error['message']
+            self.message = self.message or self.rpc_error["message"]
             if self.errs is None or not isinstance(self.errs, list):
                 self.errs = [self.rpc_error]
 
     def __repr__(self):
         """
-          pprints the response XML attribute
+        pprints the response XML attribute
         """
         if self.rpc_error is not None:
-            return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
-                .format(self.__class__.__name__, self.rpc_error['severity'],
-                        self.rpc_error['bad_element'], self.message)
+            return "{}(severity: {}, bad_element: {}, message: {})".format(
+                self.__class__.__name__,
+                self.rpc_error["severity"],
+                self.rpc_error["bad_element"],
+                self.message,
+            )
         else:
             return self.__class__.__name__
 
@@ -88,9 +96,12 @@ class CommitError(RpcError):
         RpcError.__init__(self, cmd, rsp, errs)
 
     def __repr__(self):
-        return "{0}(edit_path: {1}, bad_element: {2}, message: {3})"\
-            .format(self.__class__.__name__, self.rpc_error['edit_path'],
-                    self.rpc_error['bad_element'], self.message)
+        return "{}(edit_path: {}, bad_element: {}, message: {})".format(
+            self.__class__.__name__,
+            self.rpc_error["edit_path"],
+            self.rpc_error["bad_element"],
+            self.message,
+        )
 
     __str__ = __repr__
 
@@ -105,9 +116,12 @@ class ConfigLoadError(RpcError):
         RpcError.__init__(self, cmd, rsp, errs)
 
     def __repr__(self):
-        return "{0}(severity: {1}, bad_element: {2}, message: {3})"\
-            .format(self.__class__.__name__, self.rpc_error['severity'],
-                    self.rpc_error['bad_element'], self.message)
+        return "{}(severity: {}, bad_element: {}, message: {})".format(
+            self.__class__.__name__,
+            self.rpc_error["severity"],
+            self.rpc_error["bad_element"],
+            self.message,
+        )
 
     __str__ = __repr__
 
@@ -146,7 +160,7 @@ class PermissionError(RpcError):
 
     def __init__(self, rsp, cmd=None, errs=None):
         RpcError.__init__(self, cmd=cmd, rsp=rsp, errs=errs)
-        self.message = rsp.findtext('.//bad-element')
+        self.message = rsp.findtext(".//bad-element")
 
 
 class RpcTimeoutError(RpcError):
@@ -159,9 +173,9 @@ class RpcTimeoutError(RpcError):
         RpcError.__init__(self, dev=dev, cmd=cmd, timeout=timeout)
 
     def __repr__(self):
-        return "{0}(host: {1}, cmd: {2}, timeout: {3})"\
-            .format(self.__class__.__name__, self.dev.hostname,
-                    self.cmd, self.timeout)
+        return "{}(host: {}, cmd: {}, timeout: {})".format(
+            self.__class__.__name__, self.dev.hostname, self.cmd, self.timeout
+        )
 
     __str__ = __repr__
 
@@ -177,11 +191,11 @@ class SwRollbackError(RpcError):
 
     def __repr__(self):
         if self.re:
-            return "{0}(re: {1}, output: {2})"\
-                .format(self.__class__.__name__, self.re, self.rsp)
+            return "{}(re: {}, output: {})".format(
+                self.__class__.__name__, self.re, self.rsp
+            )
         else:
-            return "{0}(output: {1})".format(self.__class__.__name__,
-                                             self.rsp)
+            return "{}(output: {})".format(self.__class__.__name__, self.rsp)
 
     __str__ = __repr__
 
@@ -205,32 +219,31 @@ class ConnectError(Exception):
 
     @property
     def user(self):
-        """ login user-name """
+        """login user-name"""
         return self.dev.user
 
     @property
     def host(self):
-        """ login host name/ipaddr """
+        """login host name/ipaddr"""
         return self.dev.hostname
 
     @property
     def port(self):
-        """ login SSH port """
+        """login SSH port"""
         return self.dev._port
 
     @property
     def msg(self):
-        """ login SSH port """
+        """login SSH port"""
         return self._orig
 
     def __repr__(self):
         if self._orig:
-            return "{0}(host: {1}, msg: {2})".format(self.__class__.__name__,
-                                                     self.dev.hostname,
-                                                     self._orig)
+            return "{}(host: {}, msg: {})".format(
+                self.__class__.__name__, self.dev.hostname, self._orig
+            )
         else:
-            return "{0}({1})".format(self.__class__.__name__,
-                                     self.dev.hostname)
+            return "{}({})".format(self.__class__.__name__, self.dev.hostname)
 
     __str__ = __repr__
 
@@ -240,6 +253,7 @@ class ProbeError(ConnectError):
     """
     Generated if auto_probe is enabled and the probe action fails
     """
+
     pass
 
 
@@ -248,6 +262,7 @@ class ConnectAuthError(ConnectError):
     """
     Generated if the user-name, password is invalid
     """
+
     pass
 
 
@@ -258,6 +273,7 @@ class ConnectTimeoutError(ConnectError):
     be due to the fact the device is not ip reachable; bad
     ipaddr or just due to routing
     """
+
     pass
 
 
@@ -266,6 +282,7 @@ class ConnectUnknownHostError(ConnectError):
     """
     Generated if the specific hostname does not DNS resolve
     """
+
     pass
 
 
@@ -276,6 +293,7 @@ class ConnectRefusedError(ConnectError):
     be that the services is not enabled, or the host has
     too many connections already.
     """
+
     pass
 
 
@@ -286,6 +304,7 @@ class ConnectNotMasterError(ConnectError):
     routing-engine.  This could be a backup RE on an MX
     device, or a virtual-chassis member (linecard), for example
     """
+
     pass
 
 
@@ -305,24 +324,27 @@ class JSONLoadError(Exception):
     """
     Generated if json content of rpc reply fails to load
     """
+
     def __init__(self, exception, rpc_content):
         self.ex_msg = str(exception)
         self.rpc_content = rpc_content
-        self.offending_line = ''
-        obj = re.search('line (\d+)', self.ex_msg)
+        self.offending_line = ""
+        obj = re.search("line (\d+)", self.ex_msg)
         if obj:
             line_no = int(obj.group(1))
             rpc_lines = rpc_content.splitlines()
-            for line in range(line_no-3, line_no+2):
-                self.offending_line += '%s: %s\n' % (line+1, rpc_lines[line])
+            for line in range(line_no - 3, line_no + 2):
+                self.offending_line += "%s: %s\n" % (line + 1, rpc_lines[line])
 
     def __repr__(self):
         if self.offending_line:
-            return "{0}(reason: {1}, \nThe offending config appears " \
-                   "to be: \n{2})".format(self.__class__.__name__, self.ex_msg,
-                                          self.offending_line)
+            return (
+                "{}(reason: {}, \nThe offending config appears "
+                "to be: \n{})".format(
+                    self.__class__.__name__, self.ex_msg, self.offending_line
+                )
+            )
         else:
-            return "{0}(reason: {1})" \
-                .format(self.__class__.__name__, self.ex_msg)
+            return "{}(reason: {})".format(self.__class__.__name__, self.ex_msg)
 
     __str__ = __repr__

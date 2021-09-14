@@ -12,18 +12,6 @@ import json
 import yaml
 import logging
 
-import sys
-import warnings
-
-if sys.version_info[:2] == (2, 6):
-    warnings.warn(
-        "Python 2.6 is no longer supported by the Python core team, please "
-        "upgrade your Python. A future version of PyEZ will drop "
-        "support for Python 2.6",
-        DeprecationWarning
-    )
-
-__version__ = version.VERSION
 __date__ = version.DATE
 
 # import time
@@ -42,11 +30,16 @@ yaml.SafeDumper.add_multi_representer(version_info, version_yaml_representer)
 
 
 # Suppress Paramiko logger warnings
-plog = logging.getLogger('paramiko')
+plog = logging.getLogger("paramiko")
 if not plog.handlers:
-    class NullHandler(logging.Handler):
 
+    class NullHandler(logging.Handler):
         def emit(self, record):
             pass
 
     plog.addHandler(NullHandler())
+
+from ._version import get_versions
+
+__version__ = get_versions()["version"]
+del get_versions
