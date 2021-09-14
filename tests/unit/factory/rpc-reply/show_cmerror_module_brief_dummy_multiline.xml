@@ -1,0 +1,10 @@
+<output>
+-------------------------------------------------------------------------
+Module  Name              Active Errors  PFE       Callback    ModuleData
+                                         Specific  Function              
+-------------------------------------------------------------------------
+1       PQ3 Chip          0              Yes       0x00000000  0x00000000
+2       Host Loopback     0              No        0x00000000  0x464295b0
+3       CM[0]             0              No        0x41f550f0  0x462f767c
+4       LUCHIP(0)         0              No        0x00000000  0x481b84d8
+</output>

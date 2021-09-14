@@ -1,0 +1,1 @@
+<output xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/18.1R1/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">security.mac.veriexec.state: loaded active enforce</output>

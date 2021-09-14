@@ -1,0 +1,70 @@
+---
+CChipFiErrTable:
+  command: show mqss {{ instance }} fi interrupt-stats
+  target: Null
+  args:
+    instance: 0
+  key: Stream
+  view: CChipFiErrView
+
+CChipFiErrView:
+  fields:
+    _counter_group_0: _table_0
+    _counter_group_1: _table_1
+
+_table_0:
+  item: '*'
+  key: stream
+  view: _table_0_view
+
+_table_0_view:
+  columns:
+    stream: Stream
+    req-sat:
+      - Total RLIM
+      - request
+      - counter
+      - saturation
+    cchip-fi-malloc-drops:
+      - Total
+      - PT/MALLOC
+      - Usemeter
+      - Drops
+    cell-timeout-ignored:
+      - Cell timeout
+      - Ignored
+    cchip-fi-cell-timeout:
+      - Total Reorder
+      - cell timeout
+      - errors
+    drops-in-secure:
+      - Total cell
+      - drops in
+      - secure mode
+    times-in-secure:
+      - Total number
+      - of times
+      - entered into
+      - secure mode
+
+_table_1:
+  item: '*'
+  key: stream
+  view: _table_1_view
+
+_table_1_view:
+  columns:
+    stream: Stream
+    stalled:
+      - Stream reconfiguration
+      - count due to pointers
+      - stalled in secure mode
+    cchip-fi-error-cells:
+      - Total Error
+      - Cells
+    cchip-fi-late-cells:
+      - Total Late
+      - Cells
+    cchip-fi-crc-error-packets:
+      - Total CRC Errored
+      - Packets

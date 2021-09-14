@@ -1,0 +1,17 @@
+---
+PPMTable:
+  rpc: get-ppm-adjacencies
+  args:
+    level: detail
+  item: adjacency-data
+  key: protocol
+  view: PPMView
+
+PPMView:
+  fields:
+    protocol: protocol
+    holdtime: adjacency-holdtime
+    interface_index: adjacency-interface-index
+    distributed: adjacency-distributed
+    ospf_src_key: adjacency-ospf-src-key
+    ospf_area_id: adjacency-ospf-area-id

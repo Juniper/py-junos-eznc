@@ -1,0 +1,127 @@
+<output>
+LUCHIP(0) generic config:
+    routing chip index: 0
+    LU index:           0
+    asic ID:            0
+    asic name:          LUCHIP(0)
+    major version:      1
+    minor version:      1
+    exists:             TRUE
+    hw absent:          FALSE
+    hw initialized:     TRUE
+Enabled Services:  Poll_Status Wedge_Chk Mem_Chk PPE Rebalancing
+ service thread period: 100 msec.
+    status poll period: 1000 msec.
+ucode rebalance  delay: 10 min.
+ucode rebalance period: 5 min.
+
+ Congestion show msec:  100
+   JTAG_ID:  0x1142957f, Version 1.1
+    RLDRAM:  576 Mb by 4 devices at 533 MHz.
+      DDR3:  1024 Mb by 2 devices at 733MHz/CL10.
+      TCAM:  Installed.
+
+LUCHIP(0) DISP config:
+    parcel_start:             0x00000007
+    parcel_end:               0x0000007f
+    Streams:                  Enabled
+    pmark_cntl                0x00000000
+    callout_snum              0x3fde3fce
+    ppe_zone_configured       0x0000ffff
+    callout_ppe               0x0000fffe
+    pc1_other_ppe             0x0000fffe
+    pc1_rsvd_ppe   (enabled)  0x00000001
+    pc1_rsvd_zone             0x00000000
+    pzarb_timeout             0x0000a000  (409.600 msec)
+    pzarb_force_timeout_valid 0x00000200
+
+    Parcel Type Map:
+        ParcelType_0:  3 Has stream number
+        ParcelType_1:  3 Has stream number
+        ParcelType_2:  1 Has stream number
+        ParcelType_3:  0 
+        ParcelType_4:  0 
+        ParcelType_5:  0 
+        ParcelType_6:  0 
+        ParcelType_7:  0 
+        ParcelType_8:  1 
+        ParcelType_9:  1 
+        ParcelType_10:  3 
+        ParcelType_11:  0 
+        ParcelType_12:  3 Has stream number
+        ParcelType_13:  3 Has stream number
+        ParcelType_14:  3 
+        ParcelType_15:  3 
+
+    PPE Zone Enable masks and (active):
+        PPE[0] Zone Enable Mask 0xfcff0ffe  (0x00000000)
+        PPE[1] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[2] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[3] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[4] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[5] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[6] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[7] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[8] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[9] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[10] Zone Enable Mask 0xfcff0fff  (0x00000100)
+        PPE[11] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[12] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[13] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[14] Zone Enable Mask 0xfcff0fff  (0x00000000)
+        PPE[15] Zone Enable Mask 0xfcff0fff  (0x00000000)
+
+    PPE Stream Set Config:
+        Stream set  0:  Mask 0x1e Value 0x00 PPE 0xffff
+        Stream set  1:  Mask 0x1e Value 0x02 PPE 0xffff
+        Stream set  2:  Mask 0x1e Value 0x04 PPE 0xffff
+        Stream set  3:  Mask 0x1e Value 0x06 PPE 0xffff
+        Stream set  4:  Mask 0x1e Value 0x08 PPE 0xffff
+        Stream set  5:  Mask 0x1e Value 0x0a PPE 0xffff
+        Stream set  6:  Mask 0x1e Value 0x0c PPE 0xffff
+        Stream set  7:  Mask 0x1e Value 0x0e PPE 0xffff
+        Stream set  8:  Mask 0x1e Value 0x10 PPE 0xffff
+        Stream set  9:  Mask 0x1e Value 0x12 PPE 0xffff
+        Stream set 10:  Mask 0x1e Value 0x14 PPE 0xffff
+        Stream set 11:  Mask 0x1e Value 0x16 PPE 0xffff
+        Stream set 12:  Mask 0x1e Value 0x18 PPE 0xffff
+        Stream set 13:  Mask 0x1e Value 0x1a PPE 0xffff
+        Stream set 14:  Mask 0x1e Value 0x1c PPE 0xffff
+        Stream set 15:  Mask 0x1e Value 0x1e PPE 0xffff
+
+    Periodic Callout Parcel Config:
+        TID  0:        1  sec  Enabled
+        TID  1:    1.250  sec  Enabled
+        TID  2:      250 usec  Enabled
+        TID  3:        1  sec  Enabled
+        TID  4:     -- n/a --  
+        TID  5:     -- n/a --  
+        TID  6:     -- n/a --  
+        TID  7:        1 msec  Enabled
+        TID  8:     -- n/a --  
+        TID  9:       50 msec  Enabled
+        TID 10:       50 msec  Enabled
+        TID 11:        2 msec  Enabled
+        TID 12:     -- n/a --  
+        TID 13:     -- n/a --  
+        TID 14:        5 msec  Enabled
+        TID 15:        1 msec  Enabled
+LUCHIP(0) Reorder Block Config:
+    pkt_q_start        0x00000000
+    pkt_q_end:         0x000001ff
+    npkt_q_start:      0x00000200
+    npkt_q_end:        0x000002ff
+    recirc_q_start:    0x00000300
+    recirc_q_end:      0x000003ff
+    max_parcel:        0x00000010
+    mode:              0x00000001
+    perf_monitor_mode: 0x00000000
+    interrupt_enable:  0x00000000
+    poll_enable:       0x000003ff
+LUCHIP(0) PLCT config:
+    map_table:            0x0000e6e4
+    ij_pmax_shift:        0x00000007
+    plct_tick_freq:       0x00001f40
+    plct_flush_mode:      0x80013880
+    dynamic_load_balance: Disabled
+</output>

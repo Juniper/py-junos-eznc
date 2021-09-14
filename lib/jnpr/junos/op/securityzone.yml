@@ -1,0 +1,21 @@
+---
+SecurityZoneTable:
+  rpc: get-zones-information
+  item: //zones-security
+  key: zones-security-zonename
+  view: SecurityZoneView
+
+SecurityZoneView:
+  fields:
+    tcp_rst: { zones-security-send-reset : True=On }
+    policy_configurable: { zones-security-policy-configurable : True=Yes }
+    interface_count: { zones-security-interfaces-bound : int }
+    interfaces: _szInterfaceTable
+
+_szInterfaceTable:
+  item: zones-security-interfaces
+  view: _szInterfaceView
+
+_szInterfaceView:
+  fields:
+    name: zones-security-interface-name

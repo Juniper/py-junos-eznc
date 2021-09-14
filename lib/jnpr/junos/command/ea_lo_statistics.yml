@@ -1,0 +1,20 @@
+---
+CChipLoStatsTable:
+  command: show mqss {{ chip_instance }} lo stats
+  target: Null
+  args:
+    chip_instance: 0
+  title: 'LO Block  Parcel Name           Counter Name'
+  key: block
+  eval:
+    cchip-lookup-out-errors: >
+      sum([v['total'] for k,v in {{ data }}.items()])
+  view: CChipLoStatsView
+
+CChipLoStatsView:
+  regex:
+    block: \d+
+    parcel: Error Parcels
+    counter: Error parcels sent to LUSS
+    total: \d+
+    rate: \d+ pps

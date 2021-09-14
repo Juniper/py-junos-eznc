@@ -66,7 +66,7 @@ class FS(Util):
         :param str path: path to working directory
         """
         rsp = self._dev.rpc.set_cli_working_directory(directory=path)
-        return rsp.findtext('working-directory')
+        return rsp.findtext("working-directory")
 
     # -------------------------------------------------------------------------
     # pwd - return current working directory
@@ -77,13 +77,13 @@ class FS(Util):
         :returns: The current working directory path (str)
         """
         rsp = self._dev.rpc(E.command("show cli directory"))
-        return rsp.findtext('./working-directory')
+        return rsp.findtext("./working-directory")
 
     # -------------------------------------------------------------------------
     # checksum - compute file checksum
     # -------------------------------------------------------------------------
 
-    def checksum(self, path, calc='md5'):
+    def checksum(self, path, calc="md5"):
         """
         Performs the checksum command on the given file path using the
         required calculation method and returns the string value.
@@ -99,16 +99,16 @@ class FS(Util):
         :returns: checksum value (str) or ``None`` if file not found
         """
         cmd_map = {
-            'md5': self._dev.rpc.get_checksum_information,
-            'sha256': self._dev.rpc.get_sha256_checksum_information,
-            'sha1': self._dev.rpc.get_sha1_checksum_information
+            "md5": self._dev.rpc.get_checksum_information,
+            "sha256": self._dev.rpc.get_sha256_checksum_information,
+            "sha1": self._dev.rpc.get_sha1_checksum_information,
         }
         rpc = cmd_map.get(calc)
         if rpc is None:
             raise ValueError("Unknown calculation method: '%s'" % calc)
         try:
             rsp = rpc(path=path)
-            return rsp.findtext('.//checksum').strip()
+            return rsp.findtext(".//checksum").strip()
         except:
             # the only exception is that the path is not found
             return None
@@ -117,35 +117,36 @@ class FS(Util):
     def _decode_file(cls, fileinfo):
         results = {}
 
-        not_file = fileinfo.xpath('file-directory | file-symlink-target')
+        not_file = fileinfo.xpath("file-directory | file-symlink-target")
         if len(not_file):
-            results['type'] = {'file-directory': 'dir',
-                               'file-symlink-target': 'link'}[not_file[0].tag]
-            if 'link' == results['type']:
-                results['link'] = not_file[0].text.strip()
+            results["type"] = {"file-directory": "dir", "file-symlink-target": "link"}[
+                not_file[0].tag
+            ]
+            if "link" == results["type"]:
+                results["link"] = not_file[0].text.strip()
         else:
-            results['type'] = 'file'
+            results["type"] = "file"
 
-        results['path'] = fileinfo.findtext('file-name').strip()
-        results['owner'] = fileinfo.findtext('file-owner').strip()
-        results['size'] = int(fileinfo.findtext('file-size'))
-        fper = fileinfo.find('file-permissions')
-        results['permissions'] = int(fper.text.strip())
-        results['permissions_text'] = fper.get('format')
-        fdate = fileinfo.find('file-date')
-        results['ts_date'] = fdate.get('format')
-        results['ts_epoc'] = fdate.text.strip()
+        results["path"] = fileinfo.findtext("file-name").strip()
+        results["owner"] = fileinfo.findtext("file-owner").strip()
+        results["size"] = int(fileinfo.findtext("file-size"))
+        fper = fileinfo.find("file-permissions")
+        results["permissions"] = int(fper.text.strip())
+        results["permissions_text"] = fper.get("format")
+        fdate = fileinfo.find("file-date")
+        results["ts_date"] = fdate.get("format")
+        results["ts_epoc"] = fdate.text.strip()
         return results
 
     @classmethod
     def _decode_dir(cls, dirinfo, files=None):
         results = {}
-        results['type'] = 'dir'
-        results['path'] = dirinfo.get('name')
+        results["type"] = "dir"
+        results["path"] = dirinfo.get("name")
         if files is None:
-            files = dirinfo.xpath('file-information')
-        results['file_count'] = len(files)
-        results['size'] = sum([int(f.findtext('file-size')) for f in files])
+            files = dirinfo.xpath("file-information")
+        results["file_count"] = len(files)
+        results["size"] = sum([int(f.findtext("file-size")) for f in files])
         return results
 
     # -------------------------------------------------------------------------
@@ -166,23 +167,23 @@ class FS(Util):
 
         # if there is an output tag, then it means that the path
         # was not found
-        if rsp.find('output') is not None:
+        if rsp.find("output") is not None:
             return None
 
         # ok, so we've either got a directory or a file at
         # this point, so decode accordingly
 
-        xdir = rsp.find('directory')
-        if xdir.get('name'):  # then this is a directory path
+        xdir = rsp.find("directory")
+        if xdir.get("name"):  # then this is a directory path
             return FS._decode_dir(xdir)
         else:
-            return FS._decode_file(xdir.find('file-information'))
+            return FS._decode_file(xdir.find("file-information"))
 
     # -------------------------------------------------------------------------
     # ls - file/dir listing
     # -------------------------------------------------------------------------
 
-    def ls(self, path='.', brief=False, followlink=True):
+    def ls(self, path=".", brief=False, followlink=True):
         """
         File listing, returns a dict of file information.  If the
         path is a symlink, then by default **followlink** will
@@ -206,36 +207,35 @@ class FS(Util):
         # if there is an output tag, then it means that the path
         # was not found, and we return :None:
 
-        if rsp.find('output') is not None:
+        if rsp.find("output") is not None:
             return None
 
-        xdir = rsp.find('.//directory')
+        xdir = rsp.find(".//directory")
 
         # check to see if the directory element has a :name:
         # attribute, and if it does not, then this is a file, and
         # decode accordingly.  If the file is a symlink, then we
         # want to follow the symlink to get what we want.
 
-        if not xdir.get('name'):
-            results = FS._decode_file(xdir.find('file-information'))
-            link_path = results.get('link')
+        if not xdir.get("name"):
+            results = FS._decode_file(xdir.find("file-information"))
+            link_path = results.get("link")
             if not link_path:  # then we are done
                 return results
             else:
-                return results if followlink is False else self.ls(
-                    path=link_path)
+                return results if followlink is False else self.ls(path=link_path)
 
         # if we are here, then it's a directory, include information on all
         # files
-        files = xdir.xpath('file-information')
+        files = xdir.xpath("file-information")
         results = FS._decode_dir(xdir, files)
 
         if brief is True:
-            results['files'] = [f.findtext('file-name').strip() for f in files]
+            results["files"] = [f.findtext("file-name").strip() for f in files]
         else:
-            results['files'] = dict(
-                (f.findtext('file-name').strip(),
-                 FS._decode_file(f)) for f in files)
+            results["files"] = dict(
+                (f.findtext("file-name").strip(), FS._decode_file(f)) for f in files
+            )
 
         return results
 
@@ -251,24 +251,37 @@ class FS(Util):
         """
         rsp = self._dev.rpc.get_system_storage()
 
-        _name = lambda fs: fs.findtext('filesystem-name').strip()
+        def _name(fs):
+            return fs.findtext("filesystem-name").strip()
 
         def _decode(fs):
             r = {}
-            r['mount'] = fs.find('mounted-on').text.strip()
-            tb = fs.find('total-blocks')
-            r['total'] = tb.get('format')
-            r['total_blocks'] = int(tb.text)
-            ub = fs.find('used-blocks')
-            r['used'] = ub.get('format')
-            r['used_blocks'] = int(ub.text)
-            r['used_pct'] = fs.find('used-percent').text.strip()
-            ab = fs.find('available-blocks')
-            r['avail'] = ab.get('format')
-            r['avail_block'] = int(ab.text)
+            r["mount"] = fs.find("mounted-on").text.strip()
+            tb = fs.find("total-blocks")
+            r["total"] = tb.get("format")
+            r["total_blocks"] = int(tb.text)
+            ub = fs.find("used-blocks")
+            r["used"] = ub.get("format")
+            r["used_blocks"] = int(ub.text)
+            r["used_pct"] = fs.find("used-percent").text.strip()
+            ab = fs.find("available-blocks")
+            r["avail"] = ab.get("format")
+            r["avail_block"] = int(ab.text)
             return r
 
-        return dict((_name(fs), _decode(fs)) for fs in rsp.xpath('filesystem'))
+        re_list = rsp.xpath("multi-routing-engine-item")
+        if re_list:
+            fs_dict = {}
+            for re in re_list:
+                re_name = re.findtext("re-name").strip()
+                re_fs_dict = dict(
+                    (_name(fs), _decode(fs))
+                    for fs in re.xpath("system-storage-information/filesystem")
+                )
+                fs_dict[re_name] = re_fs_dict
+            return fs_dict
+
+        return dict((_name(fs), _decode(fs)) for fs in rsp.xpath("filesystem"))
 
     # -------------------------------------------------------------------------
     # directory_usage - filesystem directory usage
@@ -283,9 +296,7 @@ class FS(Util):
         """
         BLOCK_SIZE = 512
 
-        rsp = self._dev.rpc.get_directory_usage_information(
-            path=path,
-            depth=str(depth))
+        rsp = self._dev.rpc.get_directory_usage_information(path=path, depth=str(depth))
 
         result = {}
 
@@ -300,10 +311,10 @@ class FS(Util):
             else:
                 raise RpcError(rsp=rsp)
 
-            used_space = directory.find('used-space')
+            used_space = directory.find("used-space")
             if used_space is not None:
                 dir_size = used_space.text.strip()
-                dir_blocks = used_space.get('used-blocks')
+                dir_blocks = used_space.get("used-blocks")
                 if dir_blocks is not None:
                     dir_blocks = int(dir_blocks)
                     dir_bytes = dir_blocks * BLOCK_SIZE
@@ -321,12 +332,13 @@ class FS(Util):
 
     @classmethod
     def _decode_storage_cleanup(cls, files):
-        _name = lambda f: f.findtext('file-name').strip()
+        def _name(f):
+            return f.findtext("file-name").strip()
 
         def _decode(f):
             return {
-                'size': int(f.findtext('size')),
-                'ts_date': f.findtext('date').strip()
+                "size": int(f.findtext("size")),
+                "ts_date": f.findtext("date").strip(),
             }
 
         # return a dict of name/decode pairs for each file
@@ -341,7 +353,7 @@ class FS(Util):
         :returns: dict of files that would be removed (dry-run)
         """
         rsp = self._dev.rpc.request_system_storage_cleanup(dry_run=True)
-        files = rsp.xpath('file-list/file')
+        files = rsp.xpath("file-list/file")
         return FS._decode_storage_cleanup(files)
 
     def storage_cleanup(self):
@@ -353,7 +365,7 @@ class FS(Util):
         :returns: dict on files that were removed
         """
         rsp = self._dev.rpc.request_system_storage_cleanup()
-        files = rsp.xpath('file-list/file')
+        files = rsp.xpath("file-list/file")
         return FS._decode_storage_cleanup(files)
 
     # -------------------------------------------------------------------------
@@ -428,9 +440,9 @@ class FS(Util):
 
         :returns: ``True`` if OK, error-msg (str) otherwise
         """
-        rsp = self._dev.rpc.file_archive(compress=True,
-                                         source=from_path,
-                                         destination=tgz_path)
+        rsp = self._dev.rpc.file_archive(
+            compress=True, source=from_path, destination=tgz_path
+        )
 
         # if the rsp is True, then the command executed OK.
         if rsp is True:
@@ -460,7 +472,7 @@ class FS(Util):
         :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("rmdir %s" % path)
-        return True if results[0] is True else ''.join(results[1][2:-1])
+        return True if results[0] is True else "".join(results[1][2:-1])
 
     def mkdir(self, path):
         """
@@ -471,7 +483,7 @@ class FS(Util):
         :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("mkdir -p %s" % path)
-        return True if results[0] is True else ''.join(results[1][2:-1])
+        return True if results[0] is True else "".join(results[1][2:-1])
 
     def symlink(self, from_path, to_path):
         """
@@ -482,4 +494,4 @@ class FS(Util):
         :returns: ``True`` if OK, or error-message (str) otherwise
         """
         results = self._ssh_exec("ln -sf %s %s" % (from_path, to_path))
-        return True if results[0] is True else ''.join(results[1][2:-1])
+        return True if results[0] is True else "".join(results[1][2:-1])

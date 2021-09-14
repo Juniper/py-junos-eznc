@@ -1,0 +1,96 @@
+---
+EthernetDevicesStatistics:
+  command: show devices local
+  target: Null
+  item: 'TSEC Ethernet Device Driver: (\.?\w+),'
+  key: name
+  view: DevicesLocalView
+
+DevicesLocalView:
+  fields:
+    rx_counters: _ReceiveTable
+    tx_counters: _TransmitTable
+    tsec_status_counters: _TSECStatusTable
+
+_ReceiveTable:
+  item: '*'
+  title: 'Receive:'
+  view: _ReceiveView
+
+_ReceiveView:
+  regex:
+    rx_bytes: '(\d+) bytes'
+    rx_pkts: '(\d+) packets'
+    rx_err_fcs: '(\d+) FCS errors'
+    rx_mcast_pkts: '(\d+) multicast packets'
+    rx_bcast_pkts: '(\d+) broadcast packets'
+    rx_err_ctrl_frames: '(\d+) control frame packets'
+    rx_err_pause_frames: '(\d+) PAUSE frame packets'
+    rx_err_unkn_opcodes: '(\d+) unknown OP codes'
+    rx_err_allign: '(\d+) alignment errors'
+    rx_err_frame_len: '(\d+) frame length errors'
+    rx_err_code: '(\d+) code errors'
+    rx_err_carrier_sense: '(\d+) carrier sense errors'
+    rx_err_undersize_pkts: '(\d+) undersize packets'
+    rx_err_oversize_pkts: '(\d+) oversize packets'
+    rx_err_frags: '(\d+) fragments'
+    rx_err_jabbers: '(\d+) jabbers'
+    rx_err_drops: '(\d+) drops'
+
+_TransmitTable:
+  item: '*'
+  title: 'Transmit:'
+  view: _TransmitView
+
+_TransmitView:
+  regex:
+    tx_bytes: '(\d+) bytes'
+    tx_pkts: '(\d+) packets'
+    tx_mcast_pkts: '(\d+) multicast packets'
+    tx_bcast_pkts: '(\d+) broadcast packets'
+    tx_err_pause_frames: '(\d+) PAUSE control frames'
+    tx_err_deferral_pkts: '(\d+) deferral packets'
+    tx_err_excessive_deferral_pkts: '(\d+) excessive deferral packets'
+    tx_err_singel_coll_pkts: '(\d+) single collision packets'
+    tx_err_multiple_coll_pkts: '(\d+) multiple collision packets'
+    tx_err_late_coll_pkts: '(\d+) late collision packets'
+    tx_err_excessive_coll_pkts: '(\d+) excessive collision packets'
+    tx_err_total_coll_pkts: '(\d+) total collisions'
+    tx_err_drop_frames: '(\d+) drop frames'
+    tx_err_jabber_frames: '(\d+) jabber frames'
+    tx_err_fcs: '(\d+) FCS errors'
+    tx_err_ctrl_frames: '(\d+) control frames'
+    tx_err_oversize_frames: '(\d+) oversize frames'
+    tx_err_undersize_frames: '(\d+) undersize frames'
+    tx_err_frag_frames: '(\d+) fragments frames'
+
+_TSECStatusTable:
+  item: '*'
+  title: 'TSEC status counters:'
+  view: _TSECStatusView
+
+_TSECStatusView:
+  regex:
+    status_err_kernel_dropped: 'kernel_dropped:\s*(\d+)'
+    status_err_rx_large: 'rx_large:\s*(\d+)'
+    status_err_rx_short: 'rx_short:\s*(\d+)'
+    status_err_rx_nonoctet: 'rx_nonoctet:\s*(\d+)'
+    status_err_rx_crcerr: 'rx_crcerr:\s*(\d+)'
+    status_err_rx_overrun: 'rx_overrun:\s*(\d+)'
+    status_err_rx_bsy: 'rx_bsy:\s*(\d+)'
+    status_err_rx_babr: 'rx_babr:\s*(\d+)'
+    status_err_rx_trunc: 'rx_trunc:\s*(\d+)'
+    status_err_rx_length_errors: 'rx_length_errors:\s*(\d+)'
+    status_err_rx_frame_errors: 'rx_frame_errors:\s*(\d+)'
+    status_err_rx_crc_errors: 'rx_crc_errors:\s*(\d+)'
+    status_err_rx_errors: 'rx_errors:\s*(\d+)'
+    status_rx_ints: 'rx_ints:\s*(\d+)'
+    status_err_collisions: 'collisions:\s*(\d+)'
+    status_err_eberr: 'eberr:\s*(\d+)'
+    status_err_tx_babt: 'tx_babt:\s*(\d+)'
+    status_err_tx_underrun: 'tx_underrun:\s*(\d+)'
+    status_err_tx_timeout: 'tx_timeout:\s*(\d+)'
+    status_err_tx_window_errors: 'tx_window_errors:\s*(\d+)'
+    status_err_tx_aborted_errors: 'tx_aborted_errors:\s*(\d+)'
+    status_tx_ints: 'tx_ints:\s*(\d+)'
+    status_resets: 'resets:\s*(\d+)'
