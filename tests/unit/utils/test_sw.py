@@ -234,7 +234,7 @@ class TestSW(unittest.TestCase):
         self.sw._multi_RE = False
         self.assertFalse(self.sw.install("test_no_mx80_packages.tgz", no_copy=True))
 
-    @patch('jnpr.junos.Device.execute')
+    @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
