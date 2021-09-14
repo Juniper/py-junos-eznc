@@ -99,48 +99,48 @@ class Config(Util):
 
         # if a comment is provided, then include that in the RPC
 
-        comment = kvargs.get('comment')
+        comment = kvargs.get("comment")
         if comment:
-            rpc_args['log'] = comment
+            rpc_args["log"] = comment
 
         # if confirm is provided, then setup the RPC args
         # so that Junos will either use the default confirm
         # timeout (confirm=True) or a specific timeout
         # (confirm=<minutes>)
 
-        confirm = kvargs.get('confirm')
+        confirm = kvargs.get("confirm")
         if confirm:
-            rpc_args['confirmed'] = True
+            rpc_args["confirmed"] = True
             confirm_val = str(confirm)
-            if 'True' != confirm_val:
-                rpc_args['confirm-timeout'] = confirm_val
+            if "True" != confirm_val:
+                rpc_args["confirm-timeout"] = confirm_val
 
         # if a timeout is provided, then include that in the RPC
 
-        timeout = kvargs.get('timeout')
+        timeout = kvargs.get("timeout")
         if timeout:
-            rpc_args['dev_timeout'] = timeout
+            rpc_args["dev_timeout"] = timeout
 
         # Check for force_sync and sync
-        if kvargs.get('force_sync'):
-            rpc_args['synchronize'] = True
-            rpc_args['force-synchronize'] = True
-        elif kvargs.get('sync'):
-            rpc_args['synchronize'] = True
+        if kvargs.get("force_sync"):
+            rpc_args["synchronize"] = True
+            rpc_args["force-synchronize"] = True
+        elif kvargs.get("sync"):
+            rpc_args["synchronize"] = True
 
         # Check for full
-        if kvargs.get('full'):
-            rpc_args['full'] = True
+        if kvargs.get("full"):
+            rpc_args["full"] = True
 
         # Check for ignore_warning
-        ignore_warn = kvargs.get('ignore_warning')
+        ignore_warn = kvargs.get("ignore_warning")
         if ignore_warn:
-            rpc_args['ignore_warning'] = ignore_warn
+            rpc_args["ignore_warning"] = ignore_warn
 
         rpc_varg = []
-        detail = kvargs.get('detail')
+        detail = kvargs.get("detail")
         if detail:
-            rpc_varg = [{'detail': 'detail'}]
+            rpc_varg = [{"detail": "detail"}]
 
         # dbl-splat the rpc_args since we want to pass key/value to metaexec
         # if there is a commit/check error, this will raise an execption
@@ -149,8 +149,8 @@ class Config(Util):
             rsp = self.rpc.commit_configuration(*rpc_varg, **rpc_args)
         except RpcTimeoutError:
             raise
-        except RpcError as err:        # jnpr.junos exception
-            if err.rsp is not None and err.rsp.find('ok') is not None:
+        except RpcError as err:  # jnpr.junos exception
+            if err.rsp is not None and err.rsp.find("ok") is not None:
                 # this means there are warnings, but no errors
                 return True
             else:
@@ -158,7 +158,7 @@ class Config(Util):
         except Exception as err:
             # so the ncclient gives us something I don't want.  I'm going to
             # convert it and re-raise the commit error
-            if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
+            if hasattr(err, "xml") and isinstance(err.xml, etree._Element):
                 raise CommitError(rsp=err.xml)
             else:
                 raise
@@ -177,8 +177,9 @@ class Config(Util):
         Perform a commit check.  If the commit check passes, this function
         will return ``True``.  If the commit-check results in warnings, they
         are reported and available in the Exception errs.
+
         :param int timeout: If provided the command will wait for completion
-                            using the provided value as timeout (seconds).       
+                            using the provided value as timeout (seconds).
 
         :returns: ``True`` if commit-check is successful (no errors)
         :raises CommitError: When errors detected in candidate configuration.
@@ -189,17 +190,17 @@ class Config(Util):
         rpc_args = {}
 
         # if a timeout is provided, then include that in the RPC
-        
-        timeout = kvargs.get('timeout')
+
+        timeout = kvargs.get("timeout")
         if timeout:
-            rpc_args['dev_timeout'] = timeout
+            rpc_args["dev_timeout"] = timeout
 
         try:
             self.rpc.commit_configuration(check=True, **rpc_args)
         except RpcTimeoutError:
             raise
-        except RpcError as err:        # jnpr.junos exception
-            if err.rsp is not None and err.rsp.find('ok') is not None:
+        except RpcError as err:  # jnpr.junos exception
+            if err.rsp is not None and err.rsp.find("ok") is not None:
                 # this means there is a warning, but no errors
                 return True
             else:
@@ -207,23 +208,25 @@ class Config(Util):
         except Exception as err:
             # :err: is from ncclient, so extract the XML data
             # and convert into dictionary
-            if hasattr(err, 'xml') and isinstance(err.xml, etree._Element):
-	            return JXML.rpc_error(err.xml)
+            if hasattr(err, "xml") and isinstance(err.xml, etree._Element):
+                return JXML.rpc_error(err.xml)
             else:
-	            raise
-                
+                raise
+
         return True
 
     # -------------------------------------------------------------------------
     # show | compare rollback <number|0*>
     # -------------------------------------------------------------------------
 
-    def diff(self, rb_id=0, ignore_warning=False):
+    def diff(self, rb_id=0, ignore_warning=False, use_fast_diff=False):
         """
         Retrieve a diff (patch-format) report of the candidate config against
         either the current active config, or a different rollback.
 
         :param int rb_id: rollback id [0..49]
+        :param bool ignore_warning: Ignore any rpc-error with severity warning
+        :param bool use_fast_diff: equivalent to "show | compare use-fast-diff"
 
         :returns:
             * ``None`` if there is no difference
@@ -233,35 +236,55 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
+        rpc_params = dict(compare="rollback", rollback=str(rb_id), format="text")
+        if use_fast_diff:
+            if rb_id > 0:
+                raise ValueError("use_fast_diff can only be used with rb_id 0")
+            rpc_params["use-fast-diff"] = "yes"
         try:
             rsp = self.rpc.get_configuration(
-                    dict(compare='rollback', rollback=str(rb_id), format='text'),
-                    ignore_warning=ignore_warning)
+                rpc_params,
+                ignore_warning=ignore_warning,
+            )
         except RpcTimeoutError:
-            raise 
+            raise
         except RpcError as err:
-            if (err.rpc_error['severity'] == 'warning' and
-                err.message == "mgd: statement must contain additional "
-                               "statements"):
+            if (
+                err.rpc_error["severity"] == "warning"
+                and err.message == "mgd: statement must contain additional "
+                "statements"
+            ):
                 # Fix for Issue #655, JDM 15.1X53-D45 responses with
                 # extraneous warning message
                 return "Unable to parse diff from response!"
             else:
                 raise
 
-        diff_txt = rsp.find('configuration-output').text
+        # The output is expected to be an etree, it may have empty <configuration-output> tags
+        # Adding a preventive check and displaying warning in case the value is bool.
+        # This check is added for PR 1564189 (juniper internal) which has issue for certain junos releases.
+        if isinstance(rsp, bool):
+            warnings.warn(
+                "diff shouldn't return boolean as a rpc-reply",
+                RuntimeWarning,
+            )
+            return None
+
+        diff_txt = rsp.find("configuration-output").text
         return None if diff_txt == "\n" else diff_txt
 
-    def pdiff(self, rb_id=0):
+    def pdiff(self, rb_id=0, ignore_warning=False, use_fast_diff=False):
         """
         Helper method that calls ``print`` on the diff (patch-format) between
         the current candidate and the provided rollback.
 
         :param int rb_id: the rollback id value [0-49]
+        :param bool ignore_warning: Ignore any rpc-error with severity warning
+        :param bool use_fast_diff: equivalent to "show | compare use-fast-diff"
 
         :returns: ``None``
         """
-        print (self.diff(rb_id))
+        print(self.diff(rb_id, ignore_warning, use_fast_diff))
 
     # -------------------------------------------------------------------------
     # helper on loading configs
@@ -297,8 +320,10 @@ class Config(Util):
             .. note:: The format can specifically set using **format**.
 
         :param str format:
-          Determines the format of the contents. Refer to options
-          from the **path** description.
+            Determines the format of the contents.
+            Supported options - text, set, xml, json
+
+            If not provided, internally application will try to find out the format
 
         :param bool overwrite:
           Determines if the contents completely replace the existing
@@ -342,7 +367,7 @@ class Config(Util):
         :param dict template_vars:
           Used in conjunction with the other template options.  This parameter
           contains a dictionary of variables to render into the template.
-          
+
         :param ignore_warning: A boolean, string or list of string.
           If the value is True, it will ignore all warnings regardless of the
           warning message. If the value is a string, it will ignore
@@ -389,86 +414,92 @@ class Config(Util):
                                   problems.
         """
         rpc_xattrs = {}
-        rpc_xattrs['format'] = 'xml'        # default to XML format
-        rpc_xattrs['action'] = 'replace'    # replace is default action
+        rpc_xattrs["format"] = "xml"  # default to XML format
+        rpc_xattrs["action"] = "replace"  # replace is default action
 
         rpc_contents = None
 
-        actions = filter(lambda item: kvargs.get(item, False),
-                         ('overwrite', 'merge', 'update', 'patch'))
+        actions = filter(
+            lambda item: kvargs.get(item, False),
+            ("overwrite", "merge", "update", "patch"),
+        )
         if len(list(actions)) >= 2:
-            raise ValueError('actions can be only one among %s'
-                             % ', '.join(actions))
+            raise ValueError("actions can be only one among %s" % ", ".join(actions))
 
         # support the ability to completely replace the Junos configuration
         # note: this cannot be used if format='set', per Junos API.
 
-        overwrite = kvargs.get('overwrite', False)
+        overwrite = kvargs.get("overwrite", False)
         if overwrite is True:
-            rpc_xattrs['action'] = 'override'
-        if kvargs.get('update') is True:
-            rpc_xattrs['action'] = 'update'
-        elif kvargs.get('merge') is True:
-            del rpc_xattrs['action']
-        elif kvargs.get('patch') is True:
-            rpc_xattrs['action'] = 'patch'
+            rpc_xattrs["action"] = "override"
+        if kvargs.get("update") is True:
+            rpc_xattrs["action"] = "update"
+        elif kvargs.get("merge") is True:
+            del rpc_xattrs["action"]
+        elif kvargs.get("patch") is True:
+            rpc_xattrs["action"] = "patch"
 
-        ignore_warning = kvargs.get('ignore_warning', False)
+        ignore_warning = kvargs.get("ignore_warning", False)
 
         # ---------------------------------------------------------------------
         # private helpers ...
         # ---------------------------------------------------------------------
 
         def _lformat_byext(path):
-            """ determine the format style from the file extension """
+            """determine the format style from the file extension"""
             ext = os.path.splitext(path)[1]
-            if ext == '.xml':
-                return 'xml'
-            if ext in ['.conf', '.text', '.txt']:
-                return 'text'
-            if ext in ['.set']:
-                return 'set'
-            if ext in ['.json']:
-                return 'json'
+            if ext == ".xml":
+                return "xml"
+            if ext in [".conf", ".text", ".txt"]:
+                return "text"
+            if ext in [".set"]:
+                return "set"
+            if ext in [".json"]:
+                return "json"
             raise ValueError("Unknown file contents from extension: %s" % ext)
 
         def _lset_format(kvargs, rpc_xattrs):
-            """ setup the kvargs/rpc_xattrs """
+            """setup the kvargs/rpc_xattrs"""
             # when format is given, setup the xml attrs appropriately
-            if kvargs['format'] == 'set':
-                if overwrite is True or kvargs.get('update') is True:
+            if kvargs["format"] == "set":
+                if overwrite is True or kvargs.get("update") is True:
                     raise ValueError(
-                        "conflicting args, cannot use 'set' with '%s'" %
-                        ('overwrite' if overwrite is True else 'update'))
-                rpc_xattrs['action'] = 'set'
-                kvargs['format'] = 'text'
-            rpc_xattrs['format'] = kvargs['format']
+                        "conflicting args, cannot use 'set' with '%s'"
+                        % ("overwrite" if overwrite is True else "update")
+                    )
+                rpc_xattrs["action"] = "set"
+                kvargs["format"] = "text"
+            rpc_xattrs["format"] = kvargs["format"]
 
         def _lset_fromfile(path):
-            """ setup the kvargs/rpc_xattrs based on path """
-            if 'format' not in kvargs:
+            """setup the kvargs/rpc_xattrs based on path"""
+            if "format" not in kvargs:
                 # we use the extension to determine the format
-                kvargs['format'] = _lformat_byext(path)
+                kvargs["format"] = _lformat_byext(path)
                 _lset_format(kvargs, rpc_xattrs)
 
         def _lset_from_rexp(rpc):
-            """ setup the kvargs/rpc_xattrs using string regular expression """
-            if re.search(r'^\s*<.*>$', rpc, re.MULTILINE):
-                kvargs['format'] = 'xml'
-            elif re.search(r'^\s*(set|delete|rename|insert|activate|deactivate'
-                           '|annotate|copy|protect|unprotect)\s', rpc):
-                kvargs['format'] = 'set'
-            elif re.search(r'^[a-z:]*\s*[\w-]+\s+\{', rpc, re.I) and \
-                    re.search(r'.*}\s*$', rpc):
-                kvargs['format'] = 'text'
-            elif re.search(r'^\s*\{', rpc) and re.search(r'.*}\s*$', rpc):
-                kvargs['format'] = 'json'
+            """setup the kvargs/rpc_xattrs using string regular expression"""
+            if re.search(r"^\s*<.*>$", rpc, re.MULTILINE):
+                kvargs["format"] = "xml"
+            elif re.search(
+                r"^\s*(set|delete|rename|insert|activate|deactivate"
+                "|annotate|copy|protect|unprotect)\s",
+                rpc,
+            ):
+                kvargs["format"] = "set"
+            elif re.search(r"^[a-z:]*\s*[\w-]+\s+\{", rpc, re.I) and re.search(
+                r".*}\s*$", rpc
+            ):
+                kvargs["format"] = "text"
+            elif re.search(r"^\s*\{", rpc) and re.search(r".*}\s*$", rpc):
+                kvargs["format"] = "json"
 
         def try_load(rpc_contents, rpc_xattrs, ignore_warning=False):
             try:
-                got = self.rpc.load_config(rpc_contents,
-                                           ignore_warning=ignore_warning,
-                                           **rpc_xattrs)
+                got = self.rpc.load_config(
+                    rpc_contents, ignore_warning=ignore_warning, **rpc_xattrs
+                )
             except RpcTimeoutError as err:
                 raise err
             except RpcError as err:
@@ -483,7 +514,7 @@ class Config(Util):
         # end-of: private helpers
         # ---------------------------------------------------------------------
 
-        if 'format' in kvargs:
+        if "format" in kvargs:
             _lset_format(kvargs, rpc_xattrs)
 
         # ---------------------------------------------------------------------
@@ -494,16 +525,17 @@ class Config(Util):
             # caller is providing the content directly.
             rpc_contents = vargs[0]
             if isinstance(rpc_contents, str):
-                if 'format' not in kvargs:
+                if "format" not in kvargs:
                     _lset_from_rexp(rpc_contents)
-                    if 'format' in kvargs:
+                    if "format" in kvargs:
                         _lset_format(kvargs, rpc_xattrs)
                     else:
                         raise RuntimeError(
                             "Not able to resolve the config format "
                             "You must define the format of the contents "
-                            "explicitly to the function. Ex: format='set'")
-                if kvargs['format'] == 'xml':
+                            "explicitly to the function. Ex: format='set'"
+                        )
+                if kvargs["format"] == "xml":
                     # covert the XML string into XML structure
                     rpc_contents = etree.XML(rpc_contents)
 
@@ -511,16 +543,16 @@ class Config(Util):
         # if path is provided, use the static-config file
         # ---------------------------------------------------------------------
 
-        elif 'path' in kvargs:
+        elif "path" in kvargs:
             # then this is a static-config file.  load that as our rpc_contents
             try:
                 # Explicitly request Python 3.x universal newline
-                rpc_contents = open(kvargs['path'], 'r', newline=None).read()
+                rpc_contents = open(kvargs["path"], "r", newline=None).read()
             except TypeError:
                 # Fallback to Python 2.x universal newline
-                rpc_contents = open(kvargs['path'], 'rU').read()
-            _lset_fromfile(kvargs['path'])
-            if rpc_xattrs['format'] == 'xml':
+                rpc_contents = open(kvargs["path"], "rU").read()
+            _lset_fromfile(kvargs["path"])
+            if rpc_xattrs["format"] == "xml":
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
@@ -530,12 +562,12 @@ class Config(Util):
         # in the render process.
         # ---------------------------------------------------------------------
 
-        elif 'template_path' in kvargs:
-            path = kvargs['template_path']
+        elif "template_path" in kvargs:
+            path = kvargs["template_path"]
             template = self.dev.Template(path)
-            rpc_contents = template.render(kvargs.get('template_vars', {}))
+            rpc_contents = template.render(kvargs.get("template_vars", {}))
             _lset_fromfile(path)
-            if rpc_xattrs['format'] == 'xml':
+            if rpc_xattrs["format"] == "xml":
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
@@ -544,26 +576,22 @@ class Config(Util):
         # object.  Use the template.filename to determine the format style
         # ---------------------------------------------------------------------
 
-        elif 'template' in kvargs:
-            template = kvargs['template']
+        elif "template" in kvargs:
+            template = kvargs["template"]
             path = template.filename
-            rpc_contents = template.render(kvargs.get('template_vars', {}))
+            rpc_contents = template.render(kvargs.get("template_vars", {}))
             _lset_fromfile(path)
-            if rpc_xattrs['format'] == 'xml':
+            if rpc_xattrs["format"] == "xml":
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
         if rpc_contents is not None:
-            return try_load(rpc_contents,
-                            rpc_xattrs,
-                            ignore_warning=ignore_warning)
-        elif 'url' in kvargs and rpc_contents is None:
-            url = kvargs['url']
+            return try_load(rpc_contents, rpc_xattrs, ignore_warning=ignore_warning)
+        elif "url" in kvargs and rpc_contents is None:
+            url = kvargs["url"]
             _lset_fromfile(url)
-            rpc_xattrs['url'] = url
-            return try_load(rpc_contents,
-                            rpc_xattrs,
-                            ignore_warning=ignore_warning)
+            rpc_xattrs["url"] = url
+            return try_load(rpc_contents, rpc_xattrs, ignore_warning=ignore_warning)
         else:
             raise RuntimeError("Unhandled load request")
 
@@ -641,9 +669,7 @@ class Config(Util):
         if rb_id < 0 or rb_id > 49:
             raise ValueError("Invalid rollback #" + str(rb_id))
 
-        self.rpc.load_configuration(dict(
-            compare='rollback', rollback=str(rb_id)
-        ))
+        self.rpc.load_configuration(dict(compare="rollback", rollback=str(rb_id)))
 
         return True
 
@@ -651,7 +677,7 @@ class Config(Util):
     # rescue configuration
     # -------------------------------------------------------------------------
 
-    def rescue(self, action, format='text'):
+    def rescue(self, action, format="text"):
         """
         Perform action on the "rescue configuration".
 
@@ -718,9 +744,11 @@ class Config(Util):
             """
             try:
                 got = self.rpc.get_rescue_information(format=format)
-                return got.findtext(
-                    'configuration-information/configuration-output'
-                ) if 'text' == format else got
+                return (
+                    got.findtext("configuration-information/configuration-output")
+                    if "text" == format
+                    else got
+                )
             except:
                 return None
 
@@ -734,7 +762,7 @@ class Config(Util):
             exists, or :False: otherwise
             """
             try:
-                return self.rpc.load_configuration({'rescue': 'rescue'})
+                return self.rpc.load_configuration({"rescue": "rescue"})
             except:
                 return False
 
@@ -742,10 +770,10 @@ class Config(Util):
             raise ValueError("unsupported action: {}".format(action))
 
         result = {
-            'get': _rescue_get,
-            'save': _rescue_save,
-            'delete': _rescue_delete,
-            'reload': _rescue_reload
+            "get": _rescue_get,
+            "save": _rescue_save,
+            "delete": _rescue_delete,
+            "reload": _rescue_reload,
         }.get(action, _unsupported_action)()
 
         return result
@@ -780,8 +808,8 @@ class Config(Util):
             network.
         """
         self.mode = mode
-        if not kwargs.get('ephemeral_instance') and kwargs:
-            raise ValueError('Unsupported argument provided to Config class')
+        if not kwargs.get("ephemeral_instance") and kwargs:
+            raise ValueError("Unsupported argument provided to Config class")
         self.kwargs = kwargs
 
         Util.__init__(self, dev=dev)
@@ -796,9 +824,11 @@ class Config(Util):
             except (RpcTimeoutError, ConnectClosedError) as err:
                 raise err
             except RpcError as err:
-                if err.rpc_error['severity'] == 'warning':
-                    if (err.message != 'uncommitted changes will be discarded '
-                                       'on exit'):
+                if err.rpc_error["severity"] == "warning":
+                    if (
+                        err.message != "uncommitted changes will be discarded "
+                        "on exit"
+                    ):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -817,9 +847,11 @@ class Config(Util):
             except (RpcTimeoutError, ConnectClosedError) as err:
                 raise err
             except RpcError as err:
-                if err.rpc_error['severity'] == 'warning':
-                    if (err.message != 'uncommitted changes will be discarded '
-                                       'on exit'):
+                if err.rpc_error["severity"] == "warning":
+                    if (
+                        err.message != "uncommitted changes will be discarded "
+                        "on exit"
+                    ):
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -836,24 +868,22 @@ class Config(Util):
             if self.mode is not None:
                 raise ValueError("unsupported action: {}".format(self.mode))
 
-        if self.kwargs.get('ephemeral_instance'):
-            ephemeral_kwargs = {
-                'ephemeral_instance': self.kwargs['ephemeral_instance']}
+        if self.kwargs.get("ephemeral_instance"):
+            ephemeral_kwargs = {"ephemeral_instance": self.kwargs["ephemeral_instance"]}
         else:
-            ephemeral_kwargs = {'ephemeral': True}
+            ephemeral_kwargs = {"ephemeral": True}
 
         {
-            'private': _open_configuration_private,
-            'dynamic': _open_configuration_dynamic,
-            'batch': _open_configuration_batch,
-            'exclusive': _open_configuration_exclusive,
-            'ephemeral': lambda: _open_configuration_ephemeral(
-                **ephemeral_kwargs)
+            "private": _open_configuration_private,
+            "dynamic": _open_configuration_dynamic,
+            "batch": _open_configuration_batch,
+            "exclusive": _open_configuration_exclusive,
+            "ephemeral": lambda: _open_configuration_ephemeral(**ephemeral_kwargs),
         }.get(self.mode, _unsupported_option)()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.mode == 'exclusive':
+        if self.mode == "exclusive":
             self.unlock()
         elif self.mode is not None:
             self.rpc.close_configuration()

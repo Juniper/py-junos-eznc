@@ -1,7 +1,7 @@
-﻿<rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
-	<error-severity>error</error-severity>
-	<error-info>
-		<bad-element>get-permission-denied</bad-element>
-	</error-info>
-	<error-message>permission denied</error-message>
+<rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/12.1X46/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <error-severity>error</error-severity>
+        <error-info>
+                <bad-element>get-permission-denied</bad-element>
+        </error-info>
+        <error-message>permission denied</error-message>
 </rpc-error>

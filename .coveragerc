@@ -1,6 +1,7 @@
 [run]
 omit =
     lib/jnpr/junos/cfg/*
+    lib/jnpr/junos/_version.py
 
 [report]
 show_missing = True

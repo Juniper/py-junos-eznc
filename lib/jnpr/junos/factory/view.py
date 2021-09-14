@@ -17,7 +17,7 @@ class View(object):
     data appear as objects with attributes.
     """
 
-    ITEM_NAME_XPATH = 'name'
+    ITEM_NAME_XPATH = "name"
     FIELDS = {}
     EVAL = {}
     GROUPS = None
@@ -68,25 +68,27 @@ class View(object):
 
     @property
     def T(self):
-        """ return the Table instance for the View """
+        """return the Table instance for the View"""
         return self._table
 
     @property
     def D(self):
-        """ return the Device instance for this View """
+        """return the Device instance for this View"""
         return self.T.D
 
     @property
     def name(self):
-        """ return the name of view item """
+        """return the name of view item"""
         if self.ITEM_NAME_XPATH is None:
             return []
             # return self._table.D.hostname
         if isinstance(self.ITEM_NAME_XPATH, str):
             # xpath union key
-            if ' | ' in self.ITEM_NAME_XPATH:
-                if 'Null' in self.ITEM_NAME_XPATH:
-                    return self._check_key_delimiter_null(self._xml, self.ITEM_NAME_XPATH)
+            if " | " in self.ITEM_NAME_XPATH:
+                if "Null" in self.ITEM_NAME_XPATH:
+                    return self._check_key_delimiter_null(
+                        self._xml, self.ITEM_NAME_XPATH
+                    )
                 return self._xml.xpath(self.ITEM_NAME_XPATH)[0].text.strip()
             # simple key
             return self._xml.findtext(self.ITEM_NAME_XPATH).strip()
@@ -95,10 +97,10 @@ class View(object):
             # keys with missing XPATH nodes are set to None
             keys = []
             for item_name_xpath in self.ITEM_NAME_XPATH:
-                if ' | ' in item_name_xpath:
-                    key_with_null_cleaned = \
-                        self._check_key_delimiter_null(self._xml,
-                                                       item_name_xpath)
+                if " | " in item_name_xpath:
+                    key_with_null_cleaned = self._check_key_delimiter_null(
+                        self._xml, item_name_xpath
+                    )
                     if key_with_null_cleaned:
                         keys.append(key_with_null_cleaned)
                 else:
@@ -122,9 +124,9 @@ class View(object):
         :param item_name_xpath: key xpath
         :return: key if fetched else []
         """
-        if 'Null' in item_name_xpath:
+        if "Null" in item_name_xpath:
             # Let try get value for valid xpath key
-            xpath_key = [x for x in item_name_xpath.split(' | ') if x != 'Null']
+            xpath_key = [x for x in item_name_xpath.split(" | ") if x != "Null"]
             if xpath_key:
                 val = xml.xpath(xpath_key[0])
                 if val:
@@ -132,9 +134,10 @@ class View(object):
                 else:
                     # To handle Null key
                     return []
+
     @property
     def xml(self):
-        """ returns the XML associated to the item """
+        """returns the XML associated to the item"""
         return self._xml
 
     # -------------------------------------------------------------------------
@@ -142,40 +145,40 @@ class View(object):
     # -------------------------------------------------------------------------
 
     def keys(self):
-        """ list of view keys, i.e. field names """
+        """list of view keys, i.e. field names"""
         return self.FIELDS.keys()
 
     def values(self):
-        """ list of view values """
+        """list of view values"""
         return [getattr(self, field) for field in self.keys()]
 
     def items(self):
-        """ list of tuple(key,value) """
+        """list of tuple(key,value)"""
         return zip(self.keys(), self.values())
 
     def _updater_instance(self, more):
-        """ called from extend """
-        if hasattr(more, 'fields'):
+        """called from extend"""
+        if hasattr(more, "fields"):
             self.FIELDS = deepcopy(self.__class__.FIELDS)
             self.FIELDS.update(more.fields.end)
 
-        if hasattr(more, 'groups'):
+        if hasattr(more, "groups"):
             self.GROUPS = deepcopy(self.__class__.GROUPS)
             self.GROUPS.update(more.groups)
 
-        if hasattr(more, 'eval'):
+        if hasattr(more, "eval"):
             self.EVAL = deepcopy(self.__class__.EVAL)
             self.EVAL.update(more.eval)
 
     def _updater_class(self, more):
-        """ called from extend """
-        if hasattr(more, 'fields'):
+        """called from extend"""
+        if hasattr(more, "fields"):
             self.FIELDS.update(more.fields.end)
 
-        if hasattr(more, 'groups'):
+        if hasattr(more, "groups"):
             self.GROUPS.update(more.groups)
 
-        if hasattr(more, 'eval'):
+        if hasattr(more, "eval"):
             self.EVAL.update(more.eval)
 
     @contextmanager
@@ -195,7 +198,7 @@ class View(object):
         # then pass that object to the caller, yo!
         # ---------------------------------------------------------------------
 
-        more = type('RunstatViewMore', (object,), {})()
+        more = type("RunstatViewMore", (object,), {})()
         if fields is True:
             more.fields = ViewFields()
 
@@ -204,12 +207,11 @@ class View(object):
         # ---------------------------------------------------------------------
 
         yield more
-        updater = self._updater_class if all is True else \
-            self._updater_instance
+        updater = self._updater_class if all is True else self._updater_instance
         updater(more)
 
     def asview(self, view_cls):
-        """ create a new View object for this item """
+        """create a new View object for this item"""
         return view_cls(self._table, self._xml)
 
     def refresh(self):
@@ -243,7 +245,7 @@ class View(object):
     # -------------------------------------------------------------------------
 
     def __repr__(self):
-        """ returns the name of the View with the associate item name """
+        """returns the name of the View with the associate item name"""
         return "%s:%s" % (self.__class__.__name__, self.name)
 
     def __getattr__(self, name):
@@ -263,19 +265,19 @@ class View(object):
         if item is None:
             raise ValueError("Unknown field: '%s'" % name)
 
-        if 'table' in item:
+        if "table" in item:
             # if this is a sub-table, then return that now
-            return item['table'](self.D, self._xml)
+            return item["table"](self.D, self._xml)
 
         # otherwise, not a sub-table, and handle the field
-        astype = item.get('astype', str)
-        if 'group' in item:
-            if item['group'] in self._groups:
-                found = self._groups[item['group']].xpath(item['xpath'])
+        astype = item.get("astype", str)
+        if "group" in item:
+            if item["group"] in self._groups:
+                found = self._groups[item["group"]].xpath(item["xpath"])
             else:
                 return
         else:
-            found = self._xml.xpath(item['xpath'])
+            found = self._xml.xpath(item["xpath"])
 
         len_found = len(found)
 
@@ -297,16 +299,16 @@ class View(object):
             # -- 2031-dec-06, JLS
             # added support to use the element tag if the text is empty
             def _munch(x):
-                if sys.version < '3':
+                if sys.version < "3":
                     as_str = x if isinstance(x, str) else x.text
                     if isinstance(as_str, unicode):
-                        as_str = as_str.encode('ascii', 'replace')
+                        as_str = as_str.encode("ascii", "replace")
                 else:
                     as_str = x if isinstance(x, str) else x.text
                 if as_str is not None:
                     as_str = as_str.strip()
                 if not as_str:
-                    as_str = x.tag     # use 'not' to test for empty
+                    as_str = x.tag  # use 'not' to test for empty
                 return astype(as_str)
 
             if 1 == len_found:
