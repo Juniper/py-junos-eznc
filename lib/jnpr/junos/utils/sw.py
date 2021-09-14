@@ -953,10 +953,10 @@ class SW(Util):
                     )
                     try:
                         v_ok = self.validate(
-                          remote_package, issu, nssu, dev_timeout=timeout
+                            remote_package, issu, nssu, dev_timeout=timeout
                         )
                     except RpcError as e:
-                        if 'syntax error' in getattr(e, 'message', ''):
+                        if "syntax error" in getattr(e, "message", ""):
                             v_ok = True
                         else:
                             raise
