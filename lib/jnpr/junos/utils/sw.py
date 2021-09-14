@@ -303,8 +303,8 @@ class SW(Util):
         package_result = got.findtext("package-result")
         if package_result is None:
             # <package-result> is not present
-            if "ERROR:" in output_msg and ( 
-               ("is not found" in output_msg) or ("no such file" in output_msg)
+            if "ERROR:" in output_msg and (
+                ("is not found" in output_msg) or ("no such file" in output_msg)
             ):
                 # MX80 output with non-existent package looks like:
                 # <output>
@@ -316,7 +316,7 @@ class SW(Util):
                 # That is, assume <package-result>0</package-result>
                 self.log(
                     "software pkgadd response is missing package-result "
-                     "element. Assuming success."
+                    "element. Assuming success."
                 )
                 package_result = "0"
         rc = int(package_result.strip())
