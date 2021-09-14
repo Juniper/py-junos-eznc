@@ -232,7 +232,8 @@ class TestSW(unittest.TestCase):
     def test_sw_install_nonexistent_mx80_package(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
-        self.assertFalse(self.sw.install("test_no_mx80_packages.tgz", no_copy=True))
+        var_ret = self.sw.install("test_no_mx80_packages.tgz", no_copy=True)
+        self.assertFalse(var_ret[0])
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu(self, mock_execute):
