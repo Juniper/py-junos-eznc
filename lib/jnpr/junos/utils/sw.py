@@ -951,9 +951,16 @@ class SW(Util):
                         "validating software against current config,"
                         " please be patient ..."
                     )
-                    v_ok = self.validate(
-                        remote_package, issu, nssu, dev_timeout=timeout
-                    )
+                    try:
+                        v_ok = self.validate(
+                            remote_package, issu, nssu, dev_timeout=timeout
+                        )
+                    except RpcError as e:
+                        if "syntax error" in getattr(e, "message", ""):
+                            v_ok = True
+                        else:
+                            raise
+
                     if v_ok is not True:
                         return v_ok, "Package validation failed"
             else:
