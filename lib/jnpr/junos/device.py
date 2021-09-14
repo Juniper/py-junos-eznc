@@ -1431,7 +1431,7 @@ class Device(_Connection):
             try:
                 self._conn.close_session()
             except NcOpErrors.TimeoutExpiredError:
-                raise EzErrors.RpcTimeoutError(self, 'close', self.timeout)
+                raise EzErrors.RpcTimeoutError(self, "close", self.timeout)
             except NcErrors.SessionCloseError:
                 pass
 
