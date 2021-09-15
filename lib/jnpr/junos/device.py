@@ -1427,12 +1427,13 @@ class Device(_Connection):
         Closes the connection to the device only if connected.
         """
         if self.connected is True:
+            self.connected = False
             try:
                 self._conn.close_session()
+            except NcOpErrors.TimeoutExpiredError:
+                raise EzErrors.RpcTimeoutError(self, "close", self.timeout)
             except NcErrors.SessionCloseError:
                 pass
-            finally:
-                self.connected = False
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e, filter_xml=None):
