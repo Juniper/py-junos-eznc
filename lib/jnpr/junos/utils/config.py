@@ -650,6 +650,13 @@ class Config(Util):
 
         :param int rb_id: The rollback id value [0-49], defaults to ``0``.
 
+        :param ignore_warning: A boolean, string or list of string.
+          If the value is True, it will ignore all warnings regardless of the
+          warning message. If the value is a string, it will ignore
+          warning(s) if the message of each warning matches the string. If
+          the value is a list of strings, ignore warning(s) if the message of
+          each warning matches at least one of the strings in the list.
+
         :returns:
             ``True`` always when successful
 
