@@ -1,0 +1,37 @@
+---
+CChipWiStatsTable:
+  command: show xmchip {{ chip_instance }} wi stats 0
+  target: Null
+  args:
+    chip_instance: 0
+  key: mac
+  view: CChipWiStatsView
+  eval:
+    cchip-total-oversubscription-drop: >
+        sum([v['total_drop_packet'] for k, v in {{ data }}.items() if
+        isinstance(v, dict) and 'total_drop_packet' in v])
+
+CChipWiStatsView:
+  exists:
+    cchip_wi_stall_0: WIOCM STALL   0x0000000000000000_0000000000000000
+    cchip_wi_stall_1: WICPQ STALL   0x0000000000000000_0000000000000000
+  regex:
+    cchip-wi-received-packets: Received Packets\s+(\d+)
+  columns:
+    mac:
+      - MAC
+      - Port
+    total_drop_packet: Total Dropped Packets
+    drop_packet:
+      - Dropped Packets
+      - Rate (pps)
+    total_drop_byte: Total Dropped Bytes
+    drop_byte:
+      - Dropped Bytes Rate
+      - (bps)
+    total_preclassifier:
+      - Total Preclassifier
+      - Discards
+    preclassifier:
+      - Preclassifier
+      - Discards Rate (pps)

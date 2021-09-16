@@ -1,5 +1,85 @@
-## Release 2.2.0.dev0 - 8 August 2018
+## Release 2.4.2.dev0 - 29 APRIL 2020
+## Features Added
+
+## Bugs fixed
+
+### Features Added
+- None
+
+### Bugs fixed:
+- Latest `textfsm` doesn’t support in windows. Hence, supporting `textfsm 0.4.1` for windows user #1019
+- Convert `port` argument when passed  as `str` to `int` data type #1020
+- Return type of `sw.install` function going to change in the upcoming major release. 
+  So, added a deprecation warning in `sw.install` #1025
+
+## Release 2.4.0 - 1 APRIL 2020
+### Features Added
+- Added TableView Null Key support #983
+- Added timeout support for commit_check() #998
+- Added Win serial COM support #1000
+- Added load patch support #1001
+- Added textfsm support for table/view #1009
+
+### Bugs fixed:
+- Fixed table/view issue w.r.t to get() call #981
+- Fixed documentation typo #986
+- Handled sax parser input for nested fields #997
+- Fixed outbound ssh issue #1007
+- Fixed xpath issue when defined with a string function #1008
+
+## Release 2.3.1 - 10 December 2019
+### Features Added 
+- None
+
+### Bugs fixed:
+- Handled a check for pending Junos OS or package installation #966
+- Fixed  MetaPathLoader support only for jnpr.junos* modules #977
+- Fixed huge tree XML support #975
+- Fixed Junos sax parser issue for filter_xml broken #969
+
+## Release 2.3.0 - 27 September 2019
+### Features Added
+- TableView extended for vty/cli unstructured command #950
+- Added junos SAX parser feature #942 #955 #951
+- Added TableView Null Key support #910
+- Added command tables #958.
+- Added reboot support for junos vmhost platform #952
+- Added ElsEthernetSwitchingTable TableView #939
+- Added callback functionality to ftp get #932
+- Extended start shell support for Bourne shell #934
+- Added `at` option support for `sw.reboot()` and `sw.poweroff()` #916
+- Added generalized function for ssh-client #957
+
+
+### Bugs Fixed
+- Updated fact collection for srx platform #935
+- Supports new ssh private key format #945
+- Handled exception in dev.close() #956
+- Updated file transfers to use context manager to open files #885
+- Fixed reboot and poweroff behavior #916
+
+## Release 2.2.1 - 22 April 2019
+### Features Added
+- None
+
+### Bugs Fixed
+- Handle multiple package-result values from sw.install #864 
+- Extended support to WR-Based Linux H/W #882  #883 #889
+- Fixed issues in Console over SSH #877
+- Optimized PyEZ docker image size and minor bug fixes #894 #911
+- Fixed JSON serialization for Junos facts #902 
+- Updated securityzone.yml. Added item `zone-security` #909 
+- Fixed runtime error while using Outbound-SSH #915
+- Fixed Pyyaml bugs #914 #917 #918
+
+
+
+## Release 2.2.0 - 27 August 2018
 ### Features Added:
+- Support for Node virt based platforms #856
+- Support Linux based Junos devices #862 
+- Connection through console server (having login credentials) using SSH #861 #870 
+- outbound ssh #732
 
 ### Bugs Fixed:
 

@@ -1,0 +1,10 @@
+<rpc-reply>
+<output>
+There is already an install pending.
+    Use the 'request system reboot' command to complete the install,
+    or the 'request system software rollback' command to back it out.
+</output>
+<package-result>
+1
+</package-result>
+</rpc-reply>

@@ -1,0 +1,13 @@
+---
+SystemProcExtTable:
+    command: show system processes extensive
+    key: cmd
+    title: '  PID'
+    view: SystemProcExtView
+
+SystemProcExtView:
+    regex:
+        size: '.* \S +(\d+(K|M))\s+'
+        res: '(\d+(K|M))'
+        wcpu: '.* (\d+\.\d+)%'
+        cmd: '\w+'

@@ -1,0 +1,54 @@
+<output>
+LO statistics (LO block 0)
+--------------------------
+
+------------------------------------------------------------------------------------------------
+LU  Parcel Name         Counter Name              Total                 Rate
+------------------------------------------------------------------------------------------------
+0   M2L_Packet          Parcels sent to LU        7272889727            1502 pps
+0   M2L_Packet          Parcel bytes sent to LU   146050609612          241032 bps
+0   M2L_PacketHead      Parcels sent to LU        27896465              6 pps
+0   M2L_PacketHead      Parcel bytes sent to LU   3738126310            6432 bps
+0   M2L_Backpressure    Parcels sent to LU        0                     0 pps
+0   M2L_Backpressure    Parcel bytes sent to LU   0                     0 bps
+0   M2L_ReadDataReply   Parcels sent to LU        0                     0 pps
+0   M2L_ReadDataReply   Parcel bytes sent to LU   0                     0 bps
+0   M2L_WriteDataReply  Parcels sent to LU        0                     0 pps
+0   M2L_WriteDataReply  Parcel bytes sent to LU   0                     0 bps
+0   M2L_StatsUpdate     Parcels sent to LU        3735278               0 pps
+0   M2L_StatsUpdate     Parcel bytes sent to LU   33617502              32 bps
+0   M2L_Gauge           Parcels sent to LU        0                     0 pps
+0   M2L_Gauge           Parcel bytes sent to LU   0                     0 bps
+0   M2L_XMReorder_Ack   Parcels sent to LU        0                     0 pps
+0   M2L_XMReorder_Ack   Parcel bytes sent to LU   0                     0 bps
+0   M2L_BulkThreshold   Parcels sent to LU        0                     0 pps
+0   M2L_BulkThreshold   Parcel bytes sent to LU   0                     0 bps
+0   Recirc_Packet       Parcels sent to LU        0                     0 pps
+0   Recirc_Packet       Parcel bytes sent to LU   0                     0 bps
+0                       Error parcels sent to LU  410                   0 ppsa
+0                       Parcel drops              0                     0 pps
+
+1   M2L_Packet          Parcels sent to LU        7280959770            1510 pps
+1   M2L_Packet          Parcel bytes sent to LU   146203006534          242568 bps
+1   M2L_PacketHead      Parcels sent to LU        19826422              4 pps
+1   M2L_PacketHead      Parcel bytes sent to LU   2656740548            4288 bps
+1   M2L_Backpressure    Parcels sent to LU        0                     0 pps
+1   M2L_Backpressure    Parcel bytes sent to LU   0                     0 bps
+1   M2L_ReadDataReply   Parcels sent to LU        0                     0 pps
+1   M2L_ReadDataReply   Parcel bytes sent to LU   0                     0 bps
+1   M2L_WriteDataReply  Parcels sent to LU        0                     0 pps
+1   M2L_WriteDataReply  Parcel bytes sent to LU   0                     0 bps
+1   M2L_StatsUpdate     Parcels sent to LU        3734751               0 pps
+1   M2L_StatsUpdate     Parcel bytes sent to LU   33612759              0 bps
+1   M2L_Gauge           Parcels sent to LU        0                     0 pps
+1   M2L_Gauge           Parcel bytes sent to LU   0                     0 bps
+1   M2L_XMReorder_Ack   Parcels sent to LU        0                     0 pps
+1   M2L_XMReorder_Ack   Parcel bytes sent to LU   0                     0 bps
+1   M2L_BulkThreshold   Parcels sent to LU        0                     0 pps
+1   M2L_BulkThreshold   Parcel bytes sent to LU   0                     0 bps
+1   Recirc_Packet       Parcels sent to LU        0                     0 pps
+1   Recirc_Packet       Parcel bytes sent to LU   0                     0 bps
+1                       Error parcels sent to LU  90                    0 pps
+1                       Parcel drops              0                     0 pps
+------------------------------------------------------------------------------------------------
+</output>

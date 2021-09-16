@@ -1,0 +1,15 @@
+---
+CChipFiStatsTable:
+  command: show xmchip {{ instance }} fi stats
+  args:
+    instance: 0
+  target: Null
+  item: '*'
+  view: CenterChipFabricInStatsView
+
+CenterChipFabricInStatsView:
+  regex:
+    cchip-fi-packets-received: 'MIF packet received\s+(\d+)'
+    cchip-fi-packets-dropped: 'MIF packet drops \s+(\d+)'
+    cchip-fi-packets-sent-ok: 'Packets sent to PT\s+(\d+)'
+    cchip-fi-packets-with-error: 'Packets with errors sent to PT\s+(\d+)'

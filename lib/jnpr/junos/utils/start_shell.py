@@ -1,10 +1,10 @@
-import paramiko
 from select import select
 import re
 import datetime
+from jnpr.junos.utils.ssh_client import open_ssh_client
 
-_JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#|\$)\s'
+_JUNOS_PROMPT = "> "
+_SHELL_PROMPT = "(%|#|\$)\s"
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -33,6 +33,8 @@ class StartShell(object):
         """
         self._nc = nc
         self.timeout = timeout
+        self._client = None
+        self._chan = None
 
     def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
@@ -57,8 +59,7 @@ class StartShell(object):
         chan = self._chan
         got = []
         timeout = timeout or self.timeout
-        timeout = datetime.datetime.now() + datetime.timedelta(
-            seconds=timeout)
+        timeout = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
         while timeout > datetime.datetime.now():
             rd, wr, err = select([chan], [], [], _SELECT_WAIT)
             if rd:
@@ -66,10 +67,9 @@ class StartShell(object):
                 if sleep:
                     time.sleep(sleep)
                 if isinstance(data, bytes):
-                    data = data.decode('utf-8', 'replace')
+                    data = data.decode("utf-8", "replace")
                 got.append(data)
-                if this is not None and re.search(r'{}\s?$'.format(this),
-                                                  data):
+                if this is not None and re.search(r"{}\s?$".format(this), data):
                     break
         return got
 
@@ -81,7 +81,7 @@ class StartShell(object):
         :returns: result of SSH channel send
         """
         self._chan.send(data)
-        self._chan.send('\n')
+        self._chan.send("\n")
 
     def open(self):
         """
@@ -89,28 +89,16 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
-        junos = self._nc
+        self._client = open_ssh_client(dev=self._nc)
+        self._chan = self._client.invoke_shell()
 
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=junos.hostname,
-                       port=(22, junos._port)[junos.hostname == 'localhost'],
-                       username=junos._auth_user,
-                       password=junos._auth_password,
-                       )
-
-        chan = client.invoke_shell()
-        self._client = client
-        self._chan = chan
-
-        got = self.wait_for(r'(%|>|#|\$)')
+        got = self.wait_for(r"(%|>|#|\$)")
         if got[-1].endswith(_JUNOS_PROMPT):
-            self.send('start shell')
+            self.send("start shell")
             self.wait_for(_SHELL_PROMPT)
 
     def close(self):
-        """ Close the SSH client channel """
+        """Close the SSH client channel"""
         self._chan.close()
         self._client.close()
 
@@ -153,17 +141,17 @@ class StartShell(object):
         timeout = timeout or self.timeout
         # run the command and capture the output
         self.send(command)
-        got = ''.join(self.wait_for(this, timeout, sleep=sleep))
+        got = "".join(self.wait_for(this, timeout, sleep=sleep))
         self.last_ok = False
         if this is None:
-            self.last_ok = got is not ''
+            self.last_ok = got is not ""
         elif this != _SHELL_PROMPT:
-            self.last_ok = re.search(r'{}\s?$'.format(this), got) is not None
-        elif re.search(r'{}\s?$'.format(_SHELL_PROMPT), got) is not None:
+            self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
+        elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
             # use $? to get the exit code of the command
-            self.send('echo $?')
-            rc = ''.join(self.wait_for(_SHELL_PROMPT))
-            self.last_ok = rc.find('0') > 0
+            self.send("echo $?")
+            rc = "".join(self.wait_for(_SHELL_PROMPT))
+            self.last_ok = rc.find("\r\n0\r\n") > 0
         return (self.last_ok, got)
 
     # -------------------------------------------------------------------------

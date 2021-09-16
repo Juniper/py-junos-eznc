@@ -2,22 +2,20 @@ import re
 
 
 class version_info(object):
-
     def __init__(self, verstr):
         """verstr - version string"""
-        m1 = re.match('(.*?)([RBIXSF-])(.*)', verstr)
+        m1 = re.match("(.*?)([RBIXSF-])(.*)", verstr)
         self.type = m1.group(2)
 
-        self.major = tuple(map(int, m1.group(1).split('.')))  # creates tuyple
-        after_type = m1.group(3).split('.')
+        self.major = tuple(map(int, m1.group(1).split(".")))  # creates tuyple
+        after_type = m1.group(3).split(".")
         self.minor = after_type[0]
 
-        if 'X' == self.type:
+        if "X" == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
             xm = re.match("(\d+)-(\w)(\d+)", self.minor)
             if xm is not None:
-                self.minor = tuple(
-                    [int(xm.group(1)), xm.group(2), int(xm.group(3))])
+                self.minor = tuple([int(xm.group(1)), xm.group(2), int(xm.group(3))])
                 if len(after_type) < 2:
                     self.build = None
                 else:
@@ -30,8 +28,8 @@ class version_info(object):
                 else:
                     self.build = int(after_type[1])
 
-        elif ('I' == self.type) or ('-' == self.type):
-            self.type = 'I'
+        elif ("I" == self.type) or ("-" == self.type):
+            self.type = "I"
             try:
                 # assumes that we have a build/spin, but not numeric
                 self.build = after_type[1]
@@ -39,26 +37,29 @@ class version_info(object):
                 self.build = None
         else:
             try:
-                self.build = int(after_type[1])   # assumes numeric build/spin
+                self.build = int(after_type[1])  # assumes numeric build/spin
             except:
                 self.build = after_type[0]  # non-numeric
 
         self.as_tuple = self.major + tuple([self.type, self.minor, self.build])
-        self.v_dict = {'major': self.major, 'type': self.type,
-                       'minor': self.minor, 'build': self.build}
+        self.v_dict = {
+            "major": self.major,
+            "type": self.type,
+            "minor": self.minor,
+            "build": self.build,
+        }
 
     def __iter__(self):
         for key in self.v_dict:
             yield key, self.v_dict[key]
 
     def __repr__(self):
-        retstr = "junos.version_info(major={major}, type={type}," \
-                 " minor={minor}, build={build})".format(
-                     major=self.major,
-                     type=self.type,
-                     minor=self.minor,
-                     build=self.build
-                 )
+        retstr = (
+            "junos.version_info(major={major}, type={type},"
+            " minor={minor}, build={build})".format(
+                major=self.major, type=self.type, minor=self.minor, build=self.build
+            )
+        )
         return retstr
 
     def _cmp_tuple(self, other):
@@ -94,7 +95,7 @@ class version_info(object):
 
 
 def version_yaml_representer(dumper, version):
-    return dumper.represent_mapping(u'tag:yaml.org,2002:map', version.v_dict)
+    return dumper.represent_mapping(u"tag:yaml.org,2002:map", version.v_dict)
 
 
 def provides_facts():
