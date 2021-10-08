@@ -145,6 +145,22 @@ class DCS(_Connection):
         di = self._grpc_types_pb2.DeviceInfo(UUID=self._dev_uuid, component="JUNOS")
         exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
         res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
+        # Workaround fix still the device manager new rpc is available.
+        if res.error_code == self._grpc_types_pb2.ConnectionError:
+            # Attempting for node 0
+            di = self._grpc_types_pb2.DeviceInfo(
+                UUID=self._dev_uuid, component="JUNOS/Node[id=0]")
+            exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
+            node0_res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
+            if node0_res.error_code == self._grpc_types_pb2.ConnectionError:
+                # Attempting for node 1
+                di = self._grpc_types_pb2.DeviceInfo(
+                    UUID=self._dev_uuid, component="JUNOS/Node[id=1]")
+                exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
+                node1_res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
+                res = node1_res
+            else:
+                res = node0_res
         if res.error_code != self._grpc_types_pb2.NoError:
             raise EzErrors.RpcError(
                 cmd=rpc_cmd,
