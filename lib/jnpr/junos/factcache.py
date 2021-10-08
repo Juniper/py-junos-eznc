@@ -1,13 +1,17 @@
-import collections
 import warnings
 from pprint import pformat
+
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc
 import jnpr.junos.exception
 
 
-class _FactCache(collections.MutableMapping):
+class _FactCache(MutableMapping):
     """
     A dictionary-like object which performs on-demand fact gathering.
 
@@ -25,6 +29,7 @@ class _FactCache(collections.MutableMapping):
     **Additional methods:**
       * :meth:`_refresh`: Refreshes the fact cache.
     """
+
     def __init__(self, device):
         """
         _FactCache object constructor.
@@ -70,15 +75,17 @@ class _FactCache(collections.MutableMapping):
         """
         if key not in self._callbacks:
             # Not a fact that we know how to provide.
-            raise KeyError('%s: There is no function to gather the %s fact' %
-                           (key, key))
+            raise KeyError(
+                "%s: There is no function to gather the %s fact" % (key, key)
+            )
         if key not in self._cache:
             # A known fact, but not yet cached. Go get it and cache it.
             if self._callbacks[key] in self._call_stack:
                 raise jnpr.junos.exception.FactLoopError(
                     "A loop was detected while gathering the %s fact. The %s "
                     "module has already been called. Please report this error."
-                    % (key, self._callbacks[key].__module__))
+                    % (key, self._callbacks[key].__module__)
+                )
             else:
                 # Add the callback we are about to invoke to the _call_stack in
                 # order to detect loops in fact gathering.
@@ -104,16 +111,18 @@ class _FactCache(collections.MutableMapping):
             else:
                 # No exception
                 for new_key in new_facts:
-                    if (new_key not in self._callbacks or
-                       self._callbacks[key] is not self._callbacks[new_key]):
+                    if (
+                        new_key not in self._callbacks
+                        or self._callbacks[key] is not self._callbacks[new_key]
+                    ):
                         # The callback returned a fact it didn't advertise
-                        raise RuntimeError("The %s module returned the %s "
-                                           "fact, but does not list %s as a "
-                                           "provided fact. Please report this "
-                                           "error." %
-                                           (self._callbacks[key].__module__,
-                                            new_key,
-                                            new_key))
+                        raise RuntimeError(
+                            "The %s module returned the %s "
+                            "fact, but does not list %s as a "
+                            "provided fact. Please report this "
+                            "error."
+                            % (self._callbacks[key].__module__, new_key, new_key)
+                        )
                     else:
                         # Cache the returned fact
                         self._cache[new_key] = new_facts[new_key]
@@ -123,7 +132,7 @@ class _FactCache(collections.MutableMapping):
                 self._call_stack.pop()
         if key in self._cache:
             # key fact is cached. Return it.
-            if self._device._fact_style == 'both':
+            if self._device._fact_style == "both":
                 # Compare old and new-style values.
                 if key in self._device._ofacts:
                     # Skip key comparisons for certain keys.
@@ -140,23 +149,24 @@ class _FactCache(collections.MutableMapping):
                     # The new fact gathering code still returns the master fact
                     # but returns a correct value for VCs. It also returns a
                     # new re_master fact which is much more useful.
-                    if key not in ['RE0', 'RE1', 'master']:
+                    if key not in ["RE0", "RE1", "master"]:
                         if self._cache[key] != self._device._ofacts[key]:
-                            warnings.warn('New and old-style facts do not '
-                                          'match for the %s fact.\n'
-                                          '    New-style value: %s\n'
-                                          '    Old-style value: %s\n' %
-                                          (key,
-                                           self._cache[key],
-                                           self._device._ofacts[key]),
-                                          RuntimeWarning)
+                            warnings.warn(
+                                "New and old-style facts do not "
+                                "match for the %s fact.\n"
+                                "    New-style value: %s\n"
+                                "    Old-style value: %s\n"
+                                % (key, self._cache[key], self._device._ofacts[key]),
+                                RuntimeWarning,
+                            )
             return self._cache[key]
         else:
             # key fact was not returned by callback
-            raise RuntimeError("The %s module claims to provide the %s "
-                               "fact, but failed to return it. Please report "
-                               "this error." %
-                               (self._callbacks[key].__module__, key))
+            raise RuntimeError(
+                "The %s module claims to provide the %s "
+                "fact, but failed to return it. Please report "
+                "this error." % (self._callbacks[key].__module__, key)
+            )
 
     def __delitem__(self, key):
         """
@@ -180,7 +190,7 @@ class _FactCache(collections.MutableMapping):
         """
         callbacks = {}
         for key in self._callbacks:
-            if not key.startswith('_'):
+            if not key.startswith("_"):
                 callbacks[key] = self._callbacks[key]
         return iter(callbacks)
 
@@ -202,15 +212,15 @@ class _FactCache(collections.MutableMapping):
           side-effect of causing any ungathered facts to be gathered and then
           cached.
         """
-        string = ''
+        string = ""
         for key in sorted(self):
-            if not key.startswith('_'):
+            if not key.startswith("_"):
                 current = "'%s': %s" % (key, repr(self.get(key)))
                 if string:
-                    string = ', '.join([string, current])
+                    string = ", ".join([string, current])
                 else:
                     string = current
-        return '{' + string + '}'
+        return "{" + string + "}"
 
     def __repr__(self):
         """
@@ -223,10 +233,9 @@ class _FactCache(collections.MutableMapping):
         """
         return pformat(dict(self))
 
-    def _refresh(self,
-                 exception_on_failure=False,
-                 warnings_on_failure=False,
-                 keys=None):
+    def _refresh(
+        self, exception_on_failure=False, warnings_on_failure=False, keys=None
+    ):
         """
         Empty the cache to force a refresh of one or more facts.
 
@@ -252,7 +261,7 @@ class _FactCache(collections.MutableMapping):
         """
         refresh_keys = None
         if keys is not None:
-            if isinstance('str', type(keys)):
+            if isinstance("str", type(keys)):
                 refresh_keys = (keys,)
             else:
                 refresh_keys = keys
@@ -262,8 +271,10 @@ class _FactCache(collections.MutableMapping):
                     if key in self._cache:
                         del self._cache[key]
                 else:
-                    raise RuntimeError('The %s fact can not be refreshed. %s '
-                                       'is not a known fact.' % (key, key))
+                    raise RuntimeError(
+                        "The %s fact can not be refreshed. %s "
+                        "is not a known fact." % (key, key)
+                    )
         else:
             self._cache = dict()
         if exception_on_failure or warnings_on_failure:
@@ -276,16 +287,21 @@ class _FactCache(collections.MutableMapping):
                     raise
             finally:
                 if warnings_on_failure and self._should_warn:
-                    warnings.warn('Facts gathering is incomplete. '
-                                  'To know the reason call '
-                                  '"dev.facts_refresh('
-                                  'exception_on_failure=True)"',
-                                  RuntimeWarning)
+                    warnings.warn(
+                        "Facts gathering is incomplete. "
+                        "To know the reason call "
+                        '"dev.facts_refresh('
+                        'exception_on_failure=True)"',
+                        RuntimeWarning,
+                    )
                 self._exception_on_failure = False
                 self._warnings_on_failure = False
                 self._should_warn = False
 
+    # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
+    if __doc__ is None:
+        __doc__ = ""
+
     # Precede the class's documentation with the documentation on the specific
     # facts from  the jnpr.junos.facts package.
-    __doc__ = (facts_doc + "Implementation details on the _FactCache class:" +
-               __doc__)
+    __doc__ = facts_doc + "Implementation details on the _FactCache class:" + __doc__

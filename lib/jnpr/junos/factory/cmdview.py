@@ -1,5 +1,3 @@
-
-
 class CMDView(object):
 
     """
@@ -7,7 +5,7 @@ class CMDView(object):
     data appear as objects with attributes.
     """
 
-    KEY = 'name'
+    KEY = "name"
     KEY_ITEMS = []
     COLUMNS = {}
     FILTERS = None
@@ -24,17 +22,17 @@ class CMDView(object):
 
     @property
     def T(self):
-        """ return the Table instance for the View """
+        """return the Table instance for the View"""
         return self._table
 
     @property
     def D(self):
-        """ return the Device instance for this View """
+        """return the Device instance for this View"""
         return self.T.D
 
     @property
     def xml(self):
-        """ returns the XML associated to the item """
+        """returns the XML associated to the item"""
         return self._xml
 
     # -------------------------------------------------------------------------
@@ -42,19 +40,19 @@ class CMDView(object):
     # -------------------------------------------------------------------------
 
     def keys(self):
-        """ list of view keys, i.e. field names """
+        """list of view keys, i.e. field names"""
         return self.FIELDS.keys()
 
     def values(self):
-        """ list of view values """
+        """list of view values"""
         return [getattr(self, field) for field in self.keys()]
 
     def items(self):
-        """ list of tuple(key,value) """
+        """list of tuple(key,value)"""
         return zip(self.keys(), self.values())
 
     def asview(self, view_cls):
-        """ create a new View object for this item """
+        """create a new View object for this item"""
         return view_cls(self._table, self._xml)
 
     # -------------------------------------------------------------------------
@@ -62,7 +60,7 @@ class CMDView(object):
     # -------------------------------------------------------------------------
 
     def __repr__(self):
-        """ returns the name of the View with the associate item name """
+        """returns the name of the View with the associate item name"""
         return "%s:%s" % (self.__class__.__name__, self.name)
 
     def __getitem__(self, name):

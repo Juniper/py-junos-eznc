@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 import inspect
 
-import paramiko
 from scp import SCPClient
+from jnpr.junos.utils.ssh_client import open_ssh_client
 
 """
 Secure Copy Utility
@@ -22,6 +22,7 @@ class SCP(object):
             scp.put(package, remote_path)
 
     """
+
     def __init__(self, junos, **scpargs):
         """
         Constructor that wraps :py:mod:`paramiko` and :py:mod:`scp` objects.
@@ -30,31 +31,32 @@ class SCP(object):
         :param kvargs scpargs: any additional args to be passed to paramiko SCP
         """
         self._junos = junos
-        if self._junos.__dict__.get('_mode') is not None:
-            raise RuntimeError('SCP is not supported with Console mode')
+        if self._junos.__dict__.get("_mode") is not None:
+            raise RuntimeError("SCP is not supported with Console mode")
         self._scpargs = scpargs
         self._by10pct = 0
-        self._user_progress = self._scpargs.get('progress')
+        self._user_progress = self._scpargs.get("progress")
+        self._ssh = None
         if self._user_progress is True:
-            self._scpargs['progress'] = self._scp_progress
+            self._scpargs["progress"] = self._scp_progress
         elif callable(self._user_progress):
             # User case also define progress with 3 params, the way scp module
             # expects. Function will take path, total size, transferred.
             # https://github.com/jbardin/scp.py/blob/master/scp.py#L97
             spec = inspect.getargspec(self._user_progress)
-            if ((len(spec.args) == 3 and spec.args[0] != 'self') or
-                (len(spec.args) == 4 and spec.args[0] == 'self')):
-                self._scpargs['progress'] = self._user_progress
+            if (len(spec.args) == 3 and spec.args[0] != "self") or (
+                len(spec.args) == 4 and spec.args[0] == "self"
+            ):
+                self._scpargs["progress"] = self._user_progress
             else:
                 # this will override the function _progress defined for this
                 # class to use progress provided by user.
-                self._progress = lambda report: \
-                    self._user_progress(self._junos, report)
-                self._scpargs['progress'] = self._scp_progress
+                self._progress = lambda report: self._user_progress(self._junos, report)
+                self._scpargs["progress"] = self._scp_progress
 
     def _progress(self, report):
-        """ simple progress report function """
-        print (self._junos.hostname + ": " + report)
+        """simple progress report function"""
+        print(self._junos.hostname + ": " + report)
 
     def _scp_progress(self, _path, _total, _xfrd):
 
@@ -64,9 +66,7 @@ class SCP(object):
         # if 10% more has been copied, then print a message
         if 0 == (pct % 10) and pct != self._by10pct:
             self._by10pct = pct
-            self._progress(
-                "%s: %s / %s (%s%%)" %
-                (_path, _xfrd, _total, str(pct)))
+            self._progress("%s: %s / %s (%s%%)" % (_path, _xfrd, _total, str(pct)))
 
     def open(self, **scpargs):
         """
@@ -81,38 +81,7 @@ class SCP(object):
         """
         # @@@ should check for multi-calls to connect to ensure we don't keep
         # @@@ opening new connections
-        junos = self._junos
-        self._ssh = paramiko.SSHClient()
-        self._ssh.load_system_host_keys()
-        self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        # use junos._hostname since this will be correct if we are going
-        # through a jumphost.
-
-        config = {}
-        kwargs = {}
-        ssh_config = getattr(junos, '_sshconf_path')
-        if ssh_config:
-            config = paramiko.SSHConfig()
-            with open(ssh_config) as open_ssh_config:
-                config.parse(open_ssh_config)
-            config = config.lookup(junos._hostname)
-        sock = None
-        if config.get("proxycommand"):
-            sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
-
-        if self._junos._ssh_private_key_file is not None:
-            kwargs['key_filename'] = self._junos._ssh_private_key_file
-
-        self._ssh.connect(hostname=junos._hostname,
-                          port=(
-                              22, int(
-                                  junos._port))[
-                              junos._hostname == 'localhost'],
-                          username=junos._auth_user,
-                          password=junos._auth_password,
-                          sock=sock, **kwargs
-                          )
+        self._ssh = open_ssh_client(dev=self._junos)
         return SCPClient(self._ssh.get_transport(), **scpargs)
 
     def close(self):
