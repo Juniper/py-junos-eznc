@@ -1259,8 +1259,8 @@ class Device(_Connection):
             self._conf_auth_user = None
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
-            self._ssh_config = kvargs.get('ssh_config')
-            self._ssh_keepalives = kvargs.get('ssh_keepalives', 30)
+            self._ssh_config = kvargs.get("ssh_config")
+            self._ssh_keepalives = kvargs.get("ssh_keepalives", 30)
 
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
