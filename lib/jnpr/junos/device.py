@@ -1375,13 +1375,10 @@ class Device(_Connection):
                 },
             )
             self._conn._session.add_listener(DeviceSessionListener(self))
-            if isinstance(
-                    self._conn,
-                    ncclient.manager.Manager) and isinstance(
-                    self._conn._session,
-                    ncclient.transport.ssh.SSHSession):
-                self._conn._session.transport.set_keepalive(
-                    int(self._ssh_keepalives))
+            if isinstance(self._conn, ncclient.manager.Manager) and isinstance(
+                self._conn._session, ncclient.transport.ssh.SSHSession
+            ):
+                self._conn._session.transport.set_keepalive(int(self._ssh_keepalives))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
