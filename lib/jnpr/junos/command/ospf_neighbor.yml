@@ -1,0 +1,13 @@
+---
+OspfNeighborTable:
+    command: show ospf neighbor
+    key: Address
+    view: OspfNeighborView
+OspfNeighborView:
+    columns:
+        neighbor_address: Address
+        interface: Interface
+        neighbor_state: State
+        neighbor_id: ID
+        neighbor_priority: Pri
+        activity_timer: Dead

@@ -1,0 +1,23 @@
+<output>
+SENT: Ukern command: show sched
+
+Total system uptime 99+18:17:23, (8619400175 ms), 4871292458 thread dispatches
+CPU load is 16% (1 second), 14% (5 second)
+            14% (10 second), 14% (1 minute)
+Total interrupt time 16786614 (ms)
+
+ CPU       Name      Time(ms)
+ 85%       Idle      7397672498
+  0%    Level 3      1
+
+Last Long Running Thread Event time 200 ms
+
+ CPU       Name      Time(ms)    Count
+
+ Top Thread:
+   pid      = 99
+   name     = LU Background Service
+   time     = 410844018 ms
+   cpu      = 4%
+
+</output>

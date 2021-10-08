@@ -15,14 +15,16 @@ _TSFMT = "%Y%m%d%H%M%S"
 
 class Table(object):
     ITEM_XPATH = None
-    ITEM_NAME_XPATH = 'name'
+    ITEM_NAME_XPATH = "name"
     VIEW = None
+    USE_FILTER = None
 
-    def __init__(self, dev=None, xml=None, path=None):
+    def __init__(self, dev=None, xml=None, path=None, use_filter=True):
         """
         :dev: Device instance
         :xml: lxml Element instance
         :path: file path to XML, to be used rather than :dev:
+        :use_filter: Default usage is SAX parsing, disable this variable to use DOM
         """
         self._dev = dev
         self.xml = xml
@@ -30,29 +32,33 @@ class Table(object):
         self._key_list = []
         self._path = path
         self._lxml = xml
+        self._use_filter = self.USE_FILTER and use_filter
+        if self._dev is not None:
+            self._use_filter = self._use_filter and self._dev._use_filter
 
-    # -------------------------------------------------------------------------
+            # -------------------------------------------------------------------------
+
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
     def D(self):
-        """ the Device instance """
+        """the Device instance"""
         return self._dev
 
     @property
     def RPC(self):
-        """ the Device.rpc instance """
+        """the Device.rpc instance"""
         return self.D.rpc
 
     @property
     def view(self):
-        """ returns the current view assigned to this table """
+        """returns the current view assigned to this table"""
         return self._view
 
     @view.setter
     def view(self, cls):
-        """ assigns a new view to the table """
+        """assigns a new view to the table"""
         if cls is None:
             self._view = None
             return
@@ -76,7 +82,7 @@ class Table(object):
 
     @property
     def key_list(self):
-        """ the list of keys, as property for caching """
+        """the list of keys, as property for caching"""
         return self._key_list
 
     # -------------------------------------------------------------------------
@@ -88,24 +94,27 @@ class Table(object):
             raise RuntimeError("Table is empty, use get()")
 
     def _tkey(self, this, key_list):
-        """ keys with missing XPATH nodes are set to None """
+        """keys with missing XPATH nodes are set to None"""
         keys = []
         for k in key_list:
             try:
                 keys.append(this.xpath(k)[0].text)
             except:
+                # Case where key is provided like key: re-name | Null
+                if " | " in k and "Null" in k:
+                    continue
                 keys.append(None)
         return tuple(keys)
 
     def _keys_composite(self, xpath, key_list):
-        """ composite keys return a tuple of key-items """
+        """composite keys return a tuple of key-items"""
         return [self._tkey(item, key_list) for item in self.xml.xpath(xpath)]
 
     def _keys_simple(self, xpath):
         return [x.text.strip() for x in self.xml.xpath(xpath)]
 
     def _keyspec(self):
-        """ returns tuple (keyname-xpath, item-xpath) """
+        """returns tuple (keyname-xpath, item-xpath)"""
         return (self.ITEM_NAME_XPATH, self.ITEM_XPATH)
 
     def _clearkeys(self):
@@ -120,7 +129,7 @@ class Table(object):
     # ------------------------------------------------------------------------
 
     def _keys(self):
-        """ return a list of data item keys from the Table XML """
+        """return a list of data item keys from the Table XML"""
 
         self._assert_data()
         key_value, xpath = self._keyspec()
@@ -128,15 +137,22 @@ class Table(object):
         if isinstance(key_value, str):
             # Check if pipe is in the key_value, if so append xpath
             # to each value
-            if ' | ' in key_value:
-                return self._keys_simple(' | '.join([xpath + '/' + x for x in
-                                                     key_value.split(' | ')]))
-            return self._keys_simple(xpath + '/' + key_value)
+            if " | " in key_value:
+                return self._keys_simple(
+                    " | ".join(
+                        [xpath + "/" + x for x in key_value.split(" | ") if x != "Null"]
+                    )
+                )
+            return self._keys_simple(xpath + "/" + key_value)
+
+        # user explicitly passed key as Null in Table
+        if key_value is None:
+            return []
 
         if not isinstance(key_value, list):
             raise RuntimeError(
-                "What to do with key, table:'%s'" %
-                self.__class__.__name__)
+                "What to do with key, table:'%s'" % self.__class__.__name__
+            )
 
         # ok, so it's a list, which means we need to extract tuple values
         return self._keys_composite(xpath, key_value)
@@ -155,7 +171,7 @@ class Table(object):
     # ------------------------------------------------------------------------
 
     def values(self):
-        """ returns list of table entry items() """
+        """returns list of table entry items()"""
 
         self._assert_data()
         if self.view is None:
@@ -170,7 +186,7 @@ class Table(object):
     # ------------------------------------------------------------------------
 
     def items(self):
-        """ returns list of tuple(name,values) for each table entry """
+        """returns list of tuple(name,values) for each table entry"""
         return list(zip(self.keys(), self.values()))
 
     # ------------------------------------------------------------------------
@@ -229,7 +245,7 @@ class Table(object):
             fname += "_%s" % append
 
         path = fname + fext
-        return etree.ElementTree(self.xml).write(open(path, 'wb'))
+        return etree.ElementTree(self.xml).write(open(path, "wb"))
 
     def to_json(self):
         """
@@ -258,7 +274,7 @@ class Table(object):
         return len(self.keys())
 
     def __iter__(self):
-        """ iterate over each time in the table """
+        """iterate over each time in the table"""
         self._assert_data()
 
         as_xml = lambda table, view_xml: view_xml
@@ -310,8 +326,8 @@ class Table(object):
                 kv = []
                 for k, v in zip(namekey_xpath, find_value):
                     if v is not None:
-                        kv.append(xnkv.format(k.replace('_', '-'), v))
-                xpf = ''.join(kv)
+                        kv.append(xnkv.format(k.replace("_", "-"), v))
+                xpf = "".join(kv)
                 return item_xpath + xpf
 
         # ---[END: get_xpath ] ------------------------------------------------
@@ -326,5 +342,5 @@ class Table(object):
         return use_view(table=self, view_xml=found[0])
 
     def __contains__(self, key):
-        """ membership for use with 'in' """
+        """membership for use with 'in'"""
         return bool(key in self.keys())

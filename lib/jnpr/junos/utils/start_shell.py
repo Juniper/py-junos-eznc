@@ -1,11 +1,11 @@
-import paramiko
 from select import select
 import re
 import datetime
+from jnpr.junos.utils.ssh_client import open_ssh_client
 import subprocess
 
-_JUNOS_PROMPT = '> '
-_SHELL_PROMPT = '(%|#|\$)\s'
+_JUNOS_PROMPT = "> "
+_SHELL_PROMPT = "(%|#|\$)\s"
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
@@ -34,9 +34,11 @@ class StartShell(object):
         """
         self._nc = nc
         self.timeout = timeout
+        self._client = None
+        self._chan = None
         self.ON_JUNOS = self._nc.__class__.ON_JUNOS
 
-    def wait_for(self, this=_SHELL_PROMPT, timeout=0):
+    def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Wait for the result of the command, expecting **this** prompt.
 
@@ -45,6 +47,11 @@ class StartShell(object):
         :param int timeout:
           Timeout value in seconds to wait for expected string/pattern.
           If not specified defaults to self.timeout.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: resulting string of data in a list
         :rtype: list
@@ -54,30 +61,22 @@ class StartShell(object):
         chan = self._chan
         got = []
         timeout = timeout or self.timeout
-        timeout = datetime.datetime.now() + datetime.timedelta(
-            seconds=timeout)
-        if self.ON_JUNOS is True:
-            while timeout > datetime.datetime.now():
+        timeout = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
+        while timeout > datetime.datetime.now():
+            if self.ON_JUNOS is True:
                 data = chan.stdout.readline()
-                if isinstance(data, bytes):
-                    data = data.decode('utf-8', 'replace')
-                got.append(data)
-                if this is not None and re.search(r'{}\s?$'.format(this),
-                                                  data):
-                    break
-            return got
-        else:
-            while timeout > datetime.datetime.now():
+            else:
                 rd, wr, err = select([chan], [], [], _SELECT_WAIT)
                 if rd:
                     data = chan.recv(_RECVSZ)
-                    if isinstance(data, bytes):
-                        data = data.decode('utf-8', 'replace')
-                    got.append(data)
-                    if this is not None and re.search(r'{}\s?$'.format(this),
-                                                      data):
-                        break
-            return got
+            if sleep:
+                time.sleep(sleep)
+            if isinstance(data, bytes):
+                data = data.decode("utf-8", "replace")
+            got.append(data)
+            if this is not None and re.search(r"{}\s?$".format(this), data):
+                break
+        return got
 
     def send(self, data):
         """
@@ -91,7 +90,7 @@ class StartShell(object):
             self._chan.stdin.write(data)
         else:
             self._chan.send(data)
-            self._chan.send('\n')
+            self._chan.send("\n")
 
     def open(self):
         """
@@ -99,31 +98,24 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
-        junos = self._nc
-
         if self.ON_JUNOS is True:
-            self._chan = subprocess.Popen(['cli', 'start', 'shell'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            self._chan = subprocess.Popen(
+                ["cli", "start", "shell"],
+                shell=False,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+            )
         else:
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(hostname=junos.hostname,
-                           port=(22, junos._port)[junos.hostname == 'localhost'],
-                           username=junos._auth_user,
-                           password=junos._auth_password,
-                           )
+            self._client = open_ssh_client(dev=self._nc)
+            self._chan = self._client.invoke_shell()
 
-            chan = client.invoke_shell()
-            self._client = client
-            self._chan = chan
-
-            got = self.wait_for(r'(%|>|#)')
+            got = self.wait_for(r"(%|>|#|\$)")
             if got[-1].endswith(_JUNOS_PROMPT):
-                self.send('start shell')
+                self.send("start shell")
                 self.wait_for(_SHELL_PROMPT)
 
     def close(self):
-        """ Close the SSH client channel """
+        """Close the SSH client channel"""
 
         if self.ON_JUNOS is True:
             self._chan.terminate()
@@ -131,7 +123,7 @@ class StartShell(object):
             self._chan.close()
             self._client.close()
 
-    def run(self, command, this=_SHELL_PROMPT, timeout=0):
+    def run(self, command, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Run a shell command and wait for the response.  The return is a
         tuple. The first item is True/False if exit-code is 0.  The second
@@ -147,6 +139,11 @@ class StartShell(object):
           to individual run call. If ``this`` is provided with None value,
           function will wait till timeout value to grab all the content from
           command output.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: (last_ok, result of the executed shell command (str) )
 
@@ -166,22 +163,22 @@ class StartShell(object):
         # run the command and capture the output
         self.send(command)
         if self.ON_JUNOS is True:
-            got = ''.join(self.wait_for(this=']]>]]>', timeout=timeout))
-            self.send('echo $?')
-            rc = ''.join(self.wait_for(this=']]>]]>'))
-            self.last_ok = rc.find('0') > 0
+            got = "".join(self.wait_for(this="]]>]]>", timeout=timeout))
+            self.send("echo $?")
+            rc = "".join(self.wait_for(this="]]>]]>"))
+            self.last_ok = rc.find("0") > 0
         else:
-            got = ''.join(self.wait_for(this, timeout))
+            got = "".join(self.wait_for(this, timeout, sleep=sleep))
             self.last_ok = False
             if this is None:
-                self.last_ok = got is not ''
+                self.last_ok = got is not ""
             elif this != _SHELL_PROMPT:
-                self.last_ok = re.search(r'{}\s?$'.format(this), got) is not None
-            elif re.search(r'{}\s?$'.format(_SHELL_PROMPT), got) is not None:
+                self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
+            elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
                 # use $? to get the exit code of the command
-                self.send('echo $?')
-                rc = ''.join(self.wait_for(_SHELL_PROMPT))
-                self.last_ok = rc.find('0') > 0
+                self.send("echo $?")
+                rc = "".join(self.wait_for(_SHELL_PROMPT))
+                self.last_ok = rc.find("\r\n0\r\n") > 0
         return (self.last_ok, got)
 
     # -------------------------------------------------------------------------

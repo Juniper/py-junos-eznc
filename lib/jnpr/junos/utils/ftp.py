@@ -30,9 +30,12 @@ class FTP(ftplib.FTP):
 
         self._junos = junos
         self._ftpargs = ftpargs
-        ftplib.FTP.__init__(self, self._junos._hostname,
-                            self._junos._auth_user,
-                            self._junos._auth_password)
+        ftplib.FTP.__init__(
+            self,
+            self._junos._hostname,
+            self._junos._auth_user,
+            self._junos._auth_password,
+        )
 
     # dummy function, as connection is created by ftb lib in __init__ only
     def open(self):
@@ -52,26 +55,30 @@ class FTP(ftplib.FTP):
         """
 
         try:
-            mat = re.search('^.*/(.*)$', local_file)
+            mat = re.search("^.*/(.*)$", local_file)
             if mat:
                 if not remote_path:
-                    remote_file = '/tmp/' + mat.group(1)
+                    remote_file = "/tmp/" + mat.group(1)
                 else:
-                    if re.search('^.*/(.*)$', remote_path) and \
-                            re.search('\.\w+$', remote_path):
+                    if re.search("^.*/(.*)$", remote_path) and re.search(
+                        "\.\w+$", remote_path
+                    ):
                         remote_file = remote_path
                         # Looks like remote path is given as file location
                     else:
                         remote_file = os.path.join(remote_path, mat.group(1))
             else:
                 if not remote_path:
-                    remote_file = os.path.join('/tmp/', local_file)
+                    remote_file = os.path.join("/tmp/", local_file)
                 else:
                     remote_file = os.path.join(remote_path, local_file)
 
-            self.storbinary(cmd='STOR ' + remote_file,
-                                fp=open(local_file, 'rb'),
-                                callback=self._ftpargs.get('callback'))
+            with open(local_file, "rb") as open_local_file:
+                self.storbinary(
+                    cmd="STOR " + remote_file,
+                    fp=open_local_file,
+                    callback=self._ftpargs.get("callback"),
+                )
         except Exception as ex:
             logger.error(ex)
             return False
@@ -90,20 +97,28 @@ class FTP(ftplib.FTP):
         :returns: True if the transfer succeeds, else False
         """
         if os.path.isdir(local_path):
-            mat = re.search('^.*/(.*)$', remote_file)
+            mat = re.search("^.*/(.*)$", remote_file)
             if mat:
                 local_file = os.path.join(local_path, mat.group(1))
             else:
                 local_file = local_path
         else:
             local_file = local_path
-        try:
-            self.retrbinary('RETR ' + remote_file,
-                            open(local_file, 'wb').write)
-        except Exception as ex:
-            logger.error(ex)
-            return False
-        return True
+
+        with open(local_file, "wb") as local_fh:
+            args_callback = self._ftpargs.get("callback")
+
+            def callback(data):
+                local_fh.write(data)
+                if args_callback:
+                    args_callback(data)
+
+            try:
+                self.retrbinary("RETR " + remote_file, callback)
+            except Exception as ex:
+                logger.error(ex)
+                return False
+            return True
 
     # -------------------------------------------------------------------------
     # CONTEXT MANAGER

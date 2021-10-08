@@ -1,0 +1,371 @@
+<output>
+SENT: Ukern command: show toe pfe 0 xm 0 toe-inst 0 packet-stats
+
+   elapsed time: 101.673
+
+Stream 0: halt flag is NOT set
+   TX Packets
+      accepted:        0000000012665916
+      transferred:     0000000012665916
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000012665916
+      completed:       0000000012665916
+   TX Rates:
+      packets per second: 1
+      descriptors per second: 1
+      bytes per second: 34
+      descriptors completed since last count:   102
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000012665827
+   RX Descriptors:
+      completed:       0000000012665827
+      recycled:        0000000012665827
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 1
+      descriptors per second: 1
+      bytes per second: 34
+      completed since last count:  102
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 1: halt flag is NOT set
+   TX Packets
+      accepted:        0000000012665916
+      transferred:     0000000012665916
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000012665916
+      completed:       0000000012665916
+   TX Rates:
+      packets per second: 1
+      descriptors per second: 1
+      bytes per second: 34
+      descriptors completed since last count:   102
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000012665827
+   RX Descriptors:
+      completed:       0000000012665827
+      recycled:        0000000012665827
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 1
+      descriptors per second: 1
+      bytes per second: 34
+      completed since last count:  102
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 2: halt flag is NOT set
+   TX Packets
+      accepted:        0000000000000000
+      transferred:     0000000000000000
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000000000000
+      completed:       0000000000000000
+   TX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      descriptors completed since last count:   0
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000000000000
+   RX Descriptors:
+      completed:       0000000000000000
+      recycled:        0000000000000000
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      completed since last count:  0
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 3: halt flag is NOT set
+   TX Packets
+      accepted:        0000000000000000
+      transferred:     0000000000000000
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000000000000
+      completed:       0000000000000000
+   TX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      descriptors completed since last count:   0
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000000000000
+   RX Descriptors:
+      completed:       0000000000000000
+      recycled:        0000000000000000
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      completed since last count:  0
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 4: halt flag is NOT set
+   TX Packets
+      accepted:        0000000070932350
+      transferred:     0000000070932350
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000070932350
+      completed:       0000000070932350
+   TX Rates:
+      packets per second: 5
+      descriptors per second: 5
+      bytes per second: 301
+      descriptors completed since last count:   586
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000067151069
+   RX Descriptors:
+      completed:       0000000067151069
+      recycled:        0000000067151069
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 5
+      descriptors per second: 5
+      bytes per second: 367
+      completed since last count:  552
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 5: halt flag is NOT set
+   TX Packets
+      accepted:        0000000000000000
+      transferred:     0000000000000000
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000000000000
+      completed:       0000000000000000
+   TX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      descriptors completed since last count:   0
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000000000000
+   RX Descriptors:
+      completed:       0000000000000000
+      recycled:        0000000000000000
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      completed since last count:  0
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 6: halt flag is NOT set
+   TX Packets
+      accepted:        0000000000000000
+      transferred:     0000000000000000
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000000000000
+      completed:       0000000000000000
+   TX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      descriptors completed since last count:   0
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000000000000
+   RX Descriptors:
+      completed:       0000000000000000
+      recycled:        0000000000000000
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      completed since last count:  0
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+
+Stream 7: halt flag is NOT set
+   TX Packets
+      accepted:        0000000000000000
+      transferred:     0000000000000000
+      rejected:        0000000000000000
+   TX Descriptors
+      accepted:        0000000000000000
+      completed:       0000000000000000
+   TX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      descriptors completed since last count:   0
+   TX Errors:
+      FIFO not initialized:        0000000000000000
+      head descriptor invalid:     0000000000000000
+      init descriptor idx invalid: 0000000000000000
+      packet null:                 0000000000000000
+      packet buffer out of range:  0000000000000000
+      packet length out of range:  0000000000000000
+
+
+   RX Packets:
+      accepted:        0000000000000000
+   RX Descriptors:
+      completed:       0000000000000000
+      recycled:        0000000000000000
+      recycle fails:   0000000000000000
+   RX Rates:
+      packets per second: 0
+      descriptors per second: 0
+      bytes per second: 0
+      completed since last count:  0
+   RX Errors:
+      SOP/prev packet: 0000000000000000
+      no prev packet:  0000000000000000
+      no start packet: 0000000000000000
+      init descriptor idx invalid: 0000000000000000
+   Other errors:
+      Chip start fail: 0000000000000000
+
+
+Other errors:
+   RX descriptor error flag: 0
+rx tag found in packet buffer: 0x0
+rx addr mismatch found in packet buffer: 0x0
+rx packets remaining: 0x0
+
+
+TOE chip:
+   Current TOE status: TOE thread 0 status:
+
+Good! (Status code 0x4 Packet Transfer: completed meta-data DMA to ASIC)
+XM TOE pfe 0 asic 0 toe 0 thread 0 current PC: 0x00000a40
+XM TOE pfe 0 asic 0 toe 0 thread 0 reset reg contains 0x00000000
+XM TOE pfe 0 asic 0 toe 0 thread 0 reset PC reg contains 0x00000000
+XM TOE pfe 0 asic 0 toe 0 thread 0 stall reg contains 0x00000000
+TOE congestion:
+   No space in TOE TX packet FIFO: 0
+   No space in driver RX descriptor FIFO: 0
+
+
+   total captured tokens: 0000000130480204
+   total nacked tokens:   0000000000000000
+</output>

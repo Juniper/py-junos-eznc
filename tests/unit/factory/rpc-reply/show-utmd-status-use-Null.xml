@@ -1,0 +1,5 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/19.4I0/junos" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="urn:uuid:d002acd0-0f28-4ba2-a78c-042aeb5cc910">
+<utmd-status xmlns="http://xml.juniper.net/junos/19.4I0/junos-utmd">
+<running/>
+</utmd-status>
+</rpc-reply>

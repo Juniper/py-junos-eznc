@@ -1,0 +1,10 @@
+---
+HostlbStatusSummaryTable:
+  command: show host_loopback status-summary
+  target: Null
+  view: HostlbStatusSummaryView
+
+HostlbStatusSummaryView:
+  exists:
+    no-detected-wedges: No detected wedges
+    no-toolkit-errors: No toolkit errors

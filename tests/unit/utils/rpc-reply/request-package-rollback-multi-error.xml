@@ -1,22 +1,22 @@
-﻿<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/14.2I0/junos">
     <multi-routing-engine-results>
 
-		<multi-routing-engine-item>
+                <multi-routing-engine-item>
 
-			<re-name>fpc0</re-name>
+                        <re-name>fpc0</re-name>
 
-			<output>JUNOS version "D10.2" will become active at next reboot</output>
-			<package-result>0</package-result>
-		</multi-routing-engine-item>	
-        
+                        <output>JUNOS version "D10.2" will become active at next reboot</output>
+                        <package-result>0</package-result>
+                </multi-routing-engine-item>
+
         <multi-routing-engine-item>
-            
+
             <re-name>member1</re-name>
-            
+
             <output>ERROR: cannot locate jroute-14.2I20140424_0657_ramas: rollback aborted</output>
             <package-result>1</package-result>
         </multi-routing-engine-item>
-        
+
     </multi-routing-engine-results>
     <cli>
         <banner>{master:member1-re0}</banner>

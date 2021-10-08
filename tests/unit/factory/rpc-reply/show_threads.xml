@@ -1,0 +1,136 @@
+<output>
+SENT: Ukern command: show threads
+
+PID PR State     Name                   Stack Use  Time (Last/Max/Total) cpu
+--- -- -------   ---------------------  ---------  ---------------------
+  1 H  asleep    Maintenance            368/2056   0/0/99 ms  0%
+  2 L  running   Idle                   320/2056   0/0/131149992 ms 82%
+  3 H  asleep    Timer Services         312/2048   0/0/49989 ms  0%
+  5 L  asleep    Ukern Syslog           312/4104   0/0/0 ms  0%
+  6 L  asleep    Heap Accouting         496/4096   0/1/40191 ms  0%
+  7 L  asleep    Sheaf Background       400/2048   0/0/300 ms  0%
+  8 H  asleep    IGMP                  1248/16392  0/66/26330 ms  0%
+  9 H  asleep    IPv4 PFE Control Background   296/8192   0/0/0 ms  0%
+ 10 M  asleep    OTN                    376/8192   0/0/1063 ms  0%
+ 11 M  asleep    GR253                  408/4104   0/0/903 ms  0%
+ 12 M  asleep    CXP                    360/4096   0/0/1112 ms  0%
+ 13 M  asleep    QSFP                   472/4104   0/0/1150 ms  0%
+ 14 M  asleep    DCC Background         280/4104   0/0/0 ms  0%
+ 15 M  asleep    DSX50ms                328/4096   0/0/17600 ms  0%
+ 16 M  asleep    DSXonesec              320/4104   0/0/756 ms  0%
+ 17 M  asleep    mac_db                 296/8200   0/0/0 ms  0%
+ 18 M  asleep    RSMON syslog thread   2392/4096   0/35/59367 ms  0%
+ 19 M  asleep    MSA300PIN              376/4104   0/0/146 ms  0%
+ 20 M  asleep    CFP                    384/4096   0/0/1273 ms  0%
+ 21 M  asleep    XFP                    360/4104   0/0/608 ms  0%
+ 22 M  asleep    SFP                   1720/4104   0/8/337173 ms  0%
+ 23 L  asleep    Firmware Upgrade       320/4096   0/0/0 ms  0%
+ 24 L  asleep    Syslog                 840/4096   0/0/117 ms  0%
+ 25 M  asleep    50ms Periodic          224/8200   0/0/0 ms  0%
+ 26 M  asleep    100ms Periodic         224/8192   0/0/0 ms  0%
+ 27 M  asleep    1s Medium Periodic     632/8200   0/0/8820 ms  0%
+ 28 M  asleep    10s Medium Periodic    320/8192   0/0/122 ms  0%
+ 29 L  asleep    1s Low Periodic        848/8200   0/0/1819 ms  0%
+ 30 L  asleep    10s Low Periodic       320/8192   0/0/1655 ms  0%
+ 31 M  asleep    TTRACE Creator         360/4096   0/0/0 ms  0%
+ 32 M  asleep    TTRACE Tracer          432/4104   0/0/0 ms  0%
+ 33 L  asleep    LKUP ASIC Wedge poll thread   696/4096   0/0/55554 ms  0%
+ 34 L  asleep    TOE Coredump           408/4096   0/0/0 ms  0%
+ 35 L  asleep    L2PD                   392/4104   0/0/28004 ms  0%
+ 36 L  asleep    PQ3 PCI Periodic      1472/8192   0/0/693 ms  0%
+ 37 M  asleep    Host Loopback Periodic   448/8200   0/0/6066 ms  0%
+ 38 M  asleep    HSL2                   944/4096   0/1/285336 ms  0%
+ 39 H  asleep    TCP Timers            1352/8200   0/0/57676 ms  0%
+ 40 H  asleep    TCP Receive           1760/8192   0/1/78024 ms  0%
+ 41 H  asleep    TNP Hello              504/2048   0/0/5402 ms  0%
+ 42 M  asleep    UDP Input              280/2048   0/0/28 ms  0%
+ 43 H  asleep    TTP Receive           1896/4096   0/0/17950 ms  0%
+ 44 H  asleep    TTP Transmit          1504/4104   0/0/106226 ms  0%
+ 45 H  asleep    RDP Timers             208/4096   0/0/0 ms  0%
+ 46 H  asleep    RDP Input              280/2056   0/0/0 ms  0%
+ 47 M  asleep    RCM Pfe Manager        824/4104   0/0/1 ms  0%
+ 48 L  asleep    CLNS Err Input         280/4096   0/0/0 ms  0%
+ 49 L  asleep    CLNS Option Input      280/4104   0/0/0 ms  0%
+ 50 H  asleep    L2TP-SF KA Transmit    296/4096   0/0/0 ms  0%
+ 51 M  asleep    RPM Msg thread         304/8200   0/0/0 ms  0%
+ 52 M  asleep    RFC2544 periodic       392/8192   0/0/1019 ms  0%
+ 53 H  asleep    Pfesvcsor              584/8192   0/0/31 ms  0%
+ 54 M  asleep    PIC Periodic          1784/8200   0/2/543955 ms  0%
+ 55 M  asleep    PIC                    208/4096   0/0/0 ms  0%
+ 56 M  asleep    TNPC CM               8576/16392  0/356/1578719 ms  0%
+ 57 H  asleep    zlTsEngTaskzl303xx     640/8192   0/0/49053 ms  0%
+ 58 L  asleep    zlTodMgrTaskzl303xx    904/8200   0/0/0 ms  0%
+ 59 L  asleep    zlTimerTaskzl303xx     792/8192   0/0/87768 ms  0%
+ 60 M  asleep    zlPtpTaskzl303xx       968/8200   0/0/34556 ms  0%
+ 61 H  asleep    zlInt08Taskzl303xx     824/4104   0/0/2933830 ms  1%
+ 62 M  asleep    zlInt09Taskzl303xx     696/4104   0/0/3386 ms  0%
+ 63 L  asleep    zlAprTaskzl303xx       640/8192   0/0/218506 ms  0%
+ 64 L  asleep    zlSpllTaskzl303xx     1912/8200   0/0/34476 ms  0%
+ 65 L  asleep    zlTxTsMgrTaskzl303xx   728/8192   0/0/213870 ms  0%
+ 66 M  asleep    zlPktTxSchedTaskzl303xx   728/8200   0/0/89916 ms  0%
+ 67 L  asleep    zlHybridTaskzl303xx   1536/8200   0/0/0 ms  0%
+ 68 M  asleep    CLKSYNC Manager       1744/8192   0/0/465 ms  0%
+ 69 M  asleep    RDMAN                 1520/4104   0/0/3714 ms  0%
+ 70 H  asleep    CFM Manager           1216/32768  0/0/85379 ms  0%
+ 71 M  asleep    CFM Data thread       1384/8192   0/0/0 ms  0%
+ 72 M  asleep    PPM Manager           4720/8192   0/0/468 ms  0%
+ 73 M  asleep    PPM Data thread       1672/16384  0/0/18263 ms  0%
+ 74 L  asleep    IFCM                  1408/4104   0/0/1216 ms  0%
+ 75 M  asleep    VRRP Manager          1432/8192   1/1/1 ms  0%
+ 76 M  asleep    L2ALM Manager         2184/8200   0/0/5057 ms  0%
+ 78 L  asleep    ICMP6 Input            480/4104   0/0/0 ms  0%
+ 79 L  asleep    IP6 Option Input      1400/4096   0/0/0 ms  0%
+ 80 L  asleep    ICMP Input            1104/4104   0/0/0 ms  0%
+ 81 L  asleep    IP Option Input       1384/4096   0/0/0 ms  0%
+ 82 M  asleep    IGMP Input            1384/4096   0/0/0 ms  0%
+ 83 L  asleep    DFW Alert              688/4104   0/0/818 ms  0%
+ 84 L  asleep    cos halp stats daemon  1344/4104   0/1/306490 ms  0%
+ 85 L  asleep    NH Probe Service       304/4104   0/0/26 ms  0%
+ 86 L  asleep    IPC Test Daemon        672/2048   0/0/0 ms  0%
+ 87 M  asleep    PFE Manager           8240/32768  0/163/80214 ms  0%
+ 88 L  asleep    PFEMAN Service Thread  1176/16392  0/0/0 ms  0%
+ 89 L  asleep    PFEMAN SRRD Thread    2024/16384  0/1/96 ms  0%
+ 90 H  asleep    SNTP Daemon           1488/8200   0/0/83 ms  0%
+ 92 L  asleep    Console               2336/16392  0/0/0 ms  0%
+ 93 L  asleep    Console               2336/16384  0/0/0 ms  0%
+ 94 M  asleep    PFE Statistics        6392/16384  0/1/314257 ms  0%
+ 95 L  asleep    VBF Walker             352/16384  0/0/0 ms  0%
+ 96 L  asleep    VBF MC Purge           256/8192   0/0/0 ms  0%
+ 98 M  asleep    PZARB Timeout          336/4096   0/0/0 ms  0%
+ 99 L  asleep    LU Background Service   968/4096   0/1/7548118 ms  4%
+100 L  asleep    LKUP ASIC UCODE Rebalance Service  1760/4104   0/4/1757267 ms  1%
+101 M  asleep    PZARB Timeout          336/4096   0/0/0 ms  0%
+102 M  asleep    XM Chip Generic       1152/4096   0/0/12140 ms  0%
+103 L  asleep    XM Chip Statistics     816/4104   0/1/1300832 ms  0%
+104 M  asleep    XM Chip Wedge Detection and Recovery  2728/4104   0/0/6012 ms  0%
+105 M  asleep    PZARB Timeout          336/4104   0/0/0 ms  0%
+106 M  asleep    PZARB Timeout          320/4096   0/0/0 ms  0%
+108 M  asleep    XM Chip Generic       1152/4104   0/0/12503 ms  0%
+109 L  asleep    XM Chip Statistics     816/4096   0/1/1336862 ms  0%
+110 M  asleep    XM Chip Wedge Detection and Recovery  2728/4104   0/0/6524 ms  0%
+112 M  asleep    Cassis Free Timer      480/4096   0/1/5869586 ms  3%
+113 M  asleep    JNH Partition Mem Recovery  1048/4096   0/0/4003 ms  0%
+114 M  asleep    LU-CNTR Reader         392/8200   0/0/29 ms  0%
+115 M  asleep    Stats Page Ager        384/8192   0/0/139 ms  0%
+116 H  asleep    Cube Server           1392/4096   0/0/4554 ms  0%
+117 L  asleep    IP Reassembly         2224/4096   1/1/24616 ms  0%
+118 M  asleep    Services TOD          1656/4096   0/1/21858 ms  0%
+119 M  asleep    Trap_Info Read PFE 0.0   704/4096   0/0/528 ms  0%
+120 M  asleep    Trap_Info Read PFE 0.1   704/4096   0/0/509 ms  0%
+121 M  asleep    Services TOD          1656/4104   0/1/22103 ms  0%
+122 M  asleep    Trap_Info Read PFE 1.0   704/4104   0/0/1498 ms  0%
+123 M  asleep    Trap_Info Read PFE 1.1   704/4104   0/0/1454 ms  0%
+124 L  asleep    JNH Exception Counter Background Thread  1640/4096   0/3/38066 ms  0%
+125 L  asleep    DDOS Policers         2560/4096   0/3/751495 ms  0%
+126 L  asleep    jnh errors daemon      376/4104   0/0/156 ms  0%
+127 L  asleep    JNH KA Transmit       1504/4104   0/0/4212 ms  0%
+128 L  asleep    VBF PFE Events         352/4104   7/7/7 ms  0%
+129 M  asleep    bulkget Manager       4920/8200   0/0/56 ms  0%
+131 M  asleep    PRECL Chip Generic     512/4104   0/0/2110 ms  0%
+132 M  asleep    PRECL Chip Generic     512/4104   0/0/2149 ms  0%
+133 M  asleep    PRECL Chip Generic     512/4096   0/0/2171 ms  0%
+134 M  asleep    PRECL Chip Generic     512/4096   0/0/1940 ms  0%
+1659 L  asleep    Virtual Console        944/32768  0/0/0 ms  0%
+2724 L  ready     Cattle-Prod Daemon    4272/32768  0/0/5 ms  0%
+2725 L  asleep    Cattle-Prod Daemon    2128/32776  0/0/0 ms  0%
+</output>

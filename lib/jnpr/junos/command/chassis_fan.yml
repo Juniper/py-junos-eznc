@@ -1,0 +1,10 @@
+ChassisFanTable:
+    command: show chassis fan
+    key: fan-name
+    view: ChassisFanView
+ChassisFanView:
+    columns:
+        fan-name: Item
+        fan-status: Status
+        fan-rpm: RPM
+        fan-measurement: Measurement

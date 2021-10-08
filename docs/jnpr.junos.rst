@@ -3,12 +3,9 @@ jnpr.junos
 
 .. toctree::
    :maxdepth: 1
-   
-   jnpr.junos.cfg    
+
    jnpr.junos.factory
    jnpr.junos.facts
-   jnpr.junos.op
-   jnpr.junos.resources
    jnpr.junos.utils
 
 

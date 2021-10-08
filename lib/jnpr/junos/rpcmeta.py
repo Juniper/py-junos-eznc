@@ -13,9 +13,9 @@ class _RpcMetaExec(object):
 
     def __init__(self, junos):
         """
-          ~PRIVATE CLASS~
-          creates an RPC meta-executor object bound to the provided
-          ez-netconf :junos: object
+        ~PRIVATE CLASS~
+        creates an RPC meta-executor object bound to the provided
+        ez-netconf :junos: object
         """
         self._junos = junos
 
@@ -23,8 +23,15 @@ class _RpcMetaExec(object):
     # get_config
     # -----------------------------------------------------------------------
 
-    def get_config(self, filter_xml=None, options={}, model=None,
-                   namespace=None, remove_ns=True, **kwargs):
+    def get_config(
+        self,
+        filter_xml=None,
+        options={},
+        model=None,
+        namespace=None,
+        remove_ns=True,
+        **kwargs
+    ):
         """
         retrieve configuration from the Junos device
 
@@ -103,10 +110,12 @@ class _RpcMetaExec(object):
                         remove_ns=False)
         """
 
-        nmspaces = {'openconfig': "http://openconfig.net/yang/",
-                    'ietf': "urn:ietf:params:xml:ns:yang:ietf-"}
+        nmspaces = {
+            "openconfig": "http://openconfig.net/yang/",
+            "ietf": "urn:ietf:params:xml:ns:yang:ietf-",
+        }
 
-        rpc = E('get-configuration', options)
+        rpc = E("get-configuration", options)
 
         if filter_xml is not None:
             if not isinstance(filter_xml, etree._Element):
@@ -114,24 +123,27 @@ class _RpcMetaExec(object):
                     filter_xml = etree.XML(filter_xml)
                 else:
                     filter_data = None
-                    for tag in filter_xml.split('/')[::-1]:
-                        filter_data = E(tag) if filter_data is None else E(
-                            tag,
-                            filter_data)
+                    for tag in filter_xml.split("/")[::-1]:
+                        filter_data = (
+                            E(tag) if filter_data is None else E(tag, filter_data)
+                        )
                     filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
             # it does not already have one (not in case of yang model config)
-            if (filter_xml.tag != 'configuration' and model is None and
-               namespace is None):
-                etree.SubElement(rpc, 'configuration').append(filter_xml)
+            if (
+                filter_xml.tag != "configuration"
+                and model is None
+                and namespace is None
+            ):
+                etree.SubElement(rpc, "configuration").append(filter_xml)
             else:
                 if model is not None or namespace is not None:
-                    if model == 'custom' and namespace is None:
-                        raise AttributeError('For "custom" model, '
-                                             'explicitly provide "namespace"')
-                    ns = namespace or (nmspaces.get(model.lower()) +
-                                       filter_xml.tag)
-                    filter_xml.attrib['xmlns'] = ns
+                    if model == "custom" and namespace is None:
+                        raise AttributeError(
+                            'For "custom" model, ' 'explicitly provide "namespace"'
+                        )
+                    ns = namespace or (nmspaces.get(model.lower()) + filter_xml.tag)
+                    filter_xml.attrib["xmlns"] = ns
                 rpc.append(filter_xml)
         transform = self._junos.transform
         if remove_ns is False:
@@ -142,10 +154,9 @@ class _RpcMetaExec(object):
             self._junos.transform = transform
         # in case of model provided top level should be data
         # return response
-        if model and filter_xml is None and options.get('format') \
-                is not 'json':
+        if model and filter_xml is None and options.get("format") is not "json":
             response = response.getparent()
-            response.tag = 'data'
+            response.tag = "data"
         return response
 
     # -----------------------------------------------------------------------
@@ -197,13 +208,11 @@ class _RpcMetaExec(object):
         :returns: xml object
         """
         # junos only support filter type to be xpath
-        filter_params = {'type': 'xpath'}
+        filter_params = {"type": "xpath"}
         if filter_select is not None:
-            filter_params['source'] = filter_select
-        rpc = E('get', E('filter', filter_params))
-        return self._junos.execute(rpc,
-                                   ignore_warning=ignore_warning,
-                                   **kwargs)
+            filter_params["source"] = filter_select
+        rpc = E("get", E("filter", filter_params))
+        return self._junos.execute(rpc, ignore_warning=ignore_warning, **kwargs)
 
     # -----------------------------------------------------------------------
     # load_config
@@ -257,20 +266,22 @@ class _RpcMetaExec(object):
 
         <otherwise> :contents: is XML structure
         """
-        rpc = E('load-configuration', options)
+        rpc = E("load-configuration", options)
 
-        if contents is None and 'url' in options:
+        if contents is None and "url" in options:
             pass
-        elif ('action' in options) and (options['action'] == 'set'):
-            rpc.append(E('configuration-set', contents))
-        elif ('format' in options) and (options['format'] == 'text'):
-            rpc.append(E('configuration-text', contents))
-        elif ('format' in options) and (options['format'] == 'json'):
-            rpc.append(E('configuration-json', contents))
+        elif ("action" in options) and (options["action"] == "set"):
+            rpc.append(E("configuration-set", contents))
+        elif ("action" in options) and (options["action"] == "patch"):
+            rpc.append(E("configuration-patch", contents))
+        elif ("format" in options) and (options["format"] == "text"):
+            rpc.append(E("configuration-text", contents))
+        elif ("format" in options) and (options["format"] == "json"):
+            rpc.append(E("configuration-json", contents))
         else:
             # otherwise, it's just XML Element
-            if contents.tag != 'configuration':
-                etree.SubElement(rpc, 'configuration').append(contents)
+            if contents.tag != "configuration":
+                etree.SubElement(rpc, "configuration").append(contents)
             else:
                 rpc.append(contents)
 
@@ -280,10 +291,10 @@ class _RpcMetaExec(object):
     # cli
     # -----------------------------------------------------------------------
 
-    def cli(self, command, format='text', normalize=False):
-        rpc = E('command', command)
-        if format.lower() in ['text', 'json']:
-            rpc.attrib['format'] = format
+    def cli(self, command, format="text", normalize=False):
+        rpc = E("command", command)
+        if format.lower() in ["text", "json"]:
+            rpc.attrib["format"] = format
         return self._junos.execute(rpc, normalize=normalize)
 
     # -----------------------------------------------------------------------
@@ -292,22 +303,27 @@ class _RpcMetaExec(object):
 
     def __getattr__(self, rpc_cmd_name):
         """
-          metaprograms a function to execute the :rpc_cmd_name:
+        metaprograms a function to execute the :rpc_cmd_name:
 
-          the caller will be passing (*vargs, **kvargs) on
-          execution of the meta function; these are the specific
-          rpc command arguments(**kvargs) and options bound
-          as XML attributes (*vargs)
+        the caller will be passing (*vargs, **kvargs) on
+        execution of the meta function; these are the specific
+        rpc command arguments(**kvargs) and options bound
+        as XML attributes (*vargs)
         """
 
-        rpc_cmd = re.sub('_', '-', rpc_cmd_name)
+        rpc_cmd = re.sub("_", "-", rpc_cmd_name)
 
         def _exec_rpc(*vargs, **kvargs):
             # create the rpc as XML command
             rpc = etree.Element(rpc_cmd)
 
             # Gather decorator keywords into dec_args and remove from kvargs
-            dec_arg_keywords = ['dev_timeout', 'normalize', 'ignore_warning']
+            dec_arg_keywords = [
+                "dev_timeout",
+                "normalize",
+                "ignore_warning",
+                "filter_xml",
+            ]
             dec_args = {}
             for keyword in dec_arg_keywords:
                 if keyword in kvargs:
@@ -316,18 +332,21 @@ class _RpcMetaExec(object):
             # kvargs are the command parameter/values
             if kvargs:
                 for arg_name, arg_value in kvargs.items():
-                    arg_name = re.sub('_', '-', arg_name)
+                    arg_name = re.sub("_", "-", arg_name)
                     if not isinstance(arg_value, (tuple, list)):
                         arg_value = [arg_value]
                     for a in arg_value:
-                        if not isinstance(a, (bool, str, unicode)
-                                          if sys.version < '3' else (bool, str)):
-                            raise TypeError("The value %s for argument %s"
-                                            " is of %s. Argument "
-                                            "values must be a string, "
-                                            "boolean, or list/tuple of "
-                                            "strings and booleans." %
-                                            (a, arg_name, str(type(a))))
+                        if not isinstance(
+                            a,
+                            (bool, str, unicode) if sys.version < "3" else (bool, str),
+                        ):
+                            raise TypeError(
+                                "The value %s for argument %s"
+                                " is of %s. Argument "
+                                "values must be a string, "
+                                "boolean, or list/tuple of "
+                                "strings and booleans." % (a, arg_name, str(type(a)))
+                            )
                         if a is not False:
                             arg = etree.SubElement(rpc, arg_name)
                         if not isinstance(a, bool):
@@ -359,10 +378,10 @@ class _RpcMetaExec(object):
 
     def __call__(self, rpc_cmd, **kvargs):
         """
-          callable will execute the provided :rpc_cmd: against the
-          attached :junos: object and return the RPC response per
-          :junos:execute()
+        callable will execute the provided :rpc_cmd: against the
+        attached :junos: object and return the RPC response per
+        :junos:execute()
 
-          kvargs is simply passed 'as-is' to :junos:execute()
+        kvargs is simply passed 'as-is' to :junos:execute()
         """
         return self._junos.execute(rpc_cmd, **kvargs)

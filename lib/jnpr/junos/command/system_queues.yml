@@ -1,0 +1,28 @@
+---
+SystemQueuesOutTable:
+  command: show system queues
+  key: output interface
+  view: SystemQueuesOutView
+
+SystemQueuesOutView:
+  columns:
+    interface: output interface
+    bytes: bytes
+    max-bytes: max
+    packets: packets
+    max-packets: max
+    drops: drops
+
+SystemQueuesINTable:
+  command: show system queues
+  key: input protocol
+  view: SystemQueuesINView
+
+SystemQueuesINView:
+  columns:
+    interface: input protocol
+    bytes: bytes
+    max-bytes: max
+    packets: packets
+    max-packets: max
+    drops: drops
