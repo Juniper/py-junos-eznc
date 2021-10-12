@@ -1110,6 +1110,7 @@ class Device(_Connection):
             or kwargs.get("cs_user") is not None
         ):
             from jnpr.junos.console import Console
+
             if kwargs.get("conn_open_timeout", None):
                 # Console already supports timeout while opening connections
                 # via `timeout` parameter. Refer `Console` documentation
@@ -1213,7 +1214,7 @@ class Device(_Connection):
         :param bool huge_tree:
             *OPTIONAL* parse XML with very deep trees and long text content.
             default is ``False``.
-            
+
         """
 
         # ----------------------------------------
