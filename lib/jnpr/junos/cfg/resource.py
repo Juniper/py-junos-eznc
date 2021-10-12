@@ -8,16 +8,13 @@ from lxml.builder import E
 # package modules
 from jnpr.junos import jxml as JXML
 
-P_JUNOS_EXISTS = '_exists'
-P_JUNOS_ACTIVE = '_active'
+P_JUNOS_EXISTS = "_exists"
+P_JUNOS_ACTIVE = "_active"
 
 
 class Resource(object):
 
-    PROPERTIES = [
-        P_JUNOS_EXISTS,
-        P_JUNOS_ACTIVE
-    ]
+    PROPERTIES = [P_JUNOS_EXISTS, P_JUNOS_ACTIVE]
 
     def __init__(self, junos, namevar=None, **kvargs):
         """
@@ -47,9 +44,9 @@ class Resource(object):
         """
         self._junos = junos
         self._name = namevar
-        self._parent = kvargs.get('parent') or kvargs.get('P')
+        self._parent = kvargs.get("parent") or kvargs.get("P")
         self._opts = kvargs
-        self._manager = kvargs.get('M')
+        self._manager = kvargs.get("M")
 
         if not namevar:
             # then this is a resource-manager instance. setup the list and
@@ -69,7 +66,7 @@ class Resource(object):
         # if this resource manages others, then hook that
         # into the :manages: list
 
-        if hasattr(self, 'MANAGES'):
+        if hasattr(self, "MANAGES"):
             self._manages = self.MANAGES.keys()
             for k, v in self.MANAGES.items():
                 self.__dict__[k] = v(junos, parent=self)
@@ -114,7 +111,7 @@ class Resource(object):
         """
         is this a resource manager?
         """
-        return (self._name is None)
+        return self._name is None
 
     @property
     def is_new(self):
@@ -153,7 +150,7 @@ class Resource(object):
         of manager names attached to this resource, or
         :None: if there are not any
         """
-        if hasattr(self, '_manages'):
+        if hasattr(self, "_manages"):
             return self._manages
         return None
 
@@ -199,22 +196,22 @@ class Resource(object):
 
     @property
     def D(self):
-        """ returns the Device object bound to this resource/manager """
+        """returns the Device object bound to this resource/manager"""
         return self._junos
 
     @property
     def R(self):
-        """ returns the Device RPC meta object """
+        """returns the Device RPC meta object"""
         return self._junos.rpc
 
     @property
     def M(self):
-        """ returns the :Resource: manager associated to this resource """
+        """returns the :Resource: manager associated to this resource"""
         return self._manager
 
     @property
     def P(self):
-        """ returns the parent of the associated Junos object """
+        """returns the parent of the associated Junos object"""
         return self._parent
 
     # -----------------------------------------------------------------------
@@ -262,7 +259,7 @@ class Resource(object):
         if self.is_mgr:
             raise RuntimeError("Not on a manager!")
 
-        if not len(self.should) and 'touch' not in kvargs:
+        if not len(self.should) and "touch" not in kvargs:
             return False
 
         # if this resource did not previously exist,
@@ -381,7 +378,7 @@ class Resource(object):
           before="<name>"
         """
         cmd, name = next(kvargs.iteritems())
-        if cmd != 'before' and cmd != 'after':
+        if cmd != "before" and cmd != "after":
             raise ValueError("Must be either 'before' or 'after'")
 
         xml = self._xml_edit_at_res()
@@ -398,7 +395,7 @@ class Resource(object):
         if not self.is_mgr:
             raise RuntimeError("Only on a manager!")
         del self._rlist[:]
-        self._r_list()      # invoke the specific resource method
+        self._r_list()  # invoke the specific resource method
 
     def catalog_refresh(self):
         """
@@ -440,9 +437,9 @@ class Resource(object):
     # OVERLOADS
     # -----------------------------------------------------------------------
 
-        # ---------------------------------------------------------------------
-        # ITEMS: for read/write of resource managed properties
-        # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # ITEMS: for read/write of resource managed properties
+    # ---------------------------------------------------------------------
 
     def __getitem__(self, namekey):
         """
@@ -456,7 +453,7 @@ class Resource(object):
             # to return resource instance
             # ---------------------------------------------------------------
 
-            self._opts['M'] = self
+            self._opts["M"] = self
             if isinstance(namekey, int):
                 # index, not name
                 namekey = self.list[namekey]
@@ -525,7 +522,7 @@ class Resource(object):
         return self[namekey]
 
     def __setattr__(self, name, value):
-        if hasattr(self, 'properties') and name in self.properties:
+        if hasattr(self, "properties") and name in self.properties:
             # we can set this name/value in the resource property
             self[name] = value
         else:
@@ -538,24 +535,26 @@ class Resource(object):
 
     def __repr__(self):
         """
-          stringify for debug/printing
+        stringify for debug/printing
 
-          this will show the resource manager (class) name,
-          the resource (Junos) name, and the contents
-          of the :has: dict and the contents of the :should: dict
+        this will show the resource manager (class) name,
+        the resource (Junos) name, and the contents
+        of the :has: dict and the contents of the :should: dict
         """
         mgr_name = self.__class__.__name__
-        return "NAME: %s: %s\nHAS: %s\nSHOULD:%s" % \
-            (mgr_name, self._name, pformat(self.has), pformat(self.should)) \
-            if not self.is_mgr \
+        return (
+            "NAME: %s: %s\nHAS: %s\nSHOULD:%s"
+            % (mgr_name, self._name, pformat(self.has), pformat(self.should))
+            if not self.is_mgr
             else "Resource Manager: %s" % mgr_name
+        )
 
         # ---------------------------------------------------------------------
         # ITERATOR
         # ---------------------------------------------------------------------
 
     def __iter__(self):
-        """ iterate through each Resource in the Manager list """
+        """iterate through each Resource in the Manager list"""
         for name in self.list:
             yield self[name]
 
@@ -580,8 +579,7 @@ class Resource(object):
         Create an XML structure that will be used to retrieve
         the resource configuration from the device.
         """
-        raise RuntimeError("Resource missing method: %s" %
-                           self.__class__.__name__)
+        raise RuntimeError("Resource missing method: %s" % self.__class__.__name__)
 
     def _xml_at_res(self, xml):
         """
@@ -594,8 +592,7 @@ class Resource(object):
         <configuration>, and the resource needs to "cursor" at
         the specific resource within that structure
         """
-        raise RuntimeError("Resource missing method: %s" %
-                           self.__class__.__name__)
+        raise RuntimeError("Resource missing method: %s" % self.__class__.__name__)
 
     # -----------------------------------------------------------------------
     # XML writing
@@ -603,9 +600,9 @@ class Resource(object):
 
     def _xml_build_change(self):
         """
-          iterate through the :should: properties creating the
-          necessary configuration change structure.  if there
-          are no changes, then return :None:
+        iterate through the :should: properties creating the
+        necessary configuration change structure.  if there
+        are no changes, then return :None:
         """
         edit_xml = self._xml_edit_at_res()
 
@@ -641,13 +638,13 @@ class Resource(object):
 
     def _r_config_write_xml(self, xml):
         """
-          write the xml change to the Junos device,
-          trapping on exceptions.
+        write the xml change to the Junos device,
+        trapping on exceptions.
         """
         top_xml = xml.getroottree().getroot()
 
         try:
-            result = self._junos.rpc.load_config(top_xml, action='replace')
+            result = self._junos.rpc.load_config(top_xml, action="replace")
         except Exception as err:
             # see if this is OK or just a warning
             if len(err.rsp.xpath('.//error-severity[. = "error"]')):
@@ -668,16 +665,13 @@ class Resource(object):
     # ------------------------------------------------------------------------
 
     def _xml_change_description(self, xml):
-        Resource.xml_set_or_delete(
-            xml,
-            'description',
-            self.should['description'])
+        Resource.xml_set_or_delete(xml, "description", self.should["description"])
         return True
 
     def _xml_change__active(self, xml):
         if self.should[P_JUNOS_ACTIVE] == self.has[P_JUNOS_ACTIVE]:
             return False
-        value = 'active' if self.should[P_JUNOS_ACTIVE] else 'inactive'
+        value = "active" if self.should[P_JUNOS_ACTIVE] else "inactive"
         xml.attrib[value] = value
         return True
 
@@ -763,8 +757,8 @@ class Resource(object):
 
     def _r_when_new(self):
         """
-          called by :read(): when the resource is new; i.e.
-          there is no existing Junos configuration
+        called by :read(): when the resource is new; i.e.
+        there is no existing Junos configuration
         """
         pass
 
@@ -792,10 +786,9 @@ class Resource(object):
     @classmethod
     def _r_has_xml_status(klass, as_xml, as_py):
         """
-          set the 'exists' and 'active' :has: values
+        set the 'exists' and 'active' :has: values
         """
-        as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get(
-            'inactive') else True
+        as_py[P_JUNOS_ACTIVE] = False if as_xml.attrib.get("inactive") else True
         as_py[P_JUNOS_EXISTS] = True
 
     @classmethod
@@ -836,7 +829,8 @@ class Resource(object):
         items give the propery type and associated XML element name
         """
         (adds, dels) = Resource.diff_list(
-            self.has.get(prop_name, []), self.should[prop_name])
+            self.has.get(prop_name, []), self.should[prop_name]
+        )
         for this in adds:
             xml.append(E(element_name, E.name(this)))
         for this in dels:

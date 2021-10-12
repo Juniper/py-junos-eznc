@@ -21,7 +21,7 @@ def open_ssh_client(dev):
 
     config = {}
     kwargs = {}
-    ssh_config = getattr(dev, '_sshconf_path')
+    ssh_config = getattr(dev, "_sshconf_path")
     if ssh_config:
         config = paramiko.SSHConfig()
         with open(ssh_config) as open_ssh_config:
@@ -33,12 +33,16 @@ def open_ssh_client(dev):
         sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
 
     if dev._ssh_private_key_file is not None:
-        kwargs['key_filename'] = dev._ssh_private_key_file
+        kwargs["key_filename"] = dev._ssh_private_key_file
 
-    ssh_client.connect(hostname=dev._hostname,
-                       port=(22, int(dev._port))[dev._hostname == 'localhost'],
-                       username=dev._auth_user,
-                       password=dev._auth_password,
-                       sock=sock, **kwargs
-                       )
+    # pick hostname from .ssh config if any
+    hostname = config.get("hostname", dev._hostname)
+    ssh_client.connect(
+        hostname=hostname,
+        port=(22, int(dev._port))[hostname == "localhost"],
+        username=dev._auth_user,
+        password=dev._auth_password,
+        sock=sock,
+        **kwargs
+    )
     return ssh_client

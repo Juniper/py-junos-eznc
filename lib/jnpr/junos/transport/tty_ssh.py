@@ -15,14 +15,14 @@ logger = logging.getLogger("jnpr.junos.tty_ssh")
 # -------------------------------------------------------------------------
 # Terminal connection over SSH CONSOLE
 # -------------------------------------------------------------------------
-_PROMPT = re.compile(six.b('|').join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
 
 
 class PY6:
-    NEW_LINE = six.b('\n')
-    EMPTY_STR = six.b('')
-    NETCONF_EOM = six.b(']]>]]>')
-    IN_USE = six.b('in use')
+    NEW_LINE = six.b("\n")
+    EMPTY_STR = six.b("")
+    NETCONF_EOM = six.b("]]>]]>")
+    IN_USE = six.b("in use")
 
 
 class SSH(Terminal):
@@ -50,9 +50,9 @@ class SSH(Terminal):
         self._ssh_pre = self._ssh_client_pre()
         self.host = host
         self.port = port
-        self.ssh_private_key_file = kvargs.get('ssh_private_key_file')
-        self.timeout = kvargs.get('timeout', self.TIMEOUT)
-        self.baud = kvargs.get('baud', 9600)
+        self.ssh_private_key_file = kvargs.get("ssh_private_key_file")
+        self.timeout = kvargs.get("timeout", self.TIMEOUT)
+        self.baud = kvargs.get("baud", 9600)
         self._tty_name = "{}:{}".format(host, port)
 
         Terminal.__init__(self, **kvargs)
@@ -76,38 +76,46 @@ class SSH(Terminal):
         # not given a password or an ssh key file.
         # in this condition it means we want to query the agent
         # for available ssh keys
-        allow_agent = bool((self.cs_passwd is None) and
-                           (self.ssh_private_key_file is None))
+        allow_agent = bool(
+            (self.cs_passwd is None) and (self.ssh_private_key_file is None)
+        )
 
         while retry > 0:
             try:
-                self._ssh_pre.connect(hostname=self.host,
-                                      port=int(self.port),
-                                      username=self.cs_user,
-                                      password=self.cs_passwd,
-                                      timeout=self.timeout,
-                                      allow_agent=allow_agent,
-                                      look_for_keys=False,
-                                      key_filename=self.ssh_private_key_file,
-                                      )
+                self._ssh_pre.connect(
+                    hostname=self.host,
+                    port=int(self.port),
+                    username=self.cs_user,
+                    password=self.cs_passwd,
+                    timeout=self.timeout,
+                    allow_agent=allow_agent,
+                    look_for_keys=False,
+                    key_filename=self.ssh_private_key_file,
+                )
                 break
             except socket.error as err:
                 retry -= 1
                 logger.error(
                     "SSH Socket Error: {}. Checking back in: {}".format(
-                        str(err), self.RETRY_BACKOFF))
+                        str(err), self.RETRY_BACKOFF
+                    )
+                )
                 sleep(self.RETRY_BACKOFF)
             except paramiko.BadHostKeyException as err:
                 retry -= 1
                 logger.error(
                     "SSH Bad Host Key Error: {}.Checking back in: {}".format(
-                        str(err), self.RETRY_BACKOFF))
+                        str(err), self.RETRY_BACKOFF
+                    )
+                )
                 sleep(self.RETRY_BACKOFF)
             except paramiko.AuthenticationException as err:
                 retry -= 1
                 logger.error(
-                    "SSH Auth Error: {}. Checking back in: {}".format(str(err),
-                                                                      self.RETRY_BACKOFF))
+                    "SSH Auth Error: {}. Checking back in: {}".format(
+                        str(err), self.RETRY_BACKOFF
+                    )
+                )
                 sleep(self.RETRY_BACKOFF)
         else:
             raise RuntimeError("open_fail: port not ready")
@@ -115,7 +123,7 @@ class SSH(Terminal):
         self._ssh = self._ssh_pre.invoke_shell()
         self._ssh.read_until = self._read_until
         self._rx = self._ssh
-        self.write('\n')
+        self.write("\n")
 
     def _tty_close(self):
         self._ssh_pre.close()
@@ -126,13 +134,13 @@ class SSH(Terminal):
     # -------------------------------------------------------------------------
 
     def write(self, content):
-        """ write content + <ENTER> """
-        logger.debug('Write: %s' % content)
-        self._ssh.sendall(six.b((content + '\n')))
+        """write content + <ENTER>"""
+        logger.debug("Write: %s" % content)
+        self._ssh.sendall(six.b((content + "\n")))
 
     def rawwrite(self, content):
-        """ write content as-is """
-        logger.debug('rawwrite: %s' % content)
+        """write content as-is"""
+        logger.debug("rawwrite: %s" % content)
         # If baud set to 0 write full speed
         if int(self.baud) == 0:
             self._ssh.sendall(content)
@@ -141,20 +149,20 @@ class SSH(Terminal):
         # Write data according to defined baud
         # per 1 byte of data there are 2 additional bits on the line
         # (parity and stop bits)
-        if sys.version >= '3':
-            content = content.decode('utf-8')
+        if sys.version >= "3":
+            content = content.decode("utf-8")
         for char in content:
             self._ssh.sendall(six.b(char))
             wtime = 10 / float(self.baud)
             sleep(wtime)  # do not remove
 
     def read(self):
-        """ read a single line """
-        rxb = six.b('')
+        """read a single line"""
+        rxb = six.b("")
         while True:
             data = self._ssh.recv(self.RECVSZ)
             if data is None or len(data) <= 0:
-                raise ValueError('Unable to detect device prompt')
+                raise ValueError("Unable to detect device prompt")
             elif PY6.NEW_LINE in data:
                 rxb += data.split(PY6.NEW_LINE)[0]
                 break
@@ -172,7 +180,7 @@ class SSH(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b('')
+        rxb = six.b("")
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
@@ -187,11 +195,11 @@ class SSH(Terminal):
                 timeout = time() + self.READ_PROMPT_DELAY
         else:
             return None, None
-        logger.debug('Got: %s' % rxb)
+        logger.debug("Got: %s" % rxb)
         return rxb, found.lastgroup
 
     def _read_until(self, match, timeout=None):
-        rxb = six.b('')
+        rxb = six.b("")
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
