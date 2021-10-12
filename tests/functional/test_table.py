@@ -4,13 +4,13 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import pytest
 
 from jnpr.junos.op.routes import RouteTable
 import json
 
 
-@attr("functional")
+@pytest.mark.functional
 class TestTable(unittest.TestCase):
     @classmethod
     def setUpClass(self):

@@ -5,14 +5,14 @@ try:
 except ImportError:
     import unittest
 
-from nose.plugins.attrib import attr
+import pytest
 from mock import MagicMock, patch
 
 from jnpr.junos.transport.tty import Terminal
 from jnpr.junos import exception as EzErrors
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestTTY(unittest.TestCase):
     def setUp(self):
         logging.getLogger("jnpr.junos.tty")

@@ -1,14 +1,14 @@
 import unittest
 import sys
 
-from nose.plugins.attrib import attr
+import pytest
 from mock import patch
 
 __author__ = "Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
+@pytest.mark.unit
 class TestJunosInit(unittest.TestCase):
     def test_warning(self):
         with patch.object(sys.modules["sys"], "version_info", (2, 6, 3)) as mock_sys:
