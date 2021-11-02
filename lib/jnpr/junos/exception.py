@@ -348,3 +348,25 @@ class JSONLoadError(Exception):
             return "{}(reason: {})".format(self.__class__.__name__, self.ex_msg)
 
     __str__ = __repr__
+
+
+class DCSRpcError(RpcError):
+    """
+    Generated if error is returned from DCS RPC Execution
+    """
+    def __init__(self, cmd, error_code_name, error_code, error, uuid=None):
+        self.error = error
+        self.uuid = uuid
+        self.error_code_name = error_code_name
+        self.error_code = error_code
+        errs = "error-code: '{}' error: '{}'".format(
+            error_code_name, error
+        )
+        RpcError.__init__(self, cmd=cmd, errs=errs)
+
+    def __repr__(self):
+        return "error-code: '{}' error: '{}'".format(
+            self.error_code_name, self.error
+        )
+
+    __str__ = __repr__
