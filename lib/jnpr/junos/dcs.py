@@ -34,7 +34,7 @@ class DCS(_Connection):
                         "uuid": "test1234",
                         "types_pb2": types_pb2,
                         "dcs_pb2": dcs_pb2,
-                        "inventory_pb2": inventory_pb2
+                        "device_info": device_info,
                      }
 
         :param dict grpc_deps:
