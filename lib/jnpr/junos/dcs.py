@@ -146,8 +146,12 @@ class DCS(_Connection):
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
-        request_rpc = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=self._dev_info)
-        res = self._grpc_conn_stub.Get(request=request_rpc, metadata=self._grpc_meta_data)
+        request_rpc = self._grpc_dcs_pb2.GetRequest(
+            command=[rpc_cmd], device_info=self._dev_info
+        )
+        res = self._grpc_conn_stub.Get(
+            request=request_rpc, metadata=self._grpc_meta_data
+        )
         if res.error_code != self._grpc_types_pb2.NoError:
             raise EzErrors.DCSRpcError(
                 cmd=rpc_cmd,
