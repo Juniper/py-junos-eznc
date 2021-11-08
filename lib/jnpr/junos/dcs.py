@@ -28,11 +28,14 @@ class DCS(_Connection):
         """
         DCS/EMS object constructor.
 
-        grpc_deps = {"meta_data": meta_data,
-                     "stub": css,
-                     "uuid": "test1234",
-                     "types_pb2": types_pb2,
-                     "dcs_pb2": dcs_pb2}
+        grpc_deps = {
+                        "meta_data": meta_data,
+                        "stub": css,
+                        "uuid": "test1234",
+                        "types_pb2": types_pb2,
+                        "dcs_pb2": dcs_pb2,
+                        "device_info": device_info,
+                     }
 
         :param dict grpc_deps:
             **REQUIRED** gRPC call dependencies
@@ -53,6 +56,7 @@ class DCS(_Connection):
         self._grpc_types_pb2 = self._grpc_deps.get("types_pb2")
         self._grpc_dcs_pb2 = self._grpc_deps.get("dcs_pb2")
         self._dev_uuid = self._grpc_deps.get("uuid")
+        self._dev_info = self._grpc_deps.get("device_info")
 
         self.junos_dev_handler = JunosDeviceHandler(
             device_params={"name": "junos", "local": False}
@@ -142,15 +146,19 @@ class DCS(_Connection):
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
-        di = self._grpc_types_pb2.DeviceInfo(UUID=self._dev_uuid, component="JUNOS")
-        exec = self._grpc_dcs_pb2.GetRequest(command=[rpc_cmd], device_info=di)
-        res = self._grpc_conn_stub.Get(request=exec, metadata=self._grpc_meta_data)
+        request_rpc = self._grpc_dcs_pb2.GetRequest(
+            command=[rpc_cmd], device_info=self._dev_info
+        )
+        res = self._grpc_conn_stub.Get(
+            request=request_rpc, metadata=self._grpc_meta_data
+        )
         if res.error_code != self._grpc_types_pb2.NoError:
-            raise EzErrors.RpcError(
+            raise EzErrors.DCSRpcError(
                 cmd=rpc_cmd,
-                errs="error-code: '{}' error: '{}'".format(
-                    self._grpc_types_pb2.ErrorCode.Name(res.error_code), res.error
-                ),
+                error_code_name=self._grpc_types_pb2.ErrorCode.Name(res.error_code),
+                error_code=res.error_code,
+                error=res.error,
+                uuid=self._dev_uuid,
             )
         result = res.result[0].result
         reply = RPCReply(result)
