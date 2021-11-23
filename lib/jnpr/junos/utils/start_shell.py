@@ -2,6 +2,7 @@ from select import select
 import re
 import datetime
 from jnpr.junos.utils.ssh_client import open_ssh_client
+import subprocess
 
 _JUNOS_PROMPT = "> "
 _SHELL_PROMPT = "(%|#|\$)\s"
@@ -35,8 +36,9 @@ class StartShell(object):
         self.timeout = timeout
         self._client = None
         self._chan = None
+        self.ON_JUNOS = self._nc.__class__.ON_JUNOS
 
-    def wait_for(self, this=_SHELL_PROMPT, timeout=0):
+    def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Wait for the result of the command, expecting **this** prompt.
 
@@ -45,6 +47,11 @@ class StartShell(object):
         :param int timeout:
           Timeout value in seconds to wait for expected string/pattern.
           If not specified defaults to self.timeout.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: resulting string of data in a list
         :rtype: list
@@ -56,14 +63,19 @@ class StartShell(object):
         timeout = timeout or self.timeout
         timeout = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
         while timeout > datetime.datetime.now():
-            rd, wr, err = select([chan], [], [], _SELECT_WAIT)
-            if rd:
-                data = chan.recv(_RECVSZ)
-                if isinstance(data, bytes):
-                    data = data.decode("utf-8", "replace")
-                got.append(data)
-                if this is not None and re.search(r"{}\s?$".format(this), data):
-                    break
+            if self.ON_JUNOS is True:
+                data = chan.stdout.readline()
+            else:
+                rd, wr, err = select([chan], [], [], _SELECT_WAIT)
+                if rd:
+                    data = chan.recv(_RECVSZ)
+            if sleep:
+                time.sleep(sleep)
+            if isinstance(data, bytes):
+                data = data.decode("utf-8", "replace")
+            got.append(data)
+            if this is not None and re.search(r"{}\s?$".format(this), data):
+                break
         return got
 
     def send(self, data):
@@ -73,8 +85,12 @@ class StartShell(object):
         :param str data: the data to write out onto the shell.
         :returns: result of SSH channel send
         """
-        self._chan.send(data)
-        self._chan.send("\n")
+        if self.ON_JUNOS is True:
+            data += " && echo ']]>]]>' \n"
+            self._chan.stdin.write(data)
+        else:
+            self._chan.send(data)
+            self._chan.send("\n")
 
     def open(self):
         """
@@ -82,20 +98,32 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
-        self._client = open_ssh_client(dev=self._nc)
-        self._chan = self._client.invoke_shell()
+        if self.ON_JUNOS is True:
+            self._chan = subprocess.Popen(
+                ["cli", "start", "shell"],
+                shell=False,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+            )
+        else:
+            self._client = open_ssh_client(dev=self._nc)
+            self._chan = self._client.invoke_shell()
 
-        got = self.wait_for(r"(%|>|#|\$)")
-        if got[-1].endswith(_JUNOS_PROMPT):
-            self.send("start shell")
-            self.wait_for(_SHELL_PROMPT)
+            got = self.wait_for(r"(%|>|#|\$)")
+            if got[-1].endswith(_JUNOS_PROMPT):
+                self.send("start shell")
+                self.wait_for(_SHELL_PROMPT)
 
     def close(self):
         """Close the SSH client channel"""
-        self._chan.close()
-        self._client.close()
 
-    def run(self, command, this=_SHELL_PROMPT, timeout=0):
+        if self.ON_JUNOS is True:
+            self._chan.terminate()
+        else:
+            self._chan.close()
+            self._client.close()
+
+    def run(self, command, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
         Run a shell command and wait for the response.  The return is a
         tuple. The first item is True/False if exit-code is 0.  The second
@@ -111,6 +139,11 @@ class StartShell(object):
           to individual run call. If ``this`` is provided with None value,
           function will wait till timeout value to grab all the content from
           command output.
+        :param seconds sleep:
+          Time to wait after initial call to receive data from buffer. This
+          value can help stabilize the output when multiple calls to run()
+          are looped but will increase the time spent receiving output.  This
+          value can be a floating point number for subsecond precision.
 
         :returns: (last_ok, result of the executed shell command (str) )
 
@@ -129,17 +162,23 @@ class StartShell(object):
         timeout = timeout or self.timeout
         # run the command and capture the output
         self.send(command)
-        got = "".join(self.wait_for(this, timeout))
-        self.last_ok = False
-        if this is None:
-            self.last_ok = got is not ""
-        elif this != _SHELL_PROMPT:
-            self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
-        elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
-            # use $? to get the exit code of the command
+        if self.ON_JUNOS is True:
+            got = "".join(self.wait_for(this="]]>]]>", timeout=timeout))
             self.send("echo $?")
-            rc = "".join(self.wait_for(_SHELL_PROMPT))
-            self.last_ok = rc.find("\r\n0\r\n") > 0
+            rc = "".join(self.wait_for(this="]]>]]>"))
+            self.last_ok = rc.find("0") > 0
+        else:
+            got = "".join(self.wait_for(this, timeout, sleep=sleep))
+            self.last_ok = False
+            if this is None:
+                self.last_ok = got is not ""
+            elif this != _SHELL_PROMPT:
+                self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
+            elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
+                # use $? to get the exit code of the command
+                self.send("echo $?")
+                rc = "".join(self.wait_for(_SHELL_PROMPT))
+                self.last_ok = rc.find("\r\n0\r\n") > 0
         return (self.last_ok, got)
 
     # -------------------------------------------------------------------------

@@ -297,21 +297,29 @@ class SW(Util):
 
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
-        # If <package-result> is not present, then assume success.
-        # That is, assume <package-result>0</package-result>
-        rc = 0
-        package_result = got.findtext("package-result")
-        if package_result is None:
-            self.log(
-                "software pkgadd response is missing package-result "
-                "element. Assuming success."
-            )
-        else:
-            for result in got.findall("package-result"):
-                rc += int(result.text.strip())
         output_msg = "\n".join(
             [i.text for i in got.findall("output") if i.text is not None]
         )
+        package_result = got.findtext("package-result")
+        if package_result is None:
+            # <package-result> is not present
+            if "ERROR:" in output_msg and (
+                ("is not found" in output_msg) or ("no such file" in output_msg)
+            ):
+                # MX80 output with non-existent package looks like:
+                # <output>
+                # ERROR: package: /var/tmp/nonexistent.tgz is not found or empty
+                # </output>
+                package_result = "1"
+            else:
+                # Not a known specific error in the output. Assume success.
+                # That is, assume <package-result>0</package-result>
+                self.log(
+                    "software pkgadd response is missing package-result "
+                    "element. Assuming success."
+                )
+                package_result = "0"
+        rc = int(package_result.strip())
         self.log("software pkgadd package-result: %s\nOutput: %s" % (rc, output_msg))
         return rc == 0, output_msg
 
@@ -951,9 +959,16 @@ class SW(Util):
                         "validating software against current config,"
                         " please be patient ..."
                     )
-                    v_ok = self.validate(
-                        remote_package, issu, nssu, dev_timeout=timeout
-                    )
+                    try:
+                        v_ok = self.validate(
+                            remote_package, issu, nssu, dev_timeout=timeout
+                        )
+                    except RpcError as e:
+                        if "syntax error" in getattr(e, "message", ""):
+                            v_ok = True
+                        else:
+                            raise
+
                     if v_ok is not True:
                         return v_ok, "Package validation failed"
             else:

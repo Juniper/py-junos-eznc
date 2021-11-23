@@ -17,6 +17,9 @@ TedView:
   link-in: { ted-database-link-in : int }
   link-out: { ted-database-link-out : int }
   protocol: ted-database-protocol
+  srgb-base: { ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-start : int }
+  srgb-range: { ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-range : int }
+  srgb-flag: ted-spring-capability/ted-spring-srgb-block/ted-spring-srgb-block-flags
   link: _linkTable
 
 _linkTable:
@@ -33,6 +36,10 @@ _linkView:
   localADD: ted-link-local-address
   metric: { ted-link-metric : int }
   color: admin-groups/color
+  sr-adj-sid-label: {ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-label : int}
+  sr-adj-sid-weight: {ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-weight : int}
+  sr-adj-sid-afi: ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-af
+  sr-adj-sid-flags: ted-adj-sids/ted-link-p2p-adj-sid/ted-link-p2p-adj-sid-flags
 
 
 TedSummaryTable:
