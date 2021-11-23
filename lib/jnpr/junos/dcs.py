@@ -146,8 +146,8 @@ class DCS(_Connection):
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
-        request_rpc = self._grpc_dcs_pb2.GetRequest(
-            command=[rpc_cmd], device_info=self._dev_info
+        request_rpc = self._grpc_dcs_pb2.OpRequest(
+            command=[rpc_cmd], device_info=self._dev_info, telemetry=True
         )
         res = self._grpc_conn_stub.Get(
             request=request_rpc, metadata=self._grpc_meta_data
