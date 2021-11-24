@@ -149,7 +149,7 @@ class DCS(_Connection):
         request_rpc = self._grpc_dcs_pb2.OpRequest(
             command=[rpc_cmd], device_info=self._dev_info, telemetry=True
         )
-        res = self._grpc_conn_stub.Get(
+        res = self._grpc_conn_stub.Op(
             request=request_rpc, metadata=self._grpc_meta_data
         )
         if res.error_code != self._grpc_types_pb2.NoError:
