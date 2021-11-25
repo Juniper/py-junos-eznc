@@ -1119,6 +1119,15 @@ class Device(_Connection):
         ):
             from jnpr.junos.console import Console
 
+            if kwargs.get("conn_open_timeout", None):
+                # Console already supports timeout while opening connections
+                # via `timeout` parameter. Refer `Console` documentation
+                # for more details.
+
+                # Note: The actual timeout may appear higher than set timeout as
+                # the actual timeout is 3*(timeout+2)
+                kwargs["timeout"] = kwargs.pop("conn_open_timeout")
+
             instance = object.__new__(Console, *args, **kwargs)
             # Python only calls __init__() if the object returned from
             # __new__() is an instance of the class in which the __new__()
@@ -1206,9 +1215,14 @@ class Device(_Connection):
             default is ``False`` to use DOM.
             Select ``True`` to use SAX (if SAX input is provided).
 
+        :param int conn_open_timeout:
+            *OPTIONAL* To specify the timeout in seconds, which will
+            be used while opening SSH connection to the device
+
         :param bool huge_tree:
             *OPTIONAL* parse XML with very deep trees and long text content.
             default is ``False``.
+
         """
 
         # ----------------------------------------
@@ -1225,6 +1239,7 @@ class Device(_Connection):
         self._fact_style = kvargs.get("fact_style", "new")
         self._use_filter = kvargs.get("use_filter", False)
         self._huge_tree = kvargs.get("huge_tree", False)
+        self._conn_open_timeout = kvargs.get("conn_open_timeout", None)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
@@ -1362,6 +1377,7 @@ class Device(_Connection):
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 ssh_config=self._sshconf_lkup(),
+                timeout=self._conn_open_timeout,
                 device_params={
                     "name": "junos",
                     "local": self.__class__.ON_JUNOS,
@@ -1435,12 +1451,13 @@ class Device(_Connection):
         Closes the connection to the device only if connected.
         """
         if self.connected is True:
+            self.connected = False
             try:
                 self._conn.close_session()
+            except NcOpErrors.TimeoutExpiredError:
+                raise EzErrors.RpcTimeoutError(self, "close", self.timeout)
             except NcErrors.SessionCloseError:
                 pass
-            finally:
-                self.connected = False
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e, filter_xml=None):

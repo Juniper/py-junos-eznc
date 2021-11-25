@@ -229,6 +229,13 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.install("test_no_result.tgz", no_copy=True))
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_install_nonexistent_mx80_package(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.sw._multi_RE = False
+        var_ret = self.sw.install("test_no_mx80_packages.tgz", no_copy=True)
+        self.assertFalse(var_ret[0])
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
@@ -996,6 +1003,12 @@ class TestSW(unittest.TestCase):
                     == "/var/tmp/test_no_result.tgz"
                 ):
                     return self._read_file(args[0].tag + ".no_result.xml")
+                elif (
+                    args
+                    and args[0].findtext("package-name")
+                    == "/var/tmp/test_no_mx80_packages.tgz"
+                ):
+                    return self._read_file(args[0].tag + ".no_mx80_packages.xml")
                 else:
                     return self._read_file(args[0].tag + ".xml")
             if "path" in kwargs:

@@ -1,0 +1,10 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/17.3R1/junos">
+    <cli>
+        <ignore-signals>
+            hup
+        </ignore-signals>
+    </cli>
+    <output>
+        ERROR: package: /var/tmp/nonexistent.tgz is not found or empty
+    </output>
+</rpc-reply>
