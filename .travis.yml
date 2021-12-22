@@ -30,7 +30,7 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then pip install -U black; fi
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then black --check --exclude=docs/* . ; fi
+  - if [[ $TRAVIS_PYTHON_VERSION > 3.5 ]]; then black --check --exclude="build|docs" . ; fi
   - nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
 
 after_success:
