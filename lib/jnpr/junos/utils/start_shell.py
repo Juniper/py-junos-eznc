@@ -5,7 +5,7 @@ from jnpr.junos.utils.ssh_client import open_ssh_client
 import subprocess
 
 _JUNOS_PROMPT = "> "
-_SHELL_PROMPT = "(%|#|\$)\s"
+_SHELL_PROMPT = r"(%|#|\$)\s"
 _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 

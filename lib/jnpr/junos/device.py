@@ -430,7 +430,7 @@ class _Connection(object):
                 if re_name is None:
                     # Still haven't figured it out. Is this a bsys?
                     for re_state in self.facts["current_re"]:
-                        match = re.search("^re\d+$", re_state)
+                        match = re.search(r"^re\d+$", re_state)
                         if match:
                             re_string = "bsys-" + match.group(0)
                             if re_string in self.facts["hostname_info"].keys():
@@ -879,7 +879,7 @@ class _Connection(object):
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith("Extra data"):
-                        return json.loads(re.sub("\s?{\s?}\s?", "", rpc_rsp_e.text))
+                        return json.loads(re.sub(r"\s?{\s?}\s?", "", rpc_rsp_e.text))
                     else:
                         raise JSONLoadError(ex, rpc_rsp_e.text)
             else:

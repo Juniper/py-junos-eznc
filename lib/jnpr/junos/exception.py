@@ -329,7 +329,7 @@ class JSONLoadError(Exception):
         self.ex_msg = str(exception)
         self.rpc_content = rpc_content
         self.offending_line = ""
-        obj = re.search("line (\d+)", self.ex_msg)
+        obj = re.search(r"line (\d+)", self.ex_msg)
         if obj:
             line_no = int(obj.group(1))
             rpc_lines = rpc_content.splitlines()
