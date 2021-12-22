@@ -722,7 +722,9 @@ class StateMachine(Machine):
                     elif key in self._table.KEY_ITEMS:
                         self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
-                    regex = r"(\d+)\s(.*)" if item_types[0] == int else "(" r".*)\s(\d+)"
+                    regex = (
+                        r"(\d+)\s(.*)" if item_types[0] == int else "(" r".*)\s(\d+)"
+                    )
                     obj = re.search(regex, line)
                     if obj:
                         items = obj.groups()
