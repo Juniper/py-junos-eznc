@@ -430,7 +430,7 @@ class _Connection(object):
                 if re_name is None:
                     # Still haven't figured it out. Is this a bsys?
                     for re_state in self.facts["current_re"]:
-                        match = re.search("^re\d+$", re_state)
+                        match = re.search(r"^re\d+$", re_state)
                         if match:
                             re_string = "bsys-" + match.group(0)
                             if re_string in self.facts["hostname_info"].keys():
@@ -879,7 +879,7 @@ class _Connection(object):
                 except ValueError as ex:
                     # when data is {}{.*} types
                     if str(ex).startswith("Extra data"):
-                        return json.loads(re.sub("\s?{\s?}\s?", "", rpc_rsp_e.text))
+                        return json.loads(re.sub(r"\s?{\s?}\s?", "", rpc_rsp_e.text))
                     else:
                         raise JSONLoadError(ex, rpc_rsp_e.text)
             else:
@@ -906,7 +906,7 @@ class _Connection(object):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not "":
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() != "":
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
@@ -1342,7 +1342,7 @@ class Device(_Connection):
         """
 
         auto_probe = kvargs.get("auto_probe", self._auto_probe)
-        if auto_probe is not 0:
+        if auto_probe != 0:
             if not self.probe(auto_probe):
                 raise EzErrors.ProbeError(self)
 

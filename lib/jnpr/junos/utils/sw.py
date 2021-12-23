@@ -104,7 +104,7 @@ class SW(Util):
 
     @classmethod
     def local_sha256(cls, package):
-        """
+        r"""
         Computes the SHA-256 value on the package file.
 
         :param str package:
@@ -117,7 +117,7 @@ class SW(Util):
 
     @classmethod
     def local_md5(cls, package):
-        """
+        r"""
         Computes the MD5 checksum value on the local package file.
 
         :param str package:
@@ -130,7 +130,7 @@ class SW(Util):
 
     @classmethod
     def local_sha1(cls, package):
-        """
+        r"""
         Computes the SHA1 checksum value on the local package file.
 
         :param str package:
@@ -143,7 +143,7 @@ class SW(Util):
 
     @classmethod
     def local_checksum(cls, package, algorithm="md5"):
-        """
+        r"""
         Computes the checksum value on the local package file.
 
         :param str package:
@@ -997,9 +997,9 @@ class SW(Util):
                     ok = True, ""
                     # extract the VC number out of the _RE_list
                     vc_members = [
-                        re.search("(\d+)", x).group(1)
+                        re.search(r"(\d+)", x).group(1)
                         for x in self._RE_list
-                        if re.search("(\d+)", x)
+                        if re.search(r"(\d+)", x)
                     ]
                     for vc_id in vc_members:
                         _progress(
@@ -1106,7 +1106,7 @@ class SW(Util):
                             if i.text is not None
                         ]
                     )
-                    if output_msg is not "":
+                    if output_msg != "":
                         got = output_msg
             return got
         except Exception as err:

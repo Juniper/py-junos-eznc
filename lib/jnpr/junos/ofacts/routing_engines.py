@@ -65,7 +65,7 @@ def facts_routing_engines(junos, facts):
             re_name = re_name + slot_id
         else:
             # multi-instance routing platform
-            m = RE.search("(\d)", x_re_name[0].text)
+            m = RE.search(r"(\d)", x_re_name[0].text)
             if vc_info is not None:
                 # => RE0-RE0 | RE0-RE1
                 re_name = "RE{}-RE{}".format(m.group(0), re.find("slot").text)
