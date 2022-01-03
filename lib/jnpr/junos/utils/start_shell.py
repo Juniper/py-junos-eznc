@@ -25,7 +25,7 @@ class StartShell(object):
 
     """
 
-    def __init__(self, nc, timeout=30, shell_type='csh'):
+    def __init__(self, nc, timeout=30, shell_type="csh"):
         """
         Utility Constructor
 
@@ -97,7 +97,7 @@ class StartShell(object):
             data += " && echo ']]>]]>' \n"
             self._chan.stdin.write(data)
             self.t = Thread(target=self.write_stdin, args=(self._chan.stdin, data))
-            self.t.daemon = True # thread dies with the program
+            self.t.daemon = True  # thread dies with the program
             self.t.start()
             return
         else:
