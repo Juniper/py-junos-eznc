@@ -3,6 +3,8 @@ import re
 import datetime
 from jnpr.junos.utils.ssh_client import open_ssh_client
 import subprocess
+import six
+from threading import Thread
 
 _JUNOS_PROMPT = "> "
 _SHELL_PROMPT = "(%|#|\$)\s"
@@ -23,7 +25,7 @@ class StartShell(object):
 
     """
 
-    def __init__(self, nc, timeout=30):
+    def __init__(self, nc, timeout=30, shell_type='csh'):
         """
         Utility Constructor
 
@@ -37,6 +39,12 @@ class StartShell(object):
         self._client = None
         self._chan = None
         self.ON_JUNOS = self._nc.__class__.ON_JUNOS
+        self.shell_type = shell_type
+
+    def write_stdin(self, stdin, data):
+        while True:
+            stdin.write(six.b(data))
+            stdin.flush()
 
     def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
@@ -88,6 +96,10 @@ class StartShell(object):
         if self.ON_JUNOS is True:
             data += " && echo ']]>]]>' \n"
             self._chan.stdin.write(data)
+            self.t = Thread(target=self.write_stdin, args=(self._chan.stdin, data))
+            self.t.daemon = True # thread dies with the program
+            self.t.start()
+            return
         else:
             self._chan.send(data)
             self._chan.send("\n")
@@ -100,10 +112,12 @@ class StartShell(object):
         """
         if self.ON_JUNOS is True:
             self._chan = subprocess.Popen(
-                ["cli", "start", "shell"],
+                ["cli", "start", "shell", self.shell_type],
                 shell=False,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
+                close_fds=1,
+                bufsize=1,
             )
         else:
             self._client = open_ssh_client(dev=self._nc)
@@ -111,7 +125,7 @@ class StartShell(object):
 
             got = self.wait_for(r"(%|>|#|\$)")
             if got[-1].endswith(_JUNOS_PROMPT):
-                self.send("start shell")
+                self.send("start shell self.shell_type")
                 self.wait_for(_SHELL_PROMPT)
 
     def close(self):
