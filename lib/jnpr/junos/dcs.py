@@ -57,6 +57,7 @@ class DCS(_Connection):
         self._grpc_dcs_pb2 = self._grpc_deps.get("dcs_pb2")
         self._dev_uuid = self._grpc_deps.get("uuid")
         self._dev_info = self._grpc_deps.get("device_info")
+        self._grpc_timeout = self._grpc_deps.get("grpc_timeout")
 
         self.junos_dev_handler = JunosDeviceHandler(
             device_params={"name": "junos", "local": False}
@@ -147,7 +148,10 @@ class DCS(_Connection):
             else rpc_cmd_e
         )
         request_rpc = self._grpc_dcs_pb2.OpRequest(
-            command=[rpc_cmd], device_info=self._dev_info, telemetry=True
+            command=[rpc_cmd],
+            device_info=self._dev_info,
+            telemetry=True,
+            timeout=self._timeout,
         )
         res = self._grpc_conn_stub.Op(
             request=request_rpc, metadata=self._grpc_meta_data
