@@ -116,8 +116,6 @@ class StartShell(object):
                 shell=False,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                close_fds=1,
-                bufsize=1,
             )
         else:
             self._client = open_ssh_client(dev=self._nc)
@@ -125,7 +123,7 @@ class StartShell(object):
 
             got = self.wait_for(r"(%|>|#|\$)")
             if got[-1].endswith(_JUNOS_PROMPT):
-                self.send("start shell self.shell_type")
+                self.send("start shell " + self.shell_type)
                 self.wait_for(_SHELL_PROMPT)
 
     def close(self):
