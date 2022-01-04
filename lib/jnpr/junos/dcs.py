@@ -151,10 +151,11 @@ class DCS(_Connection):
             command=[rpc_cmd],
             device_info=self._dev_info,
             telemetry=True,
-            timeout=self._timeout,
         )
         res = self._grpc_conn_stub.Op(
-            request=request_rpc, metadata=self._grpc_meta_data
+            request=request_rpc,
+            metadata=self._grpc_meta_data,
+            timeout=self._grpc_timeout,
         )
         if res.error_code != self._grpc_types_pb2.NoError:
             raise EzErrors.DCSRpcError(
