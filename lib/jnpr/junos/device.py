@@ -906,7 +906,7 @@ class _Connection(object):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not "":
+            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() != "":
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
@@ -1342,7 +1342,7 @@ class Device(_Connection):
         """
 
         auto_probe = kvargs.get("auto_probe", self._auto_probe)
-        if auto_probe is not 0:
+        if auto_probe != 0:
             if not self.probe(auto_probe):
                 raise EzErrors.ProbeError(self)
 

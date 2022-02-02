@@ -171,7 +171,7 @@ class StartShell(object):
             got = "".join(self.wait_for(this, timeout, sleep=sleep))
             self.last_ok = False
             if this is None:
-                self.last_ok = got is not ""
+                self.last_ok = got != ""
             elif this != _SHELL_PROMPT:
                 self.last_ok = re.search(r"{}\s?$".format(this), got) is not None
             elif re.search(r"{}\s?$".format(_SHELL_PROMPT), got) is not None:
