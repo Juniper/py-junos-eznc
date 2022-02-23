@@ -1112,6 +1112,11 @@ class Device(_Connection):
             instance = object.__new__(DCS, *args, **kwargs)
             instance.__init__(**kwargs)
             return instance
+        elif kwargs.get("mode") == "oc-term":
+            from jnpr.junos.oc_term import OCTerm
+            instance = object.__new__(OCTerm, *args, **kwargs)
+            instance.__init__(**kwargs)
+            return instance
         elif (
             kwargs.get("port") in [23, "23"]
             or kwargs.get("mode")
