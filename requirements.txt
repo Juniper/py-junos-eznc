@@ -1,4 +1,4 @@
-lxml>=3.2.4<=3.7.1
+lxml>=3.2.4
 # ncclient version 0.6.10 has issues with PyEZ(junos-eznc) and needs to be avoided
 ncclient==0.6.9
 paramiko>=1.15.2
