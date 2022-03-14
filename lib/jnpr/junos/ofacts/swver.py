@@ -4,7 +4,7 @@ from jnpr.junos.facts.swver import version_info
 
 def _get_swver(dev, facts):
     # See if we're VC Capable
-    if facts["vc_capable"] is True:
+    if facts["vc_capable"] == True:
         try:
             return dev.rpc.cli("show version all-members", format="xml")
         except:
@@ -57,7 +57,7 @@ def facts_software_version(junos, facts):
             )
 
         facts["hostname"] = x_swver.findtext(xpath)
-        if facts["hostname"] is None:
+        if facts["hostname"] == None:
             # then there the re-name is not what we are expecting; we should
             # handle this better, eh?  For now, just assume there is one
             # software-information element and take that host-name. @@@ hack.
@@ -88,7 +88,7 @@ def facts_software_version(junos, facts):
         for re_ver in versions:
             facts["version_" + re_ver[0]] = re_ver[1]
 
-        if f_master is not None:
+        if f_master != None:
             master = f_master[0] if isinstance(f_master, list) else f_master
             if "version_" + master in facts:
                 facts["version"] = facts["version_" + master]

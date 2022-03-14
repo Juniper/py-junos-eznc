@@ -28,11 +28,11 @@ class TestDeviceSsh(unittest.TestCase):
             print("Logging in ...")
 
             self.dev = Device(
-                host=None,
+                host='10.209.14.76',
                 sock_fd=sock_fd,
-                user="jenkins",
-                ssh_private_key_file="/var/lib/jenkins/.ssh/passkey",
-                passwd="password123",
+                user="root",
+                # ssh_private_key_file="/var/lib/jenkins/.ssh/passkey",
+                passwd="Embe1mpls",
             )
 
             print("requesting info...")

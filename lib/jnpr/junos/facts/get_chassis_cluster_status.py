@@ -37,14 +37,14 @@ def get_facts(device):
 
     try:
         rsp = device.rpc.get_chassis_cluster_status(normalize=True)
-        if rsp is not None:
+        if rsp != None:
             if rsp.tag == "error":
                 srx_cluster = False
             else:
                 srx_cluster = True
                 srx_cluster_id = rsp.findtext("cluster-id")
                 groups = rsp.findall("redundancy-group")
-                if groups is not None:
+                if groups != None:
                     redundancy_group = {}
                     for group in groups:
                         group_id = group.findtext("redundancy-group-id")

@@ -77,7 +77,7 @@ class SSH(Terminal):
         # in this condition it means we want to query the agent
         # for available ssh keys
         allow_agent = bool(
-            (self.cs_passwd is None) and (self.ssh_private_key_file is None)
+            (self.cs_passwd == None) and (self.ssh_private_key_file == None)
         )
 
         while retry > 0:
@@ -161,7 +161,7 @@ class SSH(Terminal):
         rxb = six.b("")
         while True:
             data = self._ssh.recv(self.RECVSZ)
-            if data is None or len(data) <= 0:
+            if data == None or len(data) <= 0:
                 raise ValueError("Unable to detect device prompt")
             elif PY6.NEW_LINE in data:
                 rxb += data.split(PY6.NEW_LINE)[0]
@@ -190,7 +190,7 @@ class SSH(Terminal):
             if rd:
                 rxb += self._ssh.recv(self.RECVSZ)
                 found = _PROMPT.search(rxb)
-                if found is not None:
+                if found != None:
                     break
                 timeout = time() + self.READ_PROMPT_DELAY
         else:

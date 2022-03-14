@@ -37,7 +37,7 @@ def get_facts(device):
             personality = "MX"
             virtual = True
         # An MX GNF has an RE type that includes the letters 'GNF'
-        elif re_type is not None and "GNF" in re_type:
+        elif re_type != None and "GNF" in re_type:
             personality = "MX-GNF"
             virtual = True
         else:

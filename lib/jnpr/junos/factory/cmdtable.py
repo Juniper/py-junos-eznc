@@ -86,7 +86,7 @@ class CMDTable(object):
 
         if self._path and self.data:
             raise AttributeError("path and data are mutually exclusive")
-        if self._path is not None:
+        if self._path != None:
             # for loading from local file-path
             with open(self._path, "r") as fp:
                 self.data = fp.read().strip()
@@ -116,10 +116,10 @@ class CMDTable(object):
         if len(cmd_args) > 0:
             self.GET_CMD = Template(self.GET_CMD).render(**cmd_args)
 
-        if self.data is None:
+        if self.data == None:
             # execute the Junos RPC to retrieve the table
             if hasattr(self, "TARGET"):
-                if self.TARGET is None:
+                if self.TARGET == None:
                     raise ValueError('"target" value not provided')
                 rpc_args = {
                     "target": self.TARGET,
@@ -226,7 +226,7 @@ class CMDTable(object):
     # -------------------------------------------------------------------------
 
     def _assert_data(self):
-        if self.data is None:
+        if self.data == None:
             raise RuntimeError("Table is empty, use get()")
 
     def _clearkeys(self):
@@ -286,9 +286,9 @@ class CMDTable(object):
 
     def __repr__(self):
         cls_name = self.__class__.__name__
-        source = self.D.hostname if self.D is not None else self._path
+        source = self.D.hostname if self.D != None else self._path
 
-        if self.data is None:
+        if self.data == None:
             return "%s:%s - Table empty" % (cls_name, source)
         else:
             n_items = len(self.keys())
@@ -343,7 +343,7 @@ class CMDTable(object):
 
         template = None
         template_dir = None
-        if self.template_dir is not None:
+        if self.template_dir != None:
             # we dont need index file for lookup
             index = None
             template_path = os.path.join(
@@ -357,7 +357,7 @@ class CMDTable(object):
             else:
                 template = template_path
                 template_dir = self.template_dir
-        if template_dir is None:
+        if template_dir == None:
             index = "index"
             template_dir = ntc_parse._get_template_dir()
 
@@ -380,9 +380,9 @@ class CMDTable(object):
         """
         self._set_key(cli_table)
 
-        fields = self.VIEW.FIELDS if self.VIEW is not None else {}
+        fields = self.VIEW.FIELDS if self.VIEW != None else {}
         reverse_fields = {val: key for key, val in fields.items()}
-        if self.KEY is None:
+        if self.KEY == None:
             cli_table_size = cli_table.size
             if cli_table_size > 1:
                 raise KeyError(

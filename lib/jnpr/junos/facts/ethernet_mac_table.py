@@ -31,7 +31,7 @@ def get_facts(device):
     except RpcError:
         pass
 
-    if switch_style is None:
+    if switch_style == None:
         try:
             # CLI command for MX style. Using the CLI command instead of the
             # RPC because PTX lies. It returns <l2ald-rtb-mac-count> for the

@@ -68,7 +68,7 @@ class SW(Util):
         Util.__init__(self, dev)
         self._dev = dev
         self._RE_list = []
-        if "junos_info" in dev.facts and dev.facts["junos_info"] is not None:
+        if "junos_info" in dev.facts and dev.facts["junos_info"] != None:
             self._RE_list = list(dev.facts["junos_info"].keys())
         else:
             self._RE_list = [x for x in dev.facts.keys() if x.startswith("version_RE")]
@@ -77,12 +77,12 @@ class SW(Util):
         # functionality for SW.
         if (
             dev.facts.get("personality", "") == "SRX_BRANCH"
-            and dev.facts.get("srx_cluster") is True
+            and dev.facts.get("srx_cluster") == True
         ):
             self._multi_RE = False
         self._multi_VC = bool(
-            self._multi_RE is True
-            and dev.facts.get("vc_capable") is True
+            self._multi_RE == True
+            and dev.facts.get("vc_capable") == True
             and dev.facts.get("vc_mode") != "Disabled"
         )
         self._mixed_VC = bool(dev.facts.get("vc_mode") == "Mixed")
@@ -231,7 +231,7 @@ class SW(Util):
         .. warning:: Refer to the restrictions listed in :meth:`install`.
         """
 
-        if vmhost is False:
+        if vmhost == False:
             if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
                 args = dict(no_validate=True, set=remote_package)
             else:
@@ -285,7 +285,7 @@ class SW(Util):
           vhmhost. The default is ``vmhost=False``.
         """
 
-        if vmhost is False:
+        if vmhost == False:
             rsp = self.rpc.request_package_in_service_upgrade(
                 package_name=remote_package, **kvargs
             )
@@ -298,10 +298,10 @@ class SW(Util):
     def _parse_pkgadd_response(self, rsp):
         got = rsp.getparent()
         output_msg = "\n".join(
-            [i.text for i in got.findall("output") if i.text is not None]
+            [i.text for i in got.findall("output") if i.text != None]
         )
         package_result = got.findtext("package-result")
-        if package_result is None:
+        if package_result == None:
             # <package-result> is not present
             if "ERROR:" in output_msg and (
                 ("is not found" in output_msg) or ("no such file" in output_msg)
@@ -350,7 +350,7 @@ class SW(Util):
             ).getparent()
         rc = int(rsp.findtext("package-result"))
         output_msg = "\n".join(
-            [i.text for i in rsp.findall("output") if i.text is not None]
+            [i.text for i in rsp.findall("output") if i.text != None]
         )
         self.log("software validate package-result: %s\nOutput: %s" % (rc, output_msg))
         return 0 == rc
@@ -422,7 +422,7 @@ class SW(Util):
                     )
                     return False
         gres_status = re.search(r"Graceful switchover: (\w+)", output, re.I)
-        if not (gres_status is not None and gres_status.group(1).lower() == "on"):
+        if not (gres_status != None and gres_status.group(1).lower() == "on"):
             self.log("Requirement FAILED: Graceful switchover status " "is not On")
             return False
         self.log("Graceful switchover status is On")
@@ -459,7 +459,7 @@ class SW(Util):
                 "commit-scripts": "apply",
             },
         )
-        if conf.find("chassis/redundancy/graceful-switchover") is None:
+        if conf.find("chassis/redundancy/graceful-switchover") == None:
             self.log("Requirement FAILED: GRES is not Enabled " "in configuration")
             return False
         self.log("Checking commit synchronize configuration")
@@ -480,7 +480,7 @@ class SW(Util):
                 "commit-scripts": "apply",
             },
         )
-        if conf.find("system/commit/synchronize") is None:
+        if conf.find("system/commit/synchronize") == None:
             self.log(
                 "Requirement FAILED: commit synchronize is not "
                 "Enabled in configuration"
@@ -503,7 +503,7 @@ class SW(Util):
                 "commit-scripts": "apply",
             },
         )
-        if conf.find("routing-options/nonstop-routing") is None:
+        if conf.find("routing-options/nonstop-routing") == None:
             self.log("Requirement FAILED: NSR is not Enabled in configuration")
             return False
         self.log(
@@ -617,12 +617,12 @@ class SW(Util):
         """
 
         def _progress(report):
-            if progress is True:
+            if progress == True:
                 self.progress(self._dev, report)
             elif callable(progress):
                 progress(self._dev, report)
 
-        if checksum is None:
+        if checksum == None:
             _progress("computing checksum on local package: %s" % (package))
             try:
                 checksum = SW.local_checksum(package, algorithm=checksum_algorithm)
@@ -633,13 +633,13 @@ class SW(Util):
                 )
                 return False
 
-        if checksum is None:
+        if checksum == None:
             _progress(
                 "Unable to calculate the checksum on local package: %s." % (package)
             )
             return False
 
-        if cleanfs is True:
+        if cleanfs == True:
             _progress("cleaning filesystem ...")
             try:
                 self.rpc.request_system_storage_cleanup(dev_timeout=cleanfs_timeout)
@@ -653,7 +653,7 @@ class SW(Util):
         remote_checksum = None
         # Check to see if the package file already exists on the remote
         # device by trying to get the checksum.
-        if force_copy is False:
+        if force_copy == False:
             _progress(
                 "before copy, computing checksum on remote package: %s" % remote_package
             )
@@ -867,15 +867,15 @@ class SW(Util):
             * status : ``True`` when the installation is successful and ``False`` otherwise
             * msg : msg received as response or error message created
         """
-        if issu is True and nssu is True:
+        if issu == True and nssu == True:
             raise TypeError("install function can either take issu or nssu not both")
-        elif (issu is True or nssu is True) and (
-            self._multi_RE is not True and self._single_re_issu is not True
+        elif (issu == True or nssu == True) and (
+            self._multi_RE != True and self._single_re_issu != True
         ):
             raise TypeError("ISSU/NSSU requires Multi RE setup")
 
         def _progress(report):
-            if progress is True:
+            if progress == True:
                 self.progress(self._dev, report)
             elif callable(progress):
                 progress(self._dev, report)
@@ -909,7 +909,7 @@ class SW(Util):
         # perform a 'safe-copy' of the image to the remote device
         # ---------------------------------------------------------------------
 
-        if package is None and pkg_set is None:
+        if package == None and pkg_set == None:
             raise TypeError(
                 "install() requires either the package or pkg_set argument."
             )
@@ -923,7 +923,7 @@ class SW(Util):
             for pkg in pkg_set:
                 parsed_url = urlparse(pkg)
                 if parsed_url.scheme == "":
-                    if no_copy is False:
+                    if no_copy == False:
                         # To disable cleanfs after 1st iteration
                         cleanfs = cleanfs and pkg_set.index(pkg) == 0
                         copy_ok = self.safe_copy(
@@ -937,7 +937,7 @@ class SW(Util):
                             checksum_algorithm=checksum_algorithm,
                             force_copy=force_copy,
                         )
-                        if copy_ok is False:
+                        if copy_ok == False:
                             return False, "Package %s couldn't be copied" % pkg
                     pkg = remote_path + "/" + path.basename(pkg)
 
@@ -953,8 +953,8 @@ class SW(Util):
             remote_package = remote_pkg_set[0]
             # validate can't be used in the case of a Mixed VC
             # With vmhost=True, validate is handled in the package add.
-            if validate is True:
-                if self._mixed_VC is False and vmhost is not True:
+            if validate == True:
+                if self._mixed_VC == False and vmhost != True:
                     _progress(
                         "validating software against current config,"
                         " please be patient ..."
@@ -972,19 +972,19 @@ class SW(Util):
                     if v_ok is not True:
                         return v_ok, "Package validation failed"
             else:
-                if vmhost is True:
+                if vmhost == True:
                     # Need to pass the no_validate option via kwargs.
                     kwargs.update({"no_validate": True})
 
-            if issu is True:
+            if issu == True:
                 _progress("ISSU: installing software ... please be patient ...")
                 return self.pkgaddISSU(
                     remote_package, vmhost=vmhost, dev_timeout=timeout, **kwargs
                 )
-            elif nssu is True:
+            elif nssu == True:
                 _progress("NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package, dev_timeout=timeout, **kwargs)
-            elif self._multi_RE is False or all_re is False:
+            elif self._multi_RE == False or all_re == False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
                 add_ok = self.pkgadd(
@@ -993,7 +993,7 @@ class SW(Util):
                 return add_ok
             else:
                 # we need to update multiple devices
-                if self._multi_VC is True:
+                if self._multi_VC == True:
                     ok = True, ""
                     # extract the VC number out of the _RE_list
                     vc_members = [
@@ -1075,19 +1075,19 @@ class SW(Util):
 
         :raises RpcError: when command is not successful.
         """
-        if other_re is True:
+        if other_re == True:
             if self._dev.facts["2RE"]:
                 cmd = E("other-routing-engine")
-        elif all_re is True:
-            if self._multi_RE is True and vmhost is True:
+        elif all_re == True:
+            if self._multi_RE == True and vmhost == True:
                 cmd.append(E("routing-engine", "both"))
-            elif self._multi_RE is True and self._multi_VC is False:
+            elif self._multi_RE == True and self._multi_VC == False:
                 cmd.append(E("both-routing-engines"))
-            elif self._mixed_VC is True:
+            elif self._mixed_VC == True:
                 cmd.append(E("all-members"))
-        if in_min >= 0 and at is None:
+        if in_min >= 0 and at == None:
             cmd.append(E("in", str(in_min)))
-        elif at is not None:
+        elif at != None:
             cmd.append(E("at", str(at)))
         try:
             rsp = self.rpc(cmd, ignore_warning=True, normalize=True)
@@ -1095,7 +1095,7 @@ class SW(Util):
                 got = rsp.text
             else:
                 got = rsp.getparent().findtext(".//request-reboot-status")
-                if got is None:
+                if got == None:
                     # On some platforms stopping/rebooting
                     # REs produces <output> messages and
                     # <request-reboot-status> messages.
@@ -1103,10 +1103,10 @@ class SW(Util):
                         [
                             i.text
                             for i in rsp.getparent().xpath("//output")
-                            if i.text is not None
+                            if i.text != None
                         ]
                     )
-                    if output_msg is not "":
+                    if output_msg != "":
                         got = output_msg
             return got
         except Exception as err:
@@ -1148,12 +1148,12 @@ class SW(Util):
             * reboot message (string) if command successful
         """
         if self._dev.facts["_is_linux"]:
-            if on_node is None:
+            if on_node == None:
                 cmd = E("request-shutdown-reboot")
             else:
                 cmd = E("request-node-reboot")
                 cmd.append(E("node", on_node))
-        elif vmhost is True:
+        elif vmhost == True:
             cmd = E("request-vmhost-reboot")
         else:
             cmd = E("request-reboot")
@@ -1198,7 +1198,7 @@ class SW(Util):
         .. todo:: need to better handle the exception event.
         """
         if self._dev.facts["_is_linux"]:
-            if on_node is None:
+            if on_node == None:
                 cmd = E("request-shutdown-power-off")
             else:
                 cmd = E("request-node-power-off")
@@ -1262,10 +1262,10 @@ class SW(Util):
             * rpc response message (string) if command successful
         """
         cmd = E("request-system-zeroize")
-        if all_re is False:
+        if all_re == False:
             if self._dev.facts["2RE"]:
                 cmd = E("local")
-            if media is True:
+            if media == True:
                 cmd = E("media")
 
         # initialize an empty output message
@@ -1311,7 +1311,7 @@ class SW(Util):
             return "zeroize initiated with no message"
 
         output_msg += "\n".join(
-            [i.text for i in rsp.xpath("//message") if i.text is not None]
+            [i.text for i in rsp.xpath("//message") if i.text != None]
         )
         return output_msg
 

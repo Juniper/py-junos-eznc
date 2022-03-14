@@ -84,20 +84,20 @@ def get_facts(device):
             # fact.
             "up_time": current_re.findtext("up-time"),
         }
-        if first_node is None:
+        if first_node == None:
             first_node = node
             first_slot = slot
         if node == first_node:
-            if slot == "0" and RE0 is None:
+            if slot == "0" and RE0 == None:
                 # Copy the dictionary
                 RE0 = dict(info)
-            if slot == "1" and RE1 is None:
+            if slot == "1" and RE1 == None:
                 # Copy the dictionary
                 RE1 = dict(info)
         # Don't want the up_time key in the new re_info fact.
         if "up_time" in info:
             del info["up_time"]
-        if re_info is None:
+        if re_info == None:
             re_info = {}
         if node not in re_info:
             re_info[node] = {}
@@ -110,12 +110,12 @@ def get_facts(device):
             node_masters[node] = slot
             master_list.append("RE" + slot)
     # Fill in the 'default' first-level key if multi-chassis/node system
-    if first_node is not None and first_node != "default":
+    if first_node != None and first_node != "default":
         re_info["default"] = re_info[first_node]
         if first_node in node_masters:
             node_masters["default"] = node_masters[first_node]
     # Fill in the 'default' second-level key if at least one RE was found.
-    if first_slot is not None:
+    if first_slot != None:
         re_info["default"]["default"] = re_info["default"][first_slot]
 
     # Set the 'master' fact to a string or list based on the number of members.

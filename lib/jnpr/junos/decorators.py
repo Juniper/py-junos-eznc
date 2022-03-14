@@ -48,7 +48,7 @@ def normalizeDecorator(function):
             if dev._normalize != normalize:
                 restore_transform = dev.transform
 
-                if normalize is False:
+                if normalize == False:
                     try:
                         dev.transform = dev._nc_transform
                         result = function(*args, **kwargs)

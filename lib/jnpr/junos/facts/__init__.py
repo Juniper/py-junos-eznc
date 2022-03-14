@@ -67,7 +67,7 @@ def _build_fact_callbacks_and_doc_strings():
     callbacks = {}
     doc_strings = {}
     for (name, module) in sys.modules.items():
-        if name.startswith("jnpr.junos.facts.") and module is not None:
+        if name.startswith("jnpr.junos.facts.") and module != None:
             new_doc_strings = module.provides_facts()
             for key in new_doc_strings:
                 if key not in callbacks:
@@ -87,7 +87,7 @@ def _build_fact_callbacks_and_doc_strings():
 (_callbacks, _doc_strings) = _build_fact_callbacks_and_doc_strings()
 
 # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
-if __doc__ is None:
+if __doc__ == None:
     __doc__ = ""
 
 # Append the doc string (__doc__) with the documentation for each fact.

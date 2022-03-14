@@ -41,7 +41,7 @@ def _get_software_information(device):
                     )
             return sw_info_all
         # See if device is VC Capable
-        if device.facts["vc_capable"] is True:
+        if device.facts["vc_capable"] == True:
             try:
                 return device.rpc.cli(
                     "show version all-members", format="xml", normalize=True
@@ -52,7 +52,7 @@ def _get_software_information(device):
         # software information
         elif (
             hasattr(err, "rpc_error")
-            and err.rpc_error is not None
+            and err.rpc_error != None
             and "Could not connect to " in err.rpc_error.get("message")
         ):
             logger.debug(err.rpc_error.get("message"))
@@ -74,7 +74,7 @@ def _get_software_information(device):
         except Exception:
             sw_info = True
         try:
-            if sw_info is True:
+            if sw_info == True:
                 # Possibly an NFX which requires 'local' and 'detail' args.
                 sw_info = device.rpc.get_software_information(
                     local=True, detail=True, normalize=True
@@ -147,20 +147,20 @@ def get_facts(device):
         re_hostname = re_sw_info.findtext("./host-name")
         # First try the <junos-version> tag present in >= 15.1
         re_version = re_sw_info.findtext("./junos-version")
-        if re_version is None:
+        if re_version == None:
             # For < 15.1, get version from the "junos" package.
             try:
                 re_pkg_info = re_sw_info.findtext(
                     './package-information[name="junos"]/comment'
                 )
-                if re_pkg_info is not None:
+                if re_pkg_info != None:
                     re_version = re.findall(r"\[(.*)\]", re_pkg_info)[0]
                 else:
                     # Junos Node Slicing JDM case
                     re_pkg_info = re_sw_info.findtext(
                         './package-information[name="JUNOS version"]/comment'
                     )
-                    if re_pkg_info is not None:
+                    if re_pkg_info != None:
                         # In this case, re_pkg_info might look like this:
                         # JUNOS version : 17.4-20170703_dev_common.0-secure
                         # Match everything from last space until the end.
@@ -173,17 +173,17 @@ def get_facts(device):
                         re_version = re.findall(r"(.*\d+)", re_pkg_info)[0]
             except Exception:
                 re_version = None
-        if model_info is None and re_model is not None:
+        if model_info == None and re_model != None:
             model_info = {}
-        if re_model is not None:
+        if re_model != None:
             model_info[re_name] = re_model.upper()
-        if hostname_info is None and re_hostname is not None:
+        if hostname_info == None and re_hostname != None:
             hostname_info = {}
-        if re_hostname is not None:
+        if re_hostname != None:
             hostname_info[re_name] = re_hostname
-        if junos_info is None and re_version is not None:
+        if junos_info == None and re_version != None:
             junos_info = {}
-        if re_version is not None:
+        if re_version != None:
             junos_info[re_name] = {
                 "text": re_version,
                 "object": version_info(re_version),
@@ -194,7 +194,7 @@ def get_facts(device):
         this_re = False
         # 1) this device doesn't support the current_re fact and there's only
         #    one RE.
-        if device.facts["current_re"] is None and len(si_rsp) == 1:
+        if device.facts["current_re"] == None and len(si_rsp) == 1:
             this_re = True
         # 2) re_name is in the current_re fact. The easy case.
         elif re_name in device.facts["current_re"]:
@@ -225,18 +225,18 @@ def get_facts(device):
                     break
         # Set hostname, model, and version facts if we've found the RE to
         # which we are currently connected.
-        if this_re is True:
-            if hostname is None:
+        if this_re == True:
+            if hostname == None:
                 hostname = re_hostname
-            if model is None:
+            if model == None:
                 model = re_model.upper()
-            if version is None:
+            if version == None:
                 version = re_version
 
-    if version is None:
+    if version == None:
         version = "0.0I0.0"
     ver_info = version_info(version)
-    if junos_info is not None:
+    if junos_info != None:
         if "re0" in junos_info:
             version_RE0 = junos_info["re0"]["text"]
         elif "node0" in junos_info:

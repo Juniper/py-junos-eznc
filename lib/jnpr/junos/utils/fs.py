@@ -104,7 +104,7 @@ class FS(Util):
             "sha1": self._dev.rpc.get_sha1_checksum_information,
         }
         rpc = cmd_map.get(calc)
-        if rpc is None:
+        if rpc == None:
             raise ValueError("Unknown calculation method: '%s'" % calc)
         try:
             rsp = rpc(path=path)
@@ -143,7 +143,7 @@ class FS(Util):
         results = {}
         results["type"] = "dir"
         results["path"] = dirinfo.get("name")
-        if files is None:
+        if files == None:
             files = dirinfo.xpath("file-information")
         results["file_count"] = len(files)
         results["size"] = sum([int(f.findtext("file-size")) for f in files])
@@ -167,7 +167,7 @@ class FS(Util):
 
         # if there is an output tag, then it means that the path
         # was not found
-        if rsp.find("output") is not None:
+        if rsp.find("output") != None:
             return None
 
         # ok, so we've either got a directory or a file at
@@ -207,7 +207,7 @@ class FS(Util):
         # if there is an output tag, then it means that the path
         # was not found, and we return :None:
 
-        if rsp.find("output") is not None:
+        if rsp.find("output") != None:
             return None
 
         xdir = rsp.find(".//directory")
@@ -223,14 +223,14 @@ class FS(Util):
             if not link_path:  # then we are done
                 return results
             else:
-                return results if followlink is False else self.ls(path=link_path)
+                return results if followlink == False else self.ls(path=link_path)
 
         # if we are here, then it's a directory, include information on all
         # files
         files = xdir.xpath("file-information")
         results = FS._decode_dir(xdir, files)
 
-        if brief is True:
+        if brief == True:
             results["files"] = [f.findtext("file-name").strip() for f in files]
         else:
             results["files"] = dict(
@@ -306,16 +306,16 @@ class FS(Util):
 
         for directory in directories:
             dir_name = directory.findtext("directory-name")
-            if dir_name is not None:
+            if dir_name != None:
                 dir_name = dir_name.strip()
             else:
                 raise RpcError(rsp=rsp)
 
             used_space = directory.find("used-space")
-            if used_space is not None:
+            if used_space != None:
                 dir_size = used_space.text.strip()
                 dir_blocks = used_space.get("used-blocks")
-                if dir_blocks is not None:
+                if dir_blocks != None:
                     dir_blocks = int(dir_blocks)
                     dir_bytes = dir_blocks * BLOCK_SIZE
                     result[dir_name.strip()] = {
@@ -383,7 +383,7 @@ class FS(Util):
         # was successful, or an XML structure otherwise.  So we can do a simple
         # test to provide the return result to the caller.
         rsp = self._dev.rpc.file_delete(path=path)
-        if rsp is True:
+        if rsp == True:
             return True
         else:
             return False
@@ -425,7 +425,7 @@ class FS(Util):
         :returns: ``True`` if OK, ``False`` if file does not exist.
         """
         rsp = self._dev.rpc.file_rename(source=from_path, destination=to_path)
-        if rsp is True:
+        if rsp == True:
             return True
         else:
             return False
@@ -445,7 +445,7 @@ class FS(Util):
         )
 
         # if the rsp is True, then the command executed OK.
-        if rsp is True:
+        if rsp == True:
             return True
 
         # otherwise, return the error string to the caller
@@ -472,7 +472,7 @@ class FS(Util):
         :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("rmdir %s" % path)
-        return True if results[0] is True else "".join(results[1][2:-1])
+        return True if results[0] == True else "".join(results[1][2:-1])
 
     def mkdir(self, path):
         """
@@ -483,7 +483,7 @@ class FS(Util):
         :returns: ``True`` if OK, error-message (str) otherwise
         """
         results = self._ssh_exec("mkdir -p %s" % path)
-        return True if results[0] is True else "".join(results[1][2:-1])
+        return True if results[0] == True else "".join(results[1][2:-1])
 
     def symlink(self, from_path, to_path):
         """
@@ -494,4 +494,4 @@ class FS(Util):
         :returns: ``True`` if OK, or error-message (str) otherwise
         """
         results = self._ssh_exec("ln -sf %s %s" % (from_path, to_path))
-        return True if results[0] is True else "".join(results[1][2:-1])
+        return True if results[0] == True else "".join(results[1][2:-1])

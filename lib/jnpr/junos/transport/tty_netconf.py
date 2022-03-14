@@ -75,8 +75,8 @@ class tty_netconf(object):
         """issue the XML API to close the session"""
 
         # if we do not have an open connection, then return now.
-        if force is False:
-            if self.hello is None:
+        if force == False:
+            if self.hello == None:
                 return
 
         self.rpc("close-session")

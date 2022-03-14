@@ -111,7 +111,7 @@ class Resource(object):
         """
         is this a resource manager?
         """
-        return self._name is None
+        return self._name == None
 
     @property
     def is_new(self):
@@ -230,7 +230,7 @@ class Resource(object):
         self._r_has_init()
         self._has_xml = self._r_config_read_xml()
 
-        if self._has_xml is None or not len(self._has_xml):
+        if self._has_xml == None or not len(self._has_xml):
             self._is_new = True
             self._r_when_new()
             return None
@@ -273,7 +273,7 @@ class Resource(object):
 
         # construct the XML change structure
         xml_change = self._xml_build_change()
-        if xml_change is None:
+        if xml_change == None:
             return False
 
         # write these changes to the device
@@ -796,7 +796,7 @@ class Resource(object):
         """
         HELPER function to either set a value or remove the element
         """
-        if value is not None and not isinstance(value, str):
+        if value != None and not isinstance(value, str):
             value = str(value)
         xml.append(E(ele_name, (value if value else JXML.DEL)))
 
@@ -811,7 +811,7 @@ class Resource(object):
     @classmethod
     def copyifexists(klass, xml, ele_name, to_py, py_name=None):
         ele_val = xml.find(ele_name)
-        if ele_val is not None:
+        if ele_val != None:
             to_py[(py_name if py_name else ele_name)] = ele_val.text.strip()
 
     @classmethod

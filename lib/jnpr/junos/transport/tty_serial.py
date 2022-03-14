@@ -86,7 +86,7 @@ class Serial(Terminal):
                 continue
             rxb += line
             found = _PROMPT.search(rxb)
-            if found is not None:
+            if found != None:
                 break  # done reading
         else:
             # exceeded the while loop timeout

@@ -106,14 +106,14 @@ class _FactCache(MutableMapping):
                 # Set all of the facts which should have been returned
                 # by this callback to the default value of None.
                 for new_key in self._callbacks:
-                    if self._callbacks[key] is self._callbacks[new_key]:
+                    if self._callbacks[key] == self._callbacks[new_key]:
                         self._cache[new_key] = None
             else:
                 # No exception
                 for new_key in new_facts:
                     if (
                         new_key not in self._callbacks
-                        or self._callbacks[key] is not self._callbacks[new_key]
+                        or self._callbacks[key] != self._callbacks[new_key]
                     ):
                         # The callback returned a fact it didn't advertise
                         raise RuntimeError(
@@ -260,12 +260,12 @@ class _FactCache(MutableMapping):
             When keys contains an unknown fact.
         """
         refresh_keys = None
-        if keys is not None:
+        if keys != None:
             if isinstance("str", type(keys)):
                 refresh_keys = (keys,)
             else:
                 refresh_keys = keys
-        if refresh_keys is not None:
+        if refresh_keys != None:
             for key in refresh_keys:
                 if key in self._callbacks:
                     if key in self._cache:
@@ -299,7 +299,7 @@ class _FactCache(MutableMapping):
                 self._should_warn = False
 
     # In case optimization flag is enabled, it strips of docstring and __doc__ becomes None
-    if __doc__ is None:
+    if __doc__ == None:
         __doc__ = ""
 
     # Precede the class's documentation with the documentation on the specific

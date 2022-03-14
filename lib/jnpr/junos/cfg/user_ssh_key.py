@@ -62,10 +62,10 @@ class UserSSHKey(Resource):
         if not self.is_mgr:
             raise RuntimeError("must be a resource-manager!")
 
-        if path is None and key_value is None:
+        if path == None and key_value == None:
             raise RuntimeError("You must provide either path or key_value")
 
-        if path is not None:
+        if path != None:
             # snarf the file into key_value, yo!
             with open(path, "r") as f:
                 key_value = f.read().strip()
@@ -77,7 +77,7 @@ class UserSSHKey(Resource):
         vt = key_value[0:7]
         key_map = {"ssh-rsa": "ssh-rsa", "ssh-dss": "ssh-dsa"}
         key_type = key_map.get(vt)
-        if key_type is None:
+        if key_type == None:
             raise RuntimeError("Unknown ssh public key file type: %s" % vt)
 
         # at this point we are going to add a new key, so really what we are

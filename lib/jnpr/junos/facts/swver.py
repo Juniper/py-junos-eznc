@@ -14,7 +14,7 @@ class version_info(object):
         if "X" == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
             xm = re.match("(\d+)-(\w)(\d+)", self.minor)
-            if xm is not None:
+            if xm != None:
                 self.minor = tuple([int(xm.group(1)), xm.group(2), int(xm.group(3))])
                 if len(after_type) < 2:
                     self.build = None
@@ -69,7 +69,7 @@ class version_info(object):
     def __len__(self):
         length = 0
         for component in self.as_tuple:
-            if component is None:
+            if component == None:
                 return length
             else:
                 length += 1

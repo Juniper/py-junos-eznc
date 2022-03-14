@@ -117,7 +117,7 @@ class _RpcMetaExec(object):
 
         rpc = E("get-configuration", options)
 
-        if filter_xml is not None:
+        if filter_xml != None:
             if not isinstance(filter_xml, etree._Element):
                 if re.search("^<.*>$", filter_xml):
                     filter_xml = etree.XML(filter_xml)
@@ -125,20 +125,20 @@ class _RpcMetaExec(object):
                     filter_data = None
                     for tag in filter_xml.split("/")[::-1]:
                         filter_data = (
-                            E(tag) if filter_data is None else E(tag, filter_data)
+                            E(tag) if filter_data == None else E(tag, filter_data)
                         )
                     filter_xml = filter_data
             # wrap the provided filter with toplevel <configuration> if
             # it does not already have one (not in case of yang model config)
             if (
                 filter_xml.tag != "configuration"
-                and model is None
-                and namespace is None
+                and model == None
+                and namespace == None
             ):
                 etree.SubElement(rpc, "configuration").append(filter_xml)
             else:
-                if model is not None or namespace is not None:
-                    if model == "custom" and namespace is None:
+                if model != None or namespace != None:
+                    if model == "custom" and namespace == None:
                         raise AttributeError(
                             'For "custom" model, ' 'explicitly provide "namespace"'
                         )
@@ -146,7 +146,7 @@ class _RpcMetaExec(object):
                     filter_xml.attrib["xmlns"] = ns
                 rpc.append(filter_xml)
         transform = self._junos.transform
-        if remove_ns is False:
+        if remove_ns == False:
             self._junos.transform = lambda: JXML.strip_namespaces_prefix
         try:
             response = self._junos.execute(rpc, **kwargs)
@@ -154,7 +154,7 @@ class _RpcMetaExec(object):
             self._junos.transform = transform
         # in case of model provided top level should be data
         # return response
-        if model and filter_xml is None and options.get("format") is not "json":
+        if model and filter_xml == None and options.get("format") != "json":
             response = response.getparent()
             response.tag = "data"
         return response
@@ -209,7 +209,7 @@ class _RpcMetaExec(object):
         """
         # junos only support filter type to be xpath
         filter_params = {"type": "xpath"}
-        if filter_select is not None:
+        if filter_select != None:
             filter_params["source"] = filter_select
         rpc = E("get", E("filter", filter_params))
         return self._junos.execute(rpc, ignore_warning=ignore_warning, **kwargs)
@@ -268,7 +268,7 @@ class _RpcMetaExec(object):
         """
         rpc = E("load-configuration", options)
 
-        if contents is None and "url" in options:
+        if contents == None and "url" in options:
             pass
         elif ("action" in options) and (options["action"] == "set"):
             rpc.append(E("configuration-set", contents))
@@ -347,7 +347,7 @@ class _RpcMetaExec(object):
                                 "boolean, or list/tuple of "
                                 "strings and booleans." % (a, arg_name, str(type(a)))
                             )
-                        if a is not False:
+                        if a != False:
                             arg = etree.SubElement(rpc, arg_name)
                         if not isinstance(a, bool):
                             arg.text = a
@@ -355,7 +355,7 @@ class _RpcMetaExec(object):
             # vargs[0] is a dict, command options like format='text'
             if vargs:
                 for k, v in vargs[0].items():
-                    if v is not True:
+                    if v != True:
                         rpc.attrib[k] = v
 
             # now invoke the command against the

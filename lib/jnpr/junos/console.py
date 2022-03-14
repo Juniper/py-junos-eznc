@@ -182,8 +182,8 @@ class Console(_Connection):
         # validate device hostname or IP address
         # ---------------------------------------------------------------
         if (
-            (self._mode and self._mode.upper() == "TELNET") or self.cs_user is not None
-        ) and self._hostname is None:
+            (self._mode and self._mode.upper() == "TELNET") or self.cs_user != None
+        ) and self._hostname == None:
             self.results["failed"] = True
             self.results["errmsg"] = "ERROR: Device hostname/IP not specified !!!"
             return self.results
@@ -192,7 +192,7 @@ class Console(_Connection):
         # validate console server and password. Password-less connection
         # is not supported
         # ---------------------------------------------------------------
-        if self.cs_user is not None and self.cs_passwd is None:
+        if self.cs_user != None and self.cs_passwd == None:
             self.results["failed"] = True
             self.results["errmsg"] = (
                 "ERROR: Console SSH, Password-less connection is " "not supported !!!"
@@ -223,11 +223,11 @@ class Console(_Connection):
         # to __init__(). Save value to self._normalize where it is used by
         # normalizeDecorator()
         self._normalize = kvargs.get("normalize", self._normalize)
-        if self._normalize is True:
+        if self._normalize == True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get("gather_facts", self._gather_facts)
-        if gather_facts is True:
+        if gather_facts == True:
             logger.info("facts: retrieving device facts...")
             self.facts_refresh()
             self.results["facts"] = self.facts
@@ -238,7 +238,7 @@ class Console(_Connection):
         """
         Closes the connection to the device.
         """
-        if skip_logout is False and self.connected is True:
+        if skip_logout == False and self.connected == True:
             try:
                 self._tty_logout()
             except socket.error as err:
@@ -253,7 +253,7 @@ class Console(_Connection):
                 logger.error("ERROR {}:{}\n".format("logout", str(err)))
                 raise err
             self.connected = False
-        elif self.connected is True:
+        elif self.connected == True:
             try:
                 self._tty._tty_close()
             except Exception as err:

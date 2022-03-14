@@ -46,17 +46,17 @@ def get_facts(device):
 
     # Try to read the domain from the resolv.conf file. This only requires
     # view permissions.
-    if domain is None:
+    if domain == None:
         fs = FS(device)
         file_content = fs.cat("/etc/resolv.conf") or fs.cat("/var/etc/resolv.conf")
-        words = file_content.split() if file_content is not None else []
+        words = file_content.split() if file_content != None else []
         if "domain" in words:
             idx = words.index("domain") + 1
             domain = words[idx]
 
     # Set the fqdn
     fqdn = device.facts["hostname"]
-    if fqdn is not None and domain is not None:
+    if fqdn != None and domain != None:
         fqdn = fqdn + "." + domain
 
     return {

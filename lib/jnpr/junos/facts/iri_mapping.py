@@ -22,18 +22,18 @@ def get_facts(device):
 
     rsp = device.rpc.file_show(filename="/etc/hosts.junos", normalize=False)
 
-    if rsp is not None:
+    if rsp != None:
         hosts_file_content = rsp.findtext(".", default="")
-        if hosts_file_content is not None:
+        if hosts_file_content != None:
             for line in hosts_file_content.splitlines():
                 (line, _, _) = line.partition("#")
                 components = line.split(None)
                 if len(components) > 1:
                     ip = components[0]
                     hosts = components[1:]
-                    if iri_hostname is None:
+                    if iri_hostname == None:
                         iri_hostname = {}
-                    if iri_ip is None:
+                    if iri_ip == None:
                         iri_ip = {}
                     if ip in iri_hostname:
                         iri_hostname[ip] += hosts

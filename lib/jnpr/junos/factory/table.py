@@ -33,7 +33,7 @@ class Table(object):
         self._path = path
         self._lxml = xml
         self._use_filter = self.USE_FILTER and use_filter
-        if self._dev is not None:
+        if self._dev != None:
             self._use_filter = self._use_filter and self._dev._use_filter
 
             # -------------------------------------------------------------------------
@@ -59,7 +59,7 @@ class Table(object):
     @view.setter
     def view(self, cls):
         """assigns a new view to the table"""
-        if cls is None:
+        if cls == None:
             self._view = None
             return
 
@@ -78,7 +78,7 @@ class Table(object):
         True if this table does not have records, but is a container of fields
         False otherwise
         """
-        return self.ITEM_XPATH is None
+        return self.ITEM_XPATH == None
 
     @property
     def key_list(self):
@@ -90,7 +90,7 @@ class Table(object):
     # -------------------------------------------------------------------------
 
     def _assert_data(self):
-        if self.xml is None:
+        if self.xml == None:
             raise RuntimeError("Table is empty, use get()")
 
     def _tkey(self, this, key_list):
@@ -146,7 +146,7 @@ class Table(object):
             return self._keys_simple(xpath + "/" + key_value)
 
         # user explicitly passed key as Null in Table
-        if key_value is None:
+        if key_value == None:
             return []
 
         if not isinstance(key_value, list):
@@ -174,7 +174,7 @@ class Table(object):
         """returns list of table entry items()"""
 
         self._assert_data()
-        if self.view is None:
+        if self.view == None:
             # no View, so provide XML for each item
             return [this for this in self]
         else:
@@ -233,15 +233,15 @@ class Table(object):
         """
         fname, fext = os.path.splitext(path)
 
-        if hostname is True:
+        if hostname == True:
             fname += "_%s" % self.D.hostname
 
-        if timestamp is not False:
-            tsfmt = _TSFMT if timestamp is True else timestamp
+        if timestamp != False:
+            tsfmt = _TSFMT if timestamp == True else timestamp
             tsfmt_val = datetime.fromtimestamp(time()).strftime(tsfmt)
             fname += "_%s" % tsfmt_val
 
-        if append is not None:
+        if append != None:
             fname += "_%s" % append
 
         path = fname + fext
@@ -261,9 +261,9 @@ class Table(object):
 
     def __repr__(self):
         cls_name = self.__class__.__name__
-        source = self.D.hostname if self.D is not None else self._path
+        source = self.D.hostname if self.D != None else self._path
 
-        if self.xml is None:
+        if self.xml == None:
             return "%s:%s - Table empty" % (cls_name, source)
         else:
             n_items = len(self.keys())

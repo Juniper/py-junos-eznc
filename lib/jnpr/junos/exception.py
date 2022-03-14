@@ -56,7 +56,7 @@ class RpcError(Exception):
                     [
                         "%s: %s" % (err["severity"].strip(), err["message"].strip())
                         for err in errs
-                        if err["message"] is not None and err["severity"] is not None
+                        if err["message"] != None and err["severity"] != None
                     ]
                 )
                 if isinstance(errs, list)
@@ -66,14 +66,14 @@ class RpcError(Exception):
         if isinstance(self.rsp, _Element):
             self.rpc_error = jxml.rpc_error(self.rsp)
             self.message = self.message or self.rpc_error["message"]
-            if self.errs is None or not isinstance(self.errs, list):
+            if self.errs == None or not isinstance(self.errs, list):
                 self.errs = [self.rpc_error]
 
     def __repr__(self):
         """
         pprints the response XML attribute
         """
-        if self.rpc_error is not None:
+        if self.rpc_error != None:
             return "{}(severity: {}, bad_element: {}, message: {})".format(
                 self.__class__.__name__,
                 self.rpc_error["severity"],

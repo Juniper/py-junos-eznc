@@ -75,7 +75,7 @@ def convert_to_data_type(items):
 
     """
     item_types = map(data_type, items)
-    return list(map(lambda x, y: int(x) if y is int else x.strip(), items, item_types))
+    return list(map(lambda x, y: int(x) if y == int else x.strip(), items, item_types))
 
 
 class StateMachine(Machine):
@@ -195,21 +195,21 @@ class StateMachine(Machine):
         """
         self._lines = copy.deepcopy(lines)
         self._raw = "\n".join(lines)
-        if self._view is None:
-            if self._table.DELIMITER is not None:
-                if self._table.TITLE is not None:
+        if self._view == None:
+            if self._table.DELIMITER != None:
+                if self._table.TITLE != None:
                     self.delimiter_with_title()
                 else:
                     self.delimiter_without_title()
-            elif self._table.TITLE is not None:
+            elif self._table.TITLE != None:
                 self.title_provided()
-            elif self._table.ITEM is not None and self._table.ITEM != "*":
+            elif self._table.ITEM != None and self._table.ITEM != "*":
                 self._parse_item_iter(lines)
         else:
-            if self._view.TITLE is not None or self._table.TITLE:
+            if self._view.TITLE != None or self._table.TITLE:
                 self.title_provided()
             if len(self._view.REGEX) > 0:
-                if self._table.ITEM is not None:
+                if self._table.ITEM != None:
                     self.regex_with_item()
                 else:
                     self.regex_parser()
@@ -218,17 +218,17 @@ class StateMachine(Machine):
             if len(self._view.EXISTS) > 0:
                 self.exists_check()
             if len(self._view.FIELDS) > 0:
-                if self._table.ITEM is not None and self._table.ITEM != "*":
+                if self._table.ITEM != None and self._table.ITEM != "*":
                     return self._parse_item_iter(lines)
                 for key, value in self._view.FIELDS.items():
                     tbl = value["table"]
                     tbl._view = tbl.VIEW
-                    if tbl._view is None:
+                    if tbl._view == None:
                         self._data[key] = StateMachine(tbl).parse(lines)
                         continue
                     if len(tbl._view.COLUMNS) > 0:
                         self._data[key] = StateMachine(tbl).parse(lines)
-                    if tbl._view.TITLE is not None or tbl.TITLE is not None:
+                    if tbl._view.TITLE != None or tbl.TITLE != None:
                         self._data[key] = StateMachine(tbl).parse(lines)
         if self._table.EVAL:
             self._eval_in_full_data()
@@ -287,13 +287,13 @@ class StateMachine(Machine):
                     )
                 master_key = groups[0] if len(groups) == 1 else tuple(groups)
                 self._data[master_key] = {}
-                if self._view is not None:
+                if self._view != None:
                     for key, value in self._view.FIELDS.items():
                         tbl = value["table"]
                         tbl._view = tbl.VIEW
-                        if tbl._view is not None and len(tbl._view.COLUMNS) > 0:
+                        if tbl._view != None and len(tbl._view.COLUMNS) > 0:
                             self._data[master_key][key] = StateMachine(tbl).parse(lines)
-                        if tbl.TITLE is not None or tbl._view.TITLE is not None:
+                        if tbl.TITLE != None or tbl._view.TITLE != None:
                             self._data[master_key][key] = StateMachine(tbl).parse(lines)
                 else:
                     self._table.TITLE = lines[0]
@@ -332,7 +332,7 @@ class StateMachine(Machine):
         return self._data
 
     def match_columns(self, event):
-        if self._view is None:
+        if self._view == None:
             return False
         columns = self._view.COLUMNS.values()
         if len(columns) == 0:
@@ -354,7 +354,7 @@ class StateMachine(Machine):
                             [
                                 pp.Literal(i[index])
                                 for i in columns
-                                if i[index] is not None
+                                if i[index] != None
                             ],
                         )
                         if self._parse_literal(
@@ -510,29 +510,29 @@ class StateMachine(Machine):
         """
         self._insert_eval_data(tmp_dict)
         if isinstance(key, (tuple, list)):
-            if self._view.FILTERS is not None:
+            if self._view.FILTERS != None:
                 selected_dict = {}
                 for select in self._view.FILTERS:
                     if select in columns_list:
                         selected_dict[select] = tmp_dict[select]
-                if self._table.KEY_ITEMS is None:
+                if self._table.KEY_ITEMS == None:
                     self._data[tuple(tmp_dict[i] for i in key)] = selected_dict
                 elif tmp_dict[key] in self._table.KEY_ITEMS:
                     self._data[tuple(tmp_dict[i] for i in key)] = selected_dict
             else:
                 self._data[tuple(tmp_dict[i] for i in key)] = tmp_dict
         else:
-            if self._view.FILTERS is not None:
+            if self._view.FILTERS != None:
                 selected_dict = {}
                 for select in self._view.FILTERS:
                     if select in columns_list:
                         selected_dict[select] = tmp_dict[select]
-                if self._table.KEY_ITEMS is None:
+                if self._table.KEY_ITEMS == None:
                     self._data[tmp_dict[key]] = selected_dict
                 elif tmp_dict[key] in self._table.KEY_ITEMS:
                     self._data[tmp_dict[key]] = selected_dict
             else:
-                if self._table.KEY_ITEMS is None:
+                if self._table.KEY_ITEMS == None:
                     if key not in tmp_dict:
                         self._data.update(tmp_dict)
                     else:
@@ -695,11 +695,11 @@ class StateMachine(Machine):
                      'PCT entries used by all WI-0 streams': 0,
                      'PCT entries used by all WI-1 streams': 0}}
         """
-        if self._view is not None and self._view.REGEX != {}:
+        if self._view != None and self._view.REGEX != {}:
             return self.regex_provided()
         # view have only fields, so contains only nested table
         if (
-            self._view is not None
+            self._view != None
             and self._view.FIELDS
             and not self._view.COLUMNS
             and not self._view.REGEX
@@ -715,9 +715,9 @@ class StateMachine(Machine):
                     items = re.split(delimiter, line.strip())
                     item_types = list(map(data_type, items))
                     key, value = convert_to_data_type(items)
-                    if self._view is None:
+                    if self._view == None:
                         self._data[key] = value
-                    elif self._table.KEY_ITEMS is None:
+                    elif self._table.KEY_ITEMS == None:
                         self._data[self._view.FIELDS.get(key, key)] = value
                     elif key in self._table.KEY_ITEMS:
                         self._data[self._view.FIELDS.get(key, key)] = value
@@ -924,7 +924,7 @@ class StateMachine(Machine):
         """
         delimiter = self._table.DELIMITER or "\s\s+"
         pre_space_delimit = ""
-        if self._table.TITLE is None:
+        if self._table.TITLE == None:
             for line in self._lines[1:]:
                 if line.strip() == "SENT: Ukern command: %s" % self._table.GET_CMD:
                     self._lines = self._lines[self._lines.index(line) + 1 :]
@@ -943,7 +943,7 @@ class StateMachine(Machine):
                 try:
                     items = re.split(delimiter, line.strip())
                     key, value = convert_to_data_type(items)
-                    if self._table.KEY_ITEMS is None:
+                    if self._table.KEY_ITEMS == None:
                         self._data[key] = value
                     elif key in self._table.KEY_ITEMS:
                         self._data[key] = value
@@ -978,7 +978,7 @@ class StateMachine(Machine):
         {'no_detected_wedges': True, 'no_toolkit_errors': True}
         """
         for key, search in self._view.EXISTS.items():
-            self._data[key] = re.search(search, self._raw, re.I | re.M) is not None
+            self._data[key] = re.search(search, self._raw, re.I | re.M) != None
 
     def _insert_eval_data(self, tmp_dict):
         """

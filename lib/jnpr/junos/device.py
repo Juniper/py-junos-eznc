@@ -98,8 +98,8 @@ class _Connection(object):
     # and similar entities, we will need to check the product.conf
     # file for on-box implementation
 
-    if ON_JUNOS is False:
-        if os.path.isfile("/etc/product.conf") is True:
+    if ON_JUNOS == False:
+        if os.path.isfile("/etc/product.conf") == True:
             model_dict = {}
             with open("/etc/product.conf") as f:
                 for line in f:
@@ -187,7 +187,7 @@ class _Connection(object):
             When **value** is not a ``file`` object
         """
         # got an existing file that we need to close
-        if (not value) and (self._logfile is not None):
+        if (not value) and (self._logfile != None):
             rc = self._logfile.close()
             self._logfile = False
             return rc
@@ -288,7 +288,7 @@ class _Connection(object):
         master = None
 
         # Make sure the 'current_re' fact has a value
-        if self.facts.get("current_re") is not None:
+        if self.facts.get("current_re") != None:
             # Typical master case
             if "master" in self.facts["current_re"]:
                 master = True
@@ -300,14 +300,14 @@ class _Connection(object):
             #  single chassis and single RE platform based on the
             # 'RE_hw_mi' and '2RE' facts, not the 'current_re' fact.
             elif (
-                self.facts.get("2RE") is False
-                and self.facts.get("RE_hw_mi") is False
+                self.facts.get("2RE") == False
+                and self.facts.get("RE_hw_mi") == False
                 and "re0" in self.facts["current_re"]
             ):
                 master = True
             # Is it an SRX cluster?
             # If so, the cluster's "primary" is the "master"
-            elif self.facts.get("srx_cluster") is True:
+            elif self.facts.get("srx_cluster") == True:
                 if "primary" in self.facts["current_re"]:
                     master = True
                 else:
@@ -315,7 +315,7 @@ class _Connection(object):
             else:
                 # Might be a GNF case.
                 if (
-                    self.re_name is not None
+                    self.re_name != None
                     and "gnf" in self.re_name
                     and "-re" in self.re_name
                 ):
@@ -364,11 +364,11 @@ class _Connection(object):
         """
         uptime = None
         rsp = self.rpc.get_system_uptime_information(normalize=True)
-        if rsp is not None:
+        if rsp != None:
             element = rsp.find(".//system-booted-time/time-length")
-            if element is not None:
+            if element != None:
                 uptime_string = element.get("seconds")
-                if uptime_string is not None:
+                if uptime_string != None:
                     uptime = int(uptime_string)
         return uptime
 
@@ -401,8 +401,8 @@ class _Connection(object):
 
         # Make sure the 'current_re' and 'hostname_info' facts have values
         if (
-            self.facts.get("current_re") is not None
-            and self.facts.get("hostname_info") is not None
+            self.facts.get("current_re") != None
+            and self.facts.get("hostname_info") != None
         ):
             # re_name should be the intersection of the values in the
             # 'current_re' fact and the keys in the 'hostname_info' fact.
@@ -421,13 +421,13 @@ class _Connection(object):
                     if "-re" in re_state:
                         re_name = re_state
                         break
-                if re_name is None:
+                if re_name == None:
                     # Still haven't figured it out, if there's only one key
                     # in 'hostname_info', assume that.
                     all_re_names = list(self.facts["hostname_info"].keys())
                     if len(all_re_names) == 1:
                         re_name = all_re_names[0]
-                if re_name is None:
+                if re_name == None:
                     # Still haven't figured it out. Is this a bsys?
                     for re_state in self.facts["current_re"]:
                         match = re.search("^re\d+$", re_state)
@@ -452,7 +452,7 @@ class _Connection(object):
         Incorrect OPENSSH format: -----BEGIN OPENSSH PRIVATE KEY-----
         Convert an OPENSSH key to an RSA key: `ssh-keygen -p -m PEM -f ~/.ssh/some_key`
         """
-        if self.__class__.__name__ == "Device" and self._sock_fd is not None:
+        if self.__class__.__name__ == "Device" and self._sock_fd != None:
             return None
         if self._ssh_config:
             sshconf_path = os.path.expanduser(self._ssh_config)
@@ -713,10 +713,10 @@ class _Connection(object):
             or ``| count``, etc.  The only value use of the "pipe" is for the
             ``| display xml rpc`` as noted above.
         """
-        if "display xml rpc" not in command and warning is True:
+        if "display xml rpc" not in command and warning == True:
             # Get the equivalent rpc metamethod
             rpc_string = self.cli_to_rpc_string(command)
-            if rpc_string is not None:
+            if rpc_string != None:
                 warning_string = "\nCLI command is for debug use only!\n"
                 warning_string += "Instead of:\ncli('%s')\n" % (command)
                 warning_string += "Use:\n%s\n" % (rpc_string)
@@ -733,7 +733,7 @@ class _Connection(object):
             # ex:
             # <rpc-reply message-id="urn:uuid:281f624f-022b-11e6-bfa8">
             # </rpc-reply>
-            if rsp is True:
+            if rsp == True:
                 return ""
             if rsp.tag in ["output", "rpc-reply"]:
                 encode = None if sys.version < "3" else "unicode"
@@ -814,7 +814,7 @@ class _Connection(object):
             native python data-types (e.g. ``dict``).
         """
 
-        if self.connected is not True:
+        if self.connected != True:
             raise EzErrors.ConnectClosedError(self)
 
         if isinstance(rpc_cmd, str):
@@ -906,7 +906,7 @@ class _Connection(object):
             #    protocol: operation-failed
             #    error: device asdf not found
             # </rpc-reply>
-            if rpc_rsp_e.text is not None and rpc_rsp_e.text.strip() is not "":
+            if rpc_rsp_e.text != None and rpc_rsp_e.text.strip() != "":
                 return rpc_rsp_e
             # no children, so assume it means we are OK
             return True
@@ -978,9 +978,9 @@ class _Connection(object):
         if self._fact_style not in ["old", "new", "both"]:
             raise RuntimeError("Unknown fact_style: %s" % (self._fact_style))
         if self._fact_style == "old" or self._fact_style == "both":
-            if warnings_on_failure is None:
+            if warnings_on_failure == None:
                 warnings_on_failure = True
-            if keys is not None:
+            if keys != None:
                 raise RuntimeError(
                     "The keys argument can not be specified "
                     "when old-style fact gathering is in use!"
@@ -994,8 +994,8 @@ class _Connection(object):
                         raise
                     should_warn = True
             if (
-                warnings_on_failure is True
-                and should_warn is True
+                warnings_on_failure == True
+                and should_warn == True
                 and self._fact_style != "both"
             ):
                 warnings.warn(
@@ -1005,7 +1005,7 @@ class _Connection(object):
                     RuntimeWarning,
                 )
         if self._fact_style == "new" or self._fact_style == "both":
-            if warnings_on_failure is None:
+            if warnings_on_failure == None:
                 warnings_on_failure = False
             self.facts._refresh(
                 exception_on_failure=exception_on_failure,
@@ -1086,7 +1086,7 @@ class Device(_Connection):
         try:
             return self._conn._device_handler.transform_reply
         except AttributeError:
-            if self._conn is None:
+            if self._conn == None:
                 raise ConnectError(self, "Not connected to the Device")
 
     @transform.setter
@@ -1107,7 +1107,7 @@ class Device(_Connection):
         if (
             kwargs.get("port") in [23, "23"]
             or kwargs.get("mode")
-            or kwargs.get("cs_user") is not None
+            or kwargs.get("cs_user") != None
         ):
             from jnpr.junos.console import Console
 
@@ -1239,7 +1239,7 @@ class Device(_Connection):
                 RuntimeWarning,
             )
 
-        if self.__class__.ON_JUNOS is True and hostname is None:
+        if self.__class__.ON_JUNOS == True and hostname == None:
             # ---------------------------------
             # running on a Junos device locally
             # ---------------------------------
@@ -1254,7 +1254,7 @@ class Device(_Connection):
             # if hostname is None, this is an 'outbound-ssh' connection
             # which uses the established TCP connection from sock_fd
             # --------------------------
-            if hostname is None and self._sock_fd is None:
+            if hostname == None and self._sock_fd == None:
                 raise ValueError("You must provide either 'host' or 'sock_fd' value")
             self._hostname = hostname
             # user will default to $USER
@@ -1342,7 +1342,7 @@ class Device(_Connection):
         """
 
         auto_probe = kvargs.get("auto_probe", self._auto_probe)
-        if auto_probe is not 0:
+        if auto_probe != 0:
             if not self.probe(auto_probe):
                 raise EzErrors.ProbeError(self)
 
@@ -1355,7 +1355,7 @@ class Device(_Connection):
             # for available ssh keys
 
             allow_agent = bool(
-                (self._auth_password is None) and (self._ssh_private_key_file is None)
+                (self._auth_password == None) and (self._ssh_private_key_file == None)
             )
 
             # open connection using ncclient transport
@@ -1429,11 +1429,11 @@ class Device(_Connection):
         # to __init__(). Save value to self._normalize where it is used by
         # normalizeDecorator()
         self._normalize = kvargs.get("normalize", self._normalize)
-        if self._normalize is True:
+        if self._normalize == True:
             self.transform = self._norm_transform
 
         gather_facts = kvargs.get("gather_facts", self._gather_facts)
-        if gather_facts is True:
+        if gather_facts == True:
             self.facts_refresh()
 
         return self
@@ -1442,7 +1442,7 @@ class Device(_Connection):
         """
         Closes the connection to the device only if connected.
         """
-        if self.connected is True:
+        if self.connected == True:
             self.connected = False
             try:
                 self._conn.close_session()

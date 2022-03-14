@@ -14,7 +14,7 @@ from jnpr.junos.utils.config import Config
 
 
 def FactoryCfgTable(table_name=None, data_dict={}):
-    if table_name is None:
+    if table_name == None:
         table_name = "CfgTable"
     if "set" in data_dict.keys():
         new_cls = type(table_name, (CfgTable, Config), {})
@@ -35,12 +35,12 @@ def FactoryOpTable(
     table_name=None,
     use_filter=True,
 ):
-    if table_name is None:
+    if table_name == None:
         table_name = "OpTable." + cmd
     new_cls = type(table_name, (OpTable,), {})
     new_cls.GET_RPC = cmd
     new_cls.GET_ARGS = args or {}
-    if args_key is not None:
+    if args_key != None:
         new_cls.GET_KEY = args_key
     new_cls.ITEM_XPATH = item
     new_cls.ITEM_NAME_XPATH = key
@@ -110,7 +110,7 @@ def FactoryCMDChildTable(
 def FactoryTable(
     item, key=Table.ITEM_NAME_XPATH, view=None, table_name=None, use_filter=True
 ):
-    if table_name is None:
+    if table_name == None:
         table_name = "Table." + item
     new_cls = type(table_name, (Table,), {})
     new_cls.ITEM_XPATH = item
@@ -196,7 +196,7 @@ def FactoryCMDView(fields, **kvargs):
         new_cls.EXISTS = deepcopy(kvargs["exists"])
     if "filters" in kvargs:
         new_cls.FILTERS = deepcopy(kvargs["filters"])
-    if fields is not None:
+    if fields != None:
         new_cls.FIELDS = fields
     if "eval" in kvargs:
         new_cls.EVAL = kvargs["eval"]

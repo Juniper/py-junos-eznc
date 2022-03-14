@@ -71,7 +71,7 @@ class CfgTable(Table):
     @property
     def keys_required(self):
         """True/False - if this Table requires keys"""
-        return self.required_keys is not None
+        return self.required_keys != None
 
     # -----------------------------------------------------------------------
     # PRIVATE METHODS
@@ -123,7 +123,7 @@ class CfgTable(Table):
             dot.append(E(name))
             dot = dot[0]
 
-        if namesonly is True:
+        if namesonly == True:
             dot.attrib["recurse"] = "false"
         return top
 
@@ -137,7 +137,7 @@ class CfgTable(Table):
             # create an XML element with the key/value
             field_value = getattr(self, field_name, None)
             # If field value is not set ignore it
-            if field_value is None:
+            if field_value == None:
                 continue
 
             if isinstance(field_value, (list, tuple, set)):
@@ -188,7 +188,7 @@ class CfgTable(Table):
                 "bool": bool,
             }.get(ftype, None)
 
-            if ft is None:
+            if ft == None:
                 raise TypeError("Unsupported type %s\n" % (ftype))
             return ft
 
@@ -285,9 +285,9 @@ class CfgTable(Table):
             for v in value:
                 lst.append(E(xpath.replace("_", "-"), str(v)))
         elif isinstance(value, bool):
-            if value is True:
+            if value == True:
                 lst.append(E(xpath.replace("_", "-")))
-            elif value is False:
+            elif value == False:
                 lst.append(E(xpath.replace("_", "-"), {"operation": "delete"}))
         elif isinstance(value, dict):
             lst.append(E(xpath.replace("_", "-"), value))
@@ -304,7 +304,7 @@ class CfgTable(Table):
         for key_name in self.required_keys:
             # create an XML element with the key/value
             key_value = kvargs.get(key_name)
-            if key_value is None:
+            if key_value == None:
                 raise ValueError("Missing required-key: '%s'" % (key_name))
             key_xpath = rqkeys[key_name]
             add_keylist_xml = self._grindkey(key_xpath, key_value)
@@ -374,7 +374,7 @@ class CfgTable(Table):
         """Mandatory checks for set table/view"""
         for key in self.key_field:
             value = getattr(self, key)
-            if value is None:
+            if value == None:
                 raise ValueError("%s key-field value is not set.\n" % (key))
 
     def _freeze(self):
@@ -431,7 +431,7 @@ class CfgTable(Table):
         set_cmd = self._buildxml()
         top = set_cmd.find(self._data_dict[self._type])
         self._build_config_xml(top)
-        if self._config_xml_req is None:
+        if self._config_xml_req == None:
             self._config_xml_req = set_cmd
             self._insert_node = top.getparent()
         else:
@@ -464,15 +464,15 @@ class CfgTable(Table):
           *OPTIONAL* options to pass to get-configuration.  By default
           {'inherit': 'inherit', 'groups': 'groups'} is sent.
         """
-        if self._lxml is not None:
+        if self._lxml != None:
             return self
 
-        if self._path is not None:
+        if self._path != None:
             # for loading from local file-path
             self.xml = etree.parse(self._path).getroot()
             return self
 
-        if self.keys_required is True and not len(kvargs):
+        if self.keys_required == True and not len(kvargs):
             raise ValueError("This table has required-keys\n", self.required_keys)
 
         self._clearkeys()
@@ -492,7 +492,7 @@ class CfgTable(Table):
         # use-cases then make sure these are provided by the caller. Then
         # encode them into the 'get-cmd' XML
 
-        if self.keys_required is True:
+        if self.keys_required == True:
             self._encode_requiredkeys(get_cmd, kvargs)
 
         try:
@@ -514,7 +514,7 @@ class CfgTable(Table):
         if "options" in kvargs:
             options = kvargs.get("options") or {}
         else:
-            if self._options is not None:
+            if self._options != None:
                 options = self._options
             else:
                 options = jxml.INHERIT_GROUPS
@@ -530,7 +530,7 @@ class CfgTable(Table):
                 from junos import Junos_Configuration
 
                 # If part of commit script use the context
-                if Junos_Configuration is not None:
+                if Junos_Configuration != None:
                     # Convert the onbox XML to ncclient reply
                     config = jxml.conf_transform(
                         deepcopy(jxml.cscript_conf(Junos_Configuration)),

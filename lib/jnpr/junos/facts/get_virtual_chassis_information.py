@@ -33,12 +33,12 @@ def get_facts(device):
         rsp = device.rpc.get_virtual_chassis_information(normalize=True)
         # MX issue where command returns, but without content. In this case,
         # rsp is set to True.
-        if rsp is not True:
+        if rsp != True:
             vc_capable = True
-            if rsp is not None:
+            if rsp != None:
                 vc_mode = rsp.findtext(".//virtual-chassis-mode")
                 vc_id_info = rsp.find(".//virtual-chassis-id-information")
-                if vc_id_info is not None:
+                if vc_id_info != None:
                     if vc_id_info.get("style") == "fabric":
                         vc_fabric = True
                     else:
@@ -47,7 +47,7 @@ def get_facts(device):
                     ".//member-role[starts-with(.,'Master')]"
                     "/preceding-sibling::member-id"
                 ):
-                    if vc_master is None:
+                    if vc_master == None:
                         vc_master = member_id.text
                     else:
                         old_vc_master = vc_master

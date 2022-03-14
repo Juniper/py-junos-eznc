@@ -18,9 +18,9 @@ def get_facts(device):
         dir_list_element = rsp
     else:
         dir_list_element = rsp.find(".//directory-list")
-    if dir_list_element is not None:
+    if dir_list_element != None:
         home = dir_list_element.get("root-path")
-        if home is not None:
+        if home != None:
             home = home.rstrip("/")
     return {
         "HOME": home,

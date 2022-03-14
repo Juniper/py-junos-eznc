@@ -163,7 +163,7 @@ class Terminal(object):
         # in case of telnet to management port, after writing exit on console
         # it exits completely and returns None
         ###
-        if found is not None:
+        if found != None:
             _ev_tbl[found]()
         else:
             return True

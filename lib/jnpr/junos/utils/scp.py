@@ -31,13 +31,13 @@ class SCP(object):
         :param kvargs scpargs: any additional args to be passed to paramiko SCP
         """
         self._junos = junos
-        if self._junos.__dict__.get("_mode") is not None:
+        if self._junos.__dict__.get("_mode") != None:
             raise RuntimeError("SCP is not supported with Console mode")
         self._scpargs = scpargs
         self._by10pct = 0
         self._user_progress = self._scpargs.get("progress")
         self._ssh = None
-        if self._user_progress is True:
+        if self._user_progress == True:
             self._scpargs["progress"] = self._scp_progress
         elif callable(self._user_progress):
             # User case also define progress with 3 params, the way scp module

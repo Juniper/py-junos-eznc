@@ -162,7 +162,7 @@ strip_rpc_error_transform = etree.XSLT(strip_rpc_error_root)
 
 def remove_namespaces(xml):
     for elem in xml.iter():
-        if elem.tag is etree.Comment:
+        if elem.tag == etree.Comment:
             continue
         i = elem.tag.find("}")
         if i > 0:
@@ -172,7 +172,7 @@ def remove_namespaces(xml):
 
 def remove_namespaces_and_spaces(xml):
     for elem in xml.iter():
-        if elem.tag is etree.Comment:
+        if elem.tag == etree.Comment:
             continue
         # Remove namespace from attributes
         for k, v in elem.attrib.items():
@@ -203,7 +203,7 @@ def rpc_error(rpc_xml):
 
     def find_strip(x):
         ele = rpc_xml.find(x)
-        return ele.text.strip() if ele is not None and ele.text is not None else None
+        return ele.text.strip() if ele != None and ele.text != None else None
 
     this_err = {}
     this_err["severity"] = find_strip("error-severity")

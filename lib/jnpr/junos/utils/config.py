@@ -150,7 +150,7 @@ class Config(Util):
         except RpcTimeoutError:
             raise
         except RpcError as err:  # jnpr.junos exception
-            if err.rsp is not None and err.rsp.find("ok") is not None:
+            if err.rsp != None and err.rsp.find("ok") != None:
                 # this means there are warnings, but no errors
                 return True
             else:
@@ -200,7 +200,7 @@ class Config(Util):
         except RpcTimeoutError:
             raise
         except RpcError as err:  # jnpr.junos exception
-            if err.rsp is not None and err.rsp.find("ok") is not None:
+            if err.rsp != None and err.rsp.find("ok") != None:
                 # this means there is a warning, but no errors
                 return True
             else:
@@ -430,13 +430,13 @@ class Config(Util):
         # note: this cannot be used if format='set', per Junos API.
 
         overwrite = kvargs.get("overwrite", False)
-        if overwrite is True:
+        if overwrite == True:
             rpc_xattrs["action"] = "override"
-        if kvargs.get("update") is True:
+        if kvargs.get("update") == True:
             rpc_xattrs["action"] = "update"
-        elif kvargs.get("merge") is True:
+        elif kvargs.get("merge") == True:
             del rpc_xattrs["action"]
-        elif kvargs.get("patch") is True:
+        elif kvargs.get("patch") == True:
             rpc_xattrs["action"] = "patch"
 
         ignore_warning = kvargs.get("ignore_warning", False)
@@ -462,10 +462,10 @@ class Config(Util):
             """setup the kvargs/rpc_xattrs"""
             # when format is given, setup the xml attrs appropriately
             if kvargs["format"] == "set":
-                if overwrite is True or kvargs.get("update") is True:
+                if overwrite == True or kvargs.get("update") == True:
                     raise ValueError(
                         "conflicting args, cannot use 'set' with '%s'"
-                        % ("overwrite" if overwrite is True else "update")
+                        % ("overwrite" if overwrite == True else "update")
                     )
                 rpc_xattrs["action"] = "set"
                 kvargs["format"] = "text"
@@ -585,9 +585,9 @@ class Config(Util):
                 # covert the XML string into XML structure
                 rpc_contents = etree.XML(rpc_contents)
 
-        if rpc_contents is not None:
+        if rpc_contents != None:
             return try_load(rpc_contents, rpc_xattrs, ignore_warning=ignore_warning)
-        elif "url" in kvargs and rpc_contents is None:
+        elif "url" in kvargs and rpc_contents == None:
             url = kvargs["url"]
             _lset_fromfile(url)
             rpc_xattrs["url"] = url
@@ -874,7 +874,7 @@ class Config(Util):
             return True
 
         def _unsupported_option():
-            if self.mode is not None:
+            if self.mode != None:
                 raise ValueError("unsupported action: {}".format(self.mode))
 
         if self.kwargs.get("ephemeral_instance"):
@@ -894,5 +894,5 @@ class Config(Util):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.mode == "exclusive":
             self.unlock()
-        elif self.mode is not None:
+        elif self.mode != None:
             self.rpc.close_configuration()

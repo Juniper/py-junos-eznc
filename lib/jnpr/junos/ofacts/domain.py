@@ -27,7 +27,7 @@ def facts_domain(junos, facts):
 
     fs = FS(junos)
     file_content = fs.cat("/etc/resolv.conf") or fs.cat("/var/etc/resolv.conf")
-    words = file_content.split() if file_content is not None else ""
+    words = file_content.split() if file_content != None else ""
     if "domain" not in words:
         facts["domain"] = None
         facts["fqdn"] = facts["hostname"]

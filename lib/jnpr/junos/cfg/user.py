@@ -52,13 +52,13 @@ class User(Resource):
             has_py["uid"] = int(has_py["uid"])
 
         auth = has_xml.find("authentication")
-        if auth is not None:
+        if auth != None:
             # plain-text password
             Resource.copyifexists(auth, "encrypted-password", has_py, "$password")
 
             # ssh-keys
             sshkeys = auth.xpath("ssh-rsa | ssh-dsa")
-            if sshkeys is not None:
+            if sshkeys != None:
                 has_py["$sshkeys"] = [
                     (sshkey.tag, sshkey.findtext("name").strip()) for sshkey in sshkeys
                 ]

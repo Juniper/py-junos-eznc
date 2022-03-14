@@ -14,7 +14,7 @@ class TestCore(unittest.TestCase):
     def setUpClass(self):
         from jnpr.junos import Device
 
-        self.dev = Device(host="xxxx", user="jenkins", password="password")
+        self.dev = Device(host="10.209.14.76", user="root", password="Embe1mpls",port="22")
         self.dev.open()
 
     @classmethod

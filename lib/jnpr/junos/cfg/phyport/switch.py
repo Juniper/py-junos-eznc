@@ -28,11 +28,11 @@ class PhyPortSwitch(PhyPortBase):
         if ethopts is None:
             return
 
-        if ethopts.find("loopback") is not None:
+        if ethopts.find("loopback") != None:
             has_py["loopback"] = True
 
         speed = ethopts.find("speed")
-        if speed is not None:
+        if speed != None:
             # take the first child element
             has_py["speed"] = speed[0].tag
             PhyPortBase._set_invert(has_py, "speed", self.PORT_SPEED)
@@ -52,7 +52,7 @@ class PhyPortSwitch(PhyPortBase):
 
     def _xml_change_speed(self, xml):
         speed_tag = self.PORT_SPEED.get(self.speed)
-        add_this = E.speed(JXML.DEL) if speed_tag is None else E.speed(E(speed_tag))
+        add_this = E.speed(JXML.DEL) if speed_tag == None else E.speed(E(speed_tag))
         self._ethopts.append(add_this)
         return True
 

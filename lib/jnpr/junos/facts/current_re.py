@@ -48,10 +48,10 @@ def get_facts(device):
                 "interface-address/ifa-local"
             ):
                 ifa_text = ifa.text
-                if ifa_text is not None:
+                if ifa_text != None:
                     # Separate the IP from the mask
                     (ip, _, _) = ifa.text.partition("/")
-                    if ip is not None:
+                    if ip != None:
                         # Use the _iri_hostname fact to map the IP address to
                         # an internal routing instance hostname.
                         if ip in device.facts["_iri_hostname"]:
@@ -86,7 +86,7 @@ def get_facts(device):
                                         host = "node1"
                                     elif octets[0] == "143":
                                         host = "primary"
-                                    if host is not None and host not in current_re:
+                                    if host != None and host not in current_re:
                                         current_re.append(host)
                             # Problem splitting IP into octets and indexing them.
                             # Keep looping to check the other IRI IPs.
@@ -96,7 +96,7 @@ def get_facts(device):
         # Check to see if it's JDM of Junos Node slicing
         try:
             current_re_sw = device.rpc.get_software_information()
-            if current_re_sw is not None:
+            if current_re_sw != None:
                 server_slot = current_re_sw.findtext(
                     './package-information[name="Server ' 'slot"]/comment'
                 )

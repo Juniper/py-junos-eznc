@@ -120,7 +120,7 @@ class FactoryLoader(object):
             return
 
         astype = __builtins__.get(opt) or globals().get(opt)
-        if astype is not None:
+        if astype != None:
             kvargs["astype"] = astype
             fields.astype(f_name, xpath, **kvargs)
             return
@@ -171,7 +171,7 @@ class FactoryLoader(object):
                 continue
 
             # if we are here, then it means that the field is a string value
-            xpath = f_name if f_data is True else f_data
+            xpath = f_name if f_data == True else f_data
             fields.str(f_name, xpath, **kvargs)
 
     def _add_cmd_view_fields(self, view_dict, fields_name, fields):

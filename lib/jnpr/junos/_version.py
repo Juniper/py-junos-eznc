@@ -263,11 +263,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         cwd=root,
     )
     # --long was added in git-1.5.5
-    if describe_out is None:
+    if describe_out == None:
         raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
     full_out, rc = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
-    if full_out is None:
+    if full_out == None:
         raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
 

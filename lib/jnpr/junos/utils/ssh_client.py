@@ -32,7 +32,7 @@ def open_ssh_client(dev):
     if config.get("proxycommand"):
         sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
 
-    if dev._ssh_private_key_file is not None:
+    if dev._ssh_private_key_file != None:
         kwargs["key_filename"] = dev._ssh_private_key_file
 
     # pick hostname from .ssh config if any

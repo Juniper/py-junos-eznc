@@ -51,12 +51,12 @@ class OpTable(Table):
         """
         self._clearkeys()
 
-        if self._path is not None:
+        if self._path != None:
             # for loading from local file-path
             self.xml = remove_namespaces(etree.parse(self._path).getroot())
             return self
 
-        if self._lxml is not None:
+        if self._lxml != None:
             return self
 
         argkey = vargs[0] if len(vargs) else None

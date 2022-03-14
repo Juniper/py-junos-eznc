@@ -19,7 +19,7 @@ class ViewFields(object):
 
     def str(self, name, xpath=None, **kvargs):
         """field is a string"""
-        if xpath is None:
+        if xpath == None:
             xpath = name
         field = {name: {"xpath": xpath}}
         self._prockvargs(field, name, **kvargs)
@@ -38,7 +38,7 @@ class ViewFields(object):
 
           astype=lambda x: True if x == 'enabled' else False
         """
-        if xpath is None:
+        if xpath == None:
             xpath = name
         field = {name: {"xpath": xpath, "astype": astype}}
         self._prockvargs(field, name, **kvargs)

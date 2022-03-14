@@ -53,7 +53,7 @@ class View(object):
 
     def _init_xml(self, given_xml):
         self._xml = given_xml
-        if self.GROUPS is not None:
+        if self.GROUPS != None:
             self._groups = {}
             for xg_name, xg_xpath in self.GROUPS.items():
                 xg_xml = self._xml.xpath(xg_xpath)
@@ -79,7 +79,7 @@ class View(object):
     @property
     def name(self):
         """return the name of view item"""
-        if self.ITEM_NAME_XPATH is None:
+        if self.ITEM_NAME_XPATH == None:
             return []
             # return self._table.D.hostname
         if isinstance(self.ITEM_NAME_XPATH, str):
@@ -199,7 +199,7 @@ class View(object):
         # ---------------------------------------------------------------------
 
         more = type("RunstatViewMore", (object,), {})()
-        if fields is True:
+        if fields == True:
             more.fields = ViewFields()
 
         # ---------------------------------------------------------------------
@@ -207,7 +207,7 @@ class View(object):
         # ---------------------------------------------------------------------
 
         yield more
-        updater = self._updater_class if all is True else self._updater_instance
+        updater = self._updater_class if all == True else self._updater_instance
         updater(more)
 
     def asview(self, view_cls):
@@ -223,7 +223,7 @@ class View(object):
         """
         warnings.warn("Experimental method: refresh")
 
-        if self._table.can_refresh is not True:
+        if self._table.can_refresh != True:
             raise RuntimeError("table does not support this feature")
 
         # create a new table instance that gets only the specific named
@@ -262,7 +262,7 @@ class View(object):
             return val
 
         item = self.FIELDS.get(name)
-        if item is None:
+        if item == None:
             raise ValueError("Unknown field: '%s'" % name)
 
         if "table" in item:
@@ -281,7 +281,7 @@ class View(object):
 
         len_found = len(found)
 
-        if astype is bool:
+        if astype == bool:
             # handle the boolean flag case separately
             return bool(len_found)
 
@@ -305,7 +305,7 @@ class View(object):
                         as_str = as_str.encode("ascii", "replace")
                 else:
                     as_str = x if isinstance(x, str) else x.text
-                if as_str is not None:
+                if as_str != None:
                     as_str = as_str.strip()
                 if not as_str:
                     as_str = x.tag  # use 'not' to test for empty

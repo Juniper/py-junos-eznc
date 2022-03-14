@@ -987,7 +987,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
     if not keywords:
         raise NotThisMethod("no keywords at all, weird")
     date = keywords.get("date")
-    if date is not None:
+    if date != None:
         # git-2.2.0 added "%cI", which expands to an ISO-8601 -compliant
         # datestamp. However we prefer "%ci" (which expands to an "ISO-8601
         # -like" string, which we must then edit to make compliant), because
@@ -1077,11 +1077,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         cwd=root,
     )
     # --long was added in git-1.5.5
-    if describe_out is None:
+    if describe_out == None:
         raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
     full_out, rc = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
-    if full_out is None:
+    if full_out == None:
         raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
 
@@ -1450,14 +1450,14 @@ def get_versions(verbose=False):
     root = get_root()
     cfg = get_config_from_root(root)
 
-    assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
+    assert cfg.VCS != None, "please set [versioneer]VCS= in setup.cfg"
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
     verbose = verbose or cfg.verbose
     assert (
-        cfg.versionfile_source is not None
+        cfg.versionfile_source != None
     ), "please set versioneer.versionfile_source"
-    assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
+    assert cfg.tag_prefix != None, "please set versioneer.tag_prefix"
 
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
 
