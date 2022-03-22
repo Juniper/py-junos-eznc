@@ -56,6 +56,12 @@ class TestCurrentRe(unittest.TestCase):
         self.assertEqual(self.dev.facts["current_re"], ["node0", "primary"])
 
     @patch("jnpr.junos.Device.execute")
+    def test_current_re_fact_srx_cluster_primary_id_16(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_srx_primary
+        self.dev.facts._cache["srx_cluster_id"] = "16"
+        self.assertEqual(self.dev.facts["current_re"], ["node0"])
+
+    @patch("jnpr.junos.Device.execute")
     def test_current_re_fact_srx_cluster_secondary(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_current_re_srx_secondary
         self.dev.facts._cache["srx_cluster_id"] = "15"
