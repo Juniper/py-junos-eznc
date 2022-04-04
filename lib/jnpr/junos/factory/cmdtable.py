@@ -346,6 +346,7 @@ class CMDTable(object):
         if self.template_dir is not None:
             # we dont need index file for lookup
             index = None
+            command = command.replace("/", "--")
             template_path = os.path.join(
                 self.template_dir,
                 "{}_{}.textfsm".format(platform, "_".join(command.split())),
