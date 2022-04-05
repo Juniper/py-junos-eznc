@@ -340,6 +340,7 @@ class CMDTable(object):
         :return: dict of parsed data.
         """
         command = command.replace('/', '-')
+
         attrs = dict(Command=command, Platform=platform)
 
         template = None
