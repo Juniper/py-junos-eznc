@@ -42,4 +42,5 @@ jobs:
     
     - name: Run unit tests
       run: |
+        cd tests
         nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
