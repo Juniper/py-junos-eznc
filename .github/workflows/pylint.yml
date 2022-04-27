@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
         exclude:
           - os: windows-latest
             python-version: 3.8
@@ -38,7 +38,7 @@ jobs:
     - name: Run black tool
       run: |
         pip install -U black;
-        black --check --exclude=docs/* .
+        black --check --diff --exclude="docs|build|tests|samples" . 
     
     - name: Run unit tests
       run: |
