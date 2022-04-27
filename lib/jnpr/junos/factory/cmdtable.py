@@ -339,7 +339,7 @@ class CMDTable(object):
         :param raw: string blob output from the cli command execution
         :return: dict of parsed data.
         """
-        command = command.replace('/', '-')
+        command = command.replace("/", "-")
 
         attrs = dict(Command=command, Platform=platform)
 
