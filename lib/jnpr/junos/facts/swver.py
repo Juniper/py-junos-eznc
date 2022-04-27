@@ -13,7 +13,7 @@ class version_info(object):
 
         if "X" == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
-            xm = re.match("(\d+)-(\w)(\d+)", self.minor)
+            xm = re.match(r"(\d+)-(\w)(\d+)", self.minor)
             if xm is not None:
                 self.minor = tuple([int(xm.group(1)), xm.group(2), int(xm.group(3))])
                 if len(after_type) < 2:

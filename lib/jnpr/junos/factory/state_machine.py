@@ -297,11 +297,11 @@ class StateMachine(Machine):
                             self._data[master_key][key] = StateMachine(tbl).parse(lines)
                 else:
                     self._table.TITLE = lines[0]
-                    delimiter = self._table.DELIMITER or "\s\s+"
+                    delimiter = self._table.DELIMITER or r"\s\s+"
                     temp_dict = {}
                     pre_space_delimit = self._get_pre_space_delimiter(lines[1])
                     for line in lines[1:]:
-                        if re.match(pre_space_delimit + "\s+", line):
+                        if re.match(pre_space_delimit + r"\s+", line):
                             break
                         if line.startswith(pre_space_delimit):
                             try:
@@ -311,9 +311,9 @@ class StateMachine(Machine):
                                 temp_dict[key] = value
                             except ValueError:
                                 regex = (
-                                    "(\d+)\s(.*)"
+                                    r"(\d+)\s(.*)"
                                     if item_types[0] == int
-                                    else "(" ".*)\s(\d+)"
+                                    else "(" r".*)\s(\d+)"
                                 )
                                 obj = re.search(regex, line)
                                 if obj:
@@ -455,14 +455,14 @@ class StateMachine(Machine):
                         user_defined_columns.pop(x)
                         break
         key = self._get_key(event.kwargs.get("key", self._table.KEY))
-        items = re.split("\s\s+", self._lines[1].strip())
+        items = re.split(r"\s\s+", self._lines[1].strip())
 
         post_integer_data_types = event.kwargs.get("check", list(map(data_type, items)))
         index = event.kwargs.get("index", 1)
         # col_len = len(col_order)
         columns_list = list(col_order.values())
         for index, line in enumerate(self._lines[index:], start=index):
-            items = re.split("\s\s+", line.strip())
+            items = re.split(r"\s\s+", line.strip())
             if len(items) >= len(columns_list):
                 if len(items) > len(columns_list):
                     if (
@@ -587,7 +587,7 @@ class StateMachine(Machine):
         index = event.kwargs.get("index")
         post_integer_data_types = event.kwargs.get("check")
         line = self._lines[index]
-        items = re.split("\s\s+", line.strip())
+        items = re.split(r"\s\s+", line.strip())
         post_integer_data_types, pre_integer_data_types = (
             list(map(data_type, items)),
             post_integer_data_types,
@@ -620,7 +620,7 @@ class StateMachine(Machine):
           TX Packets 512-1023 Octets  526513
         """
         pre_space_delimit = ""
-        obj = re.search("(\s+).*", line)
+        obj = re.search(r"(\s+).*", line)
         if obj:
             pre_space_delimit = obj.group(1)
         return pre_space_delimit
@@ -705,10 +705,10 @@ class StateMachine(Machine):
             and not self._view.REGEX
         ):
             return
-        delimiter = self._table.DELIMITER or "\s\s+"
+        delimiter = self._table.DELIMITER or r"\s\s+"
         pre_space_delimit = self._get_pre_space_delimiter(self._lines[1])
         for line in self._lines[1:]:
-            if re.match(pre_space_delimit + "\s+", line):
+            if re.match(pre_space_delimit + r"\s+", line):
                 break
             if line.startswith(pre_space_delimit):
                 try:
@@ -722,7 +722,9 @@ class StateMachine(Machine):
                     elif key in self._table.KEY_ITEMS:
                         self._data[self._view.FIELDS.get(key, key)] = value
                 except ValueError:
-                    regex = "(\d+)\s(.*)" if item_types[0] == int else "(" ".*)\s(\d+)"
+                    regex = (
+                        r"(\d+)\s(.*)" if item_types[0] == int else "(" r".*)\s(\d+)"
+                    )
                     obj = re.search(regex, line)
                     if obj:
                         items = obj.groups()
@@ -734,7 +736,7 @@ class StateMachine(Machine):
         return self._data
 
     def parse_using_regex(self, event):
-        """
+        r"""
         All the regex should add up to match a line
 
         Args:
@@ -819,7 +821,7 @@ class StateMachine(Machine):
                     )
 
     def parse_using_item_and_regex(self, event):
-        """
+        r"""
         when multiple map is provided for regex, they gets added to search each
         line. But when item is '*' each regex item is used to search given value
         regular expression in whole string blob.
@@ -922,7 +924,7 @@ class StateMachine(Machine):
         'PTP': 0}
 
         """
-        delimiter = self._table.DELIMITER or "\s\s+"
+        delimiter = self._table.DELIMITER or r"\s\s+"
         pre_space_delimit = ""
         if self._table.TITLE is None:
             for line in self._lines[1:]:
@@ -930,7 +932,7 @@ class StateMachine(Machine):
                     self._lines = self._lines[self._lines.index(line) + 1 :]
                     break
         else:
-            obj = re.search("^(\s+).*", self._lines[1])
+            obj = re.search(r"^(\s+).*", self._lines[1])
             if obj:
                 pre_space_delimit = obj.group(1)
         for index, line in enumerate(self._lines[1:]):
@@ -981,7 +983,7 @@ class StateMachine(Machine):
             self._data[key] = re.search(search, self._raw, re.I | re.M) is not None
 
     def _insert_eval_data(self, tmp_dict):
-        """
+        r"""
 
         Args:
             tmp_dict: dictionary of key value from a iteration of view

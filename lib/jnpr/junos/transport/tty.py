@@ -44,17 +44,17 @@ class Terminal(object):
     _ST_TTY_OPTION = 7
     _ST_TTY_HOTKEY = 8
 
-    _re_pat_login = "(?P<login>ogin:\s*$)"
+    _re_pat_login = r"(?P<login>ogin:\s*$)"
 
     _RE_PAT = [
-        "(?P<loader>oader>\s*$)",
+        r"(?P<loader>oader>\s*$)",
         _re_pat_login,
-        "(?P<passwd>assword:\s*$)",
+        r"(?P<passwd>assword:\s*$)",
         "(?P<badpasswd>ogin incorrect)",
-        "(?P<netconf_closed><!-- session end at .*-->\s*)",
-        "(?P<shell>%|#|(~\$)\s*$)",
+        r"(?P<netconf_closed><!-- session end at .*-->\s*)",
+        r"(?P<shell>%|#|(~\$)\s*$)",
         '(?P<cli>[^\\-"]>\s*$)',
-        "(?P<option>Enter your option:\s*$)",
+        r"(?P<option>Enter your option:\s*$)",
         "(?P<hotkey>connection: <CTRL>Z)",
     ]
 
