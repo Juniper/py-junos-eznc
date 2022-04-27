@@ -38,7 +38,7 @@ jobs:
     - name: Run black tool
       run: |
         pip install -U black;
-        black --check --exclude="docs|build|tests|samples|venv" .
+        black --check --diff --exclude="docs|build|tests|samples|venv" .
     
     - name: Run unit tests
       run: |
