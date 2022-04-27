@@ -139,9 +139,9 @@ class TestFactoryTable(unittest.TestCase):
     def test_table_savexml(self, mock_file, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.xml = etree.XML("<root><a>test</a></root>")
-        self.ppt.savexml("/vasr/tmssp/foo.xml", hostname=True, append="test")
-        mock_file.assert_called_once_with("/vasr/tmssp/foo_1.1.1.1_test.xml", "wb")
-        self.ppt.savexml("/vasr/tmssp/foo.xml", hostname=True, timestamp=True)
+        self.ppt.savexml("foo.xml", hostname=True, append="test")
+        mock_file.assert_called_once_with("foo_1.1.1.1_test.xml", "wb+")
+        self.ppt.savexml("foo.xml", hostname=True, timestamp=True)
         self.assertEqual(mock_file.call_count, 2)
 
     def _read_file(self, fname):
