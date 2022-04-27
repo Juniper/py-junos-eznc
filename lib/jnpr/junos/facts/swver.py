@@ -95,7 +95,7 @@ class version_info(object):
 
 
 def version_yaml_representer(dumper, version):
-    return dumper.represent_mapping(u"tag:yaml.org,2002:map", version.v_dict)
+    return dumper.represent_mapping("tag:yaml.org,2002:map", version.v_dict)
 
 
 def provides_facts():
