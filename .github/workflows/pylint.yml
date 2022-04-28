@@ -18,6 +18,8 @@ jobs:
         exclude:
           - os: windows-latest
             python-version: 3.8
+          - os: windows-latest
+            python-version: 3.9
 
     steps:
     - uses: actions/checkout@v2
@@ -38,7 +40,7 @@ jobs:
     - name: Run black tool
       run: |
         pip install -U black;
-        black --check --diff --exclude="docs|build|tests|samples" .
+        black --check --diff --exclude="docs|build|tests|samples" . 
     
     - name: Run unit tests
       run: |
