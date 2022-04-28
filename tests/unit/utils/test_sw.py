@@ -161,7 +161,9 @@ class TestSW(unittest.TestCase):
         dev.facts = facts
         sw = SW(dev)
         sw.put(package="test.tgz")
-        self.assertTrue(call("test.tgz", "/var/tmp") in mock_ftp_put.mock_calls)
+        self.assertTrue(
+            any("('test.tgz', '/var/tmp')" in str(s) for s in mock_ftp_put.mock_calls)
+        )
 
     @patch("jnpr.junos.utils.scp.SCP.__exit__")
     @patch("jnpr.junos.utils.scp.SCP.__init__")
