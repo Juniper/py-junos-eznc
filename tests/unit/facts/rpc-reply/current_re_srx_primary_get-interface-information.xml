@@ -246,6 +246,9 @@
                         <ifa-local junos:emit="emit">129.240.0.1/2</ifa-local>
                     </interface-address>
                     <interface-address>
+                        <ifa-local junos:emit="emit">129.16.0.1/2</ifa-local>
+                    </interface-address>
+                    <interface-address>
                         <ifa-local junos:emit="emit">143.240.0.1/2</ifa-local>
                     </interface-address>
                 </address-family>
