@@ -7,6 +7,7 @@
 - Fixed upgrade ncclient version 0.6.13, updated requirements.txt to install ncclient==0.6.13 #1153
 - Fixed deprecation warning due to invalid escape sequences #1034
 - Fixed Unit tests test_sw_put_ftp failure #1165
+- Support for python 3.9
 
 ## Release 2.4.2.dev0 - 29 APRIL 2020
 ## Features Added

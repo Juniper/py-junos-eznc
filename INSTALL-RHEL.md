@@ -29,13 +29,13 @@ Enjoy!
 
 Development code can be installed directly from GitHub based on any branch, commit, or tag.
 
-***Step 1  still required.***
-#### Alternate Step 3: Install Junos PyEZ from GitHub
+***Step 1 and 3 still required.***
+#### Alternate Step 4: Install Junos PyEZ from GitHub
 
-#### Step 3a: Install Git from OS packages
+#### Step 4a: Install Git from OS packages
     pip install git
 
-#### Step 3b: Install Junos PyEZ from GitHub
+#### Step 4b: Install Junos PyEZ from GitHub
 
 ##### For Python 3.x:
 	    pip install git+https://github.com/Juniper/py-junos-eznc.git
