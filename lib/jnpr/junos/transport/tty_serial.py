@@ -84,7 +84,7 @@ class Serial(Terminal):
             line = self._ser.readline()
             if not line:
                 continue
-            rxb += b"line"
+            rxb += line
             found = _PROMPT.search(rxb)
             if found is not None:
                 break  # done reading
