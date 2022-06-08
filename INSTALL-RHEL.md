@@ -13,12 +13,12 @@ Operating Systems
 ##### For Python 3.x:
 ###### For RHEL:
 
-#### Step 1: Install Junos PyEZ
+#### Step 2: Install Junos PyEZ
 
 ##### For Python 3.x:
         sudo pip3 install junos-eznc
 
-#### Step 2: Verify 
+#### Step 3: Verify 
 
 Once you've completed the above step, you should be able to create a `Device` instance, connect to a Junos system, and display the "facts", as illustrated in the README.md file.
 
@@ -29,13 +29,13 @@ Enjoy!
 
 Development code can be installed directly from GitHub based on any branch, commit, or tag.
 
-***Steps 1 -2 are still required.***
-#### Alternate Step 4: Install Junos PyEZ from GitHub
+***Step 1  still required.***
+#### Alternate Step 3: Install Junos PyEZ from GitHub
 
-#### Step 4a: Install Git from OS packages
+#### Step 3a: Install Git from OS packages
     pip install git
 
-#### Step 4b: Install Junos PyEZ from GitHub
+#### Step 3b: Install Junos PyEZ from GitHub
 
 ##### For Python 3.x:
 	    pip install git+https://github.com/Juniper/py-junos-eznc.git
