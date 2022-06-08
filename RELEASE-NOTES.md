@@ -1,3 +1,13 @@
+## Release 2.6.4 - 9 JUNE 2022
+### Features Added
+- Supported start_shell options to choose the shell types (sh or csh) #995
+
+### Bugs fixed:
+- Fixed Device facts current_re returns the SRX cluster  node0 and node1 details with cluster ID 16 #1135
+- Fixed upgrade ncclient version 0.6.13, updated requirements.txt to install ncclient==0.6.13 #1153
+- Fixed deprecation warning due to invalid escape sequences #1034
+- Fixed Unit tests test_sw_put_ftp failure #1165
+
 ## Release 2.4.2.dev0 - 29 APRIL 2020
 ## Features Added
 

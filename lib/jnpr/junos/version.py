@@ -1,5 +1,5 @@
-VERSION = "2.5.0"
-DATE = "2020-Jun-15"
+VERSION = "2.6.4"
+DATE = "2022-Jun-9"
 
 # Augment with the internal version if present
 try:
