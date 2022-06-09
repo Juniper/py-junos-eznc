@@ -1,3 +1,8 @@
+## Release 2.6.5.dev0 - 10 JUNE 2022
+## Features Added
+
+## Bugs fixed
+
 ## Release 2.6.4 - 9 JUNE 2022
 ### Features Added
 - Supported start_shell options to choose the shell types (sh or csh) #995
