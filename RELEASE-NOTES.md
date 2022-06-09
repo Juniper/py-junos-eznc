@@ -2,7 +2,6 @@
 ### Features Added
 - Supported start_shell options to choose the shell types (sh or csh) #995
 - Supported for python 3.9
-
 ### Bugs fixed:
 - Fixed Device facts current_re returns the SRX cluster  node0 and node1 details with cluster ID 16 #1135
 - Fixed upgrade ncclient version 0.6.13, updated requirements.txt to install ncclient==0.6.13 #1153

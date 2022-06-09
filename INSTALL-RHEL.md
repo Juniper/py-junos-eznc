@@ -24,7 +24,6 @@ Once you've completed the above step, you should be able to create a `Device` in
 
 Enjoy!
 
-
 #### Installing from GitHub
 
 Development code can be installed directly from GitHub based on any branch, commit, or tag.
