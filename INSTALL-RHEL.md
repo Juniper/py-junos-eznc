@@ -2,7 +2,7 @@
 
 The following are instructions for setting up a system starting from a stock system images.
 
-These instructions were tested on a 64-bit systems from https://github.com/opscode/bento, and using the _Junos PyEZ_ library version 2.6.3.
+These instructions were tested on a 64-bit systems from https://github.com/opscode/bento, and using the _Junos PyEZ_ library version 2.6.4.
 
 Operating Systems
 ---------------
@@ -11,7 +11,7 @@ Operating Systems
 #### Step 1: Install Python and PIP
 
 ##### For Python 3.x:
-###### For RHEL:
+       dnf install python3-pip python3-wheel
 
 #### Step 2: Install Junos PyEZ
 
@@ -33,9 +33,9 @@ Development code can be installed directly from GitHub based on any branch, comm
 #### Alternate Step 4: Install Junos PyEZ from GitHub
 
 #### Step 4a: Install Git from OS packages
-    pip install git
+        pip3 install git
 
 #### Step 4b: Install Junos PyEZ from GitHub
 
 ##### For Python 3.x:
-	    pip install git+https://github.com/Juniper/py-junos-eznc.git
+	    pip3 install git+https://github.com/Juniper/py-junos-eznc.git

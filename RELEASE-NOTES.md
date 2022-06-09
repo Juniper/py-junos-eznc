@@ -1,7 +1,7 @@
 ## Release 2.6.4 - 9 JUNE 2022
 ### Features Added
 - Supported start_shell options to choose the shell types (sh or csh) #995
-- Support for python 3.9
+- Supported for python 3.9
 
 ### Bugs fixed:
 - Fixed Device facts current_re returns the SRX cluster  node0 and node1 details with cluster ID 16 #1135
