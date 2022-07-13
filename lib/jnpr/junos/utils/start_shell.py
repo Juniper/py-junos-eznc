@@ -42,7 +42,7 @@ class StartShell(object):
         self.shell_type = shell_type
 
     def write_stdin(self, stdin, data):
-        stdin.write(data.encode('utf-8'))
+        stdin.write(data.encode("utf-8"))
         stdin.flush()
 
     def wait_for(self, this=_SHELL_PROMPT, timeout=0, sleep=0):
@@ -94,7 +94,7 @@ class StartShell(object):
         """
         if self.ON_JUNOS is True:
             data += " && echo ']]>]]>' \n"
-            self._chan.stdin.write(data.encode('utf-8'))
+            self._chan.stdin.write(data.encode("utf-8"))
             self.t = Thread(target=self.write_stdin, args=(self._chan.stdin, data))
             self.t.daemon = True  # thread dies with the program
             self.t.start()
