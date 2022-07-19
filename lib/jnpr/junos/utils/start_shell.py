@@ -124,7 +124,7 @@ class StartShell(object):
 
             got = self.wait_for(r"(%|>|#|\$)")
             if got[-1].endswith(_JUNOS_PROMPT):
-                self.send("start shell" + self.shell_type)
+                self.send("start shell " + self.shell_type)
                 self.wait_for(_SHELL_PROMPT)
 
     def close(self):
