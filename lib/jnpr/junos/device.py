@@ -1231,7 +1231,7 @@ class Device(_Connection):
         self._fact_style = kvargs.get("fact_style", "new")
         self._use_filter = kvargs.get("use_filter", False)
         self._huge_tree = kvargs.get("huge_tree", False)
-        self._conn_open_timeout = kvargs.get("conn_open_timeout", None)
+        self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
