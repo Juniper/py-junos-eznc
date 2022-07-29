@@ -1,4 +1,4 @@
-## Release 2.6.6.dev0 - 29 JULY 2022
+## Release 2.6.6.dev0 - 30 JULY 2022
 ## Features Added
 
 ## Bugs fixed

@@ -1,5 +1,5 @@
 VERSION = "2.6.6.dev0"
-DATE = "2022-July-29"
+DATE = "2022-July-30"
 
 # Augment with the internal version if present
 try:
