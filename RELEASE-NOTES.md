@@ -1,7 +1,16 @@
-## Release 2.6.5.dev0 - 10 JUNE 2022
+## Release 2.6.6.dev0 - 29 JULY 2022
 ## Features Added
 
 ## Bugs fixed
+
+## Release 2.6.5 - 29 JULY 2022
+## Features Added
+- Supported multi-gig ports for EthPortTable.yml #1177 
+
+## Bugs fixed
+- Fixed on-box support for start shell types #1190 #1186
+- Fixed conn_open_timeout value was getting set to None , changed to default 30 seconds #1184
+
 
 ## Release 2.6.4 - 9 JUNE 2022
 ### Features Added
