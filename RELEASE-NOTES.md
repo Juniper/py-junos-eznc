@@ -1,9 +1,9 @@
-## Release 2.6.6.dev0 - 22 JULY 2022
+## Release 2.6.6.dev0 - 29 JULY 2022
 ## Features Added
 
 ## Bugs fixed
 
-## Release 2.6.5 - 22 JULy 2022
+## Release 2.6.5 - 29 JULY 2022
 ## Features Added
 - Supported multi-gig ports for EthPortTable.yml #1177 
 
