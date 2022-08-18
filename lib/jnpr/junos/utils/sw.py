@@ -1077,7 +1077,7 @@ class SW(Util):
         """
         if other_re is True:
             if self._dev.facts["2RE"]:
-                cmd = E("other-routing-engine")
+                cmd.append(E("other-routing-engine"))
         elif all_re is True:
             if self._multi_RE is True and vmhost is True:
                 cmd.append(E("routing-engine", "both"))
