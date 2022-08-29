@@ -3,7 +3,7 @@ EthPortTable:
   rpc: get-interface-information
   args:
     media: True
-    interface_name: '[afgxemgig][et]-*'
+    interface_name: '^(ge|et|fe|xe|mgig)-*'
   args_key: interface_name
   item: physical-interface
   view: EthPortView
