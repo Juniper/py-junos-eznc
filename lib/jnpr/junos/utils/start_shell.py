@@ -74,6 +74,7 @@ class StartShell(object):
             if self.ON_JUNOS is True:
                 data = chan.stdout.readline()
             else:
+                data = b""
                 rd, wr, err = select([chan], [], [], _SELECT_WAIT)
                 if rd:
                     data = chan.recv(_RECVSZ)
