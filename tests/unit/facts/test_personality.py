@@ -121,6 +121,14 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(self.dev.facts["personality"], "MX-GNF")
         self.assertEqual(self.dev.facts["virtual"], True)
 
+    def test_personality_acx(self):
+        self.dev.facts._cache["model"] = "ACX7908"
+        self.dev.facts._cache["re_info"] = {
+            "default": {"default": {"model": "ACX-7900-RE"}}
+        }
+        self.assertEqual(self.dev.facts["personality"], "ACX")
+        self.assertEqual(self.dev.facts["virtual"], False)
+
     @patch("jnpr.junos.Device.execute")
     def test_personality_vptx(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_personality_vptx
