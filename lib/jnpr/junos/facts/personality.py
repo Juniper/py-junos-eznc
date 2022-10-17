@@ -87,6 +87,9 @@ def get_facts(device):
     elif "JUNOS_NODE_SLICING" == model:
         personality = "JDM"
         virtual = True
+    elif model.startswith("ACX"):
+        personality = "ACX"
+        virtual = False
 
     return {
         "personality": personality,
