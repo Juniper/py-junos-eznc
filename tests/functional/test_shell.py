@@ -1,4 +1,4 @@
-__author__ = "rsherman, vnitinv"
+__author__ = "jnpr-community-netdev"
 
 try:
     import unittest2 as unittest
@@ -30,21 +30,20 @@ class test(unittest.TestCase):
             output = sh.run('pwd')
             self.assertTrue(output[0])
 
-    def test_shell_run_sleep(self):
+    def test_shell_run_with_sleep(self):
         from jnpr.junos.utils.start_shell import StartShell
         with StartShell(self.dev) as sh:
             output = sh.run('hostname', sleep=2)
             self.assertTrue(output[0])
 
-    def test_shell_run_shell_type_sh(self):
+    def test_shell_run_shell_type_ssh(self):
         from jnpr.junos.utils.start_shell import StartShell
-        with StartShell(self.dev, shell_type="sh") as sh:
-            output = sh.run('hostname')
+        with StartShell(self.dev, shell_type="ssh") as sh:
+            output = sh.run('hostname', sleep=2)
             self.assertTrue(output[0])
 
     def test_shell_run_shell_type_csh(self):
         from jnpr.junos.utils.start_shell import StartShell
         with StartShell(self.dev, shell_type="csh") as sh:
-            output = sh.run('hostname')
-            print(output)
+            output = sh.run('hostname', sleep=2)
             self.assertTrue(output[0])
