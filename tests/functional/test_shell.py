@@ -1,4 +1,4 @@
-__author__ = "rsherman, vnitinv"
+__author__ = "jnpr-community-netdev"
 
 try:
     import unittest2 as unittest
