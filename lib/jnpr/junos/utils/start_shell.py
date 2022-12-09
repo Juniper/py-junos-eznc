@@ -77,6 +77,8 @@ class StartShell(object):
                 rd, wr, err = select([chan], [], [], _SELECT_WAIT)
                 if rd:
                     data = chan.recv(_RECVSZ)
+                else:
+                    continue
             if sleep:
                 time.sleep(sleep)
             if isinstance(data, bytes):
