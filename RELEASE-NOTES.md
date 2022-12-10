@@ -1,8 +1,16 @@
-## Release 2.6.6.dev0 - 30 JULY 2022
+## Release 2.6.7.dev0 - 9 DEC 2022
 ## Features Added
 
 ## Bugs fixed
 
+## Release 2.6.6 - 9 DEC 2022
+## Bugs fixed
+- Fixed reboot failing on other RE #1199
+- Fixed passing 'sleep' arg to StartShell run() #1202
+- Fixed PyEZ get-facts support for ACX model #1209
+- Fixed EthPortTable regex pattern #1215
+- Fixed StartShell UnboundLocalError #1203 #1211
+- 
 ## Release 2.6.5 - 29 JULY 2022
 ## Features Added
 - Supported multi-gig ports for EthPortTable.yml #1177 
