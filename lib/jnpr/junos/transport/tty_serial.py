@@ -81,7 +81,12 @@ class Serial(Terminal):
 
         while datetime.now() < mark_end:
             sleep(0.1)  # do not remove
-            line = self._ser.readline()
+            allline = self._ser.readall()
+            key = re.findall("\n(.*)", allline.decode())
+            if key:
+                line = six.b(key[-1])
+            else:
+                line = None
             if not line:
                 continue
             rxb += line
