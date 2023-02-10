@@ -17,7 +17,6 @@ def _get_vc_status(dev, facts):
 
 
 def facts_routing_engines(junos, facts):
-
     re_facts = ["mastership-state", "status", "model", "up-time", "last-reboot-reason"]
 
     master = []

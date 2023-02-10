@@ -64,7 +64,6 @@ def facts_software_version(junos, facts):
             facts["hostname"] = x_swver.findtext(".//software-information/host-name")
 
         for re_sw in x_swver.xpath(".//software-information"):
-
             re_name = re_sw.xpath("preceding-sibling::re-name")[0].text
 
             # handle the cases where the "RE name" could be things like

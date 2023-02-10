@@ -2,7 +2,6 @@ import re
 
 
 def facts_personality(junos, facts):
-
     model = facts["model"]
 
     if model != "Virtual Chassis":
