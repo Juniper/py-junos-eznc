@@ -59,7 +59,6 @@ class SCP(object):
         print(self._junos.hostname + ": " + report)
 
     def _scp_progress(self, _path, _total, _xfrd):
-
         # calculate current percentage xferd
         pct = int(float(_xfrd) / float(_total) * 100)
 
