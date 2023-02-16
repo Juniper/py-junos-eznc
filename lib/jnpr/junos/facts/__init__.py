@@ -66,7 +66,7 @@ def _build_fact_callbacks_and_doc_strings():
     """
     callbacks = {}
     doc_strings = {}
-    for (name, module) in sys.modules.items():
+    for name, module in sys.modules.items():
         if name.startswith("jnpr.junos.facts.") and module is not None:
             new_doc_strings = module.provides_facts()
             for key in new_doc_strings:
