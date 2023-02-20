@@ -1365,7 +1365,6 @@ class Device(_Connection):
 
             #option to disable ncclient transport ssh authentication
             #using public keys look_for_keys=False
-
             if self._look_for_keys is None:
                 look_for_keys = True
             else:
