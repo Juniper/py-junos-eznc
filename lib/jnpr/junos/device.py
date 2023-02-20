@@ -1215,6 +1215,10 @@ class Device(_Connection):
             *OPTIONAL* parse XML with very deep trees and long text content.
             default is ``False``.
 
+        :param bool look_for_keys:
+            *OPTIONAL* To disable public key authentication.
+            default is ``None``.
+
         """
 
         # ----------------------------------------
@@ -1232,6 +1236,7 @@ class Device(_Connection):
         self._use_filter = kvargs.get("use_filter", False)
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
+        self._look_for_keys = kvargs.get("look_for_keys", None)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
@@ -1358,6 +1363,14 @@ class Device(_Connection):
                 (self._auth_password is None) and (self._ssh_private_key_file is None)
             )
 
+            #option to disable ncclient transport ssh authentication
+            #using public keys look_for_keys=False
+
+            if self._look_for_keys is None:
+                look_for_keys = True
+            else:
+                look_for_keys = self._look_for_keys
+
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -1368,6 +1381,7 @@ class Device(_Connection):
                 hostkey_verify=False,
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
+                look_for_keys=look_for_keys,
                 ssh_config=self._sshconf_lkup(),
                 timeout=self._conn_open_timeout,
                 device_params={
