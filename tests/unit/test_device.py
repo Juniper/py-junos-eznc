@@ -449,6 +449,20 @@ class TestDevice(unittest.TestCase):
         mock_path.return_value = "/home/test"
         self.assertEqual(self.dev._sshconf_lkup(), None)
 
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
+    def test_device_open(self, mock_connect, mock_execute):
+        with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            self.dev2 = Device(host="2.2.2.2", user="test", password="password123")
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
 
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.Device.execute")
