@@ -466,6 +466,36 @@ class TestDevice(unittest.TestCase):
 
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.Device.execute")
+    def test_device_open_with_look_for_keys_False(self, mock_connect, mock_execute):
+        with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            self.dev2 = Device(host="2.2.2.2", user="test", password="password123", look_for_keys=False)
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
+
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
+    def test_device_open_with_look_for_keys_True(self, mock_connect, mock_execute):
+        with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
+            mock_cat.return_value = """
+
+    domain jls.net
+
+            """
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            self.dev2 = Device(host="2.2.2.2", user="test", password="password123", look_for_keys=True)
+            self.dev2.open()
+            self.assertEqual(self.dev2.connected, True)
+
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
     def test_device_outbound(self, mock_connect, mock_execute):
         with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
             mock_cat.return_value = """
