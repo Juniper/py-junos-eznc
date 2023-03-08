@@ -181,7 +181,8 @@ class Terminal(object):
     def _login_state_machine(self, attempt=0):
         if self.login_attempts == attempt:
             raise RuntimeError("login_sm_failure")
-
+        if attempt == 0:
+            self._password_entered = False
         prompt, found = self.read_prompt()
 
         def _ev_loader():
@@ -195,8 +196,12 @@ class Terminal(object):
                 raise RuntimeError("probably corrupted image, stuck in loader")
 
         def _ev_login():
-            self.state = self._ST_LOGIN
-            self.write(self.user)
+            if self._password_entered:
+                _ev_bad_passwd()
+            else:
+                self._password_entered = True
+                self.state = self._ST_LOGIN
+                self.write(self.user)
 
         def _ev_passwd():
             self.state = self._ST_PASSWD
