@@ -37,9 +37,18 @@ def open_ssh_client(dev):
 
     # pick hostname from .ssh config if any
     hostname = config.get("hostname", dev._hostname)
+
+    # Assign the port value passed from Device
+    if dev._port is not None:
+        port = int(dev._port)
+
+    # Assign the port value to 22 if not set in Device
+    if dev._port == "830" or dev._port == 830 or hostname == "localhost":
+        port = 22
+
     ssh_client.connect(
         hostname=hostname,
-        port=(22, int(dev._port))[hostname == "localhost"],
+        port=port,
         username=dev._auth_user,
         password=dev._auth_password,
         sock=sock,
