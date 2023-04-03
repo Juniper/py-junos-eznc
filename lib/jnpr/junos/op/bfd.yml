@@ -42,6 +42,6 @@ _BfdSessionClientTable:
 
 _BfdSessionClientView:
   fields:
-    name: client-name
+    client_name: client-name
     transmission_interval: client-transmission-interval
     reception_interval: client-reception-interval
