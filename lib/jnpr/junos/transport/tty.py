@@ -199,18 +199,19 @@ class Terminal(object):
             if self._password_entered:
                 _ev_bad_passwd()
             else:
-                self._password_entered = True
                 self.state = self._ST_LOGIN
                 self.write(self.user)
 
         def _ev_passwd():
             self.state = self._ST_PASSWD
             self.write(self.passwd)
+            self._password_entered = True
 
         def _ev_bad_passwd():
             self.state = self._ST_BAD_PASSWD
             self.write("\n")
             self._badpasswd += 1
+            self._password_entered = False
             if self._badpasswd == 2:
                 # raise RuntimeError("Bad username/password")
                 raise EzErrors.ConnectAuthError(self, "Bad username/password")
@@ -242,7 +243,7 @@ class Terminal(object):
                 # open.  probably not a good thing,
                 # so issue a logging message, but move on.
                 logger.warning("login_warn: Shell login was open!!")
-
+            self._password_entered = False
             self.at_shell = True
             self.state = self._ST_DONE
             # if we are here, then we are done
