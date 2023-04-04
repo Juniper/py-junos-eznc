@@ -38,13 +38,9 @@ def open_ssh_client(dev):
     # pick hostname from .ssh config if any
     hostname = config.get("hostname", dev._hostname)
 
-    # Assign the port value passed from Device
-    if dev._port is not None:
-        port = int(dev._port)
-
-    # Assign the port value to 22 if not set in Device
-    if dev._port == "830" or dev._port == 830 or hostname == "localhost":
-        port = 22
+    # Assign the port value
+    port = int(dev.port) if dev._port is not None else 22
+    port = 22 if hostname == "localhost" or dev._port == 830 else port
 
     ssh_client.connect(
         hostname=hostname,
