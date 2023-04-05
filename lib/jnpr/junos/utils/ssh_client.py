@@ -37,9 +37,14 @@ def open_ssh_client(dev):
 
     # pick hostname from .ssh config if any
     hostname = config.get("hostname", dev._hostname)
+
+    # Assign the port value
+    port = int(dev.port) if dev._port is not None else 22
+    port = 22 if hostname == "localhost" or dev._port == 830 else port
+
     ssh_client.connect(
         hostname=hostname,
-        port=(22, int(dev._port))[hostname == "localhost"],
+        port=port,
         username=dev._auth_user,
         password=dev._auth_password,
         sock=sock,
