@@ -920,7 +920,7 @@ class SW(Util):
         ):
             pkg_set = [package]
         if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
-            remote_urls = ["ftp", "scp", "http", "https", "tftp"]
+            remote_urls = ["ftp", "scp", "http", "https", "tftp", "sftp"]
             for pkg in pkg_set:
                 parsed_url = urlparse(pkg)
                 if parsed_url.scheme not in remote_urls:
