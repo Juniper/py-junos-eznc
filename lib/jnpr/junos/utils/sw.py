@@ -85,6 +85,11 @@ class SW(Util):
             and dev.facts.get("vc_capable") is True
             and dev.facts.get("vc_mode") != "Disabled"
         )
+        self._multi_VC_nsync = bool(
+            self._multi_RE is False
+            and dev.facts.get("vc_capable") is True
+            and dev.facts.get("vc_mode") != "Disabled"
+        )
         self._mixed_VC = bool(dev.facts.get("vc_mode") == "Mixed")
         # The devices which currently support single-RE ISSU, communicate with
         #  the new Junos VM using internal IP 128.0.0.63.
@@ -985,6 +990,29 @@ class SW(Util):
             elif nssu is True:
                 _progress("NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package, dev_timeout=timeout, **kwargs)
+            elif member_id is not None:
+                ok = True, ""
+                if self._multi_VC_nsync is True or self._multi_VC is True:
+                    vc_members = [
+                        re.search(r"(\d+)", x).group(1)
+                        for x in self._RE_list
+                        if re.search(r"(\d+)", x)
+                    ]
+                    for vc_id in vc_members:
+                        if vc_id in member_id:
+                            _progress(
+                                "installing software on VC member: {} ... please "
+                                "be patient ...".format(vc_id)
+                            )
+                            bool_ret, msg = self.pkgadd(
+                                remote_package,
+                                vmhost=vmhost,
+                                member=vc_id,
+                                dev_timeout=timeout,
+                                **kwargs
+                            )
+                            ok = ok[0] and bool_ret, ok[1] + "\n" + msg
+                    return ok
             elif self._multi_RE is False or all_re is False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
