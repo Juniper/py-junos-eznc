@@ -707,6 +707,7 @@ class SW(Util):
         checksum_algorithm="md5",
         force_copy=False,
         all_re=True,
+        member_id=None,
         vmhost=False,
         **kwargs
     ):
