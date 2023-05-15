@@ -392,7 +392,7 @@ class FS(Util):
     # cp - local file copy
     # -------------------------------------------------------------------------
 
-    def cp(self, from_path, to_path):
+    def cp(self, from_path, to_path, routing_instance=None, **kvargs):
         """
         Perform a local file copy where **from_path** and **to_path** can be
         any valid Junos path argument.  Refer to the Junos "file copy" command
@@ -400,6 +400,10 @@ class FS(Util):
 
         :param str from_path: source file-path
         :param str to_path: destination file-path
+        :param str routing_instance: (optional) routing_instance name
+        :param dict kvargs: Any additional parameters to the 'file copy' command can
+                            be passed within **kvargs**, following the RPC syntax
+                            methodology (dash-2-underscore,etc.)
 
         .. notes: Valid Junos file-path can include URL, such as ``http://``.
                   this is handy for copying files for webservers.
@@ -409,7 +413,15 @@ class FS(Util):
         # this RPC returns True if it is OK.  If the file does not exist
         # this RPC will generate an RpcError exception, so just return False
         try:
-            self._dev.rpc.file_copy(source=from_path, destination=to_path)
+            if routing_instance is None:
+                self._dev.rpc.file_copy(source=from_path, destination=to_path, **kvargs)
+            else:
+                self._dev.rpc.file_copy(
+                    source=from_path,
+                    destination=to_path,
+                    routing_instance=routing_instance,
+                    **kvargs
+                )
         except:
             return False
         return True
