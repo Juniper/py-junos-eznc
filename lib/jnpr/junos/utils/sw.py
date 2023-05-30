@@ -1075,7 +1075,14 @@ class SW(Util):
             return add_ok
 
     def _system_operation(
-        self, cmd, in_min=0, at=None, all_re=True, other_re=False, vmhost=False, member_id=None
+        self,
+        cmd,
+        in_min=0,
+        at=None,
+        all_re=True,
+        other_re=False,
+        vmhost=False,
+        member_id=None
     ):
         """
         Send the rpc for actions like shutdown, reboot, halt  with optional
@@ -1152,7 +1159,14 @@ class SW(Util):
     # reboot - system reboot
     # -------------------------------------------------------------------------
     def reboot(
-        self, in_min=0, at=None, all_re=True, on_node=None, vmhost=False, other_re=False, member_id=None
+        self,
+        in_min=0,
+        at=None,
+        all_re=True,
+        on_node=None,
+        vmhost=False,
+        other_re=False,
+        member_id=None
     ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
@@ -1199,7 +1213,9 @@ class SW(Util):
             cmd = E("request-reboot")
 
         try:
-            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost, member_id)
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost, member_id
+            )
         except RpcTimeoutError as err:
             raise err
         except Exception as err:
