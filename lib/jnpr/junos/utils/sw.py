@@ -1082,7 +1082,7 @@ class SW(Util):
         all_re=True,
         other_re=False,
         vmhost=False,
-        member_id=None
+        member_id=None,
     ):
         """
         Send the rpc for actions like shutdown, reboot, halt  with optional
@@ -1166,7 +1166,7 @@ class SW(Util):
         on_node=None,
         vmhost=False,
         other_re=False,
-        member_id=None
+        member_id=None,
     ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
