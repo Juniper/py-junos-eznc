@@ -85,6 +85,11 @@ class SW(Util):
             and dev.facts.get("vc_capable") is True
             and dev.facts.get("vc_mode") != "Disabled"
         )
+        self._multi_VC_nsync = bool(
+            self._multi_RE is False
+            and dev.facts.get("vc_capable") is True
+            and dev.facts.get("vc_mode") != "Disabled"
+        )
         self._mixed_VC = bool(dev.facts.get("vc_mode") == "Mixed")
         # The devices which currently support single-RE ISSU, communicate with
         #  the new Junos VM using internal IP 128.0.0.63.
@@ -702,6 +707,7 @@ class SW(Util):
         checksum_algorithm="md5",
         force_copy=False,
         all_re=True,
+        member_id=None,
         vmhost=False,
         **kwargs
     ):
@@ -985,6 +991,29 @@ class SW(Util):
             elif nssu is True:
                 _progress("NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package, dev_timeout=timeout, **kwargs)
+            elif member_id is not None:
+                ok = True, ""
+                if self._multi_VC_nsync is True or self._multi_VC is True:
+                    vc_members = [
+                        re.search(r"(\d+)", x).group(1)
+                        for x in self._RE_list
+                        if re.search(r"(\d+)", x)
+                    ]
+                    for vc_id in vc_members:
+                        if vc_id in member_id:
+                            _progress(
+                                "installing software on VC member: {} ... please "
+                                "be patient ...".format(vc_id)
+                            )
+                            bool_ret, msg = self.pkgadd(
+                                remote_package,
+                                vmhost=vmhost,
+                                member=vc_id,
+                                dev_timeout=timeout,
+                                **kwargs
+                            )
+                            ok = ok[0] and bool_ret, ok[1] + "\n" + msg
+                    return ok
             elif self._multi_RE is False or all_re is False:
                 # simple case of single RE upgrade.
                 _progress("installing software ... please be patient ...")
@@ -1046,7 +1075,14 @@ class SW(Util):
             return add_ok
 
     def _system_operation(
-        self, cmd, in_min=0, at=None, all_re=True, other_re=False, vmhost=False
+        self,
+        cmd,
+        in_min=0,
+        at=None,
+        all_re=True,
+        other_re=False,
+        vmhost=False,
+        member_id=None,
     ):
         """
         Send the rpc for actions like shutdown, reboot, halt  with optional
@@ -1071,6 +1107,10 @@ class SW(Util):
             (Optional) A boolean indicating to run 'request vmhost reboot'.
             The default is ``vmhost=False``.
 
+        :param list member_id:
+            (optional) install software on the specified members ids of VC.
+            The default is ``member_id=None``.
+
         :returns:
             * rpc response message (string) if command successful
 
@@ -1086,6 +1126,12 @@ class SW(Util):
                 cmd.append(E("both-routing-engines"))
             elif self._mixed_VC is True:
                 cmd.append(E("all-members"))
+        elif (
+            self._multi_VC_nsync is True
+            or self._multi_VC is True
+            and member_id is not None
+        ):
+            cmd.append(E("member", str(member_id)))
         if in_min >= 0 and at is None:
             cmd.append(E("in", str(in_min)))
         elif at is not None:
@@ -1117,7 +1163,14 @@ class SW(Util):
     # reboot - system reboot
     # -------------------------------------------------------------------------
     def reboot(
-        self, in_min=0, at=None, all_re=True, on_node=None, vmhost=False, other_re=False
+        self,
+        in_min=0,
+        at=None,
+        all_re=True,
+        on_node=None,
+        vmhost=False,
+        other_re=False,
+        member_id=None,
     ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
@@ -1145,6 +1198,10 @@ class SW(Util):
         :param str other_re: If the system has dual Routing Engines and this option is C(true),
             then the action is performed on the other REs in the system.
 
+        :param list member_id:
+            (optional) install software on the specified members ids of VC.
+            The default is ``member_id=None``.
+
         :returns:
             * reboot message (string) if command successful
         """
@@ -1160,7 +1217,9 @@ class SW(Util):
             cmd = E("request-reboot")
 
         try:
-            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
+            return self._system_operation(
+                cmd, in_min, at, all_re, other_re, vmhost, member_id
+            )
         except RpcTimeoutError as err:
             raise err
         except Exception as err:

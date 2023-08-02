@@ -674,6 +674,22 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.install("file", no_copy=True)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_vc_member_id(self, mock_pkgadd):
+        mock_pkgadd.return_value = True, "msg"
+        self.sw._multi_RE = True
+        self.sw._multi_VC = True
+        self.sw._RE_list = ("version_RE0", "version_RE1")
+        self.assertTrue(self.sw.install("file", member_id=['1'], no_copy=True)[0])
+
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
+    def test_sw_install_multi_vc_multiple_member_id(self, mock_pkgadd):
+        mock_pkgadd.return_value = True, "msg"
+        self.sw._multi_RE = False
+        self.sw._multi_VC_nsync = True
+        self.sw._RE_list = ("version_RE0", "version_RE1")
+        self.assertTrue(self.sw.install("file", member_id=['0','1'], no_copy=True)[0])
+
+    @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc(self, mock_pkgadd):
         mock_pkgadd.return_value = True
         self.sw._mixed_VC = True
