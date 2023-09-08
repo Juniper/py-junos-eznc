@@ -221,6 +221,26 @@ class TestFS(unittest.TestCase):
             source="test/abc", destination="test/xyz"
         )
 
+    def test_copy_routing_instance_return_true(self):
+        self.fs.dev.rpc.file_copy = MagicMock()
+        initial = "test/abc"
+        final = "test/xyz"
+        ri_name = "test_ri"
+        self.assertTrue(self.fs.cp(initial, final, routing_instance=ri_name))
+        self.fs.dev.rpc.file_copy.assert_called_once_with(
+            source="test/abc", destination="test/xyz", routing_instance="test_ri"
+        )
+
+    def test_copy_source_address_return_true(self):
+        self.fs.dev.rpc.file_copy = MagicMock()
+        initial = "test/abc"
+        final = "test/xyz"
+        s_add = "0.0.0.0"
+        self.assertTrue(self.fs.cp(initial, final, source_address=s_add))
+        self.fs.dev.rpc.file_copy.assert_called_once_with(
+            source="test/abc", destination="test/xyz", source_address="0.0.0.0"
+        )
+
     def test_copy_return_false(self):
         initial = "test/abc"
         final = "test/xyz"
