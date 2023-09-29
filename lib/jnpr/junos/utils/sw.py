@@ -999,6 +999,8 @@ class SW(Util):
                         for x in self._RE_list
                         if re.search(r"(\d+)", x)
                     ]
+                    vc_members.remove(self.dev.facts["vc_master"])
+                    vc_members.insert(len(vc_members), self.dev.facts["vc_master"])
                     for vc_id in vc_members:
                         if vc_id in member_id:
                             _progress(
@@ -1031,6 +1033,8 @@ class SW(Util):
                         for x in self._RE_list
                         if re.search(r"(\d+)", x)
                     ]
+                    vc_members.remove(self.dev.facts["vc_master"])
+                    vc_members.insert(len(vc_members), self.dev.facts["vc_master"])
                     for vc_id in vc_members:
                         _progress(
                             "installing software on VC member: {} ... please "
