@@ -26,7 +26,11 @@ class version_info(object):
                 if len(after_type) < 2:
                     self.build = None
                 else:
-                    self.build = int(after_type[1])
+                    try:
+                        # handling case for EVO format X50.17-EVO
+                        self.build = int(after_type[1])
+                    except:
+                        self.build = None
 
         elif ("I" == self.type) or ("-" == self.type):
             self.type = "I"

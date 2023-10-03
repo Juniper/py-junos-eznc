@@ -1,7 +1,14 @@
-## Release 2.6.7.dev0 - 9 DEC 2022
+## Release 2.6.8 - 3 OCT 2023
 ## Features Added
-
+- Introduced optional argument routing instance for fs.cp() API
+- Intoduced optional argument member_id for installation of pkg on specific member id of EX-VC
 ## Bugs fixed
+- Changed the VlanTable field name to vlan-name and BfdSessionTable field name to client-bame #423
+- Fixed the port details in StartShell to use the port from Device object instead of default Port 22 #573
+- Fixed the sw.install to use Windows file path for package copy #1206
+- Fixed the sw.install to install the vc_master after the other vc_members gets installed for EX-3400 where unlink is set by default #1247
+- Removed Unused Dependency: Netaddr #1257
+- Fixed "object": version_info(re_version) emits ValueError: invalid literal for int() with base 10: '17-EVO' for EVO version X50.17-EVO#1264
 
 ## Release 2.6.6 - 9 DEC 2022
 ## Bugs fixed
