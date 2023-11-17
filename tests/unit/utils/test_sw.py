@@ -7,7 +7,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from contextlib import contextmanager
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError, SwRollbackError, RpcTimeoutError
@@ -59,7 +59,7 @@ facts = {
 }
 
 
-@attr("unit")
+
 class TestSW(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

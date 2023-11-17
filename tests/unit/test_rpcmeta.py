@@ -1,7 +1,7 @@
 import unittest
 import os
 import re
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos.device import Device
 from jnpr.junos.rpcmeta import _RpcMetaExec
@@ -17,7 +17,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
+
 class Test_RpcMetaExec(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

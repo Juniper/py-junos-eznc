@@ -3,7 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 import os
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
@@ -17,7 +17,7 @@ import yaml
 import json
 
 
-@attr("unit")
+
 class TestFactoryCMDTable(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

@@ -1,7 +1,7 @@
 import os
 import unittest
 from io import StringIO
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch
 from jnpr.junos.jxml import (
     NAME,
@@ -17,7 +17,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
+
 class Test_JXML(unittest.TestCase):
     def test_name(self):
         op = NAME("test")
