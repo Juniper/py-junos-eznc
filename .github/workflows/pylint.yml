@@ -47,4 +47,4 @@ jobs:
         pip install nose2
         pip install nose2[coverage_plugin]
         nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
-        nose2 -v --coverage jnpr.junos --with-coverage
+        nose2 -v --coverage jnpr.junos --with-coverage unit
