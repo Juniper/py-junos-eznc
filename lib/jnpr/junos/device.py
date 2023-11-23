@@ -1219,6 +1219,12 @@ class Device(_Connection):
             *OPTIONAL* To disable public key authentication.
             default is ``None``.
 
+        :param bool allow_agent:
+            *OPTIONAL* If ``True`` then the SSH config file is not parsed by PyEZ
+            and passed down to ncclient. If ``False`` then the SSH config file will
+            be parsed by PyEZ. If option is not provided will fallback to default
+            behavior. This option is passed down to the ncclient as is, if it is
+            present in the kwargs.
         """
 
         # ----------------------------------------
@@ -1237,6 +1243,7 @@ class Device(_Connection):
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         self._look_for_keys = kvargs.get("look_for_keys", None)
+        self._allow_agent = kvargs.get('allow_agent', False)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
@@ -1273,9 +1280,12 @@ class Device(_Connection):
             self._auth_user = (
                 kvargs.get("user") or self._conf_auth_user or self._auth_user
             )
-            self._ssh_private_key_file = (
-                kvargs.get("ssh_private_key_file") or self._conf_ssh_private_key_file
-            )
+            if self._allow_agent:
+                self._ssh_private_key_file = kvargs.get('ssh_private_key_file')
+            else:
+                self._ssh_private_key_file = (
+                    kvargs.get("ssh_private_key_file") or self._conf_ssh_private_key_file
+                )
             self._auth_password = kvargs.get("password") or kvargs.get("passwd")
 
         # -----------------------------
@@ -1354,14 +1364,16 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
+            # enable the ssh-agent if asked, or if we are
             # not given a password or an ssh key file.
             # in this condition it means we want to query the agent
             # for available ssh keys
-
-            allow_agent = bool(
-                (self._auth_password is None) and (self._ssh_private_key_file is None)
-            )
+            if self._allow_agent is False:
+                allow_agent = bool(
+                    (self._auth_password is None) and (self._ssh_private_key_file is None)
+                )
+            else:
+                allow_agent = self._allow_agent
 
             # option to disable ncclient transport ssh authentication
             # using public keys look_for_keys=False
