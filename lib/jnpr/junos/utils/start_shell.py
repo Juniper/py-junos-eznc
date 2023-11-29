@@ -84,7 +84,7 @@ class StartShell(object):
             if isinstance(data, bytes):
                 data = data.decode("utf-8", "replace")
             got.append(data)
-            if this is not None and re.search(r"{}\s?$".format(this), data):
+            if this is not None and re.search(r"{}\s?$".format(this), str(data)):
                 break
         return got
 
