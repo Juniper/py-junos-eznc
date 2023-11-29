@@ -35,6 +35,7 @@ jobs:
         pip install -r development.txt
         pip install ntc_templates==1.4.1
         pip install textfsm==0.4.1
+        pip install nose2
         pip install .
     
     - name: Run black tool
@@ -44,6 +45,4 @@ jobs:
     
     - name: Run unit tests
       run: |
-        pip install nose2
-        pip install nose2[coverage_plugin]
         nose2 -v --coverage jnpr.junos --with-coverage tests.unit
