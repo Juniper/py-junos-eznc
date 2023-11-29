@@ -119,7 +119,6 @@ class StartShell(object):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 close_fds=1,
-                bufsize=1,
             )
         else:
             self._client = open_ssh_client(dev=self._nc)
