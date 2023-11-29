@@ -71,6 +71,7 @@ class StartShell(object):
         timeout = timeout or self.timeout
         timeout = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
         while timeout > datetime.datetime.now():
+            print("Debug2 wait_for", self.ON_JUNOS)
             if self.ON_JUNOS is True:
                 data = chan.stdout.readline()
             else:
@@ -112,7 +113,7 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
-        print("Debug1", self.ON_JUNOS)
+        print("Debug1 open", self.ON_JUNOS)
         if self.ON_JUNOS is True:
             print("Debug1", self.ON_JUNOS)
             self._chan = subprocess.Popen(
@@ -124,7 +125,7 @@ class StartShell(object):
                 bufsize=0,
             )
         else:
-            print("Debug2", self.ON_JUNOS)
+            print("Debug2 open", self.ON_JUNOS)
             self._client = open_ssh_client(dev=self._nc)
             self._chan = self._client.invoke_shell()
 
