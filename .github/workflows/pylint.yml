@@ -47,4 +47,5 @@ jobs:
       run: |
         echo $SHELL
         uname -a
+        lsb_release -a
         nose2 -vvv tests.unit
