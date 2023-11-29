@@ -70,7 +70,7 @@ class TestStartShell(unittest.TestCase):
         ---(more)---
         """
         self.assertTrue(
-            self.shell.wait_for("---\(more\s?\d*%?\)---\n\s*|%")[0]
+            str(self.shell.wait_for("---\(more\s?\d*%?\)---\n\s*|%")[0])
             in self.shell._chan.recv.return_value
         )
 
