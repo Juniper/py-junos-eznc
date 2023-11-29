@@ -113,7 +113,6 @@ class StartShell(object):
         :class:`paramiko.SSHClient` instance.
         """
         if self.ON_JUNOS is True:
-            print("Debug1 open", self.ON_JUNOS)
             self._chan = subprocess.Popen(
                 ["cli", "start", "shell", self.shell_type],
                 shell=False,
