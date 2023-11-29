@@ -1225,6 +1225,7 @@ class Device(_Connection):
             be parsed by PyEZ. If option is not provided will fallback to default
             behavior. This option is passed down to the ncclient as is, if it is
             present in the kwargs.
+            default is ``False``.
         """
 
         # ----------------------------------------
