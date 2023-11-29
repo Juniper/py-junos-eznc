@@ -45,4 +45,4 @@ jobs:
     
     - name: Run unit tests
       run: |
-        nose2 -v --coverage jnpr.junos --with-coverage tests.unit
+        nose2 -vvv tests.unit
