@@ -45,4 +45,5 @@ jobs:
     
     - name: Run unit tests
       run: |
+        echo $SHELL
         nose2 -vvv tests.unit

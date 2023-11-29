@@ -113,6 +113,7 @@ class StartShell(object):
         :class:`paramiko.SSHClient` instance.
         """
         if self.ON_JUNOS is True:
+            print("Debug1", self.ON_JUNOS)
             self._chan = subprocess.Popen(
                 ["cli", "start", "shell", self.shell_type],
                 shell=False,
@@ -122,6 +123,7 @@ class StartShell(object):
                 bufsize=0,
             )
         else:
+            print("Debug2", self.ON_JUNOS)
             self._client = open_ssh_client(dev=self._nc)
             self._chan = self._client.invoke_shell()
 
