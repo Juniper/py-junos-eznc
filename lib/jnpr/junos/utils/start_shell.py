@@ -112,6 +112,7 @@ class StartShell(object):
         drop into the Junos shell (csh).  This process opens a
         :class:`paramiko.SSHClient` instance.
         """
+        print("Debug1", self.ON_JUNOS)
         if self.ON_JUNOS is True:
             print("Debug1", self.ON_JUNOS)
             self._chan = subprocess.Popen(
