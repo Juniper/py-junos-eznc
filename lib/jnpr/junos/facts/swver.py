@@ -19,7 +19,12 @@ class version_info(object):
                 if len(after_type) < 2:
                     self.build = None
                 else:
-                    self.build = int(after_type[1])
+                    try:
+                        # handling case for EVO format X100-202310100600.0-EVO
+                        self.build = int(after_type[1])
+                    except:
+                        self.build = None
+
             # X type not hyphen format, perhaps "11.4X12.1", just extract
             # build rev or set None
             else:
