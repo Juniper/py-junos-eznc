@@ -1168,7 +1168,7 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False):
+    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1190,6 +1190,9 @@ class SW(Util):
         :param str other_re: If the system has dual Routing Engines and this option is C(true),
             then the action is performed on the other REs in the system.
 
+        :param str vmhost: If the device has vmhost support,
+            then the shutdowm action is performed on the system.
+
         :returns:
             * power-off message (string) if command successful
 
@@ -1203,11 +1206,13 @@ class SW(Util):
             else:
                 cmd = E("request-node-power-off")
                 cmd.append(E("node", on_node))
+        elif vmhost is True:
+            cmd = E("request-vmhost-power-off")
         else:
             cmd = E("request-power-off")
         try:
             return self._system_operation(
-                cmd, in_min, at, all_re, other_re, vmhost=False
+                cmd, in_min, at, all_re, other_re, vmhost
             )
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
