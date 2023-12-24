@@ -2,7 +2,7 @@ __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock
 import os
 
@@ -12,7 +12,6 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 
-@attr("unit")
 class TestChassis(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

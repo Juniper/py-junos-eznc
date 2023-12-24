@@ -2,7 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock, call
 from jnpr.junos.exception import FactLoopError
 
@@ -15,7 +15,6 @@ __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 
-@attr("unit")
 class TestFactCache(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

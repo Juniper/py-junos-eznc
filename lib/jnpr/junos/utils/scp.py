@@ -43,7 +43,7 @@ class SCP(object):
             # User case also define progress with 3 params, the way scp module
             # expects. Function will take path, total size, transferred.
             # https://github.com/jbardin/scp.py/blob/master/scp.py#L97
-            spec = inspect.getargspec(self._user_progress)
+            spec = inspect.getfullargspec(self._user_progress)
             if (len(spec.args) == 3 and spec.args[0] != "self") or (
                 len(spec.args) == 4 and spec.args[0] == "self"
             ):

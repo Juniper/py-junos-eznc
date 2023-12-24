@@ -3,7 +3,7 @@ from six import StringIO
 from contextlib import contextmanager
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
@@ -19,7 +19,6 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
 class TestScp(unittest.TestCase):
     def setUp(self):
         self.dev = Device(host="1.1.1.1")

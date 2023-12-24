@@ -5,7 +5,7 @@ import unittest
 import os
 import yaml
 import json
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.op.phyport import PhyPortStatsTable
@@ -22,7 +22,6 @@ from lxml import etree
 from mock import patch
 
 
-@attr("unit")
 class TestFactoryOpTable(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

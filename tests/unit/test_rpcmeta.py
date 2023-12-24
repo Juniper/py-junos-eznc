@@ -1,7 +1,7 @@
 import unittest
 import os
 import re
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos.device import Device
 from jnpr.junos.rpcmeta import _RpcMetaExec
@@ -17,7 +17,6 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
 class Test_RpcMetaExec(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -132,7 +131,7 @@ class Test_RpcMetaExec(unittest.TestCase):
             op["system-users-information"][0]["uptime-information"][0]["date-time"][0][
                 "data"
             ],
-            u"4:43AM",
+            "4:43AM",
         )
 
     def test_rpcmeta_exec_rpc_format_json_gt_14_2(self):
@@ -143,7 +142,7 @@ class Test_RpcMetaExec(unittest.TestCase):
             op["system-users-information"][0]["uptime-information"][0]["date-time"][0][
                 "data"
             ],
-            u"4:43AM",
+            "4:43AM",
         )
 
     @patch("jnpr.junos.device.warnings")

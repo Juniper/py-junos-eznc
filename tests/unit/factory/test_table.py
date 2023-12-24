@@ -2,7 +2,7 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 import os
 
 from jnpr.junos import Device
@@ -23,7 +23,6 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
 class TestFactoryTable(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

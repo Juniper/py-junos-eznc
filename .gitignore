@@ -17,6 +17,7 @@ develop-eggs
 .installed.cfg
 lib64
 env
+.venv
 
 # Documentation
 docs/_build
@@ -42,6 +43,8 @@ MANIFEST
 
 # Testing
 .tox
+foo_*
+testfile
 
 # Vagrant
 .vagrant
