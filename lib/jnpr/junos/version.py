@@ -1,4 +1,4 @@
-VERSION = "2.7.0"
+VERSION = "2.7.1.dev0"
 DATE = "2024-Jan-12"
 
 # Augment with the internal version if present
