@@ -4,7 +4,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch
 import os
 import json
@@ -21,7 +21,6 @@ from ncclient.transport import SSHSession
 from ncclient.operations.rpc import RPCReply
 
 
-@attr("unit")
 class TestToJson(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 import os
 
 from ncclient.manager import Manager, make_device_handler
@@ -16,7 +16,6 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
 class TestFS(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

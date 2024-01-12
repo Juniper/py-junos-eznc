@@ -7,7 +7,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from contextlib import contextmanager
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError, SwRollbackError, RpcTimeoutError
@@ -59,7 +59,6 @@ facts = {
 }
 
 
-@attr("unit")
 class TestSW(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -676,25 +675,25 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_member_id(self, mock_pkgadd):
         mock_pkgadd.return_value = True, "msg"
-        self.dev.facts["vc_master"] = '0'
+        self.dev.facts["vc_master"] = "0"
         self.sw._multi_RE = True
         self.sw._multi_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", member_id=['1'], no_copy=True)[0])
+        self.assertTrue(self.sw.install("file", member_id=["1"], no_copy=True)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_multiple_member_id(self, mock_pkgadd):
         mock_pkgadd.return_value = True, "msg"
-        self.dev.facts["vc_master"] = '0'
+        self.dev.facts["vc_master"] = "0"
         self.sw._multi_RE = False
         self.sw._multi_VC_nsync = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", member_id=['0','1'], no_copy=True)[0])
+        self.assertTrue(self.sw.install("file", member_id=["0", "1"], no_copy=True)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc(self, mock_pkgadd):
         mock_pkgadd.return_value = True
-        self.dev.facts["vc_master"] = '0'
+        self.dev.facts["vc_master"] = "0"
         self.sw._mixed_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
         self.assertTrue(self.sw.install(pkg_set=["abc.tgz", "pqr.tgz"], no_copy=True))

@@ -2,7 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import MagicMock, patch, mock_open, call
 import os
 from lxml import etree
@@ -53,7 +53,6 @@ facts = {
 }
 
 
-@attr("unit")
 class Test_MyTemplateLoader(unittest.TestCase):
     def setUp(self):
         from jnpr.junos.device import _MyTemplateLoader
@@ -78,7 +77,6 @@ class Test_MyTemplateLoader(unittest.TestCase):
             self.template_loader.get_source(None, None)
 
 
-@attr("unit")
 class TestDevice(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -420,6 +418,7 @@ class TestDevice(unittest.TestCase):
         Device.ON_JUNOS = True
         localdev = Device()
         self.assertEqual(localdev._hostname, "localhost")
+        Device.ON_JUNOS = False
 
     @patch("jnpr.junos.device.os")
     @patch(builtin_string + ".open")
@@ -475,7 +474,9 @@ class TestDevice(unittest.TestCase):
             """
             mock_connect.side_effect = self._mock_manager
             mock_execute.side_effect = self._mock_manager
-            self.dev2 = Device(host="2.2.2.2", user="test", password="password123", look_for_keys=False)
+            self.dev2 = Device(
+                host="2.2.2.2", user="test", password="password123", look_for_keys=False
+            )
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
 
@@ -490,7 +491,9 @@ class TestDevice(unittest.TestCase):
             """
             mock_connect.side_effect = self._mock_manager
             mock_execute.side_effect = self._mock_manager
-            self.dev2 = Device(host="2.2.2.2", user="test", password="password123", look_for_keys=True)
+            self.dev2 = Device(
+                host="2.2.2.2", user="test", password="password123", look_for_keys=True
+            )
             self.dev2.open()
             self.assertEqual(self.dev2.connected, True)
 

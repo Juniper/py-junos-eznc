@@ -2,12 +2,11 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos.factory.viewfields import ViewFields
 
 
-@attr("unit")
 class TestFactoryViewFields(unittest.TestCase):
     def setUp(self):
         self.vf = ViewFields()

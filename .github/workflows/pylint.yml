@@ -13,35 +13,33 @@ jobs:
     
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: [3.7, 3.8, 3.9]
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ 3.9, '3.10', 3.11, 3.12 ]
         exclude:
-          - os: windows-latest
-            python-version: 3.8
           - os: windows-latest
             python-version: 3.9
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install -r requirements.txt
-        pip install -r development.txt
-        pip install ntc_templates==1.4.1
-        pip install textfsm==0.4.1
-        pip install .
-    
-    - name: Run black tool
-      run: |
-        pip install -U black;
-        black --check --diff --exclude="docs|build|tests|samples" . 
-    
-    - name: Run unit tests
-      run: |
-        nosetests -v --with-coverage --cover-package=jnpr.junos --cover-inclusive -a unit
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          pip install -r requirements.txt
+          pip install -r development.txt
+          pip install ntc_templates==1.4.1
+          pip install textfsm==0.4.1
+          pip install .
+
+      - name: Run black tool
+        run: |
+          pip install -U black;
+          black --check --diff --exclude="docs|build|tests|samples" . 
+
+      - name: Run unit tests
+        run: |
+          nose2 --with-coverage -vvv tests.unit

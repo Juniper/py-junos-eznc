@@ -5,7 +5,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock
 import os
 
@@ -17,7 +17,6 @@ from ncclient.transport import SSHSession
 from jnpr.junos.exception import RpcError
 
 
-@attr("unit")
 class TestSwver(unittest.TestCase):
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.device.warnings")

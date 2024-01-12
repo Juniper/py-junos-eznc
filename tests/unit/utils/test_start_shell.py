@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.utils.start_shell import StartShell
@@ -10,7 +10,6 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 
-@attr("unit")
 class TestStartShell(unittest.TestCase):
     @patch("paramiko.SSHClient")
     def setUp(self, mock_connect):
@@ -70,7 +69,7 @@ class TestStartShell(unittest.TestCase):
         ---(more)---
         """
         self.assertTrue(
-            self.shell.wait_for("---\(more\s?\d*%?\)---\n\s*|%")[0]
+            str(self.shell.wait_for("---\(more\s?\d*%?\)---\n\s*|%")[0])
             in self.shell._chan.recv.return_value
         )
 

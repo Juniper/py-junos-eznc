@@ -3,13 +3,12 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from mock import patch
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.ofacts.switch_style import facts_switch_style as switch_style
 
 
-@attr("unit")
 class TestSwitchStyle(unittest.TestCase):
     @patch("jnpr.junos.device.warnings")
     def setUp(self, mock_warnings):

@@ -2,7 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from lxml.etree import XML
 
@@ -22,7 +22,6 @@ from ncclient.xml_ import qualify
 __author__ = "Rick Sherman"
 
 
-@attr("unit")
 class Test_Decorators(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
