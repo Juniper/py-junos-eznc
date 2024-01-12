@@ -1,3 +1,8 @@
+## Release 2.7.1.dev0 - 12 JAN 2024
+## Features Added
+
+## Bugs Fixed
+
 ## Release 2.7.0 - 12 JAN 2024
 ## Features Added
 -  Support added for Python 3.10 and above version
