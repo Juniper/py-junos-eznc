@@ -1,3 +1,7 @@
+## Release 2.7.0 - 12 JAN 2024
+## Features Added
+-  Support added for Python 3.10 and above version
+
 ## Release 2.6.8 - 3 OCT 2023
 ## Features Added
 - Introduced optional argument routing instance for fs.cp() API
