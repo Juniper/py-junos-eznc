@@ -1131,10 +1131,8 @@ class SW(Util):
             elif self._mixed_VC is True:
                 cmd.append(E("all-members"))
         elif (
-            self._multi_VC_nsync is True
-            or self._multi_VC is True
-            and member_id is not None
-        ):
+            self._multi_VC_nsync is True or self._multi_VC is True
+        ) and member_id is not None:
             cmd.append(E("member", str(member_id)))
         if in_min >= 0 and at is None:
             cmd.append(E("in", str(in_min)))
