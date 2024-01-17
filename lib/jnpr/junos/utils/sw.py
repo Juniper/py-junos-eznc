@@ -104,7 +104,7 @@ class SW(Util):
 
     @classmethod
     def local_sha256(cls, package):
-        """
+        r"""
         Computes the SHA-256 value on the package file.
 
         :param str package:
@@ -117,7 +117,7 @@ class SW(Util):
 
     @classmethod
     def local_md5(cls, package):
-        """
+        r"""
         Computes the MD5 checksum value on the local package file.
 
         :param str package:
@@ -130,7 +130,7 @@ class SW(Util):
 
     @classmethod
     def local_sha1(cls, package):
-        """
+        r"""
         Computes the SHA1 checksum value on the local package file.
 
         :param str package:
@@ -143,7 +143,7 @@ class SW(Util):
 
     @classmethod
     def local_checksum(cls, package, algorithm="md5"):
-        """
+        r"""
         Computes the checksum value on the local package file.
 
         :param str package:
@@ -920,9 +920,10 @@ class SW(Util):
         ):
             pkg_set = [package]
         if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
+            remote_urls = ["ftp", "scp", "http", "https", "tftp", "sftp"]
             for pkg in pkg_set:
                 parsed_url = urlparse(pkg)
-                if parsed_url.scheme == "":
+                if parsed_url.scheme not in remote_urls:
                     if no_copy is False:
                         # To disable cleanfs after 1st iteration
                         cleanfs = cleanfs and pkg_set.index(pkg) == 0
@@ -997,9 +998,9 @@ class SW(Util):
                     ok = True, ""
                     # extract the VC number out of the _RE_list
                     vc_members = [
-                        re.search("(\d+)", x).group(1)
+                        re.search(r"(\d+)", x).group(1)
                         for x in self._RE_list
-                        if re.search("(\d+)", x)
+                        if re.search(r"(\d+)", x)
                     ]
                     for vc_id in vc_members:
                         _progress(
@@ -1077,7 +1078,7 @@ class SW(Util):
         """
         if other_re is True:
             if self._dev.facts["2RE"]:
-                cmd = E("other-routing-engine")
+                cmd.append(E("other-routing-engine"))
         elif all_re is True:
             if self._multi_RE is True and vmhost is True:
                 cmd.append(E("routing-engine", "both"))
@@ -1086,7 +1087,8 @@ class SW(Util):
             elif self._mixed_VC is True:
                 cmd.append(E("all-members"))
         if in_min >= 0 and at is None:
-            cmd.append(E("in", str(in_min)))
+            if vmhost is not True:
+                cmd.append(E("in", str(in_min)))
         elif at is not None:
             cmd.append(E("at", str(at)))
         try:
@@ -1106,7 +1108,7 @@ class SW(Util):
                             if i.text is not None
                         ]
                     )
-                    if output_msg is not "":
+                    if output_msg != "":
                         got = output_msg
             return got
         except Exception as err:
@@ -1168,7 +1170,9 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False):
+    def poweroff(
+        self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False
+    ):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1190,8 +1194,7 @@ class SW(Util):
         :param str other_re: If the system has dual Routing Engines and this option is C(true),
             then the action is performed on the other REs in the system.
 
-        :param str vmhost: If the device has vmhost support,
-            then the shutdowm action is performed on the system.
+        :param str vmhost: If the device is vmhost device then the shutdown will be performed on the device
 
         :returns:
             * power-off message (string) if command successful
@@ -1207,13 +1210,14 @@ class SW(Util):
                 cmd = E("request-node-power-off")
                 cmd.append(E("node", on_node))
         elif vmhost is True:
-            cmd = E("request-vmhost-power-off")
+            cmd = E("request-vmhost-poweroff")
+            all_re = False
         else:
             cmd = E("request-power-off")
         try:
-            return self._system_operation(
-                cmd, in_min, at, all_re, other_re, vmhost
-            )
+            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
+        except RpcTimeoutError as err:
+            raise err
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
                 raise err
