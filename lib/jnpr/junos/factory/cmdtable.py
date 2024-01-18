@@ -54,7 +54,7 @@ class CMDTable(object):
     # -------------------------------------------------------------------------
 
     def get(self, *vargs, **kvargs):
-        """
+        r"""
         Retrieve the XML (string blob under <output> tag of table data from the
         Device instance and returns back the Table instance - for call-chaining
         purposes.
@@ -339,7 +339,7 @@ class CMDTable(object):
         :param raw: string blob output from the cli command execution
         :return: dict of parsed data.
         """
-        command = command.replace('/', '-')
+        command = command.replace("/", "-")
 
         attrs = dict(Command=command, Platform=platform)
 

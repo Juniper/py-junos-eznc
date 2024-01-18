@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 import os
 
 from ncclient.manager import Manager, make_device_handler
@@ -16,7 +16,6 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
 class TestFS(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -219,6 +218,26 @@ class TestFS(unittest.TestCase):
         self.assertTrue(self.fs.cp(initial, final))
         self.fs.dev.rpc.file_copy.assert_called_once_with(
             source="test/abc", destination="test/xyz"
+        )
+
+    def test_copy_routing_instance_return_true(self):
+        self.fs.dev.rpc.file_copy = MagicMock()
+        initial = "test/abc"
+        final = "test/xyz"
+        ri_name = "test_ri"
+        self.assertTrue(self.fs.cp(initial, final, routing_instance=ri_name))
+        self.fs.dev.rpc.file_copy.assert_called_once_with(
+            source="test/abc", destination="test/xyz", routing_instance="test_ri"
+        )
+
+    def test_copy_source_address_return_true(self):
+        self.fs.dev.rpc.file_copy = MagicMock()
+        initial = "test/abc"
+        final = "test/xyz"
+        s_add = "0.0.0.0"
+        self.assertTrue(self.fs.cp(initial, final, source_address=s_add))
+        self.fs.dev.rpc.file_copy.assert_called_once_with(
+            source="test/abc", destination="test/xyz", source_address="0.0.0.0"
         )
 
     def test_copy_return_false(self):

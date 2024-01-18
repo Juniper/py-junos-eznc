@@ -5,7 +5,7 @@ import unittest
 import os
 import sys
 
-from nose.plugins.attrib import attr
+import nose2
 import yaml
 
 from jnpr.junos import Device
@@ -85,7 +85,6 @@ yaml_bgp_data = """---
 globals().update(FactoryLoader().load(yaml.load(yaml_bgp_data, Loader=yaml.FullLoader)))
 
 
-@attr("unit")
 @unittest.skipIf(sys.platform == "win32", "will work for windows in coming days")
 class TestFactoryCfgTable(unittest.TestCase):
     @patch("ncclient.manager.connect")

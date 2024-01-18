@@ -16,6 +16,7 @@ from jnpr.junos.exception import RpcError
 # An import for each fact file must be present in
 # lib/jnpr/junos/facts/__init__.py
 
+
 # The file must include a provide_facts() function
 # The provide_facts() function must return a dictionary. The keys of the
 # dictionary are each fact that is handled/returned by this module. The value

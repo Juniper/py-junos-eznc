@@ -14,14 +14,13 @@ logger = logging.getLogger("jnpr.junos.factory.optable")
 
 
 class OpTable(Table):
-
     # -------------------------------------------------------------------------
     # PUBLIC METHODS
     # -------------------------------------------------------------------------
 
     @checkSAXParserDecorator
     def get(self, *vargs, **kvargs):
-        """
+        r"""
         Retrieve the XML table data from the Device instance and
         returns back the Table instance - for call-chaining purposes.
 

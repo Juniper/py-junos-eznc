@@ -484,7 +484,7 @@ class Config(Util):
                 kvargs["format"] = "xml"
             elif re.search(
                 r"^\s*(set|delete|rename|insert|activate|deactivate"
-                "|annotate|copy|protect|unprotect)\s",
+                r"|annotate|copy|protect|unprotect)\s",
                 rpc,
             ):
                 kvargs["format"] = "set"
@@ -824,7 +824,6 @@ class Config(Util):
         Util.__init__(self, dev=dev)
 
     def __enter__(self):
-
         # defining separate functions for each mode so that can be
         # changed/edited as per the need of corresponding rpc call.
         def _open_configuration_private():

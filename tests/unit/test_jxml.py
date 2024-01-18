@@ -1,7 +1,7 @@
 import os
 import unittest
 from io import StringIO
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch
 from jnpr.junos.jxml import (
     NAME,
@@ -17,7 +17,6 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 
-@attr("unit")
 class Test_JXML(unittest.TestCase):
     def test_name(self):
         op = NAME("test")
@@ -28,7 +27,7 @@ class Test_JXML(unittest.TestCase):
         self.assertEqual(op["insert"], "test")
 
     def test_remove_namespaces(self):
-        xmldata = u"""<xsl:stylesheet xmlns:xsl="http://xml.juniper.net/junos">
+        xmldata = """<xsl:stylesheet xmlns:xsl="http://xml.juniper.net/junos">
                     <xsl:template>
                         <!-- Handle comments properly -->
                         <xsl:attribute name="{myname}">
@@ -57,14 +56,14 @@ class Test_JXML(unittest.TestCase):
         self.assertTrue(op is None)
 
     def test_cscript_conf_output_tag_child_element(self):
-        xmldata = u"""<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03" xmlns:junos="http://xml.juniper.net/junos/19.3R0/junos">
+        xmldata = """<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03" xmlns:junos="http://xml.juniper.net/junos/19.3R0/junos">
   <output>
     shutdown: [pid 8683]
     Shutdown NOW!
   </output>
 </rpc-reply>
 """
-        xmldata_without_ns = u"""<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03">
+        xmldata_without_ns = """<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03">
   <output>
     shutdown: [pid 8683]
     Shutdown NOW!
@@ -75,7 +74,7 @@ class Test_JXML(unittest.TestCase):
         self.assertEqual(str(rpc_reply), xmldata_without_ns)
 
     def test_cscript_conf_output_tag_not_first_child_element(self):
-        xmldata = u"""<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03" xmlns:junos="http://xml.juniper.net/junos/19.3R0/junos">
+        xmldata = """<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03" xmlns:junos="http://xml.juniper.net/junos/19.3R0/junos">
   <xyz>
     <output>
       shutdown: [pid 8683]
@@ -84,7 +83,7 @@ class Test_JXML(unittest.TestCase):
   </xyz>
 </rpc-reply>
 """
-        xmldata_without_ns = u"""<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03">
+        xmldata_without_ns = """<rpc-reply message-id="urn:uuid:932d11dc-9ae5-4d25-81fa-8b50ea2d3a03">
   <xyz>
     <output>shutdown: [pid 8683] Shutdown NOW!</output>
   </xyz>

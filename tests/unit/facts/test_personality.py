@@ -2,7 +2,7 @@ __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock
 import os
 from jnpr.junos.exception import RpcError
@@ -13,7 +13,6 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 
-@attr("unit")
 class TestPersonality(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -120,6 +119,14 @@ class TestPersonality(unittest.TestCase):
         }
         self.assertEqual(self.dev.facts["personality"], "MX-GNF")
         self.assertEqual(self.dev.facts["virtual"], True)
+
+    def test_personality_acx(self):
+        self.dev.facts._cache["model"] = "ACX7908"
+        self.dev.facts._cache["re_info"] = {
+            "default": {"default": {"model": "ACX-7900-RE"}}
+        }
+        self.assertEqual(self.dev.facts["personality"], "ACX")
+        self.assertEqual(self.dev.facts["virtual"], False)
 
     @patch("jnpr.junos.Device.execute")
     def test_personality_vptx(self, mock_execute):

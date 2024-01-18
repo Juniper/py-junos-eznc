@@ -13,20 +13,29 @@ class version_info(object):
 
         if "X" == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
-            xm = re.match("(\d+)-(\w)(\d+)", self.minor)
+            xm = re.match(r"(\d+)-(\w)(\d+)", self.minor)
             if xm is not None:
                 self.minor = tuple([int(xm.group(1)), xm.group(2), int(xm.group(3))])
                 if len(after_type) < 2:
                     self.build = None
                 else:
-                    self.build = int(after_type[1])
+                    try:
+                        # handling case for EVO format X100-202310100600.0-EVO
+                        self.build = int(after_type[1])
+                    except:
+                        self.build = None
+
             # X type not hyphen format, perhaps "11.4X12.1", just extract
             # build rev or set None
             else:
                 if len(after_type) < 2:
                     self.build = None
                 else:
-                    self.build = int(after_type[1])
+                    try:
+                        # handling case for EVO format X50.17-EVO
+                        self.build = int(after_type[1])
+                    except:
+                        self.build = None
 
         elif ("I" == self.type) or ("-" == self.type):
             self.type = "I"
@@ -95,7 +104,7 @@ class version_info(object):
 
 
 def version_yaml_representer(dumper, version):
-    return dumper.represent_mapping(u"tag:yaml.org,2002:map", version.v_dict)
+    return dumper.represent_mapping("tag:yaml.org,2002:map", version.v_dict)
 
 
 def provides_facts():

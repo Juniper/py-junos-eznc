@@ -65,14 +65,14 @@ def get_facts(device):
             virtual = True
         else:
             virtual = False
-    elif re.match("SRX\s?(\d){4}", model):
+    elif re.match(r"SRX\s?(\d){4}", model):
         srx_model = int(model[-4:])
         if srx_model > 5000:
             personality = "SRX_HIGHEND"
         else:
             personality = "SRX_MIDRANGE"
         virtual = False
-    elif re.match("SRX\s?(\d){3}", model):
+    elif re.match(r"SRX\s?(\d){3}", model):
         personality = "SRX_BRANCH"
         virtual = False
     elif re.search("firefly", model, re.IGNORECASE):
@@ -87,6 +87,9 @@ def get_facts(device):
     elif "JUNOS_NODE_SLICING" == model:
         personality = "JDM"
         virtual = True
+    elif model.startswith("ACX"):
+        personality = "ACX"
+        virtual = False
 
     return {
         "personality": personality,

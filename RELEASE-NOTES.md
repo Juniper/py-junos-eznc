@@ -1,3 +1,51 @@
+## Release 2.7.1.dev0 - 12 JAN 2024
+## Features Added
+
+## Bugs Fixed
+
+## Release 2.7.0 - 12 JAN 2024
+## Features Added
+-  Support added for Python 3.10 and above version
+
+## Release 2.6.8 - 3 OCT 2023
+## Features Added
+- Introduced optional argument routing instance for fs.cp() API
+- Intoduced optional argument member_id for installation of pkg on specific member id of EX-VC
+## Bugs fixed
+- Changed the VlanTable field name to vlan-name and BfdSessionTable field name to client-bame #423
+- Fixed the port details in StartShell to use the port from Device object instead of default Port 22 #573
+- Fixed the sw.install to use Windows file path for package copy #1206
+- Fixed the sw.install to install the vc_master after the other vc_members gets installed for EX-3400 where unlink is set by default #1247
+- Removed Unused Dependency: Netaddr #1257
+- Fixed "object": version_info(re_version) emits ValueError: invalid literal for int() with base 10: '17-EVO' for EVO version X50.17-EVO#1264
+
+## Release 2.6.6 - 9 DEC 2022
+## Bugs fixed
+- Fixed reboot failing on other RE #1199
+- Fixed passing 'sleep' arg to StartShell run() #1202
+- Fixed PyEZ get-facts support for ACX model #1209
+- Fixed EthPortTable regex pattern #1215
+- Fixed StartShell UnboundLocalError #1203 #1211
+- 
+## Release 2.6.5 - 29 JULY 2022
+## Features Added
+- Supported multi-gig ports for EthPortTable.yml #1177 
+
+## Bugs fixed
+- Fixed on-box support for start shell types #1190 #1186
+- Fixed conn_open_timeout value was getting set to None , changed to default 30 seconds #1184
+
+
+## Release 2.6.4 - 9 JUNE 2022
+### Features Added
+- Supported start_shell options to choose the shell types (sh or csh) #995
+- Supported for python 3.9
+### Bugs fixed:
+- Fixed Device facts current_re returns the SRX cluster  node0 and node1 details with cluster ID 16 #1135
+- Fixed upgrade ncclient version 0.6.13, updated requirements.txt to install ncclient==0.6.13 #1153
+- Fixed deprecation warning due to invalid escape sequences #1034
+- Fixed Unit tests test_sw_put_ftp failure #1165
+
 ## Release 2.4.2.dev0 - 29 APRIL 2020
 ## Features Added
 

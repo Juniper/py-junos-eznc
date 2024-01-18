@@ -8,7 +8,7 @@ VlanTable:
 VlanView:
   fields:
     instance: vlan-instance
-    name: vlan-name
+    vlan_name: vlan-name
     created: vlan-create-time
     status: vlan-status
     owner: vlan-owner

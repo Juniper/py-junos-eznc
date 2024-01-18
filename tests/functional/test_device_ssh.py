@@ -1,12 +1,10 @@
 __author__ = "rsherman, vnitinv"
 
 import unittest
-from nose.plugins.attrib import attr
 
 from jnpr.junos import Device
 
 
-@attr("functional")
 class TestDeviceSsh(unittest.TestCase):
     def tearDown(self):
         self.dev.close()

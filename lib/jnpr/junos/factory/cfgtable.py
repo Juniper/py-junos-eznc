@@ -9,7 +9,6 @@ from jnpr.junos.utils.config import Config
 
 
 class CfgTable(Table):
-
     __isfrozen = False
 
     # -----------------------------------------------------------------------

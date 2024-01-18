@@ -2,7 +2,7 @@ __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock
 import os
 from lxml import etree
@@ -14,7 +14,6 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 
-@attr("unit")
 class TestCurrentRe(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
@@ -48,6 +47,13 @@ class TestCurrentRe(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager_current_re_srx_primary
         self.dev.facts._cache["srx_cluster_id"] = "255"
         self.assertEqual(self.dev.facts["current_re"], ["node0", "primary"])
+
+    @patch("jnpr.junos.Device.execute")
+    def test_current_re_fact_srx_cluster_primary_id_16(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager_current_re_srx_primary
+        self.dev.facts._cache["srx_cluster_id"] = "16"
+        print(self.dev.facts._cache["srx_cluster_id"])
+        self.assertEqual(self.dev.facts["current_re"], ["node0"])
 
     @patch("jnpr.junos.Device.execute")
     def test_current_re_fact_srx_cluster_primary_id_31(self, mock_execute):

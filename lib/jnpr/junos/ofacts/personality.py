@@ -2,14 +2,13 @@ import re
 
 
 def facts_personality(junos, facts):
-
     model = facts["model"]
 
     if model != "Virtual Chassis":
         examine = model
     else:
         for fact in facts:
-            if re.match("^RE\d", fact):
+            if re.match(r"^RE\d", fact):
                 examine = facts[fact]["model"]
                 break
 
@@ -34,9 +33,9 @@ def facts_personality(junos, facts):
         persona = "T"
     elif examine.startswith("PTX"):
         persona = "PTX"
-    elif re.match("SRX\s?(\d){4}", examine):
+    elif re.match(r"SRX\s?(\d){4}", examine):
         persona = "SRX_HIGHEND"
-    elif re.match("SRX\s?(\d){3}", examine):
+    elif re.match(r"SRX\s?(\d){3}", examine):
         persona = "SRX_BRANCH"
     elif re.search("firefly", examine, re.IGNORECASE):
         facts["virtual"] = True

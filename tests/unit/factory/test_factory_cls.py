@@ -2,13 +2,12 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos.factory.factory_cls import FactoryCfgTable, FactoryOpTable
 from jnpr.junos.factory.factory_cls import FactoryTable, FactoryView
 
 
-@attr("unit")
 class TestFactoryCls(unittest.TestCase):
     def test_factory_cls_cfgtable(self):
         t = FactoryCfgTable()
