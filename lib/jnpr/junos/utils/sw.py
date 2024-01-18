@@ -1231,7 +1231,9 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False):
+    def poweroff(
+        self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False
+    ):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1274,9 +1276,7 @@ class SW(Util):
         else:
             cmd = E("request-power-off")
         try:
-            return self._system_operation(
-                cmd, in_min, at, all_re, other_re, vmhost
-            )
+            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
                 raise err
