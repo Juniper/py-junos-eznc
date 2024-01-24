@@ -84,7 +84,8 @@ class StartShell(object):
             if isinstance(data, bytes):
                 data = data.decode("utf-8", "replace")
             got.append(data)
-            if this is not None and re.search(r"{}\s?$".format(this), data):
+
+            if this is not None and re.search(r"{}\s?$".format(this), str(data)):
                 break
         return got
 
@@ -119,7 +120,7 @@ class StartShell(object):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 close_fds=1,
-                bufsize=1,
+                bufsize=0,
             )
         else:
             self._client = open_ssh_client(dev=self._nc)

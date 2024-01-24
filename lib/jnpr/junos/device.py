@@ -43,7 +43,7 @@ from jnpr.junos.exception import JSONLoadError, ConnectError
 from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
 import inspect
 
-if sys.version_info.major >= 3:
+if sys.version_info[0] >= 3:
     NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
 else:
     NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3

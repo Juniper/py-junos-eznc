@@ -2,7 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import MagicMock, patch
 import sys
 import six
@@ -15,7 +15,6 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
 class TestSerial(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_serial.serial.Serial.open")
     @patch("jnpr.junos.transport.tty_serial.serial.Serial.write")
@@ -77,7 +76,6 @@ class TestSerial(unittest.TestCase):
         self.assertEqual(self.dev._tty.read_prompt()[0], None)
 
 
-@attr("unit")
 class TestSerialWin(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_serial.serial.Serial.open")
     @patch("jnpr.junos.transport.tty_serial.serial.Serial.read")

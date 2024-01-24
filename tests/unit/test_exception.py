@@ -1,5 +1,5 @@
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 from jnpr.junos.exception import (
     RpcError,
     CommitError,
@@ -81,7 +81,6 @@ config_json = """{
 }"""
 
 
-@attr("unit")
 class Test_RpcError(unittest.TestCase):
     def test_rpcerror_repr(self):
         rsp = etree.XML(rpc_xml)

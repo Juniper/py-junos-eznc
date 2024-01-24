@@ -1,6 +1,6 @@
 import unittest
 import sys
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
@@ -32,7 +32,6 @@ else:
     builtin_string = "builtins"
 
 
-@attr("unit")
 class TestConfig(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

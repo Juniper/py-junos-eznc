@@ -2,7 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 
 from jnpr.junos import Device
 from jnpr.junos.utils.util import Util
@@ -10,7 +10,6 @@ from jnpr.junos.utils.util import Util
 from mock import patch
 
 
-@attr("unit")
 class TestUtil(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):

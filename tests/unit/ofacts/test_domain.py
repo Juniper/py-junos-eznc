@@ -2,7 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from nose.plugins.attrib import attr
+import nose2
 from mock import patch, MagicMock
 from lxml import etree
 
@@ -11,7 +11,6 @@ from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 
 
-@attr("unit")
 class TestDomain(unittest.TestCase):
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.device.warnings")
