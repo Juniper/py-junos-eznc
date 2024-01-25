@@ -1135,7 +1135,8 @@ class SW(Util):
         ) and member_id is not None:
             cmd.append(E("member", str(member_id)))
         if in_min >= 0 and at is None:
-            cmd.append(E("in", str(in_min)))
+            if vmhost is not True:
+                cmd.append(E("in", str(in_min)))
         elif at is not None:
             cmd.append(E("at", str(at)))
         try:
@@ -1230,7 +1231,9 @@ class SW(Util):
     # -------------------------------------------------------------------------
     # poweroff - system shutdown
     # -------------------------------------------------------------------------
-    def poweroff(self, in_min=0, at=None, on_node=None, all_re=True, other_re=False):
+    def poweroff(
+        self, in_min=0, at=None, on_node=None, all_re=True, other_re=False, vmhost=False
+    ):
         """
         Perform a system shutdown, with optional delay (in minutes) .
 
@@ -1252,6 +1255,8 @@ class SW(Util):
         :param str other_re: If the system has dual Routing Engines and this option is C(true),
             then the action is performed on the other REs in the system.
 
+        :param str vmhost: If the device is vmhost device then the shutdown will be performed on the device
+
         :returns:
             * power-off message (string) if command successful
 
@@ -1265,12 +1270,13 @@ class SW(Util):
             else:
                 cmd = E("request-node-power-off")
                 cmd.append(E("node", on_node))
+        elif vmhost is True:
+            cmd = E("request-vmhost-poweroff")
+            all_re = False
         else:
             cmd = E("request-power-off")
         try:
-            return self._system_operation(
-                cmd, in_min, at, all_re, other_re, vmhost=False
-            )
+            return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except Exception as err:
             if err.rsp.findtext(".//error-severity") != "warning":
                 raise err
