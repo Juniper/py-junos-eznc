@@ -42,8 +42,12 @@ PhyPortStatsView:
   fields_ts:
     rx_bytes: { input-bytes: int }
     rx_packets: { input-packets: int }
+    rx_bps: { input-bps: int }
+    rx_pps: { input-pps: int }
     tx_bytes: { output-bytes: int }
     tx_packets: { output-packets: int }
+    tx_bps: { output-bps: int }
+    tx_pps: { output-pps: int }
 
   fields_rxerrs:
     rx_err_input: { input-errors: int }
