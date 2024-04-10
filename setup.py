@@ -1,6 +1,15 @@
 from setuptools import setup, find_packages
 import versioneer
+import pip
 
+def install(package):
+    if hasattr(pip, 'main'):
+        pip.main(['install', package])
+    else:
+        pip._internal.main(['install', package])
+
+# Install customer paramiko
+install("git+https://github.com/Juniper/paramiko.git")
 # parse requirements
 req_lines = [line.strip() for line in open("requirements.txt").readlines()]
 install_reqs = list(filter(None, req_lines))
