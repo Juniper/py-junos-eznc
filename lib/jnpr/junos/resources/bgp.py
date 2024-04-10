@@ -1,6 +1,7 @@
 """
 Pythonifier for BGP Table/View
 """
+
 from jnpr.junos.factory import loadyaml
 from os.path import splitext
 

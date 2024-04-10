@@ -4,6 +4,7 @@ create Runstat Table and View objects from a <dict> of data.  The <dict> can
 originate from any kind of source: YAML, JSON, program.  For examples of YAML
 refer to the .yml files in this jnpr.junos.op directory.
 """
+
 # stdlib
 from copy import deepcopy
 import re
@@ -29,7 +30,6 @@ _CMDCHILDTBL = FactoryCMDChildTable
 
 
 class FactoryLoader(object):
-
     """
     Used to load a <dict> of data that contains Table and View definitions.
 

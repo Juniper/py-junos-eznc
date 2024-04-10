@@ -7,7 +7,6 @@ from jnpr.junos import jxml as JXML
 
 
 class UserSSHKey(Resource):
-
     """
     [edit system login user <name> authentication <key-type> <key-value> ]
 
