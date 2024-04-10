@@ -3,7 +3,7 @@ import versioneer
 import os
 
 # Install customer paramiko
-os.system("pip install git+https://github.com/Juniper/paramiko.git")
+os.system("pip install git+https://github.com/Juniper/paramiko.git@v3.4.0-JNPR")
 # parse requirements
 req_lines = [line.strip() for line in open("requirements.txt").readlines()]
 install_reqs = list(filter(None, req_lines))
