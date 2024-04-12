@@ -1,6 +1,6 @@
-## Release 2.7.1.dev0 - 12 JAN 2024
+## Release 2.7.1 - 12 APR 2024
 ## Features Added
-
+- Added customer juniper paramiko module as a dependency  which supported aes128 and aes257 cipher #1299 
 ## Bugs Fixed
 
 ## Release 2.7.0 - 12 JAN 2024
