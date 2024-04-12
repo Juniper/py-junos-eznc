@@ -31,6 +31,7 @@ NOTE: The dictionary key for each available fact is guaranteed to exist. If
 The following dictionary keys represent the available facts and their meaning:
 
 """
+
 import sys
 
 import jnpr.junos.facts.current_re

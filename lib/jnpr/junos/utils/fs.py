@@ -7,7 +7,6 @@ from jnpr.junos.exception import RpcError
 
 
 class FS(Util):
-
     """
     Filesystem (FS) utilities:
 

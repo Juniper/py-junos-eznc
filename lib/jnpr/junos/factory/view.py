@@ -11,7 +11,6 @@ from jnpr.junos.factory.to_json import TableViewJSONEncoder
 
 
 class View(object):
-
     """
     View is the base-class that makes extracting values from XML
     data appear as objects with attributes.

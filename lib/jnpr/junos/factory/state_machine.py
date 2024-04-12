@@ -810,9 +810,9 @@ class StateMachine(Machine):
                             val, result[list(self._view.REGEX.keys()).index(key)], re.I
                         )
                         if obj and len(obj.groups()) >= 1:
-                            result[
-                                list(self._view.REGEX.keys()).index(key)
-                            ] = obj.groups()[0]
+                            result[list(self._view.REGEX.keys()).index(key)] = (
+                                obj.groups()[0]
+                            )
                 items = convert_to_data_type(result)
                 tmp_dict = dict(zip(self._view.REGEX.keys(), items))
                 if len(tmp_dict) > 0:

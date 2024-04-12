@@ -6,7 +6,6 @@ from jnpr.junos.cfg.resource import Resource
 
 
 class PhyPortBase(Resource):
-
     """
     [edit interfaces <name>]
 
