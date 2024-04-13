@@ -2214,7 +2214,10 @@ FPCThreadView:
                 "L2ALM Manager": {"cpu": "0", "state": "asleep"},
                 "L2PD": {"cpu": "0", "state": "asleep"},
                 "L2TP-SF KA Transmit": {"cpu": "0", "state": "asleep"},
-                "LKUP ASIC UCODE Rebalance Service": {"cpu": "1", "state": "asleep",},
+                "LKUP ASIC UCODE Rebalance Service": {
+                    "cpu": "1",
+                    "state": "asleep",
+                },
                 "LKUP ASIC Wedge poll thread": {"cpu": "0", "state": "asleep"},
                 "LU Background Service": {"cpu": "4", "state": "asleep"},
                 "LU-CNTR Reader": {"cpu": "0", "state": "asleep"},
@@ -2376,7 +2379,7 @@ ARPtable:
 
 ARPview:
     fields:
-        mac: MAC_ADDRESS
+        mac: MAC
         ip: IP_ADDRESS
         interface: INTERFACE
         flag: FLAGS
