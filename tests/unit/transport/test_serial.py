@@ -72,7 +72,7 @@ class TestSerial(unittest.TestCase):
     def test_tty_serial_read_prompt(self):
         self.dev._tty._ser = MagicMock()
         self.dev._tty.EXPECT_TIMEOUT = 0.1
-        self.dev._tty._ser.readall.side_effect = [b"", b"test"]
+        self.dev._tty._ser.readall.side_effect = [six.b(""), six.b("test")]
         self.assertEqual(self.dev._tty.read_prompt()[0], None)
 
 
