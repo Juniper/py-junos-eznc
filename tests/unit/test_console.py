@@ -9,7 +9,6 @@ import re
 import sys
 import os
 from lxml import etree
-import six
 import socket
 
 from jnpr.junos.console import Console
@@ -40,16 +39,16 @@ class TestConsole(unittest.TestCase):
     def setUp(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search("(?P<login>ogin:\s*$)", "login: "), b"\r\r\n ogin:"),
             (
                 2,
                 re.search("(?P<passwd>assword:\s*$)", "password: "),
-                six.b("\r\r\n password:"),
+                b"\r\r\n password:",
             ),
             (
                 3,
                 re.search("(?P<shell>%|#\s*$)", "junos % "),
-                six.b("\r\r\nroot@device:~ # "),
+                b"\r\r\nroot@device:~ # ",
             ),
         ]
         self.dev = Console(host="1.1.1.1", user="lab", password="lab123", mode="Telnet")
@@ -87,16 +86,16 @@ class TestConsole(unittest.TestCase):
     def test_login_bad_password(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search("(?P<login>ogin:\s*$)", "login: "), b"\r\r\n ogin:"),
             (
                 2,
                 re.search("(?P<passwd>assword:\s*$)", "password: "),
-                six.b("\r\r\n password:"),
+                b"\r\r\n password:",
             ),
             (
                 3,
                 re.search("(?P<badpasswd>ogin incorrect)", "login incorrect"),
-                six.b("\r\r\nlogin incorrect"),
+                b"\r\r\nlogin incorrect",
             ),
         ]
         self.dev = Console(host="1.1.1.1", user="lab", password="lab123", mode="Telnet")
@@ -110,16 +109,16 @@ class TestConsole(unittest.TestCase):
         tty_netconf.open = MagicMock()
 
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search("(?P<login>ogin:\s*$)", "login: "), b"\r\r\n ogin:"),
             (
                 2,
                 re.search("(?P<passwd>assword:\s*$)", "password: "),
-                six.b("\r\r\n password:"),
+                b"\r\r\n password:",
             ),
             (
                 3,
                 re.search("(?P<shell>%|#\s*$)", "junos % "),
-                six.b("\r\r\nroot@device:~ # "),
+                b"\r\r\nroot@device:~ # ",
             ),
         ]
         with Console(
@@ -175,9 +174,9 @@ class TestConsole(unittest.TestCase):
     def test_console_serial(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
         mock_expect.side_effect = [
-            six.b("\r\r\n Login:"),
-            six.b("\r\r\n password:"),
-            six.b("\r\r\nroot@device:~ # "),
+            b"\r\r\n Login:",
+            b"\r\r\n password:",
+            b"\r\r\nroot@device:~ # ",
         ]
         self.dev = Console(host="1.1.1.1", user="lab", password="lab123", mode="serial")
         self.dev.open()
@@ -258,15 +257,13 @@ class TestConsole(unittest.TestCase):
                 </policy-statement>
                 </policy-options>"""
 
-        mock_read_until.return_value = six.b(
-            """
+        mock_read_until.return_value = b"""
         <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/15.2I0/junos">
             <load-configuration-results>
             <ok/>
             </load-configuration-results>
             </rpc-reply>
             ]]>]]>"""
-        )
         cu = Config(self.dev)
         op = cu.load(xml, format="xml")
         cu.commit()

@@ -14,10 +14,10 @@ logger = logging.getLogger("jnpr.junos.tty_telnet")
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    IN_USE = six.b("in use")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    IN_USE = b("in use"
 
 
 class Telnet(Terminal):

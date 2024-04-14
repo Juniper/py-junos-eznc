@@ -15,14 +15,14 @@ logger = logging.getLogger("jnpr.junos.tty_ssh")
 # -------------------------------------------------------------------------
 # Terminal connection over SSH CONSOLE
 # -------------------------------------------------------------------------
-_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(b"|".join([six.b(i) for i in Terminal._RE_PAT]))
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    IN_USE = six.b("in use")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    IN_USE = b"in use"
 
 
 class SSH(Terminal):
@@ -158,7 +158,7 @@ class SSH(Terminal):
 
     def read(self):
         """read a single line"""
-        rxb = six.b("")
+        rxb = b""
         while True:
             data = self._ssh.recv(self.RECVSZ)
             if data is None or len(data) <= 0:
@@ -180,7 +180,7 @@ class SSH(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b("")
+        rxb = b""
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
@@ -199,7 +199,7 @@ class SSH(Terminal):
         return rxb, found.lastgroup
 
     def _read_until(self, match, timeout=None):
-        rxb = six.b("")
+        rxb = b""
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
