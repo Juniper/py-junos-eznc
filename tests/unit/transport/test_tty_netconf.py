@@ -7,7 +7,6 @@ from mock import MagicMock, patch
 
 from jnpr.junos.transport.tty_netconf import tty_netconf
 
-import six
 import os
 import select
 import socket
@@ -43,7 +42,7 @@ class TestTTYNetconf(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_netconf.timedelta")
     def test_open_RuntimeError(self, mock_delta, mock_rcv):
         mock_rcv.return_value = "]]>]]>"
-        self.tty_net._tty.read.return_value = six.b("testing")
+        self.tty_net._tty.read.return_value = b"testing"
         from datetime import timedelta
 
         mock_delta.return_value = timedelta(seconds=0.5)
@@ -56,7 +55,7 @@ class TestTTYNetconf(unittest.TestCase):
         mock_rcv.return_value = "]]>]]>"
         self.tty_net.rpc("get-interface-information")
         self.tty_net._tty.rawwrite.assert_called_with(
-            six.b("<rpc><get-interface-information/></rpc>")
+            b"<rpc><get-interface-information/></rpc>"
         )
 
     @patch("jnpr.junos.transport.tty_netconf.tty_netconf._receive")
@@ -103,7 +102,7 @@ class TestTTYNetconf(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_netconf.select.select")
     def test_tty_netconf_receive_empty_line(self, mock_select):
         rx = MagicMock()
-        rx.read_until.side_effect = iter([six.b(""), six.b("]]>]]>")])
+        rx.read_until.side_effect = iter([b"", b"]]>]]>"])
         mock_select.return_value = ([rx], [], [])
         self.assertEqual(self.tty_net._receive().tag, "error-in-receive")
 
@@ -117,7 +116,7 @@ class TestTTYNetconf(unittest.TestCase):
     @patch("jnpr.junos.transport.tty_netconf.select.select")
     def test_tty_netconf_receive_splited_eom(self, mock_select):
         rx = MagicMock()
-        rx.read_until.side_effect = iter([six.b(i) for i in ["testing]", "]>", "]]>"]])
+        rx.read_until.side_effect = iter([i.encode('utf-8') for i in ["testing]", "]>", "]]>"]])
         mock_select.return_value = ([rx], [], [])
         self.assertEqual(self.tty_net._receive().tag, "error-in-receive")
 
@@ -126,30 +125,30 @@ class TestTTYNetconf(unittest.TestCase):
         rx = MagicMock()
 
         rx.read_until.side_effect = iter(
-            [six.b("<rpc-reply>ok<dummy></rpc-reply>"), six.b("\n]]>]]>")]
+            [b"<rpc-reply>ok<dummy></rpc-reply>", b"\n]]>]]>"]
         )
         mock_select.return_value = ([rx], [], [])
         self.assertEqual(
-            self.tty_net._receive(), six.b("<rpc-reply>ok<dummy/></rpc-reply>")
+            self.tty_net._receive(), b"<rpc-reply>ok<dummy/></rpc-reply>"
         )
 
     @patch("jnpr.junos.transport.tty_netconf.select.select")
     def test_tty_netconf_receive_XMLSyntaxError_eom_in_center(self, mock_select):
         rx = MagicMock()
         rx.read_until.side_effect = iter(
-            [six.b("<rpc-reply>ok</rpc-reply>"), six.b("]]>]]>\ndummy")]
+            [b"<rpc-reply>ok</rpc-reply>", b"]]>]]>\ndummy"]
         )
         mock_select.return_value = ([rx], [], [])
-        self.assertEqual(self.tty_net._receive(), six.b("<rpc-reply>ok</rpc-reply>"))
+        self.assertEqual(self.tty_net._receive(), b"<rpc-reply>ok</rpc-reply>")
 
     @patch("jnpr.junos.transport.tty_netconf.select.select")
     def test_tty_netconf_receive_xmn_error(self, mock_select):
         rx = MagicMock()
         rx.read_until.side_effect = iter(
             [
-                six.b("<message>ok</message>"),
-                six.b("\n</xnm:error>\n"),
-                six.b("]]>]]>\ndummy"),
+                b"<message>ok</message>",
+                b"\n</xnm:error>\n",
+                b"]]>]]>\ndummy",
             ]
         )
         mock_select.return_value = ([rx], [], [])

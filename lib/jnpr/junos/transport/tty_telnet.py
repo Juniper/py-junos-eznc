@@ -2,7 +2,6 @@ from time import sleep
 import telnetlib
 import logging
 import sys
-import six
 
 from jnpr.junos.transport.tty import Terminal
 
@@ -14,10 +13,10 @@ logger = logging.getLogger("jnpr.junos.tty_telnet")
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    IN_USE = six.b("in use")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    IN_USE = b"in use"
 
 
 class Telnet(Terminal):
@@ -81,7 +80,7 @@ class Telnet(Terminal):
     def write(self, content):
         """write content + <ENTER>"""
         logger.debug("Write: %s" % content)
-        self._tn.write(six.b((content + "\n")))
+        self._tn.write(bytes(content + "\n", 'utf-8'))
 
     def rawwrite(self, content):
         """write content as-is"""
@@ -97,7 +96,7 @@ class Telnet(Terminal):
         if sys.version >= "3":
             content = content.decode("utf-8")
         for char in content:
-            self._tn.write(six.b(char))
+            self._tn.write(char.encode("utf-8"))
             wtime = 10 / float(self.baud)
             sleep(wtime)  # do not remove
 
@@ -106,7 +105,7 @@ class Telnet(Terminal):
         return self._tn.read_until(PY6.NEW_LINE, self.EXPECT_TIMEOUT)
 
     def read_prompt(self):
-        _RE_PAT = [six.b(i) for i in Terminal._RE_PAT]
+        _RE_PAT = [i.encode('utf-8') for i in Terminal._RE_PAT]
         got = self._tn.expect(_RE_PAT, self.EXPECT_TIMEOUT)
         if PY6.IN_USE in got[2]:
             raise RuntimeError("open_fail: port already in use")

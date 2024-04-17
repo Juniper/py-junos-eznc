@@ -5,7 +5,6 @@ except ImportError:
 import nose2
 from mock import MagicMock, patch
 import sys
-import six
 
 from jnpr.junos.console import Console
 
@@ -90,12 +89,9 @@ class TestSerialWin(unittest.TestCase):
             ("shell", "shell"),
         ]
         mock_serial_read.side_effect = [
-            six.b(
-                "<!-- No zombies were killed during the creation of this user interface -->"
-            ),
-            six.b(""),
-            six.b(
-                """<!-- user root, class super-user -->
+            b"<!-- No zombies were killed during the creation of this user interface -->",
+            b"",
+            b"""<!-- user root, class super-user -->
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
   <capabilities>
     <capability>urn:ietf:params:netconf:base:1.0</capability>
@@ -114,9 +110,8 @@ class TestSerialWin(unittest.TestCase):
   </capabilities>
   <session-id>7478</session-id>
 </hello>
-]]>]]>"""
-            ),
-            six.b(""),
+]]>]]>""",
+            b"",
         ]
         self.dev.open()
 
@@ -144,7 +139,7 @@ class TestSerialWin(unittest.TestCase):
         self.dev._tty.read = MagicMock()
         self.dev._tty.rawwrite = MagicMock()
         self.dev._tty.read.side_effect = [
-            six.b(
+            bytes(
                 '<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"'
                 ' xmlns:junos="http://xml.juniper.net/junos/15.1X49/junos">'
                 '<route-engine-information xmlns="http://xml.juniper.net/ju'
@@ -170,7 +165,8 @@ class TestSerialWin(unittest.TestCase):
                 "-reason><load-average-one>0.12</load-average-one><load-ave"
                 "rage-five>0.08</load-average-five><load-average-fifteen>0."
                 "06</load-average-fifteen></route-engine></route-engine-inf"
-                "ormation></rpc-reply>]]>]]>"
+                "ormation></rpc-reply>]]>]]>",
+                'utf-8'
             )
         ]
         res = self.dev.rpc.get_route_engine_information()

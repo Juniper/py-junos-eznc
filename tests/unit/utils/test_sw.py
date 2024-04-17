@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os
 import sys
-from six import StringIO
+from io import StringIO
 
 try:
     import unittest2 as unittest
