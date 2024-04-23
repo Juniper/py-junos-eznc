@@ -1237,9 +1237,7 @@ class SW(Util):
                             cmd, in_min, at, all_re, other_re, vmhost, member_id
                         )
             else:
-                return self._system_operation(
-                    cmd, in_min, at, all_re, other_re, vmhost
-                )
+                return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except RpcTimeoutError as err:
             raise err
         except Exception as err:
