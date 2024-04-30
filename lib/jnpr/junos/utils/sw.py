@@ -1234,7 +1234,7 @@ class SW(Util):
                 for m_id in member_id:
                     if m_id in vc_members:
                         return self._system_operation(
-                            cmd, in_min, at, all_re, other_re, vmhost, member_id
+                            cmd, in_min, at, all_re, other_re, vmhost, member_id=m_id
                         )
             else:
                 return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
