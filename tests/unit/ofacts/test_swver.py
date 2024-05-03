@@ -6,7 +6,7 @@ try:
 except ImportError:
     import unittest
 import nose2
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device

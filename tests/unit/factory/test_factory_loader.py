@@ -4,7 +4,7 @@ __credits__ = "Jeremy Schulman"
 import unittest
 import nose2
 from jnpr.junos.factory import FactoryLoader
-from mock import patch
+from unittest.mock import patch
 
 
 class TestFactoryLoader(unittest.TestCase):

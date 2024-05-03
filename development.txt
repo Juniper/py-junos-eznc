@@ -1,7 +1,6 @@
 -r requirements.txt
 
 coverage     # http://nedbatchelder.com/code/coverage/
-mock         # http://www.voidspace.org.uk/python/mock/
 nose2        # https://docs.nose2.io/en/latest/
 pep8	     # https://github.com/jcrocholl/pep8
 pyflakes	 # https://launchpad.net/pyflakes

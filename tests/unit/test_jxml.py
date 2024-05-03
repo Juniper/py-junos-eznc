@@ -2,7 +2,7 @@ import os
 import unittest
 from io import StringIO
 import nose2
-from mock import patch
+from unittest.mock import patch
 from jnpr.junos.jxml import (
     NAME,
     INSERT,

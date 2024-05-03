@@ -9,7 +9,7 @@ from jnpr.junos import Device
 from jnpr.junos.utils.fs import FS
 from jnpr.junos.exception import RpcError
 
-from mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call
 from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"

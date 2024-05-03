@@ -3,7 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 import nose2
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 from jnpr.junos import Device
 from jnpr.junos.factory.view import View
 from jnpr.junos.op.phyport import PhyPortStatsTable, PhyPortStatsView
