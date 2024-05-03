@@ -7,7 +7,7 @@ import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.util import Util
 
-from mock import patch
+from unittest.mock import patch
 
 
 class TestUtil(unittest.TestCase):

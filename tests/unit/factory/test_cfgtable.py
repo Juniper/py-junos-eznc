@@ -13,7 +13,7 @@ from jnpr.junos import Device
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from lxml import etree
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from jnpr.junos.factory import loadyaml
 from jnpr.junos.factory.factory_loader import FactoryLoader

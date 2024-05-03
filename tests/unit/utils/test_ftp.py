@@ -7,7 +7,7 @@ import os
 from jnpr.junos import Device
 import jnpr.junos.utils.ftp
 
-from mock import patch
+from unittest.mock import patch
 
 if sys.version < "3":
     builtin_string = "__builtin__"

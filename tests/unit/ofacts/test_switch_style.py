@@ -2,7 +2,7 @@ __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-from mock import patch
+from unittest.mock import patch
 import nose2
 
 from jnpr.junos import Device

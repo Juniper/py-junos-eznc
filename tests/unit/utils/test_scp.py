@@ -8,7 +8,7 @@ import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
 
-from mock import patch
+from unittest.mock import patch
 
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"

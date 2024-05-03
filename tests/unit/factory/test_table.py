@@ -8,7 +8,7 @@ import os
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
 
-from mock import patch
+from unittest.mock import patch
 from lxml import etree
 from jnpr.junos.op.phyport import PhyPortTable
 

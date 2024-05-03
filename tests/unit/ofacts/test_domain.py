@@ -3,7 +3,7 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 import nose2
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 from lxml import etree
 
 from jnpr.junos.ofacts.domain import facts_domain
