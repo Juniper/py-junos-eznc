@@ -16,18 +16,18 @@ from ncclient.transport.session import HelloHandler
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    STARTS_WITH = six.b("<!--")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    STARTS_WITH = b"<!--"
 
 
 __all__ = ["xmlmode_netconf"]
 
-_NETCONF_EOM = six.b("]]>]]>")
-_xmlns = re.compile(six.b("xmlns=[^>]+"))
+_NETCONF_EOM = b"]]>]]>"
+_xmlns = re.compile(b"xmlns=[^>]+")
 _xmlns_strip = lambda text: _xmlns.sub(PY6.EMPTY_STR, text)
-_junosns = re.compile(six.b("junos:"))
+_junosns = re.compile(b"junos:")
 _junosns_strip = lambda text: _junosns.sub(PY6.EMPTY_STR, text)
 
 logger = logging.getLogger("jnpr.junos.tty_netconf")
