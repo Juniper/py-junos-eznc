@@ -210,7 +210,9 @@ class _RpcMetaExec(object):
         filter_params = {"type": "xpath"}
         if filter_select is not None:
             filter_params["source"] = filter_select
-        rpc = E("get", E("filter", filter_params))
+            rpc = E("get", E("filter", filter_params))
+        else:
+            rpc = E("get")
         return self._junos.execute(rpc, ignore_warning=ignore_warning, **kwargs)
 
     # -----------------------------------------------------------------------
