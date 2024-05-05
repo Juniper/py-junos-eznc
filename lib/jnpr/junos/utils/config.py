@@ -495,7 +495,7 @@ class Config(Util):
             elif re.search(r"^\s*\{", rpc) and re.search(r".*}\s*$", rpc):
                 kvargs["format"] = "json"
 
-        def try_load(rpc_contents, rpc_xattrs, ignore_warning=False):
+        def try_load(rpc_contents, rpc_xattrs, ignore_warning=ignore_warning):
             try:
                 got = self.rpc.load_config(
                     rpc_contents, ignore_warning=ignore_warning, **rpc_xattrs
