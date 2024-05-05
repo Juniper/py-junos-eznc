@@ -3,7 +3,6 @@ import re
 import datetime
 from jnpr.junos.utils.ssh_client import open_ssh_client
 import subprocess
-import six
 from threading import Thread
 import time
 

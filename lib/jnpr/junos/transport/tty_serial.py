@@ -1,6 +1,5 @@
 import serial
 import re
-import six
 from time import sleep
 from datetime import datetime, timedelta
 
@@ -10,7 +9,7 @@ from jnpr.junos.transport.tty import Terminal
 # Terminal connection over SERIAL CONSOLE
 # -------------------------------------------------------------------------
 
-_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(b"|".join([i.encode('utf-8') for i in Terminal._RE_PAT]))
 
 
 class Serial(Terminal):
@@ -56,7 +55,7 @@ class Serial(Terminal):
 
     def write(self, content):
         """write content + <RETURN>"""
-        self._ser.write(six.b(content + "\n"))
+        self._ser.write(bytes(content + "\n", 'utf-8'))
         self._ser.flush()
 
     def rawwrite(self, content):
@@ -75,7 +74,7 @@ class Serial(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b("")
+        rxb = b""
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=self.EXPECT_TIMEOUT)
 

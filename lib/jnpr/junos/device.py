@@ -1,6 +1,5 @@
 # stdlib
 import os
-import six
 import types
 import platform
 import warnings
@@ -659,7 +658,7 @@ class _Connection(object):
         command = command.strip()
         # Get the equivalent RPC
         rpc = self.display_xml_rpc(command)
-        if isinstance(rpc, six.string_types):
+        if isinstance(rpc, str):
             # No RPC is available.
             return None
         rpc_string = "rpc.%s(" % (rpc.tag.replace("-", "_"))

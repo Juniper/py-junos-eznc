@@ -6,7 +6,6 @@ import sys
 from time import sleep, time
 
 import paramiko
-import six
 
 from jnpr.junos.transport.tty import Terminal
 
@@ -15,14 +14,14 @@ logger = logging.getLogger("jnpr.junos.tty_ssh")
 # -------------------------------------------------------------------------
 # Terminal connection over SSH CONSOLE
 # -------------------------------------------------------------------------
-_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(b"|".join([i.encode('utf-8') for i in Terminal._RE_PAT]))
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    IN_USE = six.b("in use")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    IN_USE = b"in use"
 
 
 class SSH(Terminal):
@@ -136,7 +135,7 @@ class SSH(Terminal):
     def write(self, content):
         """write content + <ENTER>"""
         logger.debug("Write: %s" % content)
-        self._ssh.sendall(six.b((content + "\n")))
+        self._ssh.sendall(bytes(content + "\n", 'utf-8'))
 
     def rawwrite(self, content):
         """write content as-is"""
@@ -152,13 +151,13 @@ class SSH(Terminal):
         if sys.version >= "3":
             content = content.decode("utf-8")
         for char in content:
-            self._ssh.sendall(six.b(char))
+            self._ssh.sendall(bchar)
             wtime = 10 / float(self.baud)
             sleep(wtime)  # do not remove
 
     def read(self):
         """read a single line"""
-        rxb = six.b("")
+        rxb = b""
         while True:
             data = self._ssh.recv(self.RECVSZ)
             if data is None or len(data) <= 0:
@@ -180,7 +179,7 @@ class SSH(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b("")
+        rxb = b""
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
@@ -199,7 +198,7 @@ class SSH(Terminal):
         return rxb, found.lastgroup
 
     def _read_until(self, match, timeout=None):
-        rxb = six.b("")
+        rxb = b""
         timeout = time() + self.READ_PROMPT_DELAY
 
         while time() < timeout:
