@@ -72,14 +72,6 @@ class SSH(Terminal):
     def _tty_open(self):
         retry = self.RETRY_OPEN
 
-        # we want to enable the ssh-agent if-and-only-if we are
-        # not given a password or an ssh key file.
-        # in this condition it means we want to query the agent
-        # for available ssh keys
-        allow_agent = bool(
-            (self.cs_passwd is None) and (self.ssh_private_key_file is None)
-        )
-
         while retry > 0:
             try:
                 self._ssh_pre.connect(
@@ -88,7 +80,6 @@ class SSH(Terminal):
                     username=self.cs_user,
                     password=self.cs_passwd,
                     timeout=self.timeout,
-                    allow_agent=allow_agent,
                     look_for_keys=False,
                     key_filename=self.ssh_private_key_file,
                 )
