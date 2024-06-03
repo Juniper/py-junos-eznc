@@ -52,7 +52,7 @@ class Terminal(object):
         "(?P<badpasswd>ogin incorrect)",
         r"(?P<netconf_closed><!-- session end at .*-->\s*)",
         r"(?P<shell>%|#|(~\$)\s*$)",
-        '(?P<cli>[^\\-"]>\s*$)',
+        r'(?P<cli>[^\-"]>\s*$)',
         r"(?P<option>Enter your option:\s*$)",
         "(?P<hotkey>connection: <CTRL>Z)",
     ]
