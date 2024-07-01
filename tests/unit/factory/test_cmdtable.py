@@ -351,7 +351,7 @@ FPCLinkStatTable:
     @patch("jnpr.junos.Device.execute")
     def test_title_in_view(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 ShowLuchipTable:
   command: show luchip {{ lu_instance }}
@@ -498,7 +498,7 @@ FPCLinkStatTable:
     @patch("jnpr.junos.Device.execute")
     def test_field_eval(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 XMChipStatsTable:
   command: show xmchip {{ instance }} pt stats
@@ -675,7 +675,7 @@ FPCTTPReceiveStatsView:
     @patch("jnpr.junos.Device.execute")
     def test_unstructured_mtip_cge_regex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 MtipCgeSummaryTable:
   command: show mtip-cge summary
@@ -877,7 +877,7 @@ _ICMPRateView:
     @patch("jnpr.junos.Device.execute")
     def test_unstructured_ithrottle_key_args(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 IthrottleIDTable:
   command: show ithrottle id {{ id }}
   args:
@@ -921,7 +921,7 @@ _ThrottleStatsTable:
     @patch("jnpr.junos.Device.execute")
     def test_pci_errs_multi_key_regex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 ShowPciErrorsTable:
   command: show pci errors {{ pci_controller_number }}
@@ -1024,7 +1024,7 @@ FPCMemoryView:
     @patch("jnpr.junos.Device.execute")
     def test_item_regex_pq3_pci(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 PQ3PCITable:
   command: show pq3 pci
@@ -1147,7 +1147,7 @@ PQ3PCI:
     @patch("jnpr.junos.Device.execute")
     def test_regex_with_fields(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 SchedulerTable:
   command: show sched
@@ -1252,7 +1252,7 @@ HostlbStatusSummaryView:
     @patch("jnpr.junos.Device.execute")
     def test_table_with_item_regex(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 DevicesLocalTable:
   command: show devices local
@@ -1354,7 +1354,7 @@ _TransmitPerQueueView:
     @patch("jnpr.junos.Device.execute")
     def test_table_item_group_key_mismatch(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 DevicesLocalTable:
   command: show devices local
@@ -1390,7 +1390,7 @@ _ReceiveView:
     @patch("jnpr.junos.Device.execute")
     def test_table_with_item_without_view(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 EthernetSwitchStatisticsIterTable:
   command: show chassis ethernet-switch statistics
@@ -1629,7 +1629,7 @@ _EthSwitchStatsFpc5Table:
     @patch("jnpr.junos.Device.execute")
     def test_valueerror_with_no_target(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 ShowToePfePacketStatsTable:
   command: show toe pfe {{ pfe_instance }} {{ asic_type }} {{ asic_instance }} toe-inst {{ toe_instance }} packet-stats
@@ -1697,7 +1697,7 @@ _ShowToePfePacketStatsStream_rx_errors:
     @patch("jnpr.junos.Device.execute")
     def test_item_with_fields_delimiter(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 ShowToePfePacketStatsTable:
   command: show toe pfe {{ pfe_instance }} {{ asic_type }} {{ asic_instance }} toe-inst {{ toe_instance }} packet-stats
@@ -2300,7 +2300,7 @@ FPCThreadView:
     @patch("jnpr.junos.Device.execute")
     def test_new_line_in_data(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
-        yaml_data = """
+        yaml_data = r"""
 ---
 CChipLoStatsTable:
   command: show xmchip {{ chip_instance }} lo stats 0

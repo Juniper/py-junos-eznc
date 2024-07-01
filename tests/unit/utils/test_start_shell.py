@@ -69,7 +69,7 @@ class TestStartShell(unittest.TestCase):
         ---(more)---
         """
         self.assertTrue(
-            str(self.shell.wait_for("---\(more\s?\d*%?\)---\n\s*|%")[0])
+            str(self.shell.wait_for(r"---\(more\s?\d*%?\)---\n\s*|%")[0])
             in self.shell._chan.recv.return_value
         )
 
@@ -92,7 +92,7 @@ class TestStartShell(unittest.TestCase):
         """
         ]
         self.assertTrue(
-            self.shell.run("show version", "---\(more\s?\d*%?\)---\n\s*|%")[0]
+            self.shell.run("show version", r"---\(more\s?\d*%?\)---\n\s*|%")[0]
         )
 
     @patch("jnpr.junos.utils.start_shell.StartShell.wait_for")
