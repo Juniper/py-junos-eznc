@@ -735,7 +735,7 @@ class _Connection(object):
             if rsp is True:
                 return ""
             if rsp.tag in ["output", "rpc-reply"]:
-                if rsp.tag == "output" and rsp.getparent():
+                if rsp.tag == "output" and rsp.getparent() is not None:
                     rsp = rsp.getparent()
                 encode = None if sys.version < "3" else "unicode"
                 return etree.tostring(
