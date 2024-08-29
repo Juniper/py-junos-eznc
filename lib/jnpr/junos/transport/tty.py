@@ -14,7 +14,6 @@ __all__ = ["Terminal"]
 
 
 class Terminal(object):
-
     """
     Terminal is used to bootstrap Junos New Out of the Box (NOOB) device
     over the CONSOLE port. The general use-case is to setup the minimal

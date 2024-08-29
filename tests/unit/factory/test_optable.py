@@ -19,7 +19,7 @@ from ncclient.operations.rpc import RPCReply
 
 from lxml import etree
 
-from mock import patch
+from unittest.mock import patch
 
 
 class TestFactoryOpTable(unittest.TestCase):

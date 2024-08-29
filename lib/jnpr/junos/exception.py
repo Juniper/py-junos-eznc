@@ -14,7 +14,6 @@ class FactLoopError(RuntimeError):
 
 
 class RpcError(Exception):
-
     """
     Parent class for all junos-pyez RPC Exceptions
     """
@@ -87,7 +86,6 @@ class RpcError(Exception):
 
 
 class CommitError(RpcError):
-
     """
     Generated in response to a commit-check or a commit action.
     """
@@ -107,7 +105,6 @@ class CommitError(RpcError):
 
 
 class ConfigLoadError(RpcError):
-
     """
     Generated in response to a failure when loading a configuration.
     """
@@ -127,7 +124,6 @@ class ConfigLoadError(RpcError):
 
 
 class LockError(RpcError):
-
     """
     Generated in response to attempting to take an exclusive
     lock on the configuration database.
@@ -138,7 +134,6 @@ class LockError(RpcError):
 
 
 class UnlockError(RpcError):
-
     """
     Generated in response to attempting to unlock the
     configuration database.
@@ -149,7 +144,6 @@ class UnlockError(RpcError):
 
 
 class PermissionError(RpcError):
-
     """
     Generated in response to invoking an RPC for which the
     auth user does not have user-class permissions.
@@ -164,7 +158,6 @@ class PermissionError(RpcError):
 
 
 class RpcTimeoutError(RpcError):
-
     """
     Generated in response to a RPC execution timeout.
     """
@@ -181,7 +174,6 @@ class RpcTimeoutError(RpcError):
 
 
 class SwRollbackError(RpcError):
-
     """
     Generated in response to a SW rollback error.
     """
@@ -208,7 +200,6 @@ class SwRollbackError(RpcError):
 
 
 class ConnectError(Exception):
-
     """
     Parent class for all connection related exceptions
     """
@@ -249,7 +240,6 @@ class ConnectError(Exception):
 
 
 class ProbeError(ConnectError):
-
     """
     Generated if auto_probe is enabled and the probe action fails
     """
@@ -258,7 +248,6 @@ class ProbeError(ConnectError):
 
 
 class ConnectAuthError(ConnectError):
-
     """
     Generated if the user-name, password is invalid
     """
@@ -267,7 +256,6 @@ class ConnectAuthError(ConnectError):
 
 
 class ConnectTimeoutError(ConnectError):
-
     """
     Generated if the NETCONF session fails to connect, could
     be due to the fact the device is not ip reachable; bad
@@ -278,7 +266,6 @@ class ConnectTimeoutError(ConnectError):
 
 
 class ConnectUnknownHostError(ConnectError):
-
     """
     Generated if the specific hostname does not DNS resolve
     """
@@ -287,7 +274,6 @@ class ConnectUnknownHostError(ConnectError):
 
 
 class ConnectRefusedError(ConnectError):
-
     """
     Generated if the specified host denies the NETCONF; could
     be that the services is not enabled, or the host has
@@ -298,7 +284,6 @@ class ConnectRefusedError(ConnectError):
 
 
 class ConnectNotMasterError(ConnectError):
-
     """
     Generated if the connection is made to a non-master
     routing-engine.  This could be a backup RE on an MX
@@ -309,7 +294,6 @@ class ConnectNotMasterError(ConnectError):
 
 
 class ConnectClosedError(ConnectError):
-
     """
     Generated if connection unexpectedly closed
     """
@@ -320,7 +304,6 @@ class ConnectClosedError(ConnectError):
 
 
 class JSONLoadError(Exception):
-
     """
     Generated if json content of rpc reply fails to load
     """

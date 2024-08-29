@@ -19,7 +19,7 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from ncclient.operations import RPCError, RPCReply
 
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 from lxml import etree
 import os
 

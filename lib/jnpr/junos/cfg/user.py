@@ -8,7 +8,6 @@ from jnpr.junos.cfg.user_ssh_key import UserSSHKey
 
 
 class User(Resource):
-
     """
     [edit system login user <name>]
 

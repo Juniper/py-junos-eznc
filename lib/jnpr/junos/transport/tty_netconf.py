@@ -38,7 +38,6 @@ logger = logging.getLogger("jnpr.junos.tty_netconf")
 
 
 class tty_netconf(object):
-
     """
     Basic Junos XML API for bootstraping through the TTY
     """

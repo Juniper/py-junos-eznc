@@ -3,7 +3,7 @@ try:
 except ImportError:
     import unittest
 import nose2
-from mock import MagicMock, patch, mock_open, call
+from unittest.mock import MagicMock, patch, mock_open, call
 import os
 from lxml import etree
 import sys

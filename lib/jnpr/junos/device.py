@@ -54,7 +54,6 @@ logger = logging.getLogger("jnpr.junos.device")
 
 
 class _MyTemplateLoader(jinja2.BaseLoader):
-
     """
     Create a jinja2 template loader class that can be used to
     load templates from all over the filesystem, but defaults
@@ -1023,7 +1022,6 @@ class _Connection(object):
 
 
 class DeviceSessionListener(SessionListener):
-
     """
     Listens to Session class of Netconf Transport
     and detects errors in the transport.
@@ -1045,7 +1043,6 @@ class DeviceSessionListener(SessionListener):
 
 
 class Device(_Connection):
-
     """
     Junos Device class.
 

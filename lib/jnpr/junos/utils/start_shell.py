@@ -14,7 +14,6 @@ _RECVSZ = 1024
 
 
 class StartShell(object):
-
     """
     Junos shell execution utility.  This utility is written to
     support the "context manager" design pattern.  For example::

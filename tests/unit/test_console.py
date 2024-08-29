@@ -4,7 +4,7 @@ except ImportError:
     import unittest
 from jnpr.junos.utils.config import Config
 import nose2
-from mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call
 import re
 import sys
 import os

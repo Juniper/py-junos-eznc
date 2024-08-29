@@ -10,7 +10,7 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from jnpr.junos.exception import JSONLoadError
 
-from mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call
 from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"
