@@ -12,7 +12,7 @@ from jnpr.junos.exception import RpcError, ConfigLoadError
 from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
 from jnpr.junos.decorators import ignoreWarnDecorator
 
-from mock import patch, MagicMock, PropertyMock, call
+from unittest.mock import patch, MagicMock, PropertyMock, call
 
 from ncclient.operations.rpc import RPCError
 from ncclient.manager import Manager, make_device_handler

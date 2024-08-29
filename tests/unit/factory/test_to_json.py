@@ -5,7 +5,7 @@ try:
 except ImportError:
     import unittest
 import nose2
-from mock import patch
+from unittest.mock import patch
 import os
 import json
 

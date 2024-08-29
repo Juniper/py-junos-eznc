@@ -1208,6 +1208,16 @@ class SW(Util):
         :returns:
             * reboot message (string) if command successful
         """
+
+        if self._multi_VC_nsync is True or self._multi_VC is True:
+            vc_members = [
+                re.search(r"(\d+)", x).group(1)
+                for x in self._RE_list
+                if re.search(r"(\d+)", x)
+            ]
+            vc_members.remove(self.dev.facts["vc_master"])
+            vc_members.insert(len(vc_members), self.dev.facts["vc_master"])
+
         if self._dev.facts["_is_linux"]:
             if on_node is None:
                 cmd = E("request-shutdown-reboot")
@@ -1220,9 +1230,14 @@ class SW(Util):
             cmd = E("request-reboot")
 
         try:
-            return self._system_operation(
-                cmd, in_min, at, all_re, other_re, vmhost, member_id
-            )
+            if member_id is not None:
+                for m_id in member_id:
+                    if m_id in vc_members:
+                        return self._system_operation(
+                            cmd, in_min, at, all_re, other_re, vmhost, member_id=m_id
+                        )
+            else:
+                return self._system_operation(cmd, in_min, at, all_re, other_re, vmhost)
         except RpcTimeoutError as err:
             raise err
         except Exception as err:

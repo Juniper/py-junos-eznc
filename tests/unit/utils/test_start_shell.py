@@ -4,7 +4,7 @@ import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.start_shell import StartShell
 
-from mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call
 
 __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman, Nitin Kumar"

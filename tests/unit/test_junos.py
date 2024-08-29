@@ -4,7 +4,7 @@ import unittest
 import sys
 
 import nose2
-from mock import patch
+from unittest.mock import patch
 
 __author__ = "Nitin Kumar"
 __credits__ = "Jeremy Schulman"

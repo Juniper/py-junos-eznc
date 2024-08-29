@@ -16,7 +16,7 @@ from jnpr.junos.facts.swver import version_info
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from lxml import etree
-from mock import patch, MagicMock, call, mock_open
+from unittest.mock import patch, MagicMock, call, mock_open
 
 if sys.version < "3":
     builtin_string = "__builtin__"

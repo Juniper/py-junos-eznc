@@ -10,7 +10,7 @@ from jnpr.junos.exception import RpcError
 
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 import yamlordereddictloader
 from jnpr.junos.factory.factory_loader import FactoryLoader
 import yaml
