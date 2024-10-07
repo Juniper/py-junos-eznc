@@ -1,8 +1,6 @@
 __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
-import six
-
 try:
     import unittest2 as unittest
 except:
@@ -13,9 +11,6 @@ from jnpr.junos.facts.swver import version_info, get_facts
 
 
 class TestVersionInfo(unittest.TestCase):
-    if six.PY2:
-        assertCountEqual = unittest.TestCase.assertItemsEqual
-
     def test_version_info_after_type_len_else(self):
         self.assertEqual(version_info("12.1X46-D10").build, None)
 

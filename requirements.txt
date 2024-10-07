@@ -4,7 +4,6 @@ ncclient>=0.6.15
 scp>=0.7.0
 jinja2>=2.7.1
 PyYAML>=5.1
-six
 pyserial
 yamlordereddictloader
 pyparsing

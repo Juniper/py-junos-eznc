@@ -1,7 +1,6 @@
 from ncclient import manager
 from ncclient.xml_ import NCElement
 from lxml import etree
-import six
 
 """
   These are Junos XML 'helper' definitions use for generic XML processing
@@ -226,8 +225,7 @@ def cscript_conf(reply):
 
 
 # xslt to remove prefix like junos:ns
-strip_namespaces_prefix = six.b(
-    """<?xml version="1.0" encoding="UTF-8" ?>
+strip_namespaces_prefix = b"""<?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" indent="no" omit-xml-declaration="no" />
 
@@ -249,4 +247,3 @@ strip_namespaces_prefix = six.b(
         </xsl:attribute>
     </xsl:template>
 </xsl:stylesheet>"""
-)

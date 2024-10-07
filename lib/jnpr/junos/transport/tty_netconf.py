@@ -11,23 +11,22 @@ from lxml.etree import XMLSyntaxError
 from datetime import datetime, timedelta
 from ncclient.operations.rpc import RPCReply, RPCError
 from ncclient.xml_ import to_ele
-import six
 from ncclient.transport.session import HelloHandler
 
 
 class PY6:
-    NEW_LINE = six.b("\n")
-    EMPTY_STR = six.b("")
-    NETCONF_EOM = six.b("]]>]]>")
-    STARTS_WITH = six.b("<!--")
+    NEW_LINE = b"\n"
+    EMPTY_STR = b""
+    NETCONF_EOM = b"]]>]]>"
+    STARTS_WITH = b"<!--"
 
 
 __all__ = ["xmlmode_netconf"]
 
-_NETCONF_EOM = six.b("]]>]]>")
-_xmlns = re.compile(six.b("xmlns=[^>]+"))
+_NETCONF_EOM = b"]]>]]>"
+_xmlns = re.compile(b"xmlns=[^>]+")
 _xmlns_strip = lambda text: _xmlns.sub(PY6.EMPTY_STR, text)
-_junosns = re.compile(six.b("junos:"))
+_junosns = re.compile(b"junos:")
 _junosns_strip = lambda text: _junosns.sub(PY6.EMPTY_STR, text)
 
 logger = logging.getLogger("jnpr.junos.tty_netconf")
@@ -116,7 +115,7 @@ class tty_netconf(object):
         """
         if not cmd.startswith("<"):
             cmd = "<{}/>".format(cmd)
-        rpc = six.b("<rpc>{}</rpc>".format(cmd))
+        rpc = "<rpc>{}</rpc>".format(cmd).encode('utf-8')
         logger.info("Calling rpc: %s" % rpc)
         self._tty.rawwrite(rpc)
 

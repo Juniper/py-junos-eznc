@@ -1,5 +1,5 @@
 import sys
-from six import StringIO
+from io import StringIO
 from contextlib import contextmanager
 
 import unittest
