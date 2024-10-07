@@ -5,7 +5,7 @@ LABEL net.juniper.description="Junos PyEZ library for Python in a lightweight co
 
 WORKDIR /source
 
-## Copy project inside the container
+## Copy project inside the containers
 ADD setup.* ./
 ADD versioneer.py .
 ADD requirements.txt .
