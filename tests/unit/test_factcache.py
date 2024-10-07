@@ -32,11 +32,13 @@ class TestFactCache(unittest.TestCase):
         # Change the callback for the model
         # fact to be the same as the personality fact
         # in order to induce a fact loop.
+        tmp = self.dev.facts._callbacks["model"]
         self.dev.facts._callbacks["model"] = self.dev.facts._callbacks["personality"]
         # Now, trying to fetch the personality
         # fact should cause a FactLoopError
         with self.assertRaises(FactLoopError):
             personality = self.dev.facts["personality"]
+        self.dev.facts._callbacks["model"] = tmp # To clear FactLoopError
 
     def test_factcache_return_unexpected_fact(self):
         # Create a callback for the foo fact.
