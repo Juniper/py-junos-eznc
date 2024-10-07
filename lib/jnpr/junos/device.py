@@ -1216,6 +1216,10 @@ class Device(_Connection):
             *OPTIONAL* To disable public key authentication.
             default is ``None``.
 
+        :param bool hostkey_verify:
+            *OPTIONAL* To enable ssh_known hostkey verify
+            default is ``False``.
+
         """
 
         # ----------------------------------------
@@ -1234,6 +1238,7 @@ class Device(_Connection):
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         self._look_for_keys = kvargs.get("look_for_keys", None)
+        self._hostkey_verify = kvargs.get("hostkey_verify", False)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
@@ -1367,6 +1372,14 @@ class Device(_Connection):
             else:
                 look_for_keys = self._look_for_keys
 
+            # option to enable ssh_known hosts key verification
+            # using hostkey_verify=True
+            # Default is disabled with hostkey_verify=False
+            if self._hostkey_verify is None:
+                hostkey_verify = False
+            else:
+                hostkey_verify = self._hostkey_verify
+
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
@@ -1374,7 +1387,7 @@ class Device(_Connection):
                 sock_fd=self._sock_fd,
                 username=self._auth_user,
                 password=self._auth_password,
-                hostkey_verify=False,
+                hostkey_verify=hostkey_verify,
                 key_filename=self._ssh_private_key_file,
                 allow_agent=allow_agent,
                 look_for_keys=look_for_keys,
