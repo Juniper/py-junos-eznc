@@ -214,7 +214,7 @@ class Test_RpcMetaExec(unittest.TestCase):
         except JSONLoadError as ex:
             self.assertTrue(
                 re.search(
-                    "Expecting '?,'? delimiter: line 17 column 39 \(char 516\)",
+                    r"Expecting '?,'? delimiter: line 17 column 39 \(char 516\)",
                     ex.ex_msg,
                 )
                 is not None
