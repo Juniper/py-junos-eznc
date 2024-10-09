@@ -1,0 +1,11 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/16.1R1/junos">
+<rpc-error>
+<error-type>protocol</error-type>
+<error-tag>operation-failed</error-tag>
+<error-severity>error</error-severity>
+<error-message>permission denied</error-message>
+<error-info>
+<bad-element>system</bad-element>
+</error-info>
+</rpc-error>
+</rpc-reply>

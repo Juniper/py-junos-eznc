@@ -31,7 +31,6 @@ NOTE: The dictionary key for each available fact is guaranteed to exist. If
 The following dictionary keys represent the available facts and their meaning:
 
 """
-
 import sys
 
 import jnpr.junos.facts.current_re
@@ -48,6 +47,7 @@ import jnpr.junos.facts.iri_mapping
 import jnpr.junos.facts.personality
 import jnpr.junos.facts.swver
 import jnpr.junos.facts.is_linux
+import jnpr.junos.facts.vmhost
 
 
 def _build_fact_callbacks_and_doc_strings():
