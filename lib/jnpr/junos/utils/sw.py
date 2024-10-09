@@ -984,11 +984,17 @@ class SW(Util):
                     kwargs.update({"no_validate": True})
 
             if issu is True:
+                if validate is False:  # To Check validation is False
+                    # Need to pass the no_validate option via kwargs
+                    kwargs.update({"no_validate": True})
                 _progress("ISSU: installing software ... please be patient ...")
                 return self.pkgaddISSU(
                     remote_package, vmhost=vmhost, dev_timeout=timeout, **kwargs
                 )
             elif nssu is True:
+                if validate is False:
+                    # Need to pass the no_validate option via kwargs
+                    kwargs.update({"no_validate": True})
                 _progress("NSSU: installing software ... please be patient ...")
                 return self.pkgaddNSSU(remote_package, dev_timeout=timeout, **kwargs)
             elif member_id is not None:
