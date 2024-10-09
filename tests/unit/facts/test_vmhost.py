@@ -12,7 +12,6 @@ from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 
 
-@attr("unit")
 class TestVmHost(unittest.TestCase):
     @patch("ncclient.manager.connect")
     def setUp(self, mock_connect):
