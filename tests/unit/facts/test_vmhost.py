@@ -1,7 +1,10 @@
 __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
-import unittest
+try:
+    import unittest2 as unittest
+except:
+    import unittest
 import nose2
 from unittest.mock import patch, MagicMock
 import os
