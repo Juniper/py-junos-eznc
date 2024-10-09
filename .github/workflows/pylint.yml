@@ -13,11 +13,11 @@ jobs:
     
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest, windows-2022 ]
         python-version: [ 3.9, '3.10', 3.11, 3.12 ]
         exclude:
           - os: windows-latest
-            python-version: [3.9, 3.10]
+            python-version: 3.9
 
     steps:
       - uses: actions/checkout@v2
