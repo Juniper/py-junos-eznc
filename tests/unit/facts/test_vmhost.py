@@ -2,8 +2,8 @@ __author__ = "Stacy Smith"
 __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import unittest
-from nose.plugins.attrib import attr
-from mock import patch, MagicMock
+import nose2
+from unittest.mock import patch, MagicMock
 import os
 
 from jnpr.junos import Device
