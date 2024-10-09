@@ -984,7 +984,7 @@ class SW(Util):
                     kwargs.update({"no_validate": True})
 
             if issu is True:
-                if validate is False: # To Check validation is False
+                if validate is False:  # To Check validation is False
                     # Need to pass the no_validate option via kwargs
                     kwargs.update({"no_validate": True})
                 _progress("ISSU: installing software ... please be patient ...")
