@@ -48,6 +48,7 @@ import jnpr.junos.facts.iri_mapping
 import jnpr.junos.facts.personality
 import jnpr.junos.facts.swver
 import jnpr.junos.facts.is_linux
+import jnpr.junos.facts.vmhost
 
 
 def _build_fact_callbacks_and_doc_strings():
