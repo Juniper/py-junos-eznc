@@ -35,10 +35,10 @@ class TestVmHost(unittest.TestCase):
         self.assertEqual(self.dev.facts["vmhost"], False)
 
     @patch("jnpr.junos.Device.execute")
-    def test_vmhost_none(self, mock_execute):
+    def test_vmhost_linux(self, mock_execute):
         mock_execute.side_effect = self._mock_manager_vmhost_false
         self.dev.facts._cache["_is_linux"] = True
-        self.assertEqual(self.dev.facts["vmhost"], None)
+        self.assertEqual(self.dev.facts["vmhost"], False)
 
     @patch("jnpr.junos.Device.execute")
     def test_vmhost_error(self, mock_execute):
