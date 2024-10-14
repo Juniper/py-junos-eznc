@@ -21,7 +21,7 @@ def get_facts(device):
     vmhost = None
 
     if device.facts["_is_linux"]:
-        vmhost = False 
+        vmhost = False
     else:
         try:
             rsp = device.rpc.request_shell_execute(command=SYSCTL_VMHOST_MODE)
