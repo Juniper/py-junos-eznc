@@ -50,6 +50,7 @@ import jnpr.junos.facts.swver
 import jnpr.junos.facts.is_linux
 import jnpr.junos.facts.vmhost
 
+
 def _build_fact_callbacks_and_doc_strings():
     """
     Imports the fact modules and returns callbacks and doc_strings.
