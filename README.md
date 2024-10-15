@@ -33,10 +33,6 @@ There is a growing interest and need to automate the network infrastructure into
 
 # SUPPORT
 
-For questions and general support, please visit our [Google Group](https://groups.google.com/forum/#!forum/junos-python-ez)
-
-You can also post your query on stackoverflow with __pyez__ [tag](http://stackoverflow.com/questions/tagged/pyez)
-
 For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](http://www.juniper.net/techpubs/en_US/release-independent/junos-pyez/information-products/pathway-pages/index.html).
 
 Issues and bugs can be opened in the repository.
