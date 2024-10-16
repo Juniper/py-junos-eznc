@@ -870,8 +870,8 @@ class _Connection(object):
             ver_info = self.facts.get("version_info")
             if (
                 ver_info
-                and ver_info.major[0] >= 15
-                or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
+                and (ver_info.major[0] >= 15
+                or (ver_info.major[0] == 14 and ver_info.major[1] >= 2))
             ):
                 try:
                     return json.loads(rpc_rsp_e.text, strict=False)
