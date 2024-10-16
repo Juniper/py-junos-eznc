@@ -870,9 +870,8 @@ class _Connection(object):
             "JSON",
         ]:
             ver_info = self.facts.get("version_info")
-            if (
-                ver_info
-                and ver_info.major[0] >= 15
+            if ver_info and (
+                ver_info.major[0] >= 15
                 or (ver_info.major[0] == 14 and ver_info.major[1] >= 2)
             ):
                 try:
