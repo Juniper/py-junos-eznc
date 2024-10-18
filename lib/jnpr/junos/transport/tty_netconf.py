@@ -68,7 +68,9 @@ class tty_netconf(object):
             raise RuntimeError("Error: netconf not responding")
 
         self.hello = self._receive()
-        self._session_id, _ = HelloHandler.parse(self.hello.decode("utf-8"))
+        self._session_id, _ = HelloHandler.parse(
+            self.hello.decode("utf-8") if isinstance(self.hello, bytes) else self.hello
+        )
 
     def close(self, force=False):
         """issue the XML API to close the session"""
