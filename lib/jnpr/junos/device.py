@@ -1217,6 +1217,10 @@ class Device(_Connection):
             *OPTIONAL* To disable public key authentication.
             default is ``None``.
 
+        :param str bind_addr:
+            *OPTIONAL* To use (local) source IP address.
+            default is ``None``.
+
         :param bool hostkey_verify:
             *OPTIONAL* To enable ssh_known hostkey verify
             default is ``False``.
