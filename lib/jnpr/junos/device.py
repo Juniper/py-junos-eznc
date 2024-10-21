@@ -1239,6 +1239,7 @@ class Device(_Connection):
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         self._look_for_keys = kvargs.get("look_for_keys", None)
+        self._bind_addr = kvargs.get("bind_addr", None)
         self._hostkey_verify = kvargs.get("hostkey_verify", False)
         if self._fact_style != "new":
             warnings.warn(
@@ -1393,6 +1394,7 @@ class Device(_Connection):
                 allow_agent=allow_agent,
                 look_for_keys=look_for_keys,
                 ssh_config=self._sshconf_lkup(),
+                bind_addr=self._bind_addr,
                 timeout=self._conn_open_timeout,
                 device_params={
                     "name": "junos",
