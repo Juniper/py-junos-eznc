@@ -6,4 +6,4 @@ pep8	     # https://github.com/jcrocholl/pep8
 pyflakes	 # https://launchpad.net/pyflakes
 coveralls	 # https://coveralls.io/
 ntc_templates # user needs to explicitly install this
-cryptography==3.2
+cryptography
