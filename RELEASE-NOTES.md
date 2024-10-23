@@ -1,4 +1,9 @@
-## Release 2.7.2 - 23 Oct 2024
+## Release 2.7.3.dev0 - 23 OCT 2024
+## Features Added
+
+## Bugs Fixed
+
+## Release 2.7.2 - 23 OCT 2024
 ## Features Added
 - Introduced bind_addr parameter in Device() API #1279
 - Introduced vmhost paramater in dev.facts #1333
