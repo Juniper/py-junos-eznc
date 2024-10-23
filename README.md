@@ -154,7 +154,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
-
+* v2.7.2: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
 * v2.7.1: [Dinesh Babu](https://github.com/dineshbaburam91)
 * v2.6.4: [Chidanand Pujar](https://github.com/chidanandpujar)
 * v2.6.3: [Rahul Kumar](https://github.com/rahkumar651991)
