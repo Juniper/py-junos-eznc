@@ -18,8 +18,11 @@ function pip_install {
 }
 
 function run_scripts {
-    echo "Executing defined script"
-    python3 $1 ${@:2}
+    if [ "$1" = "python3" ] || [ "$1" = "python" ]; then python3
+    else
+      echo "Executing defined script"
+      $1 ${@:2}
+    fi
 }
 
 ## Manually defined variables will take precedence
