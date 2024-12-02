@@ -243,10 +243,34 @@ class TestSW(unittest.TestCase):
         self.assertTrue(self.sw.install(package, issu=True, no_copy=True))
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_install_issu_validate_False(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = "test.tgz"
+        self.assertTrue(self.sw.install(package, issu=True, no_copy=True, validate=False))
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_install_issu_validate_True(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = "test.tgz"
+        self.assertTrue(self.sw.install(package, issu=True, no_copy=True, validate=True))
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_install_nssu(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
         self.assertTrue(self.sw.install(package, nssu=True, no_copy=True))
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_install_nssu_validate_False(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = "test.tgz"
+        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True, validate=False))
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_install_nssu_validate_True(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        package = "test.tgz"
+        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True, validate=True))
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu_nssu_both_error(self, mock_execute):

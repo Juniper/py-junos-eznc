@@ -1,5 +1,5 @@
 [![PyPi Version](https://img.shields.io/pypi/v/junos-eznc.svg)](https://pypi.python.org/pypi/junos-eznc/)
-[![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=stable)](http://junos-pyez.readthedocs.io)
+[![Documentation Status](https://readthedocs.org/projects/junos-pyez/badge/?version=stable)](https://junos-pyez.readthedocs.io/en/latest/)
 [![Coverage Status](https://img.shields.io/coveralls/Juniper/py-junos-eznc.svg)](https://coveralls.io/r/Juniper/py-junos-eznc)
 [![UnitTest Status](https://travis-ci.org/Juniper/py-junos-eznc.svg?branch=master)](https://travis-ci.org/Juniper/py-junos-eznc)
 [![](https://images.microbadger.com/badges/image/juniper/pyez.svg)](https://microbadger.com/images/juniper/pyez)
@@ -29,15 +29,11 @@ This means that "non-programmers", for example the _Network Engineer_, can use t
 
 ## For "Programmers" - Open and Extensible
 
-There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos PyEZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos PyEZ_ is not specifically tied to any version of Junos or any Junos product family.
+There is a growing interest and need to automate the network infrastructure into larger IT systems.  To do so, traditional software programmers, DevOps, "hackers", etc. need an abstraction library of code to further those activities.  _Junos PyEZ_ is designed for extensibility so that the programmer can quickly and easily add new widgets to the library in support of their specific project requirements.  There is no need to "wait on the vendor" to provide new functionality.   _Junos PyEZ_ is not specifically tied to any version of Junos (or Junos Evolved) or any Junos (or Junos Evolved) product family.
 
 # SUPPORT
 
-For questions and general support, please visit our [Google Group](https://groups.google.com/forum/#!forum/junos-python-ez)
-
-You can also post your query on stackoverflow with __pyez__ [tag](http://stackoverflow.com/questions/tagged/pyez)
-
-For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](http://forums.juniper.net/t5/Automation/Where-can-I-learn-more-about-Junos-PyEZ/ta-p/280496).
+For documentation and more usage examples, please visit the _Junos PyEZ_ project page, [here](http://www.juniper.net/techpubs/en_US/release-independent/junos-pyez/information-products/pathway-pages/index.html).
 
 Issues and bugs can be opened in the repository.
 
@@ -54,7 +50,7 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 
 # NOTICES
 
-- As of release 2.0.0, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.5.2 or later.
+- As of release 2.7.1, _Junos PyEZ_ requires [ncclient](https://pypi.python.org/pypi/ncclient) version 0.6.15 or later.
 - When using the `ssh_private_key_file` argument of the Device constructor on MacOS Mojave and higher, ensure that the SSH keys are in the RSA format, and not the newer OPENSSH format.
   - New key: `ssh-keygen -p -m PEM -f ~/.ssh/id_rsa`
   - Convert an existing OPENSSH key: ``ssh-keygen -p -m PEM -f ~/.ssh/private_key`
@@ -88,11 +84,16 @@ Move to the local directory which contains your script(s) and run the container.
 
 Your local scripts will be mounted to /scripts in the container.
 
+As per PEP 668, use Virtual Env in the container (after you enter the container). The docker container has virtual environment installed in the /scripts folder.
+
+Use `source .venv/bin/activate` to activate the virtual environment.
+
+
 ### Microservice Usage
 
 This image can also be used as a Python "executable" with the required Python PyEZ libraries pre-installed. To use the image in this way, mount the volume which contains the Python script and pass the script name as an argument to `docker run`. Optionally, you may also pass in a `requirements.txt` file to install additional python packages via `pip`. To add OS packages (Alpine Linux), provide a file with a list of packages --one per line-- and either reference it as an env var (`$APK`) or mount it to the container `/extras/apk.txt`. To add additional Python packages (via pip), provide a `requirements.txt` file and pass it in as an env var (`$REQ`) or mount it to the container at `/extras/requirements.txt`.
 
-`Usage: `docker run -it [ --rm ] -v some/dir:/scripts juniper/pyez [ myscript.py ]`
+Usage: `docker run -it [ --rm ] -v some/dir:/scripts juniper/pyez [ myscript.py ]`
 
 Example:
 
@@ -153,8 +154,11 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
-[Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
-
+* v2.7.2: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
+* v2.7.1: [Dinesh Babu](https://github.com/dineshbaburam91)
+* v2.6.4: [Chidanand Pujar](https://github.com/chidanandpujar)
+* v2.6.3: [Rahul Kumar](https://github.com/rahkumar651991)
+* v2.5.0: [Rahul Kumar](https://github.com/rahkumar651991)
 * v2.4.1: [Nitin Kumar](https://github.com/vnitinv)
 * v2.4.0: [Nitin Kumar](https://github.com/vnitinv)
 * v2.3.0: [Nitin Kumar](https://github.com/vnitinv), [Raja Shekar Mekala](https://github.com/rsmekala), [Dinesh Babu](https://github.com/dineshbaburam91), [Chris Jenn](https://github.com/ipmonk), [Shigechika](https://github.com/shigechika)
@@ -167,4 +171,4 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Former Contributors:*
 
-[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog), [Edward Arcuri](https://github.com/sdndude)
+[Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog), [Edward Arcuri](https://github.com/sdndude), [Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)

@@ -114,6 +114,7 @@ class Console(_Connection):
         self._attempts = kvargs.get("attempts", 10)
         self._gather_facts = kvargs.get("gather_facts", False)
         self._fact_style = kvargs.get("fact_style", "new")
+        self._use_filter = False
         self._huge_tree = kvargs.get("huge_tree", False)
         if self._fact_style != "new":
             warnings.warn(

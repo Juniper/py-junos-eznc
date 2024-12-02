@@ -1,11 +1,11 @@
-FROM alpine:3.12
+FROM python:3.12-alpine
 
 LABEL net.juniper.description="Junos PyEZ library for Python in a lightweight container." \
-      net.juniper.maintainer="Stephen Steiner <ssteiner@juniper.net>"
+      net.juniper.maintainer="jnpr-community-netdev@juniper.net"
 
 WORKDIR /source
 
-## Copy project inside the container
+## Copy project inside the containers
 ADD setup.* ./
 ADD versioneer.py .
 ADD requirements.txt .
@@ -13,14 +13,17 @@ ADD lib lib
 ADD entrypoint.sh /usr/local/bin/.
 
 ## Install dependancies and PyEZ
-RUN apk add --no-cache build-base python3-dev py-lxml \
+RUN apk add --no-cache build-base python3-dev \
     libxslt-dev libxml2-dev libffi-dev openssl-dev curl \
-    ca-certificates py3-pip bash \
-    && pip install -U pip \
-    && pip install -r requirements.txt \
-    && apk del -r --purge gcc make g++ \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && pip install . \
+    ca-certificates py3-pip bash
+
+RUN pip install --upgrade pip \
+    && pip install pipdeptree \
+    && python3 -m pip install -r requirements.txt \
+    && pip install .
+
+## Clean up and start init
+RUN apk del -r --purge gcc make g++ \
     && rm -rf /source/* \
     && chmod +x /usr/local/bin/entrypoint.sh
 

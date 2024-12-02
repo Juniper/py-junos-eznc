@@ -3,6 +3,7 @@ EthernetSwitchingTable:
     rpc: get-ethernet-switching-table-information
     args:
         detail: True
+    key: mac-table-count
     item: ethernet-switching-table
     view: EthernetSwitchingView
 
