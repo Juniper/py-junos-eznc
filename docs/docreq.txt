@@ -1,5 +1,5 @@
+git+https://github.com/ryan-roemer/sphinx-bootstrap-theme.git#egg=sphinx-bootstrap-theme
 lxml>=3.2.4
-# ncclient version 0.6.10 and 0.6.16 has issues with PyEZ(junos-eznc) and needs to be avoided
 ncclient==0.6.15
 scp>=0.7.0
 jinja2>=2.7.1

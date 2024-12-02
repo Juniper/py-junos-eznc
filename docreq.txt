@@ -1,1 +1,0 @@
-git+https://github.com/ryan-roemer/sphinx-bootstrap-theme.git#egg=sphinx-bootstrap-theme

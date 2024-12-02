@@ -1,7 +1,28 @@
-## Release 2.7.2 - 12 APR 2024
+## Release 2.7.3.dev0 - 23 OCT 2024
 ## Features Added
 
 ## Bugs Fixed
+
+## Release 2.7.2 - 23 OCT 2024
+## Features Added
+- Introduced bind_addr parameter in Device() API #1279
+- Introduced vmhost paramater in dev.facts #1333
+- Introduced hostkey_verify paramater in Device() API #1321
+- Updated Docker file to use the latest Alpine #1316
+
+## Bugs Fixed
+
+- Fixed the missing key to EthernetSwitchingTable #1228
+- Fixed error handling on HelloHandler #1339
+- Fixed the version check #1338
+- Removed Google and Stackflow link from the ReadME #1337
+- Fixed SystemStorageTable tables and views to handles multiple routing-engine file system storage information.#1244
+- Fixed Console' object has no attribute '_use_filter' error when executed Table/View script #1335
+- Fixed cli function to get full RPC response #1315
+- Fixed sw.install to set no_validate option when validate=False for NSSU and ISSU upgrade #1323
+- Fixed UT framework mock to use built-in unittest.mock #1311
+- Fixed specific VC member reboot handling #1308 #1310
+- Supported latest paramiko version which supports aes128-gcm and aes256-gcm cipher
 
 ## Release 2.7.1 - 12 APR 2024
 ## Features Added

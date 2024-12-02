@@ -40,15 +40,15 @@ class TestConsole(unittest.TestCase):
     def setUp(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search(r"(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
             (
                 2,
-                re.search("(?P<passwd>assword:\s*$)", "password: "),
+                re.search(r"(?P<passwd>assword:\s*$)", "password: "),
                 six.b("\r\r\n password:"),
             ),
             (
                 3,
-                re.search("(?P<shell>%|#\s*$)", "junos % "),
+                re.search(r"(?P<shell>%|#\s*$)", "junos % "),
                 six.b("\r\r\nroot@device:~ # "),
             ),
         ]
@@ -87,10 +87,10 @@ class TestConsole(unittest.TestCase):
     def test_login_bad_password(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search(r"(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
             (
                 2,
-                re.search("(?P<passwd>assword:\s*$)", "password: "),
+                re.search(r"(?P<passwd>assword:\s*$)", "password: "),
                 six.b("\r\r\n password:"),
             ),
             (
@@ -110,15 +110,15 @@ class TestConsole(unittest.TestCase):
         tty_netconf.open = MagicMock()
 
         mock_expect.side_effect = [
-            (1, re.search("(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
+            (1, re.search(r"(?P<login>ogin:\s*$)", "login: "), six.b("\r\r\n ogin:")),
             (
                 2,
-                re.search("(?P<passwd>assword:\s*$)", "password: "),
+                re.search(r"(?P<passwd>assword:\s*$)", "password: "),
                 six.b("\r\r\n password:"),
             ),
             (
                 3,
-                re.search("(?P<shell>%|#\s*$)", "junos % "),
+                re.search(r"(?P<shell>%|#\s*$)", "junos % "),
                 six.b("\r\r\nroot@device:~ # "),
             ),
         ]
