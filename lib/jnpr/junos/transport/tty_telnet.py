@@ -1,5 +1,5 @@
 from time import sleep
-import telnetlib
+from netmiko._telnetlib import telnetlib
 import logging
 import sys
 import six
