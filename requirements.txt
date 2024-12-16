@@ -5,6 +5,8 @@ scp>=0.7.0
 jinja2>=2.7.1
 PyYAML>=5.1
 paramiko>=3.5.0
+# needed to support telnetlib (i.e. Netmiko vendored telnetlib internally)
+netmiko>=4.4.0
 six
 pyserial
 yamlordereddictloader

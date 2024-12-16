@@ -62,7 +62,7 @@ _Junos PyEZ_ is designed to provide the same capabilities as a user would have o
 
 ## PIP
 
-Installation requires Python >=3.8 and associated `pip` tool
+Installation requires Python >=3.9 and associated `pip` tool
 
     pip install junos-eznc
 
