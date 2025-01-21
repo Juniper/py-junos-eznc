@@ -52,6 +52,9 @@ _MODULEPATH = os.path.dirname(__file__)
 
 logger = logging.getLogger("jnpr.junos.device")
 
+# Setup paramiko logging
+logging.thread = None
+paramiko.util.log_to_file("paramiko.log")
 
 class _MyTemplateLoader(jinja2.BaseLoader):
     """
@@ -1422,12 +1425,14 @@ class Device(_Connection):
             ts_err = datetime.datetime.now()
             diff_ts = ts_err - ts_start
             if diff_ts.seconds < 3:
+                logger.exception(err)
                 raise EzErrors.ConnectRefusedError(self)
 
             # at this point, we assume that the connection
             # has timed out due to ip-reachability issues
 
             if str(err).find("not open") > 0:
+                logger.exception(err)
                 raise EzErrors.ConnectTimeoutError(self)
             else:
                 # otherwise raise a generic connection
@@ -1444,6 +1449,7 @@ class Device(_Connection):
         except Exception as err:
             # anything else, we will re-raise as a
             # generic ConnectError
+            logger.exception(err)
             cnx_err = EzErrors.ConnectError(self)
             cnx_err._orig = err
             raise cnx_err
