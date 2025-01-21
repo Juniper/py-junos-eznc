@@ -56,6 +56,7 @@ logger = logging.getLogger("jnpr.junos.device")
 logging.thread = None
 paramiko.util.log_to_file("paramiko.log")
 
+
 class _MyTemplateLoader(jinja2.BaseLoader):
     """
     Create a jinja2 template loader class that can be used to
