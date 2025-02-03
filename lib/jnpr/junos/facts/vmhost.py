@@ -2,6 +2,7 @@ from jnpr.junos.exception import RpcError
 import re
 from lxml import etree
 
+
 def _get_vmhost_version_information(device):
     multi_re = False
     try:
@@ -17,17 +18,18 @@ def _get_vmhost_version_information(device):
     if multi_re == True:
         try:
             return device.rpc.cli(
-                "show vmhost version invoke-on all-routing-engines", format="xml", normalize=True
+                "show vmhost version invoke-on all-routing-engines",
+                format="xml",
+                normalize=True
             )
         except RpcError as err:
             raise RpcError()
     else:
         try:
-            return device.rpc.cli(
-                "show vmhost version", format="xml", normalize=True
-            )
+            return device.rpc.cli("show vmhost version", format="xml", normalize=True)
         except RpcError as err:
             raise RpcError()
+
 
 def provides_facts():
     """
@@ -36,6 +38,7 @@ def provides_facts():
     """
     return {
         "vmhost": "A boolean indicating if the device is vmhost.",
+        "vmhost_info": "A dictionay indicating  vmhost RE partion JUNOS versions.",
     }
 
 
@@ -77,14 +80,18 @@ def get_facts(device):
             for re_vm_ver_info in vm_ver_rsp:
                 re_name = re_vm_ver_info.findtext("../re-name", "re0")
                 vmhost_current_root_set = re_vm_ver_info.findtext("./current-root-set")
-                vmhost_set_junos_version_set_p = re_vm_ver_info.findtext("./set-disk-info[set-disk-name = 'set p']/set-junos-version")
-                vmhost_set_junos_version_set_b = re_vm_ver_info.findtext("./set-disk-info[set-disk-name = 'set b']/set-junos-version")
+                vmhost_set_junos_version_set_p = re_vm_ver_info.findtext(
+                    "./set-disk-info[set-disk-name = 'set p']/set-junos-version"
+                )
+                vmhost_set_junos_version_set_b = re_vm_ver_info.findtext(
+                    "./set-disk-info[set-disk-name = 'set b']/set-junos-version"
+                )
 
                 vmhost_info[re_name] = {
                     "vmhost_current_root_set": vmhost_current_root_set,
-                    "vmhost_version_set_p" : vmhost_set_junos_version_set_p,
+                    "vmhost_version_set_p": vmhost_set_junos_version_set_p,
                     "vmhost_version_set_b": vmhost_set_junos_version_set_b,
-               }
+                }
 
     return {
         "vmhost": vmhost,
