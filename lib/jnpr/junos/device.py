@@ -53,8 +53,7 @@ _MODULEPATH = os.path.dirname(__file__)
 logger = logging.getLogger("jnpr.junos.device")
 
 # Setup paramiko logging
-logging.thread = None
-paramiko.util.log_to_file("paramiko.log")
+logging.basicConfig(level=logging.DEBUG)
 
 
 class _MyTemplateLoader(jinja2.BaseLoader):
