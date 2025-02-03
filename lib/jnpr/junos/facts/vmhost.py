@@ -38,7 +38,7 @@ def provides_facts():
     """
     return {
         "vmhost": "A boolean indicating if the device is vmhost.",
-        "vmhost_info": "A dictionay indicating  vmhost RE partion JUNOS versions.",
+        "vmhost_info": "A dictionary indicating  vmhost RE partition JUNOS versions.",
     }
 
 
