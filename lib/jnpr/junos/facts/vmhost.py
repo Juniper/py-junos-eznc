@@ -87,6 +87,7 @@ def get_facts(device):
                     "./set-disk-info[set-disk-name = 'set b']/set-junos-version"
                 )
 
+
                 vmhost_info[re_name] = {
                     "vmhost_current_root_set": vmhost_current_root_set,
                     "vmhost_version_set_p": vmhost_set_junos_version_set_p,
