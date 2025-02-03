@@ -20,7 +20,7 @@ def _get_vmhost_version_information(device):
             return device.rpc.cli(
                 "show vmhost version invoke-on all-routing-engines",
                 format="xml",
-                normalize=True
+                normalize=True,
             )
         except RpcError as err:
             raise RpcError()
@@ -86,7 +86,6 @@ def get_facts(device):
                 vmhost_set_junos_version_set_b = re_vm_ver_info.findtext(
                     "./set-disk-info[set-disk-name = 'set b']/set-junos-version"
                 )
-
 
                 vmhost_info[re_name] = {
                     "vmhost_current_root_set": vmhost_current_root_set,
