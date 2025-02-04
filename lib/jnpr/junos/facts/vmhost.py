@@ -66,7 +66,7 @@ def get_facts(device):
         except RpcError:
             pass
 
-    if vmhost == True:
+    if vmhost:
         rsp = _get_vmhost_version_information(device)
         if rsp.tag == "output":
             pass
