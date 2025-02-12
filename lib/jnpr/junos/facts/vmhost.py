@@ -13,7 +13,7 @@ def _get_vmhost_version_information(device):
         else:
             multi_re = False
     except RpcError as err:
-        pass
+        raise RpcError()
 
     if multi_re == True:
         try:
