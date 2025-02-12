@@ -1215,7 +1215,9 @@ class SW(Util):
             * reboot message (string) if command successful
         """
 
-        if self._multi_VC_nsync is True or self._multi_VC is True:
+        if (
+            self._multi_VC_nsync is True or self._multi_VC is True
+        ) and member_id is not None:
             vc_members = [
                 re.search(r"(\d+)", x).group(1)
                 for x in self._RE_list

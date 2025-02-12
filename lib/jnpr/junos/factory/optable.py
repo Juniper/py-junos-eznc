@@ -70,6 +70,7 @@ class OpTable(Table):
                 logger.debug("Not able to create SAX parser input due to " "'%s'" % ex)
             self.D.transform = lambda: remove_namespaces_and_spaces
 
+        self.D.transform = lambda: remove_namespaces_and_spaces
         rpc_args.update(self.GET_ARGS)  # copy default args
         # saltstack get_table pass args as named keyword
         if "args" in kvargs and isinstance(kvargs["args"], dict):
