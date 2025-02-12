@@ -50,6 +50,10 @@ def get_facts(device):
     vmhost = None
     vmhost_info = {}
     vm_ver_rsp = None
+    vmhost_current_root_set = None
+    vmhost_set_junos_version_set_p = None
+    vmhost_set_junos_version_set_b = None
+    re_name = None
 
     if device.facts["_is_linux"]:
         vmhost = False
@@ -68,14 +72,11 @@ def get_facts(device):
 
     if vmhost:
         rsp = _get_vmhost_version_information(device)
-        if rsp.tag == "output":
-            pass
-        else:
+        if device.facts["version"] >= "22.2R3":  # PR 1510446 for show vmhost version rpc supports form 22.2R3
             if rsp.tag == "vmhost-version-information":
                 vm_ver_rsp = [rsp]
             else:
                 vm_ver_rsp = rsp.findall(".//vmhost-version-information")
-            vmhost_info = {}
 
             for re_vm_ver_info in vm_ver_rsp:
                 re_name = re_vm_ver_info.findtext("../re-name", "re0")
@@ -92,6 +93,8 @@ def get_facts(device):
                     "vmhost_version_set_p": vmhost_set_junos_version_set_p,
                     "vmhost_version_set_b": vmhost_set_junos_version_set_b,
                 }
+        else:
+            pass
 
     return {
         "vmhost": vmhost,
