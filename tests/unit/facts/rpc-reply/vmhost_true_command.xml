@@ -1,0 +1,35 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/24.2R2.1/junos">
+    <vmhost-version-information>
+        <current-root>
+            <current-root-device>sda</current-root-device>
+            <current-root-label>jrootb_P</current-root-label>
+            <current-root-partition>sda4</current-root-partition>
+        </current-root>
+        <current-boot-disk>Primary</current-boot-disk>
+        <current-root-set>b</current-root-set>
+        <uefi-version>CBEP_P_VAL1_00.18.02</uefi-version>
+        <primary-disk-upgrade-time>Tue Jan 21 21:05:21 PST 2025
+        </primary-disk-upgrade-time>
+        <set-disk-info>
+            <set-disk-name>set p</set-disk-name>
+            <set-vmhost-version>7.2725</set-vmhost-version>
+            <set-vmhost-root>vmhost-x86_64-22.4R3-S2-20240326_1606_builder</set-vmhost-root>
+            <set-vmhost-core>vmhost-core-x86-64-22.4R3-S3.3</set-vmhost-core>
+            <set-vmhost-kernel-version>5.2.60-rt15-LTS19</set-vmhost-kernel-version>
+            <set-junos-version>junos-install-mx-x86-64-22.4R3-S3.3</set-junos-version>
+            <set-vmhost-diag-version></set-vmhost-diag-version>
+        </set-disk-info>
+        <set-disk-info>
+            <set-disk-name>set b</set-disk-name>
+            <set-vmhost-version>10.3103</set-vmhost-version>
+            <set-vmhost-root>vmhost-x86_64-24.2R2-20241112_0808_builder</set-vmhost-root>
+            <set-vmhost-core>vmhost-core-x86-64-24.2R2.1</set-vmhost-core>
+            <set-vmhost-kernel-version>5.15.136-rt61-LTS22</set-vmhost-kernel-version>
+            <set-junos-version>junos-install-mx-x86-64-24.2R2.1</set-junos-version>
+            <set-vmhost-diag-version></set-vmhost-diag-version>
+        </set-disk-info>
+    </vmhost-version-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
