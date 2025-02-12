@@ -1,0 +1,42 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/19.3R0/junos">
+    <route-engine-information xmlns="http://xml.juniper.net/junos/19.3R0/junos-chassis">
+        <route-engine>
+            <status>OK</status>
+            <temperature junos:celsius="43">43 degrees C / 109 degrees F</temperature>
+            <cpu-temperature junos:celsius="43">43 degrees C / 109 degrees F</cpu-temperature>
+            <memory-dram-size>16337 MB</memory-dram-size>
+            <memory-installed-size>(16384 MB installed)</memory-installed-size>
+            <memory-buffer-utilization>5</memory-buffer-utilization>
+            <cpu-user>0</cpu-user>
+            <cpu-background>0</cpu-background>
+            <cpu-system>0</cpu-system>
+            <cpu-interrupt>0</cpu-interrupt>
+            <cpu-idle>99</cpu-idle>
+            <cpu-user1>1</cpu-user1>
+            <cpu-background1>0</cpu-background1>
+            <cpu-system1>0</cpu-system1>
+            <cpu-interrupt1>0</cpu-interrupt1>
+            <cpu-idle1>99</cpu-idle1>
+            <cpu-user2>0</cpu-user2>
+            <cpu-background2>0</cpu-background2>
+            <cpu-system2>0</cpu-system2>
+            <cpu-interrupt2>0</cpu-interrupt2>
+            <cpu-idle2>99</cpu-idle2>
+            <cpu-user3>0</cpu-user3>
+            <cpu-background3>0</cpu-background3>
+            <cpu-system3>0</cpu-system3>
+            <cpu-interrupt3>0</cpu-interrupt3>
+            <cpu-idle3>99</cpu-idle3>
+            <model>RE-S-1600x8</model>
+            <start-time junos:seconds="1738724429">2025-02-05 08:30:29 IST</start-time>
+            <up-time junos:seconds="101832">1 day, 4 hours, 17 minutes, 12 seconds</up-time>
+            <last-reboot-reason>0x4000:VJUNOS reboot</last-reboot-reason>
+            <load-average-one>0.39</load-average-one>
+            <load-average-five>0.29</load-average-five>
+            <load-average-fifteen>0.25</load-average-fifteen>
+        </route-engine>
+    </route-engine-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

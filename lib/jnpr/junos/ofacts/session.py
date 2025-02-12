@@ -1,5 +1,5 @@
 """
-  facts['HOME'] = login home directory
+facts['HOME'] = login home directory
 """
 
 from lxml.builder import E
