@@ -72,7 +72,8 @@ def get_facts(device):
 
     if vmhost:
         rsp = _get_vmhost_version_information(device)
-        if device.facts["version"] >= "22.2R3":  # PR 1510446 for show vmhost version rpc supports form 22.2R3
+        # PR 1510446 fix for show vmhost version rpc supports form 22.2R3
+        if device.facts["version"] >= "22.2R3":
             if rsp.tag == "vmhost-version-information":
                 vm_ver_rsp = [rsp]
             else:
