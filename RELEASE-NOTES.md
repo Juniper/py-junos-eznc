@@ -1,7 +1,10 @@
-## Release 2.7.3.dev0 - 23 OCT 2024
+## Release 2.7.3 - 14 Feb 2025
 ## Features Added
+- Introduced vmhost paramater for show vmhost version in dev.facts #1355
 
 ## Bugs Fixed
+- Fixed napalm get_interfaces returns empty list #1354
+- Fixed sw.reboot to handle when member_id is not set #1351
 
 ## Release 2.7.2 - 23 OCT 2024
 ## Features Added
