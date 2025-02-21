@@ -29,6 +29,7 @@ class TestTTY(unittest.TestCase):
         self.terminal.read_prompt = MagicMock()
         self.terminal.read_prompt.return_value = (None, "badpasswd")
         self.terminal.write = MagicMock()
+        self.terminal._tty_close = MagicMock()
         self.assertRaises(EzErrors.ConnectAuthError, self.terminal._login_state_machine)
 
     @patch("jnpr.junos.transport.tty.sleep")
