@@ -1,4 +1,4 @@
-  ---
+---
 SystemStorageTable:
   rpc: get-system-storage
   key: re-name | Null

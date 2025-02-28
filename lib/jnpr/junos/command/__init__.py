@@ -11,7 +11,7 @@ __all__ = []
 
 
 class MetaPathFinder(MetaPathFinder):
-    def find_module(self, fullname, path=None):
+    def find_spec(self, fullname, path=None, target=None):
         mod = fullname.split(".")[-1]
         if mod in [
             os.path.splitext(i)[0] for i in os.listdir(os.path.dirname(__file__))
