@@ -1,3 +1,7 @@
+## Release 2.7.4.dev0 - 28 Feb 2025
+## Features Added
+## Bugs Fixed
+
 ## Release 2.7.3 - 14 Feb 2025
 ## Features Added
 - Introduced vmhost paramater for show vmhost version in dev.facts #1355
