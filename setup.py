@@ -14,6 +14,7 @@ setup(
     author="Jeremy Schulman, Nitin Kumar, Rick Sherman, Stacy Smith",
     author_email="jnpr-community-netdev@juniper.net",
     description=("Junos 'EZ' automation for non-programmers"),
+    license_files=["LICENSE"],
     license="Apache 2.0",
     keywords="Junos NETCONF networking automation",
     url="http://www.github.com/Juniper/py-junos-eznc",

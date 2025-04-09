@@ -212,6 +212,7 @@ class Terminal(object):
             self._badpasswd += 1
             self._password_entered = False
             if self._badpasswd == 2:
+                self._tty_close()
                 # raise RuntimeError("Bad username/password")
                 raise EzErrors.ConnectAuthError(self, "Bad username/password")
             # return through and try again ... could have been
