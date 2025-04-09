@@ -1229,7 +1229,7 @@ class SW(Util):
 
         if self._dev.facts["_is_linux"]:
             if on_node is None:
-                cmd = E("request-shutdown-reboot")
+                cmd = E("request-system-reboot")
             else:
                 cmd = E("request-node-reboot")
                 cmd.append(E("node", on_node))
