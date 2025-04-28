@@ -1059,9 +1059,7 @@ class SW(Util):
                 else:
                     # For Dual RE device re0/re1 is not required
                     if self._dev.facts["_is_linux"]:
-                        _progress(
-                            "installing software ... please be patient ..."
-                        )
+                        _progress("installing software ... please be patient ...")
                         ok = self.pkgadd(
                             remote_package, vmhost=vmhost, dev_timeout=timeout, **kwargs
                         )
@@ -1078,7 +1076,9 @@ class SW(Util):
                             dev_timeout=timeout,
                             **kwargs
                         )
-                        _progress("installing software on RE1 ... please be patient ...")
+                        _progress(
+                            "installing software on RE1 ... please be patient ..."
+                        )
                         bool_ret, msg = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
