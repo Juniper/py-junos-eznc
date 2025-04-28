@@ -1059,17 +1059,18 @@ class SW(Util):
                 else:
                     # For Dual RE device re0/re1 is not required
                     if self._dev.facts["_is_linux"]:
-                        _progress("installing software ... please be patient ...")
+                        _progress(
+                            "installing software ... please be patient ..."
+                        )
                         ok = self.pkgadd(
-                            remote_package,
-                            vmhost=vmhost,
-                            dev_timeout=timeout,
-                            **kwargs
+                            remote_package, vmhost=vmhost, dev_timeout=timeout, **kwargs
                         )
                     else:
                         # then this is a device with two RE that supports the "re0"
                         # and "re1" options to the command (M, MX tested only)
-                        _progress("installing software on RE0 ... please be patient ...")
+                        _progress(
+                            "installing software on RE0 ... please be patient ..."
+                        )
                         ok = self.pkgadd(
                             remote_package,
                             vmhost=vmhost,
