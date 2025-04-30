@@ -1057,24 +1057,35 @@ class SW(Util):
                         ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
                 else:
-                    # then this is a device with two RE that supports the "re0"
-                    # and "re1" options to the command (M, MX tested only)
-                    _progress("installing software on RE0 ... please be patient ...")
-                    ok = self.pkgadd(
-                        remote_package,
-                        vmhost=vmhost,
-                        re0=True,
-                        dev_timeout=timeout,
-                        **kwargs
-                    )
-                    _progress("installing software on RE1 ... please be patient ...")
-                    bool_ret, msg = self.pkgadd(
-                        remote_package,
-                        vmhost=vmhost,
-                        re1=True,
-                        dev_timeout=timeout,
-                        **kwargs
-                    )
+                    # For Dual RE device re0/re1 is not required
+                    if self._dev.facts["_is_linux"]:
+                        _progress("installing software ... please be patient ...")
+                        ok = self.pkgadd(
+                            remote_package, vmhost=vmhost, dev_timeout=timeout, **kwargs
+                        )
+                    else:
+                        # then this is a device with two RE that supports the "re0"
+                        # and "re1" options to the command (M, MX tested only)
+                        _progress(
+                            "installing software on RE0 ... please be patient ..."
+                        )
+                        ok = self.pkgadd(
+                            remote_package,
+                            vmhost=vmhost,
+                            re0=True,
+                            dev_timeout=timeout,
+                            **kwargs
+                        )
+                        _progress(
+                            "installing software on RE1 ... please be patient ..."
+                        )
+                        bool_ret, msg = self.pkgadd(
+                            remote_package,
+                            vmhost=vmhost,
+                            re1=True,
+                            dev_timeout=timeout,
+                            **kwargs
+                        )
                     ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
 
