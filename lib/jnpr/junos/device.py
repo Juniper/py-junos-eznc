@@ -1362,15 +1362,6 @@ class Device(_Connection):
         try:
             ts_start = datetime.datetime.now()
 
-            # we want to enable the ssh-agent if-and-only-if we are
-            # not given a password or an ssh key file.
-            # in this condition it means we want to query the agent
-            # for available ssh keys
-
-            allow_agent = bool(
-                (self._auth_password is None) and (self._ssh_private_key_file is None)
-            )
-
             # option to disable ncclient transport ssh authentication
             # using public keys look_for_keys=False
             if self._look_for_keys is None:
@@ -1395,7 +1386,6 @@ class Device(_Connection):
                 password=self._auth_password,
                 hostkey_verify=hostkey_verify,
                 key_filename=self._ssh_private_key_file,
-                allow_agent=allow_agent,
                 look_for_keys=look_for_keys,
                 ssh_config=self._sshconf_lkup(),
                 bind_addr=self._bind_addr,
