@@ -1,5 +1,0 @@
-Value IP_ADDRESS (\d+.\d+.\d+.\d+)
-Value NAME (\S+)
-
-Start
-  ^name\s+${IP_ADDRESS}\s+${NAME}\s* -> Record

@@ -1,4 +1,0 @@
-Value HOSTNAME (.+?)
-
-Start
-  ^${HOSTNAME}\s*$$ -> Record

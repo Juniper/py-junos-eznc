@@ -1,9 +1,0 @@
-Value Required NAME (\S+)
-Value TABLE (\d+)
-
-Start
-  ^--- -> Start_record
-
-Start_record
-  ^${NAME}\s+${TABLE} -> Record
-  ^. -> Error

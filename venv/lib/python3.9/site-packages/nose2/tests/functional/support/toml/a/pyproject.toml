@@ -1,5 +1,0 @@
-[tool.nose2.a]
-a = 1
-
-[tool.nose2.unittest]
-plugins = "plugin_a"

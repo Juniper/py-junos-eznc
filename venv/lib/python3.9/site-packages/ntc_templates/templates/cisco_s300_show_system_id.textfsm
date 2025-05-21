@@ -1,6 +1,0 @@
-Value SERIAL_NUMBER (\S+)
-
-Start
-  ^\s*Serial\s+number\s*:\s*${SERIAL_NUMBER}\s*$$ -> Record
-  ^\s*$$
-  ^. -> Error

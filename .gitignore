@@ -18,6 +18,8 @@ develop-eggs
 lib64
 env
 .venv
+venv/
+
 
 # Documentation
 docs/_build
@@ -64,3 +66,4 @@ desktop.ini
 
 # PyCharm
 .idea
+venv/

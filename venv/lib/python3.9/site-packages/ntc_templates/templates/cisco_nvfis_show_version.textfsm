@@ -1,9 +1,0 @@
-Value VERSION (\S+)
-Value BUILD_DATE (.+)
-Value LAST_REBOOT (.+)
-
-
-Start
-  ^Version\s${VERSION}
-  ^Build\sdate\s${BUILD_DATE}
-  ^Last\sReboot\s${LAST_REBOOT} -> Record
