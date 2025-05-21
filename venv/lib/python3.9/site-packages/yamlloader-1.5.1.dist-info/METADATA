@@ -1,0 +1,205 @@
+Metadata-Version: 2.4
+Name: yamlloader
+Version: 1.5.1
+Summary: Ordered YAML loader and dumper for PyYAML.
+Project-URL: Documentation, https://yamlloader.readthedocs.io/
+Project-URL: Homepage, https://github.com/Phynix/yamlloader
+Author-email: Jonas Eschle <jonas.eschle@gmail.com>, Johannes Lade <johannes.lade@phynix.science>
+Maintainer-email: Jonas Eschle <jonas.eschle@gmail.com>
+License: Copyright 2017 Jonas Eschle
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of
+        this software and associated documentation files (the "Software"), to deal in
+        the Software without restriction, including without limitation the rights to
+        use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+        the Software, and to permit persons to whom the Software is furnished to do so,
+        subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+        FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+        COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+        IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+        CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        
+        
+        
+        
+        Parts of the code, mostly from ordereddict.py including within others
+        the functions construct_yaml_map, construct_mapping are licensed under the
+        following license.
+        
+        Copyright 2017 François Ménabé
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of
+        this software and associated documentation files (the "Software"), to deal in
+        the Software without restriction, including without limitation the rights to
+        use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+        the Software, and to permit persons to whom the Software is furnished to do so,
+        subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+        FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+        COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+        IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+        CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+License-File: LICENSE
+Keywords: PyYAML,dict,dumper,loader,ordered,yaml
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Utilities
+Requires-Python: >=3.7
+Provides-Extra: dev
+Requires-Dist: coverage; extra == 'dev'
+Requires-Dist: hypothesis; extra == 'dev'
+Requires-Dist: sphinx; extra == 'dev'
+Requires-Dist: sphinx-autodoc-typehints; extra == 'dev'
+Requires-Dist: sphinx-rtd-theme; extra == 'dev'
+Requires-Dist: sphinxcontrib-apidoc; extra == 'dev'
+Provides-Extra: doc
+Requires-Dist: sphinx; extra == 'doc'
+Requires-Dist: sphinx-autodoc-typehints; extra == 'doc'
+Requires-Dist: sphinx-rtd-theme; extra == 'doc'
+Requires-Dist: sphinxcontrib-apidoc; extra == 'doc'
+Provides-Extra: test
+Requires-Dist: coverage; extra == 'test'
+Requires-Dist: hypothesis; extra == 'test'
+Description-Content-Type: text/x-rst
+
+
+.. image:: https://github.com/Phynix/yamlloader/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/Phynix/yamlloader/actions
+.. image:: https://img.shields.io/pypi/pyversions/yamlloader.svg
+    :target: https://pypi.org/project/yamlloader/
+.. image:: https://badge.fury.io/py/yamlloader.svg
+    :target: https://badge.fury.io/py/yamlloader
+.. image:: https://coveralls.io/repos/github/Phynix/yamlloader/badge.svg
+    :target: https://coveralls.io/github/Phynix/yamlloader
+
+yamlloader
+==========
+
+
+This module provides loaders and dumpers for PyYAML. Currently, an OrderedDict loader/dumper is
+implemented, allowing to keep items order
+when loading resp. dumping a file from/to an OrderedDict (Python 3.7+: Also regular dicts are supported and are the default items to be loaded to. As of Python 3.7 preservation of insertion order is a language feature of regular dicts.)
+
+This project was originally mirrored from
+`yamlordereddict <https://github.com/fmenabe/python-yamlordereddictloader>`_
+Many thanks to the original author François Ménabé!
+The library contains several improvements including automated testing and
+the much faster C-versions of the Loaders/Dumpers.
+
+
+`API Documentation <https://yamlloader.readthedocs.io/>`_
+
+
+Install
+-------
+There is a pip and a conda version available
+
+.. code-block:: bash
+
+    $ pip install yamlloader
+
+or
+
+.. code-block:: bash
+
+    $ conda install yamlloader -c conda-forge
+
+
+But does [your special case here] also work?
+--------------------------------------------
+
+Tests are run continuously using randomly generated yaml files.
+Also, there are no fails to be expected.
+
+Still, if you are concerned that *your* special case may breaks in the future, please
+add your own tests as `test_ext_anyname.py` under `tests/` or let us know about your needs.
+This guarantees that no code will be added that breaks *your* case.
+
+
+C vs non-C version
+------------------
+
+A significant speedup can be reached by replacing the Loader* and Dumper* classes by CLoader*
+and CDumper*. The package hereby relies on the implementations from PyYAML. If they have not
+been compiled, *yamlloader* **automatically** falls back to the non-C versions.
+
+Therefore using the C-version is safe: if it is not available, the pure Python version is
+automatically used.
+
+Usage examples
+==============
+
+
+Loader usage
+------------
+
+.. code-block:: python
+
+    import yaml
+    import yamlloader
+
+    with open('myfile.yml') as yaml_file:
+        data = yaml.load(yaml_file,
+                         Loader=yamlloader.ordereddict.CLoader)
+                         # CLoader is faster than Loader
+
+**Note:** For using the safe loader (which takes standard YAML tags and does
+not construct arbitrary Python objects), replace ``yamlloader.ordereddict.CLoader`` by
+``yamlloader.ordereddict.CSafeLoader``.
+
+Dumper usage
+------------
+
+.. code-block:: python
+
+    import yaml
+    import yamlloader
+    from collections import OrderedDict
+
+    data = OrderedDict([('key1', 'val1'),
+                        ('key2', OrderedDict([('key21', 'val21'),
+                                              ('key22', 'val22')]))])
+
+    with open('myfile.yaml', 'w') as yaml_file:
+        yaml.dump(data, yaml_file,
+                  Dumper=yamlloader.ordereddict.CDumper)
+
+**Note:** For using the safe dumper (which produce standard YAML tags and does
+not represent arbitrary Python objects), replace ``yamlloader.ordereddict.CDumper`` by
+``yamlloader.ordereddict.CSafeDumper``.
+
+
+FAQ
+===
+
+C version not working
+---------------------------
+If the C version is not working (it falls back by default to a non-C version),
+check if yaml.cyaml exists. If not, the cyaml module was not compiled during the installation of
+yaml (pyyaml). Make sure that cython is installed (`pip install Cython`) and the yaml.h file is
+there (apt: libyaml-dev).

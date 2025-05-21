@@ -1,0 +1,13 @@
+Value INTERFACE (\S+)
+Value IP_ADDRESS (\d+\.\d+\.\d+\.\d+)
+Value MAC_ADDRESS (\S+)
+Value TYPE (\S+)
+
+Start
+  ^\s+ARP\s+Aging\s+Time\s+:\s+\d+
+  ^Interface\s+IP Address\s+MAC Address\s+Type
+  ^\-+\s+\-+\s+\-+\s+\-+$$
+  ^Total Entries:\s+\d+
+  ^${INTERFACE}\s+${IP_ADDRESS}\s+${MAC_ADDRESS}\s+${TYPE} -> Record
+  ^\s*$$
+  ^. -> Error

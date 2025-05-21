@@ -1,0 +1,9 @@
+Value IP_ADDRESS (\d+.\d+.\d+.\d+)
+Value MAC_ADDRESS (\w+-\w+-\w+)
+Value VLAN_ID (\S+|\d+)
+Value INTERFACE (\S+)
+Value AGING (\d+)
+Value TYPE (\S+)
+
+Start
+  ^${IP_ADDRESS}\s+${MAC_ADDRESS}\s+${VLAN_ID}\s+${INTERFACE}\s+${AGING}\s+${TYPE} -> Record

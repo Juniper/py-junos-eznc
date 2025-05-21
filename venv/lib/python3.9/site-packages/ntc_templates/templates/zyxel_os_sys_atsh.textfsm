@@ -1,0 +1,31 @@
+Value VERSION (\S+)
+Value BOOT_VERSION (.+)
+Value VENDOR (.+)
+Value HARDWARE_MODEL (\S+)
+Value SERIAL_NUMBER (\S+)
+Value MAC_ADDRESS ([0-9A-F]{12})
+
+Start
+  ^\d{4}-\d{2}-\d{2}.*
+  ^mtd\[readflash\].+
+  ^Unlocking.+
+  ^Reading\s+from.+
+  ^\/tmp.+
+  ^zyUtil.+
+  ^Firmware\s+Version\s*:\s+${VERSION}
+  ^Bootbase\s+Version\s*:\s+${BOOT_VERSION}
+  ^Vendor\s+Name\s*:\s+${VENDOR}
+  ^Product\s+Model\s*:\s+${HARDWARE_MODEL}
+  ^Serial\s+Number\s*:\s+${SERIAL_NUMBER}
+  ^First\s+MAC\s+Address\s*:\s+${MAC_ADDRESS}
+  ^Last\s+MAC\s+Address\s*:.+
+  ^MAC\s+Address\s+Quantity\s*:.+
+  ^Default\s+Country\s+Code\s*:.+
+  ^Boot\s+Module\s+Debug\s+Flag\s*:.+
+  ^Kernel\s+Checksum\s*:.+
+  ^RootFS\s+Checksum\s*:.+
+  ^Romfile\s+Checksum\s*:.+
+  ^Main\s+Feature\s+Bits\s*:.+
+  ^Other\s+Feature\s+Bits\s*:.*
+  ^[0-9a-f]{1,8}:\s+[0-9a-f]{1,8}\s+[0-9a-f]{1,8}\s+[0-9a-f]{1,8}(\s+[0-9a-f]{1,8})?
+  ^. -> Error
