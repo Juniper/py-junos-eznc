@@ -1,6 +1,15 @@
-## Release 2.7.4.dev0 - 28 Feb 2025
+## Release 2.7.5.dev0 - 30 Apr 2025
 ## Features Added
 ## Bugs Fixed
+
+## Release 2.7.4 - 30 Apr 2025
+## Features Added
+None
+## Bugs Fixed
+- Fixed import error related to OspfNeighborTable #1365
+- Fixed Virtual chassis member upgrade issue #1368
+- To support EVO system reboot #1371
+- EVO dual RE upgrade support #1373
 
 ## Release 2.7.3 - 14 Feb 2025
 ## Features Added
