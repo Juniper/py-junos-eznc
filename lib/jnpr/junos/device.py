@@ -1385,7 +1385,8 @@ class Device(_Connection):
             else:
                 # Default behaviour if allow_agent is None
                 allow_agent = bool(
-                    (self._auth_password is None) and (self._ssh_private_key_file is None)
+                    (self._auth_password is None)
+                    and (self._ssh_private_key_file is None)
                 )
 
             # option to disable ncclient transport ssh authentication
