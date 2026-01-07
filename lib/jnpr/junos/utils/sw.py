@@ -757,7 +757,7 @@ class SW(Util):
                       * MX virtual-chassis
 
         You can get a progress report on this process by providing a
-        **progress** callback.
+        ``progress`` callback.
 
         .. note:: You will need to invoke the :meth:`reboot` method explicitly
                    to reboot the device.
@@ -865,9 +865,10 @@ class SW(Util):
           (Optional) A boolean indicating if this is a software update of the
           vhmhost. The default is ``vmhost=False``.
 
-        :param kwargs **kwargs:
-          (Optional) Additional keyword arguments are passed through to the
-          "package add" RPC.
+        :param dict kwargs:
+          (Optional) Additional keyword arguments passed through to the
+          ``package add`` RPC. Use dash-to-underscore conversion for RPC
+          parameters when passing them in via Python kwargs.
 
         :returns: tuple(<status>, <msg>)
             * status : ``True`` when the installation is successful and ``False`` otherwise
