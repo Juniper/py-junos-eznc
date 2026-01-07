@@ -388,7 +388,7 @@ class CMDTable(object):
             cli_table_size = cli_table.size
             if cli_table_size > 1:
                 raise KeyError(
-                    "Key is Mandatory for parsed o/p of %s " "length" % cli_table_size
+                    "Key is Mandatory for parsed o/p of %s length" % cli_table_size
                 )
             elif cli_table_size == 1:
                 temp_dict = self._parse_row(cli_table[1], cli_table, reverse_fields)

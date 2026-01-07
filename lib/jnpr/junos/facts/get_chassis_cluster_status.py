@@ -7,8 +7,7 @@ def provides_facts():
     of each key is the doc string describing the fact.
     """
     return {
-        "srx_cluster": "A boolean indicating if the device is part of an "
-        "SRX cluster.",
+        "srx_cluster": "A boolean indicating if the device is part of an SRX cluster.",
         "srx_cluster_id": "A string containing the configured cluster id",
         "srx_cluster_redundancy_group": "A multi-level dictionary of "
         "information about the SRX "

@@ -96,8 +96,7 @@ def provides_facts():
         "second level key is 'text' for the version as a "
         "string and 'object' for the version as a "
         "version_info object.",
-        "hostname": "A string containing the hostname of the current "
-        "Routing Engine.",
+        "hostname": "A string containing the hostname of the current Routing Engine.",
         "hostname_info": "A dictionary keyed on Routing Engine name. The "
         "value of each key is the hostname of the "
         "Routing Engine.",

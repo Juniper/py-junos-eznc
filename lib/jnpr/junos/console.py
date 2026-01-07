@@ -196,7 +196,7 @@ class Console(_Connection):
         if self.cs_user is not None and self.cs_passwd is None:
             self.results["failed"] = True
             self.results["errmsg"] = (
-                "ERROR: Console SSH, Password-less connection is " "not supported !!!"
+                "ERROR: Console SSH, Password-less connection is not supported !!!"
             )
             logger.error(self.results["errmsg"])
             return self.results

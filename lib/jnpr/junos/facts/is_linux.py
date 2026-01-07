@@ -7,7 +7,7 @@ def provides_facts():
     of each key is the doc string describing the fact.
     """
     return {
-        "_is_linux": "A boolean indicating if the device is running linux" "kernel.",
+        "_is_linux": "A boolean indicating if the device is running linuxkernel.",
     }
 
 

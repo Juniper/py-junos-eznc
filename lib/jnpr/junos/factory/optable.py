@@ -67,7 +67,7 @@ class OpTable(Table):
                 filter_xml = generate_sax_parser_input(self)
                 rpc_args["filter_xml"] = filter_xml
             except Exception as ex:
-                logger.debug("Not able to create SAX parser input due to " "'%s'" % ex)
+                logger.debug("Not able to create SAX parser input due to '%s'" % ex)
             self.D.transform = lambda: remove_namespaces_and_spaces
 
         self.D.transform = lambda: remove_namespaces_and_spaces

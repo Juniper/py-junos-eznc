@@ -283,7 +283,7 @@ class StateMachine(Machine):
                     else [self._table.KEY]
                 ):
                     raise KeyError(
-                        "Table with grouped item must contain " "corresponding key(s)"
+                        "Table with grouped item must contain corresponding key(s)"
                     )
                 master_key = groups[0] if len(groups) == 1 else tuple(groups)
                 self._data[master_key] = {}

@@ -102,7 +102,7 @@ def get_facts(device):
             current_re_sw = device.rpc.get_software_information()
             if current_re_sw is not None:
                 server_slot = current_re_sw.findtext(
-                    './package-information[name="Server ' 'slot"]/comment'
+                    './package-information[name="Server slot"]/comment'
                 )
                 slot_num = re.findall(r"Server slot : (\d+)", server_slot)[0]
                 current_re = ["server" + slot_num]

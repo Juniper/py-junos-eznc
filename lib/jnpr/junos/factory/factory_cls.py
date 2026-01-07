@@ -63,7 +63,7 @@ def FactoryCMDTable(
     eval=None,
     platform="juniper_junos",
     use_textfsm=False,
-    **kwargs
+    **kwargs,
 ):
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd
