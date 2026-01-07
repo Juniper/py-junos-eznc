@@ -11,7 +11,7 @@ from jnpr.junos.exception import RpcError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 from unittest.mock import MagicMock, patch
-import yamlordereddictloader
+from yamlloader import ordereddict
 from jnpr.junos.factory.factory_loader import FactoryLoader
 import yaml
 import json
@@ -49,7 +49,7 @@ CMErrorView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -84,7 +84,7 @@ sysctlView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = sysctlVeriexecTable(self.dev)
@@ -125,7 +125,7 @@ CMErrorView:
     """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -187,7 +187,7 @@ CMErrorView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -211,7 +211,7 @@ CMErrorView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -239,7 +239,7 @@ CMErrorView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -266,7 +266,7 @@ CMErrorView:
     """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev)
@@ -292,7 +292,7 @@ CMErrorView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CMErrorTable(self.dev).get()
@@ -326,7 +326,7 @@ FPCLinkStatTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCLinkStatTable(self.dev)
@@ -370,7 +370,7 @@ ShowLuchipView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ShowLuchipTable(self.dev)
@@ -473,7 +473,7 @@ FPCLinkStatTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCLinkStatTable(self.dev)
@@ -517,7 +517,7 @@ XMChipStatsView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = XMChipStatsTable(self.dev)
@@ -536,7 +536,7 @@ FPCLinkStatTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCLinkStatTable(self.dev)
@@ -635,7 +635,7 @@ FPCTTPReceiveStatsView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCTTPStatsTable(self.dev)
@@ -709,7 +709,7 @@ MtipCgeStatisticsTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = MtipCgeSummaryTable(self.dev)
@@ -803,7 +803,7 @@ _ICMPRateView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ICMPStatsTable(self.dev)
@@ -904,7 +904,7 @@ _ThrottleStatsTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = IthrottleIDTable(self.dev).get(target="fpc2")
@@ -945,7 +945,7 @@ ShowPciErrorsView:
     """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ShowPciErrorsTable(self.dev).get()
@@ -987,7 +987,7 @@ FPCMemoryView:
         """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCMemory(self.dev).get()
@@ -1045,7 +1045,7 @@ PQ3PCI:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = PQ3PCITable(self.dev)
@@ -1171,7 +1171,7 @@ _TopThreadTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = SchedulerTable(self.dev)
@@ -1208,7 +1208,7 @@ HostlbStatusSummaryView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = HostlbStatusSummaryTable(self.dev)
@@ -1234,7 +1234,7 @@ HostlbStatusSummaryView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = HostlbStatusSummaryTable(
@@ -1310,7 +1310,7 @@ _TransmitPerQueueView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = DevicesLocalTable(self.dev)
@@ -1381,7 +1381,7 @@ _ReceiveView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = DevicesLocalTable(self.dev)
@@ -1401,7 +1401,7 @@ EthernetSwitchStatisticsIterTable:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = EthernetSwitchStatisticsIterTable(self.dev)
@@ -1531,7 +1531,7 @@ _EthSwitchStatsFpc5Table:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = EthernetSwitchStatistics(self.dev)
@@ -1688,7 +1688,7 @@ _ShowToePfePacketStatsStream_rx_errors:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ShowToePfePacketStatsTable(self.dev)
@@ -1756,7 +1756,7 @@ _ShowToePfePacketStatsStream_rx_errors:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ShowToePfePacketStatsTable(self.dev)
@@ -2093,7 +2093,7 @@ XMChipInterruptStatsView:
     """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = XMChipInterruptStatsTable(self.dev)
@@ -2126,7 +2126,7 @@ XMChipInterruptStatsView:
         """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = XMChipInterruptStatsTable(self.dev)
@@ -2160,7 +2160,7 @@ FPCThreadView:
             """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = FPCThreads(self.dev)
@@ -2327,7 +2327,7 @@ CChipLoStatsView:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = CChipLoStatsTable(self.dev)
@@ -2355,7 +2355,7 @@ ARPview:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ARPtable(self.dev)
@@ -2386,7 +2386,7 @@ ARPview:
 """
         globals().update(
             FactoryLoader().load(
-                yaml.load(yaml_data, Loader=yamlordereddictloader.Loader)
+                yaml.load(yaml_data, Loader=ordereddict.Loader)
             )
         )
         stats = ARPtable(self.dev)
