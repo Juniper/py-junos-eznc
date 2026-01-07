@@ -4,9 +4,11 @@ import re
 import warnings
 
 from jnpr.junos import jxml as JXML
+
 # package modules
 from jnpr.junos.exception import *
 from jnpr.junos.utils.util import Util
+
 # 3rd-party modules
 from lxml import etree
 

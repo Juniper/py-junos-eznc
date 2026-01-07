@@ -6,6 +6,7 @@ from inspect import isclass
 from time import time
 
 from jnpr.junos.factory.to_json import TableJSONEncoder
+
 # 3rd-party
 from lxml import etree
 

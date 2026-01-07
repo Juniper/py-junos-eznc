@@ -6,10 +6,12 @@ refer to the .yml files in this jnpr.junos.op directory.
 """
 
 import re
+
 # stdlib
 from copy import deepcopy
 
 from jinja2 import Environment
+
 # locally
 from jnpr.junos.factory.factory_cls import *
 from jnpr.junos.factory.viewfields import *

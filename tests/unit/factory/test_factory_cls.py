@@ -4,8 +4,12 @@ __credits__ = "Jeremy Schulman"
 import unittest
 
 import nose2
-from jnpr.junos.factory.factory_cls import (FactoryCfgTable, FactoryOpTable,
-                                            FactoryTable, FactoryView)
+from jnpr.junos.factory.factory_cls import (
+    FactoryCfgTable,
+    FactoryOpTable,
+    FactoryTable,
+    FactoryView,
+)
 
 
 class TestFactoryCls(unittest.TestCase):

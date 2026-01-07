@@ -4,8 +4,13 @@ from io import StringIO
 from unittest.mock import patch
 
 import nose2
-from jnpr.junos.jxml import (INSERT, NAME, cscript_conf, normalize_xslt,
-                             remove_namespaces)
+from jnpr.junos.jxml import (
+    INSERT,
+    NAME,
+    cscript_conf,
+    normalize_xslt,
+    remove_namespaces,
+)
 from lxml import etree
 from ncclient.xml_ import NCElement
 

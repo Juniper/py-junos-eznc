@@ -6,6 +6,7 @@ import logging
 import os
 import platform
 import re
+
 # stdlib, in support of the the 'probe' method
 import socket
 import sys
@@ -20,17 +21,23 @@ import paramiko
 import six
 from jnpr.junos import exception as EzErrors
 from jnpr.junos import jxml as JXML
-from jnpr.junos.decorators import (ignoreWarnDecorator, normalizeDecorator,
-                                   timeoutDecorator)
+from jnpr.junos.decorators import (
+    ignoreWarnDecorator,
+    normalizeDecorator,
+    timeoutDecorator,
+)
 from jnpr.junos.exception import ConnectError, JSONLoadError
 from jnpr.junos.factcache import _FactCache
 from jnpr.junos.ofacts import *
+
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
+
 # 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
 from ncclient.operations import RPCError
+
 # check for ncclient support for filter_xml. Remove these changes once ncclient
 # release filter_xml/SAX parsing feature
 # https://github.com/ncclient/ncclient/pull/324

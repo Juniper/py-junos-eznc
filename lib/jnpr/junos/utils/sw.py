@@ -15,6 +15,7 @@ except ImportError:
 
 # 3rd-party modules
 from jnpr.junos import jxml as JXML
+
 # local modules
 from jnpr.junos.decorators import timeoutDecorator
 from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError

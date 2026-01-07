@@ -2,9 +2,11 @@ import logging
 from copy import deepcopy
 
 from jnpr.junos.decorators import checkSAXParserDecorator
+
 # local
 from jnpr.junos.factory.table import Table
 from jnpr.junos.jxml import remove_namespaces, remove_namespaces_and_spaces
+
 # 3rd-party
 from lxml import etree
 from lxml.builder import E

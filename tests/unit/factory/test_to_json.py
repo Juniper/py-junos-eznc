@@ -11,8 +11,11 @@ from unittest.mock import patch
 
 import nose2
 from jnpr.junos import Device
-from jnpr.junos.factory.to_json import (PyEzJSONEncoder, TableJSONEncoder,
-                                        TableViewJSONEncoder)
+from jnpr.junos.factory.to_json import (
+    PyEzJSONEncoder,
+    TableJSONEncoder,
+    TableViewJSONEncoder,
+)
 from jnpr.junos.op.routes import RouteSummaryTable
 from ncclient.manager import Manager, make_device_handler
 from ncclient.operations.rpc import RPCReply

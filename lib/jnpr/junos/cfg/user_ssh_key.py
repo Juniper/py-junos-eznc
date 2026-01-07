@@ -1,5 +1,6 @@
 # 3rd-party modules
 from jnpr.junos import jxml as JXML
+
 # local module
 from jnpr.junos.cfg import Resource
 from lxml.builder import E

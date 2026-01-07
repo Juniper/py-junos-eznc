@@ -6,9 +6,15 @@ from unittest.mock import MagicMock, patch
 import ncclient
 import nose2
 from jnpr.junos import Device
-from jnpr.junos.exception import (CommitError, ConfigLoadError,
-                                  ConnectClosedError, LockError, RpcError,
-                                  RpcTimeoutError, UnlockError)
+from jnpr.junos.exception import (
+    CommitError,
+    ConfigLoadError,
+    ConnectClosedError,
+    LockError,
+    RpcError,
+    RpcTimeoutError,
+    UnlockError,
+)
 from jnpr.junos.utils.config import Config
 from lxml import etree
 from ncclient.manager import Manager, make_device_handler

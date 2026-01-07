@@ -1,5 +1,6 @@
 # 3rd-party
 from jnpr.junos import JXML
+
 # local
 from jnpr.junos.cfg import Resource
 from jnpr.junos.cfg.phyport.base import PhyPortBase
