@@ -29,11 +29,7 @@ from jnpr.junos.decorators import (
 from jnpr.junos.exception import ConnectError, JSONLoadError
 from jnpr.junos.factcache import _FactCache
 from jnpr.junos.ofacts import *
-
-# local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
-
-# 3rd-party packages
 from lxml import etree
 from ncclient import manager as netconf_ssh
 from ncclient.operations import RPCError

@@ -1,5 +1,3 @@
-# 3rd-party
-# local module
 from jnpr.junos.cfg.resource import Resource
 from lxml.builder import E
 
