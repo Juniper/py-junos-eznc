@@ -1217,6 +1217,14 @@ class Device(_Connection):
             *OPTIONAL* To disable public key authentication.
             default is ``None``.
 
+        :param bool allow_agent:
+            *OPTIONAL* Specifies whether to use keys provided by an SSH agent for authentication.
+            If set to ``True``, the SSH connection will use any keys loaded in the agent.
+            If set to ``False``, keys from the SSH agent will not be used.
+            If set to ``None``, the default behavior is applied: agent keys are used only if
+            both password and private key file are not provided.
+            Default is ``None``.
+
         :param str bind_addr:
             *OPTIONAL* To use (local) source IP address.
             default is ``None``.
@@ -1243,6 +1251,7 @@ class Device(_Connection):
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         self._look_for_keys = kvargs.get("look_for_keys", None)
+        self._allow_agent = kvargs.get("allow_agent", None)
         self._bind_addr = kvargs.get("bind_addr", None)
         self._hostkey_verify = kvargs.get("hostkey_verify", False)
         if self._fact_style != "new":
@@ -1367,9 +1376,14 @@ class Device(_Connection):
             # in this condition it means we want to query the agent
             # for available ssh keys
 
-            allow_agent = bool(
-                (self._auth_password is None) and (self._ssh_private_key_file is None)
-            )
+            if self._allow_agent is not None:
+                allow_agent = self._allow_agent
+            else:
+                # Default behaviour if allow_agent is None
+                allow_agent = bool(
+                    (self._auth_password is None)
+                    and (self._ssh_private_key_file is None)
+                )
 
             # option to disable ncclient transport ssh authentication
             # using public keys look_for_keys=False
