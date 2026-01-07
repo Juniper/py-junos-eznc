@@ -29,7 +29,7 @@ class _RpcMetaExec(object):
         model=None,
         namespace=None,
         remove_ns=True,
-        **kwargs
+        **kwargs,
     ):
         """
         retrieve configuration from the Junos device
@@ -139,7 +139,7 @@ class _RpcMetaExec(object):
                 if model is not None or namespace is not None:
                     if model == "custom" and namespace is None:
                         raise AttributeError(
-                            'For "custom" model, ' 'explicitly provide "namespace"'
+                            'For "custom" model, explicitly provide "namespace"'
                         )
                     ns = namespace or (nmspaces.get(model.lower()) + filter_xml.tag)
                     filter_xml.attrib["xmlns"] = ns

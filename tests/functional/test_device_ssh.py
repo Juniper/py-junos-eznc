@@ -7,6 +7,7 @@ try:
 except ImportError:
     import unittest
 
+
 class TestDeviceSsh(unittest.TestCase):
     def tearDown(self):
         self.dev.close()
@@ -31,11 +32,7 @@ class TestDeviceSsh(unittest.TestCase):
         self.assertEqual(self.dev.connected, True)
 
     def test_device_open_ssh_agent_true(self):
-        self.dev = Device(
-            host="x.x.x.x",
-            user="netops",
-            allow_agent=True
-        )
+        self.dev = Device(host="x.x.x.x", user="netops", allow_agent=True)
         self.dev.open()
         self.assertEqual(self.dev.connected, True)
 
@@ -68,9 +65,7 @@ class TestDeviceSsh(unittest.TestCase):
 
     def test_device_open_proxy(self):
         self.dev = Device(
-            host="x.x.x.x",
-            user="netops",
-            proxy_command="ssh -J netops@y.y.y.y"
+            host="x.x.x.x", user="netops", proxy_command="ssh -J netops@y.y.y.y"
         )
         self.dev.open()
         self.assertEqual(self.dev.connected, True)

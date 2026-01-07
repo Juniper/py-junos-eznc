@@ -38,7 +38,7 @@ class TestFactCache(unittest.TestCase):
         # fact should cause a FactLoopError
         with self.assertRaises(FactLoopError):
             personality = self.dev.facts["personality"]
-        self.dev.facts._callbacks["model"] = tmp # To clear FactLoopError
+        self.dev.facts._callbacks["model"] = tmp  # To clear FactLoopError
 
     def test_factcache_return_unexpected_fact(self):
         # Create a callback for the foo fact.
@@ -122,9 +122,7 @@ class TestFactCache(unittest.TestCase):
         self.dev.facts._cache["foo"] = "foo"
         self.dev.facts._cache["bar"] = {"bar": "bar"}
         # Now, get the string (pretty) representation of the facts
-        self.assertEqual(
-            str(self.dev.facts), "{'bar': {'bar': 'bar'}, " "'foo': 'foo'}"
-        )
+        self.assertEqual(str(self.dev.facts), "{'bar': {'bar': 'bar'}, 'foo': 'foo'}")
 
     def test_factcache_repr_facts(self):
         # Override the callbacks

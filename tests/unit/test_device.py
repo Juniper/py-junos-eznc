@@ -44,7 +44,7 @@ facts = {
     "model": "FIREFLY-PERIMETER",
     "RE0": {
         "status": "Testing",
-        "last_reboot_reason": "Router rebooted after a " "normal shutdown.",
+        "last_reboot_reason": "Router rebooted after a normal shutdown.",
         "model": "FIREFLY-PERIMETER RE",
         "up_time": "6 hours, 29 minutes, 30 seconds",
     },
@@ -309,7 +309,7 @@ class TestDevice(unittest.TestCase):
         mock_warn.assert_has_calls(
             [
                 call.warn(
-                    "fact-style old will be removed " "in a future release.",
+                    "fact-style old will be removed in a future release.",
                     RuntimeWarning,
                 )
             ]
@@ -394,7 +394,7 @@ class TestDevice(unittest.TestCase):
         mock_warn.assert_has_calls(
             [
                 call.warn(
-                    "fact-style old will be removed " "in a future release.",
+                    "fact-style old will be removed in a future release.",
                     RuntimeWarning,
                 )
             ]
@@ -761,7 +761,7 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_output_warning(self, mock_warnings, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli(
-            "show interfaces ge-0/0/0.0 routing-instance " "all media", format="xml"
+            "show interfaces ge-0/0/0.0 routing-instance all media", format="xml"
         )
         ip = data.findtext(
             'logical-interface[name="ge-0/0/0.0"]/'
@@ -911,7 +911,7 @@ class TestDevice(unittest.TestCase):
         with patch("jnpr.junos.device.socket"):
             self.assertTrue(
                 self.dev.probe(1),
-                "probe fn is not working for" " timeout greater than zero",
+                "probe fn is not working for timeout greater than zero",
             )
 
     def test_device_probe_timeout_exception(self):

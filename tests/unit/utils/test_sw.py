@@ -49,7 +49,7 @@ facts = {
     },
     "RE0": {
         "status": "Testing",
-        "last_reboot_reason": "Router rebooted after a " "normal shutdown.",
+        "last_reboot_reason": "Router rebooted after a normal shutdown.",
         "model": "FIREFLY-PERIMETER RE",
         "up_time": "6 hours, 29 minutes, 30 seconds",
     },
@@ -105,7 +105,7 @@ class TestSW(unittest.TestCase):
         package = "test.tgz"
         self.assertEqual(
             SW.local_checksum(package, algorithm="sha256"),
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934" "ca495991b7852b855",
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         )
 
     @patch(builtin_string + ".open")
@@ -246,13 +246,17 @@ class TestSW(unittest.TestCase):
     def test_sw_install_issu_validate_False(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
-        self.assertTrue(self.sw.install(package, issu=True, no_copy=True, validate=False))
+        self.assertTrue(
+            self.sw.install(package, issu=True, no_copy=True, validate=False)
+        )
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu_validate_True(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
-        self.assertTrue(self.sw.install(package, issu=True, no_copy=True, validate=True))
+        self.assertTrue(
+            self.sw.install(package, issu=True, no_copy=True, validate=True)
+        )
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_nssu(self, mock_execute):
@@ -264,13 +268,17 @@ class TestSW(unittest.TestCase):
     def test_sw_install_nssu_validate_False(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
-        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True, validate=False))
+        self.assertTrue(
+            self.sw.install(package, nssu=True, no_copy=True, validate=False)
+        )
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_nssu_validate_True(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
-        self.assertTrue(self.sw.install(package, nssu=True, no_copy=True, validate=True))
+        self.assertTrue(
+            self.sw.install(package, nssu=True, no_copy=True, validate=True)
+        )
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu_nssu_both_error(self, mock_execute):
@@ -432,7 +440,7 @@ class TestSW(unittest.TestCase):
         self.sw.log = MagicMock()
         self.assertFalse(self.sw.validate("package.tgz", issu=True))
         self.sw.log.assert_called_with(
-            "Requirement FAILED: commit synchronize is not Enabled " "in configuration"
+            "Requirement FAILED: commit synchronize is not Enabled in configuration"
         )
 
     @patch("jnpr.junos.Device.execute")
@@ -861,7 +869,7 @@ class TestSW(unittest.TestCase):
             "become active at next reboot</output></rpc-reply>"
         )
         mock_execute.side_effect = etree.XML(rsp)
-        msg = "junos-vsrx-12.1X46-D30.2-domestic will become active " "at next reboot"
+        msg = "junos-vsrx-12.1X46-D30.2-domestic will become active at next reboot"
         self.assertEqual(self.sw.rollback(), msg)
 
     @patch("jnpr.junos.Device.execute")

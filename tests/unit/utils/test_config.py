@@ -103,7 +103,7 @@ class TestConfig(unittest.TestCase):
         )
         self.conf.rpc.commit_configuration.assert_called_with(
             {"detail": "detail"},
-            **{"synchronize": True, "full": True, "force-synchronize": True}
+            **{"synchronize": True, "full": True, "force-synchronize": True},
         )
 
     @patch("jnpr.junos.utils.config.JXML.remove_namespaces")

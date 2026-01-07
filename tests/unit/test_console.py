@@ -162,7 +162,7 @@ class TestConsole(unittest.TestCase):
     @patch("jnpr.junos.console.Console._tty_login")
     def test_console_tty_open_err(self, mock_login, mock_telnet):
         with patch(
-            "jnpr.junos.transport.tty_telnet." "telnetlib.Telnet.open"
+            "jnpr.junos.transport.tty_telnet.telnetlib.Telnet.open"
         ) as mock_open:
             mock_telnet.RETRY_OPEN = 1
             mock_login.side_effect = ValueError
