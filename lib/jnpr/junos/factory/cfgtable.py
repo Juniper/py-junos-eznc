@@ -1,11 +1,11 @@
-from copy import deepcopy
 import re
+from copy import deepcopy
 
+from jnpr.junos import jxml
+from jnpr.junos.factory.table import Table
+from jnpr.junos.utils.config import Config
 from lxml import etree
 from lxml.builder import E
-from jnpr.junos.factory.table import Table
-from jnpr.junos import jxml
-from jnpr.junos.utils.config import Config
 
 
 class CfgTable(Table):

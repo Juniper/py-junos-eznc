@@ -7,9 +7,9 @@ try:
     import unittest2 as unittest
 except:
     import unittest
-import nose2
 
-from jnpr.junos.facts.swver import version_info, get_facts
+import nose2
+from jnpr.junos.facts.swver import get_facts, version_info
 
 
 class TestVersionInfo(unittest.TestCase):

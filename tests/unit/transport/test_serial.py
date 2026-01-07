@@ -2,11 +2,12 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
-from unittest.mock import MagicMock, patch
-import sys
-import six
 
+import sys
+from unittest.mock import MagicMock, patch
+
+import nose2
+import six
 from jnpr.junos.console import Console
 
 if sys.version < "3":

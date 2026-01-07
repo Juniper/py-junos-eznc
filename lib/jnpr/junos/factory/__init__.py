@@ -1,6 +1,6 @@
-import yaml
 import os.path
 
+import yaml
 from jnpr.junos.factory.factory_loader import FactoryLoader
 
 __all__ = ["loadyaml", "FactoryLoader"]

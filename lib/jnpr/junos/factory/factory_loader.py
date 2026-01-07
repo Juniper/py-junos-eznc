@@ -5,12 +5,11 @@ originate from any kind of source: YAML, JSON, program.  For examples of YAML
 refer to the .yml files in this jnpr.junos.op directory.
 """
 
+import re
 # stdlib
 from copy import deepcopy
-import re
 
 from jinja2 import Environment
-
 # locally
 from jnpr.junos.factory.factory_cls import *
 from jnpr.junos.factory.viewfields import *

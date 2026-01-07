@@ -1,15 +1,10 @@
 import unittest
+
 import nose2
-from jnpr.junos.exception import (
-    RpcError,
-    CommitError,
-    ConnectError,
-    ConfigLoadError,
-    RpcTimeoutError,
-    SwRollbackError,
-    JSONLoadError,
-)
 from jnpr.junos import Device
+from jnpr.junos.exception import (CommitError, ConfigLoadError, ConnectError,
+                                  JSONLoadError, RpcError, RpcTimeoutError,
+                                  SwRollbackError)
 from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"

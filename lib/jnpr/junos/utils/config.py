@@ -3,13 +3,12 @@ import os
 import re
 import warnings
 
-# 3rd-party modules
-from lxml import etree
-
+from jnpr.junos import jxml as JXML
 # package modules
 from jnpr.junos.exception import *
-from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
+# 3rd-party modules
+from lxml import etree
 
 """
 Configuration Utilities

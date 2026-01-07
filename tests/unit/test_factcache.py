@@ -2,12 +2,12 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+from unittest.mock import MagicMock, call, patch
+
 import nose2
-from unittest.mock import patch, MagicMock, call
-from jnpr.junos.exception import FactLoopError
-
 from jnpr.junos import Device
-
+from jnpr.junos.exception import FactLoopError
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 

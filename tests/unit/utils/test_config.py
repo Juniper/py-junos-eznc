@@ -1,27 +1,19 @@
-import unittest
+import os
 import sys
-import nose2
-
-from jnpr.junos import Device
-from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import (
-    RpcError,
-    LockError,
-    UnlockError,
-    CommitError,
-    RpcTimeoutError,
-    ConfigLoadError,
-    ConnectClosedError,
-)
+import unittest
+from unittest.mock import MagicMock, patch
 
 import ncclient
-from ncclient.manager import Manager, make_device_handler
-from ncclient.transport import SSHSession
-from ncclient.operations import RPCError, RPCReply
-
-from unittest.mock import MagicMock, patch
+import nose2
+from jnpr.junos import Device
+from jnpr.junos.exception import (CommitError, ConfigLoadError,
+                                  ConnectClosedError, LockError, RpcError,
+                                  RpcTimeoutError, UnlockError)
+from jnpr.junos.utils.config import Config
 from lxml import etree
-import os
+from ncclient.manager import Manager, make_device_handler
+from ncclient.operations import RPCError, RPCReply
+from ncclient.transport import SSHSession
 
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"

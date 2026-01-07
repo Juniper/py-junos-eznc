@@ -1,4 +1,5 @@
 import re
+
 from jnpr.junos.facts.swver import version_info
 
 

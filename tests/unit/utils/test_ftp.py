@@ -1,13 +1,12 @@
-import unittest
-import nose2
 import ftplib
-import sys
 import os
-
-from jnpr.junos import Device
-import jnpr.junos.utils.ftp
-
+import sys
+import unittest
 from unittest.mock import patch
+
+import jnpr.junos.utils.ftp
+import nose2
+from jnpr.junos import Device
 
 if sys.version < "3":
     builtin_string = "__builtin__"

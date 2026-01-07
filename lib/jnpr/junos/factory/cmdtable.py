@@ -1,21 +1,22 @@
-import re
 import copy
+import json
+# stdlib
+import os
+import re
+from inspect import isclass
+
+from jinja2 import Template
+# local
+from jnpr.junos.exception import RpcError
+from jnpr.junos.factory.state_machine import StateMachine
+from jnpr.junos.factory.to_json import TableJSONEncoder
+from jnpr.junos.utils.start_shell import StartShell
+from lxml import etree
 
 # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
 
-# stdlib
-import os
-from inspect import isclass
-from lxml import etree
-import json
 
-# local
-from jnpr.junos.exception import RpcError
-from jnpr.junos.utils.start_shell import StartShell
-from jnpr.junos.factory.state_machine import StateMachine
-from jnpr.junos.factory.to_json import TableJSONEncoder
 
-from jinja2 import Template
 
 HAS_NTC_TEMPLATE = False
 try:

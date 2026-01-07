@@ -1,25 +1,22 @@
 __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
-import unittest
-import os
-import yaml
 import json
-import nose2
+import os
+import unittest
+from unittest.mock import patch
 
+import nose2
+import yaml
 from jnpr.junos import Device
-from jnpr.junos.op.phyport import PhyPortStatsTable
-from jnpr.junos.op.ethport import EthPortTable
 from jnpr.junos.factory.factory_loader import FactoryLoader
 from jnpr.junos.factory.optable import generate_sax_parser_input
-
-from ncclient.manager import Manager, make_device_handler
-from ncclient.transport import SSHSession
-from ncclient.operations.rpc import RPCReply
-
+from jnpr.junos.op.ethport import EthPortTable
+from jnpr.junos.op.phyport import PhyPortStatsTable
 from lxml import etree
-
-from unittest.mock import patch
+from ncclient.manager import Manager, make_device_handler
+from ncclient.operations.rpc import RPCReply
+from ncclient.transport import SSHSession
 
 
 class TestFactoryOpTable(unittest.TestCase):

@@ -1,6 +1,8 @@
-from setuptools import setup, find_packages
-import versioneer
 import os
+
+from setuptools import find_packages, setup
+
+import versioneer
 
 # parse requirements
 req_lines = [line.strip() for line in open("requirements.txt").readlines()]

@@ -1,22 +1,26 @@
 from __future__ import print_function
+
 import os
 import sys
+
 from six import StringIO
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
+
 from contextlib import contextmanager
+from unittest.mock import MagicMock, call, mock_open, patch
+
+import nose2
 from jnpr.junos import Device
-from jnpr.junos.exception import RpcError, SwRollbackError, RpcTimeoutError
-from jnpr.junos.utils.sw import SW
+from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError
 from jnpr.junos.facts.swver import version_info
+from jnpr.junos.utils.sw import SW
+from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from lxml import etree
-from unittest.mock import patch, MagicMock, call, mock_open
 
 if sys.version < "3":
     builtin_string = "__builtin__"

@@ -1,9 +1,9 @@
-import re
 import logging
+import re
 
-from jnpr.junos.facts.swver import version_info
-from jnpr.junos.exception import RpcError
 from jnpr.junos import jxml as JXML
+from jnpr.junos.exception import RpcError
+from jnpr.junos.facts.swver import version_info
 
 logger = logging.getLogger("jnpr.junos.facts.get_software_information")
 

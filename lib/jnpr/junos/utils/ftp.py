@@ -2,10 +2,10 @@
 FTP utility
 """
 
-import re
 import ftplib
-import os
 import logging
+import os
+import re
 
 logger = logging.getLogger("jnpr.junos.utils.ftp")
 

@@ -1,20 +1,19 @@
 __author__ = "Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
-import unittest
+import json
 import os
-import nose2
+import unittest
+from unittest.mock import MagicMock, patch
 
+import nose2
+import yaml
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
-
+from jnpr.junos.factory.factory_loader import FactoryLoader
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from unittest.mock import MagicMock, patch
 from yamlloader import ordereddict
-from jnpr.junos.factory.factory_loader import FactoryLoader
-import yaml
-import json
 
 
 class TestFactoryCMDTable(unittest.TestCase):

@@ -1,16 +1,14 @@
-import unittest
-import nose2
 import os
+import unittest
+from unittest.mock import MagicMock, call, patch
 
+import nose2
+from jnpr.junos import Device
+from jnpr.junos.exception import RpcError
+from jnpr.junos.utils.fs import FS
+from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-
-from jnpr.junos import Device
-from jnpr.junos.utils.fs import FS
-from jnpr.junos.exception import RpcError
-
-from unittest.mock import patch, MagicMock, call
-from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"

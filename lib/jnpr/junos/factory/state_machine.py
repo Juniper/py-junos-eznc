@@ -1,12 +1,12 @@
-from collections import OrderedDict
-from functools import reduce
-import re
 import copy
 import logging
+import re
+from collections import OrderedDict
+from functools import reduce
 
+import pyparsing as pp
 from jinja2 import Template, meta
 from transitions import Machine
-import pyparsing as pp
 
 logger = logging.getLogger("jnpr.junos.factory.state_machine")
 

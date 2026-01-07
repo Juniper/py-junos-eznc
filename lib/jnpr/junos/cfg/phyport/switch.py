@@ -1,10 +1,9 @@
 # 3rd-party
-from lxml.builder import E
-
+from jnpr.junos import JXML
 # local
 from jnpr.junos.cfg import Resource
-from jnpr.junos import JXML
 from jnpr.junos.cfg.phyport.base import PhyPortBase
+from lxml.builder import E
 
 
 class PhyPortSwitch(PhyPortBase):

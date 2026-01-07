@@ -6,9 +6,9 @@ try:
 except ImportError:
     from collections import MutableMapping
 
+import jnpr.junos.exception
 import jnpr.junos.facts
 from jnpr.junos.facts import __doc__ as facts_doc
-import jnpr.junos.exception
 
 
 class _FactCache(MutableMapping):

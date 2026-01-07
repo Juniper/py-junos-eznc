@@ -5,12 +5,12 @@ try:
     import unittest2 as unittest
 except:
     import unittest
-import nose2
-from unittest.mock import patch, MagicMock
+
 import os
+from unittest.mock import MagicMock, patch
 
+import nose2
 from jnpr.junos import Device
-
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 

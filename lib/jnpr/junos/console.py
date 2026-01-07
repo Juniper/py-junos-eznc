@@ -1,25 +1,23 @@
-import traceback
-import sys
 import logging
-import warnings
 import socket
+import sys
+import traceback
+import warnings
 
-# 3rd-party packages
-from ncclient.devices.junos import JunosDeviceHandler
-from lxml import etree
-from jnpr.junos.transport.tty_telnet import Telnet
-from jnpr.junos.transport.tty_serial import Serial
-from jnpr.junos.transport.tty_ssh import SSH
-from ncclient.xml_ import NCElement
-from jnpr.junos.device import _Connection
-
+from jnpr.junos import jxml as JXML
+from jnpr.junos.decorators import ignoreWarnDecorator
+from jnpr.junos.device import _Connection, _Jinja2ldr
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
 # local modules
 from jnpr.junos.rpcmeta import _RpcMetaExec
-from jnpr.junos.factcache import _FactCache
-from jnpr.junos import jxml as JXML
-from jnpr.junos.ofacts import *
-from jnpr.junos.decorators import ignoreWarnDecorator
-from jnpr.junos.device import _Jinja2ldr
+from jnpr.junos.transport.tty_serial import Serial
+from jnpr.junos.transport.tty_ssh import SSH
+from jnpr.junos.transport.tty_telnet import Telnet
+from lxml import etree
+# 3rd-party packages
+from ncclient.devices.junos import JunosDeviceHandler
+from ncclient.xml_ import NCElement
 
 logger = logging.getLogger("jnpr.junos.console")
 

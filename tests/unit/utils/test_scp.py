@@ -1,14 +1,12 @@
 import sys
-from six import StringIO
-from contextlib import contextmanager
-
 import unittest
-import nose2
+from contextlib import contextmanager
+from unittest.mock import patch
 
+import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
-
-from unittest.mock import patch
+from six import StringIO
 
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"

@@ -5,11 +5,11 @@ try:
 except ImportError:
     import unittest
 
-import nose2
 from unittest.mock import MagicMock, patch
 
-from jnpr.junos.transport.tty import Terminal
+import nose2
 from jnpr.junos import exception as EzErrors
+from jnpr.junos.transport.tty import Terminal
 
 
 class TestTTY(unittest.TestCase):

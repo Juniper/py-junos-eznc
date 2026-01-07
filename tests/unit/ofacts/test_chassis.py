@@ -1,17 +1,15 @@
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
-import unittest
-import nose2
-from unittest.mock import patch, MagicMock
-from lxml import etree
 import os
+import unittest
+from unittest.mock import MagicMock, patch
 
+import nose2
 from jnpr.junos import Device
+from jnpr.junos.exception import ConnectNotMasterError, RpcError
 from jnpr.junos.ofacts.chassis import facts_chassis as chassis
-from jnpr.junos.exception import ConnectNotMasterError
-from jnpr.junos.exception import RpcError
-
+from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
 

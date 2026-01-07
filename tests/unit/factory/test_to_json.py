@@ -4,21 +4,19 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
-from unittest.mock import patch
-import os
-import json
 
+import json
+import os
+from unittest.mock import patch
+
+import nose2
 from jnpr.junos import Device
-from jnpr.junos.factory.to_json import (
-    PyEzJSONEncoder,
-    TableJSONEncoder,
-    TableViewJSONEncoder,
-)
+from jnpr.junos.factory.to_json import (PyEzJSONEncoder, TableJSONEncoder,
+                                        TableViewJSONEncoder)
 from jnpr.junos.op.routes import RouteSummaryTable
 from ncclient.manager import Manager, make_device_handler
-from ncclient.transport import SSHSession
 from ncclient.operations.rpc import RPCReply
+from ncclient.transport import SSHSession
 
 
 class TestToJson(unittest.TestCase):

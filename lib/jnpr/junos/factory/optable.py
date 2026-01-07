@@ -1,14 +1,13 @@
-from copy import deepcopy
 import logging
+from copy import deepcopy
 
-# 3rd-party
-from lxml import etree
-from lxml.builder import E
-
+from jnpr.junos.decorators import checkSAXParserDecorator
 # local
 from jnpr.junos.factory.table import Table
 from jnpr.junos.jxml import remove_namespaces, remove_namespaces_and_spaces
-from jnpr.junos.decorators import checkSAXParserDecorator
+# 3rd-party
+from lxml import etree
+from lxml.builder import E
 
 logger = logging.getLogger("jnpr.junos.factory.optable")
 

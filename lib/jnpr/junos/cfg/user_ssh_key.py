@@ -1,9 +1,8 @@
 # 3rd-party modules
-from lxml.builder import E
-
+from jnpr.junos import jxml as JXML
 # local module
 from jnpr.junos.cfg import Resource
-from jnpr.junos import jxml as JXML
+from lxml.builder import E
 
 
 class UserSSHKey(Resource):

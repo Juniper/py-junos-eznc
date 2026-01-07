@@ -1,8 +1,9 @@
 import re
 import sys
+
+from jnpr.junos import jxml as JXML
 from lxml import etree
 from lxml.builder import E
-from jnpr.junos import jxml as JXML
 
 
 class _RpcMetaExec(object):

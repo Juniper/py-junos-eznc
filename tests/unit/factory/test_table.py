@@ -1,21 +1,19 @@
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
-import unittest
-import nose2
 import os
+import sys
+import unittest
+from unittest.mock import patch
 
+import nose2
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
-
-from unittest.mock import patch
-from lxml import etree
 from jnpr.junos.op.phyport import PhyPortTable
-
+from lxml import etree
+from ncclient.devices.junos import JunosDeviceHandler
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from ncclient.devices.junos import JunosDeviceHandler
-import sys
 
 if sys.version < "3":
     builtin_string = "__builtin__"

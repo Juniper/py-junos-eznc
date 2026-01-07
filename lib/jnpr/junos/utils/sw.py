@@ -1,9 +1,10 @@
 # stdlib
 from __future__ import print_function
+
 import hashlib
 import re
-from os import path
 import sys
+from os import path
 
 try:
     # Python 3.x
@@ -13,18 +14,17 @@ except ImportError:
     from urlparse import urlparse
 
 # 3rd-party modules
-from lxml.builder import E
-from lxml import etree
-
+from jnpr.junos import jxml as JXML
 # local modules
 from jnpr.junos.decorators import timeoutDecorator
-from jnpr.junos.utils.util import Util
-from jnpr.junos.utils.scp import SCP
+from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError
 from jnpr.junos.utils.ftp import FTP
+from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.start_shell import StartShell
-from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
+from jnpr.junos.utils.util import Util
+from lxml import etree
+from lxml.builder import E
 from ncclient.xml_ import NCElement
-from jnpr.junos import jxml as JXML
 
 """
 Software Installation Utilities
