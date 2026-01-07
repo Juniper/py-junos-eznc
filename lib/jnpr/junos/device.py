@@ -16,6 +16,7 @@ import re
 
 # 3rd-party packages
 from lxml import etree
+import ncclient
 from ncclient import manager as netconf_ssh
 import ncclient.transport.errors as NcErrors
 from ncclient.transport.session import SessionListener
@@ -1196,6 +1197,16 @@ class Device(_Connection):
             This can be used to load SSH information from a configuration file.
             By default ~/.ssh/config is queried.
 
+        :param int ssh_keepalives:
+            *OPTIONAL* The interval, in seconds, at which to send SSH
+            keepalives for the NETCONF over SSH session. Without SSH
+            keepalives, a NAT or stateful firewall along the network
+            path between the PyEZ host and the target Junos device,
+            may timeout an inactive TCP flow and cause the NETCONF over SSH
+            session to hang. Sending SSH keepalives avoids this situation. The
+            default value is 30 seconds. Setting this parameter to a value of 0
+            disables SSH keepalives.
+
         :param bool normalize:
             *OPTIONAL* default is ``False``.  If ``True`` then the
             XML returned by :meth:`execute` will have whitespace normalized
@@ -1270,6 +1281,7 @@ class Device(_Connection):
             self._hostname = "localhost"
             self._ssh_private_key_file = None
             self._ssh_config = None
+            self._ssh_keepalives = None
         else:
             # --------------------------
             # making a remote connection
@@ -1285,6 +1297,8 @@ class Device(_Connection):
             self._conf_ssh_private_key_file = None
             # user can get updated by ssh_config
             self._ssh_config = kvargs.get("ssh_config")
+            self._ssh_keepalives = kvargs.get("ssh_keepalives", 30)
+
             self._sshconf_lkup()
             # but if user or private key is explicit from call, then use it.
             self._auth_user = (
@@ -1421,6 +1435,10 @@ class Device(_Connection):
                 },
             )
             self._conn._session.add_listener(DeviceSessionListener(self))
+            if isinstance(self._conn, ncclient.manager.Manager) and isinstance(
+                self._conn._session, ncclient.transport.ssh.SSHSession
+            ):
+                self._conn._session.transport.set_keepalive(int(self._ssh_keepalives))
         except NcErrors.AuthenticationError as err:
             # bad authentication credentials
             raise EzErrors.ConnectAuthError(self)
