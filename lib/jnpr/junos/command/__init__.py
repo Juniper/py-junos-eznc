@@ -4,8 +4,8 @@ from importlib.abc import Loader, MetaPathFinder
 from importlib.util import spec_from_loader
 
 import yaml
-from yamlloader import ordereddict
 from jnpr.junos.factory.factory_loader import FactoryLoader
+from yamlloader import ordereddict
 
 __all__ = []
 

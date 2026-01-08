@@ -1,15 +1,16 @@
 import unittest
+
 import nose2
+from jnpr.junos import Device
 from jnpr.junos.exception import (
-    RpcError,
     CommitError,
-    ConnectError,
     ConfigLoadError,
+    ConnectError,
+    JSONLoadError,
+    RpcError,
     RpcTimeoutError,
     SwRollbackError,
-    JSONLoadError,
 )
-from jnpr.junos import Device
 from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"
@@ -85,7 +86,7 @@ class Test_RpcError(unittest.TestCase):
     def test_rpcerror_repr(self):
         rsp = etree.XML(rpc_xml)
         obj = RpcError(rsp=rsp)
-        err = "RpcError(severity: error, bad_element: bgp, " "message: syntax error)"
+        err = "RpcError(severity: error, bad_element: bgp, message: syntax error)"
         self.assertEqual(str, type(obj.__repr__()))
         self.assertEqual(obj.__repr__(), err)
 

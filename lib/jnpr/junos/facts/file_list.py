@@ -4,7 +4,7 @@ def provides_facts():
     of each key is the doc string describing the fact.
     """
     return {
-        "HOME": "A string indicating the home directory of the current " "user.",
+        "HOME": "A string indicating the home directory of the current user.",
     }
 
 

@@ -1,8 +1,8 @@
 __author__ = "mwiget"
 
+import socket
 import unittest
 
-import socket
 from jnpr.junos import Device
 
 

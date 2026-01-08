@@ -2,23 +2,23 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
-from unittest.mock import MagicMock, patch, mock_open, call
-import os
-from lxml import etree
-import sys
+
 import json
+import os
+import sys
+from unittest.mock import MagicMock, call, mock_open, patch
 
-from ncclient.manager import Manager, make_device_handler
-from ncclient.transport import SSHSession
 import ncclient.transport.errors as NcErrors
-from ncclient.operations import RPCError, TimeoutExpiredError
-
-from jnpr.junos.facts.swver import version_info
+import nose2
 from jnpr.junos import Device
-from jnpr.junos.exception import RpcError
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.console import Console
+from jnpr.junos.exception import RpcError
+from jnpr.junos.facts.swver import version_info
+from lxml import etree
+from ncclient.manager import Manager, make_device_handler
+from ncclient.operations import RPCError, TimeoutExpiredError
+from ncclient.transport import SSHSession
 
 __author__ = "Rick Sherman, Nitin Kumar, Stacy Smith"
 __credits__ = "Jeremy Schulman"
@@ -44,7 +44,7 @@ facts = {
     "model": "FIREFLY-PERIMETER",
     "RE0": {
         "status": "Testing",
-        "last_reboot_reason": "Router rebooted after a " "normal shutdown.",
+        "last_reboot_reason": "Router rebooted after a normal shutdown.",
         "model": "FIREFLY-PERIMETER RE",
         "up_time": "6 hours, 29 minutes, 30 seconds",
     },
@@ -117,7 +117,7 @@ class TestDevice(unittest.TestCase):
         mock_manager.connect.side_effect = NcErrors.SSHError(
             "Could not open socket to 1.1.1.1:830"
         )
-        from datetime import timedelta, datetime
+        from datetime import datetime, timedelta
 
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [
@@ -131,7 +131,7 @@ class TestDevice(unittest.TestCase):
     def test_device_diff_err_message(self, mock_datetime, mock_manager):
         NcErrors.SSHError.message = "why are you trying :)"
         mock_manager.connect.side_effect = NcErrors.SSHError
-        from datetime import timedelta, datetime
+        from datetime import datetime, timedelta
 
         currenttime = datetime.now()
         mock_datetime.datetime.now.side_effect = [
@@ -309,7 +309,7 @@ class TestDevice(unittest.TestCase):
         mock_warn.assert_has_calls(
             [
                 call.warn(
-                    "fact-style old will be removed " "in a future release.",
+                    "fact-style old will be removed in a future release.",
                     RuntimeWarning,
                 )
             ]
@@ -394,7 +394,7 @@ class TestDevice(unittest.TestCase):
         mock_warn.assert_has_calls(
             [
                 call.warn(
-                    "fact-style old will be removed " "in a future release.",
+                    "fact-style old will be removed in a future release.",
                     RuntimeWarning,
                 )
             ]
@@ -761,7 +761,7 @@ class TestDevice(unittest.TestCase):
     def test_device_cli_output_warning(self, mock_warnings, mock_execute):
         mock_execute.side_effect = self._mock_manager
         data = self.dev.cli(
-            "show interfaces ge-0/0/0.0 routing-instance " "all media", format="xml"
+            "show interfaces ge-0/0/0.0 routing-instance all media", format="xml"
         )
         ip = data.findtext(
             'logical-interface[name="ge-0/0/0.0"]/'
@@ -911,7 +911,7 @@ class TestDevice(unittest.TestCase):
         with patch("jnpr.junos.device.socket"):
             self.assertTrue(
                 self.dev.probe(1),
-                "probe fn is not working for" " timeout greater than zero",
+                "probe fn is not working for timeout greater than zero",
             )
 
     def test_device_probe_timeout_exception(self):

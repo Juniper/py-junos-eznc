@@ -2,20 +2,21 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+from unittest.mock import MagicMock, PropertyMock, call, patch
+
 import nose2
-
-from lxml.etree import XML
-
+from jnpr.junos.decorators import (
+    ignoreWarnDecorator,
+    normalizeDecorator,
+    timeoutDecorator,
+)
 from jnpr.junos.device import Device
+from jnpr.junos.exception import ConfigLoadError, RpcError
 from jnpr.junos.utils.config import Config
-from jnpr.junos.exception import RpcError, ConfigLoadError
-from jnpr.junos.decorators import timeoutDecorator, normalizeDecorator
-from jnpr.junos.decorators import ignoreWarnDecorator
-
-from unittest.mock import patch, MagicMock, PropertyMock, call
-
-from ncclient.operations.rpc import RPCError
+from lxml.etree import XML
 from ncclient.manager import Manager, make_device_handler
+from ncclient.operations.rpc import RPCError
 from ncclient.transport import SSHSession
 from ncclient.xml_ import qualify
 

@@ -1,6 +1,6 @@
-from jnpr.junos.utils.fs import FS
 from jnpr.junos.exception import RpcError
 from jnpr.junos.jxml import INHERIT
+from jnpr.junos.utils.fs import FS
 from lxml.builder import E
 
 

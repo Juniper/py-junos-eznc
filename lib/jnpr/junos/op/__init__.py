@@ -1,9 +1,9 @@
-import sys
 import os
-import yaml
-
+import sys
 from importlib.abc import Loader, MetaPathFinder
 from importlib.util import spec_from_loader
+
+import yaml
 from jnpr.junos.factory.factory_loader import FactoryLoader
 
 __all__ = []

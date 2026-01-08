@@ -1,6 +1,6 @@
-from lxml import etree
 from jnpr.junos.exception import PermissionError
 from jnpr.junos.utils.fs import FS
+from lxml import etree
 
 
 def provides_facts():

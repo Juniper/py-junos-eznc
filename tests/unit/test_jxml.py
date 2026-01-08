@@ -1,14 +1,15 @@
 import os
 import unittest
 from io import StringIO
-import nose2
 from unittest.mock import patch
+
+import nose2
 from jnpr.junos.jxml import (
-    NAME,
     INSERT,
-    remove_namespaces,
+    NAME,
     cscript_conf,
     normalize_xslt,
+    remove_namespaces,
 )
 from lxml import etree
 from ncclient.xml_ import NCElement

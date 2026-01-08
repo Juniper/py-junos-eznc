@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 import inspect
 
 from jnpr.junos.utils.ssh_client import open_ssh_client

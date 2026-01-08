@@ -1,22 +1,19 @@
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
-import unittest
 import os
 import sys
+import unittest
+from unittest.mock import MagicMock, patch
 
 import nose2
 import yaml
-
 from jnpr.junos import Device
-
-from ncclient.manager import Manager, make_device_handler
-from ncclient.transport import SSHSession
-from lxml import etree
-from unittest.mock import MagicMock, patch
-
 from jnpr.junos.factory import loadyaml
 from jnpr.junos.factory.factory_loader import FactoryLoader
+from lxml import etree
+from ncclient.manager import Manager, make_device_handler
+from ncclient.transport import SSHSession
 
 try:
     _YAML_ = loadyaml("lib/jnpr/junos/cfgro/srx")

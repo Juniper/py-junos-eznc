@@ -1,9 +1,7 @@
-from lxml.builder import E
-
-from jnpr.junos.utils.util import Util
-from jnpr.junos.utils.start_shell import StartShell
-
 from jnpr.junos.exception import RpcError
+from jnpr.junos.utils.start_shell import StartShell
+from jnpr.junos.utils.util import Util
+from lxml.builder import E
 
 
 class FS(Util):
@@ -419,7 +417,7 @@ class FS(Util):
                     source=from_path,
                     destination=to_path,
                     routing_instance=routing_instance,
-                    **kvargs
+                    **kvargs,
                 )
         except:
             return False

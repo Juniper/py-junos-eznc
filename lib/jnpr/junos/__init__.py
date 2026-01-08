@@ -1,16 +1,16 @@
-from jnpr.junos.device import Device
+import json
+import logging
+
+import yaml
 from jnpr.junos.console import Console
+from jnpr.junos.device import Device
 from jnpr.junos.factory.to_json import PyEzJSONEncoder
-from jnpr.junos.facts.swver import version_info
-from jnpr.junos.facts.swver import version_yaml_representer
+from jnpr.junos.facts.swver import version_info, version_yaml_representer
+
+from . import exception
 from . import jxml
 from . import jxml as JXML
 from . import version
-from . import exception
-
-import json
-import yaml
-import logging
 
 __date__ = version.DATE
 

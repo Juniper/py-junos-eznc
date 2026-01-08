@@ -45,9 +45,9 @@ import jnpr.junos.facts.get_software_information
 import jnpr.junos.facts.get_virtual_chassis_information
 import jnpr.junos.facts.ifd_style
 import jnpr.junos.facts.iri_mapping
+import jnpr.junos.facts.is_linux
 import jnpr.junos.facts.personality
 import jnpr.junos.facts.swver
-import jnpr.junos.facts.is_linux
 import jnpr.junos.facts.vmhost
 
 

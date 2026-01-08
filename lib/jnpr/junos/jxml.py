@@ -1,7 +1,7 @@
+import six
+from lxml import etree
 from ncclient import manager
 from ncclient.xml_ import NCElement
-from lxml import etree
-import six
 
 """
   These are Junos XML 'helper' definitions use for generic XML processing

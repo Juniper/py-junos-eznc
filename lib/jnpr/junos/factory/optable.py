@@ -1,14 +1,15 @@
-from copy import deepcopy
 import logging
+from copy import deepcopy
 
-# 3rd-party
-from lxml import etree
-from lxml.builder import E
+from jnpr.junos.decorators import checkSAXParserDecorator
 
 # local
 from jnpr.junos.factory.table import Table
 from jnpr.junos.jxml import remove_namespaces, remove_namespaces_and_spaces
-from jnpr.junos.decorators import checkSAXParserDecorator
+
+# 3rd-party
+from lxml import etree
+from lxml.builder import E
 
 logger = logging.getLogger("jnpr.junos.factory.optable")
 
@@ -67,7 +68,7 @@ class OpTable(Table):
                 filter_xml = generate_sax_parser_input(self)
                 rpc_args["filter_xml"] = filter_xml
             except Exception as ex:
-                logger.debug("Not able to create SAX parser input due to " "'%s'" % ex)
+                logger.debug("Not able to create SAX parser input due to '%s'" % ex)
             self.D.transform = lambda: remove_namespaces_and_spaces
 
         self.D.transform = lambda: remove_namespaces_and_spaces

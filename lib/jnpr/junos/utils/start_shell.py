@@ -1,11 +1,12 @@
-from select import select
-import re
 import datetime
-from jnpr.junos.utils.ssh_client import open_ssh_client
+import re
 import subprocess
-import six
-from threading import Thread
 import time
+from select import select
+from threading import Thread
+
+import six
+from jnpr.junos.utils.ssh_client import open_ssh_client
 
 _JUNOS_PROMPT = "> "
 _SHELL_PROMPT = r"(%|#|\$)\s"

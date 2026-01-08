@@ -3,13 +3,14 @@ import os
 import re
 import warnings
 
-# 3rd-party modules
-from lxml import etree
+from jnpr.junos import jxml as JXML
 
 # package modules
 from jnpr.junos.exception import *
-from jnpr.junos import jxml as JXML
 from jnpr.junos.utils.util import Util
+
+# 3rd-party modules
+from lxml import etree
 
 """
 Configuration Utilities
@@ -251,8 +252,7 @@ class Config(Util):
         except RpcError as err:
             if (
                 err.rpc_error["severity"] == "warning"
-                and err.message == "mgd: statement must contain additional "
-                "statements"
+                and err.message == "mgd: statement must contain additional statements"
             ):
                 # Fix for Issue #655, JDM 15.1X53-D45 responses with
                 # extraneous warning message
@@ -833,10 +833,7 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error["severity"] == "warning":
-                    if (
-                        err.message != "uncommitted changes will be discarded "
-                        "on exit"
-                    ):
+                    if err.message != "uncommitted changes will be discarded on exit":
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:
@@ -856,10 +853,7 @@ class Config(Util):
                 raise err
             except RpcError as err:
                 if err.rpc_error["severity"] == "warning":
-                    if (
-                        err.message != "uncommitted changes will be discarded "
-                        "on exit"
-                    ):
+                    if err.message != "uncommitted changes will be discarded on exit":
                         warnings.warn(err.message, RuntimeWarning)
                     return True
                 else:

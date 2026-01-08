@@ -5,16 +5,17 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
-from unittest.mock import patch, MagicMock
-import os
 
+import os
+from unittest.mock import MagicMock, patch
+
+import nose2
 from jnpr.junos import Device
-from jnpr.junos.ofacts.swver import facts_software_version as software_version
+from jnpr.junos.exception import RpcError
 from jnpr.junos.ofacts.swver import _get_swver
+from jnpr.junos.ofacts.swver import facts_software_version as software_version
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from jnpr.junos.exception import RpcError
 
 
 class TestSwver(unittest.TestCase):

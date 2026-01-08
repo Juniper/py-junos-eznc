@@ -1,47 +1,44 @@
 # stdlib
-import os
-import six
-import types
-import platform
-import warnings
+import datetime
+import inspect
+import json
 import logging
+import os
+import platform
+import re
 
 # stdlib, in support of the the 'probe' method
 import socket
-import datetime
-import time
 import sys
-import json
-import re
+import time
+import types
+import warnings
 
-# 3rd-party packages
-from lxml import etree
-from ncclient import manager as netconf_ssh
-import ncclient.transport.errors as NcErrors
-from ncclient.transport.session import SessionListener
-import ncclient.operations.errors as NcOpErrors
-from ncclient.operations import RPCError
-import paramiko
 import jinja2
-
-# local modules
-from jnpr.junos.rpcmeta import _RpcMetaExec
+import ncclient.operations.errors as NcOpErrors
+import ncclient.transport.errors as NcErrors
+import paramiko
+import six
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.factcache import _FactCache
-from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import (
-    timeoutDecorator,
-    normalizeDecorator,
     ignoreWarnDecorator,
+    normalizeDecorator,
+    timeoutDecorator,
 )
-from jnpr.junos.exception import JSONLoadError, ConnectError
+from jnpr.junos.exception import ConnectError, JSONLoadError
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
+from jnpr.junos.rpcmeta import _RpcMetaExec
+from lxml import etree
+from ncclient import manager as netconf_ssh
+from ncclient.operations import RPCError
 
 # check for ncclient support for filter_xml. Remove these changes once ncclient
 # release filter_xml/SAX parsing feature
 # https://github.com/ncclient/ncclient/pull/324
 from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
-import inspect
+from ncclient.transport.session import SessionListener
 
 if sys.version_info[0] >= 3:
     NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
@@ -226,7 +223,7 @@ class _Connection(object):
             self._conn.timeout = int(value)
         except (ValueError, TypeError):
             raise RuntimeError(
-                "could not convert timeout value of %s to an " "integer" % (value)
+                "could not convert timeout value of %s to an integer" % (value)
             )
 
     # ------------------------------------------------------------------------

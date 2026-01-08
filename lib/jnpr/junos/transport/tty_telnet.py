@@ -1,8 +1,8 @@
-from time import sleep
 import logging
 import sys
-import six
+from time import sleep
 
+import six
 from jnpr.junos.transport._telnetlib import telnetlib
 from jnpr.junos.transport.tty import Terminal
 

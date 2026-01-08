@@ -2,9 +2,10 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import unittest
+from unittest.mock import patch
+
 import nose2
 from jnpr.junos.factory import FactoryLoader
-from unittest.mock import patch
 
 
 class TestFactoryLoader(unittest.TestCase):

@@ -7,7 +7,6 @@ from time import sleep, time
 
 import paramiko
 import six
-
 from jnpr.junos.transport.tty import Terminal
 
 logger = logging.getLogger("jnpr.junos.tty_ssh")

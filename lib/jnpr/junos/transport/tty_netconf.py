@@ -1,18 +1,18 @@
+import logging
 import re
-import time
-from lxml import etree
 import select
 import socket
-import logging
 import sys
+import time
+from datetime import datetime, timedelta
 
+import six
+from lxml import etree
 from lxml.builder import E
 from lxml.etree import XMLSyntaxError
-from datetime import datetime, timedelta
-from ncclient.operations.rpc import RPCReply, RPCError
-from ncclient.xml_ import to_ele
-import six
+from ncclient.operations.rpc import RPCError, RPCReply
 from ncclient.transport.session import HelloHandler
+from ncclient.xml_ import to_ele
 
 
 class PY6:

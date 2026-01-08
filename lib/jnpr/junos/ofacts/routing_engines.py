@@ -25,18 +25,15 @@ def facts_routing_engines(junos, facts):
 
     if vc_info is not None:
         facts["vc_mode"] = vc_info.findtext(".//virtual-chassis-mode")
-        if (
-            len(vc_info.xpath(".//virtual-chassis-id-information" "[@style='fabric']"))
-            > 0
-        ):
+        if len(vc_info.xpath(".//virtual-chassis-id-information[@style='fabric']")) > 0:
             facts["vc_fabric"] = True
         vc_list = vc_info.xpath(
-            ".//member-role[starts-with(.,'Master') " "or starts-with(.,'Backup')]"
+            ".//member-role[starts-with(.,'Master') or starts-with(.,'Backup')]"
         )
         if len(vc_list) > 1:
             facts["2RE"] = True
         for member_id in vc_info.xpath(
-            ".//member-role[starts-with(.,'Master')]" "/preceding-sibling::member-id"
+            ".//member-role[starts-with(.,'Master')]/preceding-sibling::member-id"
         ):
             master.append("RE{}".format(member_id.text))
 

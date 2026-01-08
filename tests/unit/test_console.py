@@ -2,20 +2,20 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-from jnpr.junos.utils.config import Config
-import nose2
-from unittest.mock import patch, MagicMock, call
-import re
-import sys
-import os
-from lxml import etree
-import six
-import socket
 
+import os
+import re
+import socket
+import sys
+from unittest.mock import MagicMock, call, patch
+
+import nose2
+import six
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
 from jnpr.junos.transport.tty_telnet import Terminal
-
+from jnpr.junos.utils.config import Config
+from lxml import etree
 
 if sys.version < "3":
     builtin_string = "__builtin__"
@@ -162,7 +162,7 @@ class TestConsole(unittest.TestCase):
     @patch("jnpr.junos.console.Console._tty_login")
     def test_console_tty_open_err(self, mock_login, mock_telnet):
         with patch(
-            "jnpr.junos.transport.tty_telnet." "telnetlib.Telnet.open"
+            "jnpr.junos.transport.tty_telnet.telnetlib.Telnet.open"
         ) as mock_open:
             mock_telnet.RETRY_OPEN = 1
             mock_login.side_effect = ValueError
