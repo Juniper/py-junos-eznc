@@ -54,7 +54,9 @@ def get_facts(device):
         except RpcError as err:
             # Probably a PTX.
             rpc_error = err.rpc_error or {}
-            bad_element = rpc_error.get("bad_element") if isinstance(rpc_error, dict) else None
+            bad_element = (
+                rpc_error.get("bad_element") if isinstance(rpc_error, dict) else None
+            )
             message = rpc_error.get("message") if isinstance(rpc_error, dict) else None
             if bad_element == "bridge":
                 switch_style = "NONE"

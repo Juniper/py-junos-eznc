@@ -154,7 +154,7 @@ class Resource(object):
         return None
 
     @manages.setter
-    def manages(self):
+    def manages(self, value):
         raise AttributeError("read-only")
 
     @property

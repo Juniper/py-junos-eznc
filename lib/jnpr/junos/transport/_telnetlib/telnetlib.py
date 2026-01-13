@@ -629,6 +629,7 @@ class Telnet:
             if not hasattr(list[i], "search"):
                 if regex_module is None:
                     import re as _re
+
                     regex_module = _re
                 # regex_module is now a ModuleType
                 list[i] = regex_module.compile(list[i])

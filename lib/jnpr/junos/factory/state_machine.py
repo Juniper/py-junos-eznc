@@ -350,20 +350,27 @@ class StateMachine(Machine):
             )
             for index, item in enumerate(columns):
                 columns[index] = item + [None] * (max_title_len - len(item))
-            col_parser = cast(Any, reduce(
-                lambda x, y: x & y, [pp.Literal(i[0]) for i in columns]  # type: ignore[arg-type]
-            ))
+            col_parser = cast(
+                Any,
+                reduce(
+                    lambda x, y: x & y,
+                    [pp.Literal(i[0]) for i in columns],  # type: ignore[arg-type]
+                ),
+            )
             for line in self._lines:
                 if self._parse_literal(line, col_parser):
                     for index in range(1, max_title_len):
-                        col_parser = cast(Any, reduce(
-                            lambda x, y: x & y,  # type: ignore[arg-type]
-                            [
-                                pp.Literal(i[index])
-                                for i in columns
-                                if i[index] is not None
-                            ],
-                        ))
+                        col_parser = cast(
+                            Any,
+                            reduce(
+                                lambda x, y: x & y,  # type: ignore[arg-type]
+                                [
+                                    pp.Literal(i[index])
+                                    for i in columns
+                                    if i[index] is not None
+                                ],
+                            ),
+                        )
                         if self._parse_literal(
                             self._lines[self._lines.index(line) + 1], col_parser
                         ):
@@ -378,9 +385,13 @@ class StateMachine(Machine):
                 else:
                     continue
         else:
-            col_parser_single = cast(Any, reduce(
-                lambda x, y: x & y, [pp.Literal(i) for i in columns]  # type: ignore[arg-type]
-            ))
+            col_parser_single = cast(
+                Any,
+                reduce(
+                    lambda x, y: x & y,
+                    [pp.Literal(i) for i in columns],  # type: ignore[arg-type]
+                ),
+            )
             for line in self._lines:
                 if self._parse_literal(line, col_parser_single):
                     d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
