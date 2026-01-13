@@ -3,8 +3,8 @@ __credits__ = "Jeremy Schulman"
 
 import unittest
 from unittest.mock import patch
-import nose2
 
+import nose2
 from jnpr.junos import Device
 from jnpr.junos.ofacts.ifd_style import facts_ifd_style as ifd_style
 

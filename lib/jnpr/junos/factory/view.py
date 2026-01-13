@@ -1,13 +1,13 @@
+import json
+import sys
 import warnings
 from contextlib import contextmanager
 from copy import deepcopy
-from lxml import etree
-import json
-import sys
-from jinja2 import Template, meta
 
-from jnpr.junos.factory.viewfields import ViewFields
+from jinja2 import Template, meta
 from jnpr.junos.factory.to_json import TableViewJSONEncoder
+from jnpr.junos.factory.viewfields import ViewFields
+from lxml import etree
 
 
 class View(object):

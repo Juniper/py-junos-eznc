@@ -1,6 +1,13 @@
-## Release 2.7.5.dev0 - 30 Apr 2025
+## Release 2.7.6.dev0 - 23 Sep 2025
 ## Features Added
 ## Bugs Fixed
+None
+
+## Release 2.7.5 - 22 Sep 2025
+## Features Added
+- Support for ncclient 0.7.0
+## Bugs Fixed
+None
 
 ## Release 2.7.4 - 30 Apr 2025
 ## Features Added

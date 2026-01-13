@@ -1,12 +1,12 @@
-from collections import OrderedDict
-from functools import reduce
-import re
 import copy
 import logging
+import re
+from collections import OrderedDict
+from functools import reduce
 
+import pyparsing as pp
 from jinja2 import Template, meta
 from transitions import Machine
-import pyparsing as pp
 
 logger = logging.getLogger("jnpr.junos.factory.state_machine")
 
@@ -283,7 +283,7 @@ class StateMachine(Machine):
                     else [self._table.KEY]
                 ):
                     raise KeyError(
-                        "Table with grouped item must contain " "corresponding key(s)"
+                        "Table with grouped item must contain corresponding key(s)"
                     )
                 master_key = groups[0] if len(groups) == 1 else tuple(groups)
                 self._data[master_key] = {}

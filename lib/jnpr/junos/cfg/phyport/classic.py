@@ -1,10 +1,7 @@
-# 3rd-party
-from lxml.builder import E
-
-# local
-from jnpr.junos.cfg.resource import Resource
 from jnpr.junos import JXML
 from jnpr.junos.cfg.phyport.base import PhyPortBase
+from jnpr.junos.cfg.resource import Resource
+from lxml.builder import E
 
 
 class PhyPortClassic(PhyPortBase):

@@ -1,9 +1,9 @@
-import re
 import logging
+import re
 
-from jnpr.junos.facts.swver import version_info
-from jnpr.junos.exception import RpcError
 from jnpr.junos import jxml as JXML
+from jnpr.junos.exception import RpcError
+from jnpr.junos.facts.swver import version_info
 
 logger = logging.getLogger("jnpr.junos.facts.get_software_information")
 
@@ -96,8 +96,7 @@ def provides_facts():
         "second level key is 'text' for the version as a "
         "string and 'object' for the version as a "
         "version_info object.",
-        "hostname": "A string containing the hostname of the current "
-        "Routing Engine.",
+        "hostname": "A string containing the hostname of the current Routing Engine.",
         "hostname_info": "A dictionary keyed on Routing Engine name. The "
         "value of each key is the hostname of the "
         "Routing Engine.",

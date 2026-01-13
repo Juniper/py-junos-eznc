@@ -1,7 +1,6 @@
 # Import any exceptions raised in this module.
 from jnpr.junos.exception import RpcError
 
-
 # In general, a "fact" should be a piece of information that does not change
 # over the life of a PyEZ connection. While things like mastership state can
 # change, they also result in the PyEZ connection being closed, so it can

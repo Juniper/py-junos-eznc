@@ -13,8 +13,7 @@ def provides_facts():
         "the device is CAPABLE of joining a VC.",
         "vc_mode": "A string indicating the current virtual chassis "
         "mode of the device.",
-        "vc_fabric": "A boolean indicating if the device is currently in "
-        "fabric mode.",
+        "vc_fabric": "A boolean indicating if the device is currently in fabric mode.",
         "vc_master": "A string indicating the chassis/node which is "
         "currently the master of the VC.",
     }

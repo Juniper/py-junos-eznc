@@ -1,0 +1,10 @@
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "PL"]
+exclude = ["docs", "build", "tests", "samples", "setup.py", "versioneer.py"]
+
+[tool.ruff.format]
+quote-style = "double"

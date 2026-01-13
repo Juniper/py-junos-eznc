@@ -1,11 +1,11 @@
-from copy import deepcopy
 import re
+from copy import deepcopy
 
+from jnpr.junos import jxml
+from jnpr.junos.factory.table import Table
+from jnpr.junos.utils.config import Config
 from lxml import etree
 from lxml.builder import E
-from jnpr.junos.factory.table import Table
-from jnpr.junos import jxml
-from jnpr.junos.utils.config import Config
 
 
 class CfgTable(Table):
@@ -195,16 +195,16 @@ class CfgTable(Table):
             if isinstance(enum_value, list):
                 if value not in enum_value:
                     raise ValueError(
-                        "Invalid value %s assigned " "to field %s" % (value, field_name)
+                        "Invalid value %s assigned to field %s" % (value, field_name)
                     )
             elif isinstance(enum_value, str):
                 if not value == enum_value:
                     raise ValueError(
-                        "Invalid value %s assigned " "to field %s" % (value, field_name)
+                        "Invalid value %s assigned to field %s" % (value, field_name)
                     )
             else:
                 raise TypeError(
-                    "Value of enum should " "be either a string or list of strings.\n"
+                    "Value of enum should be either a string or list of strings.\n"
                 )
 
         def _validate_type(field_name, value, opt):
@@ -234,14 +234,12 @@ class CfgTable(Table):
             if isinstance(value, (int, float)):
                 if value < opt["minValue"] or value > opt["maxValue"]:
                     raise ValueError(
-                        "Invalid value %s assigned "
-                        "to field %s.\n" % (value, field_name)
+                        "Invalid value %s assigned to field %s.\n" % (value, field_name)
                     )
             elif isinstance(value, str):
                 if len(value) < opt["minValue"] or len(value) > opt["maxValue"]:
                     raise ValueError(
-                        "Invalid value %s assigned "
-                        "to field %s.\n" % (value, field_name)
+                        "Invalid value %s assigned to field %s.\n" % (value, field_name)
                     )
 
         if isinstance(value, dict):
@@ -622,7 +620,7 @@ class CfgTable(Table):
         """
         if self._is_field_set:
             raise RuntimeError(
-                "Field value is changed, append() " "must be called before set()"
+                "Field value is changed, append() must be called before set()"
             )
 
         self.lock()
@@ -698,7 +696,7 @@ class CfgTable(Table):
         """
         if self._is_field_set:
             raise RuntimeError(
-                "Field value is changed, append() " "must be called before load()"
+                "Field value is changed, append() must be called before load()"
             )
 
         # pass up to config class load() api, with xml object as vargs[0].

@@ -1,5 +1,5 @@
-from time import sleep
 import logging
+from time import sleep
 
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.transport.tty_netconf import tty_netconf

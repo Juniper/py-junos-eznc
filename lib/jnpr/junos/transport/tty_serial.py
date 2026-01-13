@@ -1,9 +1,9 @@
-import serial
 import re
-import six
-from time import sleep
 from datetime import datetime, timedelta
+from time import sleep
 
+import serial
+import six
 from jnpr.junos.transport.tty import Terminal
 
 # -------------------------------------------------------------------------

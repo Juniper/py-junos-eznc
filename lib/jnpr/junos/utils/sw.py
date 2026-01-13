@@ -1,9 +1,10 @@
 # stdlib
 from __future__ import print_function
+
 import hashlib
 import re
-from os import path
 import sys
+from os import path
 
 try:
     # Python 3.x
@@ -13,18 +14,18 @@ except ImportError:
     from urlparse import urlparse
 
 # 3rd-party modules
-from lxml.builder import E
-from lxml import etree
+from jnpr.junos import jxml as JXML
 
 # local modules
 from jnpr.junos.decorators import timeoutDecorator
-from jnpr.junos.utils.util import Util
-from jnpr.junos.utils.scp import SCP
+from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError
 from jnpr.junos.utils.ftp import FTP
+from jnpr.junos.utils.scp import SCP
 from jnpr.junos.utils.start_shell import StartShell
-from jnpr.junos.exception import SwRollbackError, RpcTimeoutError, RpcError
+from jnpr.junos.utils.util import Util
+from lxml import etree
+from lxml.builder import E
 from ncclient.xml_ import NCElement
-from jnpr.junos import jxml as JXML
 
 """
 Software Installation Utilities
@@ -413,7 +414,7 @@ class SW(Util):
             # request-shell-execute rpc is not available for <14.1
             with StartShell(self._dev) as ss:
                 ss.run("cli", "> ", timeout=5)
-                if ss.run("request routing-engine " "login other-routing-engine")[0]:
+                if ss.run("request routing-engine login other-routing-engine")[0]:
                     # depending on user permission, prompt will go to either
                     # cli or shell, below line of code prompt will finally end
                     # up in cli mode
@@ -423,12 +424,12 @@ class SW(Util):
                     ss.run("exit")
                 else:
                     self.log(
-                        "Requirement FAILED: Not able run " '"show system switchover"'
+                        'Requirement FAILED: Not able run "show system switchover"'
                     )
                     return False
         gres_status = re.search(r"Graceful switchover: (\w+)", output, re.I)
         if not (gres_status is not None and gres_status.group(1).lower() == "on"):
-            self.log("Requirement FAILED: Graceful switchover status " "is not On")
+            self.log("Requirement FAILED: Graceful switchover status is not On")
             return False
         self.log("Graceful switchover status is On")
         return True
@@ -465,7 +466,7 @@ class SW(Util):
             },
         )
         if conf.find("chassis/redundancy/graceful-switchover") is None:
-            self.log("Requirement FAILED: GRES is not Enabled " "in configuration")
+            self.log("Requirement FAILED: GRES is not Enabled in configuration")
             return False
         self.log("Checking commit synchronize configuration")
         conf = self._dev.rpc.get_config(
@@ -487,8 +488,7 @@ class SW(Util):
         )
         if conf.find("system/commit/synchronize") is None:
             self.log(
-                "Requirement FAILED: commit synchronize is not "
-                "Enabled in configuration"
+                "Requirement FAILED: commit synchronize is not Enabled in configuration"
             )
             return False
         self.log("Checking NSR configuration")
@@ -709,7 +709,7 @@ class SW(Util):
         all_re=True,
         member_id=None,
         vmhost=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Performs the complete installation of the **package** that includes the
@@ -757,7 +757,7 @@ class SW(Util):
                       * MX virtual-chassis
 
         You can get a progress report on this process by providing a
-        **progress** callback.
+        ``progress`` callback.
 
         .. note:: You will need to invoke the :meth:`reboot` method explicitly
                    to reboot the device.
@@ -865,9 +865,10 @@ class SW(Util):
           (Optional) A boolean indicating if this is a software update of the
           vhmhost. The default is ``vmhost=False``.
 
-        :param kwargs **kwargs:
-          (Optional) Additional keyword arguments are passed through to the
-          "package add" RPC.
+        :param dict kwargs:
+          (Optional) Additional keyword arguments passed through to the
+          ``package add`` RPC. Use dash-to-underscore conversion for RPC
+          parameters when passing them in via Python kwargs.
 
         :returns: tuple(<status>, <msg>)
             * status : ``True`` when the installation is successful and ``False`` otherwise
@@ -1018,7 +1019,7 @@ class SW(Util):
                                 vmhost=vmhost,
                                 member=vc_id,
                                 dev_timeout=timeout,
-                                **kwargs
+                                **kwargs,
                             )
                             ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
@@ -1052,7 +1053,7 @@ class SW(Util):
                             vmhost=vmhost,
                             member=vc_id,
                             dev_timeout=timeout,
-                            **kwargs
+                            **kwargs,
                         )
                         ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok
@@ -1074,7 +1075,7 @@ class SW(Util):
                             vmhost=vmhost,
                             re0=True,
                             dev_timeout=timeout,
-                            **kwargs
+                            **kwargs,
                         )
                         _progress(
                             "installing software on RE1 ... please be patient ..."
@@ -1084,7 +1085,7 @@ class SW(Util):
                             vmhost=vmhost,
                             re1=True,
                             dev_timeout=timeout,
-                            **kwargs
+                            **kwargs,
                         )
                     ok = ok[0] and bool_ret, ok[1] + "\n" + msg
                     return ok

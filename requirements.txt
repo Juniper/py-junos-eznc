@@ -1,12 +1,12 @@
 lxml>=3.2.4
 # ncclient version 0.6.10 and 0.6.16 has issues with PyEZ(junos-eznc) and needs to be avoided
-ncclient==0.6.15
+ncclient==0.7.0
 scp>=0.7.0
 jinja2>=2.7.1
 PyYAML>=5.1
 paramiko>=3.5.0
 six
 pyserial
-yamlordereddictloader
+yamlloader
 pyparsing
 transitions

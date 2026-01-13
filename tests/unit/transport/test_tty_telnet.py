@@ -4,10 +4,12 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
+
 from unittest.mock import MagicMock, patch
-from jnpr.junos.transport.tty_telnet import Telnet
+
+import nose2
 import six
+from jnpr.junos.transport.tty_telnet import Telnet
 
 
 class TestTTYTelnet(unittest.TestCase):

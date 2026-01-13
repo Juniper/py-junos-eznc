@@ -1,17 +1,16 @@
-import unittest
 import os
 import re
-import nose2
+import unittest
+from unittest.mock import MagicMock, call, patch
 
+import nose2
 from jnpr.junos.device import Device
-from jnpr.junos.rpcmeta import _RpcMetaExec
+from jnpr.junos.exception import JSONLoadError
 from jnpr.junos.facts.swver import version_info
+from jnpr.junos.rpcmeta import _RpcMetaExec
+from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-from jnpr.junos.exception import JSONLoadError
-
-from unittest.mock import patch, MagicMock, call
-from lxml import etree
 
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"

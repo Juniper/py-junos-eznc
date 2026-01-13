@@ -1,47 +1,44 @@
 # stdlib
-import os
-import six
-import types
-import platform
-import warnings
+import datetime
+import inspect
+import json
 import logging
+import os
+import platform
+import re
 
 # stdlib, in support of the the 'probe' method
 import socket
-import datetime
-import time
 import sys
-import json
-import re
+import time
+import types
+import warnings
 
-# 3rd-party packages
-from lxml import etree
-from ncclient import manager as netconf_ssh
-import ncclient.transport.errors as NcErrors
-from ncclient.transport.session import SessionListener
-import ncclient.operations.errors as NcOpErrors
-from ncclient.operations import RPCError
-import paramiko
 import jinja2
-
-# local modules
-from jnpr.junos.rpcmeta import _RpcMetaExec
+import ncclient.operations.errors as NcOpErrors
+import ncclient.transport.errors as NcErrors
+import paramiko
+import six
 from jnpr.junos import exception as EzErrors
-from jnpr.junos.factcache import _FactCache
-from jnpr.junos.ofacts import *
 from jnpr.junos import jxml as JXML
 from jnpr.junos.decorators import (
-    timeoutDecorator,
-    normalizeDecorator,
     ignoreWarnDecorator,
+    normalizeDecorator,
+    timeoutDecorator,
 )
-from jnpr.junos.exception import JSONLoadError, ConnectError
+from jnpr.junos.exception import ConnectError, JSONLoadError
+from jnpr.junos.factcache import _FactCache
+from jnpr.junos.ofacts import *
+from jnpr.junos.rpcmeta import _RpcMetaExec
+from lxml import etree
+from ncclient import manager as netconf_ssh
+from ncclient.operations import RPCError
 
 # check for ncclient support for filter_xml. Remove these changes once ncclient
 # release filter_xml/SAX parsing feature
 # https://github.com/ncclient/ncclient/pull/324
 from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
-import inspect
+from ncclient.transport.session import SessionListener
 
 if sys.version_info[0] >= 3:
     NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
@@ -226,7 +223,7 @@ class _Connection(object):
             self._conn.timeout = int(value)
         except (ValueError, TypeError):
             raise RuntimeError(
-                "could not convert timeout value of %s to an " "integer" % (value)
+                "could not convert timeout value of %s to an integer" % (value)
             )
 
     # ------------------------------------------------------------------------
@@ -1217,6 +1214,14 @@ class Device(_Connection):
             *OPTIONAL* To disable public key authentication.
             default is ``None``.
 
+        :param bool allow_agent:
+            *OPTIONAL* Specifies whether to use keys provided by an SSH agent for authentication.
+            If set to ``True``, the SSH connection will use any keys loaded in the agent.
+            If set to ``False``, keys from the SSH agent will not be used.
+            If set to ``None``, the default behavior is applied: agent keys are used only if
+            both password and private key file are not provided.
+            Default is ``None``.
+
         :param str bind_addr:
             *OPTIONAL* To use (local) source IP address.
             default is ``None``.
@@ -1243,6 +1248,7 @@ class Device(_Connection):
         self._huge_tree = kvargs.get("huge_tree", False)
         self._conn_open_timeout = kvargs.get("conn_open_timeout", 30)
         self._look_for_keys = kvargs.get("look_for_keys", None)
+        self._allow_agent = kvargs.get("allow_agent", None)
         self._bind_addr = kvargs.get("bind_addr", None)
         self._hostkey_verify = kvargs.get("hostkey_verify", False)
         if self._fact_style != "new":
@@ -1367,9 +1373,14 @@ class Device(_Connection):
             # in this condition it means we want to query the agent
             # for available ssh keys
 
-            allow_agent = bool(
-                (self._auth_password is None) and (self._ssh_private_key_file is None)
-            )
+            if self._allow_agent is not None:
+                allow_agent = self._allow_agent
+            else:
+                # Default behaviour if allow_agent is None
+                allow_agent = bool(
+                    (self._auth_password is None)
+                    and (self._ssh_private_key_file is None)
+                )
 
             # option to disable ncclient transport ssh authentication
             # using public keys look_for_keys=False

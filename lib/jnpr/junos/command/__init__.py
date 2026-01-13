@@ -4,8 +4,8 @@ from importlib.abc import Loader, MetaPathFinder
 from importlib.util import spec_from_loader
 
 import yaml
-import yamlordereddictloader
 from jnpr.junos.factory.factory_loader import FactoryLoader
+from yamlloader import ordereddict
 
 __all__ = []
 
@@ -32,7 +32,7 @@ class MetaPathLoader(Loader):
         with open(os.path.join(os.path.dirname(__file__), mod + ".yml"), "r") as stream:
             try:
                 modules = FactoryLoader().load(
-                    yaml.load(stream, Loader=yamlordereddictloader.Loader)
+                    yaml.load(stream, Loader=ordereddict.Loader)
                 )
             except yaml.YAMLError as exc:
                 raise ImportError("%s is not loaded" % mod)

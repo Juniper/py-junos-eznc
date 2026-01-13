@@ -1,4 +1,5 @@
 import re
+
 from jnpr.junos.facts.swver import version_info
 
 
@@ -75,7 +76,7 @@ def facts_software_version(junos, facts):
             if not swinfo:
                 # For < 15.1, get version from the "junos" package.
                 pkginfo = re_sw.xpath(
-                    "package-information[normalize-space(name)=" '"junos"]/comment'
+                    'package-information[normalize-space(name)="junos"]/comment'
                 )[0].text
                 try:
                     swinfo = re.findall(r"\[(.*)\]", pkginfo)[0]

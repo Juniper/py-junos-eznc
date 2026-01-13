@@ -3,13 +3,11 @@ from copy import deepcopy
 
 # local
 from jnpr.junos.factory.cfgtable import CfgTable
-from jnpr.junos.factory.optable import OpTable
 from jnpr.junos.factory.cmdtable import CMDTable
-from jnpr.junos.factory.table import Table
-
-from jnpr.junos.factory.view import View
 from jnpr.junos.factory.cmdview import CMDView
-
+from jnpr.junos.factory.optable import OpTable
+from jnpr.junos.factory.table import Table
+from jnpr.junos.factory.view import View
 from jnpr.junos.utils.config import Config
 
 
@@ -63,7 +61,7 @@ def FactoryCMDTable(
     eval=None,
     platform="juniper_junos",
     use_textfsm=False,
-    **kwargs
+    **kwargs,
 ):
     new_cls = type(table_name, (CMDTable,), {})
     new_cls.GET_CMD = cmd

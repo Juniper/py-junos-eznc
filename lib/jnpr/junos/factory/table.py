@@ -1,14 +1,14 @@
 # stdlib
+import json
+import os
+from datetime import datetime
 from inspect import isclass
 from time import time
-from datetime import datetime
-import os
+
+from jnpr.junos.factory.to_json import TableJSONEncoder
 
 # 3rd-party
 from lxml import etree
-
-import json
-from jnpr.junos.factory.to_json import TableJSONEncoder
 
 _TSFMT = "%Y%m%d%H%M%S"
 

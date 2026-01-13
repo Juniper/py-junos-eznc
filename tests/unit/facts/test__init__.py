@@ -5,11 +5,12 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
+
 import importlib
 import sys
 
 import jnpr.junos.facts
+import nose2
 
 
 class TestFactInitialization(unittest.TestCase):

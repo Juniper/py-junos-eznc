@@ -2,10 +2,14 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-import nose2
 
-from jnpr.junos.factory.factory_cls import FactoryCfgTable, FactoryOpTable
-from jnpr.junos.factory.factory_cls import FactoryTable, FactoryView
+import nose2
+from jnpr.junos.factory.factory_cls import (
+    FactoryCfgTable,
+    FactoryOpTable,
+    FactoryTable,
+    FactoryView,
+)
 
 
 class TestFactoryCls(unittest.TestCase):

@@ -1,5 +1,4 @@
-from jnpr.junos.exception import ConnectNotMasterError
-from jnpr.junos.exception import RpcError
+from jnpr.junos.exception import ConnectNotMasterError, RpcError
 
 
 def provides_facts():

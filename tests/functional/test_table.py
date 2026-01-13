@@ -5,8 +5,9 @@ try:
 except ImportError:
     import unittest
 
-from jnpr.junos.op.routes import RouteTable
 import json
+
+from jnpr.junos.op.routes import RouteTable
 
 
 class TestTable(unittest.TestCase):

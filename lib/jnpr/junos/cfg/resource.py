@@ -1,12 +1,12 @@
 # stdlib
-from pprint import pformat
 from copy import deepcopy
-
-# 3rd-party
-from lxml.builder import E
+from pprint import pformat
 
 # package modules
 from jnpr.junos import jxml as JXML
+
+# 3rd-party
+from lxml.builder import E
 
 P_JUNOS_EXISTS = "_exists"
 P_JUNOS_ACTIVE = "_active"

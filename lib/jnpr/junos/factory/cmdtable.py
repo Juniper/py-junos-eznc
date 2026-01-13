@@ -1,21 +1,22 @@
-import re
 import copy
-
-# https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+import json
 
 # stdlib
 import os
+import re
 from inspect import isclass
-from lxml import etree
-import json
+
+from jinja2 import Template
 
 # local
 from jnpr.junos.exception import RpcError
-from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.factory.state_machine import StateMachine
 from jnpr.junos.factory.to_json import TableJSONEncoder
+from jnpr.junos.utils.start_shell import StartShell
+from lxml import etree
 
-from jinja2 import Template
+# https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+
 
 HAS_NTC_TEMPLATE = False
 try:
@@ -388,7 +389,7 @@ class CMDTable(object):
             cli_table_size = cli_table.size
             if cli_table_size > 1:
                 raise KeyError(
-                    "Key is Mandatory for parsed o/p of %s " "length" % cli_table_size
+                    "Key is Mandatory for parsed o/p of %s length" % cli_table_size
                 )
             elif cli_table_size == 1:
                 temp_dict = self._parse_row(cli_table[1], cli_table, reverse_fields)

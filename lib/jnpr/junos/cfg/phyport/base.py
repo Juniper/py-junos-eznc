@@ -1,8 +1,5 @@
-# 3rd-party
-from lxml.builder import E
-
-# local module
 from jnpr.junos.cfg.resource import Resource
+from lxml.builder import E
 
 
 class PhyPortBase(Resource):

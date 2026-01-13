@@ -2,8 +2,8 @@ __author__ = "Rick Sherman"
 __credits__ = "Jeremy Schulman"
 
 import unittest
-import nose2
 
+import nose2
 from jnpr.junos.factory.viewfields import ViewFields
 
 

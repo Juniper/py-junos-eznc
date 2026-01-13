@@ -1,12 +1,12 @@
 # stdlib
-from functools import wraps
 import re
 import sys
+from functools import wraps
 
+from jnpr.junos import jxml as JXML
 from lxml import etree
 from ncclient.operations.rpc import RPCError
 from ncclient.xml_ import NCElement
-from jnpr.junos import jxml as JXML
 
 
 def timeoutDecorator(function):

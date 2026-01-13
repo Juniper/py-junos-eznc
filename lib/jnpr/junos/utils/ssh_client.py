@@ -48,6 +48,6 @@ def open_ssh_client(dev):
         username=dev._auth_user,
         password=dev._auth_password,
         sock=sock,
-        **kwargs
+        **kwargs,
     )
     return ssh_client

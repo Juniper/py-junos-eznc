@@ -5,8 +5,10 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import nose2
+
 from unittest.mock import MagicMock, patch
+
+import nose2
 from jnpr.junos.transport.tty_ssh import SSH
 
 
