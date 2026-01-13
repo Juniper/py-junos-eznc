@@ -1,13 +1,9 @@
 import json
 from copy import deepcopy
+from collections.abc import MutableMapping
 
 from jnpr.junos.jxml import strip_comments_transform
 from lxml import etree
-
-try:
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
 
 
 class TableJSONEncoder(json.JSONEncoder):

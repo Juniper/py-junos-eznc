@@ -1,19 +1,26 @@
+from typing import Any, ClassVar, Dict, List, Optional
+
+
 class CMDView(object):
     """
     View is the base-class that makes extracting values from XML
     data appear as objects with attributes.
     """
 
-    KEY = "name"
-    KEY_ITEMS = []
-    COLUMNS = {}
-    FILTERS = None
-    FIELDS = {}
-    REGEX = {}
-    EXISTS = {}
-    GROUPS = None
-    TITLE = None
-    EVAL = {}
+    KEY: ClassVar[str] = "name"
+    KEY_ITEMS: ClassVar[List[str]] = []
+    COLUMNS: ClassVar[Dict[str, Any]] = {}
+    FILTERS: ClassVar[Optional[Any]] = None
+    FIELDS: ClassVar[Dict[str, Any]] = {}
+    REGEX: ClassVar[Dict[str, Any]] = {}
+    EXISTS: ClassVar[Dict[str, Any]] = {}
+    GROUPS: ClassVar[Optional[Any]] = None
+    TITLE: ClassVar[Optional[str]] = None
+    EVAL: ClassVar[Dict[str, Any]] = {}
+
+    _table: Any
+    _xml: Any
+    name: Optional[str]
 
     # -------------------------------------------------------------------------
     # PROPERTIES

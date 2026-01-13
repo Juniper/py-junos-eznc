@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from typing import Optional
 
 from jnpr.junos.decorators import checkSAXParserDecorator
 
@@ -15,6 +16,10 @@ logger = logging.getLogger("jnpr.junos.factory.optable")
 
 
 class OpTable(Table):
+    # Default RPC and args placeholders to satisfy type checkers; subclasses override.
+    GET_ARGS: dict = {}
+    GET_RPC: str = ""
+    GET_KEY: Optional[str] = None
     # -------------------------------------------------------------------------
     # PUBLIC METHODS
     # -------------------------------------------------------------------------
@@ -78,8 +83,10 @@ class OpTable(Table):
             rpc_args.update(kvargs.pop("args"))
         rpc_args.update(kvargs)  # copy caller provided args
 
-        if hasattr(self, "GET_KEY") and argkey is not None:
-            rpc_args.update({self.GET_KEY: argkey})
+        if argkey is not None:
+            get_key = getattr(self, "GET_KEY", None)
+            if get_key is not None:
+                rpc_args.update({get_key: argkey})
 
         # execute the Junos RPC to retrieve the table
         self.xml = getattr(self.RPC, self.GET_RPC)(**rpc_args)

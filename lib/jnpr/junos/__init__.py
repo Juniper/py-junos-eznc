@@ -18,7 +18,7 @@ __date__ = version.DATE
 # __date__ = time.strftime("%Y-%b-%d")
 
 # Set default JSON encoder
-json._default_encoder = PyEzJSONEncoder()
+setattr(json, "_default_encoder", PyEzJSONEncoder())
 
 # Disable ignore_aliases for YAML dumper
 # To support version_info

@@ -118,9 +118,9 @@ class tty_netconf(object):
         """
         if not cmd.startswith("<"):
             cmd = "<{}/>".format(cmd)
-        rpc = six.b("<rpc>{}</rpc>".format(cmd))
-        logger.info("Calling rpc: %s" % rpc)
-        self._tty.rawwrite(rpc)
+        rpc_bytes = six.b("<rpc>{}</rpc>".format(cmd))
+        logger.info("Calling rpc: %s", rpc_bytes.decode("utf-8", "replace"))
+        self._tty.rawwrite(rpc_bytes)
 
         rsp = self._receive()
         rsp = rsp.decode("utf-8") if isinstance(rsp, bytes) else rsp
@@ -199,7 +199,7 @@ class tty_netconf(object):
         try:
             rxbuf = [i.strip() for i in rxbuf if i.strip() != PY6.EMPTY_STR]
             rcvd_data = PY6.NEW_LINE.join(rxbuf)
-            logger.debug("Received: \n%s" % rcvd_data)
+            logger.debug("Received: \n%s", rcvd_data)
             parser = etree.XMLParser(
                 remove_blank_text=True, huge_tree=self._tty._huge_tree
             )
