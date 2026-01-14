@@ -13,7 +13,7 @@ def get_facts(device):
     """
     Determines ifd_style fact based on the personality.
     """
-    ifd_style = "CLASSIC"
+    ifd_style: str | None = "CLASSIC"
 
     if device.facts["personality"] == "SWITCH":
         ifd_style = "SWITCH"

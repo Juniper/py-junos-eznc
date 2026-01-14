@@ -1,15 +1,19 @@
 import re
+from typing import Optional, Tuple, Union
 
 
 class version_info(object):
     def __init__(self, verstr):
         """verstr - version string"""
         m1 = re.match("(.*?)([RBIXSF-])(.*)", verstr)
+        if m1 is None:
+            raise ValueError("Invalid version string: %s" % verstr)
         self.type = m1.group(2)
 
-        self.major = tuple(map(int, m1.group(1).split(".")))  # creates tuyple
+        self.major = tuple(map(int, m1.group(1).split(".")))  # creates tuple
         after_type = m1.group(3).split(".")
         self.minor = after_type[0]
+        self.build: Optional[Union[int, str]]
 
         if "X" == self.type:
             # assumes form similar to "45-D10", so extract the bits from this
@@ -22,7 +26,7 @@ class version_info(object):
                     try:
                         # handling case for EVO format X100-202310100600.0-EVO
                         self.build = int(after_type[1])
-                    except:
+                    except Exception:
                         self.build = None
 
             # X type not hyphen format, perhaps "11.4X12.1", just extract
@@ -34,7 +38,7 @@ class version_info(object):
                     try:
                         # handling case for EVO format X50.17-EVO
                         self.build = int(after_type[1])
-                    except:
+                    except Exception:
                         self.build = None
 
         elif ("I" == self.type) or ("-" == self.type):
@@ -42,12 +46,12 @@ class version_info(object):
             try:
                 # assumes that we have a build/spin, but not numeric
                 self.build = after_type[1]
-            except:
+            except Exception:
                 self.build = None
         else:
             try:
                 self.build = int(after_type[1])  # assumes numeric build/spin
-            except:
+            except Exception:
                 self.build = after_type[0]  # non-numeric
 
         self.as_tuple = self.major + tuple([self.type, self.minor, self.build])

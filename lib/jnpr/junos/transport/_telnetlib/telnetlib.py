@@ -32,6 +32,8 @@ To do:
 """
 
 import selectors
+from types import ModuleType
+from typing import Any, Optional, Type
 import socket
 
 # Imported modules
@@ -136,9 +138,11 @@ NOOPT = bytes([0])
 # poll/select have the advantage of not requiring any extra file descriptor,
 # contrarily to epoll/kqueue (also, they require a single syscall).
 if hasattr(selectors, "PollSelector"):
-    _TelnetSelector = selectors.PollSelector
+    _TelnetSelector: Type[selectors.BaseSelector] = selectors.PollSelector
 else:
     _TelnetSelector = selectors.SelectSelector
+
+_GLOBAL_DEFAULT_TIMEOUT: Any = getattr(socket, "_GLOBAL_DEFAULT_TIMEOUT", None)
 
 
 class Telnet:
@@ -197,7 +201,7 @@ class Telnet:
 
     sock = None  # for __del__()
 
-    def __init__(self, host=None, port=0, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def __init__(self, host=None, port=0, timeout=_GLOBAL_DEFAULT_TIMEOUT):
         """Constructor.
 
         When called without arguments, create an unconnected instance.
@@ -220,7 +224,7 @@ class Telnet:
         if host is not None:
             self.open(host, port, timeout)
 
-    def open(self, host, port=0, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def open(self, host, port=0, timeout=_GLOBAL_DEFAULT_TIMEOUT):
         """Connect to a host.
 
         The optional second argument is the port number, which
@@ -279,6 +283,8 @@ class Telnet:
 
     def fileno(self):
         """Return the fileno() of the socket object used internally."""
+        if self.sock is None:
+            raise RuntimeError("Socket is not connected")
         return self.sock.fileno()
 
     def write(self, buffer):
@@ -292,6 +298,8 @@ class Telnet:
             buffer = buffer.replace(IAC, IAC + IAC)
         sys.audit("telnetlib.Telnet.write", self, buffer)
         self.msg("send %r", buffer)
+        if self.sock is None:
+            raise RuntimeError("Socket is not connected")
         self.sock.sendall(buffer)
 
     def read_until(self, match, timeout=None):
@@ -480,6 +488,8 @@ class Telnet:
                         if self.option_callback:
                             self.option_callback(self.sock, cmd, opt)
                         else:
+                            if self.sock is None:
+                                raise RuntimeError("Socket is not connected")
                             self.sock.sendall(IAC + WONT + opt)
                     elif cmd in (WILL, WONT):
                         self.msg(
@@ -488,6 +498,8 @@ class Telnet:
                         if self.option_callback:
                             self.option_callback(self.sock, cmd, opt)
                         else:
+                            if self.sock is None:
+                                raise RuntimeError("Socket is not connected")
                             self.sock.sendall(IAC + DONT + opt)
         except EOFError:  # raised by self.rawq_getchar()
             self.iacseq = b""  # Reset on EOF
@@ -525,6 +537,8 @@ class Telnet:
             self.irawq = 0
         # The buffer size should be fairly small so as to avoid quadratic
         # behavior in process_rawq() above
+        if self.sock is None:
+            raise RuntimeError("Socket is not connected")
         buf = self.sock.recv(50)
         self.msg("recv %r", buf)
         self.eof = not buf
@@ -608,14 +622,17 @@ class Telnet:
         results are undeterministic, and may depend on the I/O timing.
 
         """
-        re = None
+        regex_module: Optional[ModuleType] = None
         list = list[:]
         indices = range(len(list))
         for i in indices:
             if not hasattr(list[i], "search"):
-                if not re:
-                    import re
-                list[i] = re.compile(list[i])
+                if regex_module is None:
+                    import re as _re
+
+                    regex_module = _re
+                # regex_module is now a ModuleType
+                list[i] = regex_module.compile(list[i])
         if timeout is not None:
             deadline = _time() + timeout
         with _TelnetSelector() as selector:

@@ -10,7 +10,7 @@ from yamlloader import ordereddict
 __all__ = []
 
 
-class MetaPathFinder(MetaPathFinder):
+class _CommandMetaPathFinder(MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
         mod = fullname.split(".")[-1]
         if mod in [
@@ -45,4 +45,4 @@ class MetaPathLoader(Loader):
         return module
 
 
-sys.meta_path.insert(0, MetaPathFinder())
+sys.meta_path.insert(0, _CommandMetaPathFinder())

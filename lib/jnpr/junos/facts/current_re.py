@@ -113,8 +113,6 @@ def get_facts(device):
     # An empty list indicates a problem finding any current_re info.
     # Return None.
     if len(current_re) == 0:
-        current_re = None
+        return {"current_re": None}
 
-    return {
-        "current_re": current_re,
-    }
+    return {"current_re": current_re}

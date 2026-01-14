@@ -135,10 +135,13 @@ class StartShell(object):
         """Close the SSH client channel"""
 
         if self.ON_JUNOS is True:
-            self._chan.terminate()
+            if self._chan is not None:
+                self._chan.terminate()
         else:
-            self._chan.close()
-            self._client.close()
+            if self._chan is not None:
+                self._chan.close()
+            if self._client is not None:
+                self._client.close()
 
     def run(self, command, this=_SHELL_PROMPT, timeout=0, sleep=0):
         """
