@@ -1,5 +1,8 @@
-## Release 2.7.6 - 16 Jan 2026
+## Release 2.7.7.dev0 - 16 Jan 2026
 ## Features Added
+## Bugs Fixed
+
+## Release 2.7.6 - 16 Jan 2026
 - Python 3.12+ Support: Added official support for Python 3.12 and later versions,
 ensuring compatibility with the latest Python ecosystems (#1382)
 - SSH Agent Support: Added the allow_agent parameter support
