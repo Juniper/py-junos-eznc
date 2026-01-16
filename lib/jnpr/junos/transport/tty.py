@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+from typing import Any, Optional, Tuple
 
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.transport.tty_netconf import tty_netconf
@@ -83,6 +84,8 @@ class Terminal(object):
         self.login_attempts = kvargs.get("attempts") or self.LOGIN_RETRY
         self.console_has_banner = kvargs.get("console_has_banner") or False
         self._huge_tree = kvargs.get("huge_tree", False)
+        self._tty_name: str = ""
+        self.at_shell: bool = False
 
         # misc setup
         self.nc = tty_netconf(self)
@@ -93,6 +96,22 @@ class Terminal(object):
     @property
     def tty_name(self):
         return self._tty_name
+
+    # -------------------------------------------------------------------
+    # Interface expected from concrete TTY implementations
+    # -------------------------------------------------------------------
+
+    def _tty_open(self) -> None:
+        raise NotImplementedError
+
+    def _tty_close(self) -> None:
+        raise NotImplementedError
+
+    def write(self, data: str) -> Any:
+        raise NotImplementedError
+
+    def read_prompt(self) -> Tuple[Optional[str], Optional[str]]:
+        raise NotImplementedError
 
     # -----------------------------------------------------------------------
     # Login/logout
@@ -279,7 +298,8 @@ class Terminal(object):
             "hotkey": _ev_hot_key,
         }
 
-        _ev_tbl.get(found, _ev_tty_nologin)()
+        handler = _ev_tbl.get(found) if found is not None else None
+        (handler or _ev_tty_nologin)()
 
         if self.state == self._ST_DONE:
             return True

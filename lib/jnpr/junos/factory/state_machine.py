@@ -3,6 +3,7 @@ import logging
 import re
 from collections import OrderedDict
 from functools import reduce
+from typing import Any, Dict, List, cast
 
 import pyparsing as pp
 from jinja2 import Template, meta
@@ -85,14 +86,14 @@ class StateMachine(Machine):
         self._view = self._table.VIEW
         self._raw = ""
         self._lines = []
-        self.states = [
+        states_list: List[str] = [
             "row_column",
             "title_data",
             "regex_data",
             "delimiter_data",
             "exists_bool_data",
         ]
-        self.transitions = [
+        transitions_list: List[Dict[str, Any]] = [
             {
                 "trigger": "column_provided",
                 "source": "*",
@@ -176,8 +177,8 @@ class StateMachine(Machine):
         ]
         Machine.__init__(
             self,
-            states=self.states,
-            transitions=self.transitions,
+            states=states_list,
+            transitions=transitions_list,
             initial="start",
             send_event=True,
         )
@@ -274,10 +275,12 @@ class StateMachine(Machine):
                 raw = self._raw[x[i][0] :]
             lines = raw.splitlines()
             obj = re.search(self._table.ITEM, lines[0])
-            groups = obj.groups()
-            groups = [data_type(val)(val) for val in groups]
-            if len(groups) >= 1:
-                if len(groups) != len(
+            if obj is None:
+                continue
+            groups_tuple = obj.groups()
+            groups_list = [data_type(val)(val) for val in groups_tuple]
+            if len(groups_list) >= 1:
+                if len(groups_list) != len(
                     self._table.KEY
                     if isinstance(self._table.KEY, list)
                     else [self._table.KEY]
@@ -285,7 +288,9 @@ class StateMachine(Machine):
                     raise KeyError(
                         "Table with grouped item must contain corresponding key(s)"
                     )
-                master_key = groups[0] if len(groups) == 1 else tuple(groups)
+                master_key = (
+                    groups_list[0] if len(groups_list) == 1 else tuple(groups_list)
+                )
                 self._data[master_key] = {}
                 if self._view is not None:
                     for key, value in self._view.FIELDS.items():
@@ -317,7 +322,7 @@ class StateMachine(Machine):
                                 )
                                 obj = re.search(regex, line)
                                 if obj:
-                                    items = obj.groups()
+                                    items = list(obj.groups())
                                     key, value = convert_to_data_type(items)
                                     temp_dict[key] = value
                         # check if next line is blank or new title (delimiter
@@ -334,7 +339,7 @@ class StateMachine(Machine):
     def match_columns(self, event):
         if self._view is None:
             return False
-        columns = self._view.COLUMNS.values()
+        columns = list(self._view.COLUMNS.values())
         if len(columns) == 0:
             return False
         if True in [isinstance(i, list) for i in columns]:
@@ -345,17 +350,26 @@ class StateMachine(Machine):
             )
             for index, item in enumerate(columns):
                 columns[index] = item + [None] * (max_title_len - len(item))
-            col_parser = reduce(lambda x, y: x & y, [pp.Literal(i[0]) for i in columns])
+            col_parser = cast(
+                Any,
+                reduce(
+                    lambda x, y: x & y,
+                    [pp.Literal(i[0]) for i in columns],  # type: ignore[arg-type]
+                ),
+            )
             for line in self._lines:
                 if self._parse_literal(line, col_parser):
                     for index in range(1, max_title_len):
-                        col_parser = reduce(
-                            lambda x, y: x & y,
-                            [
-                                pp.Literal(i[index])
-                                for i in columns
-                                if i[index] is not None
-                            ],
+                        col_parser = cast(
+                            Any,
+                            reduce(
+                                lambda x, y: x & y,  # type: ignore[arg-type]
+                                [
+                                    pp.Literal(i[index])
+                                    for i in columns
+                                    if i[index] is not None
+                                ],
+                            ),
                         )
                         if self._parse_literal(
                             self._lines[self._lines.index(line) + 1], col_parser
@@ -371,9 +385,15 @@ class StateMachine(Machine):
                 else:
                     continue
         else:
-            col_parser = reduce(lambda x, y: x & y, [pp.Literal(i) for i in columns])
+            col_parser_single = cast(
+                Any,
+                reduce(
+                    lambda x, y: x & y,
+                    [pp.Literal(i) for i in columns],  # type: ignore[arg-type]
+                ),
+            )
             for line in self._lines:
-                if self._parse_literal(line, col_parser):
+                if self._parse_literal(line, col_parser_single):
                     d = set(map(lambda x, y: x in y, columns, [line] * len(columns)))
                     if d.pop():
                         current_index = self._lines.index(line)
@@ -727,7 +747,7 @@ class StateMachine(Machine):
                     )
                     obj = re.search(regex, line)
                     if obj:
-                        items = obj.groups()
+                        items = list(obj.groups())
                         key, value = convert_to_data_type(items)
                         self._data[key] = value
             # check if next line is blank or new title (delimiter test to fail)

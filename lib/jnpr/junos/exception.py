@@ -97,8 +97,8 @@ class CommitError(RpcError):
     def __repr__(self):
         return "{}(edit_path: {}, bad_element: {}, message: {})".format(
             self.__class__.__name__,
-            self.rpc_error["edit_path"],
-            self.rpc_error["bad_element"],
+            self.rpc_error.get("edit_path") if self.rpc_error else None,
+            self.rpc_error.get("bad_element") if self.rpc_error else None,
             self.message,
         )
 
@@ -116,8 +116,8 @@ class ConfigLoadError(RpcError):
     def __repr__(self):
         return "{}(severity: {}, bad_element: {}, message: {})".format(
             self.__class__.__name__,
-            self.rpc_error["severity"],
-            self.rpc_error["bad_element"],
+            self.rpc_error.get("severity") if self.rpc_error else None,
+            self.rpc_error.get("bad_element") if self.rpc_error else None,
             self.message,
         )
 

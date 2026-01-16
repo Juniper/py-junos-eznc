@@ -1,3 +1,6 @@
+from typing import Dict, List, Optional
+
+
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
@@ -17,8 +20,8 @@ def get_facts(device):
     """
     Gathers facts from a <file-show/> RPC on the '/etc/hosts.junos' file.
     """
-    iri_hostname = None
-    iri_ip = None
+    iri_hostname: Optional[Dict[str, List[str]]] = None
+    iri_ip: Optional[Dict[str, List[str]]] = None
 
     rsp = device.rpc.file_show(filename="/etc/hosts.junos", normalize=False)
 

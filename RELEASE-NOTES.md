@@ -1,5 +1,20 @@
-## Release 2.7.6.dev0 - 23 Sep 2025
+## Release 2.7.7.dev0 - 16 Jan 2026
 ## Features Added
+## Bugs Fixed
+
+## Release 2.7.6 - 16 Jan 2026
+- Python 3.12+ Support: Added official support for Python 3.12 and later versions,
+ensuring compatibility with the latest Python ecosystems (#1382)
+- SSH Agent Support: Added the allow_agent parameter support
+to improve flexible authentication workflows (#1385, #1285, #1353)
+- Enhanced Type Hinting: Updated type hinting throughout
+- junos-eznc for better IDE integration and static analysis (#1392)
+- Formatter Migration: Adopted Ruff for faster,
+more reliable code formatting (#1391).
+- Dependency Update: Migrated from yamlordereddictloader
+to yamlloader for improved YAML processing (#1390)
+- CI/CD Enhancements: Updated GitHub Actions to validate all supported
+Python versions against PyEZ, ensuring broader stability (#1389)
 ## Bugs Fixed
 None
 

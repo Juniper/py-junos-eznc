@@ -9,6 +9,7 @@ from lxml.builder import E
 
 
 class CfgTable(Table):
+    DEFINE: dict = {}
     __isfrozen = False
 
     # -----------------------------------------------------------------------

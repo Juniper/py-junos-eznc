@@ -1,3 +1,6 @@
+from typing import Dict, Optional
+
+
 def provides_facts():
     """
     Returns a dictionary keyed on the facts provided by this module. The value
@@ -55,7 +58,7 @@ def get_facts(device):
     master = None
     RE0 = None
     RE1 = None
-    re_info = None
+    re_info: Dict[str, Dict[str, Dict[str, Optional[str]]]] = {}
     re_master = None
 
     rsp = device.rpc.get_route_engine_information(normalize=True)

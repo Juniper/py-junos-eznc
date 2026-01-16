@@ -1,4 +1,5 @@
 import paramiko
+from typing import Any, Dict
 
 
 def open_ssh_client(dev):
@@ -19,18 +20,19 @@ def open_ssh_client(dev):
     # use junos._hostname since this will be correct if we are going
     # through a jumphost.
 
-    config = {}
-    kwargs = {}
+    config: Dict[str, Any] = {}
+    kwargs: Dict[str, Any] = {}
     ssh_config = getattr(dev, "_sshconf_path")
     if ssh_config:
-        config = paramiko.SSHConfig()
+        ssh_cfg_obj = paramiko.SSHConfig()
         with open(ssh_config) as open_ssh_config:
-            config.parse(open_ssh_config)
-        config = config.lookup(dev._hostname)
+            ssh_cfg_obj.parse(open_ssh_config)
+        config = ssh_cfg_obj.lookup(dev._hostname)
 
     sock = None
-    if config.get("proxycommand"):
-        sock = paramiko.proxy.ProxyCommand(config.get("proxycommand"))
+    proxy_cmd = config.get("proxycommand")
+    if proxy_cmd:
+        sock = paramiko.proxy.ProxyCommand(proxy_cmd)
 
     if dev._ssh_private_key_file is not None:
         kwargs["key_filename"] = dev._ssh_private_key_file

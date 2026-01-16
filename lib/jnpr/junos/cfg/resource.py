@@ -154,7 +154,7 @@ class Resource(object):
         return None
 
     @manages.setter
-    def manages(self):
+    def manages(self, value):
         raise AttributeError("read-only")
 
     @property
@@ -376,7 +376,7 @@ class Resource(object):
           after="<name>"
           before="<name>"
         """
-        cmd, name = next(kvargs.iteritems())
+        cmd, name = next(iter(kvargs.items()))
         if cmd != "before" and cmd != "after":
             raise ValueError("Must be either 'before' or 'after'")
 
@@ -645,10 +645,13 @@ class Resource(object):
         try:
             result = self._junos.rpc.load_config(top_xml, action="replace")
         except Exception as err:
+            rsp = getattr(err, "rsp", None)
+            if rsp is None:
+                raise
             # see if this is OK or just a warning
-            if len(err.rsp.xpath('.//error-severity[. = "error"]')):
+            if len(rsp.xpath('.//error-severity[. = "error"]')):
                 raise err
-            return err.rsp
+            return rsp
 
         return result
 

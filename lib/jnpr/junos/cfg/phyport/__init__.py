@@ -11,5 +11,7 @@ class PhyPort(object):
             "CLASSIC": PhyPortClassic,
             "SWITCH": PhyPortSwitch,
         }.get(dev.facts["ifd_style"])
+        if supercls is None:
+            raise ValueError("Unknown interface style: %s" % dev.facts.get("ifd_style"))
         newcls = type(cls.__name__, (supercls,), {})
         return newcls(dev, name)

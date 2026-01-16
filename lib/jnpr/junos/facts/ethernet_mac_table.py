@@ -53,10 +53,15 @@ def get_facts(device):
                 switch_style = "NONE"
         except RpcError as err:
             # Probably a PTX.
-            if err.rpc_error["bad_element"] == "bridge":
+            rpc_error = err.rpc_error or {}
+            bad_element = (
+                rpc_error.get("bad_element") if isinstance(rpc_error, dict) else None
+            )
+            message = rpc_error.get("message") if isinstance(rpc_error, dict) else None
+            if bad_element == "bridge":
                 switch_style = "NONE"
             # Probably a non-master RE on an MX.
-            elif err.rpc_error["message"] == "the l2-learning subsystem is not running":
+            elif message == "the l2-learning subsystem is not running":
                 switch_style = "BRIDGE_DOMAIN"
 
     return {
