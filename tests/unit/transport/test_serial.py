@@ -1,19 +1,9 @@
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
-import sys
+import unittest
 from unittest.mock import MagicMock, patch
 
 import nose2
 import six
 from jnpr.junos.console import Console
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 
 class TestSerial(unittest.TestCase):

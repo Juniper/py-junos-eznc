@@ -11,11 +11,6 @@ from six import StringIO
 __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
-
 
 class TestScp(unittest.TestCase):
     def setUp(self):
@@ -44,7 +39,7 @@ class TestScp(unittest.TestCase):
         self.assertRaises(RuntimeError, SCP, dev)
 
     @patch("jnpr.junos.device.os")
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     @patch("paramiko.config.SSHConfig.lookup")
     @patch("paramiko.SSHClient")
     @patch("paramiko.proxy.ProxyCommand")

@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -23,11 +22,6 @@ from ncclient.transport import SSHSession
 
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 
 class TestConfig(unittest.TestCase):
@@ -300,7 +294,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(op.tag, "load-configuration-results")
         self.assertEqual(self.conf.rpc.load_config.call_args[1]["format"], "json")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_with_format_json_from_file_ext(self, mock_open):
         self.conf.rpc.load_config = MagicMock(
             return_value=etree.fromstring(
@@ -313,7 +307,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(op.tag, "load-configuration-results")
         self.assertEqual(self.conf.rpc.load_config.call_args[1]["format"], "json")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_update(self, mock_open):
         self.conf.rpc.load_config = MagicMock(
             return_value=etree.fromstring(
@@ -336,7 +330,7 @@ class TestConfig(unittest.TestCase):
             overwrite=True,
         )
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_lformat_byext_ValueError(self, mock_open):
         self.conf.rpc.load_config = MagicMock(return_value="rpc_contents")
         self.assertRaises(ValueError, self.conf.load, path="test.jnpr")
@@ -347,7 +341,7 @@ class TestConfig(unittest.TestCase):
             ValueError, self.conf.load, "test.xml", format="set", overwrite=True
         )
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     @patch("jnpr.junos.utils.config.etree.XML")
     def test_config_load_path_xml(self, mock_etree, mock_open):
         self.conf.dev.Template = MagicMock()
@@ -355,19 +349,19 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.load_config = MagicMock(return_value=mock_etree.return_value)
         self.assertEqual(self.conf.load(path="test.xml"), "rpc_contents")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_path_text(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path="test.conf")
         self.assertEqual(self.conf.rpc.load_config.call_args[1]["format"], "text")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_path_set(self, mock_open):
         self.conf.rpc.load_config = MagicMock()
         self.conf.load(path="test.set")
         self.assertEqual(self.conf.rpc.load_config.call_args[1]["action"], "set")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_try_load_rpcerror(self, mock_open):
         ex = ConfigLoadError(
             rsp=etree.fromstring(
@@ -384,13 +378,13 @@ class TestConfig(unittest.TestCase):
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(ConfigLoadError, self.conf.load, path="config.conf")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_load_try_load_rpctimeouterror(self, mock_open):
         ex = RpcTimeoutError(self.dev, None, 10)
         self.conf.rpc.load_config = MagicMock(side_effect=ex)
         self.assertRaises(RpcTimeoutError, self.conf.load, path="config.conf")
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_config_try_load_exception(self, mock_open):
         class OtherException(Exception):
             pass

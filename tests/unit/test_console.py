@@ -1,12 +1,8 @@
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
 
 import os
 import re
 import socket
-import sys
+import unittest
 from unittest.mock import MagicMock, call, patch
 
 import nose2
@@ -16,11 +12,6 @@ from jnpr.junos.transport.tty_netconf import tty_netconf
 from jnpr.junos.transport.tty_telnet import Terminal
 from jnpr.junos.utils.config import Config
 from lxml import etree
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 
 class TestConsole(unittest.TestCase):

@@ -1,17 +1,9 @@
 # stdlib
-from __future__ import print_function
 
 import hashlib
 import re
-import sys
 from os import path
-
-try:
-    # Python 3.x
-    from urllib.parse import urlparse
-except ImportError:
-    # Python 2.x
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 # 3rd-party modules
 from jnpr.junos import jxml as JXML
@@ -922,9 +914,7 @@ class SW(Util):
             )
 
         remote_pkg_set = []
-        if (sys.version < "3" and isinstance(package, (str, unicode))) or isinstance(
-            package, str
-        ):
+        if isinstance(package, str):
             pkg_set = [package]
         if isinstance(pkg_set, (list, tuple)) and len(pkg_set) > 0:
             remote_urls = ["ftp", "scp", "http", "https", "tftp", "sftp"]
@@ -1395,9 +1385,8 @@ class SW(Util):
                 rsp = ex.xml.getroottree().getroot()
                 # 1) A normal response has been run through the XSLT
                 #    transformation, but ex.xml has not. Do that now.
-                encode = None if sys.version < "3" else "unicode"
                 rsp = NCElement(
-                    etree.tostring(rsp, encoding=encode), self._dev.transform()
+                    etree.tostring(rsp, encoding="unicode"), self._dev.transform()
                 )._NCElement__doc
                 # 2) Now remove all of the <rpc-error> elements from
                 #    the response. We've already confirmed they are all warnings

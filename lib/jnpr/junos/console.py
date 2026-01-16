@@ -1,6 +1,5 @@
 import logging
 import socket
-import sys
 import traceback
 import warnings
 
@@ -263,9 +262,8 @@ class Console(_Connection):
 
     @ignoreWarnDecorator
     def _rpc_reply(self, rpc_cmd_e, *args, **kwargs):
-        encode = None if sys.version < "3" else "unicode"
         rpc_cmd = (
-            etree.tostring(rpc_cmd_e, encoding=encode)
+            etree.tostring(rpc_cmd_e, encoding="unicode")
             if isinstance(rpc_cmd_e, etree._Element)
             else rpc_cmd_e
         )
