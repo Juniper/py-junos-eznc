@@ -81,10 +81,11 @@ class Serial(Terminal):
 
         while datetime.now() < mark_end:
             sleep(0.1)  # do not remove
-            line = self._ser.readline()
+            allline = self._ser.readall()
+            line = re.findall("\n(.*)", allline.decode())
             if not line:
                 continue
-            rxb += line
+            rxb += six.b(line[-1])
             found = _PROMPT.search(rxb)
             if found is not None:
                 break  # done reading
