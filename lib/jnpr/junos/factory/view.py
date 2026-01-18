@@ -1,5 +1,4 @@
 import json
-import sys
 import warnings
 from contextlib import contextmanager
 from copy import deepcopy
@@ -298,12 +297,7 @@ class View(object):
             # -- 2031-dec-06, JLS
             # added support to use the element tag if the text is empty
             def _munch(x):
-                if sys.version < "3":
-                    as_str = x if isinstance(x, str) else x.text
-                    if isinstance(as_str, unicode):
-                        as_str = as_str.encode("ascii", "replace")
-                else:
-                    as_str = x if isinstance(x, str) else x.text
+                as_str = x if isinstance(x, str) else x.text
                 if as_str is not None:
                     as_str = as_str.strip()
                 if not as_str:

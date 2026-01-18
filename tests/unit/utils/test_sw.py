@@ -1,16 +1,9 @@
-from __future__ import print_function
-
 import os
 import sys
-
-from six import StringIO
-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 from contextlib import contextmanager
+from io import StringIO
 from unittest.mock import MagicMock, call, mock_open, patch
 
 import nose2
@@ -21,11 +14,6 @@ from jnpr.junos.utils.sw import SW
 from lxml import etree
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 __author__ = "Nitin Kumar, Rick Sherman"
 __credits__ = "Jeremy Schulman"
@@ -84,7 +72,7 @@ class TestSW(unittest.TestCase):
         self.dev.close()
 
     def test_sw_hashfile(self):
-        with patch(builtin_string + ".open", mock_open(), create=True):
+        with patch("builtins.open", mock_open(), create=True):
             import jnpr.junos.utils.sw
 
             with open("foo") as h:
@@ -104,7 +92,7 @@ class TestSW(unittest.TestCase):
         self.sw = SW(self.dev)
         self.assertFalse(self.sw._multi_VC)
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_sw_local_sha256(self, mock_built_open):
         package = "test.tgz"
         self.assertEqual(
@@ -112,7 +100,7 @@ class TestSW(unittest.TestCase):
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         )
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_sw_local_md5(self, mock_built_open):
         package = "test.tgz"
         self.assertEqual(
@@ -120,7 +108,7 @@ class TestSW(unittest.TestCase):
             "d41d8cd98f00b204e9800998ecf8427e",
         )
 
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_sw_local_sha1(self, mock_built_open):
         package = "test.tgz"
         self.assertEqual(
@@ -670,7 +658,7 @@ class TestSW(unittest.TestCase):
         output = self.sw.install("file", validate=True, no_copy=True)
         self.assertFalse(output[0])
 
-    @patch(builtin_string + ".print")
+    @patch("builtins.print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_mx(self, mock_pkgadd, mock_print):
         mock_pkgadd.return_value = True, "msg"
@@ -678,7 +666,7 @@ class TestSW(unittest.TestCase):
         self.sw._multi_MX = True
         self.assertTrue(self.sw.install("file", no_copy=True, progress=True)[0])
 
-    @patch(builtin_string + ".print")
+    @patch("builtins.print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_mx_msg_check(self, mock_pkgadd, mock_print):
         # mock_pkgadd.return_value = True
@@ -689,7 +677,7 @@ class TestSW(unittest.TestCase):
         self.assertEqual(msg, "re0\nre1")
         self.assertTrue(bool_ret)
 
-    @patch(builtin_string + ".print")
+    @patch("builtins.print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_mx_msg_check_failure(self, mock_pkgadd, mock_print):
         # mock_pkgadd.return_value = True

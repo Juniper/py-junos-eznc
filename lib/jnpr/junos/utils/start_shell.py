@@ -5,7 +5,6 @@ import time
 from select import select
 from threading import Thread
 
-import six
 from jnpr.junos.utils.ssh_client import open_ssh_client
 
 _JUNOS_PROMPT = "> "
@@ -14,7 +13,7 @@ _SELECT_WAIT = 0.1
 _RECVSZ = 1024
 
 
-class StartShell(object):
+class StartShell:
     """
     Junos shell execution utility.  This utility is written to
     support the "context manager" design pattern.  For example::

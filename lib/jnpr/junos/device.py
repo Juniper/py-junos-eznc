@@ -40,10 +40,7 @@ from ncclient.operations import RPCError
 from ncclient.operations.third_party.juniper.rpc import ExecuteRpc
 from ncclient.transport.session import SessionListener
 
-if sys.version_info[0] >= 3:
-    NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
-else:
-    NCCLIENT_FILTER_XML = len(inspect.getargspec(ExecuteRpc.request).args) == 3
+NCCLIENT_FILTER_XML = len(inspect.signature(ExecuteRpc.request).parameters) == 3
 
 _MODULEPATH = os.path.dirname(__file__)
 
@@ -188,14 +185,10 @@ class _Connection(object):
             self._logfile = False
             return rc
 
-        if sys.version < "3":
-            if not isinstance(value, file):
-                raise ValueError("value must be a file object")
-        else:
-            import io
+        import io
 
-            if not isinstance(value, io.TextIOWrapper):
-                raise ValueError("value must be a file object")
+        if not isinstance(value, io.TextIOWrapper):
+            raise ValueError("value must be a file object")
 
         self._logfile = value
         return self._logfile
@@ -487,8 +480,7 @@ class _Connection(object):
             rsp = self.rpc.cli(command, format="xml")
             rsp = rsp.getparent().find(".//rpc")
             if format == "text":
-                encode = None if sys.version < "3" else "unicode"
-                return etree.tostring(rsp[0], encoding=encode)
+                return etree.tostring(rsp[0], encoding="unicode")
             return rsp[0]
         except TypeError:
             return "No RPC equivalent found for: " + command
@@ -562,12 +554,7 @@ class _Connection(object):
                     )
             for fn in vargs:
                 # bind as instance method, majik.
-                if sys.version < "3":
-                    self.__dict__[fn.__name__] = types.MethodType(
-                        fn, self, self.__class__
-                    )
-                else:
-                    self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
+                self.__dict__[fn.__name__] = types.MethodType(fn, self.__class__)
             return
 
         # first verify that the names do not conflict with
@@ -734,9 +721,8 @@ class _Connection(object):
             if rsp.tag in ["output", "rpc-reply"]:
                 if rsp.tag == "output" and rsp.getparent() is not None:
                     rsp = rsp.getparent()
-                encode = None if sys.version < "3" else "unicode"
                 return etree.tostring(
-                    rsp, method="text", with_tail=False, encoding=encode
+                    rsp, method="text", with_tail=False, encoding="unicode"
                 )
             if rsp.tag == "configuration-information":
                 return rsp.findtext("configuration-output")
@@ -1124,10 +1110,7 @@ class Device(_Connection):
             instance.__init__(**kwargs)
             return instance
         else:
-            if sys.version < "3":
-                return super(Device, cls).__new__(cls, *args, **kwargs)
-            else:
-                return super().__new__(cls)
+            return super().__new__(cls)
 
     def __init__(self, *vargs, **kvargs):
         """

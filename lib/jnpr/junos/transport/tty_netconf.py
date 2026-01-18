@@ -2,7 +2,6 @@ import logging
 import re
 import select
 import socket
-import sys
 import time
 from datetime import datetime, timedelta
 
@@ -91,8 +90,7 @@ class tty_netconf(object):
         """issue a reboot to the device"""
         cmd = E.command("request system zeroize")
         try:
-            encode = None if sys.version < "3" else "unicode"
-            self.rpc(etree.tostring(cmd, encoding=encode))
+            self.rpc(etree.tostring(cmd, encoding="unicode"))
         except:
             return False
         return True

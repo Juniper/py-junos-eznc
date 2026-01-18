@@ -1,11 +1,7 @@
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
 import json
 import os
 import sys
+import unittest
 from unittest.mock import MagicMock, call, mock_open, patch
 
 import ncclient.transport.errors as NcErrors
@@ -22,11 +18,6 @@ from ncclient.transport import SSHSession
 
 __author__ = "Rick Sherman, Nitin Kumar, Stacy Smith"
 __credits__ = "Jeremy Schulman"
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 facts = {
     "domain": None,
@@ -59,7 +50,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
 
         self.template_loader = _MyTemplateLoader()
 
-    @patch(builtin_string + ".filter")
+    @patch("builtins.filter")
     def test_temp_load_get_source_filter_false(self, filter_mock):
         filter_mock.return_value = []
         try:
@@ -73,7 +64,7 @@ class Test_MyTemplateLoader(unittest.TestCase):
     def test_temp_load_get_source_filter_true(self, os_path_mock):
         # cant use @patch here as with statement will have exit
         m = mock_open()
-        with patch(builtin_string + ".open", m, create=True):
+        with patch("builtins.open", m, create=True):
             self.template_loader.get_source(None, None)
 
 
@@ -164,11 +155,11 @@ class TestDevice(unittest.TestCase):
 
     def test_device_property_logfile_isinstance(self):
         mock = MagicMock()
-        with patch(builtin_string + ".open", mock):
+        with patch("builtins.open", mock):
             if sys.version > "3":
                 builtin_file = "io.TextIOWrapper"
             else:
-                builtin_file = builtin_string + ".file"
+                builtin_file = "builtins.file"
             with patch(builtin_file, MagicMock):
                 handle = open("filename", "r")
                 self.dev.logfile = handle
@@ -421,7 +412,7 @@ class TestDevice(unittest.TestCase):
         Device.ON_JUNOS = False
 
     @patch("jnpr.junos.device.os")
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     @patch("paramiko.config.SSHConfig.lookup")
     def test_device__sshconf_lkup(self, mock_paramiko, open_mock, os_mock):
         os_mock.path.exists.return_value = True
@@ -429,7 +420,7 @@ class TestDevice(unittest.TestCase):
         mock_paramiko.assert_called_once_with("1.1.1.1")
 
     @patch("jnpr.junos.device.os")
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     @patch("paramiko.config.SSHConfig.lookup")
     def test_device__sshconf_lkup_def(self, mock_paramiko, open_mock, os_mock):
         os_mock.path.exists.return_value = True

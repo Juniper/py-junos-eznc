@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import inspect
 
 from jnpr.junos.utils.ssh_client import open_ssh_client
@@ -9,7 +7,7 @@ Secure Copy Utility
 """
 
 
-class SCP(object):
+class SCP:
     """
     The SCP utility is used to conjunction with :class:`jnpr.junos.utils.sw.SW`
     when transferring the Junos image to the device.  The :class:`SCP` can be

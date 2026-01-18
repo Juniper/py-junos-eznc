@@ -2,7 +2,6 @@ import logging
 import re
 import select
 import socket
-import sys
 from time import sleep, time
 
 import paramiko
@@ -148,8 +147,7 @@ class SSH(Terminal):
         # Write data according to defined baud
         # per 1 byte of data there are 2 additional bits on the line
         # (parity and stop bits)
-        if sys.version >= "3":
-            content = content.decode("utf-8")
+        content = content.decode("utf-8")
         for char in content:
             self._ssh.sendall(six.b(char))
             wtime = 10 / float(self.baud)

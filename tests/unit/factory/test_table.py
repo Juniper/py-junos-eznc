@@ -2,7 +2,6 @@ __author__ = "Rick Sherman, Nitin Kumar"
 __credits__ = "Jeremy Schulman"
 
 import os
-import sys
 import unittest
 from unittest.mock import patch
 
@@ -14,11 +13,6 @@ from lxml import etree
 from ncclient.devices.junos import JunosDeviceHandler
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession
-
-if sys.version < "3":
-    builtin_string = "__builtin__"
-else:
-    builtin_string = "builtins"
 
 
 class TestFactoryTable(unittest.TestCase):
@@ -132,7 +126,7 @@ class TestFactoryTable(unittest.TestCase):
         self.assertRaises(RuntimeError, self.table._keys)
 
     @patch("jnpr.junos.Device.execute")
-    @patch(builtin_string + ".open")
+    @patch("builtins.open")
     def test_table_savexml(self, mock_file, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.ppt.xml = etree.XML("<root><a>test</a></root>")
