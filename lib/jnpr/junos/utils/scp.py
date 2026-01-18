@@ -1,4 +1,3 @@
-
 import inspect
 
 from jnpr.junos.utils.ssh_client import open_ssh_client
