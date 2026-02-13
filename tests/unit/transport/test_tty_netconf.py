@@ -129,9 +129,7 @@ class TestTTYNetconf(unittest.TestCase):
             [b"<rpc-reply>ok<dummy></rpc-reply>", b"\n]]>]]>"]
         )
         mock_select.return_value = ([rx], [], [])
-        self.assertEqual(
-            self.tty_net._receive(), b"<rpc-reply>ok<dummy/></rpc-reply>"
-        )
+        self.assertEqual(self.tty_net._receive(), b"<rpc-reply>ok<dummy/></rpc-reply>")
 
     @patch("jnpr.junos.transport.tty_netconf.select.select")
     def test_tty_netconf_receive_XMLSyntaxError_eom_in_center(self, mock_select):
