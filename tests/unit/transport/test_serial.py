@@ -94,7 +94,7 @@ class TestSerialWin(unittest.TestCase):
             six.b(
                 "<!-- No zombies were killed during the creation of this user interface -->"
             ),
-            six.b(""),
+            b"",
             six.b(
                 """<!-- user root, class super-user -->
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
