@@ -7,7 +7,6 @@ except ImportError:
 
 from unittest.mock import MagicMock, patch
 
-import nose2
 import six
 from jnpr.junos.transport.tty_telnet import Telnet
 

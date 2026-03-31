@@ -3,9 +3,8 @@ try:
 except ImportError:
     import unittest
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import call, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import FactLoopError
 from ncclient.manager import Manager, make_device_handler

@@ -4,7 +4,6 @@ __credits__ = "Jeremy Schulman"
 import unittest
 from unittest.mock import MagicMock, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos.ofacts.domain import facts_domain

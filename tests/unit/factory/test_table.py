@@ -6,7 +6,6 @@ import sys
 import unittest
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.factory.table import Table
 from jnpr.junos.op.phyport import PhyPortTable

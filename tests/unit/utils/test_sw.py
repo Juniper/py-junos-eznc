@@ -13,7 +13,6 @@ except ImportError:
 from contextlib import contextmanager
 from unittest.mock import MagicMock, call, mock_open, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError
 from jnpr.junos.facts.swver import version_info

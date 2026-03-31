@@ -9,7 +9,6 @@ except ImportError:
 import os
 from unittest.mock import MagicMock, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos.ofacts.swver import _get_swver

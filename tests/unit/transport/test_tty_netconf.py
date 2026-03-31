@@ -8,7 +8,6 @@ import select
 import socket
 from unittest.mock import MagicMock, patch
 
-import nose2
 import six
 from jnpr.junos.transport.tty_netconf import tty_netconf
 from ncclient.operations import RPCError

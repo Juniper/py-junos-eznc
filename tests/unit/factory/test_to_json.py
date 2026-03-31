@@ -9,7 +9,6 @@ import json
 import os
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.factory.to_json import (
     PyEzJSONEncoder,

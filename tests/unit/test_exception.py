@@ -1,6 +1,5 @@
 import unittest
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import (
     CommitError,
