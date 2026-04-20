@@ -131,11 +131,14 @@ class TestScp(unittest.TestCase):
     ):
         mock_scpclient.return_value = None
         package = "test.tgz"
-        self.dev._auth_user = "user"
-        self.dev._auth_password = None
-        self.dev._ssh_private_key_file = None
-        self.dev._allow_agent = False
-        with SCP(self.dev) as scp:
+        dev = Device(
+            host="1.1.1.1", user="user", allow_agent=False
+        )
+        dev._auth_user = "user"
+        dev._auth_password = None
+        dev._ssh_private_key_file = None
+        dev._allow_agent = False
+        with SCP(dev) as scp:
             scp.put(package)
         self.assertFalse(mock_sshclient.mock_calls[0][2]["allow_agent"])
 
@@ -147,12 +150,16 @@ class TestScp(unittest.TestCase):
     ):
         mock_scpclient.return_value = None
         package = "test.tgz"
-        self.dev._auth_user = "user"
-        self.dev._auth_password = None
-        self.dev._ssh_private_key_file = None
-        self.dev._look_for_keys = False
-        with SCP(self.dev) as scp:
+        dev = Device(
+            host="1.1.1.1", user="user", look_for_keys=False,
+        )
+        dev._auth_user = "user"
+        dev._auth_password = None
+        dev._ssh_private_key_file = None
+        dev._look_for_keys = False
+        with SCP(dev) as scp:
             scp.put(package)
+        print(mock_sshclient.mock_calls[0][2])
         self.assertFalse(mock_sshclient.mock_calls[0][2]["look_for_keys"])
 
     @contextmanager
