@@ -122,6 +122,39 @@ class TestScp(unittest.TestCase):
             mock_sshclient.mock_calls[0][2]["key_filename"], "/Users/test/testkey"
         )
 
+    @patch("ncclient.manager.connect")
+    @patch("paramiko.SSHClient.connect")
+    @patch("scp.SCPClient.put")
+    @patch("scp.SCPClient.__init__")
+    def test_scp_honors_device_allow_agent(
+        self, mock_scpclient, mock_put, mock_sshclient, mock_ncclient
+    ):
+        mock_scpclient.return_value = None
+        package = "test.tgz"
+        self.dev._auth_user = "user"
+        self.dev._auth_password = None
+        self.dev._ssh_private_key_file = None
+        self.dev._allow_agent = False
+        with SCP(self.dev) as scp:
+            scp.put(package)
+        self.assertFalse(mock_sshclient.mock_calls[0][2]["allow_agent"])
+
+    @patch("paramiko.SSHClient.connect")
+    @patch("scp.SCPClient.put")
+    @patch("scp.SCPClient.__init__")
+    def test_scp_honors_device_look_for_keys(
+        self, mock_scpclient, mock_put, mock_sshclient
+    ):
+        mock_scpclient.return_value = None
+        package = "test.tgz"
+        self.dev._auth_user = "user"
+        self.dev._auth_password = None
+        self.dev._ssh_private_key_file = None
+        self.dev._look_for_keys = False
+        with SCP(self.dev) as scp:
+            scp.put(package)
+        self.assertFalse(mock_sshclient.mock_calls[0][2]["look_for_keys"])
+
     @contextmanager
     def capture(self, command, *args, **kwargs):
         out, sys.stdout = sys.stdout, StringIO()
