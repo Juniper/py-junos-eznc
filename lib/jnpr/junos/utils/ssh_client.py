@@ -42,7 +42,7 @@ def open_ssh_client(dev):
 
     if dev._look_for_keys is not None:
         kwargs["look_for_keys"] = dev._look_for_keys
-    
+
     # pick hostname from .ssh config if any
     hostname = config.get("hostname", dev._hostname)
 

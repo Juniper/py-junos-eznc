@@ -131,9 +131,7 @@ class TestScp(unittest.TestCase):
     ):
         mock_scpclient.return_value = None
         package = "test.tgz"
-        dev = Device(
-            host="1.1.1.1", user="user", allow_agent=False
-        )
+        dev = Device(host="1.1.1.1", user="user", allow_agent=False)
         dev._auth_user = "user"
         dev._auth_password = None
         dev._ssh_private_key_file = None
@@ -151,7 +149,9 @@ class TestScp(unittest.TestCase):
         mock_scpclient.return_value = None
         package = "test.tgz"
         dev = Device(
-            host="1.1.1.1", user="user", look_for_keys=False,
+            host="1.1.1.1",
+            user="user",
+            look_for_keys=False,
         )
         dev._auth_user = "user"
         dev._auth_password = None
