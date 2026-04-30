@@ -162,6 +162,25 @@ class TestScp(unittest.TestCase):
         print(mock_sshclient.mock_calls[0][2])
         self.assertFalse(mock_sshclient.mock_calls[0][2]["look_for_keys"])
 
+    @patch("paramiko.SSHClient.connect")
+    @patch("scp.SCPClient.put")
+    @patch("scp.SCPClient.__init__")
+    def test_scp_with_password_disables_agent_by_default(
+        self, mock_scpclient, mock_put, mock_sshclient
+    ):
+        mock_scpclient.return_value = None
+        package = "test.tgz"
+        dev = Device(
+            host="192.168.1.2",
+            user="root",
+            passwd="robotsarecool1922",
+            look_for_keys=False,
+        )
+        with SCP(dev) as scp:
+            scp.put(package)
+        self.assertFalse(mock_sshclient.mock_calls[0][2]["allow_agent"])
+        self.assertFalse(mock_sshclient.mock_calls[0][2]["look_for_keys"])
+
     @contextmanager
     def capture(self, command, *args, **kwargs):
         out, sys.stdout = sys.stdout, StringIO()
