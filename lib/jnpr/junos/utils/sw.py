@@ -129,8 +129,7 @@ class SW(Util):
         sat_info = self.rpc.get_jnu_satellites_information(normalize=True)
         if not hasattr(sat_info, "xpath"):
             raise RpcError(
-                "get-jnu-satellites-information returned "
-                "unexpected response"
+                "get-jnu-satellites-information returned unexpected response"
             )
 
         alive_satellites = []
@@ -138,12 +137,9 @@ class SW(Util):
             query = f"//satellite-information[satellite-ip='{sat_name}']"
             target_sat = sat_info.xpath(query)
             if target_sat:
-                status = target_sat[0].findtext('alive', default='').strip()
-                if status == 'up':
-                    self.log(
-                        f"Satellite {sat_name} is operational "
-                        f"(state: {status})."
-                    )
+                status = target_sat[0].findtext("alive", default="").strip()
+                if status == "up":
+                    self.log(f"Satellite {sat_name} is operational (state: {status}).")
                     alive_satellites.append(sat_name)
                 else:
                     self.log(
@@ -151,9 +147,7 @@ class SW(Util):
                         f"Current state: {status}"
                     )
             else:
-                self.log(
-                    f"WARNING: No satellite found with name {sat_name}"
-                )
+                self.log(f"WARNING: No satellite found with name {sat_name}")
 
         return alive_satellites
 
@@ -405,9 +399,7 @@ class SW(Util):
         if satellite_name is not None:
             alive_satellites = self._check_satellite_alive(satellite_name)
             if not alive_satellites:
-                self.log(
-                    "ERROR: No alive satellites available for validation"
-                )
+                self.log("ERROR: No alive satellites available for validation")
                 return False
             if "device_list" not in kwargs:
                 kwargs["device_list"] = alive_satellites
@@ -1366,9 +1358,7 @@ class SW(Util):
         if satellite_name is not None:
             alive_satellites = self._check_satellite_alive(satellite_name)
             if not alive_satellites:
-                raise RpcError(
-                    "No alive satellites available for reboot"
-                )
+                raise RpcError("No alive satellites available for reboot")
             for sat in alive_satellites:
                 cmd.append(E("device-list", sat))
 
@@ -1562,9 +1552,7 @@ class SW(Util):
         if satellite_name is not None:
             alive_satellites = self._check_satellite_alive(satellite_name)
             if not alive_satellites:
-                raise SwRollbackError(
-                    rsp="No alive satellites available for rollback"
-                )
+                raise SwRollbackError(rsp="No alive satellites available for rollback")
             kwargs["device_list"] = alive_satellites
 
         rsp = self.rpc.request_package_rollback(**kwargs)

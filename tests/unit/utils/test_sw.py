@@ -513,9 +513,7 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     @patch("jnpr.junos.Device.execute")
-    def test_sw_validate_with_satellite_name_list(
-        self, mock_execute, mock_sat_check
-    ):
+    def test_sw_validate_with_satellite_name_list(self, mock_execute, mock_sat_check):
         mock_execute.side_effect = self._mock_manager
         mock_sat_check.return_value = ["sat1", "sat2"]
         self.sw.validate("package.tgz", satellite_name=["sat1", "sat2"])
@@ -526,9 +524,7 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     def test_sw_validate_satellite_none_alive(self, mock_sat_check):
         mock_sat_check.return_value = []
-        self.assertFalse(
-            self.sw.validate("package.tgz", satellite_name="sat_down")
-        )
+        self.assertFalse(self.sw.validate("package.tgz", satellite_name="sat_down"))
 
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     def test_sw_validate_satellite_rpc_error(self, mock_sat_check):
@@ -1231,7 +1227,6 @@ class TestSW(unittest.TestCase):
             else:
                 return self._read_file(args[0].tag + ".xml")
 
-
     # -------------------------------------------------------------------------
     # _check_satellite_alive tests
     # -------------------------------------------------------------------------
@@ -1319,9 +1314,7 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     def test_sw_reboot_satellite_none_alive(self, mock_sat_check):
         mock_sat_check.return_value = []
-        self.assertRaises(
-            RpcError, self.sw.reboot, satellite_name="sat_down"
-        )
+        self.assertRaises(RpcError, self.sw.reboot, satellite_name="sat_down")
 
     # -------------------------------------------------------------------------
     # rollback with satellite tests
@@ -1342,9 +1335,7 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     @patch("jnpr.junos.Device.execute")
-    def test_sw_rollback_with_satellite_name_list(
-        self, mock_execute, mock_sat_check
-    ):
+    def test_sw_rollback_with_satellite_name_list(self, mock_execute, mock_sat_check):
         mock_sat_check.return_value = ["sat1", "sat2"]
         rsp = (
             "<rpc-reply><output>junos-vsrx-12.1X46-D30.2-domestic will "
@@ -1359,9 +1350,7 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW._check_satellite_alive")
     def test_sw_rollback_satellite_none_alive(self, mock_sat_check):
         mock_sat_check.return_value = []
-        self.assertRaises(
-            SwRollbackError, self.sw.rollback, satellite_name="sat_down"
-        )
+        self.assertRaises(SwRollbackError, self.sw.rollback, satellite_name="sat_down")
 
 
 if __name__ == "__main__":
