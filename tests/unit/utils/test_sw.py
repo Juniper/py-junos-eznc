@@ -1134,6 +1134,36 @@ class TestSW(unittest.TestCase):
         self.assertRaises(Exception, self.sw.zeroize)
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_vmhost(self, mock_execute):
+        mock_execute.side_effect = self._mock_manager
+        self.assertTrue("zeroizing vmhost" in self.sw.zeroize(vmhost=True))
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_vmhost_uses_vmhost_rpc(self, mock_execute):
+        # Verify that the request-vmhost-zeroize RPC tag is used, not
+        # request-system-zeroize, for VMHost-based SRX platforms.
+        mock_execute.side_effect = self._mock_manager
+        self.sw.zeroize(vmhost=True)
+        rpc_call = mock_execute.call_args[0][0]
+        self.assertEqual(rpc_call.tag, "request-vmhost-zeroize")
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_non_vmhost_uses_system_rpc(self, mock_execute):
+        # Verify that non-vmhost path still uses request-system-zeroize (or
+        # its sub-element, e.g. 'local' when 2RE is True and all_re=False).
+        mock_execute.side_effect = self._mock_manager
+        self.sw.zeroize()
+        rpc_call = mock_execute.call_args[0][0]
+        self.assertIn(rpc_call.tag, ("request-system-zeroize", "local", "media"))
+
+    @patch("jnpr.junos.Device.execute")
+    def test_sw_zeroize_vmhost_exception(self, mock_execute):
+        # Exception path: non-warning RpcError on vmhost zeroize must propagate.
+        rsp = etree.XML("<rpc-reply><a>test</a></rpc-reply>")
+        mock_execute.side_effect = RpcError(rsp=rsp)
+        self.assertRaises(Exception, self.sw.zeroize, vmhost=True)
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_check_pending_install(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         package = "test.tgz"
@@ -1194,6 +1224,16 @@ class TestSW(unittest.TestCase):
                 if args[0].tag == "get-jnu-satellites-information":
                     return self._read_file("get-jnu-satellites-information.xml")
             if args and self._testMethodName == "test_sw_zeroize":
+                return self._read_file("request-zeroize.xml")
+            if args and self._testMethodName in (
+                "test_sw_zeroize_vmhost",
+                "test_sw_zeroize_vmhost_uses_vmhost_rpc",
+            ):
+                return self._read_file("request-vmhost-zeroize.xml")
+            if (
+                args
+                and self._testMethodName == "test_sw_zeroize_non_vmhost_uses_system_rpc"
+            ):
                 return self._read_file("request-zeroize.xml")
             device_params = kwargs["device_params"]
             device_handler = make_device_handler(device_params)

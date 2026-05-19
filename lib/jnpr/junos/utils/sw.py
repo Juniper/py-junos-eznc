@@ -1463,26 +1463,37 @@ class SW(Util):
         except Exception as err:
             raise err
 
-    def zeroize(self, all_re=False, media=None):
+    def zeroize(self, all_re=False, media=None, vmhost=False):
         """
         Restore the system (configuration, log files, etc.) to a
         factory default state. This is the equivalent of the
-        C(request system zeroize) CLI command.
+        C(request system zeroize) CLI command, or
+        C(request vmhost zeroize) for VMHost-based platforms
+        (e.g. SRX1600, SRX2300, SRX4300).
 
         :param bool all_re: In case of dual re or VC setup, function by default
             will halt all. If all is False will only halt connected device
 
         :param str media: Overwrite media when performing the zeroize operation.
 
+        :param bool vmhost:
+            (Optional) When ``True``, issue the ``request vmhost zeroize``
+            command instead of ``request system zeroize``.  Required for
+            VMHost-based SRX platforms (SRX1600, SRX2300, SRX4300).
+            The default is ``False``.
+
         :returns:
             * rpc response message (string) if command successful
         """
-        cmd = E("request-system-zeroize")
-        if all_re is False:
-            if self._dev.facts["2RE"]:
-                cmd = E("local")
-            if media is True:
-                cmd = E("media")
+        if vmhost is True:
+            cmd = E("request-vmhost-zeroize")
+        else:
+            cmd = E("request-system-zeroize")
+            if all_re is False:
+                if self._dev.facts["2RE"]:
+                    cmd = E("local")
+                if media is True:
+                    cmd = E("media")
 
         # initialize an empty output message
         output_msg = ""

@@ -29,12 +29,12 @@ class Identifiers:
     printables = pp.OneOrMore(pp.Word(pp.printables))
     numbers = (
         pp.Word(pp.nums) + pp.Optional(pp.Literal(".") + pp.Word(pp.nums))
-    ).setParseAction(lambda i: "".join(i))
+    ).set_parse_action(lambda i: "".join(i))
     hex_numbers = pp.OneOrMore(pp.Word(pp.nums, min=1)) & pp.OneOrMore(
         pp.Word("abcdefABCDEF", min=1)
     )
     word = pp.Word(pp.alphanums) | pp.Word(pp.alphas)
-    words = (pp.OneOrMore(word)).setParseAction(lambda i: " ".join(i))
+    words = (pp.OneOrMore(word)).set_parse_action(lambda i: " ".join(i))
     percentage = pp.Word(pp.nums) + pp.Literal("%")
     header_bar = (
         pp.OneOrMore(pp.Word("-")) | pp.OneOrMore(pp.Word("="))
