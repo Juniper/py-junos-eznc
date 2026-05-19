@@ -1,4 +1,4 @@
-## Release 2.7.7 - 19 May 2026
+## Release 2.8.0 - 19 May 2026
 ## Features Added
 - supported routing instance and satellite options in sw.install() #1403
 - support for proxy_command parameter #1401
