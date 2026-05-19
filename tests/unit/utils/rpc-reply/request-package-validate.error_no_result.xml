@@ -1,0 +1,5 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/26.3I0/junos">
+    <output>
+        ERROR: package: /var/tmp/nonexistent.tgz is not found or empty
+    </output>
+</rpc-reply>

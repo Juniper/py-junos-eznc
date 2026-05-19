@@ -105,6 +105,53 @@ class SW(Util):
         self.log = lambda report: None
 
     # -----------------------------------------------------------------------
+    # SATELLITE HELPER
+    # -----------------------------------------------------------------------
+
+    def _check_satellite_alive(self, satellite_name):
+        """Check which satellites from the given list are alive.
+
+        :param satellite_name:
+          A satellite name (str) or a list/tuple of satellite names.
+
+        :returns:
+          A list of satellite names whose ``alive`` status is ``up``.
+
+        :raises RpcError:
+          If the ``get-jnu-satellites-information`` RPC fails or returns
+          an unexpected response.
+        """
+        if isinstance(satellite_name, str):
+            satellite_name_list = [satellite_name]
+        else:
+            satellite_name_list = list(satellite_name)
+
+        sat_info = self.rpc.get_jnu_satellites_information(normalize=True)
+        if not hasattr(sat_info, "xpath"):
+            raise RpcError(
+                "get-jnu-satellites-information returned unexpected response"
+            )
+
+        alive_satellites = []
+        for sat_name in satellite_name_list:
+            query = f"//satellite-information[satellite-ip='{sat_name}']"
+            target_sat = sat_info.xpath(query)
+            if target_sat:
+                status = target_sat[0].findtext("alive", default="").strip()
+                if status == "up":
+                    self.log(f"Satellite {sat_name} is operational (state: {status}).")
+                    alive_satellites.append(sat_name)
+                else:
+                    self.log(
+                        f"WARNING: Satellite {sat_name} is NOT up! "
+                        f"Current state: {status}"
+                    )
+            else:
+                self.log(f"WARNING: No satellite found with name {sat_name}")
+
+        return alive_satellites
+
+    # -----------------------------------------------------------------------
     # CLASS METHODS
     # -----------------------------------------------------------------------
 
@@ -333,15 +380,30 @@ class SW(Util):
     # validate - perform 'request' operation to validate the package
     # -------------------------------------------------------------------------
 
-    def validate(self, remote_package, issu=False, nssu=False, **kwargs):
+    def validate(
+        self, remote_package, issu=False, nssu=False, satellite_name=None, **kwargs
+    ):
         """
         Issues the 'request' operation to validate the package against the
         config.
+
+        :param satellite_name:
+            (Optional) A satellite name (str) or list of satellite names to
+            validate on.  Only satellites whose ``alive`` status is ``up``
+            will be included.
 
         :returns:
             * ``True`` if validation passes. i.e return code (rc) value is 0
             * * ``False`` otherwise
         """
+        if satellite_name is not None:
+            alive_satellites = self._check_satellite_alive(satellite_name)
+            if not alive_satellites:
+                self.log("ERROR: No alive satellites available for validation")
+                return False
+            if "device_list" not in kwargs:
+                kwargs["device_list"] = alive_satellites
+
         if nssu and not self._issu_nssu_requirement_validation():
             return False
         if issu:
@@ -354,10 +416,22 @@ class SW(Util):
             rsp = self.rpc.request_package_validate(
                 package_name=remote_package, **kwargs
             ).getparent()
-        rc = int(rsp.findtext("package-result"))
         output_msg = "\n".join(
-            [i.text for i in rsp.findall("output") if i.text is not None]
+            [i.text for i in rsp.findall(".//output") if i.text is not None]
         )
+        package_result = rsp.findtext(".//package-result")
+        if package_result is None:
+            if "ERROR:" in output_msg and (
+                ("is not found" in output_msg) or ("no such file" in output_msg)
+            ):
+                package_result = "1"
+            else:
+                self.log(
+                    "software validate response is missing package-result "
+                    "element. Assuming success."
+                )
+                package_result = "0"
+        rc = int(package_result.strip())
         self.log("software validate package-result: %s\nOutput: %s" % (rc, output_msg))
         return 0 == rc
 
@@ -705,6 +779,8 @@ class SW(Util):
         cleanfs_timeout=300,
         checksum_timeout=300,
         checksum_algorithm="md5",
+        routing_instance=None,
+        satellite_name=None,
         force_copy=False,
         all_re=True,
         member_id=None,
@@ -888,6 +964,26 @@ class SW(Util):
                 progress(self._dev, report)
 
         self.log = _progress
+
+        if routing_instance is not None and "routing_instance" not in kwargs:
+            kwargs["routing_instance"] = routing_instance
+
+        # ---------------------------------------------------------------------
+        # Check satellite devices are active before doing software installation on them.
+        # ---------------------------------------------------------------------
+        if satellite_name is not None:
+            try:
+                alive_satellites = self._check_satellite_alive(satellite_name)
+                if not alive_satellites:
+                    error_msg = "ERROR: No alive satellites available for installation"
+                    _progress(error_msg)
+                    return False, error_msg
+                if "device_list" not in kwargs:
+                    kwargs["device_list"] = alive_satellites
+            except RpcError as err:
+                error_msg = "Problem checking satellite device status: %s" % (str(err))
+                _progress(error_msg)
+                return False, error_msg
 
         # ---------------------------------------------------------------------
         # Before doing anything, Do check if any pending install exists.
@@ -1193,6 +1289,7 @@ class SW(Util):
         vmhost=False,
         other_re=False,
         member_id=None,
+        satellite_name=None,
     ):
         """
         Perform a system reboot, with optional delay (in minutes) or at
@@ -1224,6 +1321,11 @@ class SW(Util):
             (optional) install software on the specified members ids of VC.
             The default is ``member_id=None``.
 
+        :param satellite_name:
+            (Optional) A satellite name (str) or list of satellite names to
+            reboot.  Only satellites whose ``alive`` status is ``up`` will
+            be included.
+
         :returns:
             * reboot message (string) if command successful
         """
@@ -1249,6 +1351,16 @@ class SW(Util):
             cmd = E("request-vmhost-reboot")
         else:
             cmd = E("request-reboot")
+
+        # -----------------------------------------------------------------
+        # Satellite reboot support
+        # -----------------------------------------------------------------
+        if satellite_name is not None:
+            alive_satellites = self._check_satellite_alive(satellite_name)
+            if not alive_satellites:
+                raise RpcError("No alive satellites available for reboot")
+            for sat in alive_satellites:
+                cmd.append(E("device-list", sat))
 
         try:
             if member_id is not None:
@@ -1351,26 +1463,37 @@ class SW(Util):
         except Exception as err:
             raise err
 
-    def zeroize(self, all_re=False, media=None):
+    def zeroize(self, all_re=False, media=None, vmhost=False):
         """
         Restore the system (configuration, log files, etc.) to a
         factory default state. This is the equivalent of the
-        C(request system zeroize) CLI command.
+        C(request system zeroize) CLI command, or
+        C(request vmhost zeroize) for VMHost-based platforms
+        (e.g. SRX1600, SRX2300, SRX4300).
 
         :param bool all_re: In case of dual re or VC setup, function by default
             will halt all. If all is False will only halt connected device
 
         :param str media: Overwrite media when performing the zeroize operation.
 
+        :param bool vmhost:
+            (Optional) When ``True``, issue the ``request vmhost zeroize``
+            command instead of ``request system zeroize``.  Required for
+            VMHost-based SRX platforms (SRX1600, SRX2300, SRX4300).
+            The default is ``False``.
+
         :returns:
             * rpc response message (string) if command successful
         """
-        cmd = E("request-system-zeroize")
-        if all_re is False:
-            if self._dev.facts["2RE"]:
-                cmd = E("local")
-            if media is True:
-                cmd = E("media")
+        if vmhost is True:
+            cmd = E("request-vmhost-zeroize")
+        else:
+            cmd = E("request-system-zeroize")
+            if all_re is False:
+                if self._dev.facts["2RE"]:
+                    cmd = E("local")
+                if media is True:
+                    cmd = E("media")
 
         # initialize an empty output message
         output_msg = ""
@@ -1423,15 +1546,27 @@ class SW(Util):
     # rollback - clears the install request
     # -------------------------------------------------------------------------
 
-    def rollback(self):
+    def rollback(self, satellite_name=None):
         """
         Issues the 'request' command to do the rollback and returns the string
         output of the results.
 
+        :param satellite_name:
+            (Optional) A satellite name (str) or list of satellite names to
+            rollback.  Only satellites whose ``alive`` status is ``up`` will
+            be included.
+
         :returns:
             Rollback results (str)
         """
-        rsp = self.rpc.request_package_rollback()
+        kwargs = {}
+        if satellite_name is not None:
+            alive_satellites = self._check_satellite_alive(satellite_name)
+            if not alive_satellites:
+                raise SwRollbackError(rsp="No alive satellites available for rollback")
+            kwargs["device_list"] = alive_satellites
+
+        rsp = self.rpc.request_package_rollback(**kwargs)
         fail_list = ["Cannot rollback", "rollback aborted"]
         multi = rsp.xpath("//multi-routing-engine-item")
         if multi:

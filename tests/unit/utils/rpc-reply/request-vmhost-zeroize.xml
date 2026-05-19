@@ -1,0 +1,13 @@
+<rpc-reply>
+<rpc-error>
+<error-severity>warning</error-severity>
+<error-message>
+zeroizing vmhost re0
+</error-message>
+</rpc-error>
+<warning xmlns="http://xml.juniper.net/xnm/1.1/xnm" xmlns:xnm="http://xml.juniper.net/xnm/1.1/xnm">
+<message>
+zeroizing vmhost re0
+</message>
+</warning>
+</rpc-reply>

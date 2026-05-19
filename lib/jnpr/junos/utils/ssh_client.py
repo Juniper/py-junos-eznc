@@ -14,8 +14,10 @@ def open_ssh_client(dev):
     # note, the following code was extracted from the scp module, and then the scp module
     # was refactored to use this function
     ssh_client = paramiko.SSHClient()
-    ssh_client.load_system_host_keys()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    if dev._hostkey_verify:
+        ssh_client.load_system_host_keys()
+    else:
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     # use junos._hostname since this will be correct if we are going
     # through a jumphost.
@@ -36,6 +38,16 @@ def open_ssh_client(dev):
 
     if dev._ssh_private_key_file is not None:
         kwargs["key_filename"] = dev._ssh_private_key_file
+
+    if dev._allow_agent is not None:
+        kwargs["allow_agent"] = dev._allow_agent
+    else:
+        kwargs["allow_agent"] = bool(
+            (dev._auth_password is None) and (dev._ssh_private_key_file is None)
+        )
+
+    if dev._look_for_keys is not None:
+        kwargs["look_for_keys"] = dev._look_for_keys
 
     # pick hostname from .ssh config if any
     hostname = config.get("hostname", dev._hostname)
