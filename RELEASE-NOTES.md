@@ -1,6 +1,14 @@
-## Release 2.7.7.dev0 - 16 Jan 2026
+## Release 2.7.7 - 19 May 2026
 ## Features Added
+- supported routing instance and satellite options in sw.install() #1403
+- support for proxy_command parameter #1401
+- support for "request vmhost zeroize" #1372
 ## Bugs Fixed
+- setParseAction' deprecated, replaced with 'set_parse_action #1399
+- Fix issue were allow_agent and look_for_keys were not honored by ssh_client #1405
+- Revise SECURITY.md for clarity on updates and reporting #1402
+- Support for issue and pull request templates for types of Bug, feature,
+Task and Security related issues #1407
 
 ## Release 2.7.6 - 16 Jan 2026
 - Python 3.12+ Support: Added official support for Python 3.12 and later versions,
