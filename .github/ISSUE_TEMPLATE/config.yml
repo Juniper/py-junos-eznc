@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: PyEZ Documentation
+    url: https://junos-pyez.readthedocs.io/en/latest/
+    about: Browse the full API reference and usage guides before opening a Bug, Feature, or Task issue.
+  - name: Report a Security Vulnerability
+    url: https://github.com/Juniper/py-junos-eznc/security/advisories/new
+    about: Do NOT open a public issue for security problems. Use GitHub's "Report a vulnerability" feature in the Security tab instead.
