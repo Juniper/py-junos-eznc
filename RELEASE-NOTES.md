@@ -1,3 +1,7 @@
+## Release 2.8.1.dev0 - 19 May 2026
+## Features Added
+## Bugs Fixed
+
 ## Release 2.8.0 - 19 May 2026
 ## Features Added
 - Added support for routing instances and satellite options in `sw.install()` (#1403)
