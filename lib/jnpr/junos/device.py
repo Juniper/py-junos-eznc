@@ -1230,6 +1230,13 @@ class Device(_Connection):
             *OPTIONAL* To enable ssh_known hostkey verify
             default is ``False``.
 
+        :param str proxy_command:
+            *OPTIONAL* The SSH ProxyCommand string to use when connecting
+            through a bastion/jump host, e.g.
+            ``"ssh -W %h:%p bastion.example.com"``.
+            Wraps :class:`paramiko.proxy.ProxyCommand` and is passed as the
+            ``sock`` argument to the underlying ncclient transport.
+            Cannot be combined with ``sock_fd``.
         """
 
         # ----------------------------------------
@@ -1251,6 +1258,7 @@ class Device(_Connection):
         self._allow_agent = kvargs.get("allow_agent", None)
         self._bind_addr = kvargs.get("bind_addr", None)
         self._hostkey_verify = kvargs.get("hostkey_verify", False)
+        self._proxy_command = kvargs.get("proxy_command", None)
         if self._fact_style != "new":
             warnings.warn(
                 "fact-style %s will be removed in a future "
@@ -1275,6 +1283,10 @@ class Device(_Connection):
             # --------------------------
             if hostname is None and self._sock_fd is None:
                 raise ValueError("You must provide either 'host' or 'sock_fd' value")
+            if self._proxy_command is not None and self._sock_fd is not None:
+                raise ValueError(
+                    "'proxy_command' and 'sock_fd' cannot be used together"
+                )
             self._hostname = hostname
             # user will default to $USER
             self._auth_user = os.getenv("USER")
@@ -1397,11 +1409,20 @@ class Device(_Connection):
             else:
                 hostkey_verify = self._hostkey_verify
 
+            # build sock from proxy_command if provided
+            sock = None
+            if self._proxy_command:
+                proxy_cmd = self._proxy_command.replace("%h", self._hostname).replace(
+                    "%p", str(self._port)
+                )
+                sock = paramiko.proxy.ProxyCommand(proxy_cmd)
+
             # open connection using ncclient transport
             self._conn = netconf_ssh.connect(
                 host=self._hostname,
                 port=self._port,
                 sock_fd=self._sock_fd,
+                sock=sock,  # support for ProxyCommand parameter
                 username=self._auth_user,
                 password=self._auth_password,
                 hostkey_verify=hostkey_verify,

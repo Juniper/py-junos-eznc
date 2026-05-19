@@ -553,6 +553,52 @@ class TestDevice(unittest.TestCase):
 
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.Device.execute")
+    def test_device_open_with_proxy_command(self, mock_connect, mock_execute):
+        with (
+            patch("jnpr.junos.utils.fs.FS.cat") as mock_cat,
+            patch("paramiko.proxy.ProxyCommand") as mock_proxy,
+        ):
+            mock_cat.return_value = "\n    domain jls.net\n"
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            mock_sock = MagicMock()
+            mock_proxy.return_value = mock_sock
+            self.dev2 = Device(
+                host="2.2.2.2",
+                user="test",
+                password="password123",
+                proxy_command="ssh -W %h:%p jump-host",
+            )
+            self.dev2.open()
+            mock_proxy.assert_called_once_with("ssh -W 2.2.2.2:830 jump-host")
+            _, connect_kwargs = mock_execute.call_args
+            self.assertEqual(connect_kwargs["sock"], mock_sock)
+
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
+    def test_device_open_with_proxy_command_empty_string(
+        self, mock_connect, mock_execute
+    ):
+        with (
+            patch("jnpr.junos.utils.fs.FS.cat") as mock_cat,
+            patch("paramiko.proxy.ProxyCommand") as mock_proxy,
+        ):
+            mock_cat.return_value = "\n    domain jls.net\n"
+            mock_connect.side_effect = self._mock_manager
+            mock_execute.side_effect = self._mock_manager
+            self.dev2 = Device(
+                host="2.2.2.2",
+                user="test",
+                password="password123",
+                proxy_command="",
+            )
+            self.dev2.open()
+            mock_proxy.assert_not_called()
+            _, connect_kwargs = mock_execute.call_args
+            self.assertIsNone(connect_kwargs["sock"])
+
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
     def test_device_outbound(self, mock_connect, mock_execute):
         with patch("jnpr.junos.utils.fs.FS.cat") as mock_cat:
             mock_cat.return_value = """
