@@ -949,6 +949,13 @@ class TestSW(unittest.TestCase):
         )
 
     @patch("jnpr.junos.Device.execute")
+    def test_sw_install_with_unlink(self, mock_execute):
+        """install(unlink=True) must add <unlink/> to the request-package-add RPC."""
+        self.sw.install("file", no_copy=True, unlink=True)
+        rpc = etree.tostring(mock_execute.call_args[0][0]).decode("utf-8")
+        self.assertIn("<unlink/>", rpc)
+
+    @patch("jnpr.junos.Device.execute")
     def test_sw_install_with_routing_instance(self, mock_execute):
         self.sw.install("file", no_copy=True, routing_instance="mgmt_junos")
         rpc = etree.tostring(mock_execute.call_args[0][0]).decode("utf-8")
