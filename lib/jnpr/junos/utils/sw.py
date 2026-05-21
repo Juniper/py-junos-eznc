@@ -901,6 +901,8 @@ class SW(Util):
           major version upgrades may otherwise fail with
           ``ERROR: insufficient space`` during validation. Equivalent to
           the ``request system software add ... unlink`` CLI option.
+          Intended for non-vmhost devices; ``request vmhost package add``
+          does not document an ``unlink`` option.
 
         :param bool issu:
           (Optional) When ``True`` allows unified in-service software upgrade
