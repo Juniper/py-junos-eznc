@@ -773,6 +773,7 @@ class SW(Util):
         checksum=None,
         cleanfs=True,
         no_copy=False,
+        unlink=False,
         issu=False,
         nssu=False,
         timeout=1800,
@@ -892,6 +893,17 @@ class SW(Util):
           If the value of :package: or :pkg_set: is a URL, then the value of
           :no_copy: is unused.
 
+        :param bool unlink:
+          (Optional) When ``True``, pass the ``unlink`` option to the
+          ``request system software add`` RPC. With ``unlink``, the package
+          tarball is removed during pkgadd, reducing peak filesystem usage.
+          This is useful for low-flash devices (e.g. EX2300, EX3400) where
+          major version upgrades may otherwise fail with
+          ``ERROR: insufficient space`` during validation. Equivalent to
+          the ``request system software add ... unlink`` CLI option.
+          Intended for non-vmhost devices; ``request vmhost package add``
+          does not document an ``unlink`` option.
+
         :param bool issu:
           (Optional) When ``True`` allows unified in-service software upgrade
           (ISSU) feature enables you to upgrade between two different Junos OS
@@ -967,6 +979,12 @@ class SW(Util):
 
         if routing_instance is not None and "routing_instance" not in kwargs:
             kwargs["routing_instance"] = routing_instance
+
+        # Forward unlink to the underlying request-package-add RPC so that an
+        # <unlink/> element appears in the request, matching the behavior of
+        # the equivalent ``request system software add ... unlink`` CLI.
+        if unlink is True and "unlink" not in kwargs:
+            kwargs["unlink"] = True
 
         # ---------------------------------------------------------------------
         # Check satellite devices are active before doing software installation on them.
