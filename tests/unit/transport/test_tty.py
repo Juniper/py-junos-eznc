@@ -7,7 +7,6 @@ except ImportError:
 
 from unittest.mock import MagicMock, patch
 
-import nose2
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.transport.tty import Terminal
 

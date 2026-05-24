@@ -6,7 +6,6 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-import nose2
 import yaml
 from jnpr.junos import Device
 from jnpr.junos.factory import loadyaml
@@ -122,7 +121,6 @@ class TestFactoryCfgTable(unittest.TestCase):
         mock_execute.side_effect = self._mock_manager
         mock_jxml.result_value = None
         with patch.dict("sys.modules", junos=MagicMock()):
-            import junos
 
             self.dev.ON_JUNOS = True
             self.bgp.get()

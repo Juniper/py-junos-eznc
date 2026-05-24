@@ -9,11 +9,9 @@ import socket
 import sys
 from unittest.mock import MagicMock, call, patch
 
-import nose2
 import six
 from jnpr.junos.console import Console
 from jnpr.junos.transport.tty_netconf import tty_netconf
-from jnpr.junos.transport.tty_telnet import Terminal
 from jnpr.junos.utils.config import Config
 from lxml import etree
 
@@ -297,7 +295,6 @@ class TestConsole(unittest.TestCase):
             return self._read_file(etree.XML(args[0]).tag + ".xml")
 
     def _read_file(self, fname):
-        from ncclient.xml_ import NCElement
 
         fpath = os.path.join(os.path.dirname(__file__), "rpc-reply", fname)
         with open(fpath) as fp:

@@ -38,7 +38,6 @@ import socket
 
 # Imported modules
 import sys
-import warnings
 from time import monotonic as _time
 
 # warnings._deprecated(__name__, remove=(3, 13))

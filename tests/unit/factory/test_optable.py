@@ -6,7 +6,6 @@ import os
 import unittest
 from unittest.mock import patch
 
-import nose2
 import yaml
 from jnpr.junos import Device
 from jnpr.junos.factory.factory_loader import FactoryLoader

@@ -2,7 +2,6 @@ import os
 import unittest
 from unittest.mock import MagicMock, call, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import RpcError
 from jnpr.junos.utils.fs import FS

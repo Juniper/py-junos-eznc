@@ -3,7 +3,6 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos.jxml import (
     INSERT,
     NAME,

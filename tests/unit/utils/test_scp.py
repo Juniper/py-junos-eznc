@@ -3,7 +3,6 @@ import unittest
 from contextlib import contextmanager
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.scp import SCP
 from six import StringIO
