@@ -597,6 +597,159 @@ class TestDevice(unittest.TestCase):
             _, connect_kwargs = mock_execute.call_args
             self.assertIsNone(connect_kwargs["sock"])
 
+    # ------------------------------------------------------------------
+    # Hostname validation tests (security fix: argument-injection guard)
+    # ------------------------------------------------------------------
+
+    def test_device_host_valid_ipv4(self):
+        # Plain IPv4 address must be accepted without raising.
+        dev = Device(
+            host="192.168.1.1", user="test", password="password123", gather_facts=False
+        )
+        self.assertEqual(dev._hostname, "192.168.1.1")
+
+    def test_device_host_valid_fqdn(self):
+        # Typical FQDN with dots and hyphens must be accepted.
+        dev = Device(
+            host="router.example.com",
+            user="test",
+            password="password123",
+            gather_facts=False,
+        )
+        self.assertEqual(dev._hostname, "router.example.com")
+
+    def test_device_host_valid_single_label(self):
+        # Single alphanumeric label (e.g. bare hostname) must be accepted.
+        dev = Device(
+            host="router1", user="test", password="password123", gather_facts=False
+        )
+        self.assertEqual(dev._hostname, "router1")
+
+    def test_device_host_valid_ipv6_bracketed(self):
+        # Bracketed IPv6 literal must be accepted.
+        dev = Device(
+            host="[2001:db8::1]",
+            user="test",
+            password="password123",
+            gather_facts=False,
+        )
+        self.assertEqual(dev._hostname, "[2001:db8::1]")
+
+    def test_device_host_valid_ipv6_loopback(self):
+        # Bracketed IPv6 loopback must be accepted.
+        dev = Device(
+            host="[::1]", user="test", password="password123", gather_facts=False
+        )
+        self.assertEqual(dev._hostname, "[::1]")
+
+    def test_device_host_invalid_whitespace_injection(self):
+        # Hostname with embedded space must be rejected at construction
+        # (core argument-injection vector from the security report).
+        with self.assertRaises(ValueError):
+            Device(
+                host="valid.host -oProxyCommand=touch /tmp/pwned",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_backslash_space_injection(self):
+        # Backslash-escaped space variant must also be rejected.
+        with self.assertRaises(ValueError):
+            Device(
+                host=r"valid.host:22 -oProxyCommand=touch\ /tmp/pwned",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_leading_hyphen(self):
+        # A hostname starting with a hyphen looks like an option flag to ssh.
+        with self.assertRaises(ValueError):
+            Device(
+                host="-oProxyCommand=id",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_semicolon(self):
+        # Shell metacharacter ; must be rejected.
+        with self.assertRaises(ValueError):
+            Device(
+                host="host;rm -rf /",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_backtick(self):
+        # Backtick command substitution must be rejected.
+        with self.assertRaises(ValueError):
+            Device(
+                host="host`id`",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_dollar_sign(self):
+        # Dollar-sign variable expansion must be rejected.
+        with self.assertRaises(ValueError):
+            Device(
+                host="$(id)",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_invalid_colon_port_suffix(self):
+        # host:port notation must be rejected (port belongs in the 'port' kwarg).
+        with self.assertRaises(ValueError):
+            Device(
+                host="router.example.com:22",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+
+    def test_device_host_none_with_sock_fd_allowed(self):
+        # host=None is valid for outbound-SSH (sock_fd) connections and must
+        # not be rejected by the hostname validator.
+        dev = Device(sock_fd=6, user="test", password="password123")
+        self.assertIsNone(dev._hostname)
+
+    def test_device_host_invalid_raises_value_error_not_other(self):
+        # Confirm the exception type is exactly ValueError (not ConnectError
+        # or any other exception class).
+        with self.assertRaises(ValueError) as ctx:
+            Device(
+                host="bad host",
+                user="test",
+                password="password123",
+                gather_facts=False,
+            )
+        self.assertIn("Invalid 'host' value", str(ctx.exception))
+
+    @patch("ncclient.manager.connect")
+    @patch("jnpr.junos.Device.execute")
+    def test_device_host_invalid_no_subprocess_spawned(
+        self, mock_connect, mock_execute
+    ):
+        # Verify that a malicious hostname raises BEFORE any ProxyCommand
+        # subprocess is spawned — i.e. the error fires at Device() time,
+        # not at .open() time.
+        with patch("paramiko.proxy.ProxyCommand") as mock_proxy:
+            with self.assertRaises(ValueError):
+                Device(
+                    host=r"valid.host -oProxyCommand=touch\ /tmp/pwned",
+                    user="test",
+                    password="password123",
+                    proxy_command="ssh -W %h:%p jump-host",
+                    gather_facts=False,
+                )
+            mock_proxy.assert_not_called()
+
     @patch("ncclient.manager.connect")
     @patch("jnpr.junos.Device.execute")
     def test_device_outbound(self, mock_connect, mock_execute):

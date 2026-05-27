@@ -49,6 +49,15 @@ _MODULEPATH = os.path.dirname(__file__)
 
 logger = logging.getLogger("jnpr.junos.device")
 
+# Matches a plain hostname/IPv4 label sequence or a bracketed IPv6 literal.
+# Used to reject whitespace, leading hyphens, and shell metacharacters
+# before substituting the hostname into a proxy_command template.
+# The plain-hostname branch requires the value to start and end with an
+# alphanumeric character, which also blocks leading-hyphen argument injection.
+_HOSTNAME_RE = re.compile(
+    r"^(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?|\[[0-9a-fA-F:]+\])$"
+)
+
 
 class _MyTemplateLoader(jinja2.BaseLoader):
     """
@@ -1286,6 +1295,11 @@ class Device(_Connection):
             if self._proxy_command is not None and self._sock_fd is not None:
                 raise ValueError(
                     "'proxy_command' and 'sock_fd' cannot be used together"
+                )
+            if hostname is not None and not _HOSTNAME_RE.match(hostname):
+                raise ValueError(
+                    f"Invalid 'host' value {hostname!r}: only alphanumerics, dots, "
+                    "underscores, hyphens, or bracketed IPv6 literals are permitted."
                 )
             self._hostname = hostname
             # user will default to $USER
