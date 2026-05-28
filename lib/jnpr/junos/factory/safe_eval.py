@@ -54,7 +54,9 @@ class _ExpressionValidator(ast.NodeVisitor):
         return any(name in local_names for local_names in self._locals)
 
     def _is_allowed_load_name(self, name):
-        return name in self.allowed_names or name in SAFE_FUNCTIONS or self._is_local(name)
+        return (
+            name in self.allowed_names or name in SAFE_FUNCTIONS or self._is_local(name)
+        )
 
     def visit_Expression(self, node):
         self.visit(node.body)
@@ -249,7 +251,5 @@ def eval_jinja_expression(expression, context):
     rendered_expression = template.render(placeholder_context)
     # Preserve legacy patterns like "'{{ cpu }}'[:-1]" by converting
     # quoted placeholders to bare variable names bound in eval_names.
-    rendered_expression = re.sub(
-        r"([\"'])(__val_\d+)\1", r"\2", rendered_expression
-    )
+    rendered_expression = re.sub(r"([\"'])(__val_\d+)\1", r"\2", rendered_expression)
     return eval_expression(rendered_expression, names=eval_names)
