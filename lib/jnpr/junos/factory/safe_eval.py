@@ -225,7 +225,11 @@ def eval_expression(expression, names=None):
     _ExpressionValidator(names.keys()).visit(parsed)
     scope = dict(SAFE_FUNCTIONS)
     scope.update(names)
-    return eval(compile(parsed, "<safe-eval>", "eval"), {"__builtins__": {}}, scope)
+    # Comprehensions in Python 3 resolve names from globals, not locals.
+    # Provide the same safe scope in globals to keep behavior consistent.
+    safe_globals = {"__builtins__": {}}
+    safe_globals.update(scope)
+    return eval(compile(parsed, "<safe-eval>", "eval"), safe_globals, scope)
 
 
 def eval_jinja_expression(expression, context):
