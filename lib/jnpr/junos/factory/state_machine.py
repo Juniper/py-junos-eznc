@@ -6,7 +6,7 @@ from functools import reduce
 from typing import Any, Dict, List, cast
 
 import pyparsing as pp
-from jinja2 import Template, meta
+from jnpr.junos.factory.safe_eval import eval_jinja_expression
 from transitions import Machine
 
 logger = logging.getLogger("jnpr.junos.factory.state_machine")
@@ -243,10 +243,8 @@ class StateMachine(Machine):
         Returns: None
         """
         for name, expression in self._table.EVAL.items():
-            t = Template(expression)
-            expression = t.render(data=self._data)
             try:
-                val = eval(expression)
+                val = eval_jinja_expression(expression, {"data": self._data})
             except Exception as ex:
                 logger.error("eval expression for '%s' failed due to %s" % (name, ex))
                 self._data[name] = None
@@ -1032,8 +1030,5 @@ class StateMachine(Machine):
         """
         if self._view and len(self._view.EVAL) > 0:
             for name, expression in self._view.EVAL.items():
-                variables = meta.find_undeclared_variables(expression)
-                t = Template(expression)
-                expression = t.render({k: tmp_dict.get(k) for k in variables})
-                val = eval(expression)
+                val = eval_jinja_expression(expression, tmp_dict)
                 tmp_dict[name] = val

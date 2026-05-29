@@ -5,6 +5,7 @@ import pyparsing as pp
 
 from jnpr.junos.factory.state_machine import (
     Identifiers,
+    StateMachine,
     convert_to_data_type,
     data_type,
 )
@@ -110,6 +111,37 @@ class TestConvertToDataType(unittest.TestCase):
     def test_converts_string_items(self):
         result = convert_to_data_type(["hello", "world"])
         self.assertEqual(result, ["hello", "world"])
+
+
+class _DummyView:
+    EVAL = {}
+
+
+class _DummyTable:
+    VIEW = _DummyView
+    EVAL = {}
+
+
+class TestStateMachineEval(unittest.TestCase):
+    def test_eval_in_full_data_allows_shipped_pattern(self):
+        class _EvalTable(_DummyTable):
+            EVAL = {
+                "total": "sum([v['count'] for k, v in {{ data }}.items() if isinstance(v, dict) and 'count' in v])"
+            }
+
+        sm = StateMachine(_EvalTable())
+        sm._data = {"a": {"count": 2}, "b": {"count": 3}, "c": "skip"}
+        sm._eval_in_full_data()
+        self.assertEqual(sm._data["total"], 5)
+
+    def test_eval_in_full_data_blocks_unsafe_expression(self):
+        class _EvalTable(_DummyTable):
+            EVAL = {"pwn": "__import__('os').system('id')"}
+
+        sm = StateMachine(_EvalTable())
+        sm._data = {}
+        sm._eval_in_full_data()
+        self.assertEqual(sm._data["pwn"], None)
 
 
 if __name__ == "__main__":

@@ -2023,7 +2023,7 @@ XMChipInterruptStatsTable:
     - name
   view: XMChipInterruptStatsView
   eval:
-    total_interrupt: "reduce(lambda x,y: x+y, [v['interrupts'] for k,v in {{ data }}.items() if 'cookie_sz_err' in v.get('name')])"
+        total_interrupt: "sum([v['interrupts'] for k,v in {{ data }}.items() if isinstance(v, dict) and 'cookie_sz_err' in v['name']])"
 
 XMChipInterruptStatsView:
   columns:
