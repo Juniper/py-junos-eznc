@@ -9,7 +9,6 @@ import sys
 from unittest.mock import MagicMock, call, mock_open, patch
 
 import ncclient.transport.errors as NcErrors
-import nose2
 from jnpr.junos import Device
 from jnpr.junos import exception as EzErrors
 from jnpr.junos.console import Console

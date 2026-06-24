@@ -5,7 +5,6 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.exception import ConnectNotMasterError, RpcError
 from jnpr.junos.ofacts.chassis import facts_chassis as chassis

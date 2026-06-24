@@ -1,9 +1,7 @@
-import copy
 import json
 
 # stdlib
 import os
-import re
 from inspect import isclass
 
 from jinja2 import Template

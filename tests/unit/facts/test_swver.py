@@ -8,7 +8,6 @@ try:
 except:
     import unittest
 
-import nose2
 from jnpr.junos.facts.swver import get_facts, version_info
 
 

@@ -5,7 +5,6 @@ import os
 import unittest
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.ofacts.srx_cluster import facts_srx_cluster as srx_cluster
 from ncclient.manager import Manager, make_device_handler

@@ -1,4 +1,3 @@
-from jnpr.junos import JXML
 from jnpr.junos.cfg.phyport.base import PhyPortBase
 from jnpr.junos.cfg.resource import Resource
 from lxml.builder import E

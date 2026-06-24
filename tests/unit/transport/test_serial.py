@@ -6,7 +6,6 @@ except ImportError:
 import sys
 from unittest.mock import MagicMock, patch
 
-import nose2
 import six
 from jnpr.junos.console import Console
 

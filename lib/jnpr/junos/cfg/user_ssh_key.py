@@ -1,4 +1,3 @@
-from jnpr.junos import jxml as JXML
 from jnpr.junos.cfg import Resource
 from lxml.builder import E
 

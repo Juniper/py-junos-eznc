@@ -5,14 +5,13 @@ except ImportError:
 
 from unittest.mock import MagicMock, PropertyMock, call, patch
 
-import nose2
 from jnpr.junos.decorators import (
     ignoreWarnDecorator,
     normalizeDecorator,
     timeoutDecorator,
 )
 from jnpr.junos.device import Device
-from jnpr.junos.exception import ConfigLoadError, RpcError
+from jnpr.junos.exception import ConfigLoadError
 from jnpr.junos.utils.config import Config
 from lxml.etree import XML
 from ncclient.manager import Manager, make_device_handler

@@ -1,5 +1,4 @@
 import re
-import sys
 
 from jnpr.junos import jxml as JXML
 from lxml import etree

@@ -4,7 +4,6 @@ __credits__ = "Jeremy Schulman"
 import unittest
 from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.util import Util
 

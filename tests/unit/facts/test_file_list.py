@@ -3,9 +3,8 @@ __credits__ = "Jeremy Schulman, Nitin Kumar"
 
 import os
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import nose2
 from jnpr.junos import Device
 from ncclient.manager import Manager, make_device_handler
 from ncclient.transport import SSHSession

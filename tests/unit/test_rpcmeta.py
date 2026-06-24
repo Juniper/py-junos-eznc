@@ -3,7 +3,6 @@ import re
 import unittest
 from unittest.mock import MagicMock, call, patch
 
-import nose2
 from jnpr.junos.device import Device
 from jnpr.junos.exception import JSONLoadError
 from jnpr.junos.facts.swver import version_info

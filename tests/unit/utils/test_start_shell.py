@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, call, patch
 
-import nose2
 from jnpr.junos import Device
 from jnpr.junos.utils.start_shell import StartShell
 

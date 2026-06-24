@@ -17,7 +17,6 @@ except ImportError:
 from jnpr.junos import jxml as JXML
 
 # local modules
-from jnpr.junos.decorators import timeoutDecorator
 from jnpr.junos.exception import RpcError, RpcTimeoutError, SwRollbackError
 from jnpr.junos.utils.ftp import FTP
 from jnpr.junos.utils.scp import SCP
