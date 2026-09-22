@@ -2,6 +2,7 @@ import logging
 import socket
 import sys
 import traceback
+import types
 import warnings
 
 from jnpr.junos import jxml as JXML
@@ -15,6 +16,7 @@ from jnpr.junos.transport.tty_ssh import SSH
 from jnpr.junos.transport.tty_telnet import Telnet
 from lxml import etree
 from ncclient.devices.junos import JunosDeviceHandler
+from ncclient.operations.rpc import RPCReply
 from ncclient.xml_ import NCElement
 
 logger = logging.getLogger("jnpr.junos.console")
@@ -270,9 +272,13 @@ class Console(_Connection):
             else rpc_cmd_e
         )
         reply = self._tty.nc.rpc(rpc_cmd)
-        rpc_rsp_e = NCElement(
-            reply, self.junos_dev_handler.transform_reply(), self._huge_tree
-        )._NCElement__doc
+        transform_reply = self.junos_dev_handler.transform_reply()
+        if isinstance(transform_reply, types.FunctionType):
+            # A callable transform is applied to the parsed reply element,
+            # but console RPCs hand back the reply as a raw string.
+            reply = RPCReply(reply, huge_tree=self._huge_tree)
+            reply.parse()
+        rpc_rsp_e = NCElement(reply, transform_reply, self._huge_tree)._NCElement__doc
         return rpc_rsp_e
 
     # -------------------------------------------------------------------------

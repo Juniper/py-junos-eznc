@@ -237,7 +237,9 @@ class TestSW(unittest.TestCase):
     def test_sw_install_nonexistent_mx80_package(self, mock_execute):
         mock_execute.side_effect = self._mock_manager
         self.sw._multi_RE = False
-        var_ret = self.sw.install("test_no_mx80_packages.tgz", no_copy=True)
+        var_ret = self.sw.install(
+            "test_no_mx80_packages.tgz", no_copy=True, validate=False
+        )
         self.assertFalse(var_ret[0])
 
     @patch("jnpr.junos.Device.execute")
@@ -758,7 +760,9 @@ class TestSW(unittest.TestCase):
         mock_pkgadd.return_value = True, "msg"
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        self.assertTrue(self.sw.install("file", no_copy=True, progress=True)[0])
+        self.assertTrue(
+            self.sw.install("file", no_copy=True, progress=True, validate=False)[0]
+        )
 
     @patch(builtin_string + ".print")
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
@@ -767,7 +771,9 @@ class TestSW(unittest.TestCase):
         mock_pkgadd.side_effect = [(True, "re0"), (True, "re1")]
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        bool_ret, msg = self.sw.install(
+            "file", no_copy=True, progress=True, validate=False
+        )
         self.assertEqual(msg, "re0\nre1")
         self.assertTrue(bool_ret)
 
@@ -778,7 +784,9 @@ class TestSW(unittest.TestCase):
         mock_pkgadd.side_effect = [(True, "re0"), (False, "re1 install failed")]
         self.sw._multi_RE = True
         self.sw._multi_MX = True
-        bool_ret, msg = self.sw.install("file", no_copy=True, progress=True)
+        bool_ret, msg = self.sw.install(
+            "file", no_copy=True, progress=True, validate=False
+        )
         self.assertEqual(msg, "re0\nre1 install failed")
         self.assertFalse(bool_ret)
 
@@ -788,7 +796,7 @@ class TestSW(unittest.TestCase):
         self.sw._multi_RE = True
         self.sw._multi_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", no_copy=True)[0])
+        self.assertTrue(self.sw.install("file", no_copy=True, validate=False)[0])
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_member_id(self, mock_pkgadd):
@@ -797,7 +805,9 @@ class TestSW(unittest.TestCase):
         self.sw._multi_RE = True
         self.sw._multi_VC = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", member_id=["1"], no_copy=True)[0])
+        self.assertTrue(
+            self.sw.install("file", member_id=["1"], no_copy=True, validate=False)[0]
+        )
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_multi_vc_multiple_member_id(self, mock_pkgadd):
@@ -806,7 +816,11 @@ class TestSW(unittest.TestCase):
         self.sw._multi_RE = False
         self.sw._multi_VC_nsync = True
         self.sw._RE_list = ("version_RE0", "version_RE1")
-        self.assertTrue(self.sw.install("file", member_id=["0", "1"], no_copy=True)[0])
+        self.assertTrue(
+            self.sw.install("file", member_id=["0", "1"], no_copy=True, validate=False)[
+                0
+            ]
+        )
 
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_install_mixed_vc(self, mock_pkgadd):
@@ -840,7 +854,7 @@ class TestSW(unittest.TestCase):
             "personality": "SWITCH",
         }
         sw = self.get_sw()
-        sw.install(package="abc.tgz", no_copy=True)
+        sw.install(package="abc.tgz", no_copy=True, validate=False)
         self.assertFalse(sw._multi_VC)
         calls = [
             call("/var/tmp/abc.tgz", dev_timeout=1800, vmhost=False, re0=True),
@@ -911,38 +925,38 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_kwargs_force_host(self, mock_execute):
-        self.sw.install("file", no_copy=True, force_host=True)
+        self.sw.install("file", no_copy=True, force_host=True, validate=False)
         rpc = [
-            "<request-package-add><force-host/><no-validate/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/><re1/></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><re1/><force-host/></request-package-add>",
-            "<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
-            "<request-package-add><force-host/><re1/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><no-validate/><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
-            "<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>",
-            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/><re1/></request-package-add>",
-            "<request-package-add><re1/><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
-            "<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>",
-            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>",
-            "<request-package-add><re1/><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><no-validate/><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/><re1/></request-package-add>",
-            "<request-package-add><no-validate/><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/><no-validate/></request-package-add>",
-            "<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
-            "<request-package-add><force-host/><no-validate/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>",
-            "<request-package-add><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><no-validate/></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><no-validate/><force-host/></request-package-add>",
-            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><force-host/><no-validate/></request-package-add>",
-            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/><no-validate/></request-package-add>",
-            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><no-validate/><force-host/></request-package-add>",
-            "<request-package-add><no-validate/><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>",
-            "<request-package-add><re1/><no-validate/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
-            "<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name><no-validate/></request-package-add>",
+            "<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
+            "<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
+            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>",
+            "<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/><re1/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>",
+            "<request-package-add><force-host/><package-name>/var/tmp/file</package-name><re1/></request-package-add>",
+            "<request-package-add><re1/><package-name>/var/tmp/file</package-name><force-host/></request-package-add>",
+            "<request-package-add><package-name>/var/tmp/file</package-name><re1/><force-host/></request-package-add>",
+            "<request-package-add><re1/><force-host/><package-name>/var/tmp/file</package-name></request-package-add>",
+            "<request-package-add><force-host/><re1/><package-name>/var/tmp/file</package-name></request-package-add>",
         ]
         self.assertTrue(
             etree.tostring(mock_execute.call_args[0][0]).decode("utf-8") in rpc
@@ -950,7 +964,9 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_with_routing_instance(self, mock_execute):
-        self.sw.install("file", no_copy=True, routing_instance="mgmt_junos")
+        self.sw.install(
+            "file", no_copy=True, routing_instance="mgmt_junos", validate=False
+        )
         rpc = etree.tostring(mock_execute.call_args[0][0]).decode("utf-8")
         self.assertTrue("<routing-instance>mgmt_junos</routing-instance>" in rpc)
 
@@ -984,7 +1000,13 @@ class TestSW(unittest.TestCase):
 
     @patch("jnpr.junos.Device.execute")
     def test_sw_install_issu_with_routing_instance(self, mock_execute):
-        self.sw.install("file", no_copy=True, issu=True, routing_instance="mgmt_junos")
+        self.sw.install(
+            "file",
+            no_copy=True,
+            issu=True,
+            routing_instance="mgmt_junos",
+            validate=False,
+        )
         rpc = etree.tostring(mock_execute.call_args[0][0]).decode("utf-8")
         self.assertTrue("<routing-instance>mgmt_junos</routing-instance>" in rpc)
 
@@ -1183,7 +1205,7 @@ class TestSW(unittest.TestCase):
     @patch("jnpr.junos.utils.sw.SW.pkgadd")
     def test_sw_check_pending_install_RpcError_continue(self, mock_pkgadd):
         mock_pkgadd.return_value = True, "msg"
-        self.assertTrue(self.sw.install("test.tgz", no_copy=True)[0])
+        self.assertTrue(self.sw.install("test.tgz", no_copy=True, validate=False)[0])
 
     def _myprogress(self, dev, report):
         pass
