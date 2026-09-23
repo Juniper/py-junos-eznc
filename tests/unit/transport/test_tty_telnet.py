@@ -8,7 +8,6 @@ except ImportError:
 from unittest.mock import MagicMock, patch
 
 import nose2
-import six
 from jnpr.junos.transport.tty_telnet import Telnet
 
 
@@ -64,7 +63,7 @@ class TestTTYTelnet(unittest.TestCase):
         self.tel_conn._tn.expect.return_value = (
             None,
             None,
-            six.b("port already in use"),
+            b"port already in use",
         )
         self.assertRaises(RuntimeError, self.tel_conn._login_state_machine)
 

@@ -5,7 +5,6 @@ import time
 from select import select
 from threading import Thread
 
-import six
 from jnpr.junos.utils.ssh_client import open_ssh_client
 
 _JUNOS_PROMPT = "> "

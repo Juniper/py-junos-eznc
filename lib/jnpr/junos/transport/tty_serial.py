@@ -10,7 +10,7 @@ from jnpr.junos.transport.tty import Terminal
 # Terminal connection over SERIAL CONSOLE
 # -------------------------------------------------------------------------
 
-_PROMPT = re.compile(six.b("|").join([six.b(i) for i in Terminal._RE_PAT]))
+_PROMPT = re.compile(b"|".join([six.b(i) for i in Terminal._RE_PAT]))
 
 
 class Serial(Terminal):
@@ -75,7 +75,7 @@ class Serial(Terminal):
         regular-expression group. If a timeout occurs, then return
         the tuple(None,None).
         """
-        rxb = six.b("")
+        rxb = b""
         mark_start = datetime.now()
         mark_end = mark_start + timedelta(seconds=self.EXPECT_TIMEOUT)
 
