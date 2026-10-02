@@ -10,6 +10,7 @@ except:
 
 import nose2
 from jnpr.junos.facts.swver import get_facts, version_info
+from jnpr.junos.factory.to_json import PyEzJSONEncoder
 
 
 class TestVersionInfo(unittest.TestCase):
@@ -62,7 +63,7 @@ class TestVersionInfo(unittest.TestCase):
         import json
 
         self.assertEqual(
-            eval(json.dumps(version_info("11.4R7.5"))),
+            json.loads(json.dumps(version_info("11.4R7.5"), cls=PyEzJSONEncoder)),
             {"major": [11, 4], "type": "R", "build": 5, "minor": "7"},
         )
 

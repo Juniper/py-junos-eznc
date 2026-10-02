@@ -1,4 +1,3 @@
-import json
 import logging
 
 import yaml
@@ -16,9 +15,6 @@ __date__ = version.DATE
 
 # import time
 # __date__ = time.strftime("%Y-%b-%d")
-
-# Set default JSON encoder
-setattr(json, "_default_encoder", PyEzJSONEncoder())
 
 # Disable ignore_aliases for YAML dumper
 # To support version_info
