@@ -5,6 +5,7 @@ FTP utility
 import ftplib
 import logging
 import os
+import posixpath
 import re
 
 logger = logging.getLogger("jnpr.junos.utils.ftp")
@@ -55,23 +56,16 @@ class FTP(ftplib.FTP):
         """
 
         try:
-            mat = re.search("^.*/(.*)$", local_file)
-            if mat:
-                if not remote_path:
-                    remote_file = "/tmp/" + mat.group(1)
-                else:
-                    if re.search("^.*/(.*)$", remote_path) and re.search(
-                        r"\.\w+$", remote_path
-                    ):
-                        remote_file = remote_path
-                        # Looks like remote path is given as file location
-                    else:
-                        remote_file = os.path.join(remote_path, mat.group(1))
+            file_name = os.path.basename(local_file)
+            if not remote_path:
+                remote_file = posixpath.join("/tmp", file_name)
+            elif re.search("^.*/(.*)$", remote_path) and re.search(
+                r"\.\w+$", remote_path
+            ):
+                # Looks like remote path is given as file location
+                remote_file = remote_path
             else:
-                if not remote_path:
-                    remote_file = os.path.join("/tmp/", local_file)
-                else:
-                    remote_file = os.path.join(remote_path, local_file)
+                remote_file = posixpath.join(remote_path, file_name)
 
             with open(local_file, "rb") as open_local_file:
                 self.storbinary(
