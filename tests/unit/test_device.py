@@ -1102,6 +1102,14 @@ class TestDevice(unittest.TestCase):
             self.dev.rpc.get_software_information.__doc__, "get-software-information"
         )
 
+    def test_rpc_reply_with_illegal_xml_char(self):
+        from ncclient.operations.rpc import RPCReply
+
+        reply = RPCReply("<rpc-reply><a>x\x0cy</a></rpc-reply>")
+        reply.parse()
+        self.assertNotIn("\x0c", reply.xml)
+        self.assertEqual(reply._root.find("a").text, "xy")
+
     def test_device_probe_timeout_zero(self):
         with patch("jnpr.junos.device.socket"):
             self.assertFalse(self.dev.probe(0))
