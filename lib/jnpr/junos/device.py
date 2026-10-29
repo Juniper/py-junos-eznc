@@ -47,6 +47,22 @@ else:
 
 _MODULEPATH = os.path.dirname(__file__)
 
+from ncclient.operations import rpc as _nc_rpc
+
+# XML 1.0 forbids these control chars; devices can echo them from user data (e.g. LLDP descriptions)
+_ILLEGAL_XML_CHARS_RE = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+if not getattr(_nc_rpc.RPCReply.parse, "_ez_sanitized", False):
+    _nc_orig_parse = _nc_rpc.RPCReply.parse
+
+    def _ez_parse(self):
+        if isinstance(self._raw, six.string_types):
+            self._raw = _ILLEGAL_XML_CHARS_RE.sub("", self._raw)
+        return _nc_orig_parse(self)
+
+    _ez_parse._ez_sanitized = True
+    _nc_rpc.RPCReply.parse = _ez_parse
+
 logger = logging.getLogger("jnpr.junos.device")
 
 # Matches a plain hostname/IPv4 label sequence or a bracketed IPv6 literal.
