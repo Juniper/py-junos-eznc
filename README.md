@@ -121,8 +121,8 @@ The following is a quick "hello, world" example to ensure that the software was 
 from pprint import pprint
 from jnpr.junos import Device
 
-with Device(host='my_host_or_ipaddr', user='jeremy', password='jeremy123' ) as dev:
-    pprint( dev.facts )
+with Device(host="my_host_or_ipaddr", user="jeremy", password="jeremy123") as dev:
+    pprint(dev.facts)
 ````
 Example output for an SRX-210 device:
 ````python
