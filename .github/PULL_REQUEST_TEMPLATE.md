@@ -71,6 +71,14 @@ sphinx-build -b html docs docs/_build/html -W
 - [ ] No hardcoded credentials, IPs, or sensitive data introduced
 - [ ] Dependencies in `requirements.txt` updated (if new packages were added)
 
+### Credential & Sensitive Data Scrubbing
+
+- [ ] PR description, comments, and code snippets contain no real hostnames or IP addresses
+- [ ] PR description, comments, and code snippets contain no real usernames or passwords
+- [ ] No SSH keys, tokens, or secrets appear anywhere in this PR
+- [ ] Test fixtures and sample XML/RPC output use placeholder values (e.g. `192.0.2.x`, `<REDACTED>`)
+- [ ] Log output included in this PR (in comments or CI artifacts) has been scrubbed of credentials
+
 ---
 
 ## Testing Matrix

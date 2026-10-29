@@ -33,6 +33,15 @@ Any technical details, constraints, or suggested approach for completing this ta
 - Closes #
 - Related to #
 
+## Credential & Sensitive Data Reminder
+
+> **Before submitting:** ensure this issue contains no real credentials or sensitive data.
+
+- [ ] No real hostnames or IP addresses (use `<DEVICE-IP>`)
+- [ ] No real usernames or passwords (use `<USERNAME>` / `<REDACTED>`)
+- [ ] No SSH keys, tokens, or secrets
+- [ ] Any code snippets or logs use placeholder values
+
 ## Additional Context
 
 Any other context, references, or considerations.
