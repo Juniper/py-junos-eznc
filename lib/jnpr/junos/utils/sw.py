@@ -1622,7 +1622,7 @@ class SW(Util):
         (e.g. SRX1600, SRX2300, SRX4300).
 
         :param bool all_re: In case of dual re or VC setup, function by default
-            will halt all. If all is False will only halt connected device
+            will zeroize all. If all is False will only zeroize connected device
 
         :param str media: Overwrite media when performing the zeroize operation.
 
