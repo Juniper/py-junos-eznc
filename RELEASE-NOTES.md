@@ -1,3 +1,9 @@
+## Unreleased
+## Compatibility Changes
+- Importing PyEZ no longer replaces Python's global JSON encoder (#1404).
+  Pass `cls=PyEzJSONEncoder` to `json.dumps` when serializing PyEZ facts,
+  version information, or XML RPC replies. Table/View `to_json()` is unchanged.
+
 ## Release 2.8.2 - 22 Jun 2026
 ## Features Added
 - Gather facts for the satellite devices

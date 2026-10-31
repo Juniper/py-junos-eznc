@@ -179,3 +179,19 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 *Former Contributors:*
 
 [Jeremy Schulman](https://github.com/jeremyschulman), [Rick Sherman](https://github.com/shermdog), [Edward Arcuri](https://github.com/sdndude), [Nitin Kumar](https://github.com/vnitinv), [Stacy Smith](https://github.com/stacywsmith), [Stephen Steiner](https://github.com/ntwrkguru)
+
+### JSON serialization
+
+Importing PyEZ does not change Python's default JSON encoder. To serialize
+PyEZ facts, version information, or XML RPC replies, pass the encoder explicitly:
+
+```python
+import json
+from jnpr.junos import PyEzJSONEncoder
+
+encoded_facts = json.dumps(dev.facts, cls=PyEzJSONEncoder)
+```
+
+Code that previously relied on importing PyEZ to make `json.dumps(value)` accept
+these objects must now specify `cls=PyEzJSONEncoder`. Table and View `to_json()`
+methods already select their encoders explicitly and require no changes.
