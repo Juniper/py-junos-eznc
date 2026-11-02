@@ -19,8 +19,11 @@ Why is this important to you? Who else might benefit?
 
 Describe how you'd like the feature to work. Include API sketches or usage examples if possible.
 
+> **Security reminder:** Replace any real hostnames, IP addresses, usernames, or passwords
+> in code examples with safe placeholders before posting.
+
 ```python
-# Example of how you'd like to use the new feature
+# Example of how you'd like to use the new feature — use placeholder credentials
 from jnpr.junos import Device
 
 Dev = Device(host="<DEVICE-IP>", user="<USERNAME>")
