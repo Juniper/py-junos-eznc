@@ -16,7 +16,7 @@ A clear and concise description of the bug.
 # Minimal reproducible example
 from jnpr.junos import Device
 
-dev = Device(host="router.example.com", user="admin")
+Dev = Device(host="<DEVICE-IP>", user="<USERNAME>")
 dev.open()
 # ...
 ```

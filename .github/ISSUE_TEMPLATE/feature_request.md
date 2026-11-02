@@ -23,7 +23,7 @@ Describe how you'd like the feature to work. Include API sketches or usage examp
 # Example of how you'd like to use the new feature
 from jnpr.junos import Device
 
-dev = Device(host="router.example.com", user="admin")
+Dev = Device(host="<DEVICE-IP>", user="<USERNAME>")
 dev.open()
 # proposed new API usage...
 ```
