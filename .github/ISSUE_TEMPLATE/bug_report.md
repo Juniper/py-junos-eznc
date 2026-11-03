@@ -20,7 +20,7 @@ A clear and concise description of the bug.
 # Minimal reproducible example — credentials/hostnames already replaced
 from jnpr.junos import Device
 
-dev = Device(host='<DEVICE-IP>', user='<USERNAME>')
+dev = Device(host="<DEVICE-IP>", user="<USERNAME>")
 dev.open()
 # ...
 ```
