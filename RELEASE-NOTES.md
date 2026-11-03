@@ -4,6 +4,17 @@
   Pass `cls=PyEzJSONEncoder` to `json.dumps` when serializing PyEZ facts,
   version information, or XML RPC replies. Table/View `to_json()` is unchanged.
 
+## Release 2.8.3 - 3 Nov 2026
+## Features Added
+- Added ub26 and python3.14 support for Docker container #1431
+- Python Python3.13, 3.14, 3.15 support update #1425
+- SW validate set to True by default #1422
+- ncclient version update 0.7.1 #1433
+
+## Bugs Fixed
+- Doc update for SW halt 
+- issue and pull request templates update #1420
+
 ## Release 2.8.2 - 22 Jun 2026
 ## Features Added
 - Gather facts for the satellite devices

@@ -424,9 +424,9 @@ class SW(Util):
 
         if vmhost is False:
             if isinstance(remote_package, (list, tuple)) and self._mixed_VC:
-                args = dict(no_validate=True, set=remote_package)
+                args = dict(no_validate=False, set=remote_package)
             else:
-                args = dict(no_validate=True, package_name=remote_package)
+                args = dict(no_validate=False, package_name=remote_package)
             args.update(kvargs)
             rsp = self.rpc.request_package_add(**args)
         else:
@@ -907,7 +907,7 @@ class SW(Util):
         pkg_set=None,
         remote_path="/var/tmp",
         progress=None,
-        validate=False,
+        validate=True,
         checksum=None,
         cleanfs=True,
         no_copy=False,
@@ -1622,7 +1622,7 @@ class SW(Util):
         (e.g. SRX1600, SRX2300, SRX4300).
 
         :param bool all_re: In case of dual re or VC setup, function by default
-            will halt all. If all is False will only halt connected device
+            will zeroize all. If all is False will only zeroize connected device
 
         :param str media: Overwrite media when performing the zeroize operation.
 
