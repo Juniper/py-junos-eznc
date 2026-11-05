@@ -170,7 +170,7 @@ class TestConsole(unittest.TestCase):
             self.assertRaises(ValueError, self.dev.open)
 
     @patch("jnpr.junos.transport.tty_serial.Serial._tty_open")
-    @patch("jnpr.junos.transport.tty_serial.serial.Serial.readline")
+    @patch("jnpr.junos.transport.tty_serial.serial.Serial.readall")
     @patch("jnpr.junos.transport.tty_serial.Serial.write")
     def test_console_serial(self, mock_write, mock_expect, mock_open):
         tty_netconf.open = MagicMock()
