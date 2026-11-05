@@ -121,8 +121,8 @@ The following is a quick "hello, world" example to ensure that the software was 
 from pprint import pprint
 from jnpr.junos import Device
 
-with Device(host='my_host_or_ipaddr', user='jeremy', password='jeremy123' ) as dev:
-    pprint( dev.facts )
+with Device(host="my_host_or_ipaddr", user="jeremy", password="jeremy123") as dev:
+    pprint(dev.facts)
 ````
 Example output for an SRX-210 device:
 ````python
@@ -154,6 +154,7 @@ Juniper Networks is actively contributing to and maintaining this repo. Please c
 
 *Contributors:*
 
+* v2.8.3: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
 * v2.8.2: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
 * v2.8.1: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
 * v2.8.0: [Dinesh Babu](https://github.com/dineshbaburam91), [Chidanand Pujar](https://github.com/chidanandpujar)
