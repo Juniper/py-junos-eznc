@@ -1,4 +1,7 @@
-## Unreleased
+## Release 2.8.4.dev0 - 3 Nov 2026
+## Features Added
+## Bugs Fixed
+
 ## Compatibility Changes
 - Importing PyEZ no longer replaces Python's global JSON encoder (#1404).
   Pass `cls=PyEzJSONEncoder` to `json.dumps` when serializing PyEZ facts,
