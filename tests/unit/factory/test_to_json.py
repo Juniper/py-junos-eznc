@@ -7,6 +7,9 @@ except ImportError:
 
 import json
 import os
+import subprocess
+import sys
+import textwrap
 from unittest.mock import patch
 
 import nose2
@@ -121,7 +124,7 @@ class TestToJson(unittest.TestCase):
             "product-model": "firefly-perimeter",
             "product-name": "firefly-perimeter",
         }
-        self.assertEqual(eval(json.dumps(resp)), j)
+        self.assertEqual(json.loads(json.dumps(resp, cls=PyEzJSONEncoder)), j)
 
     def _read_file(self, fname):
         from ncclient.xml_ import NCElement
@@ -146,3 +149,44 @@ class TestToJson(unittest.TestCase):
 
         if args:
             return self._read_file(args[0].tag + ".xml")
+
+
+class TestJsonImportIsolation(unittest.TestCase):
+    """Importing PyEZ must preserve the application JSON configuration."""
+
+    def test_import_preserves_default_encoder(self):
+        """Check first-import behaviour in a fresh interpreter."""
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-c",
+                textwrap.dedent("""
+                import json
+                original = json._default_encoder
+                import jnpr.junos
+                assert json._default_encoder is original
+            """),
+            ]
+        )
+
+    def test_import_preserves_application_encoder(self):
+        """An application encoder must still serialize its own objects."""
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-c",
+                textwrap.dedent("""
+                import json
+                class ApplicationValue:
+                    pass
+                class ApplicationEncoder(json.JSONEncoder):
+                    def default(self, obj):
+                        if isinstance(obj, ApplicationValue):
+                            return "application-value"
+                        return super().default(obj)
+                json._default_encoder = ApplicationEncoder()
+                import jnpr.junos
+                assert json.loads(json.dumps(ApplicationValue())) == "application-value"
+            """),
+            ]
+        )

@@ -2,6 +2,11 @@
 ## Features Added
 ## Bugs Fixed
 
+## Compatibility Changes
+- Importing PyEZ no longer replaces Python's global JSON encoder (#1404).
+  Pass `cls=PyEzJSONEncoder` to `json.dumps` when serializing PyEZ facts,
+  version information, or XML RPC replies. Table/View `to_json()` is unchanged.
+
 ## Release 2.8.3 - 3 Nov 2026
 ## Features Added
 - Added ub26 and python3.14 support for Docker container #1431
